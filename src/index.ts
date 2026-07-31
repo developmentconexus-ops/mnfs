@@ -1,4 +1,5 @@
 export * from './domain/errors.js';
+export * from './domain/mission-plan.js';
 export * from './domain/types.js';
 export * from './runtime/environment.js';
 export * from './runtime/paths.js';

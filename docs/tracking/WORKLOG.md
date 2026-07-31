@@ -2,50 +2,62 @@
 
 ## 2026-07-31
 
-### M0 foundation
+### M0 — Pi-first foundation
 
-- Accepted the Pi-first, WSL2-first direction.
-- Created the clean MNFS repository baseline with ADRs, roadmap, backlog and the M0 implementation plan.
-- Completed M0 Task 1: environment doctor and CLI report contract.
-- Completed M0 Task 2: stable repository UUID, atomic identity creation and one runtime root shared by worktrees.
-- Completed M0 Task 3: SQLite migration v1, WAL/foreign-key setup, atomic mission+event transaction, rollback coverage and restart persistence.
-- Completed M0 Task 4: sequential mission IDs and a stable project status view.
-- Completed M0 Task 5: `init`, `mission open` and `status` CLI paths with stable errors and a fresh-process subprocess proof.
-- Published `main` and `feat/m0-foundation` to https://github.com/developmentconexus-ops/mnfs.
-- Opened draft PR #4 and issues #1–#3.
-- Operator confirmed the complete Ubuntu WSL2 acceptance sequence passed: Pi/Node setup, `npm run verify`, `mnfs doctor`, initialization, mission creation and fresh-process status recovery.
-- Generated and committed `package-lock.json`; operator confirmed a clean clone completed `npm ci && npm run verify` successfully.
-- Closed issues #1 and #2 as completed.
-- Marked PR #4 ready and merged M0 into `main` at commit `e26214111ca6e6245a7f8c89f95391be71bf828b`.
+- Accepted Ubuntu on WSL2 as the canonical runtime, with Windows as browser/desktop host.
+- Created the TypeScript CLI baseline, repository identity, runtime paths and SQLite store.
+- Implemented `doctor`, `init`, `mission open` and `status` with fresh-process recovery.
+- Added WAL/foreign keys, atomic mission + event persistence and rollback coverage.
+- Published the repository, opened issues #1–#3 and PR #4.
+- Operator confirmed the real WSL2 smoke, committed lockfile and clean-clone `npm ci && npm run verify` proof.
+- Closed issues #1 and #2 and merged PR #4 into `main` at `e26214111ca6e6245a7f8c89f95391be71bf828b`.
 
-### M1 visual mission planning
+### M1.0 — Visual planning design
 
-- Created branch `feat/m1-visual-planning` and draft PR #5.
-- Defined the M1 authority split: MNFS owns structured state and approval; Pi reasons; Lavish transports visual feedback; HTML is projection only.
-- Chose a project-local Pi skill for M1 instead of introducing a Pi SDK host or extension prematurely.
+- Created `feat/m1-visual-planning`, issue #3 and draft PR #5.
+- Fixed the authority split: MNFS owns structured state and approval; Pi reasons; Lavish transports visual feedback; HTML is projection only.
+- Chose a project-local Pi skill before any Pi SDK host or extension.
 - Committed the M1 microdesign and TDD implementation plan.
-- Completed M1.1 with mission-plan types, runtime validation, dependency reference/cycle checks, canonical JSON and SHA-256 content hashing.
-- Added six domain tests covering valid normalization, deterministic hashing, duplicate IDs, unknown dependencies, cycles and answered-question invariants.
-- Operator confirmed the full M1 branch verification was green after dependency-lock alignment.
-- Retargeted PR #5 from the stacked M0 branch to `main` after M0 acceptance.
-- Implemented M1.2 SQLite migration v2 with content-addressed plan revisions and widened mission event types.
-- Added transactional revision save, sequential revision numbers, previous-draft supersession, identical-content idempotency and optimistic stale-hash protection.
-- Added exact-hash approval with one approved revision per mission and idempotent repeated approval.
-- Added six persistence tests for v1 migration preservation, revision+event atomicity, sequential revisions, stale-write rejection, rollback and approval idempotency.
-- Verified the combined M1 domain/store slice in a strict focused harness: 16 tests passed, 0 failed, including the original SQLite foundation behavior.
-- Operator confirmed the canonical WSL2 full-suite verification of M1.2 was green.
-- Implemented M1.3 `MissionPlanService`: untrusted JSON file ingestion, runtime validation, stale-hash propagation, current-plan lookup and exact-hash approval.
-- Added `PLAN_BLOCKED` for unresolved blocking product questions and `PLAN_MATERIALIZATION_FAILED` for repairable publication failures.
-- Added atomic approved-contract publication at `.mnfs/missions/<mission-id>/plan.json` using same-directory temp file, file fsync and rename.
-- Preserved approved SQLite state when materialization fails, allowing explicit rematerialization from durable state.
-- Added eight lifecycle service tests for normalization, invalid JSON, stale writes, blocked approval, exact-hash materialization, failure recovery, rematerialization and draft refusal.
-- A new adversarial test exposed two cleanup-boundary defects: directory creation occurred outside the named-error boundary, and best-effort cleanup could replace the original error. Both root causes were corrected before publication.
-- Verified the combined M1.3 focused slice: 22 relevant domain/store/service tests passed, 0 failed.
-- Operator confirmed the canonical WSL2 full-suite verification of M1.3 was green.
-- Implemented M1.4 deterministic self-contained HTML rendering for outcomes, scope, milestones, features, risks, questions and dependency source.
-- Escaped all semantic plan text and kept the artifact free of external assets, random values and timestamps so repeated rendering is byte-identical.
-- Bound Lavish approval and change-request controls to literal mission/hash prompts stored in auditable `data-*` attributes; HTML remains projection and never mutates structured source.
-- Added runtime artifact publication at `artifacts/plans/<mission-id>/rev-<NNNN>.html` through `MissionPlanService.renderCurrentPlan`.
-- The first TDD pass exposed that dynamically assembled review prompts were not directly auditable in the saved artifact. The renderer now stores exact prompts in attributes and the script reads those values.
-- Verified the focused M1.4 slice: 6 renderer/service tests passed, 0 failed.
-- Canonical WSL2 full-suite verification of M1.4 is the gate before M1.5.
+
+### M1.1 — Plan domain and hashing
+
+- Added mission-plan types, validation, ID uniqueness, dependency reference/cycle checks and question invariants.
+- Added deterministic canonical JSON and SHA-256 content hashing.
+- Added six domain tests; operator confirmed the canonical WSL2 full suite green.
+
+### M1.2 — SQLite revisions and approval
+
+- Added migration v2 with append-only content-addressed plan revisions and widened event types.
+- Added sequential revisions, draft supersession, identical-content idempotency and stale-hash protection inside `BEGIN IMMEDIATE`.
+- Added exact-current-hash approval and one approved revision per mission.
+- Added six persistence tests, including migration preservation, atomicity, rollback and approval idempotency.
+- Focused proof: 16 relevant tests green; operator confirmed the canonical WSL2 full suite green.
+
+### M1.3 — Lifecycle service and approved contract
+
+- Added untrusted JSON ingestion, validation, stale-hash propagation and current-plan lookup.
+- Added `PLAN_BLOCKED` for open blocking questions and exact-hash approval.
+- Added atomic `.mnfs/missions/<id>/plan.json` publication and repair from durable SQLite state.
+- Adversarial tests exposed and corrected two publication cleanup-boundary defects.
+- Added eight service tests; focused proof: 22 relevant tests green; operator confirmed the canonical WSL2 full suite green.
+
+### M1.4 — Deterministic HTML renderer
+
+- Added self-contained rendering for mission identity, outcomes, scope, milestones, features, risks, questions and dependencies.
+- Escaped semantic content and removed external assets, random values and render-time timestamps.
+- Bound approval/change controls to literal mission/hash prompts in auditable attributes.
+- Added runtime publication at `artifacts/plans/<mission-id>/rev-<NNNN>.html`.
+- Focused proof: six renderer/service tests green.
+- The canonical WSL2 run found a strict `noUncheckedIndexedAccess` fixture error; corrected it by explicit narrowing rather than an empty-string fallback.
+- Operator confirmed the corrected canonical WSL2 full suite green.
+
+### M1.5 — Lavish process adapter
+
+- Added narrow open, poll and end operations around the public `lavish-axi` CLI.
+- Commands use argument arrays and `shell: false`; no share or host-binding option is emitted.
+- Stdout remains byte-preserved opaque feedback for Pi; stderr and signals become named evidence on failure.
+- Added injected runner and `AbortSignal` support without introducing MNFS state transitions.
+- Added `LAVISH_NOT_FOUND` and `LAVISH_COMMAND_FAILED`, including install remediation.
+- Proved RED for the missing adapter and separately for the production process runner.
+- Focused proof: six adapter tests green, including a real child-process stdout/stderr capture.
+- Canonical WSL2 full-suite verification is the gate before M1.6.

@@ -84,4 +84,12 @@
 - The skill forbids editing rendered HTML, writing SQLite or approved contracts directly, inventing product decisions and starting implementation workers.
 - TDD RED: static tests failed because the project-local skill and reference did not exist.
 - Focused GREEN: 8 tests passed, 0 failed; three new skill tests cover frontmatter/discovery, workflow markers, approval and stop constraints, instruction size and schema invariants.
-- Canonical WSL2 full-suite verification and real Pi `/skill:mnfs-plan` discovery remain the next gate.
+- Operator confirmed the canonical WSL2 full suite and real Pi `/skill:mnfs-plan` discovery.
+
+### M1.8 — Automated visual-planning walking skeleton
+
+- Added one real-subprocess test that uses the compiled CLI across independent processes rather than mocked services.
+- The test initializes a temporary Git repository, opens two missions, saves revision 1, recovers and renders it in another process, then saves revision 2 with the exact previous hash.
+- It proves stale revision rejection, wrong-hash approval rejection and blocking-question approval rejection without changing current state.
+- It approves revision 2 by its exact hash, recovers the approved plan in a fresh process, deletes the contract deliberately and rematerializes it from durable SQLite state.
+- Lavish/browser behavior remains outside the automated test and is reserved for the real M1.9 acceptance, keeping CI deterministic.

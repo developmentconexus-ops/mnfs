@@ -4,19 +4,27 @@
 - **Canonical environment:** Ubuntu on WSL2
 - **Active milestone:** M0 — Foundation walking skeleton
 - **Active plan:** `docs/superpowers/plans/2026-07-31-m0-foundation-walking-skeleton.md`
-- **Current state:** planning complete; implementation not started
-- **Repository publication:** blocked until an empty GitHub repository exists or repository-creation permission is available
+- **Current state:** implementation and GitHub publication complete; WSL2 acceptance and clean-clone reproducibility remain
+- **Repository:** https://github.com/developmentconexus-ops/mnfs
+- **Draft PR:** https://github.com/developmentconexus-ops/mnfs/pull/4
+- **Tooling status:** Pi is required by the environment contract; Lavish, Treehouse and Herdr are detected but their adapters intentionally begin in M1/M2; see `docs/tooling-adoption.md`
 
 ## Current objective
 
-Create the smallest durable control plane that initializes a repository, opens a mission transactionally and recovers status in a new process.
+Complete the two external M0 acceptance gates, then begin the visual Pi + Lavish planning loop.
 
 ## Definition of done for M0
 
-- [ ] `mnfs doctor` reports required and optional WSL2 tools.
-- [ ] `mnfs init` creates a stable repository identity.
-- [ ] runtime state is stored outside the checkout.
-- [ ] `mnfs mission open` persists a mission and matching event atomically.
-- [ ] `mnfs status` returns the same mission from a fresh process.
-- [ ] tests, build and typecheck pass.
-- [ ] the repository is published and M0 tracking issues exist on GitHub.
+- [x] `mnfs doctor` reports required and optional WSL2 tools.
+- [x] repository service creates a stable, idempotent identity.
+- [x] runtime root resolves outside the checkout from the committed repository UUID.
+- [x] SQLite persists a mission and matching `MISSION_OPENED` event atomically.
+- [x] `mnfs status` recovers the same mission from a fresh CLI process.
+- [x] implementation, tests and tracking files are published in draft PR #4.
+- [x] remaining M0 and M1 work is represented by GitHub issues.
+- [ ] `mnfs doctor` and the walking-skeleton commands pass in the operator's Ubuntu WSL2 environment with Node 24.18+ and Pi installed — [issue #1](https://github.com/developmentconexus-ops/mnfs/issues/1).
+- [ ] a clean WSL2 clone reproduces dependencies with `npm ci` from a committed lockfile and passes `npm run verify` — [issue #2](https://github.com/developmentconexus-ops/mnfs/issues/2).
+
+## Next milestone
+
+M1 visual mission planning is tracked in [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3).

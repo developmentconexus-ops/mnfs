@@ -19,8 +19,8 @@
 - [x] M1-001 Mission plan domain, validation, canonical JSON and content hash.
 - [x] M1-002 SQLite plan revision and approval persistence.
 - [x] M1-003 Mission plan service and approved contract materialization.
-- [~] M1-004 Deterministic, escaped HTML plan renderer — implementation and focused tests committed; canonical full-suite verification pending.
-- [ ] M1-005 Lavish open/poll/end process adapter.
+- [x] M1-004 Deterministic, escaped HTML plan renderer.
+- [~] M1-005 Lavish open/poll/end process adapter — implementation and focused tests committed; canonical full-suite verification pending.
 - [ ] M1-006 CLI plan commands.
 - [ ] M1-007 Project-local Pi `mnfs-plan` skill.
 - [ ] M1-008 Automated visual-planning walking skeleton.

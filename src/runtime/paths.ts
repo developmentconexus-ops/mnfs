@@ -10,6 +10,13 @@ export interface RuntimeRootInput {
 }
 
 const SAFE_REPOSITORY_ID = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+const SAFE_MISSION_ID = /^MIS-\d{3,}$/;
+
+function requireMissionPlanMissionId(missionId: string): void {
+  if (!SAFE_MISSION_ID.test(missionId)) {
+    throw new MnfsError('PLAN_INVALID', `Invalid mission id for plan artifact: ${missionId}.`);
+  }
+}
 
 export function findGitRoot(startPath: string): string {
   const result = spawnSync('git', ['rev-parse', '--show-toplevel'], {
@@ -44,4 +51,24 @@ export function resolveRuntimeRoot(input: RuntimeRootInput): string {
     : join(resolve(input.homeDir), '.local', 'state', 'mnfs');
 
   return join(stateHome, 'repos', input.repoId);
+}
+
+export function resolveMissionPlanContractPath(projectRoot: string, missionId: string): string {
+  requireMissionPlanMissionId(missionId);
+  return join(projectRoot, '.mnfs', 'missions', missionId, 'plan.json');
+}
+
+export function resolveMissionPlanHtmlPath(runtimeRoot: string, missionId: string, revision: number): string {
+  requireMissionPlanMissionId(missionId);
+  if (!Number.isInteger(revision) || revision < 1) {
+    throw new MnfsError('PLAN_INVALID', `Invalid mission plan revision: ${revision}.`);
+  }
+
+  return join(
+    runtimeRoot,
+    'artifacts',
+    'plans',
+    missionId,
+    `rev-${String(revision).padStart(4, '0')}.html`,
+  );
 }

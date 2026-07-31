@@ -32,5 +32,13 @@
 - Added transactional revision save, sequential revision numbers, previous-draft supersession, identical-content idempotency and optimistic stale-hash protection.
 - Added exact-hash approval with one approved revision per mission and idempotent repeated approval.
 - Added six persistence tests for v1 migration preservation, revision+event atomicity, sequential revisions, stale-write rejection, rollback and approval idempotency.
-- Verified the combined M1 domain/store slice in a strict focused harness: 16 tests passed, 0 failed, including the four original SQLite foundation tests.
-- Canonical WSL2 full-suite verification of M1.2 is the gate before M1.3.
+- Verified the combined M1 domain/store slice in a strict focused harness: 16 tests passed, 0 failed, including the original SQLite foundation behavior.
+- Operator confirmed the canonical WSL2 full-suite verification of M1.2 was green.
+- Implemented M1.3 `MissionPlanService`: untrusted JSON file ingestion, runtime validation, stale-hash propagation, current-plan lookup and exact-hash approval.
+- Added `PLAN_BLOCKED` for unresolved blocking product questions and `PLAN_MATERIALIZATION_FAILED` for repairable publication failures.
+- Added atomic approved-contract publication at `.mnfs/missions/<mission-id>/plan.json` using same-directory temp file, file fsync and rename.
+- Preserved approved SQLite state when materialization fails, allowing explicit rematerialization from durable state.
+- Added eight lifecycle service tests for normalization, invalid JSON, stale writes, blocked approval, exact-hash materialization, failure recovery, rematerialization and draft refusal.
+- A new adversarial test exposed two cleanup-boundary defects: directory creation occurred outside the named-error boundary, and best-effort cleanup could replace the original error. Both root causes were corrected before publication.
+- Verified the combined M1.3 focused slice: 22 relevant domain/store/service tests passed, 0 failed.
+- Canonical WSL2 full-suite verification of M1.3 is the gate before M1.4.

@@ -17,8 +17,8 @@
 
 - [x] M1-000 Define the visual planning microdesign and implementation plan.
 - [x] M1-001 Mission plan domain, validation, canonical JSON and content hash.
-- [~] M1-002 SQLite plan revision and approval persistence — implementation and focused tests committed; canonical full-suite verification pending.
-- [ ] M1-003 Mission plan service and approved contract materialization.
+- [x] M1-002 SQLite plan revision and approval persistence.
+- [~] M1-003 Mission plan service and approved contract materialization — implementation and focused tests committed; canonical full-suite verification pending.
 - [ ] M1-004 Deterministic, escaped HTML plan renderer.
 - [ ] M1-005 Lavish open/poll/end process adapter.
 - [ ] M1-006 CLI plan commands.

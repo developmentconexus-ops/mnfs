@@ -20,8 +20,8 @@
 - [x] M1-002 SQLite plan revision and approval persistence.
 - [x] M1-003 Mission plan service and approved contract materialization.
 - [x] M1-004 Deterministic, escaped HTML plan renderer.
-- [~] M1-005 Lavish open/poll/end process adapter — implementation and focused tests committed; canonical full-suite verification pending.
-- [ ] M1-006 CLI plan commands.
+- [x] M1-005 Lavish open/poll/end process adapter.
+- [~] M1-006 CLI plan commands — implementation and focused tests committed; canonical full-suite verification pending.
 - [ ] M1-007 Project-local Pi `mnfs-plan` skill.
 - [ ] M1-008 Automated visual-planning walking skeleton.
 - [ ] M1-009 Real Pi + Lavish WSL2/browser acceptance — [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3).

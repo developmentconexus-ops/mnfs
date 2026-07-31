@@ -7,7 +7,7 @@
 - **Active design:** `docs/design/2026-07-31-m1-visual-mission-planning.md`
 - **Active plan:** `docs/superpowers/plans/2026-07-31-m1-visual-mission-planning.md`
 - **Active branch:** `feat/m1-visual-planning`
-- **Current state:** M1.1 is accepted in the canonical WSL2 full suite; M1.2 revision persistence and focused tests are committed; full branch verification is the next gate
+- **Current state:** M1.1 and M1.2 are accepted in the canonical WSL2 full suite; M1.3 lifecycle service and atomic contract materialization are committed with a focused compatibility proof; full branch verification is the next gate
 - **Repository:** https://github.com/developmentconexus-ops/mnfs
 - **M1 draft PR:** https://github.com/developmentconexus-ops/mnfs/pull/5
 - **M1 issue:** https://github.com/developmentconexus-ops/mnfs/issues/3
@@ -36,9 +36,9 @@ open mission → structured revision → deterministic HTML → Lavish feedback
 ## M1 definition of done
 
 - [x] mission plan content is validated and content-addressed.
-- [~] revisions are append-only, idempotent and stale-write protected — implementation and focused proof committed; canonical full-suite verification pending.
-- [ ] plan service validates untrusted JSON and blocks approval on open blocking questions.
-- [ ] approved contract is materialized atomically under `.mnfs/missions/<id>/plan.json`.
+- [x] revisions are append-only, idempotent and stale-write protected.
+- [~] plan service validates untrusted JSON and blocks approval on open blocking questions — implementation and focused proof committed; canonical full-suite verification pending.
+- [~] approved contract is materialized atomically under `.mnfs/missions/<id>/plan.json` and can be repaired from SQLite — implementation and focused proof committed; canonical full-suite verification pending.
 - [ ] plan HTML is deterministic, escaped and hash-bound.
 - [ ] Lavish opens and polls through a narrow process adapter.
 - [ ] Pi discovers the project-local `mnfs-plan` skill.
@@ -49,9 +49,11 @@ open mission → structured revision → deterministic HTML → Lavish feedback
 
 - M0 real WSL2 acceptance and clean-clone reproduction: operator-confirmed complete.
 - M1.1 canonical branch verification: green.
-- M1.2 focused strict TypeScript proof: 16 relevant domain/store tests passed, 0 failed, including all original SQLite tests.
-- M1.2 still requires `npm run verify` in the canonical WSL2 checkout before beginning M1.3.
+- M1.2 canonical branch verification: green.
+- M1.3 focused strict TypeScript proof: 22 relevant domain/store/service tests passed, 0 failed; eight tests exercise the new service boundary.
+- The M1.3 proof includes invalid JSON rejection, stale-write propagation, blocking-question approval rejection, exact-hash approval, atomic contract publication, publication-failure recovery and rematerialization.
+- M1.3 still requires `npm run verify` in the canonical WSL2 checkout before beginning M1.4.
 
 ## Immediate next action
 
-Pull `feat/m1-visual-planning` in WSL2 and run `npm ci && npm run verify`. If green, begin **M1.3 — plan lifecycle service and approved contract materialization**.
+Pull `feat/m1-visual-planning` in WSL2 and run `npm ci && npm run verify`. If green, begin **M1.4 — deterministic, escaped HTML plan renderer**.

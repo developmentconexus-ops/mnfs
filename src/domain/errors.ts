@@ -15,6 +15,8 @@ export type MnfsErrorCode =
   | 'PLAN_APPROVAL_CONFLICT'
   | 'PLAN_BLOCKED'
   | 'PLAN_MATERIALIZATION_FAILED'
+  | 'LAVISH_NOT_FOUND'
+  | 'LAVISH_COMMAND_FAILED'
   | 'INTERNAL_ERROR';
 
 export class MnfsError extends Error {

@@ -75,20 +75,23 @@ test('renders every plan section and the exact revision identity', () => {
   const value = revision();
   const html = renderMissionPlanHtml(value);
 
-  for (const expected of [
+  const expectedValues = [
     value.content.title,
     value.content.goal,
     value.content.successCriteria[0],
     value.content.scope.included[0],
     value.content.scope.excluded[0],
-    value.content.milestones[0]?.title ?? '',
-    value.content.milestones[0]?.features[0]?.title ?? '',
-    value.content.risks[0]?.description ?? '',
-    value.content.questions[0]?.question ?? '',
+    value.content.milestones[0]?.title,
+    value.content.milestones[0]?.features[0]?.title,
+    value.content.risks[0]?.description,
+    value.content.questions[0]?.question,
     value.missionId,
     `Revision ${value.revision}`,
     value.contentHash,
-  ]) {
+  ];
+
+  for (const expected of expectedValues) {
+    assert.ok(expected !== undefined, 'renderer test fixture must provide every expected value');
     assert.equal(html.includes(expected), true, `missing rendered value: ${expected}`);
   }
 });

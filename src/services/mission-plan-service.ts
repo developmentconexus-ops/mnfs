@@ -17,7 +17,11 @@ import {
   validateMissionPlan,
   type MissionPlanRevision,
 } from '../domain/mission-plan.js';
-import { resolveMissionPlanContractPath } from '../runtime/paths.js';
+import { renderMissionPlanHtml } from '../planning/render-plan.js';
+import {
+  resolveMissionPlanContractPath,
+  resolveMissionPlanHtmlPath,
+} from '../runtime/paths.js';
 import { SqliteStore } from '../store/sqlite-store.js';
 
 export interface SavePlanFromFileInput {
@@ -36,9 +40,15 @@ export interface ApprovePlanResult {
   readonly contractPath: string;
 }
 
+export interface RenderPlanResult {
+  readonly revision: MissionPlanRevision;
+  readonly htmlPath: string;
+}
+
 export interface MissionPlanServiceOptions {
   readonly store: SqliteStore;
   readonly projectRoot: string;
+  readonly runtimeRoot?: string;
   readonly now?: () => string;
 }
 
@@ -104,14 +114,35 @@ function publishContract(path: string, contract: ApprovedPlanContract): void {
   }
 }
 
+function publishRenderedPlan(path: string, html: string): void {
+  const temporaryPath = `${path}.tmp-${process.pid}-${randomUUID()}`;
+  try {
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(temporaryPath, html, { encoding: 'utf8', flag: 'wx' });
+    renameSync(temporaryPath, path);
+  } catch (error) {
+    try {
+      rmSync(temporaryPath, { force: true });
+    } catch {
+      // Preserve the original artifact publication failure.
+    }
+    throw new MnfsError(
+      'PLAN_MATERIALIZATION_FAILED',
+      `Could not publish rendered mission plan at ${path}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
 export class MissionPlanService {
   readonly #store: SqliteStore;
   readonly #projectRoot: string;
+  readonly #runtimeRoot: string | undefined;
   readonly #now: () => string;
 
   constructor(options: MissionPlanServiceOptions) {
     this.#store = options.store;
     this.#projectRoot = options.projectRoot;
+    this.#runtimeRoot = options.runtimeRoot;
     this.#now = options.now ?? (() => new Date().toISOString());
   }
 
@@ -133,6 +164,25 @@ export class MissionPlanService {
       throw new MnfsError('PLAN_NOT_FOUND', `Mission ${missionId} has no mission plan.`);
     }
     return revision;
+  }
+
+  renderCurrentPlan(missionId: string): RenderPlanResult {
+    if (this.#runtimeRoot === undefined) {
+      throw new MnfsError(
+        'RUNTIME_HOME_INVALID',
+        'Mission plan rendering requires a runtime root.',
+        { remediation: 'Construct MissionPlanService with the repository runtime root.' },
+      );
+    }
+
+    const revision = this.getCurrentPlan(missionId);
+    const htmlPath = resolveMissionPlanHtmlPath(
+      this.#runtimeRoot,
+      missionId,
+      revision.revision,
+    );
+    publishRenderedPlan(htmlPath, renderMissionPlanHtml(revision));
+    return { revision, htmlPath };
   }
 
   approvePlan(input: ApprovePlanInput): ApprovePlanResult {

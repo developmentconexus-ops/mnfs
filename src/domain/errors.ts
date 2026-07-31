@@ -10,6 +10,9 @@ export type MnfsErrorCode =
   | 'PROJECT_INITIALIZATION_FAILED'
   | 'RUNTIME_HOME_INVALID'
   | 'PLAN_INVALID'
+  | 'PLAN_NOT_FOUND'
+  | 'PLAN_REVISION_CONFLICT'
+  | 'PLAN_APPROVAL_CONFLICT'
   | 'INTERNAL_ERROR';
 
 export class MnfsError extends Error {

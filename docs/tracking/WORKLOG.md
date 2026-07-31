@@ -14,16 +14,23 @@
 - Published `main` and `feat/m0-foundation` to https://github.com/developmentconexus-ops/mnfs.
 - Opened draft PR #4 and issues #1–#3.
 - Operator confirmed the complete Ubuntu WSL2 acceptance sequence passed: Pi/Node setup, `npm run verify`, `mnfs doctor`, initialization, mission creation and fresh-process status recovery.
-- Closed issue #1 as completed.
-- Clean-clone reproduction remains tracked in issue #2 until the generated `package-lock.json` is committed and `npm ci` is proven from a new clone.
+- Generated and committed `package-lock.json`; operator confirmed a clean clone completed `npm ci && npm run verify` successfully.
+- Closed issues #1 and #2 as completed.
+- Marked PR #4 ready and merged M0 into `main` at commit `e26214111ca6e6245a7f8c89f95391be71bf828b`.
 
 ### M1 visual mission planning
 
-- Created branch `feat/m1-visual-planning` stacked on the M0 foundation.
+- Created branch `feat/m1-visual-planning` and draft PR #5.
 - Defined the M1 authority split: MNFS owns structured state and approval; Pi reasons; Lavish transports visual feedback; HTML is projection only.
 - Chose a project-local Pi skill for M1 instead of introducing a Pi SDK host or extension prematurely.
 - Committed the M1 microdesign and TDD implementation plan.
-- Opened draft PR #5 and expanded issue #3 with behavioral acceptance criteria.
-- Started M1.1 with mission-plan types, validation, dependency reference/cycle checks, canonical JSON and SHA-256 content hashing.
-- Added six focused domain tests covering valid normalization, deterministic hashing, duplicate IDs, unknown dependencies, cycles and answered-question invariants.
-- Verified the M1.1 domain slice in an isolated strict TypeScript harness: 6 tests passed, 0 failed. Full repository verification remains required after the branch is pulled into the canonical WSL2 checkout.
+- Completed M1.1 with mission-plan types, runtime validation, dependency reference/cycle checks, canonical JSON and SHA-256 content hashing.
+- Added six domain tests covering valid normalization, deterministic hashing, duplicate IDs, unknown dependencies, cycles and answered-question invariants.
+- Operator confirmed the full M1 branch verification was green after dependency-lock alignment.
+- Retargeted PR #5 from the stacked M0 branch to `main` after M0 acceptance.
+- Implemented M1.2 SQLite migration v2 with content-addressed plan revisions and widened mission event types.
+- Added transactional revision save, sequential revision numbers, previous-draft supersession, identical-content idempotency and optimistic stale-hash protection.
+- Added exact-hash approval with one approved revision per mission and idempotent repeated approval.
+- Added six persistence tests for v1 migration preservation, revision+event atomicity, sequential revisions, stale-write rejection, rollback and approval idempotency.
+- Verified the combined M1 domain/store slice in a strict focused harness: 16 tests passed, 0 failed, including the four original SQLite foundation tests.
+- Canonical WSL2 full-suite verification of M1.2 is the gate before M1.3.

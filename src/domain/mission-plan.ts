@@ -183,7 +183,7 @@ function parseRisk(value: unknown, path: string): RiskPlan {
 function parseQuestion(value: unknown, path: string): PlanQuestion {
   const input = objectAt(value, path);
   const status = input.status;
-  if (status !== 'OPEN' && status !== 'ANSWERED') fail(`${path}.status`, 'must be OPEN or ANSWED.');
+  if (status !== 'OPEN' && status !== 'ANSWERED') fail(`${path}.status`, 'must be OPEN or ANSWERED.');
 
   const answer = input.answer === undefined ? undefined : stringAt(input.answer, `${path}.answer`);
   if (status === 'ANSWERED' && answer === undefined) fail(`${path}.answer`, 'is required for an answered question.');

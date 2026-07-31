@@ -2,7 +2,19 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-import type { Mission, MissionEvent } from '../domain/types.js';
+import { MnfsError } from '../domain/errors.js';
+import {
+  canonicalJson,
+  hashPlanContent,
+  type MissionPlanContent,
+  type MissionPlanRevision,
+} from '../domain/mission-plan.js';
+import type {
+  ApproveMissionPlanInput,
+  Mission,
+  MissionEvent,
+  SaveMissionPlanRevisionInput,
+} from '../domain/types.js';
 import { applyMigrations } from './migrations.js';
 
 export interface OpenMissionInput {
@@ -23,6 +35,19 @@ function missionFromRow(row: Readonly<Record<string, unknown>>): Mission {
     goal: String(row.goal),
     status: String(row.status) as Mission['status'],
     openedAt: String(row.opened_at),
+  };
+}
+
+function planRevisionFromRow(row: Readonly<Record<string, unknown>>): MissionPlanRevision {
+  const approvedAt = row.approved_at === null || row.approved_at === undefined ? undefined : String(row.approved_at);
+  return {
+    missionId: String(row.mission_id),
+    revision: Number(row.revision),
+    status: String(row.status) as MissionPlanRevision['status'],
+    contentHash: String(row.content_hash),
+    content: JSON.parse(String(row.content_json)) as MissionPlanContent,
+    createdAt: String(row.created_at),
+    ...(approvedAt === undefined ? {} : { approvedAt }),
   };
 }
 
@@ -73,6 +98,37 @@ export class SqliteStore {
     return mission;
   }
 
+  #getCurrentMissionPlan(missionId: string): MissionPlanRevision | undefined {
+    const row = this.#database
+      .prepare(`
+        SELECT mission_id, revision, status, content_hash, content_json, created_at, approved_at
+        FROM mission_plan_revisions
+        WHERE mission_id = ?
+        ORDER BY revision DESC
+        LIMIT 1
+      `)
+      .get(missionId);
+    return row === undefined ? undefined : planRevisionFromRow(row);
+  }
+
+  #getMissionPlanByHash(missionId: string, contentHash: string): MissionPlanRevision | undefined {
+    const row = this.#database
+      .prepare(`
+        SELECT mission_id, revision, status, content_hash, content_json, created_at, approved_at
+        FROM mission_plan_revisions
+        WHERE mission_id = ? AND content_hash = ?
+      `)
+      .get(missionId, contentHash);
+    return row === undefined ? undefined : planRevisionFromRow(row);
+  }
+
+  #requireOpenMission(missionId: string): void {
+    const mission = this.#database.prepare('SELECT status FROM missions WHERE id = ?').get(missionId);
+    if (mission === undefined || String(mission.status) !== 'OPEN') {
+      throw new MnfsError('PLAN_NOT_FOUND', `Open mission ${missionId} was not found.`);
+    }
+  }
+
   openMission(input: OpenMissionInput): Mission {
     return this.#transaction(() => this.#insertMissionAndEvent(input));
   }
@@ -98,6 +154,145 @@ export class SqliteStore {
     });
   }
 
+  saveMissionPlanRevision(input: SaveMissionPlanRevisionInput): MissionPlanRevision {
+    return this.#transaction(() => {
+      this.#requireOpenMission(input.missionId);
+      const contentHash = hashPlanContent(input.content);
+      const existing = this.#getMissionPlanByHash(input.missionId, contentHash);
+      if (existing !== undefined) return existing;
+
+      const current = this.#getCurrentMissionPlan(input.missionId);
+      if (current === undefined) {
+        if (input.expectedPreviousHash !== undefined) {
+          throw new MnfsError(
+            'PLAN_REVISION_CONFLICT',
+            `Mission ${input.missionId} has no previous plan matching ${input.expectedPreviousHash}.`,
+          );
+        }
+      } else {
+        if (current.status === 'APPROVED') {
+          throw new MnfsError('PLAN_REVISION_CONFLICT', `Mission ${input.missionId} already has an approved plan.`);
+        }
+        if (input.expectedPreviousHash !== current.contentHash) {
+          throw new MnfsError(
+            'PLAN_REVISION_CONFLICT',
+            `Expected previous hash ${current.contentHash} for mission ${input.missionId}.`,
+          );
+        }
+      }
+
+      const revisionNumber = (current?.revision ?? 0) + 1;
+      if (current !== undefined) {
+        this.#database
+          .prepare(`
+            UPDATE mission_plan_revisions
+            SET status = 'SUPERSEDED'
+            WHERE mission_id = ? AND revision = ? AND status = 'DRAFT'
+          `)
+          .run(input.missionId, current.revision);
+      }
+
+      const revision: MissionPlanRevision = {
+        missionId: input.missionId,
+        revision: revisionNumber,
+        status: 'DRAFT',
+        contentHash,
+        content: input.content,
+        createdAt: input.createdAt,
+      };
+      this.#database
+        .prepare(`
+          INSERT INTO mission_plan_revisions (
+            mission_id, revision, status, content_hash, content_json, created_at, approved_at
+          ) VALUES (?, ?, 'DRAFT', ?, ?, ?, NULL)
+        `)
+        .run(
+          revision.missionId,
+          revision.revision,
+          revision.contentHash,
+          canonicalJson(revision.content),
+          revision.createdAt,
+        );
+      this.#database
+        .prepare(`
+          INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
+          VALUES (?, 'PLAN_REVISION_SAVED', ?, ?, ?)
+        `)
+        .run(
+          `EVT-${input.missionId}-PLAN-R${String(revisionNumber).padStart(4, '0')}`,
+          input.missionId,
+          input.createdAt,
+          JSON.stringify({ revision: revisionNumber, contentHash }),
+        );
+
+      return revision;
+    });
+  }
+
+  getCurrentMissionPlan(missionId: string): MissionPlanRevision | undefined {
+    return this.#getCurrentMissionPlan(missionId);
+  }
+
+  listMissionPlanRevisions(missionId: string): MissionPlanRevision[] {
+    return this.#database
+      .prepare(`
+        SELECT mission_id, revision, status, content_hash, content_json, created_at, approved_at
+        FROM mission_plan_revisions
+        WHERE mission_id = ?
+        ORDER BY revision
+      `)
+      .all(missionId)
+      .map(planRevisionFromRow);
+  }
+
+  approveMissionPlan(input: ApproveMissionPlanInput): MissionPlanRevision {
+    return this.#transaction(() => {
+      this.#requireOpenMission(input.missionId);
+      const current = this.#getCurrentMissionPlan(input.missionId);
+      if (current === undefined) {
+        throw new MnfsError('PLAN_NOT_FOUND', `Mission ${input.missionId} has no plan to approve.`);
+      }
+      if (current.status === 'APPROVED') {
+        if (current.contentHash === input.contentHash) return current;
+        throw new MnfsError(
+          'PLAN_APPROVAL_CONFLICT',
+          `Mission ${input.missionId} is already approved at ${current.contentHash}.`,
+        );
+      }
+      if (current.contentHash !== input.contentHash) {
+        throw new MnfsError(
+          'PLAN_APPROVAL_CONFLICT',
+          `Current plan hash is ${current.contentHash}, not ${input.contentHash}.`,
+        );
+      }
+
+      this.#database
+        .prepare(`
+          UPDATE mission_plan_revisions
+          SET status = 'APPROVED', approved_at = ?
+          WHERE mission_id = ? AND revision = ? AND status = 'DRAFT'
+        `)
+        .run(input.approvedAt, input.missionId, current.revision);
+      this.#database
+        .prepare(`
+          INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
+          VALUES (?, 'PLAN_APPROVED', ?, ?, ?)
+        `)
+        .run(
+          `EVT-${input.missionId}-PLAN-APPROVED-R${String(current.revision).padStart(4, '0')}`,
+          input.missionId,
+          input.approvedAt,
+          JSON.stringify({ revision: current.revision, contentHash: current.contentHash }),
+        );
+
+      return {
+        ...current,
+        status: 'APPROVED',
+        approvedAt: input.approvedAt,
+      };
+    });
+  }
+
   listMissionStatuses(): Mission[] {
     return this.#database
       .prepare('SELECT id, goal, status, opened_at FROM missions ORDER BY id')
@@ -120,7 +315,7 @@ export class SqliteStore {
         missionId: String(row.mission_id),
         occurredAt: String(row.occurred_at),
         payload: JSON.parse(String(row.payload_json)) as MissionEvent['payload'],
-      }));
+      })) as MissionEvent[];
   }
 
   close(): void {

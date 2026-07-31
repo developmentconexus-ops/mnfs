@@ -7,34 +7,21 @@
 - **Default branch:** `main`
 - **Implementation branch:** `feat/m0-foundation`
 
-The operator created the empty GitHub repository on 2026-07-31. Publication now consists only of pushing the two prepared branches, creating the tracking issues and opening the draft PR.
+## Publication result
 
-## Current publication state
+- [x] repository exists at https://github.com/developmentconexus-ops/mnfs;
+- [x] `main` and `feat/m0-foundation` are published;
+- [x] remaining M0 and M1 gates are tracked in issues;
+- [x] draft PR #4 targets `main` from `feat/m0-foundation`;
+- [x] resulting URLs are recorded in `STATUS.md` and `BACKLOG.md`.
 
-- [x] repository exists at `https://github.com/developmentconexus-ops/mnfs`;
-- [ ] `main` and `feat/m0-foundation` are pushed;
-- [ ] GitHub issues mirror the remaining M0 and M1 gates;
-- [ ] a draft PR targets `main` from `feat/m0-foundation`;
-- [ ] resulting URLs are recorded in `STATUS.md`.
+## Links
 
-## One-time WSL2 publication
+- WSL2 acceptance: https://github.com/developmentconexus-ops/mnfs/issues/1
+- Clean-clone reproducibility: https://github.com/developmentconexus-ops/mnfs/issues/2
+- Pi + Lavish visual planning: https://github.com/developmentconexus-ops/mnfs/issues/3
+- M0 draft PR: https://github.com/developmentconexus-ops/mnfs/pull/4
 
-Use the publication kit generated with this repository. Inside Ubuntu WSL2, with `gh auth login` already completed:
+## Note on history
 
-```bash
-unzip mnfs-github-publish-kit.zip -d ~/mnfs-publish-kit
-bash ~/mnfs-publish-kit/publish.sh
-```
-
-The script is idempotent for issue and pull-request creation. It performs normal non-force pushes to the empty repository and preserves the complete local Git history.
-
-## Manual fallback
-
-From a restored checkout:
-
-```bash
-git remote set-url origin https://github.com/developmentconexus-ops/mnfs.git   || git remote add origin https://github.com/developmentconexus-ops/mnfs.git
-
-git push -u origin main
-git push -u origin feat/m0-foundation
-```
+The repository contents were published through the connected GitHub API after the operator created the empty repository. The remote contains the baseline on `main` and the complete M0 implementation on `feat/m0-foundation`. The local bundle remains a separate archival copy of the earlier granular commit history.

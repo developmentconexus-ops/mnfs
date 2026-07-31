@@ -41,4 +41,11 @@
 - Added eight lifecycle service tests for normalization, invalid JSON, stale writes, blocked approval, exact-hash materialization, failure recovery, rematerialization and draft refusal.
 - A new adversarial test exposed two cleanup-boundary defects: directory creation occurred outside the named-error boundary, and best-effort cleanup could replace the original error. Both root causes were corrected before publication.
 - Verified the combined M1.3 focused slice: 22 relevant domain/store/service tests passed, 0 failed.
-- Canonical WSL2 full-suite verification of M1.3 is the gate before M1.4.
+- Operator confirmed the canonical WSL2 full-suite verification of M1.3 was green.
+- Implemented M1.4 deterministic self-contained HTML rendering for outcomes, scope, milestones, features, risks, questions and dependency source.
+- Escaped all semantic plan text and kept the artifact free of external assets, random values and timestamps so repeated rendering is byte-identical.
+- Bound Lavish approval and change-request controls to literal mission/hash prompts stored in auditable `data-*` attributes; HTML remains projection and never mutates structured source.
+- Added runtime artifact publication at `artifacts/plans/<mission-id>/rev-<NNNN>.html` through `MissionPlanService.renderCurrentPlan`.
+- The first TDD pass exposed that dynamically assembled review prompts were not directly auditable in the saved artifact. The renderer now stores exact prompts in attributes and the script reads those values.
+- Verified the focused M1.4 slice: 6 renderer/service tests passed, 0 failed.
+- Canonical WSL2 full-suite verification of M1.4 is the gate before M1.5.

@@ -7,9 +7,10 @@
 - **Active design:** `docs/design/2026-07-31-m1-visual-mission-planning.md`
 - **Active plan:** `docs/superpowers/plans/2026-07-31-m1-visual-mission-planning.md`
 - **Active branch:** `feat/m1-visual-planning`
-- **Current state:** M1 design and task plan committed; implementation starts with plan domain, validation and revision hashing
+- **Current state:** M1.1 domain implementation and focused tests committed; canonical WSL2 full-suite verification is the next gate
 - **Repository:** https://github.com/developmentconexus-ops/mnfs
 - **M0 draft PR:** https://github.com/developmentconexus-ops/mnfs/pull/4
+- **M1 draft PR:** https://github.com/developmentconexus-ops/mnfs/pull/5
 - **M1 issue:** https://github.com/developmentconexus-ops/mnfs/issues/3
 - **Tooling:** Pi is the reasoning runtime; Lavish is the M1 browser review adapter; Treehouse and Herdr remain deferred to M2
 
@@ -35,7 +36,7 @@ open mission → structured revision → deterministic HTML → Lavish feedback
 
 ## M1 definition of done
 
-- [ ] mission plan content is validated and content-addressed.
+- [~] mission plan content is validated and content-addressed — implementation committed; full branch verification pending.
 - [ ] revisions are append-only, idempotent and stale-write protected.
 - [ ] plan HTML is deterministic, escaped and hash-bound.
 - [ ] Lavish opens and polls through a narrow process adapter.
@@ -45,6 +46,12 @@ open mission → structured revision → deterministic HTML → Lavish feedback
 - [ ] approved plan is materialized under `.mnfs/missions/<id>/plan.json`.
 - [ ] a fresh process recovers the approved plan.
 
+## Verification evidence
+
+- M0 real WSL2 acceptance: operator-confirmed complete.
+- M1.1 isolated strict TypeScript proof: 6 tests passed, 0 failed.
+- M1.1 still requires `npm run verify` inside the canonical WSL2 repository checkout before being marked complete.
+
 ## Immediate next action
 
-Implement **Task 1 — canonical plan content and validation** using TDD. Do not begin Treehouse, Herdr, workers or parallelism.
+Pull `feat/m1-visual-planning` in WSL2 and run the full suite. If green, mark M1.1 complete and begin **M1.2 — SQLite revision persistence**.

@@ -22,8 +22,8 @@
 - [x] M1-004 Deterministic, escaped HTML plan renderer.
 - [x] M1-005 Lavish open/poll/end process adapter.
 - [x] M1-006 CLI plan commands.
-- [~] M1-007 Project-local Pi `mnfs-plan` skill — files and focused static tests committed; canonical Pi discovery pending.
-- [ ] M1-008 Automated visual-planning walking skeleton.
+- [x] M1-007 Project-local Pi `mnfs-plan` skill — canonical full suite and real Pi discovery confirmed.
+- [~] M1-008 Automated visual-planning walking skeleton — independent-process test added; canonical full-suite verification pending.
 - [ ] M1-009 Real Pi + Lavish WSL2/browser acceptance — [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3).
 
 ## Next — M2 One Worker

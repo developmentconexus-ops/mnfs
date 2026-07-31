@@ -72,4 +72,16 @@
 - Added tests for every command, missing/duplicate/unknown flags, asynchronous wiring, exact hash visibility and stable MNFS error codes.
 - Proved RED against the pre-M1.6 CLI: all planning commands were rejected as unknown.
 - Focused green proof: four parser/dispatch tests passed, 0 failed; production entry wiring compiled in a strict compatibility harness.
-- Canonical WSL2 full-suite verification is the gate before M1.7.
+- Operator confirmed the canonical WSL2 full suite green and authorized continuation.
+
+### M1.7 — Project-local Pi planning skill
+
+- Confirmed the current Pi Agent Skills contract: project skills are discovered recursively under `.pi/skills/`, the directory name must match frontmatter `name`, and the skill is invoked as `/skill:mnfs-plan`.
+- Added `.pi/skills/mnfs-plan/SKILL.md` with bounded progressive-disclosure instructions.
+- Added `references/plan-schema.md` with the complete JSON shape, ID rules, dependency invariants, question states and planning boundary.
+- The skill resolves the mission, reads current state, creates full JSON revisions, uses the exact previous hash, opens/polls Lavish, refuses self-approval and stops when the operator ends review.
+- Approval is permitted only after the exact feedback token `MNFS_APPROVE_PLAN mission=<mission-id> hash=<current-hash>` and a fresh `plan show` check.
+- The skill forbids editing rendered HTML, writing SQLite or approved contracts directly, inventing product decisions and starting implementation workers.
+- TDD RED: static tests failed because the project-local skill and reference did not exist.
+- Focused GREEN: 8 tests passed, 0 failed; three new skill tests cover frontmatter/discovery, workflow markers, approval and stop constraints, instruction size and schema invariants.
+- Canonical WSL2 full-suite verification and real Pi `/skill:mnfs-plan` discovery remain the next gate.

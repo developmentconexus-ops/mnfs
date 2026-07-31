@@ -60,4 +60,16 @@
 - Added `LAVISH_NOT_FOUND` and `LAVISH_COMMAND_FAILED`, including install remediation.
 - Proved RED for the missing adapter and separately for the production process runner.
 - Focused proof: six adapter tests green, including a real child-process stdout/stderr capture.
-- Canonical WSL2 full-suite verification is the gate before M1.6.
+- Operator confirmed the canonical WSL2 full suite green.
+
+### M1.6 — Planning CLI
+
+- Added strict parser contracts for `plan save`, `show`, `render`, `open`, `poll`, `approve` and `materialize`.
+- Plan content continues to travel through files; optional `expectedPreviousHash` is preserved without long inline JSON.
+- Added synchronous/asynchronous dependency boundaries so the CLI remains testable while real Lavish polling stays asynchronous.
+- Wired the production entry to `MissionPlanService`, runtime artifact paths and the Lavish open/poll adapter, closing SQLite only after asynchronous work completes.
+- Added stable JSON output for every command and human output with a concrete next action.
+- Added tests for every command, missing/duplicate/unknown flags, asynchronous wiring, exact hash visibility and stable MNFS error codes.
+- Proved RED against the pre-M1.6 CLI: all planning commands were rejected as unknown.
+- Focused green proof: four parser/dispatch tests passed, 0 failed; production entry wiring compiled in a strict compatibility harness.
+- Canonical WSL2 full-suite verification is the gate before M1.7.

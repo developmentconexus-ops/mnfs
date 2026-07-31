@@ -7,7 +7,7 @@
 - **Active design:** `docs/design/2026-07-31-m1-visual-mission-planning.md`
 - **Active plan:** `docs/superpowers/plans/2026-07-31-m1-visual-mission-planning.md`
 - **Active branch:** `feat/m1-visual-planning`
-- **Current state:** M1.1–M1.5 are accepted in the canonical WSL2 full suite; M1.6 planning CLI commands are committed with a focused TDD proof; full branch verification is the next gate
+- **Current state:** M1.1–M1.6 are accepted in the canonical WSL2 full suite; M1.7 project-local Pi skill is committed with a focused TDD proof; full branch verification and real Pi discovery are the next gates
 - **Repository:** https://github.com/developmentconexus-ops/mnfs
 - **M1 draft PR:** https://github.com/developmentconexus-ops/mnfs/pull/5
 - **M1 issue:** https://github.com/developmentconexus-ops/mnfs/issues/3
@@ -41,8 +41,8 @@ open mission → structured revision → deterministic HTML → Lavish feedback
 - [x] approved contract is materialized atomically under `.mnfs/missions/<id>/plan.json` and can be repaired from SQLite.
 - [x] plan HTML is deterministic, escaped, responsive and hash-bound.
 - [x] Lavish opens, polls and ends through a narrow process adapter.
-- [~] all planning operations are available through strict human/JSON CLI contracts — implementation and focused proof committed; canonical full-suite verification pending.
-- [ ] Pi discovers the project-local `mnfs-plan` skill.
+- [x] all planning operations are available through strict human/JSON CLI contracts.
+- [~] Pi discovers and follows the project-local `mnfs-plan` skill — files and static contract proof committed; canonical Pi discovery pending.
 - [ ] operator feedback changes structured source and produces a new hash.
 - [ ] a fresh process recovers the approved plan.
 
@@ -54,11 +54,11 @@ open mission → structured revision → deterministic HTML → Lavish feedback
 - M1.3 canonical branch verification: green.
 - M1.4 canonical branch verification: green after strict `noUncheckedIndexedAccess` fixture narrowing.
 - M1.5 canonical branch verification: green.
-- M1.6 red proof: existing CLI rejected all `plan` commands.
-- M1.6 focused green proof: 4 parser/dispatch tests passed, 0 failed; the production entry wiring also compiled in a strict compatibility harness.
-- M1.6 coverage includes all seven planning commands, missing/duplicate/unknown arguments, asynchronous dependency wiring, stable JSON output, stable MNFS error codes and concrete human next actions.
-- M1.6 still requires `npm run verify` in the canonical WSL2 checkout before beginning M1.7.
+- M1.6 canonical branch verification: operator-confirmed green.
+- M1.7 RED: the project-local skill and schema reference did not exist.
+- M1.7 focused GREEN: 8 tests passed, 0 failed; three new static tests cover valid Pi frontmatter, bounded progressive disclosure, the complete hash-bound workflow, approval restrictions, stop behavior and schema invariants.
+- M1.7 still requires `npm run verify` plus `/skill:mnfs-plan` discovery inside the canonical WSL2 Pi session.
 
 ## Immediate next action
 
-Pull `feat/m1-visual-planning` in WSL2 and run `npm ci && npm run verify`. If green, begin **M1.7 — project-local Pi `mnfs-plan` skill**.
+Pull `feat/m1-visual-planning`, run `npm run verify`, start Pi from the repository root, run `/reload`, and confirm `/skill:mnfs-plan` is discoverable. If green, begin **M1.8 — automated visual-planning walking skeleton**.

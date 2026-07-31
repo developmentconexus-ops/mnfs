@@ -13,6 +13,8 @@ export type MnfsErrorCode =
   | 'PLAN_NOT_FOUND'
   | 'PLAN_REVISION_CONFLICT'
   | 'PLAN_APPROVAL_CONFLICT'
+  | 'PLAN_BLOCKED'
+  | 'PLAN_MATERIALIZATION_FAILED'
   | 'INTERNAL_ERROR';
 
 export class MnfsError extends Error {

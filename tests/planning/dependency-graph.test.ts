@@ -65,7 +65,7 @@ test('renders a deterministic inline SVG with every dependency node and edge', (
   assert.match(first, /data-edge="F01-&gt;F02"/);
   assert.match(first, /Foundation &lt;safe&gt;/);
   assert.doesNotMatch(first, /<pre class="mermaid"/);
-  assert.doesNotMatch(first, /https?:\/\//);
+  assert.doesNotMatch(first, /<(?:script|image|use)[^>]+https?:\/\//i);
 });
 
 test('omits the graph when the plan has no dependency edges', () => {

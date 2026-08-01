@@ -149,11 +149,13 @@ test('binds Lavish review controls to the exact mission and hash', () => {
   assert.match(html, /data-lavish-question="mnfs-plan-review"/);
 });
 
-test('includes Mermaid dependency source only when dependency edges exist', () => {
+test('renders dependency edges as inline SVG only when edges exist', () => {
   const withDependencies = renderMissionPlanHtml(revision());
-  assert.match(withDependencies, /class="mermaid"/);
-  assert.match(withDependencies, /M01 --&gt; M02/);
-  assert.match(withDependencies, /F01 --&gt; F02/);
+  assert.match(withDependencies, /<svg class="dependency-graph"/);
+  assert.match(withDependencies, /data-edge="M01-&gt;M02"/);
+  assert.match(withDependencies, /data-edge="F01-&gt;F02"/);
+  assert.doesNotMatch(withDependencies, /<pre class="mermaid"/);
+  assert.doesNotMatch(withDependencies, /mermaid(?:\.min)?\.js/i);
 
   const withoutDependencies = revision({
     milestones: revision().content.milestones.map((milestone) => ({
@@ -162,5 +164,5 @@ test('includes Mermaid dependency source only when dependency edges exist', () =
       features: milestone.features.map((feature) => ({ ...feature, dependsOn: [] })),
     })),
   });
-  assert.doesNotMatch(renderMissionPlanHtml(withoutDependencies), /class="mermaid"/);
+  assert.doesNotMatch(renderMissionPlanHtml(withoutDependencies), /class="dependency-graph"/);
 });

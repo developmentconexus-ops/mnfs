@@ -23,8 +23,8 @@
 - [x] M1-005 Lavish open/poll/end process adapter.
 - [x] M1-006 CLI plan commands.
 - [x] M1-007 Project-local Pi `mnfs-plan` skill — canonical full suite and real Pi discovery confirmed.
-- [~] M1-008 Automated visual-planning walking skeleton — independent-process test added; canonical full-suite verification pending.
-- [ ] M1-009 Real Pi + Lavish WSL2/browser acceptance — [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3).
+- [x] M1-008 Automated visual-planning walking skeleton — canonical full-suite verification confirmed.
+- [ ] M1-009 Real Pi + Lavish WSL2/browser acceptance — follow `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md` and close [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3).
 
 ## Next — M2 One Worker
 

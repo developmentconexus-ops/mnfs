@@ -1,9 +1,9 @@
 import type {
   FeaturePlan,
-  MissionPlanContent,
   MissionPlanRevision,
   PlanQuestion,
 } from '../domain/mission-plan.js';
+import { renderDependencyGraphSvg } from './dependency-graph.js';
 import { escapeHtml } from './html.js';
 
 function renderItems(items: readonly string[], emptyLabel: string): string {
@@ -32,31 +32,6 @@ function renderQuestion(question: PlanQuestion): string {
     <h4>${escapeHtml(question.question)}</h4>
     ${answer}
   </article>`;
-}
-
-function dependencyMermaid(content: MissionPlanContent): string | undefined {
-  const edges: string[] = [];
-  for (const milestone of content.milestones) {
-    for (const dependency of milestone.dependsOn) edges.push(`${dependency} --> ${milestone.id}`);
-    for (const feature of milestone.features) {
-      for (const dependency of feature.dependsOn) edges.push(`${dependency} --> ${feature.id}`);
-    }
-  }
-  if (edges.length === 0) return undefined;
-
-  const nodes = [
-    ...content.milestones.map((milestone) => milestone.id),
-    ...content.milestones.flatMap((milestone) => milestone.features.map((feature) => feature.id)),
-  ];
-  const source = [
-    'flowchart LR',
-    ...nodes.map((node) => `  ${node}["${node}"]`),
-    ...edges.map((edge) => `  ${edge}`),
-  ].join('\n');
-  return `<section class="panel" aria-labelledby="dependencies-heading">
-    <div class="section-heading"><p class="eyebrow">Composition</p><h2 id="dependencies-heading">Dependency graph</h2></div>
-    <pre class="mermaid">${escapeHtml(source)}</pre>
-  </section>`;
 }
 
 function reviewScript(): string {
@@ -105,7 +80,13 @@ function reviewScript(): string {
 
 export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
   const { content } = revision;
-  const dependencies = dependencyMermaid(content);
+  const dependencyGraph = renderDependencyGraphSvg(content);
+  const dependencies = dependencyGraph === undefined
+    ? undefined
+    : `<section class="panel" aria-labelledby="dependencies-heading">
+    <div class="section-heading"><p class="eyebrow">Composition</p><h2 id="dependencies-heading">Dependency graph</h2></div>
+    <div class="dependency-graph-scroll">${dependencyGraph}</div>
+  </section>`;
   const milestones = content.milestones.map((milestone) => `<article class="milestone" id="milestone-${escapeHtml(milestone.id)}">
     <div class="card-heading"><span class="identifier">${escapeHtml(milestone.id)}</span><h3>${escapeHtml(milestone.title)}</h3></div>
     <p class="outcome">${escapeHtml(milestone.outcome)}</p>
@@ -155,7 +136,15 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
     .dependency { margin: 14px 0 0; font-size: .86rem; }
     .answer { margin-top: 14px; }
     .empty { color: #8290b2; font-style: italic; }
-    .mermaid { overflow-x: auto; margin: 0; padding: 22px; border-radius: 16px; background: #070b16; color: #bae6fd; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+    .dependency-graph-scroll { overflow-x: auto; padding: 8px; border-radius: 16px; background: #070b16; }
+    .dependency-graph { display: block; width: 100%; min-width: 640px; height: auto; }
+    .dependency-edge { fill: none; stroke: #64748b; stroke-width: 2.5; }
+    .dependency-arrow { fill: #64748b; }
+    .dependency-node rect { stroke-width: 1.5; }
+    .dependency-node-milestone rect { fill: #172554; stroke: #60a5fa; }
+    .dependency-node-feature rect { fill: #13273a; stroke: #38bdf8; }
+    .dependency-node-id { fill: #93c5fd; font: 800 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .06em; }
+    .dependency-node-title { fill: #e2e8f0; font: 650 14px Inter, ui-sans-serif, system-ui, sans-serif; }
     .review { position: relative; overflow: hidden; border-color: rgba(56, 189, 248, .45); }
     .review::before { content: ""; position: absolute; inset: 0 auto auto 0; width: 100%; height: 3px; background: linear-gradient(90deg, #38bdf8, #a78bfa); }
     textarea { width: 100%; min-height: 130px; resize: vertical; border: 1px solid #334155; border-radius: 14px; padding: 14px; background: #070b16; color: #f8fafc; font: inherit; }

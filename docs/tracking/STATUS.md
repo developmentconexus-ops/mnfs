@@ -4,63 +4,57 @@
 - **Canonical environment:** Ubuntu on WSL2
 - **Completed milestone:** M0 — Foundation walking skeleton, merged through [PR #4](https://github.com/developmentconexus-ops/mnfs/pull/4)
 - **Active milestone:** M1 — Visual mission planning
-- **Active design:** `docs/design/2026-07-31-m1-visual-mission-planning.md`
-- **Active plan:** `docs/superpowers/plans/2026-07-31-m1-visual-mission-planning.md`
-- **Active acceptance:** `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md`
+- **Active design:** `docs/design/2026-08-01-m1.9-review-continuity-svg-design.md`
+- **Active plan:** `docs/superpowers/plans/2026-08-01-m1.9-review-continuity-svg.md`
 - **Active branch:** `feat/m1-visual-planning`
-- **Current state:** M1.1–M1.8 are accepted in the canonical WSL2/Pi environment; M1.9 real Pi + Lavish browser acceptance is the final gate
+- **Current state:** M1.1–M1.8 are accepted. The real M1.9 pilot approved `MIS-002` and proved Pi, Lavish feedback, revision/hash approval and fresh-process recovery, but exposed two visual integration defects. Stable `review.html` continuity and deterministic inline SVG fixes are committed; canonical verification and a short browser retest are the final gates.
 - **Repository:** https://github.com/developmentconexus-ops/mnfs
 - **M1 draft PR:** https://github.com/developmentconexus-ops/mnfs/pull/5
 - **M1 issue:** https://github.com/developmentconexus-ops/mnfs/issues/3
-- **Tooling:** Pi is the reasoning runtime; Lavish is the browser review adapter; Treehouse and Herdr remain deferred to M2
+- **Tooling:** Pi is the reasoning runtime; Lavish is browser review/feedback; Treehouse and Herdr remain deferred to M2
 
 ## Current objective
 
-Prove the smallest complete visual planning loop:
+Finish M1 without carrying pilot defects forward:
 
 ```text
-open mission → structured revision → deterministic HTML → Lavish feedback
-→ newer structured revision → exact-hash operator approval → versioned contract
+stable review.html session → live reload across revisions → conversation preserved
++ deterministic inline SVG dependency graph → exact-hash approval → recovery
 ```
 
-## M0 acceptance
-
-- [x] `mnfs doctor` reports required and optional WSL2 tools.
-- [x] repository service creates a stable, idempotent identity.
-- [x] runtime root resolves outside the checkout from the committed repository UUID.
-- [x] SQLite persists a mission and matching `MISSION_OPENED` event atomically.
-- [x] `mnfs status` recovers the same mission from a fresh CLI process.
-- [x] `mnfs doctor`, verification and walking-skeleton commands pass in the operator Ubuntu WSL2 environment — [issue #1](https://github.com/developmentconexus-ops/mnfs/issues/1).
-- [x] committed `package-lock.json` reproduces `npm ci && npm run verify` from a clean clone — [issue #2](https://github.com/developmentconexus-ops/mnfs/issues/2).
-- [x] M0 merged to `main` through PR #4.
-
-## M1 definition of done
+## M1 accepted evidence
 
 - [x] mission plan content is validated and content-addressed.
 - [x] revisions are append-only, idempotent and stale-write protected.
-- [x] plan service validates untrusted JSON and blocks approval on open blocking questions.
-- [x] approved contract is materialized atomically under `.mnfs/missions/<id>/plan.json` and can be repaired from SQLite.
-- [x] plan HTML is deterministic, escaped, responsive and hash-bound.
-- [x] Lavish opens, polls and ends through a narrow process adapter.
-- [x] all planning operations are available through strict human/JSON CLI contracts.
-- [x] Pi discovers and follows the project-local `mnfs-plan` skill.
-- [x] independent CLI processes recover revisions, approval and a rematerialized contract.
-- [ ] real operator feedback changes structured source and produces a new hash in Lavish.
-- [ ] real exact-hash browser approval materializes and versions the accepted contract.
+- [x] blocking product questions prevent approval.
+- [x] approved contracts materialize under `.mnfs/missions/<id>/plan.json` and can be repaired from SQLite.
+- [x] all planning operations have strict human/JSON CLI contracts.
+- [x] Pi discovers and follows `/skill:mnfs-plan`.
+- [x] automated independent-process lifecycle proof is green.
+- [x] real operator feedback produced newer revisions and hashes.
+- [x] `MIS-002` revision 3 was approved by exact hash and committed.
+- [x] a fresh process recovered the approved revision and matching contract hash.
+
+## M1.9 defects found by real use
+
+### Review continuity
+
+- Root cause: Lavish keys sessions by canonical HTML path, while MNFS opened `rev-0001.html`, `rev-0002.html`, etc.
+- Fix: every mission now has stable `review.html` plus immutable `rev-<NNNN>.html` snapshots.
+- `plan open` and `plan poll` use `review.html`; later revisions run `plan render` and continue polling instead of reopening.
+
+### Dependency graph
+
+- Root cause: MNFS emitted raw `<pre class="mermaid">` without a Mermaid runtime.
+- Fix: MNFS generates deterministic inline SVG directly from the validated dependency DAG, with no CDN, browser library or new package.
 
 ## Verification evidence
 
-- M0 real WSL2 acceptance and clean-clone reproduction: operator-confirmed complete.
-- M1.1 canonical branch verification: green.
-- M1.2 canonical branch verification: green.
-- M1.3 canonical branch verification: green.
-- M1.4 canonical branch verification: green after strict `noUncheckedIndexedAccess` fixture narrowing.
-- M1.5 canonical branch verification: green.
-- M1.6 canonical branch verification: operator-confirmed green.
-- M1.7 canonical full suite and real `/skill:mnfs-plan` discovery: operator-confirmed green.
-- M1.8 canonical full suite: operator-confirmed green.
-- M1.8 automated proof covers independent-process recovery, deterministic rendering, revision supersession, stale-write rejection, wrong-hash rejection, blocking questions, exact-hash approval and contract rematerialization.
+- M1.1–M1.8 canonical WSL2/Pi gates: operator-confirmed green.
+- M1.9 original browser pilot: core flow green; conversation continuity and graph rendering failed and were reproduced.
+- New automated tests cover stable review/snapshot paths, Pi open-once behavior, SVG nodes/edges, escaping, deterministic output and removal of raw Mermaid source.
+- Pending: `npm run verify` on the corrected branch and one short browser retest.
 
 ## Immediate next action
 
-Run the exact **M1.9 real Pi + Lavish browser pilot** in `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md`. The dogfood mission plans the smallest M2 one-worker slice; do not begin implementation during the pilot.
+Pull `feat/m1-visual-planning`, run `npm run verify`, then follow the shortened retest in `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md`. M1 closes only after the same Lavish tab retains history across a new revision and displays the dependency graph as SVG.

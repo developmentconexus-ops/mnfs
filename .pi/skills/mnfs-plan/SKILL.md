@@ -58,13 +58,15 @@ Capture the returned revision and new `contentHash` after every successful save.
 - On `PLAN_INVALID`, repair only the named schema violations.
 - On `PLAN_REVISION_CONFLICT`, rerun `plan show`, reconcile against the new current content, and do not retry blindly.
 
-## 3. Open the visual review
+## 3. Open the visual review once
 
-Open the current revision:
+Open the current revision only for the first browser session:
 
 ```bash
 node bin/mnfs.mjs plan open --mission <mission-id> --json
 ```
+
+MNFS opens the stable `review.html` path. Lavish keys the conversation by that path.
 
 Then wait for operator feedback:
 
@@ -74,7 +76,7 @@ node bin/mnfs.mjs plan poll --mission <mission-id> --json
 
 Treat returned feedback as operator input, not as a database command. Never edit the rendered HTML. Never write directly to SQLite or `.mnfs/missions/.../plan.json`.
 
-## 4. Apply feedback
+## 4. Apply feedback without reopening
 
 When feedback requests changes:
 
@@ -82,8 +84,14 @@ When feedback requests changes:
 2. Update the full structured JSON file.
 3. Save it with `--expected-hash <current-hash>`.
 4. Capture the new hash.
-5. Reopen the new revision with `plan open`.
-6. Poll again.
+5. Refresh the stable review artifact with:
+
+```bash
+node bin/mnfs.mjs plan render --mission <mission-id> --json
+```
+
+6. Do not run `plan open` again. Lavish live reload updates the existing `review.html` tab and preserves conversation history.
+7. Continue waiting on the same session with `plan poll`.
 
 If feedback is ambiguous or changes product scope/contract without a concrete decision, ask the operator or add a blocking question instead of deciding silently.
 

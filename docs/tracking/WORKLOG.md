@@ -98,6 +98,21 @@
 ### M1.9 — Real Pi + Lavish browser pilot
 
 - Added `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md` as the exact dogfood protocol.
-- The pilot plans the smallest M2 one-worker slice: Pi worker, leased Treehouse worktree, durable CLAIM and lead restart recovery, with Herdr explicitly optional.
-- The required human change removes Herdr from deciding acceptance criteria so revision 2 and its new hash are unambiguous.
-- Completion requires real Windows-browser review, exact-current-hash approval, fresh-process recovery and committing the accepted `.mnfs` contract.
+- The pilot planned the smallest M2 one-worker slice: Pi worker, leased Treehouse worktree, durable CLAIM and lead restart recovery, with Herdr explicitly optional.
+- Pi, Lavish feedback, multiple structured revisions, exact-hash approval and fresh-process recovery succeeded.
+- The accepted `MIS-002` revision 3 was committed with hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
+- The pilot exposed two integration defects:
+  - each revision used a different HTML path, so Lavish opened a new session/tab and lost conversation continuity;
+  - the dependency panel displayed raw Mermaid source because no Mermaid runtime was loaded.
+
+## 2026-08-01
+
+### M1.9 fixes — stable review path and static SVG
+
+- Confirmed that Lavish session identity is the canonical HTML file path and that live reload preserves conversation only when the path remains stable.
+- Added one stable `artifacts/plans/<mission-id>/review.html` path while preserving revision-specific `rev-<NNNN>.html` snapshots.
+- Changed `plan open` and `plan poll` to use `review.html`; the Pi skill now opens once, renders later revisions and continues polling the same session.
+- Replaced raw Mermaid source with deterministic inline SVG generated directly from the validated milestone/feature dependency DAG.
+- Added topological columns, distinct milestone/feature nodes, arrows, escaped titles and accessible SVG metadata without adding a package, CDN or browser runtime.
+- Added tests for stable review/snapshot paths, open-once skill behavior, SVG nodes/edges, escaping, deterministic output and absence of raw Mermaid markup.
+- Canonical `npm run verify` and a short browser continuity/SVG retest remain the final M1 gates.

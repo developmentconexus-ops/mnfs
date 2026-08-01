@@ -115,4 +115,14 @@
 - Replaced raw Mermaid source with deterministic inline SVG generated directly from the validated milestone/feature dependency DAG.
 - Added topological columns, distinct milestone/feature nodes, arrows, escaped titles and accessible SVG metadata without adding a package, CDN or browser runtime.
 - Added tests for stable review/snapshot paths, open-once skill behavior, SVG nodes/edges, escaping, deterministic output and absence of raw Mermaid markup.
-- Canonical `npm run verify` and a short browser continuity/SVG retest remain the final M1 gates.
+
+### M1 final acceptance
+
+- Operator confirmed the corrected canonical `npm run verify` gate green.
+- Corrected browser retest preserved one Lavish tab and conversation history across revisions.
+- Revision updates used `plan render` and continued polling the stable `review.html` session rather than reopening.
+- Dependency graph rendered as deterministic inline SVG and updated through live reload.
+- Exact-hash approval and fresh-process recovery remained green after the fixes.
+- Issue #3 was closed as completed.
+- PR #5 was moved out of draft and marked ready for final review and integration.
+- M2 implementation remains unstarted; the approved contract is `.mnfs/missions/MIS-002/plan.json`.

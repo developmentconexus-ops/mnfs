@@ -115,7 +115,7 @@ export function renderDependencyGraphSvg(content: MissionPlanContent): string | 
   const edges = nodes.flatMap((node) => node.dependsOn.map((sourceId) => ({ sourceId, targetId: node.id })));
   if (edges.length === 0) return undefined;
 
-  const nodesById = new Map(nodes.map((node) => [node.id, node]));
+  const nodesById = new Map<string, GraphNode>(nodes.map((node) => [node.id, node] as const));
   const depthMemo = new Map<string, number>();
   const grouped = new Map<number, GraphNode[]>();
   let maximumDepth = 0;

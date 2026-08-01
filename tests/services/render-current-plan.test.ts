@@ -5,15 +5,18 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 import type { MissionPlanContent } from '../../src/domain/mission-plan.js';
-import { resolveMissionPlanHtmlPath } from '../../src/runtime/paths.js';
+import {
+  resolveMissionPlanHtmlPath,
+  resolveMissionPlanReviewPath,
+} from '../../src/runtime/paths.js';
 import { MissionPlanService } from '../../src/services/mission-plan-service.js';
 import { SqliteStore } from '../../src/store/sqlite-store.js';
 
-function plan(): MissionPlanContent {
+function plan(title = 'Render the approved planning surface'): MissionPlanContent {
   return {
     schemaVersion: 1,
     missionId: 'MIS-001',
-    title: 'Render the approved planning surface',
+    title,
     goal: 'Create one deterministic browser artifact',
     successCriteria: ['The current revision and hash are visible'],
     scope: { included: ['HTML renderer'], excluded: ['Worker execution'] },
@@ -40,7 +43,7 @@ function plan(): MissionPlanContent {
   };
 }
 
-test('renderCurrentPlan writes the deterministic revision artifact under runtime root', () => {
+test('renderCurrentPlan keeps one stable Lavish path and immutable revision snapshots', () => {
   const root = mkdtempSync(join(tmpdir(), 'mnfs-render-current-plan-'));
   const projectRoot = join(root, 'project');
   const runtimeRoot = join(root, 'runtime');
@@ -57,22 +60,37 @@ test('renderCurrentPlan writes the deterministic revision artifact under runtime
     runtimeRoot,
     now: () => '2026-07-31T20:00:00.000Z',
   });
-  const inputPath = join(root, 'plan.json');
-  writeFileSync(inputPath, JSON.stringify(plan()), 'utf8');
-  const revision = service.savePlanFromFile({ missionId: 'MIS-001', inputPath });
 
+  const firstInput = join(root, 'plan-1.json');
+  writeFileSync(firstInput, JSON.stringify(plan()), 'utf8');
+  const revision1 = service.savePlanFromFile({ missionId: 'MIS-001', inputPath: firstInput });
   const firstResult = service.renderCurrentPlan('MIS-001');
-  const expectedPath = resolveMissionPlanHtmlPath(runtimeRoot, 'MIS-001', revision.revision);
 
-  assert.equal(firstResult.htmlPath, expectedPath);
-  assert.deepEqual(firstResult.revision, revision);
-  assert.equal(existsSync(expectedPath), true);
-  const firstHtml = readFileSync(expectedPath, 'utf8');
-  assert.equal(firstHtml.includes(revision.contentHash), true);
-  assert.equal(firstHtml.includes('Render the approved planning surface'), true);
+  const reviewPath = resolveMissionPlanReviewPath(runtimeRoot, 'MIS-001');
+  const snapshot1 = resolveMissionPlanHtmlPath(runtimeRoot, 'MIS-001', 1);
+  assert.equal(firstResult.htmlPath, reviewPath);
+  assert.equal(firstResult.snapshotPath, snapshot1);
+  assert.equal(existsSync(reviewPath), true);
+  assert.equal(existsSync(snapshot1), true);
+  assert.equal(readFileSync(reviewPath, 'utf8'), readFileSync(snapshot1, 'utf8'));
 
+  const secondInput = join(root, 'plan-2.json');
+  writeFileSync(secondInput, JSON.stringify(plan('Revised planning surface')), 'utf8');
+  const revision2 = service.savePlanFromFile({
+    missionId: 'MIS-001',
+    inputPath: secondInput,
+    expectedPreviousHash: revision1.contentHash,
+  });
   const secondResult = service.renderCurrentPlan('MIS-001');
-  assert.equal(secondResult.htmlPath, expectedPath);
-  assert.equal(readFileSync(expectedPath, 'utf8'), firstHtml);
+  const snapshot2 = resolveMissionPlanHtmlPath(runtimeRoot, 'MIS-001', 2);
+
+  assert.equal(secondResult.htmlPath, reviewPath);
+  assert.equal(secondResult.snapshotPath, snapshot2);
+  assert.notEqual(secondResult.snapshotPath, firstResult.snapshotPath);
+  assert.equal(existsSync(snapshot1), true);
+  assert.equal(existsSync(snapshot2), true);
+  assert.equal(readFileSync(reviewPath, 'utf8'), readFileSync(snapshot2, 'utf8'));
+  assert.equal(readFileSync(reviewPath, 'utf8').includes(revision2.contentHash), true);
+  assert.equal(readFileSync(snapshot1, 'utf8').includes(revision1.contentHash), true);
   store.close();
 });

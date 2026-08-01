@@ -72,3 +72,8 @@ export function resolveMissionPlanHtmlPath(runtimeRoot: string, missionId: strin
     `rev-${String(revision).padStart(4, '0')}.html`,
   );
 }
+
+export function resolveMissionPlanReviewPath(runtimeRoot: string, missionId: string): string {
+  requireMissionPlanMissionId(missionId);
+  return join(runtimeRoot, 'artifacts', 'plans', missionId, 'review.html');
+}

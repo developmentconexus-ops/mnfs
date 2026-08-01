@@ -93,3 +93,11 @@
 - It proves stale revision rejection, wrong-hash approval rejection and blocking-question approval rejection without changing current state.
 - It approves revision 2 by its exact hash, recovers the approved plan in a fresh process, deletes the contract deliberately and rematerializes it from durable SQLite state.
 - Lavish/browser behavior remains outside the automated test and is reserved for the real M1.9 acceptance, keeping CI deterministic.
+- Operator confirmed the canonical WSL2 full suite green with the M1.8 walking skeleton included.
+
+### M1.9 — Real Pi + Lavish browser pilot
+
+- Added `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md` as the exact dogfood protocol.
+- The pilot plans the smallest M2 one-worker slice: Pi worker, leased Treehouse worktree, durable CLAIM and lead restart recovery, with Herdr explicitly optional.
+- The required human change removes Herdr from deciding acceptance criteria so revision 2 and its new hash are unambiguous.
+- Completion requires real Windows-browser review, exact-current-hash approval, fresh-process recovery and committing the accepted `.mnfs` contract.

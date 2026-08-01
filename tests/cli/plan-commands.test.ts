@@ -123,6 +123,8 @@ test('wires JSON planning commands to asynchronous dependencies', async () => {
   const calls: string[] = [];
   const revision = planRevision();
   const approved = planRevision('APPROVED');
+  const reviewPath = '/tmp/review.html';
+  const snapshotPath = '/tmp/rev-0002.html';
   const dependencies = baseDependencies({
     savePlan: async (input) => {
       calls.push(`save:${input.missionId}:${input.inputPath}`);
@@ -134,15 +136,15 @@ test('wires JSON planning commands to asynchronous dependencies', async () => {
     },
     renderPlan: async (missionId) => {
       calls.push(`render:${missionId}`);
-      return { revision, htmlPath: '/tmp/rev-0002.html' };
+      return { revision, htmlPath: reviewPath, snapshotPath };
     },
     openPlan: async (missionId) => {
       calls.push(`open:${missionId}`);
-      return { revision, htmlPath: '/tmp/rev-0002.html', lavishOutput: 'opened' };
+      return { revision, htmlPath: reviewPath, snapshotPath, lavishOutput: 'opened' };
     },
     pollPlan: async (missionId) => {
       calls.push(`poll:${missionId}`);
-      return { revision, htmlPath: '/tmp/rev-0002.html', feedback: 'change the title' };
+      return { revision, htmlPath: reviewPath, snapshotPath, feedback: 'change the title' };
     },
     approvePlan: async (input) => {
       calls.push(`approve:${input.missionId}:${input.contentHash}`);

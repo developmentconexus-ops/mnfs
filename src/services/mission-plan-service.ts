@@ -21,6 +21,7 @@ import { renderMissionPlanHtml } from '../planning/render-plan.js';
 import {
   resolveMissionPlanContractPath,
   resolveMissionPlanHtmlPath,
+  resolveMissionPlanReviewPath,
 } from '../runtime/paths.js';
 import { SqliteStore } from '../store/sqlite-store.js';
 
@@ -43,6 +44,7 @@ export interface ApprovePlanResult {
 export interface RenderPlanResult {
   readonly revision: MissionPlanRevision;
   readonly htmlPath: string;
+  readonly snapshotPath: string;
 }
 
 export interface MissionPlanServiceOptions {
@@ -176,13 +178,16 @@ export class MissionPlanService {
     }
 
     const revision = this.getCurrentPlan(missionId);
-    const htmlPath = resolveMissionPlanHtmlPath(
+    const snapshotPath = resolveMissionPlanHtmlPath(
       this.#runtimeRoot,
       missionId,
       revision.revision,
     );
-    publishRenderedPlan(htmlPath, renderMissionPlanHtml(revision));
-    return { revision, htmlPath };
+    const htmlPath = resolveMissionPlanReviewPath(this.#runtimeRoot, missionId);
+    const html = renderMissionPlanHtml(revision);
+    publishRenderedPlan(snapshotPath, html);
+    publishRenderedPlan(htmlPath, html);
+    return { revision, htmlPath, snapshotPath };
   }
 
   approvePlan(input: ApprovePlanInput): ApprovePlanResult {

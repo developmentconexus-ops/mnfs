@@ -32,7 +32,7 @@ test('mnfs-plan is a discoverable project-local Pi skill with bounded instructio
   assert.match(metadata.description ?? '', /mission plan/i);
   assert.match(metadata.description ?? '', /Lavish/i);
   assert.ok((metadata.description ?? '').length <= 1024);
-  assert.ok(skill.split('\n').length <= 180, 'keep progressive-disclosure instructions concise');
+  assert.ok(skill.split('\n').length <= 190, 'keep progressive-disclosure instructions concise');
   assert.match(skill, /references\/plan-schema\.md/);
 });
 
@@ -44,6 +44,7 @@ test('mnfs-plan enforces the complete hash-bound planning loop', () => {
     'node bin/mnfs.mjs plan save --mission',
     '--expected-hash',
     'node bin/mnfs.mjs plan open --mission',
+    'node bin/mnfs.mjs plan render --mission',
     'node bin/mnfs.mjs plan poll --mission',
     'node bin/mnfs.mjs plan approve --mission',
     'MNFS_APPROVE_PLAN mission=<mission-id> hash=<current-hash>',
@@ -59,6 +60,17 @@ test('mnfs-plan enforces the complete hash-bound planning loop', () => {
   assert.match(skill, /Never write directly to SQLite/i);
   assert.match(skill, /Do not start implementation/i);
   assert.match(skill, /user-ended|operator ended|session is ended/i);
+});
+
+test('mnfs-plan opens Lavish once and uses render plus live reload for later revisions', () => {
+  const skill = read(SKILL_PATH);
+  const openCommands = skill.match(/node bin\/mnfs\.mjs plan open --mission/g) ?? [];
+
+  assert.equal(openCommands.length, 1, 'the skill must create only one Lavish session');
+  assert.match(skill, /review\.html/i);
+  assert.match(skill, /live reload/i);
+  assert.match(skill, /Do not run `plan open` again/i);
+  assert.match(skill, /plan render --mission <mission-id> --json/);
 });
 
 test('plan schema reference documents every authoritative field and invariant', () => {

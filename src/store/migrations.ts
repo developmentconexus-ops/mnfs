@@ -28,6 +28,48 @@ const MIGRATIONS: readonly Migration[] = [
       CREATE INDEX events_mission_seq_idx ON events (mission_id, seq);
     `,
   },
+  {
+    version: 2,
+    sql: `
+      ALTER TABLE events RENAME TO events_v1;
+
+      CREATE TABLE events (
+        seq INTEGER PRIMARY KEY AUTOINCREMENT,
+        event_id TEXT NOT NULL UNIQUE,
+        type TEXT NOT NULL CHECK (type IN ('MISSION_OPENED', 'PLAN_REVISION_SAVED', 'PLAN_APPROVED')),
+        mission_id TEXT NOT NULL REFERENCES missions(id),
+        occurred_at TEXT NOT NULL,
+        payload_json TEXT NOT NULL CHECK (json_valid(payload_json))
+      );
+
+      INSERT INTO events (seq, event_id, type, mission_id, occurred_at, payload_json)
+      SELECT seq, event_id, type, mission_id, occurred_at, payload_json
+      FROM events_v1;
+
+      DROP TABLE events_v1;
+      CREATE INDEX events_mission_seq_idx ON events (mission_id, seq);
+
+      CREATE TABLE mission_plan_revisions (
+        mission_id TEXT NOT NULL REFERENCES missions(id),
+        revision INTEGER NOT NULL CHECK (revision > 0),
+        status TEXT NOT NULL CHECK (status IN ('DRAFT', 'SUPERSEDED', 'APPROVED')),
+        content_hash TEXT NOT NULL CHECK (content_hash GLOB 'sha256:*'),
+        content_json TEXT NOT NULL CHECK (json_valid(content_json)),
+        created_at TEXT NOT NULL,
+        approved_at TEXT,
+        PRIMARY KEY (mission_id, revision),
+        UNIQUE (mission_id, content_hash),
+        CHECK (
+          (status = 'APPROVED' AND approved_at IS NOT NULL)
+          OR (status != 'APPROVED' AND approved_at IS NULL)
+        )
+      );
+
+      CREATE UNIQUE INDEX mission_plan_one_approved_idx
+      ON mission_plan_revisions (mission_id)
+      WHERE status = 'APPROVED';
+    `,
+  },
 ];
 
 function currentVersions(database: DatabaseSync): Set<number> {

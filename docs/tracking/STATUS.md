@@ -1,30 +1,70 @@
 # Project status
 
 - **Program:** Pi-first MNFS
-- **Canonical environment:** Ubuntu on WSL2
-- **Active milestone:** M0 — Foundation walking skeleton
-- **Active plan:** `docs/superpowers/plans/2026-07-31-m0-foundation-walking-skeleton.md`
-- **Current state:** implementation and GitHub publication complete; WSL2 acceptance and clean-clone reproducibility remain
+- **Canonical environment:** Ubuntu on WSL2; Windows remains the browser, terminal and desktop host
+- **Completed milestones:**
+  - M0 — Foundation walking skeleton, merged through [PR #4](https://github.com/developmentconexus-ops/mnfs/pull/4)
+  - M1 — Visual mission planning, accepted through the real Pi + Lavish pilot and corrected browser retest
+- **Current integration:** [PR #5](https://github.com/developmentconexus-ops/mnfs/pull/5) is ready for final review and merge into `main`
+- **Next milestone:** M2 — One worker
+- **Approved M2 contract:** `.mnfs/missions/MIS-002/plan.json`
+- **Active branch:** `feat/m1-visual-planning`
 - **Repository:** https://github.com/developmentconexus-ops/mnfs
-- **Draft PR:** https://github.com/developmentconexus-ops/mnfs/pull/4
-- **Tooling status:** Pi is required by the environment contract; Lavish, Treehouse and Herdr are detected but their adapters intentionally begin in M1/M2; see `docs/tooling-adoption.md`
+- **M1 issue:** [#3](https://github.com/developmentconexus-ops/mnfs/issues/3), closed as completed
+- **Tooling:** Pi is the agent runtime; Lavish is the accepted browser planning surface; Treehouse enters in M2; Herdr remains optional presentation
 
-## Current objective
+## Product direction
 
-Complete the two external M0 acceptance gates, then begin the visual Pi + Lavish planning loop.
+MNFS is a planning-first development harness. It turns an operator objective into a structured, revisioned and explicitly approved contract, then will execute that contract through isolated AI workers with durable evidence, risk-adaptive review, integration and live QA.
 
-## Definition of done for M0
+```text
+operator intent
+→ structured mission plan
+→ browser review and exact-hash approval
+→ isolated write tracks
+→ durable CLAIM and verification
+→ controlled integration
+→ user-level QA
+```
 
-- [x] `mnfs doctor` reports required and optional WSL2 tools.
-- [x] repository service creates a stable, idempotent identity.
-- [x] runtime root resolves outside the checkout from the committed repository UUID.
-- [x] SQLite persists a mission and matching `MISSION_OPENED` event atomically.
-- [x] `mnfs status` recovers the same mission from a fresh CLI process.
-- [x] implementation, tests and tracking files are published in draft PR #4.
-- [x] remaining M0 and M1 work is represented by GitHub issues.
-- [ ] `mnfs doctor` and the walking-skeleton commands pass in the operator's Ubuntu WSL2 environment with Node 24.18+ and Pi installed — [issue #1](https://github.com/developmentconexus-ops/mnfs/issues/1).
-- [ ] a clean WSL2 clone reproduces dependencies with `npm ci` from a committed lockfile and passes `npm run verify` — [issue #2](https://github.com/developmentconexus-ops/mnfs/issues/2).
+## Accepted M0 evidence
 
-## Next milestone
+- [x] WSL2 environment contract and `doctor` command.
+- [x] stable repository identity under `.mnfs/`.
+- [x] operational runtime outside individual worktrees.
+- [x] SQLite mission and event persistence.
+- [x] fresh-process mission recovery.
 
-M1 visual mission planning is tracked in [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3).
+## Accepted M1 evidence
+
+- [x] mission plans are validated, normalized and content-addressed.
+- [x] revisions are append-only, idempotent and stale-write protected.
+- [x] blocking product questions prevent approval.
+- [x] every planning operation has strict human and `--json` CLI output.
+- [x] Pi discovers and follows `/skill:mnfs-plan`.
+- [x] Lavish opens in the Windows browser while MNFS remains in WSL2.
+- [x] operator feedback produces newer revisions using the exact previous hash.
+- [x] approval is bound to the exact current hash.
+- [x] approved contracts materialize under `.mnfs/missions/<id>/plan.json` and can be repaired from SQLite.
+- [x] a fresh process recovers the approved revision and matching contract hash.
+- [x] one stable `review.html` preserves the Lavish tab and conversation across revisions.
+- [x] dependency graphs render as deterministic inline SVG rather than raw Mermaid source.
+- [x] the real pilot approved and committed the M2 contract as `MIS-002`.
+
+## Current boundary
+
+M2 has **not** started. The following remain intentionally absent until its microdesign is approved:
+
+- Pi worker process adapter;
+- Treehouse lease adapter;
+- durable CLAIM lifecycle;
+- lead restart recovery for workers;
+- Herdr presentation adapter;
+- worker integration or parallelism.
+
+## Immediate next action
+
+1. Perform final review of PR #5.
+2. Merge M1 into `main` after operator authorization.
+3. Re-read the approved `MIS-002` contract.
+4. Conduct the M2 microdesign section by section before implementation.

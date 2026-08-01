@@ -5,7 +5,11 @@ import { delimiter, join } from 'node:path';
 import { openLavishPlan, pollLavishPlan } from '../adapters/lavish.js';
 import type { ProjectIdentity } from '../domain/types.js';
 import { inspectEnvironment } from '../runtime/environment.js';
-import { resolveMissionPlanHtmlPath, resolveRuntimeRoot } from '../runtime/paths.js';
+import {
+  resolveMissionPlanHtmlPath,
+  resolveMissionPlanReviewPath,
+  resolveRuntimeRoot,
+} from '../runtime/paths.js';
 import { MissionPlanService } from '../services/mission-plan-service.js';
 import { MissionService } from '../services/mission-service.js';
 import { initializeProject, loadProject } from '../services/project-service.js';
@@ -88,9 +92,10 @@ const result = await runCli(process.argv.slice(2), {
   }),
   pollPlan: (missionId) => withMissionPlanService(async (service, root) => {
     const revision = service.getCurrentPlan(missionId);
-    const htmlPath = resolveMissionPlanHtmlPath(root, missionId, revision.revision);
+    const htmlPath = resolveMissionPlanReviewPath(root, missionId);
+    const snapshotPath = resolveMissionPlanHtmlPath(root, missionId, revision.revision);
     const feedback = await pollLavishPlan(htmlPath);
-    return { revision, htmlPath, feedback };
+    return { revision, htmlPath, snapshotPath, feedback };
   }),
   approvePlan: (input) => withMissionPlanService((service) => service.approvePlan(input)),
   materializePlan: (missionId) => withMissionPlanService((service) => {

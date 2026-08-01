@@ -24,7 +24,10 @@
 - [x] M1-006 CLI plan commands.
 - [x] M1-007 Project-local Pi `mnfs-plan` skill — canonical full suite and real Pi discovery confirmed.
 - [x] M1-008 Automated visual-planning walking skeleton — canonical full-suite verification confirmed.
-- [ ] M1-009 Real Pi + Lavish WSL2/browser acceptance — follow `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md` and close [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3).
+- [x] M1-009A Real Pi + Lavish core pilot — feedback, multiple revisions, exact-hash approval, `MIS-002` contract commit and fresh-process recovery confirmed.
+- [~] M1-009B Preserve one Lavish session across revisions — stable `review.html`, revision snapshots and skill open-once behavior committed; verify and retest pending.
+- [~] M1-009C Render the dependency graph as deterministic inline SVG — implementation and tests committed; verify and visual retest pending.
+- [ ] M1-009D Close [issue #3](https://github.com/developmentconexus-ops/mnfs/issues/3), review PR #5 and merge M1 after the corrected browser retest.
 
 ## Next — M2 One Worker
 

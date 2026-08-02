@@ -1,0 +1,737 @@
+{
+  "schemaVersion": 1,
+  "capabilityId": "CAP-EXECUTION",
+  "capabilityVersion": "0.1.0",
+  "baseline": {
+    "blueprintVersion": "1.0.0",
+    "roadmapVersion": "2.0.0-proposed",
+    "adrs": [
+      "ADR-0002",
+      "ADR-0003",
+      "ADR-0004",
+      "ADR-0005",
+      "ADR-0006",
+      "ADR-0007"
+    ],
+    "missionContract": {
+      "missionId": "MIS-002",
+      "currentRevision": 3,
+      "status": "REPLAN_REQUIRED"
+    }
+  },
+  "requirements": [
+    {
+      "id": "CAP-EXEC-REQ-001",
+      "class": "STATE",
+      "statement": "A Write Track shall have at most one current non-terminal Attempt.",
+      "level": "MUST",
+      "source": [
+        "PB-02",
+        "PB-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-01"
+      ],
+      "realizedBy": [
+        "AttemptStore unique/current invariant"
+      ],
+      "verifiedBy": [
+        "unit:FSM-current-attempt"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-002",
+      "class": "STATE",
+      "statement": "Worker Run identity shall be separate from Attempt identity.",
+      "level": "MUST",
+      "source": [
+        "PB-02",
+        "PB-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-02"
+      ],
+      "realizedBy": [
+        "WorkerRun entity and Attempt relation"
+      ],
+      "verifiedBy": [
+        "unit:worker-run-replacement"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-003",
+      "class": "QUALITY",
+      "statement": "Worker completion shall not accept a Claim or close a Feature.",
+      "level": "MUST",
+      "source": [
+        "PB-P3",
+        "PB-07",
+        "ADR-0005"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-01"
+      ],
+      "realizedBy": [
+        "ClaimService transition policy"
+      ],
+      "verifiedBy": [
+        "unit:exit-does-not-accept",
+        "DR-11"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-004",
+      "class": "STATE",
+      "statement": "Claim creation and its Domain Event shall commit atomically.",
+      "level": "MUST",
+      "source": [
+        "PB-07",
+        "PB-08",
+        "ADR-0002"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-03"
+      ],
+      "realizedBy": [
+        "ClaimService transaction"
+      ],
+      "verifiedBy": [
+        "unit:claim-event-atomicity"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-005",
+      "class": "CONSTRAINT",
+      "statement": "Every Attempt, Worker Run and Claim shall bind to the exact Approved Contract hash.",
+      "level": "MUST",
+      "source": [
+        "PB-02",
+        "PB-09"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-04"
+      ],
+      "realizedBy": [
+        "contract binding fields and validation"
+      ],
+      "verifiedBy": [
+        "unit:contract-hash-conflict"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-006",
+      "class": "RECOVERY",
+      "statement": "Treehouse acquisition and release shall use Intent–Action–Observation.",
+      "level": "MUST",
+      "source": [
+        "PB-08",
+        "ADR-0003"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-05"
+      ],
+      "realizedBy": [
+        "LeaseService external operation protocol"
+      ],
+      "verifiedBy": [
+        "unit:lease-crash-windows",
+        "real:treehouse"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-007",
+      "class": "RECOVERY",
+      "statement": "Lease release shall be idempotent and fenced by internal and external Lease identity.",
+      "level": "MUST",
+      "source": [
+        "PB-08",
+        "ADR-0003"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-06"
+      ],
+      "realizedBy": [
+        "Lease generation/external ID validation"
+      ],
+      "verifiedBy": [
+        "unit:release-idempotency",
+        "DR-03"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-008",
+      "class": "RECOVERY",
+      "statement": "Reconcile shall detect orphan worktrees and Leases without worktrees without destroying work automatically.",
+      "level": "MUST",
+      "source": [
+        "PB-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-07"
+      ],
+      "realizedBy": [
+        "RecoveryService divergence taxonomy"
+      ],
+      "verifiedBy": [
+        "DR-04",
+        "DR-05"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-009",
+      "class": "FUNCTIONAL",
+      "statement": "The Pi Worker shall start with cwd set to the leased worktree.",
+      "level": "MUST",
+      "source": [
+        "PB-05",
+        "PB-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-02"
+      ],
+      "realizedBy": [
+        "PiProcessAdapter"
+      ],
+      "verifiedBy": [
+        "integration:worker-cwd"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-010",
+      "class": "SECURITY",
+      "statement": "The Worker shall execute under the frozen E1 policy hash bound to its Attempt.",
+      "level": "MUST",
+      "source": [
+        "PB-P14",
+        "PB-10",
+        "ADR-0006"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-03"
+      ],
+      "realizedBy": [
+        "SandboxPolicyResolver and Environment binding"
+      ],
+      "verifiedBy": [
+        "AS-02/S09"
+      ],
+      "evidencedBy": [],
+      "state": "BLOCKED",
+      "blockers": [
+        "AS-02 not executed"
+      ]
+    },
+    {
+      "id": "CAP-EXEC-REQ-011",
+      "class": "SECURITY",
+      "statement": "The E1 boundary shall deny protected host and credential reads and writes outside allowed roots.",
+      "level": "MUST",
+      "source": [
+        "PB-10",
+        "ADR-0006"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-04"
+      ],
+      "realizedBy": [
+        "ProcessSandboxAdapter filesystem policy"
+      ],
+      "verifiedBy": [
+        "AS-02/S02",
+        "AS-02/S03",
+        "AS-02/S04"
+      ],
+      "evidencedBy": [],
+      "state": "BLOCKED",
+      "blockers": [
+        "AS-02 not executed"
+      ]
+    },
+    {
+      "id": "CAP-EXEC-REQ-012",
+      "class": "SECURITY",
+      "statement": "M2 Worker execution shall have no network access, credentials or X2+ external effects.",
+      "level": "MUST",
+      "source": [
+        "PB-10",
+        "ADR-0007"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-05"
+      ],
+      "realizedBy": [
+        "network/credential/effect policy"
+      ],
+      "verifiedBy": [
+        "AS-02/S05",
+        "inspection:no-credentials"
+      ],
+      "evidencedBy": [],
+      "state": "BLOCKED",
+      "blockers": [
+        "AS-02 not executed"
+      ]
+    },
+    {
+      "id": "CAP-EXEC-REQ-013",
+      "class": "SECURITY",
+      "statement": "Sandbox startup failure shall fail closed and prevent Worker start.",
+      "level": "MUST",
+      "source": [
+        "PB-10",
+        "ADR-0006"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-06"
+      ],
+      "realizedBy": [
+        "WorkerService sandbox prerequisite"
+      ],
+      "verifiedBy": [
+        "AS-02/S13"
+      ],
+      "evidencedBy": [],
+      "state": "BLOCKED",
+      "blockers": [
+        "AS-02 not executed"
+      ]
+    },
+    {
+      "id": "CAP-EXEC-REQ-014",
+      "class": "CONTEXT",
+      "statement": "Dispatch shall include a fresh Current Authority Snapshot.",
+      "level": "MUST",
+      "source": [
+        "PB-09",
+        "ADR-0004"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-07"
+      ],
+      "realizedBy": [
+        "AuthoritySnapshotService"
+      ],
+      "verifiedBy": [
+        "unit:snapshot-freshness"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-015",
+      "class": "CONTEXT",
+      "statement": "The fixed Writer Pack shall declare target, contract, task, write-set, policy, output and termination.",
+      "level": "MUST",
+      "source": [
+        "PB-09",
+        "PB-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-08"
+      ],
+      "realizedBy": [
+        "M2 Writer Pack compiler"
+      ],
+      "verifiedBy": [
+        "snapshot:writer-pack"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-016",
+      "class": "FUNCTIONAL",
+      "statement": "Worker process exit shall be recorded as an observation and shall not be the durable state mutation path.",
+      "level": "MUST",
+      "source": [
+        "PB-06",
+        "PB-08",
+        "ADR-0005"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-09"
+      ],
+      "realizedBy": [
+        "PiProcessAdapter observation and MNFS CLI"
+      ],
+      "verifiedBy": [
+        "unit:exit-observation"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-017",
+      "class": "RECOVERY",
+      "statement": "A fresh Lead shall recover execution state without transcript, terminal scraping or OM.",
+      "level": "MUST",
+      "source": [
+        "PB-08",
+        "PB-09"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-10"
+      ],
+      "realizedBy": [
+        "RecoveryService"
+      ],
+      "verifiedBy": [
+        "DR-01",
+        "golden:fresh-lead"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-018",
+      "class": "RECOVERY",
+      "statement": "Late results from a superseded Attempt shall not mutate the current Attempt or Claim.",
+      "level": "MUST",
+      "source": [
+        "PB-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-11"
+      ],
+      "realizedBy": [
+        "Attempt fencing"
+      ],
+      "verifiedBy": [
+        "DR-06"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-019",
+      "class": "QUALITY",
+      "statement": "Deterministic verification shall produce a runner-owned Receipt bound to contract and result tree.",
+      "level": "MUST",
+      "source": [
+        "PB-07"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-12"
+      ],
+      "realizedBy": [
+        "MinimalVerificationService"
+      ],
+      "verifiedBy": [
+        "integration:demo-receipt"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-020",
+      "class": "QUALITY",
+      "statement": "Only an MNFS Gate with valid Evidence and Authority shall accept the Claim.",
+      "level": "MUST",
+      "source": [
+        "PB-P3",
+        "PB-07"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-13"
+      ],
+      "realizedBy": [
+        "ClaimAcceptanceGate"
+      ],
+      "verifiedBy": [
+        "unit:acceptance-authority",
+        "golden:m2"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-021",
+      "class": "QUALITY",
+      "statement": "Wrong contract hash, result tree or stale Evidence shall reject or block acceptance.",
+      "level": "MUST",
+      "source": [
+        "PB-07"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-14"
+      ],
+      "realizedBy": [
+        "Gate freshness validation"
+      ],
+      "verifiedBy": [
+        "unit:wrong-tree",
+        "unit:stale-receipt"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-022",
+      "class": "RECOVERY",
+      "statement": "Resources and work shall remain preserved until acceptance or explicit abandonment, then release idempotently.",
+      "level": "MUST",
+      "source": [
+        "PB-06",
+        "PB-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-15"
+      ],
+      "realizedBy": [
+        "Close/release orchestration"
+      ],
+      "verifiedBy": [
+        "integration:preserve-before-release",
+        "unit:release-idempotency"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-023",
+      "class": "OPERABILITY",
+      "statement": "All M2 commands shall provide stable human and JSON output, typed errors and a next action.",
+      "level": "MUST",
+      "source": [
+        "PB-05",
+        "PB-11"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-01"
+      ],
+      "realizedBy": [
+        "CLI command contracts"
+      ],
+      "verifiedBy": [
+        "contract:cli-json",
+        "snapshot:human-output"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-024",
+      "class": "OBSERVABILITY",
+      "statement": "M2 shall persist Domain Events and references to logs, durations, errors and available token counters.",
+      "level": "SHOULD",
+      "source": [
+        "PB-11"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-02"
+      ],
+      "realizedBy": [
+        "local telemetry and Artifact refs"
+      ],
+      "verifiedBy": [
+        "inspection:events-telemetry"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-025",
+      "class": "RECOVERY",
+      "statement": "The required M2 Recovery and Security failure drills shall pass on canonical WSL2.",
+      "level": "MUST",
+      "source": [
+        "PB-08",
+        "PB-10",
+        "PB-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-03"
+      ],
+      "realizedBy": [
+        "failure drill suite"
+      ],
+      "verifiedBy": [
+        "DR-01",
+        "DR-03",
+        "DR-04",
+        "DR-05",
+        "DR-06",
+        "DR-11",
+        "AS-02"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-026",
+      "class": "CONTRACT",
+      "statement": "The approved M2 Plan shall include Acceptance Criteria at Mission, Milestone and Feature levels and qualified identities.",
+      "level": "MUST",
+      "source": [
+        "PB-02",
+        "PB-07",
+        "PB-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-04"
+      ],
+      "realizedBy": [
+        "Mission Plan schema v2 and Replan"
+      ],
+      "verifiedBy": [
+        "schema:plan-v2",
+        "inspection:approved-revision"
+      ],
+      "evidencedBy": [],
+      "state": "BLOCKED",
+      "blockers": [
+        "Mission Plan schema v2 and approved Replan unavailable"
+      ]
+    },
+    {
+      "id": "CAP-EXEC-REQ-027",
+      "class": "DOCUMENTATION",
+      "statement": "Implementation Claims shall declare requirements and documentation impact, and coverage shall remain current.",
+      "level": "MUST",
+      "source": [
+        "PB-P17",
+        "PB-13",
+        "DOC-CAPABILITY-REALIZATION-METHOD"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-05"
+      ],
+      "realizedBy": [
+        "Traceability manifest and Claim schema"
+      ],
+      "verifiedBy": [
+        "docs:coverage-check"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    },
+    {
+      "id": "CAP-EXEC-REQ-028",
+      "class": "CONSTRAINT",
+      "statement": "No deciding M2 criterion shall depend on Herdr, OM, pi-link, remote execution or an external observability backend.",
+      "level": "MUST",
+      "source": [
+        "PB-09",
+        "PB-11",
+        "PB-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-06"
+      ],
+      "realizedBy": [
+        "M2 exclusions and adapter optionality"
+      ],
+      "verifiedBy": [
+        "inspection:dependency-boundary"
+      ],
+      "evidencedBy": [],
+      "state": "DESIGNED",
+      "blockers": []
+    }
+  ],
+  "readiness": {
+    "R0": {
+      "result": "PASS",
+      "reason": "Baseline sources identified"
+    },
+    "R1": {
+      "result": "PASS",
+      "reason": "All impact domains assessed"
+    },
+    "R2": {
+      "result": "PASS",
+      "reason": "Requirements are sourced and have verification methods"
+    },
+    "R3": {
+      "result": "REVIEW_REQUIRED",
+      "reason": "Capability Spec awaits architecture PR acceptance"
+    },
+    "R4": {
+      "result": "BLOCKED",
+      "reason": "Plan schema v2, AS-02 and new MIS-002 revision are unavailable"
+    },
+    "R5": {
+      "result": "NOT_STARTED",
+      "reason": "Approved Mission contract required"
+    },
+    "R6": {
+      "result": "NOT_STARTED",
+      "reason": "No implementation Claim"
+    },
+    "R7": {
+      "result": "NOT_STARTED",
+      "reason": "No verification Evidence"
+    },
+    "R8": {
+      "result": "NOT_STARTED",
+      "reason": "M2 has not started"
+    }
+  },
+  "blockingItems": [
+    {
+      "id": "BLOCK-PLAN-SCHEMA-V2",
+      "statement": "Plan schema v1 cannot express required Milestone criteria and expanded execution/security bindings."
+    },
+    {
+      "id": "BLOCK-AS-02",
+      "statement": "Real local Pi sandbox behavior on canonical WSL2 is unproven."
+    },
+    {
+      "id": "BLOCK-MIS-002-REPLAN",
+      "statement": "Revision 3 must remain preserved and a new revision must be approved through MNFS."
+    },
+    {
+      "id": "BLOCK-AB1-MERGE",
+      "statement": "Architecture Baseline documents and decisions are not merged."
+    }
+  ],
+  "nextSequence": [
+    "merge Architecture Baseline",
+    "implement and verify Plan Contract schema v2",
+    "execute AS-02",
+    "run MIS-002 Replan through Lavish",
+    "approve exact new hash",
+    "rerun R0-R4",
+    "begin M2 implementation"
+  ]
+}

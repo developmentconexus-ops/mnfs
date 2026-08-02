@@ -15,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit",
     "test:unit": "npm run build --silent && node scripts/run-tests.mjs",
-    "verify": "npm run typecheck && npm run test:unit",
+    "docs:generate": "node scripts/generate-product-blueprint.mjs && node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
+    "docs:coverage": "node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
+    "docs:check": "node scripts/validate-docs.mjs",
+    "verify": "npm run typecheck && npm run test:unit && npm run docs:check",
     "doctor": "npm run build --silent && node bin/mnfs.mjs doctor"
   },
   "devDependencies": {

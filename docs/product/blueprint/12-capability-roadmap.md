@@ -1,16 +1,24 @@
-<!-- GENERATED — DO NOT EDIT
-Source: docs/product/blueprint/12-capability-roadmap.md
-Projection: Product Roadmap
--->
-
-# MNFS capability roadmap
-
-**Status:** Accepted architecture baseline  
-**Version:** 2.0.0  
-**Current gate:** AB1 — Architecture Baseline and Contract Reconciliation
-
-> Edit the canonical Product Blueprint Section 12 and regenerate this projection.
-
+---
+id: DOC-PRODUCT-BLUEPRINT-12
+title: Roadmap de Capacidades e Ordem de Implementação
+document_type: product_blueprint_section
+form: explanation
+authority: constitutional
+status: accepted
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+approvers:
+  - operator
+source_of_truth_for:
+  - product blueprint section 12
+related:
+  - DOC-PRODUCT-BLUEPRINT
+  - DOC-DOCUMENTATION-MAP
+review_triggers:
+  - material change to this section's concepts
+last_reviewed: 2026-08-02
+tracking_issue: 6
 ---
 
 # 12. Roadmap de Capacidades e Ordem de Implementação

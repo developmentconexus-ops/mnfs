@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mnfs.local/schemas/capability-traceability.schema.json",
+  "title": "MNFS capability traceability",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "capabilityId",
+    "capabilityVersion",
+    "baseline",
+    "requirements"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "capabilityId": {
+      "type": "string",
+      "pattern": "^CAP-[A-Z0-9-]+$"
+    },
+    "capabilityVersion": {
+      "type": "string"
+    },
+    "baseline": {
+      "type": "object"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "class",
+          "statement",
+          "level",
+          "source",
+          "proposedAllocation",
+          "realizedBy",
+          "verifiedBy",
+          "evidencedBy",
+          "state",
+          "blockers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^CAP-[A-Z0-9-]+-REQ-[0-9]{3}$"
+          },
+          "class": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "level": {
+            "enum": [
+              "MUST",
+              "SHOULD",
+              "MAY"
+            ]
+          },
+          "source": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "proposedAllocation": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "realizedBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verifiedBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidencedBy": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "state": {
+            "enum": [
+              "UNASSESSED",
+              "APPLICABLE",
+              "ALLOCATED",
+              "DESIGNED",
+              "IMPLEMENTED",
+              "VERIFIED",
+              "VALIDATED",
+              "DEFERRED",
+              "NOT_APPLICABLE",
+              "BLOCKED",
+              "SUPERSEDED"
+            ]
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "readiness": {
+      "type": "object"
+    },
+    "blockingItems": {
+      "type": "array"
+    },
+    "nextSequence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

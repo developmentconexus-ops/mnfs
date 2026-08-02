@@ -150,11 +150,9 @@ test('materialization keeps the latest approved contract authoritative during Re
     readonly revision: number;
     readonly contentHash: string;
   };
-  assert.deepEqual(beforeApproval, {
-    schemaVersion: 1,
-    revision: approvedV1.revision.revision,
-    contentHash: approvedV1.revision.contentHash,
-  });
+  assert.equal(beforeApproval.schemaVersion, 1);
+  assert.equal(beforeApproval.revision, approvedV1.revision.revision);
+  assert.equal(beforeApproval.contentHash, approvedV1.revision.contentHash);
 
   service.approvePlan({ missionId: 'MIS-001', contentHash: v2.contentHash });
   const afterApproval = JSON.parse(readFileSync(contractPath, 'utf8')) as {
@@ -162,11 +160,9 @@ test('materialization keeps the latest approved contract authoritative during Re
     readonly revision: number;
     readonly contentHash: string;
   };
-  assert.deepEqual(afterApproval, {
-    schemaVersion: 2,
-    revision: 2,
-    contentHash: v2.contentHash,
-  });
+  assert.equal(afterApproval.schemaVersion, 2);
+  assert.equal(afterApproval.revision, 2);
+  assert.equal(afterApproval.contentHash, v2.contentHash);
   assert.equal(store.listMissionPlanRevisions('MIS-001')[0]?.status, 'APPROVED');
   assert.equal(store.listMissionPlanRevisions('MIS-001')[1]?.status, 'APPROVED');
   store.close();

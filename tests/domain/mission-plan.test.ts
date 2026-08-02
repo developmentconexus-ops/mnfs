@@ -7,10 +7,10 @@ import {
   hashPlanContent,
   hasOpenBlockingQuestions,
   validateMissionPlan,
-  type MissionPlanContent,
+  type MissionPlanContentV1,
 } from '../../src/domain/mission-plan.js';
 
-function validPlan(): MissionPlanContent {
+function validPlan(): MissionPlanContentV1 {
   return {
     schemaVersion: 1,
     missionId: 'MIS-001',
@@ -46,7 +46,13 @@ function validPlan(): MissionPlanContent {
         ],
       },
     ],
-    risks: [{ id: 'R01', description: 'HTML becomes source of truth', mitigation: 'Render from JSON only' }],
+    risks: [
+      {
+        id: 'R01',
+        description: 'HTML becomes source of truth',
+        mitigation: 'Render from JSON only',
+      },
+    ],
     questions: [{ id: 'Q01', question: 'Approve M1 scope?', blocking: true, status: 'OPEN' }],
   };
 }
@@ -54,7 +60,8 @@ function validPlan(): MissionPlanContent {
 function expectInvalid(plan: unknown, message: RegExp): void {
   assert.throws(
     () => validateMissionPlan(plan, 'MIS-001'),
-    (error: unknown) => error instanceof MnfsError && error.code === 'PLAN_INVALID' && message.test(error.message),
+    (error: unknown) =>
+      error instanceof MnfsError && error.code === 'PLAN_INVALID' && message.test(error.message),
   );
 }
 
@@ -69,7 +76,7 @@ test('validates and normalizes a complete mission plan', () => {
 
 test('hash is stable across object key order but preserves array order', () => {
   const plan = validPlan();
-  const reordered = JSON.parse(canonicalJson(plan)) as MissionPlanContent;
+  const reordered = JSON.parse(canonicalJson(plan)) as MissionPlanContentV1;
   const extended = { ...plan, successCriteria: [...plan.successCriteria, 'A second criterion'] };
   const reversed = { ...extended, successCriteria: [...extended.successCriteria].reverse() };
 
@@ -92,7 +99,12 @@ test('rejects unknown dependencies', () => {
   const feature = plan.milestones[0]?.features[0];
   assert.ok(feature);
   expectInvalid(
-    { ...plan, milestones: [{ ...plan.milestones[0], features: [{ ...feature, dependsOn: ['F99'] }] }] },
+    {
+      ...plan,
+      milestones: [
+        { ...plan.milestones[0], features: [{ ...feature, dependsOn: ['F99'] }] },
+      ],
+    },
     /unknown id F99/,
   );
 });
@@ -104,7 +116,9 @@ test('rejects dependency cycles', () => {
   expectInvalid(
     {
       ...plan,
-      milestones: [{ ...plan.milestones[0], features: [{ ...first, dependsOn: ['F02'] }, second] }],
+      milestones: [
+        { ...plan.milestones[0], features: [{ ...first, dependsOn: ['F02'] }, second] },
+      ],
     },
     /dependency cycle/,
   );

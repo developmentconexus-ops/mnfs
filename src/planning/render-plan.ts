@@ -1,7 +1,11 @@
-import type {
-  FeaturePlan,
-  MissionPlanRevision,
-  PlanQuestion,
+import {
+  isMissionPlanV2,
+  type AcceptanceCriterionV2,
+  type EnvironmentBindingV2,
+  type FeaturePlanV1,
+  type FeaturePlanV2,
+  type MissionPlanRevision,
+  type PlanQuestion,
 } from '../domain/mission-plan.js';
 import { renderDependencyGraphSvg } from './dependency-graph.js';
 import { escapeHtml } from './html.js';
@@ -11,12 +15,47 @@ function renderItems(items: readonly string[], emptyLabel: string): string {
   return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
 }
 
-function renderFeature(feature: FeaturePlan): string {
+function renderEnvironment(binding: EnvironmentBindingV2 | undefined): string {
+  if (binding === undefined) return '<p class="empty">No environment binding.</p>';
+  return `<dl class="facts">
+    <div><dt>Environment</dt><dd>${escapeHtml(binding.environmentRef)}</dd></div>
+    <div><dt>Security policy</dt><dd>${escapeHtml(binding.securityPolicyRef)}</dd></div>
+    ${binding.securityPolicyHash === undefined ? '' : `<div><dt>Policy hash</dt><dd class="hash">${escapeHtml(binding.securityPolicyHash)}</dd></div>`}
+  </dl>`;
+}
+
+function renderCriteria(criteria: readonly AcceptanceCriterionV2[]): string {
+  return `<div class="criteria-grid">${criteria.map((criterion) => `<article class="criterion" id="criterion-${escapeHtml(criterion.qualifiedId)}">
+    <div class="card-heading"><span class="identifier">${escapeHtml(criterion.qualifiedId)}</span><span class="badge">${escapeHtml(criterion.verificationPlan.method)}</span></div>
+    <p>${escapeHtml(criterion.statement)}</p>
+    <dl class="facts">
+      <div><dt>Verifier</dt><dd>${escapeHtml(criterion.verificationPlan.owner)}</dd></div>
+      <div><dt>Proof</dt><dd>${escapeHtml(criterion.verificationPlan.proofType)}</dd></div>
+      <div><dt>Proof owner</dt><dd>${escapeHtml(criterion.verificationPlan.proofOwner)}</dd></div>
+    </dl>
+    <h5>Requirement references</h5>
+    ${renderItems(criterion.requirementRefs, 'No criterion-specific requirement references.')}
+  </article>`).join('')}</div>`;
+}
+
+function renderFeatureV1(feature: FeaturePlanV1): string {
   return `<article class="feature" id="feature-${escapeHtml(feature.id)}">
     <div class="card-heading"><span class="identifier">${escapeHtml(feature.id)}</span><h4>${escapeHtml(feature.title)}</h4></div>
     <p>${escapeHtml(feature.outcome)}</p>
     <h5>Acceptance criteria</h5>
     ${renderItems(feature.acceptanceCriteria, 'No acceptance criteria.')}
+    ${feature.dependsOn.length === 0 ? '' : `<p class="dependency"><strong>Depends on:</strong> ${feature.dependsOn.map(escapeHtml).join(', ')}</p>`}
+  </article>`;
+}
+
+function renderFeatureV2(feature: FeaturePlanV2): string {
+  return `<article class="feature" id="feature-${escapeHtml(feature.qualifiedId)}">
+    <div class="card-heading"><span class="identifier">${escapeHtml(feature.qualifiedId)}</span><h4>${escapeHtml(feature.title)}</h4></div>
+    <p>${escapeHtml(feature.outcome)}</p>
+    <h5>Requirement references</h5>
+    ${renderItems(feature.requirementRefs, 'No Feature requirement references.')}
+    <h5>Feature acceptance criteria</h5>
+    ${renderCriteria(feature.acceptanceCriteria)}
     ${feature.dependsOn.length === 0 ? '' : `<p class="dependency"><strong>Depends on:</strong> ${feature.dependsOn.map(escapeHtml).join(', ')}</p>`}
   </article>`;
 }
@@ -78,8 +117,32 @@ function reviewScript(): string {
 </script>`;
 }
 
+function renderV2Traceability(
+  content: Extract<MissionPlanRevision['content'], { readonly schemaVersion: 2 }>,
+): string {
+  const capabilities = content.capabilityRefs.map((reference) => {
+    const version = reference.version === undefined ? '' : ` @ ${escapeHtml(reference.version)}`;
+    return `<li><strong>${escapeHtml(reference.id)}</strong>${version}<br><span class="path">${escapeHtml(reference.specPath)}</span></li>`;
+  }).join('');
+  const docFollowUp = content.documentationImpact.followUp === undefined
+    ? ''
+    : `<p><strong>Follow-up:</strong> ${escapeHtml(content.documentationImpact.followUp)}</p>`;
+  return `<section class="panel" aria-labelledby="traceability-heading">
+    <div class="section-heading"><p class="eyebrow">Contract bindings</p><h2 id="traceability-heading">Traceability, environment and impact</h2></div>
+    <div class="two-column">
+      <article class="subpanel"><h3>Product Milestones</h3>${renderItems(content.productMilestoneRefs, 'No Product Milestone references.')}</article>
+      <article class="subpanel"><h3>Capability Specs</h3>${capabilities.length === 0 ? '<p class="empty">No Capability Specs.</p>' : `<ul>${capabilities}</ul>`}</article>
+      <article class="subpanel"><h3>Mission requirements</h3>${renderItems(content.requirementRefs, 'No Mission requirement references.')}</article>
+      <article class="subpanel"><h3>Environment and security</h3>${renderEnvironment(content.environmentBinding)}</article>
+      <article class="subpanel"><h3>Documentation impact · ${escapeHtml(content.documentationImpact.status)}</h3>${renderItems(content.documentationImpact.refs, 'No documentation references.')}<p>${escapeHtml(content.documentationImpact.rationale)}</p>${docFollowUp}</article>
+      <article class="subpanel"><h3>Requirements impact · ${escapeHtml(content.requirementsImpact.status)}</h3>${renderItems(content.requirementsImpact.refs, 'No requirement impact references.')}<p>${escapeHtml(content.requirementsImpact.rationale)}</p></article>
+    </div>
+  </section>`;
+}
+
 export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
   const { content } = revision;
+  const v2 = isMissionPlanV2(content);
   const dependencyGraph = renderDependencyGraphSvg(content);
   const dependencies = dependencyGraph === undefined
     ? undefined
@@ -87,12 +150,28 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
     <div class="section-heading"><p class="eyebrow">Composition</p><h2 id="dependencies-heading">Dependency graph</h2></div>
     <div class="dependency-graph-scroll">${dependencyGraph}</div>
   </section>`;
-  const milestones = content.milestones.map((milestone) => `<article class="milestone" id="milestone-${escapeHtml(milestone.id)}">
-    <div class="card-heading"><span class="identifier">${escapeHtml(milestone.id)}</span><h3>${escapeHtml(milestone.title)}</h3></div>
-    <p class="outcome">${escapeHtml(milestone.outcome)}</p>
-    ${milestone.dependsOn.length === 0 ? '' : `<p class="dependency"><strong>Depends on:</strong> ${milestone.dependsOn.map(escapeHtml).join(', ')}</p>`}
-    <div class="feature-grid">${milestone.features.map(renderFeature).join('')}</div>
-  </article>`).join('');
+  const milestones = v2
+    ? content.milestones.map((milestone) => `<article class="milestone" id="milestone-${escapeHtml(milestone.qualifiedId)}">
+      <div class="card-heading"><span class="identifier">${escapeHtml(milestone.qualifiedId)}</span><h3>${escapeHtml(milestone.title)}</h3></div>
+      <p class="outcome">${escapeHtml(milestone.outcome)}</p>
+      <h5>Requirement references</h5>
+      ${renderItems(milestone.requirementRefs, 'No Milestone requirement references.')}
+      <h5>Milestone acceptance criteria</h5>
+      ${renderCriteria(milestone.acceptanceCriteria)}
+      <h5>Environment override</h5>
+      ${renderEnvironment(milestone.environmentBinding)}
+      ${milestone.dependsOn.length === 0 ? '' : `<p class="dependency"><strong>Depends on:</strong> ${milestone.dependsOn.map(escapeHtml).join(', ')}</p>`}
+      <div class="feature-grid">${milestone.features.map(renderFeatureV2).join('')}</div>
+    </article>`).join('')
+    : content.milestones.map((milestone) => `<article class="milestone" id="milestone-${escapeHtml(milestone.id)}">
+      <div class="card-heading"><span class="identifier">${escapeHtml(milestone.id)}</span><h3>${escapeHtml(milestone.title)}</h3></div>
+      <p class="outcome">${escapeHtml(milestone.outcome)}</p>
+      ${milestone.dependsOn.length === 0 ? '' : `<p class="dependency"><strong>Depends on:</strong> ${milestone.dependsOn.map(escapeHtml).join(', ')}</p>`}
+      <div class="feature-grid">${milestone.features.map(renderFeatureV1).join('')}</div>
+    </article>`).join('');
+  const missionCriteria = v2
+    ? renderCriteria(content.acceptanceCriteria)
+    : renderItems(content.successCriteria, 'No success criteria.');
 
   return `<!doctype html>
 <html lang="en" data-lavish-live-reload-root>
@@ -104,15 +183,18 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
     :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1020; color: #edf2ff; }
     * { box-sizing: border-box; }
     body { margin: 0; background: radial-gradient(circle at top left, #172554 0, transparent 34rem), #0b1020; line-height: 1.55; }
-    main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 40px 0 96px; }
+    main { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 40px 0 96px; }
     h1, h2, h3, h4, h5, p { margin-top: 0; }
     h1 { max-width: 880px; margin-bottom: 12px; font-size: clamp(2.25rem, 6vw, 4.75rem); line-height: 1.02; letter-spacing: -0.045em; }
     h2 { margin-bottom: 0; font-size: clamp(1.55rem, 3vw, 2.2rem); }
     h3, h4 { margin-bottom: 8px; }
     h5 { margin: 20px 0 8px; color: #bac7e8; text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; }
-    p, li { color: #c8d2ec; }
+    p, li, dd { color: #c8d2ec; }
     ul { margin: 8px 0 0; padding-left: 22px; }
-    .hero, .panel, .milestone, .feature, .risk, .question, .review { border: 1px solid rgba(148, 163, 184, .2); background: rgba(15, 23, 42, .78); box-shadow: 0 20px 70px rgba(2, 6, 23, .24); }
+    dl { margin: 12px 0 0; }
+    dt { color: #8290b2; font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    dd { margin: 2px 0 10px; }
+    .hero, .panel, .milestone, .feature, .criterion, .risk, .question, .review { border: 1px solid rgba(148, 163, 184, .2); background: rgba(15, 23, 42, .78); box-shadow: 0 20px 70px rgba(2, 6, 23, .24); }
     .hero { padding: clamp(28px, 5vw, 64px); border-radius: 30px; }
     .panel, .review { margin-top: 24px; padding: clamp(24px, 4vw, 40px); border-radius: 24px; }
     .eyebrow { margin-bottom: 8px; color: #7dd3fc; font-size: .75rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
@@ -120,17 +202,18 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
     .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
     .badge, .identifier { display: inline-flex; align-items: center; width: fit-content; border-radius: 999px; padding: 6px 10px; font-size: .72rem; font-weight: 800; letter-spacing: .05em; }
     .badge { background: #1e293b; color: #dbeafe; }
-    .identifier { background: #172554; color: #93c5fd; }
+    .identifier { background: #172554; color: #93c5fd; overflow-wrap: anywhere; }
     .badge-warning { background: #713f12; color: #fde68a; }
     .status-open { background: #7f1d1d; color: #fecaca; }
     .status-answered { background: #14532d; color: #bbf7d0; }
-    .hash { overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .hash, .path { overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     .section-heading { margin-bottom: 24px; }
     .two-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
     .subpanel { border-radius: 18px; padding: 20px; background: rgba(30, 41, 59, .48); }
     .milestone { margin-top: 18px; padding: 24px; border-radius: 20px; }
-    .feature-grid, .risk-grid, .question-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 16px; margin-top: 20px; }
-    .feature, .risk, .question { padding: 20px; border-radius: 16px; background: rgba(15, 23, 42, .9); }
+    .feature-grid, .criteria-grid, .risk-grid, .question-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 16px; margin-top: 20px; }
+    .feature, .criterion, .risk, .question { padding: 20px; border-radius: 16px; background: rgba(15, 23, 42, .9); }
+    .criterion { border-color: rgba(125, 211, 252, .28); }
     .card-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
     .card-heading h3, .card-heading h4 { margin: 0; }
     .dependency { margin: 14px 0 0; font-size: .86rem; }
@@ -143,7 +226,7 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
     .dependency-node rect { stroke-width: 1.5; }
     .dependency-node-milestone rect { fill: #172554; stroke: #60a5fa; }
     .dependency-node-feature rect { fill: #13273a; stroke: #38bdf8; }
-    .dependency-node-id { fill: #93c5fd; font: 800 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .06em; }
+    .dependency-node-id { fill: #93c5fd; font: 800 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em; }
     .dependency-node-title { fill: #e2e8f0; font: 650 14px Inter, ui-sans-serif, system-ui, sans-serif; }
     .review { position: relative; overflow: hidden; border-color: rgba(56, 189, 248, .45); }
     .review::before { content: ""; position: absolute; inset: 0 auto auto 0; width: 100%; height: 3px; background: linear-gradient(90deg, #38bdf8, #a78bfa); }
@@ -155,7 +238,7 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
     button.secondary { background: #293548; color: #e2e8f0; }
     button:hover { transform: translateY(-1px); }
     #review-status { min-height: 1.5em; margin: 14px 0 0; color: #bae6fd; }
-    @media (max-width: 720px) { main { width: min(100% - 20px, 1180px); padding-top: 10px; } .hero, .panel, .review { border-radius: 18px; } .two-column { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) { main { width: min(100% - 20px, 1240px); padding-top: 10px; } .hero, .panel, .review { border-radius: 18px; } .two-column { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -166,6 +249,7 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
     <p class="lead">${escapeHtml(content.goal)}</p>
     <div class="meta">
       <span class="badge">${escapeHtml(revision.missionId)}</span>
+      <span class="badge">Schema v${content.schemaVersion}</span>
       <span class="badge">Revision ${revision.revision}</span>
       <span class="badge">${revision.status}</span>
       <span class="badge hash">${escapeHtml(revision.contentHash)}</span>
@@ -173,14 +257,17 @@ export function renderMissionPlanHtml(revision: MissionPlanRevision): string {
   </header>
 
   <section class="panel" aria-labelledby="outcome-heading">
-    <div class="section-heading"><p class="eyebrow">Outcome</p><h2 id="outcome-heading">Success and scope</h2></div>
+    <div class="section-heading"><p class="eyebrow">Outcome</p><h2 id="outcome-heading">Acceptance and scope</h2></div>
+    <h3>${v2 ? 'Mission acceptance criteria' : 'Success criteria'}</h3>
+    ${missionCriteria}
     <div class="two-column">
-      <article class="subpanel"><h3>Success criteria</h3>${renderItems(content.successCriteria, 'No success criteria.')}</article>
       <article class="subpanel"><h3>Assumptions</h3>${renderItems(content.assumptions, 'No assumptions recorded.')}</article>
       <article class="subpanel"><h3>Included</h3>${renderItems(content.scope.included, 'Nothing included.')}</article>
       <article class="subpanel"><h3>Excluded</h3>${renderItems(content.scope.excluded, 'Nothing excluded.')}</article>
     </div>
   </section>
+
+  ${v2 ? renderV2Traceability(content) : ''}
 
   <section class="panel" aria-labelledby="milestones-heading">
     <div class="section-heading"><p class="eyebrow">Execution shape</p><h2 id="milestones-heading">Milestones and features</h2></div>

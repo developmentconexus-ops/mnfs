@@ -4,7 +4,7 @@ title: Mission Plan Contract schema v2 verification evidence
 document_type: acceptance_evidence
 form: explanation
 authority: evidence
-status: completed
+status: accepted
 owners:
   - developmentconexus-ops
 related:

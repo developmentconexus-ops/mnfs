@@ -356,9 +356,9 @@ CONSTRAINED_BY
 ## 7.1 Exemplo
 
 ```text
-PB-P14 Authority and isolation
-  DERIVED_TO
 CAP-EXEC-REQ-007 Frozen Environment Policy
+  DERIVED_FROM
+DOC-PRODUCT-BLUEPRINT-01#pb-p14 Authority and isolation are complementary
   ALLOCATED_TO
 MIS-002/M01/AC-03
   REALIZED_BY
@@ -789,7 +789,7 @@ statement: >
   The Writer process shall execute under the Environment
   Policy hash bound to its Attempt.
 source:
-  - PB-10.10
+  - DOC-PRODUCT-BLUEPRINT-10
   - ADR-0006
 rationale: Prevent active-policy tampering and fail-open execution.
 verification_method:
@@ -1264,7 +1264,7 @@ Exemplo:
 requirements:
   - id: CAP-EXEC-REQ-007
     source:
-      - PB-P14
+      - DOC-PRODUCT-BLUEPRINT-01#pb-p14
       - ADR-0006
     allocated_to:
       - MIS-002/M01/AC-03
@@ -1437,15 +1437,15 @@ Validation of parent outcome remains required.
 ## 26.1 Source clauses
 
 ```text
-PB-P3   Claim is not Verdict
-PB-P6   Integration/composition honesty
-PB-P14  Authority and isolation
-PB-8    Recovery and reconcile
-PB-9    Current Authority Snapshot
-PB-10   E1 Security Environment
-PB-12   M2 Golden Proof
-ADR-0002 SQLite state
-ADR-0003 Worktree per Track
+DOC-PRODUCT-BLUEPRINT-01#pb-p4   Claim is not Verdict
+DOC-PRODUCT-BLUEPRINT-01#pb-p6   Isolated work must be composed
+DOC-PRODUCT-BLUEPRINT-01#pb-p14  Authority and isolation are complementary
+DOC-PRODUCT-BLUEPRINT-08         Recovery and reconcile
+DOC-PRODUCT-BLUEPRINT-09         Current Authority Snapshot
+DOC-PRODUCT-BLUEPRINT-10         E1 Security Environment
+DOC-PRODUCT-BLUEPRINT-12         M2 Golden Proof
+ADR-0002                         SQLite operational state
+ADR-0003                         Worktree per concurrent Write Track
 ```
 
 ## 26.2 Derived requirements

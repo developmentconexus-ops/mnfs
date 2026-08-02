@@ -6,7 +6,7 @@ import { MnfsError } from '../domain/errors.js';
 import {
   canonicalJson,
   hashPlanContent,
-  type MissionPlanContent,
+  validateMissionPlan,
   type MissionPlanRevision,
 } from '../domain/mission-plan.js';
 import type {
@@ -39,13 +39,16 @@ function missionFromRow(row: Readonly<Record<string, unknown>>): Mission {
 }
 
 function planRevisionFromRow(row: Readonly<Record<string, unknown>>): MissionPlanRevision {
-  const approvedAt = row.approved_at === null || row.approved_at === undefined ? undefined : String(row.approved_at);
+  const missionId = String(row.mission_id);
+  const approvedAt = row.approved_at === null || row.approved_at === undefined
+    ? undefined
+    : String(row.approved_at);
   return {
-    missionId: String(row.mission_id),
+    missionId,
     revision: Number(row.revision),
     status: String(row.status) as MissionPlanRevision['status'],
     contentHash: String(row.content_hash),
-    content: JSON.parse(String(row.content_json)) as MissionPlanContent,
+    content: validateMissionPlan(JSON.parse(String(row.content_json)) as unknown, missionId),
     createdAt: String(row.created_at),
     ...(approvedAt === undefined ? {} : { approvedAt }),
   };
@@ -111,7 +114,23 @@ export class SqliteStore {
     return row === undefined ? undefined : planRevisionFromRow(row);
   }
 
-  #getMissionPlanByHash(missionId: string, contentHash: string): MissionPlanRevision | undefined {
+  #getLatestApprovedMissionPlan(missionId: string): MissionPlanRevision | undefined {
+    const row = this.#database
+      .prepare(`
+        SELECT mission_id, revision, status, content_hash, content_json, created_at, approved_at
+        FROM mission_plan_revisions
+        WHERE mission_id = ? AND status = 'APPROVED'
+        ORDER BY revision DESC
+        LIMIT 1
+      `)
+      .get(missionId);
+    return row === undefined ? undefined : planRevisionFromRow(row);
+  }
+
+  #getMissionPlanByHash(
+    missionId: string,
+    contentHash: string,
+  ): MissionPlanRevision | undefined {
     const row = this.#database
       .prepare(`
         SELECT mission_id, revision, status, content_hash, content_json, created_at, approved_at
@@ -158,10 +177,16 @@ export class SqliteStore {
     return this.#transaction(() => {
       this.#requireOpenMission(input.missionId);
       const contentHash = hashPlanContent(input.content);
-      const existing = this.#getMissionPlanByHash(input.missionId, contentHash);
-      if (existing !== undefined) return existing;
-
       const current = this.#getCurrentMissionPlan(input.missionId);
+      const existing = this.#getMissionPlanByHash(input.missionId, contentHash);
+      if (existing !== undefined) {
+        if (current?.revision === existing.revision) return existing;
+        throw new MnfsError(
+          'PLAN_REVISION_CONFLICT',
+          `Mission ${input.missionId} content matches historical revision ${existing.revision}; revisions cannot rewind.`,
+        );
+      }
+
       if (current === undefined) {
         if (input.expectedPreviousHash !== undefined) {
           throw new MnfsError(
@@ -169,20 +194,15 @@ export class SqliteStore {
             `Mission ${input.missionId} has no previous plan matching ${input.expectedPreviousHash}.`,
           );
         }
-      } else {
-        if (current.status === 'APPROVED') {
-          throw new MnfsError('PLAN_REVISION_CONFLICT', `Mission ${input.missionId} already has an approved plan.`);
-        }
-        if (input.expectedPreviousHash !== current.contentHash) {
-          throw new MnfsError(
-            'PLAN_REVISION_CONFLICT',
-            `Expected previous hash ${current.contentHash} for mission ${input.missionId}.`,
-          );
-        }
+      } else if (input.expectedPreviousHash !== current.contentHash) {
+        throw new MnfsError(
+          'PLAN_REVISION_CONFLICT',
+          `Expected previous hash ${current.contentHash} for mission ${input.missionId}.`,
+        );
       }
 
       const revisionNumber = (current?.revision ?? 0) + 1;
-      if (current !== undefined) {
+      if (current?.status === 'DRAFT') {
         this.#database
           .prepare(`
             UPDATE mission_plan_revisions
@@ -231,6 +251,10 @@ export class SqliteStore {
 
   getCurrentMissionPlan(missionId: string): MissionPlanRevision | undefined {
     return this.#getCurrentMissionPlan(missionId);
+  }
+
+  getLatestApprovedMissionPlan(missionId: string): MissionPlanRevision | undefined {
+    return this.#getLatestApprovedMissionPlan(missionId);
   }
 
   listMissionPlanRevisions(missionId: string): MissionPlanRevision[] {

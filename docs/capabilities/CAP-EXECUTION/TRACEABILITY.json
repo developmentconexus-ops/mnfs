@@ -622,10 +622,12 @@
         "schema:plan-v2",
         "inspection:approved-revision"
       ],
-      "evidencedBy": [],
+      "evidencedBy": [
+        "EVID-PLAN-CONTRACT-SCHEMA-V2"
+      ],
       "state": "BLOCKED",
       "blockers": [
-        "Mission Plan schema v2 and approved Replan unavailable"
+        "Approved MIS-002 schema v2 Replan unavailable"
       ]
     },
     {
@@ -678,11 +680,11 @@
   "readiness": {
     "R3": {
       "result": "REVIEW_REQUIRED",
-      "reason": "Capability Spec awaits architecture PR acceptance"
+      "reason": "Capability Spec remains proposed pending explicit Operator acceptance"
     },
     "R4": {
       "result": "BLOCKED",
-      "reason": "Plan schema v2, AS-02 and new MIS-002 revision are unavailable"
+      "reason": "AS-02 and a newly approved MIS-002 schema v2 revision are unavailable"
     },
     "R5": {
       "result": "NOT_STARTED",
@@ -703,27 +705,17 @@
   },
   "blockingItems": [
     {
-      "id": "BLOCK-PLAN-SCHEMA-V2",
-      "statement": "Plan schema v1 cannot express required Milestone criteria and expanded execution/security bindings."
-    },
-    {
       "id": "BLOCK-AS-02",
       "statement": "Real local Pi sandbox behavior on canonical WSL2 is unproven."
     },
     {
       "id": "BLOCK-MIS-002-REPLAN",
-      "statement": "Revision 3 must remain preserved and a new revision must be approved through MNFS."
-    },
-    {
-      "id": "BLOCK-AB1-MERGE",
-      "statement": "Architecture Baseline documents and decisions are not merged."
+      "statement": "Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS."
     }
   ],
   "nextSequence": [
-    "merge Architecture Baseline",
-    "implement and verify Plan Contract schema v2",
     "execute AS-02",
-    "run MIS-002 Replan through Lavish",
+    "run MIS-002 schema v2 Replan through Lavish",
     "approve exact new hash",
     "rerun R0-R4",
     "begin M2 implementation"

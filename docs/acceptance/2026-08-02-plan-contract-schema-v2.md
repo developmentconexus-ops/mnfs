@@ -4,7 +4,7 @@ title: Mission Plan Contract schema v2 verification evidence
 document_type: acceptance_evidence
 form: explanation
 authority: evidence
-status: verified
+status: completed
 owners:
   - developmentconexus-ops
 related:
@@ -18,7 +18,7 @@ tracking_issue: 7
 **Date:** 2026-08-02  
 **Branch:** `feat/plan-schema-v2`  
 **Pull request:** #12  
-**Verified head:** `5e7f41e714d2632fa672d235ecfba06ef58a1461`  
+**Verified implementation head:** `5e7f41e714d2632fa672d235ecfba06ef58a1461`  
 **Canonical environment:** GitHub Actions Ubuntu 24.04 with Node.js 24.18.0 and npm 11.16.0  
 **Workflow run:** `30764704736`, job `91541239981`
 
@@ -52,8 +52,10 @@ Result:
 0 cancelled
 0 skipped
 Documentation tooling tests passed
-Documentation validation passed (62 canonical IDs, 0 indexed aliases checked)
+Documentation validation passed
 ```
+
+The pull-request check reruns the same complete gate after evidence and tracking changes; the PR may leave draft only when its current HEAD is green.
 
 ## Acceptance proof mapping
 

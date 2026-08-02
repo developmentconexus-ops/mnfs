@@ -55,7 +55,7 @@ export interface MissionPlanServiceOptions {
 }
 
 interface ApprovedPlanContract {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 1 | 2;
   readonly missionId: string;
   readonly revision: number;
   readonly contentHash: string;
@@ -135,6 +135,28 @@ function publishRenderedPlan(path: string, html: string): void {
   }
 }
 
+function assertSchemaTransition(
+  current: MissionPlanRevision | undefined,
+  nextSchema: 1 | 2,
+  missionId: string,
+): void {
+  if (current === undefined) return;
+
+  if (current.content.schemaVersion === 2 && nextSchema === 1) {
+    throw new MnfsError(
+      'PLAN_REVISION_CONFLICT',
+      `Mission ${missionId} cannot downgrade a schema v2 revision to schema v1.`,
+    );
+  }
+
+  if (current.status === 'APPROVED' && current.content.schemaVersion === 1 && nextSchema === 1) {
+    throw new MnfsError(
+      'PLAN_REVISION_CONFLICT',
+      `Approved schema v1 mission ${missionId} is immutable; Replan must create a schema v2 revision.`,
+    );
+  }
+}
+
 export class MissionPlanService {
   readonly #store: SqliteStore;
   readonly #projectRoot: string;
@@ -150,6 +172,8 @@ export class MissionPlanService {
 
   savePlanFromFile(input: SavePlanFromFileInput): MissionPlanRevision {
     const content = validateMissionPlan(parsePlanFile(input.inputPath), input.missionId);
+    const current = this.#store.getCurrentMissionPlan(input.missionId);
+    assertSchemaTransition(current, content.schemaVersion, input.missionId);
     return this.#store.saveMissionPlanRevision({
       missionId: input.missionId,
       content,
@@ -215,8 +239,8 @@ export class MissionPlanService {
   }
 
   materializeApprovedPlan(missionId: string): string {
-    const revision = this.getCurrentPlan(missionId);
-    if (revision.status !== 'APPROVED' || revision.approvedAt === undefined) {
+    const revision = this.#store.getLatestApprovedMissionPlan(missionId);
+    if (revision === undefined || revision.approvedAt === undefined) {
       throw new MnfsError(
         'PLAN_APPROVAL_CONFLICT',
         `Mission ${missionId} does not have an approved plan to materialize.`,
@@ -225,7 +249,7 @@ export class MissionPlanService {
 
     const contractPath = resolveMissionPlanContractPath(this.#projectRoot, missionId);
     publishContract(contractPath, {
-      schemaVersion: 1,
+      schemaVersion: revision.content.schemaVersion,
       missionId,
       revision: revision.revision,
       contentHash: revision.contentHash,

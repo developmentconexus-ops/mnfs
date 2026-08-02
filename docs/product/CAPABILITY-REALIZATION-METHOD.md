@@ -873,7 +873,7 @@ Canonical source:
 
 ```text
 docs/capabilities/CAP-*/SPEC.md
-docs/capabilities/CAP-*/TRACEABILITY.yaml
+docs/capabilities/CAP-*/TRACEABILITY.json
 ```
 
 Generated projection:
@@ -1674,7 +1674,7 @@ docs/capabilities/template.md
 
 docs/capabilities/CAP-*/
 ├── SPEC.md
-├── TRACEABILITY.yaml
+├── TRACEABILITY.json
 └── COVERAGE.md          # generated
 ```
 
@@ -1820,4 +1820,4 @@ A tiny change may use a reduced lane while preserving lineage and proof.
 
 # Decisão resumida
 
-> **O MNFS Capability Realization Method transforma o Product Blueprint em execução através de um Coverage Graph bidirecional. Cada Product Milestone passa por Baseline, Applicability Scan, Requirements Derivation, Capability Spec, Mission Allocation, Microdesign, Continuous Coverage, Verification/Validation e Closeout. Todo requirement relevante é identificado, alocado, realizado e provado — ou recebe uma disposition explícita. Readiness Gates impedem que implementação comece com domains não avaliados, requisitos órfãos, critérios sem prova ou decisões ocultas. A primeira implementação será leve: Capability Spec, `TRACEABILITY.yaml`, validator TypeScript e Coverage Report gerado. Assim, a Harness não depende de alguém lembrar os 13 capítulos; o próprio sistema demonstra o que foi levado em conta e o que ainda falta.**
+> **O MNFS Capability Realization Method transforma o Product Blueprint em execução através de um Coverage Graph bidirecional. Cada Product Milestone passa por Baseline, Applicability Scan, Requirements Derivation, Capability Spec, Mission Allocation, Microdesign, Continuous Coverage, Verification/Validation e Closeout. Todo requirement relevante é identificado, alocado, realizado e provado — ou recebe uma disposition explícita. Readiness Gates impedem que implementação comece com domains não avaliados, requisitos órfãos, critérios sem prova ou decisões ocultas. A primeira implementação será leve: Capability Spec, `TRACEABILITY.json`, validator TypeScript e Coverage Report gerado. Assim, a Harness não depende de alguém lembrar os 13 capítulos; o próprio sistema demonstra o que foi levado em conta e o que ainda falta.**

@@ -5,6 +5,7 @@ document_type: research_report
 form: explanation
 authority: research_historical
 status: published
+source_manifest: MNFS-RESEARCH-CAPABILITY-ROADMAP-v1.sources.json
 version: 1.0.0
 owners:
   - developmentconexus-ops

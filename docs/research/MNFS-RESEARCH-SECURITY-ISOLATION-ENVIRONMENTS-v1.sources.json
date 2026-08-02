@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "reportId": "DOC-RESEARCH-MNFS-RESEARCH-SECURITY-ISOLATION-ENVIRONMENTS-v1",
+  "asOf": "2026-08-02",
+  "sources": [
+    {
+      "id": "pi-extensions",
+      "title": "Pi extension documentation",
+      "url": "https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md",
+      "kind": "official_docs",
+      "supports": [
+        "Tool interception, permission gates and extension trust boundary"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "anthropic-sandbox-runtime",
+      "title": "Anthropic Sandbox Runtime",
+      "url": "https://github.com/anthropic-experimental/sandbox-runtime",
+      "kind": "repository",
+      "supports": [
+        "Linux bubblewrap, filesystem and network isolation model and limitations"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "devcontainer-spec",
+      "title": "Development Container Specification",
+      "url": "https://github.com/devcontainers/spec/blob/main/docs/specs/devcontainer-reference.md",
+      "kind": "standard",
+      "supports": [
+        "Environment-as-code metadata, lifecycle and mounts"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "daytona-pi",
+      "title": "Daytona Pi extension",
+      "url": "https://www.daytona.io/docs/en/guides/pi/pi-extension/",
+      "kind": "product_docs",
+      "supports": [
+        "Per-session remote sandbox, resume and Pi tool redirection"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "e2b",
+      "title": "E2B sandbox documentation",
+      "url": "https://e2b.dev/docs",
+      "kind": "product_docs",
+      "supports": [
+        "Remote isolated Linux command and filesystem execution"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "firecracker",
+      "title": "Firecracker design",
+      "url": "https://github.com/firecracker-microvm/firecracker/blob/main/docs/design.md",
+      "kind": "repository",
+      "supports": [
+        "MicroVM isolation, jailer, seccomp and host responsibilities"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "github-oidc",
+      "title": "GitHub Actions OpenID Connect",
+      "url": "https://docs.github.com/en/actions/concepts/security/openid-connect",
+      "kind": "official_docs",
+      "supports": [
+        "Short-lived federated CI identity"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "onepassword-cli",
+      "title": "1Password CLI secret references",
+      "url": "https://developer.1password.com/docs/cli/secrets-scripts/",
+      "kind": "official_docs",
+      "supports": [
+        "Process-scoped local secret injection"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "sops",
+      "title": "Mozilla SOPS",
+      "url": "https://github.com/getsops/sops",
+      "kind": "repository",
+      "supports": [
+        "Encrypted structured configuration and exec-env/exec-file patterns"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "nist-ssdf",
+      "title": "NIST Secure Software Development Framework 1.1",
+      "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "kind": "standard",
+      "supports": [
+        "Outcome-based secure development taxonomy"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "openssf-scorecard",
+      "title": "OpenSSF Scorecard",
+      "url": "https://github.com/ossf/scorecard",
+      "kind": "repository",
+      "supports": [
+        "Supporting supply-chain security signals"
+      ],
+      "accessed": "2026-08-02"
+    }
+  ]
+}

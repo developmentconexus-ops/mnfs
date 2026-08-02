@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { stripFrontmatter } from './document-utils.mjs';
 
 const sections = [
   '01-product-vision.md',
@@ -28,28 +29,39 @@ function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
 
-function stripFrontmatter(value) {
-  if (!value.startsWith('---\n')) return value.trim();
-  const end = value.indexOf('\n---\n', 4);
-  if (end === -1) throw new Error('Unclosed frontmatter');
-  return value.slice(end + 5).trim();
-}
-
 export async function renderBlueprint() {
   const loaded = [];
   for (const name of sections) {
     const rel = `docs/product/blueprint/${name}`;
     const content = await readFile(path.join(sourceDir, name), 'utf8');
-    loaded.push({ rel, content, body: stripFrontmatter(content) });
+    loaded.push({ rel, content, body: stripFrontmatter(content, rel) });
   }
 
   const manifest = loaded.map(({ rel, content }) => `${rel}:${sha256(content)}`).join('\n');
   const manifestHash = sha256(manifest);
 
-  const header = `<!-- GENERATED — DO NOT EDIT
+  const header = `---
+id: DOC-PRODUCT-BLUEPRINT
+title: MNFS Product Blueprint
+document_type: product_blueprint
+form: explanation
+authority: generated_projection
+status: generated
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+generated_from:
+${loaded.map(({ rel }) => `  - ${rel}`).join('\n')}
+related:
+  - DOC-PRODUCT-INDEX
+  - DOC-DOCUMENTATION-MAP
+tracking_issue: 6
+---
+
+<!-- GENERATED — DO NOT EDIT
 Source: docs/product/blueprint/*.md
 Generator: scripts/generate-product-blueprint.mjs
-Generator version: 1
+Generator version: 2
 Source manifest hash: sha256:${manifestHash}
 -->
 

@@ -14,7 +14,7 @@ supersedes: []
 superseded_by: null
 related:
   - DOC-PRODUCT-BLUEPRINT-09
-  - DOC-CAPABILITY-REALIZATION-METHOD
+  - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
 tracking_issue: 6
 ---
 
@@ -78,4 +78,4 @@ This ADR is accepted. A semantic change requires a new ADR that explicitly super
 ## Related documents
 
 - DOC-PRODUCT-BLUEPRINT-09
-- DOC-CAPABILITY-REALIZATION-METHOD
+- DOC-MNFS-CAPABILITY-REALIZATION-METHOD

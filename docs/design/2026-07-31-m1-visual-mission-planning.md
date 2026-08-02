@@ -1,3 +1,14 @@
+---
+id: DESIGN-M1-VISUAL-MISSION-PLANNING
+title: M1 Visual Mission Planning Design
+document_type: design_document
+form: explanation
+authority: specification
+status: implemented
+owners:
+  - developmentconexus-ops
+---
+
 # M1 — Visual Mission Planning with Pi and Lavish
 
 **Date:** 2026-07-31  

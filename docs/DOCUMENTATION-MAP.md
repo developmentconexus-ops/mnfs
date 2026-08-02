@@ -40,16 +40,13 @@ AB1 — Architecture Baseline and Contract Reconciliation
 
 Current state:
 
-- M0 accepted;
-- M1 accepted;
-- Product Blueprint Sections 1–13 approved;
-- Capability Realization Method approved;
-- roadmap v2 approved and being published;
-- canonical GitHub publication pending;
-- ADR-0004–ADR-0012 included in the Architecture Baseline branch;
-- CAP-EXECUTION applicability and traceability published;
-- MIS-002 revision 3 preserved and pending Replan;
-- M2 remains blocked.
+- M0 and M1 are accepted history;
+- Product Blueprint Sections 1–13 and the Capability Realization Method are approved;
+- Architecture Baseline PR #11 contains the canonical documentation package;
+- documentation CI is active and review corrections are being applied;
+- ADR-0004–ADR-0012, roadmap v2, research maps and CAP-EXECUTION are present;
+- MIS-002 revision 3 is preserved byte-for-byte and pending Replan;
+- M2 remains blocked by #7, #8, #9 and explicit Operator unblock.
 
 Tracking container:
 
@@ -211,7 +208,7 @@ Current accepted ADRs:
 | ADR-0002 | SQLite current state plus append-only Events |
 | ADR-0003 | Worktree per concurrent Write Track |
 
-Planned after Blueprint approval:
+Architecture Baseline decisions published in PR #11:
 
 | ADR | Proposed decision |
 |---|---|
@@ -225,7 +222,7 @@ Planned after Blueprint approval:
 | ADR-0011 | Evaluation and Calibration framework |
 | ADR-0012 | Documentation authority and lifecycle |
 
-Proposed paths:
+Canonical paths:
 
 ```text
 docs/adr/README.md
@@ -360,7 +357,7 @@ Ownership:
 
 Research is Evidence, not Authority.
 
-Proposed publications:
+Published Architecture Baseline research reports:
 
 ```text
 docs/research/MNFS-RESEARCH-PI-MEMORY-CONTEXT-MESSAGING-v1.md
@@ -370,14 +367,14 @@ docs/research/MNFS-RESEARCH-CAPABILITY-ROADMAP-v1.md
 docs/research/MNFS-RESEARCH-DOCUMENTATION-GOVERNANCE-v1.md
 ```
 
-Required additional maps from Issue #6:
+Architecture source maps required by Issue #6:
 
 ```text
 docs/research/LEGACY-MNFS-HARNESS-MAP.md
 docs/research/FIRSTMATE-INSPIRATION-MAP.md
 ```
 
-These maps remain pending until canonical publication work.
+These reports and maps are present in PR #11. Each published research report is paired with a validated `*.sources.json` manifest.
 
 ---
 
@@ -609,33 +606,30 @@ Generated files carry a `DO NOT EDIT` header.
 
 Before AB1 closes, resolve:
 
-1. current roadmap is too shallow;
-2. MIS-002 revision 3 conflicts with the Security model;
-3. README does not point to the complete architecture;
-4. AGENTS.md does not yet link the new authority map;
-5. STATUS does not reflect the full AB1 work;
-6. ADR-0004–0012 do not exist;
-7. Blueprint is not yet canonical in Git;
-8. Documentation Map is not yet canonical;
-9. legacy and FirstMate maps remain pending;
-10. docs CI and ownership are not implemented.
+1. apply and verify the adversarial-review corrections on PR #11;
+2. merge the Architecture Baseline after all checks and review findings are closed;
+3. implement and verify Mission Plan schema v2 in #7;
+4. execute AS-02 on canonical WSL2 in #8;
+5. Replan and approve a superseding MIS-002 revision in #9;
+6. rerun MCRM R0–R4 against the approved contract;
+7. record explicit Operator unblock before M2 implementation.
 
 ---
 
 # 22. Immediate next action
 
-After Section 13 approval:
-
 ```text
-Create the Architecture Baseline branch and publish the canonical documentation system.
+Correct and re-review PR #11, then merge the canonical Architecture Baseline.
 ```
 
 M2 remains blocked until:
 
-- canonical docs merge;
-- MIS-002 is replanned;
+- PR #11 is merged;
+- Plan Contract schema v2 is verified;
 - AS-02 is accepted;
-- Operator explicitly unblocks M2.
+- MIS-002 is replanned and approved;
+- MCRM R0–R4 pass;
+- the Operator explicitly unblocks M2.
 
 
 ---

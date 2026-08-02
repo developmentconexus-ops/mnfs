@@ -1,3 +1,14 @@
+---
+id: ADR-0002
+title: SQLite Operational State
+document_type: architecture_decision_record
+form: explanation
+authority: decision
+status: accepted
+owners:
+  - developmentconexus-ops
+---
+
 # ADR-0002: SQLite for local operational state
 
 - **Status:** Accepted for M0; reassess after the first multi-worker pilot

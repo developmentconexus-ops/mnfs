@@ -1,8 +1,38 @@
+---
+id: DOC-PRODUCT-BLUEPRINT
+title: MNFS Product Blueprint
+document_type: product_blueprint
+form: explanation
+authority: generated_projection
+status: generated
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+generated_from:
+  - docs/product/blueprint/01-product-vision.md
+  - docs/product/blueprint/02-domain-model.md
+  - docs/product/blueprint/03-lifecycle-flows.md
+  - docs/product/blueprint/04-engineering-system.md
+  - docs/product/blueprint/05-system-architecture.md
+  - docs/product/blueprint/06-roles-authority.md
+  - docs/product/blueprint/07-quality-evidence.md
+  - docs/product/blueprint/08-state-recovery.md
+  - docs/product/blueprint/09-context-memory.md
+  - docs/product/blueprint/10-security-isolation.md
+  - docs/product/blueprint/11-operator-observability.md
+  - docs/product/blueprint/12-capability-roadmap.md
+  - docs/product/blueprint/13-documentation-governance.md
+related:
+  - DOC-PRODUCT-INDEX
+  - DOC-DOCUMENTATION-MAP
+tracking_issue: 6
+---
+
 <!-- GENERATED — DO NOT EDIT
 Source: docs/product/blueprint/*.md
 Generator: scripts/generate-product-blueprint.mjs
-Generator version: 1
-Source manifest hash: sha256:5fc0e97ecf73c92bcde04bc8b02d6246e077098dd7a06d7966a12d98cc3665b2
+Generator version: 2
+Source manifest hash: sha256:673b666b2accc1eca19a7991710b9d805b355e14dedfadf55d03bd757bcceba1
 -->
 
 # MNFS Product Blueprint
@@ -430,49 +460,73 @@ FirstMate permanece uma referência operacional e uma fonte seletiva de padrões
 
 ## 1.8 Princípios constitucionais
 
+<a id="pb-p1"></a>
+
 ### P1 — Controle determinístico, execução probabilística
 
 LLMs raciocinam e produzem trabalho. O MNFS controla estado, contratos e avanço.
+
+<a id="pb-p2"></a>
 
 ### P2 — Uma sessão é descartável
 
 Nenhuma missão depende da continuidade de um transcript.
 
+<a id="pb-p3"></a>
+
 ### P3 — Mensagem é notificação, não memória
 
 Informação durável vive em SQLite ou em artefato content-addressed.
+
+<a id="pb-p4"></a>
 
 ### P4 — CLAIM não é veredito
 
 O implementador nunca é a autoridade final sobre o próprio trabalho.
 
+<a id="pb-p5"></a>
+
 ### P5 — Evidência não escrita não aconteceu
 
 Uma afirmação sem artefato ou verificação não pode fechar critério.
+
+<a id="pb-p6"></a>
 
 ### P6 — Trabalho isolado precisa ser composto
 
 Um worktree verde não prova que o sistema integrado está verde.
 
+<a id="pb-p7"></a>
+
 ### P7 — Implementer e reviewer são papéis distintos quando o risco exige julgamento
 
 Self-review não é suficiente como gate independente.
+
+<a id="pb-p8"></a>
 
 ### P8 — QA deve observar o produto como usuário quando o critério é comportamental
 
 Código, mocks e endpoints isolados não substituem a jornada real.
 
+<a id="pb-p9"></a>
+
 ### P9 — Rigor proporcional ao risco
 
 Mais agentes e mais gates somente quando aumentam a confiança necessária.
+
+<a id="pb-p10"></a>
 
 ### P10 — Sem retry cego
 
 Nova tentativa exige nova hipótese, nova evidência ou mudança de plano.
 
+<a id="pb-p11"></a>
+
 ### P11 — YAGNI é vinculante
 
 Nova abstração, adapter ou serviço precisa de uma necessidade presente e uma prova nomeada.
+
+<a id="pb-p12"></a>
 
 ### P12 — Nenhuma ferramenta externa é autoridade de domínio
 
@@ -484,21 +538,31 @@ Nova abstração, adapter ou serviço precisa de uma necessidade presente e uma 
 - SQLite guarda runtime;
 - MNFS decide o estado da missão.
 
+<a id="pb-p13"></a>
+
 ### P13 — O caminho correto deve ser o caminho mais fácil
 
 Boas práticas recorrentes devem ser transformadas em Golden Paths, templates, comandos, checks e feedback acionável. O MNFS não depende de o worker lembrar uma convenção quando ela pode ser fornecida ou verificada mecanicamente.
+
+<a id="pb-p14"></a>
 
 ### P14 — Authority e isolation são complementares
 
 Permissão em prompt, worktree ou container não constitui uma boundary de segurança completa. Ações são governadas por Authority e Effect Policy, enquanto filesystem, network, credentials e processos são limitados por enforcement técnico proporcional ao risco.
 
+<a id="pb-p15"></a>
+
 ### P15 — Medição existe para informar decisões
 
 O MNFS não coleta métricas para fabricar atividade, ranquear agentes ou produzir um score universal de produtividade. Cada sinal precisa declarar qual decisão informa, sua cobertura, limitações e condição de ação.
 
+<a id="pb-p16"></a>
+
 ### P16 — Provar antes de generalizar
 
 O MNFS evolui por walking skeletons e vertical slices. Cada nova abstração, adapter, Golden Path ou plataforma precisa nascer de um Product Milestone com consumidor, Golden Proof, Entry Gate e Removal Conditions.
+
+<a id="pb-p17"></a>
 
 ### P17 — Um conceito possui uma fonte canônica
 

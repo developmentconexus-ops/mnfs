@@ -14,7 +14,8 @@
   "properties": {
     "id": {
       "type": "string",
-      "minLength": 3
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
     },
     "title": {
       "type": "string",
@@ -49,8 +50,33 @@
       ]
     },
     "status": {
-      "type": "string",
-      "minLength": 1
+      "enum": [
+        "draft",
+        "proposed",
+        "accepted",
+        "rejected",
+        "superseded",
+        "deprecated",
+        "implementing",
+        "implemented",
+        "deferred",
+        "withdrawn",
+        "candidate",
+        "pilot",
+        "ratified",
+        "enforced",
+        "active",
+        "retired",
+        "published",
+        "historical",
+        "current",
+        "completed",
+        "archived",
+        "generated",
+        "review_required",
+        "stale",
+        "unknown"
+      ]
     },
     "version": {
       "type": "string"
@@ -59,7 +85,8 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       }
     },
     "approvers": {
@@ -85,6 +112,32 @@
         "string",
         "null"
       ]
+    },
+    "generated_from": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_manifest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_of_truth_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "review_triggers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_reviewed": {
+      "type": "string"
     },
     "tracking_issue": {
       "type": [

@@ -1,7 +1,24 @@
+---
+id: CAP-EXECUTION-COVERAGE
+title: CAP-EXECUTION Planning Coverage
+document_type: coverage_report
+form: reference
+authority: generated_projection
+status: generated
+version: 0.1.0
+owners:
+  - developmentconexus-ops
+generated_from:
+  - CAP-EXECUTION
+related:
+  - CAP-EXECUTION
+  - CAP-EXECUTION-APPLICABILITY
+---
+
 <!-- GENERATED — DO NOT EDIT
 Source: docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
 Generator: scripts/generate-capability-coverage.mjs
-Generator version: 1
+Generator version: 2
 -->
 
 # CAP-EXECUTION Planning Coverage
@@ -13,7 +30,8 @@ Generator version: 1
 | Requirements | 28 |
 | MUST | 27 |
 | SHOULD | 1 |
-| Unassessed | 0 |
+| Unassessed requirements | 0 |
+| Applicability domains | 23 |
 | Requirements with source | 28/28 |
 | Requirements with proposed allocation | 28/28 |
 | Requirements with verification method | 28/28 |
@@ -26,15 +44,19 @@ Generator version: 1
 
 | Gate | Result | Reason |
 |---|---|---|
-| R0 | PASS | Baseline sources identified |
-| R1 | PASS | All impact domains assessed |
-| R2 | PASS | Requirements are sourced and have verification methods |
+| R0 | PASS | Blueprint, roadmap, ADR and Mission baseline bindings resolve to the declared versions. |
+| R1 | PASS | 23 impact domains assessed with explicit dispositions. |
+| R2 | PASS | 28 requirements are uniquely identified, sourced and proof-planned. |
 | R3 | REVIEW_REQUIRED | Capability Spec awaits architecture PR acceptance |
 | R4 | BLOCKED | Plan schema v2, AS-02 and new MIS-002 revision are unavailable |
 | R5 | NOT_STARTED | Approved Mission contract required |
 | R6 | NOT_STARTED | No implementation Claim |
 | R7 | NOT_STARTED | No verification Evidence |
 | R8 | NOT_STARTED | M2 has not started |
+
+## Computed gate defects
+
+None.
 
 ## Blocking items
 
@@ -57,4 +79,4 @@ merge Architecture Baseline
 
 ## Coverage interpretation
 
-This report does not claim implementation readiness unless R0–R4 pass. It makes omissions, deferments and blockers explicit rather than depending on Lead memory.
+R0–R2 are computed from canonical document versions, the Applicability Matrix and requirement traceability. R3–R8 remain lifecycle dispositions until their corresponding work exists. This report does not claim implementation readiness unless R0–R4 pass.

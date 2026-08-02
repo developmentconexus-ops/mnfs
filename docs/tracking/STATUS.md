@@ -1,3 +1,19 @@
+---
+id: DOC-PROJECT-STATUS
+title: MNFS Project Status
+document_type: project_status
+form: reference
+authority: tracking
+status: current
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+related:
+  - DOC-DOCUMENTATION-MAP
+  - DOC-CAPABILITY-ROADMAP
+tracking_issue: 6
+---
+
 # Project status
 
 - **Program:** Pi-first MNFS

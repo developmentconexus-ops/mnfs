@@ -9,7 +9,7 @@ version: 0.1.0
 owners:
   - developmentconexus-ops
 related:
-  - DOC-CAPABILITY-REALIZATION-METHOD
+  - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
 last_reviewed: 2026-08-02
 ---
 

@@ -1,5 +1,5 @@
 ---
-id: CAP-<NAME>
+id: CAP-TEMPLATE
 title: Capability title
 document_type: capability_spec
 form: explanation

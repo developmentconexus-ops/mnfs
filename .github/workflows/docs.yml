@@ -8,6 +8,8 @@ on:
       - 'schemas/**'
       - 'scripts/generate-*.mjs'
       - 'scripts/validate-docs.mjs'
+      - 'scripts/document-utils.mjs'
+      - 'scripts/test-documentation-tooling.mjs'
       - 'README.md'
       - 'AGENTS.md'
       - 'package.json'
@@ -24,6 +26,8 @@ on:
       - 'schemas/**'
       - 'scripts/generate-*.mjs'
       - 'scripts/validate-docs.mjs'
+      - 'scripts/document-utils.mjs'
+      - 'scripts/test-documentation-tooling.mjs'
 
 permissions:
   contents: read
@@ -38,4 +42,4 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
-      - run: npm run docs:check
+      - run: npm run verify

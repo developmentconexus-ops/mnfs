@@ -1,6 +1,24 @@
+---
+id: DOC-CAPABILITY-ROADMAP
+title: MNFS Capability Roadmap
+document_type: product_roadmap
+form: reference
+authority: generated_projection
+status: generated
+version: 2.0.0
+owners:
+  - developmentconexus-ops
+generated_from:
+  - DOC-PRODUCT-BLUEPRINT-12
+related:
+  - DOC-PRODUCT-BLUEPRINT
+  - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
+---
+
 <!-- GENERATED — DO NOT EDIT
 Source: docs/product/blueprint/12-capability-roadmap.md
-Projection: Product Roadmap
+Generator: scripts/generate-roadmap.mjs
+Generator version: 1
 -->
 
 # MNFS capability roadmap

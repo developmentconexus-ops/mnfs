@@ -1,3 +1,14 @@
+---
+id: PLAN-M0-FOUNDATION-WALKING-SKELETON
+title: M0 Foundation Walking Skeleton Plan
+document_type: implementation_plan
+form: explanation
+authority: specification
+status: implemented
+owners:
+  - developmentconexus-ops
+---
+
 # M0 Foundation Walking Skeleton Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.

@@ -12,7 +12,7 @@ source_of_truth_for:
   - product documentation entrypoint
 related:
   - DOC-PRODUCT-BLUEPRINT
-  - DOC-CAPABILITY-REALIZATION-METHOD
+  - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
   - DOC-DOCUMENTATION-MAP
 last_reviewed: 2026-08-02
 ---

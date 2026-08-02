@@ -3,8 +3,14 @@
   "capabilityId": "CAP-EXECUTION",
   "capabilityVersion": "0.1.0",
   "baseline": {
-    "blueprintVersion": "1.0.0",
-    "roadmapVersion": "2.0.0-proposed",
+    "blueprint": {
+      "documentId": "DOC-PRODUCT-BLUEPRINT",
+      "version": "1.0.0"
+    },
+    "roadmap": {
+      "documentId": "DOC-CAPABILITY-ROADMAP",
+      "version": "2.0.0"
+    },
     "adrs": [
       "ADR-0002",
       "ADR-0003",
@@ -26,8 +32,8 @@
       "statement": "A Write Track shall have at most one current non-terminal Attempt.",
       "level": "MUST",
       "source": [
-        "PB-02",
-        "PB-08"
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-08"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M01/AC-01"
@@ -48,8 +54,8 @@
       "statement": "Worker Run identity shall be separate from Attempt identity.",
       "level": "MUST",
       "source": [
-        "PB-02",
-        "PB-08"
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-08"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M01/AC-02"
@@ -70,8 +76,8 @@
       "statement": "Worker completion shall not accept a Claim or close a Feature.",
       "level": "MUST",
       "source": [
-        "PB-P3",
-        "PB-07",
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p4",
+        "DOC-PRODUCT-BLUEPRINT-07",
         "ADR-0005"
       ],
       "proposedAllocation": [
@@ -94,8 +100,8 @@
       "statement": "Claim creation and its Domain Event shall commit atomically.",
       "level": "MUST",
       "source": [
-        "PB-07",
-        "PB-08",
+        "DOC-PRODUCT-BLUEPRINT-07",
+        "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0002"
       ],
       "proposedAllocation": [
@@ -117,8 +123,8 @@
       "statement": "Every Attempt, Worker Run and Claim shall bind to the exact Approved Contract hash.",
       "level": "MUST",
       "source": [
-        "PB-02",
-        "PB-09"
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-09"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M01/AC-04"
@@ -139,7 +145,7 @@
       "statement": "Treehouse acquisition and release shall use Intent–Action–Observation.",
       "level": "MUST",
       "source": [
-        "PB-08",
+        "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0003"
       ],
       "proposedAllocation": [
@@ -162,7 +168,7 @@
       "statement": "Lease release shall be idempotent and fenced by internal and external Lease identity.",
       "level": "MUST",
       "source": [
-        "PB-08",
+        "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0003"
       ],
       "proposedAllocation": [
@@ -185,7 +191,7 @@
       "statement": "Reconcile shall detect orphan worktrees and Leases without worktrees without destroying work automatically.",
       "level": "MUST",
       "source": [
-        "PB-08"
+        "DOC-PRODUCT-BLUEPRINT-08"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M01/AC-07"
@@ -207,8 +213,8 @@
       "statement": "The Pi Worker shall start with cwd set to the leased worktree.",
       "level": "MUST",
       "source": [
-        "PB-05",
-        "PB-12"
+        "DOC-PRODUCT-BLUEPRINT-05",
+        "DOC-PRODUCT-BLUEPRINT-12"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-02"
@@ -229,8 +235,8 @@
       "statement": "The Worker shall execute under the frozen E1 policy hash bound to its Attempt.",
       "level": "MUST",
       "source": [
-        "PB-P14",
-        "PB-10",
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p14",
+        "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0006"
       ],
       "proposedAllocation": [
@@ -254,7 +260,7 @@
       "statement": "The E1 boundary shall deny protected host and credential reads and writes outside allowed roots.",
       "level": "MUST",
       "source": [
-        "PB-10",
+        "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0006"
       ],
       "proposedAllocation": [
@@ -280,7 +286,7 @@
       "statement": "M2 Worker execution shall have no network access, credentials or X2+ external effects.",
       "level": "MUST",
       "source": [
-        "PB-10",
+        "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0007"
       ],
       "proposedAllocation": [
@@ -305,7 +311,7 @@
       "statement": "Sandbox startup failure shall fail closed and prevent Worker start.",
       "level": "MUST",
       "source": [
-        "PB-10",
+        "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0006"
       ],
       "proposedAllocation": [
@@ -329,7 +335,7 @@
       "statement": "Dispatch shall include a fresh Current Authority Snapshot.",
       "level": "MUST",
       "source": [
-        "PB-09",
+        "DOC-PRODUCT-BLUEPRINT-09",
         "ADR-0004"
       ],
       "proposedAllocation": [
@@ -351,8 +357,8 @@
       "statement": "The fixed Writer Pack shall declare target, contract, task, write-set, policy, output and termination.",
       "level": "MUST",
       "source": [
-        "PB-09",
-        "PB-12"
+        "DOC-PRODUCT-BLUEPRINT-09",
+        "DOC-PRODUCT-BLUEPRINT-12"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-08"
@@ -373,8 +379,8 @@
       "statement": "Worker process exit shall be recorded as an observation and shall not be the durable state mutation path.",
       "level": "MUST",
       "source": [
-        "PB-06",
-        "PB-08",
+        "DOC-PRODUCT-BLUEPRINT-06",
+        "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0005"
       ],
       "proposedAllocation": [
@@ -396,8 +402,8 @@
       "statement": "A fresh Lead shall recover execution state without transcript, terminal scraping or OM.",
       "level": "MUST",
       "source": [
-        "PB-08",
-        "PB-09"
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "DOC-PRODUCT-BLUEPRINT-09"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-10"
@@ -419,7 +425,7 @@
       "statement": "Late results from a superseded Attempt shall not mutate the current Attempt or Claim.",
       "level": "MUST",
       "source": [
-        "PB-08"
+        "DOC-PRODUCT-BLUEPRINT-08"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-11"
@@ -440,7 +446,7 @@
       "statement": "Deterministic verification shall produce a runner-owned Receipt bound to contract and result tree.",
       "level": "MUST",
       "source": [
-        "PB-07"
+        "DOC-PRODUCT-BLUEPRINT-07"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-12"
@@ -461,8 +467,8 @@
       "statement": "Only an MNFS Gate with valid Evidence and Authority shall accept the Claim.",
       "level": "MUST",
       "source": [
-        "PB-P3",
-        "PB-07"
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p4",
+        "DOC-PRODUCT-BLUEPRINT-07"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-13"
@@ -484,7 +490,7 @@
       "statement": "Wrong contract hash, result tree or stale Evidence shall reject or block acceptance.",
       "level": "MUST",
       "source": [
-        "PB-07"
+        "DOC-PRODUCT-BLUEPRINT-07"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-14"
@@ -506,8 +512,8 @@
       "statement": "Resources and work shall remain preserved until acceptance or explicit abandonment, then release idempotently.",
       "level": "MUST",
       "source": [
-        "PB-06",
-        "PB-08"
+        "DOC-PRODUCT-BLUEPRINT-06",
+        "DOC-PRODUCT-BLUEPRINT-08"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/M02/AC-15"
@@ -529,8 +535,8 @@
       "statement": "All M2 commands shall provide stable human and JSON output, typed errors and a next action.",
       "level": "MUST",
       "source": [
-        "PB-05",
-        "PB-11"
+        "DOC-PRODUCT-BLUEPRINT-05",
+        "DOC-PRODUCT-BLUEPRINT-11"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/AC-01"
@@ -552,7 +558,7 @@
       "statement": "M2 shall persist Domain Events and references to logs, durations, errors and available token counters.",
       "level": "SHOULD",
       "source": [
-        "PB-11"
+        "DOC-PRODUCT-BLUEPRINT-11"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/AC-02"
@@ -573,9 +579,9 @@
       "statement": "The required M2 Recovery and Security failure drills shall pass on canonical WSL2.",
       "level": "MUST",
       "source": [
-        "PB-08",
-        "PB-10",
-        "PB-12"
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "DOC-PRODUCT-BLUEPRINT-10",
+        "DOC-PRODUCT-BLUEPRINT-12"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/AC-03"
@@ -602,9 +608,9 @@
       "statement": "The approved M2 Plan shall include Acceptance Criteria at Mission, Milestone and Feature levels and qualified identities.",
       "level": "MUST",
       "source": [
-        "PB-02",
-        "PB-07",
-        "PB-12"
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-07",
+        "DOC-PRODUCT-BLUEPRINT-12"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/AC-04"
@@ -628,9 +634,9 @@
       "statement": "Implementation Claims shall declare requirements and documentation impact, and coverage shall remain current.",
       "level": "MUST",
       "source": [
-        "PB-P17",
-        "PB-13",
-        "DOC-CAPABILITY-REALIZATION-METHOD"
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p17",
+        "DOC-PRODUCT-BLUEPRINT-13",
+        "DOC-MNFS-CAPABILITY-REALIZATION-METHOD"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/AC-05"
@@ -651,9 +657,9 @@
       "statement": "No deciding M2 criterion shall depend on Herdr, OM, pi-link, remote execution or an external observability backend.",
       "level": "MUST",
       "source": [
-        "PB-09",
-        "PB-11",
-        "PB-12"
+        "DOC-PRODUCT-BLUEPRINT-09",
+        "DOC-PRODUCT-BLUEPRINT-11",
+        "DOC-PRODUCT-BLUEPRINT-12"
       ],
       "proposedAllocation": [
         "proposed:MIS-002/AC-06"
@@ -670,18 +676,6 @@
     }
   ],
   "readiness": {
-    "R0": {
-      "result": "PASS",
-      "reason": "Baseline sources identified"
-    },
-    "R1": {
-      "result": "PASS",
-      "reason": "All impact domains assessed"
-    },
-    "R2": {
-      "result": "PASS",
-      "reason": "Requirements are sourced and have verification methods"
-    },
     "R3": {
       "result": "REVIEW_REQUIRED",
       "reason": "Capability Spec awaits architecture PR acceptance"
@@ -733,5 +727,151 @@
     "approve exact new hash",
     "rerun R0-R4",
     "begin M2 implementation"
+  ],
+  "applicability": [
+    {
+      "domain": "Product and outcome",
+      "state": "APPLICABLE",
+      "rationale": "M2 must prove safe delegation and recovery",
+      "requiredOutput": "Mission/Milestone criteria and Golden Proof"
+    },
+    {
+      "domain": "State and persistence",
+      "state": "APPLICABLE",
+      "rationale": "durable Claim, Events and restart",
+      "requiredOutput": "migrations, transactions and tests"
+    },
+    {
+      "domain": "External operations",
+      "state": "APPLICABLE",
+      "rationale": "Treehouse and Pi process are external effects to SQLite",
+      "requiredOutput": "adapters and Intent–Action–Observation"
+    },
+    {
+      "domain": "Failure and Recovery",
+      "state": "APPLICABLE",
+      "rationale": "Lead/process crash is core proof",
+      "requiredOutput": "Recovery matrix and drills"
+    },
+    {
+      "domain": "Security",
+      "state": "APPLICABLE",
+      "rationale": "Writer otherwise inherits host authority",
+      "requiredOutput": "E1 policy and AS-02"
+    },
+    {
+      "domain": "Credentials",
+      "state": "NOT_APPLICABLE",
+      "rationale": "fixed task needs no credential",
+      "requiredOutput": "explicit `NONE` grant"
+    },
+    {
+      "domain": "Network",
+      "state": "APPLICABLE",
+      "rationale": "default denial is deciding security behavior",
+      "requiredOutput": "AS-02 network test"
+    },
+    {
+      "domain": "External effects",
+      "state": "NOT_APPLICABLE",
+      "rationale": "M2 permits X0/X1 only",
+      "requiredOutput": "denial policy"
+    },
+    {
+      "domain": "Quality and Evidence",
+      "state": "APPLICABLE",
+      "rationale": "Claim must be verified and accepted",
+      "requiredOutput": "Receipt and Gate"
+    },
+    {
+      "domain": "Independent Review",
+      "state": "DEFERRED",
+      "rationale": "M4 owns judgment review",
+      "requiredOutput": "roadmap target M4",
+      "deferredTo": "M4"
+    },
+    {
+      "domain": "Live QA",
+      "state": "DEFERRED",
+      "rationale": "fixed repository edit is not user-facing",
+      "requiredOutput": "roadmap target M6",
+      "deferredTo": "M6"
+    },
+    {
+      "domain": "Concurrency",
+      "state": "APPLICABLE",
+      "rationale": "duplicate starts and late results still exist with one Worker",
+      "requiredOutput": "optimistic concurrency and fencing"
+    },
+    {
+      "domain": "Parallel write Tracks",
+      "state": "DEFERRED",
+      "rationale": "M5 owns real parallelism",
+      "requiredOutput": "roadmap target M5",
+      "deferredTo": "M5"
+    },
+    {
+      "domain": "Context and memory",
+      "state": "APPLICABLE",
+      "rationale": "Worker needs bounded authoritative input",
+      "requiredOutput": "Snapshot and fixed Writer Pack"
+    },
+    {
+      "domain": "Observational Memory",
+      "state": "NOT_APPLICABLE",
+      "rationale": "bounded Writer does not require long-session OM",
+      "requiredOutput": "Pi native behavior only"
+    },
+    {
+      "domain": "Operator experience",
+      "state": "APPLICABLE",
+      "rationale": "status, errors and next action are required",
+      "requiredOutput": "human/JSON CLI"
+    },
+    {
+      "domain": "Observability",
+      "state": "APPLICABLE",
+      "rationale": "local Events, duration and logs support Recovery",
+      "requiredOutput": "local telemetry only"
+    },
+    {
+      "domain": "External observability backend",
+      "state": "DEFERRED",
+      "rationale": "not needed for M2 correctness",
+      "requiredOutput": "roadmap target M9",
+      "deferredTo": "M9"
+    },
+    {
+      "domain": "Engineering System",
+      "state": "APPLICABLE",
+      "rationale": "M2 uses an embedded fixed path, not generalized Profile/Standards engine",
+      "requiredOutput": "explicit M2 rules; generalize in M3"
+    },
+    {
+      "domain": "Compatibility",
+      "state": "APPLICABLE",
+      "rationale": "Plan and SQLite schemas already exist",
+      "requiredOutput": "migration and downgrade plan"
+    },
+    {
+      "domain": "Documentation",
+      "state": "APPLICABLE",
+      "rationale": "contract, spec, traceability and docs impact must agree",
+      "requiredOutput": "canonical docs and coverage"
+    },
+    {
+      "domain": "Web Console",
+      "state": "DEFERRED",
+      "rationale": "CLI remains canonical",
+      "requiredOutput": "roadmap option M10",
+      "deferredTo": "M10"
+    },
+    {
+      "domain": "Remote execution",
+      "state": "DEFERRED",
+      "rationale": "local proof precedes cloud",
+      "requiredOutput": "roadmap option M12",
+      "deferredTo": "M12"
+    }
   ]
 }

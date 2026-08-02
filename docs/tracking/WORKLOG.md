@@ -137,3 +137,35 @@ owners:
 - Issue #3 was closed as completed.
 - PR #5 was moved out of draft and marked ready for final review and integration.
 - M2 implementation remains unstarted; the approved contract is `.mnfs/missions/MIS-002/plan.json`.
+
+## 2026-08-02
+
+### Architecture Baseline integration
+
+- PR #11, `docs: establish MNFS architecture baseline`, was reviewed adversarially and merged into `main` at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`.
+- Published the 13-section Product Blueprint, MCRM, Capability Roadmap, ADR-0004 through ADR-0012, CAP-EXECUTION, research manifests and documentation governance/tooling.
+- Kept Issue #6 open because M2 remains explicitly blocked.
+- Selected Issue #7 as the next bounded enabler before AS-02 and the `MIS-002` Replan.
+
+### Issue #7 — Mission Plan Contract schema v2
+
+- Created branch `feat/plan-schema-v2` and draft PR #12 from the accepted Architecture Baseline commit.
+- Replaced the monolithic plan type with a discriminated schema v1/v2 domain while preserving the historical v1 reader and canonical hash algorithm.
+- Added mandatory Mission, Milestone and Feature Acceptance Criteria with structured verification method, verifier, proof type and proof owner.
+- Added derived qualified identities for Milestones, Features and all criterion levels; v2 dependency references are fully qualified and same-level.
+- Added Product Milestone, Capability Spec and requirement references with hierarchical allocation validation.
+- Added reference-only Environment/Security Policy binding, optional exact policy hash, documentation impact and requirements impact.
+- Added strict unknown-field, downgrade, cross-level reference, duplicate, cycle and historical-rewind rejection.
+- Added SQLite migration v3 so multiple approved revisions remain immutable historical records; materialization selects the latest approved revision while a draft Replan leaves the previous approval authoritative.
+- Preserved existing v1 drafts, blocked approved-v1 rewrites and implemented the exact-hash v1-to-v2 Replan path.
+- Expanded Lavish to render and escape every deciding v2 field and qualified dependency node/edge without changing exact-hash approval controls.
+- Updated the project-local Pi skill and schema reference so new plans/Replans use v2 and accepted v1 history is never rewritten.
+- Added microdesign, implementation plan and automated acceptance evidence.
+- Adversarial review strengthened proof for approved-v2 fresh-process recovery, malformed requirement IDs, duplicate local IDs and Security Policy hashes.
+- Canonical GitHub Actions proof on Ubuntu 24.04 and Node.js 24.18.0 passed:
+  - TypeScript typecheck green;
+  - 94 tests passed, 0 failed;
+  - documentation tooling tests green;
+  - documentation validation green with 62 canonical IDs.
+- Automated tests verify `.mnfs/missions/MIS-002/plan.json` remains revision 3 with Git blob SHA `6b79117fe66cd5c9c8142099828812f470ce20de` and content hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
+- M2 remains blocked. Next sequence is Issue #8 AS-02, Issue #9 Replan, exact-hash Operator approval, mechanical R0–R4 recalculation and explicit unblock.

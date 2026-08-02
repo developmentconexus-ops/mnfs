@@ -38,7 +38,7 @@ Generator version: 2
 | Designed | 23 |
 | Blocked | 5 |
 | Verified | 0 |
-| Evidenced | 0 |
+| Evidenced | 1 |
 
 ## Readiness Gates
 
@@ -47,8 +47,8 @@ Generator version: 2
 | R0 | PASS | Blueprint, roadmap, ADR and Mission baseline bindings resolve to the declared versions. |
 | R1 | PASS | 23 impact domains assessed with explicit dispositions. |
 | R2 | PASS | 28 requirements are uniquely identified, sourced and proof-planned. |
-| R3 | REVIEW_REQUIRED | Capability Spec awaits architecture PR acceptance |
-| R4 | BLOCKED | Plan schema v2, AS-02 and new MIS-002 revision are unavailable |
+| R3 | REVIEW_REQUIRED | Capability Spec remains proposed pending explicit Operator acceptance |
+| R4 | BLOCKED | AS-02 and a newly approved MIS-002 schema v2 revision are unavailable |
 | R5 | NOT_STARTED | Approved Mission contract required |
 | R6 | NOT_STARTED | No implementation Claim |
 | R7 | NOT_STARTED | No verification Evidence |
@@ -60,18 +60,14 @@ None.
 
 ## Blocking items
 
-1. **BLOCK-PLAN-SCHEMA-V2:** Plan schema v1 cannot express required Milestone criteria and expanded execution/security bindings.
-2. **BLOCK-AS-02:** Real local Pi sandbox behavior on canonical WSL2 is unproven.
-3. **BLOCK-MIS-002-REPLAN:** Revision 3 must remain preserved and a new revision must be approved through MNFS.
-4. **BLOCK-AB1-MERGE:** Architecture Baseline documents and decisions are not merged.
+1. **BLOCK-AS-02:** Real local Pi sandbox behavior on canonical WSL2 is unproven.
+2. **BLOCK-MIS-002-REPLAN:** Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS.
 
 ## Required next sequence
 
 ```text
-merge Architecture Baseline
-→ implement and verify Plan Contract schema v2
-→ execute AS-02
-→ run MIS-002 Replan through Lavish
+execute AS-02
+→ run MIS-002 schema v2 Replan through Lavish
 → approve exact new hash
 → rerun R0-R4
 → begin M2 implementation

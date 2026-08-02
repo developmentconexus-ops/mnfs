@@ -1,11 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import type { MissionPlanContent, MissionPlanRevision } from '../../src/domain/mission-plan.js';
+import type {
+  MissionPlanContentV1,
+  MissionPlanRevision,
+} from '../../src/domain/mission-plan.js';
 import { renderMissionPlanHtml } from '../../src/planning/render-plan.js';
 
-function revision(contentOverrides: Partial<MissionPlanContent> = {}): MissionPlanRevision {
-  const content: MissionPlanContent = {
+function revision(
+  contentOverrides: Partial<MissionPlanContentV1> = {},
+): MissionPlanRevision & { readonly content: MissionPlanContentV1 } {
+  const content: MissionPlanContentV1 = {
     schemaVersion: 1,
     missionId: 'MIS-001',
     title: 'Visual planning',
@@ -98,32 +103,36 @@ test('renders every plan section and the exact revision identity', () => {
 
 test('escapes every semantic text surface instead of executing it', () => {
   const payload = '<img src=x onerror="alert(1)">';
-  const html = renderMissionPlanHtml(revision({
-    title: payload,
-    goal: payload,
-    successCriteria: [payload],
-    scope: { included: [payload], excluded: [payload] },
-    assumptions: [payload],
-    milestones: [
-      {
-        id: 'M01',
-        title: payload,
-        outcome: payload,
-        dependsOn: [],
-        features: [
-          {
-            id: 'F01',
-            title: payload,
-            outcome: payload,
-            acceptanceCriteria: [payload],
-            dependsOn: [],
-          },
-        ],
-      },
-    ],
-    risks: [{ id: 'R01', description: payload, mitigation: payload }],
-    questions: [{ id: 'Q01', question: payload, blocking: false, status: 'ANSWERED', answer: payload }],
-  }));
+  const html = renderMissionPlanHtml(
+    revision({
+      title: payload,
+      goal: payload,
+      successCriteria: [payload],
+      scope: { included: [payload], excluded: [payload] },
+      assumptions: [payload],
+      milestones: [
+        {
+          id: 'M01',
+          title: payload,
+          outcome: payload,
+          dependsOn: [],
+          features: [
+            {
+              id: 'F01',
+              title: payload,
+              outcome: payload,
+              acceptanceCriteria: [payload],
+              dependsOn: [],
+            },
+          ],
+        },
+      ],
+      risks: [{ id: 'R01', description: payload, mitigation: payload }],
+      questions: [
+        { id: 'Q01', question: payload, blocking: false, status: 'ANSWERED', answer: payload },
+      ],
+    }),
+  );
 
   assert.equal(html.includes(payload), false);
   assert.match(html, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);

@@ -4,7 +4,14 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 const SKILL_PATH = join(process.cwd(), '.pi', 'skills', 'mnfs-plan', 'SKILL.md');
-const REFERENCE_PATH = join(process.cwd(), '.pi', 'skills', 'mnfs-plan', 'references', 'plan-schema.md');
+const REFERENCE_PATH = join(
+  process.cwd(),
+  '.pi',
+  'skills',
+  'mnfs-plan',
+  'references',
+  'plan-schema.md',
+);
 
 function read(path: string): string {
   return readFileSync(path, 'utf8');
@@ -29,10 +36,10 @@ test('mnfs-plan is a discoverable project-local Pi skill with bounded instructio
   const metadata = frontmatter(skill);
 
   assert.equal(metadata.name, 'mnfs-plan');
-  assert.match(metadata.description ?? '', /mission plan/i);
+  assert.match(metadata.description ?? '', /Mission Plan/i);
   assert.match(metadata.description ?? '', /Lavish/i);
   assert.ok((metadata.description ?? '').length <= 1024);
-  assert.ok(skill.split('\n').length <= 190, 'keep progressive-disclosure instructions concise');
+  assert.ok(skill.split('\n').length <= 240, 'keep progressive-disclosure instructions concise');
   assert.match(skill, /references\/plan-schema\.md/);
 });
 
@@ -56,10 +63,10 @@ test('mnfs-plan enforces the complete hash-bound planning loop', () => {
     assert.equal(skill.includes(marker), true, `missing workflow marker: ${marker}`);
   }
 
-  assert.match(skill, /Never edit the rendered HTML/i);
+  assert.match(skill, /Never edit rendered HTML|Never edit the rendered HTML/i);
   assert.match(skill, /Never write directly to SQLite/i);
   assert.match(skill, /Do not start implementation/i);
-  assert.match(skill, /user-ended|operator ended|session is ended/i);
+  assert.match(skill, /user-ended|Operator ended|session is ended/i);
 });
 
 test('mnfs-plan opens Lavish once and uses render plus live reload for later revisions', () => {
@@ -73,17 +80,25 @@ test('mnfs-plan opens Lavish once and uses render plus live reload for later rev
   assert.match(skill, /plan render --mission <mission-id> --json/);
 });
 
-test('plan schema reference documents every authoritative field and invariant', () => {
+test('plan schema reference documents every authoritative v2 field and invariant', () => {
   const reference = read(REFERENCE_PATH);
   for (const marker of [
     'schemaVersion',
     'missionId',
-    'successCriteria',
+    'acceptanceCriteria',
     'scope',
     'assumptions',
+    'productMilestoneRefs',
+    'capabilityRefs',
+    'requirementRefs',
+    'environmentBinding',
+    'securityPolicyRef',
+    'documentationImpact',
+    'requirementsImpact',
+    'verificationPlan',
+    'proofOwner',
     'milestones',
     'features',
-    'acceptanceCriteria',
     'risks',
     'questions',
     'dependsOn',
@@ -94,7 +109,18 @@ test('plan schema reference documents every authoritative field and invariant', 
   }
 
   assert.match(reference, /full JSON document/i);
+  assert.match(reference, /qualified/i);
   assert.match(reference, /unique/i);
   assert.match(reference, /cycle/i);
   assert.match(reference, /blocking/i);
+  assert.match(reference, /downgrade/i);
+  assert.match(reference, /schema v1 remains readable/i);
+});
+
+test('mnfs-plan preserves approved v1 history and requires v2 for Replan', () => {
+  const skill = read(SKILL_PATH);
+  assert.match(skill, /approved v1.*schema v2 Replan/is);
+  assert.match(skill, /requested v2 to v1.*refuse/is);
+  assert.match(skill, /previous approved revision stays authoritative/is);
+  assert.match(skill, /Never write directly.*\.mnfs\/missions/is);
 });

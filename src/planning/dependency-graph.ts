@@ -1,4 +1,4 @@
-import type { MissionPlanContent } from '../domain/mission-plan.js';
+import { isMissionPlanV2, type MissionPlanContent } from '../domain/mission-plan.js';
 import { escapeHtml } from './html.js';
 
 type GraphNodeKind = 'milestone' | 'feature';
@@ -18,7 +18,7 @@ interface PositionedNode {
   readonly y: number;
 }
 
-const NODE_WIDTH = 220;
+const NODE_WIDTH = 260;
 const NODE_HEIGHT = 82;
 const COLUMN_GAP = 96;
 const ROW_GAP = 28;
@@ -26,6 +26,30 @@ const PADDING = 28;
 
 function collectNodes(content: MissionPlanContent): GraphNode[] {
   const nodes: GraphNode[] = [];
+  if (isMissionPlanV2(content)) {
+    for (const milestone of content.milestones) {
+      nodes.push({
+        id: milestone.qualifiedId,
+        title: milestone.title,
+        kind: 'milestone',
+        dependsOn: milestone.dependsOn,
+        order: nodes.length,
+      });
+    }
+    for (const milestone of content.milestones) {
+      for (const feature of milestone.features) {
+        nodes.push({
+          id: feature.qualifiedId,
+          title: feature.title,
+          kind: 'feature',
+          dependsOn: feature.dependsOn,
+          order: nodes.length,
+        });
+      }
+    }
+    return nodes;
+  }
+
   for (const milestone of content.milestones) {
     nodes.push({
       id: milestone.id,
@@ -79,7 +103,7 @@ function titleLines(title: string): readonly string[] {
 
   for (const word of words) {
     const candidate = current.length === 0 ? word : `${current} ${word}`;
-    if (candidate.length <= 28 || current.length === 0) {
+    if (candidate.length <= 32 || current.length === 0) {
       current = candidate;
     } else {
       lines.push(current);
@@ -91,7 +115,7 @@ function titleLines(title: string): readonly string[] {
 
   const first = lines.shift() ?? '';
   const remaining = lines.join(' ');
-  const second = remaining.length <= 27 ? remaining : `${remaining.slice(0, 26)}…`;
+  const second = remaining.length <= 31 ? remaining : `${remaining.slice(0, 30)}…`;
   return [first, second];
 }
 
@@ -99,7 +123,10 @@ function renderNode(positioned: PositionedNode): string {
   const { node, x, y } = positioned;
   const lines = titleLines(node.title);
   const titleSpans = lines
-    .map((line, index) => `<tspan x="16" dy="${index === 0 ? 0 : 18}">${escapeHtml(line)}</tspan>`)
+    .map(
+      (line, index) =>
+        `<tspan x="16" dy="${index === 0 ? 0 : 18}">${escapeHtml(line)}</tspan>`,
+    )
     .join('');
 
   return `<g class="dependency-node dependency-node-${node.kind}" data-node="${escapeHtml(node.id)}" transform="translate(${x} ${y})">
@@ -112,7 +139,9 @@ function renderNode(positioned: PositionedNode): string {
 
 export function renderDependencyGraphSvg(content: MissionPlanContent): string | undefined {
   const nodes = collectNodes(content);
-  const edges = nodes.flatMap((node) => node.dependsOn.map((sourceId) => ({ sourceId, targetId: node.id })));
+  const edges = nodes.flatMap((node) =>
+    node.dependsOn.map((sourceId) => ({ sourceId, targetId: node.id })),
+  );
   if (edges.length === 0) return undefined;
 
   const nodesById = new Map<string, GraphNode>(nodes.map((node) => [node.id, node] as const));
@@ -130,7 +159,8 @@ export function renderDependencyGraphSvg(content: MissionPlanContent): string | 
 
   const maximumRows = Math.max(...Array.from(grouped.values(), (column) => column.length));
   const width = PADDING * 2 + (maximumDepth + 1) * NODE_WIDTH + maximumDepth * COLUMN_GAP;
-  const height = PADDING * 2 + maximumRows * NODE_HEIGHT + Math.max(0, maximumRows - 1) * ROW_GAP;
+  const height =
+    PADDING * 2 + maximumRows * NODE_HEIGHT + Math.max(0, maximumRows - 1) * ROW_GAP;
   const positions = new Map<string, PositionedNode>();
 
   for (let depth = 0; depth <= maximumDepth; depth += 1) {
@@ -147,17 +177,19 @@ export function renderDependencyGraphSvg(content: MissionPlanContent): string | 
     });
   }
 
-  const renderedEdges = edges.map(({ sourceId, targetId }) => {
-    const source = positions.get(sourceId);
-    const target = positions.get(targetId);
-    if (source === undefined || target === undefined) return '';
-    const sourceX = source.x + NODE_WIDTH;
-    const sourceY = source.y + NODE_HEIGHT / 2;
-    const targetX = target.x;
-    const targetY = target.y + NODE_HEIGHT / 2;
-    const middleX = Math.round((sourceX + targetX) / 2);
-    return `<path class="dependency-edge" data-edge="${escapeHtml(`${sourceId}->${targetId}`)}" d="M ${sourceX} ${sourceY} C ${middleX} ${sourceY}, ${middleX} ${targetY}, ${targetX} ${targetY}" marker-end="url(#mnfs-dependency-arrow)"></path>`;
-  }).join('');
+  const renderedEdges = edges
+    .map(({ sourceId, targetId }) => {
+      const source = positions.get(sourceId);
+      const target = positions.get(targetId);
+      if (source === undefined || target === undefined) return '';
+      const sourceX = source.x + NODE_WIDTH;
+      const sourceY = source.y + NODE_HEIGHT / 2;
+      const targetX = target.x;
+      const targetY = target.y + NODE_HEIGHT / 2;
+      const middleX = Math.round((sourceX + targetX) / 2);
+      return `<path class="dependency-edge" data-edge="${escapeHtml(`${sourceId}->${targetId}`)}" d="M ${sourceX} ${sourceY} C ${middleX} ${sourceY}, ${middleX} ${targetY}, ${targetX} ${targetY}" marker-end="url(#mnfs-dependency-arrow)"></path>`;
+    })
+    .join('');
 
   const renderedNodes = nodes
     .map((node) => positions.get(node.id))

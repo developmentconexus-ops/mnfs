@@ -1,57 +1,106 @@
+---
+id: DOC-TOOLING-ADOPTION
+title: MNFS Tooling Adoption
+document_type: tooling_reference
+form: reference
+authority: policy
+status: accepted
+version: 2.0.0
+owners:
+  - developmentconexus-ops
+source_of_truth_for:
+  - external tooling adoption state
+related:
+  - DOC-PRODUCT-BLUEPRINT-05
+  - DOC-PRODUCT-BLUEPRINT-09
+  - DOC-PRODUCT-BLUEPRINT-10
+  - DOC-PRODUCT-BLUEPRINT-11
+  - DOC-PRODUCT-BLUEPRINT-12
+last_reviewed: 2026-08-02
+---
+
 # Tooling adoption
 
-MNFS is **Pi-first** but does not vendor or fork the FirstMate stack. FirstMate is a reference implementation and source of field-tested patterns. Each external tool enters behind a narrow adapter only when a named milestone needs it and has an explicit behavioral proof.
+MNFS is Pi-first and adapter-driven. An external tool enters only for a named consumer, behind a replaceable boundary, with an explicit proof and Removal Conditions.
 
-## Current status
+## Lifecycle
 
-| Tool | Role in MNFS | Current status | Required proof |
+```text
+RESEARCHED
+→ CANDIDATE
+→ SPIKE
+→ PILOT
+→ ADOPTED
+→ DEPRECATED
+→ REMOVED
+```
+
+## Current matrix
+
+| Tool | MNFS role | State | Proof / next decision |
 |---|---|---|---|
-| **Pi** | Primary reasoning and worker runtime | Project-local planning skill is implemented and accepted in M1; worker process adapter begins in M2 | M2: one Pi worker executes a fixed task in a leased worktree and produces a durable claim |
-| **Lavish** | Browser review and operator feedback | Narrow open/poll/end adapter, stable `review.html` session and real browser pilot accepted in M1 | Complete: feedback creates a newer hash-bound revision and exact-hash approval freezes the contract |
-| **Treehouse** | Reusable leased worktrees for `write_track` | Deferred until M2; not yet integrated | M2: one durable lease survives lead restart, maps to the real worktree and can be released safely |
-| **Herdr** | Optional terminal projection for lead and workers | Deferred and explicitly non-authoritative; not a deciding criterion of M2 | Later: workers remain correct and recoverable with Herdr absent |
-| **no-mistakes** | Optional final PR/CI delivery gate | Deferred until MNFS quality gates exist | M6: an MNFS-green change is delivered through PR and CI without duplicating review authority |
-| **SQLite** | Local operational state | Implemented and accepted since M0; expanded with plan revisions in M1 | Missions, revisions, approval and later claims survive process restart transactionally |
-| **Git** | Code, contracts and accepted evidence | Implemented | Approved contracts and final evidence are versioned; transient runtime state is not |
-| **FirstMate** | Reference, benchmark and pattern source | Never a runtime dependency or repository base | Research, comparative dogfood and selective pattern adoption only |
+| Pi | primary reasoning and Worker runtime | ADOPTED | M1 planning accepted; M2 secure Worker proof pending |
+| Lavish | structured visual review | ADOPTED | M1 exact-hash planning loop accepted |
+| SQLite | local operational state | ADOPTED | M0/M1 restart proof accepted |
+| Git | code and accepted repository artifacts | ADOPTED | accepted contracts and docs versioned |
+| Treehouse | physical worktree and Lease adapter | CANDIDATE | M2 real WSL2 Lease/recovery proof |
+| Anthropic Sandbox Runtime | E1 local process sandbox | CANDIDATE | AS-02 |
+| Herdr | optional terminal projection | DEFERRED | absence must not affect correctness |
+| `pi-observational-memory` V3 | optional Lead Session memory | CANDIDATE | AS-01 after M3 |
+| `pi-link` | future notification/steering transport | DEFERRED | durable command semantics first |
+| Dev Container Spec/CLI | optional environment-as-code | TARGET | Repository Profile binding in M7 or earlier proven need |
+| Daytona | future remote workspace | RESEARCHED | AS-04 before M12 |
+| E2B | narrow remote sandbox alternative | RESEARCHED | AS-04 comparison |
+| Ona | Software Factory/environment reference | REFERENCE | no runtime dependency |
+| Firecracker | E4 isolation reference | REFERENCE | use established platform, do not build local runtime |
+| OpenTelemetry | telemetry interchange | TARGET | instrument after stable end-to-end flow |
+| Phoenix | local trace/evaluation backend | CANDIDATE | AS-03 |
+| Langfuse | trace/evaluation backend | CANDIDATE | AS-03 |
+| 1Password CLI | local secret injection binding | OPTIONAL | M7 provider-specific proof |
+| SOPS | encrypted configuration binding | OPTIONAL | M7 provider-specific proof |
+| no-mistakes | optional Delivery adapter | DEFERRED | M8 authority-overlap evaluation |
+| Backstage | future multi-repository portal | OPTION | AS-05 before M11 |
+| FirstMate | pattern and benchmark source | REFERENCE | never domain/runtime authority |
 
 ## Authority boundaries
 
 ```text
-MNFS core   -> mission, contracts, state, criteria, decisions and gates
-Pi          -> probabilistic reasoning and agent execution
-Treehouse   -> physical worktree pool and lease lifecycle
-Herdr       -> terminal presentation and operational visibility only
-Lavish      -> human visual feedback surface only
-Git         -> code, commits, approved contracts and accepted evidence
-SQLite      -> local operational state and recovery
-no-mistakes -> optional final delivery to PR/CI
+MNFS
+→ domain, contracts, state, decisions, policy and gates
+
+Pi
+→ probabilistic reasoning and tool execution
+
+Treehouse
+→ physical worktree pool
+
+Sandbox Runtime
+→ technical process enforcement
+
+Lavish
+→ human review transport
+
+Herdr
+→ operational presentation
+
+Observability backend
+→ telemetry/evaluation projection
+
+Git
+→ code and versioned artifacts
+
+SQLite
+→ local operational state
 ```
 
-No adapter may become the source of truth for the MNFS domain:
+## Admission rule
 
-- removing Herdr must not stop or invalidate execution;
-- losing a transport message must not lose durable state;
-- a Pi process exiting successfully must not close a feature;
-- a worker emits a CLAIM, never its own verdict;
-- only MNFS gates can accept work;
-- Lavish feedback changes structured source, not rendered HTML directly.
+A tool is not adopted because it is popular or used by FirstMate. It must have:
 
-## Adoption order
-
-1. **M0 — Foundation:** TypeScript, SQLite, CLI, repository identity and recovery — complete.
-2. **M1 — Visual planning:** mission contract, revisions, Pi skill, deterministic HTML/SVG and Lavish review — complete.
-3. **M2 — One worker:** Pi process adapter, Treehouse lease adapter, durable CLAIM and lead restart recovery — next.
-4. **M3–M5 — Quality:** independent review, local correction reuse, parallel write tracks, controlled integration and live QA.
-5. **M6 — Delivery:** optional no-mistakes adapter and policy calibration.
-
-## YAGNI rule
-
-An external tool is not integrated merely because FirstMate uses it. It enters only when:
-
-1. a named observed failure or capability gap exists;
-2. the tool is simpler than implementing the same mechanism correctly;
-3. the integration has a narrow replaceable adapter;
-4. MNFS remains the domain authority;
-5. a real acceptance proof demonstrates value;
-6. a removal condition is known if the tool fails to outperform the simpler baseline.
+1. a named failure mode or capability consumer;
+2. a simpler baseline comparison;
+3. a narrow adapter;
+4. preserved MNFS authority;
+5. real acceptance evidence;
+6. a pinned version and source/license review;
+7. Removal Conditions.

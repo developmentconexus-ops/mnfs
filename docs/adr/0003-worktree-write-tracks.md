@@ -1,3 +1,14 @@
+---
+id: ADR-0003
+title: Worktree per Concurrent Write Track
+document_type: architecture_decision_record
+form: explanation
+authority: decision
+status: accepted
+owners:
+  - developmentconexus-ops
+---
+
 # ADR-0003: Worktree per concurrent write track
 
 - **Status:** Accepted

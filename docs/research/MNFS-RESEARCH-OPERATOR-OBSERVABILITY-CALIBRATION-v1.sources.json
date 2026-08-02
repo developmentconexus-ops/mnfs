@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "reportId": "DOC-RESEARCH-MNFS-RESEARCH-OPERATOR-OBSERVABILITY-CALIBRATION-v1",
+  "asOf": "2026-08-02",
+  "sources": [
+    {
+      "id": "backstage-templates",
+      "title": "Backstage Software Templates",
+      "url": "https://backstage.io/docs/features/software-templates/",
+      "kind": "official_docs",
+      "supports": [
+        "Developer portal, catalog and self-service workflow patterns"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "backstage-techdocs",
+      "title": "Backstage TechDocs concepts",
+      "url": "https://backstage.io/docs/features/techdocs/concepts/",
+      "kind": "official_docs",
+      "supports": [
+        "Docs-like-code and generated publication model"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "github-agent-sessions",
+      "title": "Track GitHub Copilot coding-agent sessions",
+      "url": "https://docs.github.com/en/copilot/how-tos/agents/copilot-coding-agent/tracking-copilots-sessions",
+      "kind": "official_docs",
+      "supports": [
+        "Session dashboard, logs, token and control UX patterns"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "herdr",
+      "title": "Herdr",
+      "url": "https://github.com/ogulcancelik/herdr",
+      "kind": "repository",
+      "supports": [
+        "Persistent terminal workspace and operational projection patterns"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "firstmate",
+      "title": "FirstMate",
+      "url": "https://github.com/kunchenguid/firstmate",
+      "kind": "repository",
+      "supports": [
+        "One liaison, visible crew and isolated worker UX"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "otel-genai",
+      "title": "OpenTelemetry GenAI semantic conventions",
+      "url": "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "kind": "standard",
+      "supports": [
+        "Vendor-neutral GenAI traces, tools, models and token attributes"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "phoenix",
+      "title": "Arize Phoenix documentation",
+      "url": "https://arize.com/docs/phoenix",
+      "kind": "product_docs",
+      "supports": [
+        "OTLP/OpenInference tracing, datasets, evaluations and experiments"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "langfuse",
+      "title": "Langfuse documentation",
+      "url": "https://langfuse.com/docs",
+      "kind": "product_docs",
+      "supports": [
+        "Traces, sessions, scores, datasets, annotations and experiments"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "dora-2025",
+      "title": "DORA 2025 report",
+      "url": "https://dora.dev/research/2025/dora-report/",
+      "kind": "research",
+      "supports": [
+        "AI as amplifier and system-level delivery outcomes"
+      ],
+      "accessed": "2026-08-02"
+    },
+    {
+      "id": "space",
+      "title": "The SPACE of Developer Productivity",
+      "url": "https://www.microsoft.com/en-us/research/publication/the-space-of-developer-productivity-theres-more-to-it-than-you-think/",
+      "kind": "research",
+      "supports": [
+        "Multidimensional productivity framework"
+      ],
+      "accessed": "2026-08-02"
+    }
+  ]
+}

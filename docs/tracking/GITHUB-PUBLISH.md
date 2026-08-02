@@ -1,3 +1,14 @@
+---
+id: TRACKING-GITHUB-PUBLISH
+title: GitHub Publication Tracking
+document_type: tracking_document
+form: explanation
+authority: tracking
+status: current
+owners:
+  - developmentconexus-ops
+---
+
 # GitHub publication handoff
 
 ## Target

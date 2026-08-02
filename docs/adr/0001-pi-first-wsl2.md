@@ -1,3 +1,14 @@
+---
+id: ADR-0001
+title: Pi-first WSL2 Architecture
+document_type: architecture_decision_record
+form: explanation
+authority: decision
+status: accepted
+owners:
+  - developmentconexus-ops
+---
+
 # ADR-0001: Pi-first runtime on WSL2
 
 - **Status:** Accepted

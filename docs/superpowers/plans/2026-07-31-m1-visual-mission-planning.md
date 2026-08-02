@@ -1,3 +1,14 @@
+---
+id: PLAN-M1-VISUAL-MISSION-PLANNING
+title: M1 Visual Mission Planning Implementation Plan
+document_type: implementation_plan
+form: explanation
+authority: specification
+status: implemented
+owners:
+  - developmentconexus-ops
+---
+
 # M1 Visual Mission Planning Implementation Plan
 
 > Execute task-by-task with TDD. Do not begin worker execution, Treehouse, Herdr or parallel orchestration in this plan.

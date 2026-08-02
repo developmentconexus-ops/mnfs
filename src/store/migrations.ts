@@ -70,6 +70,15 @@ const MIGRATIONS: readonly Migration[] = [
       WHERE status = 'APPROVED';
     `,
   },
+  {
+    version: 3,
+    sql: `
+      DROP INDEX mission_plan_one_approved_idx;
+      CREATE INDEX mission_plan_approved_revision_idx
+      ON mission_plan_revisions (mission_id, revision DESC)
+      WHERE status = 'APPROVED';
+    `,
+  },
 ];
 
 function currentVersions(database: DatabaseSync): Set<number> {

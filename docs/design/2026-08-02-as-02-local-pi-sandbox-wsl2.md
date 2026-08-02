@@ -5,7 +5,7 @@ document_type: microdesign
 form: explanation
 authority: specification
 status: proposed
-version: 0.1.0
+version: 0.1.1
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ Pi host process
 + Ubuntu on WSL2
 ```
 
-The selected candidate keeps the Pi/model-provider process in the trusted host plane while all repository-facing tool operations execute through the sandbox runtime. The spike will also prove why the upstream Pi example that overrides only `bash` is not, by itself, a complete Worker boundary: Pi also exposes native `read`, `write`, `edit`, `grep`, `find`, and `ls` tools unless they are disabled or replaced.
+The selected candidate keeps the Pi/model-provider process in the trusted host plane while every repository-facing tool operation executes through the sandbox runtime. The spike also proves why the upstream Pi example that overrides only `bash` is not, by itself, a complete Worker boundary: Pi exposes native `read`, `write`, `edit`, `grep`, `find`, and `ls` tools unless they are disabled or replaced.
 
 AS-02 is an architecture spike. It may recommend an adapter and policy, but it must not implement the production M2 Worker, approve a new Mission Plan, mutate `MIS-002` revision 3, or unblock M2 automatically.
 
@@ -53,7 +53,7 @@ ADR-0006 therefore requires an E1 boundary with OS-level enforcement, write allo
 ## 3. Goals
 
 1. Execute the Issue #8 S1–S15 scenarios on the real canonical Ubuntu WSL2 environment.
-2. Use only synthetic sentinel secrets and disposable fixtures.
+2. Use only synthetic sentinels and disposable fixtures.
 3. Verify filesystem, network, socket, process-tree, policy-integrity, fail-closed, restart, compatibility, and performance behavior.
 4. Produce machine-readable raw evidence plus a human acceptance report.
 5. Compare the upstream Pi `bash`-only sandbox pattern against a complete brokered-tools pattern.
@@ -69,24 +69,25 @@ ADR-0006 therefore requires an E1 boundary with OS-level enforcement, write allo
 - No remote sandbox, Dev Container engine, VM, or microVM integration.
 - No generic policy DSL.
 - No automatic host security weakening.
-- No automatic `sudo`, `sysctl`, AppArmor modification, WSL restart, or Windows command execution.
+- No automatic `sudo`, `sysctl`, AppArmor modification, WSL restart, or Windows executable invocation.
 - No modification of `.mnfs/missions/MIS-002/plan.json`.
 - No conclusion that WSL2, a worktree, a prompt, or a Pi extension is independently sufficient isolation.
 
 ## 5. Fixed constraints
 
 - Canonical runtime: Ubuntu under WSL2.
-- Repository and all disposable repositories must live on the Linux filesystem, never under `/mnt/c`.
+- Repository and all disposable Git repositories must live on the Linux filesystem, never under `/mnt/c`.
 - Supported Node.js floor remains `24.18.0`.
 - `@anthropic-ai/sandbox-runtime` is pinned exactly to `0.0.67` for this spike.
-- The Sandbox Runtime remains a Beta Research Preview; the spike must treat its API and behavior as candidate evidence, not a permanent platform guarantee.
+- The Sandbox Runtime remains a Beta Research Preview; its API and behavior are candidate evidence, not a permanent platform guarantee.
 - Linux dependencies are `bubblewrap`, `socat`, and `ripgrep`.
 - Ubuntu 24.04 user-namespace/AppArmor restrictions must be observed and reported. The harness must not disable them automatically.
 - The Pi version used by the real test must be captured exactly from the installed WSL environment.
-- Third-party source references must record version or commit, license, checksum/lockfile, and reviewed capabilities.
-- All deny tests operate on controlled synthetic fixtures. No real SSH key, cloud credential, kubeconfig, browser data, password-manager socket, or user `.env` is opened.
+- Third-party source references must record version or commit, license, lockfile/integrity, and reviewed capabilities.
+- No real SSH key, cloud credential, kubeconfig, browser data, password-manager socket, or user `.env` is opened.
 - Sandbox initialization failure must prevent the candidate tool action from running.
 - A test may report `BLOCKED_BY_HOST_POLICY`; it must never silently retry outside the sandbox.
+- Any controlled sentinel unexpectedly modified outside the allowlist produces immediate failure and trusted cleanup.
 
 ## 6. Options considered
 
@@ -94,7 +95,7 @@ ADR-0006 therefore requires an E1 boundary with OS-level enforcement, write allo
 
 **Advantage:** one process-tree boundary includes Pi and its tools.
 
-**Problem:** the Pi process needs model-provider authentication and usually provider network access. Giving the same process credentials and provider egress weakens the isolation that should protect those credentials from agent-directed tools. Separating model communication from tool execution becomes difficult.
+**Problem:** the Pi process needs model-provider authentication and usually provider network access. Giving the same process credentials and provider egress weakens the separation intended to protect them from agent-directed tools.
 
 **Disposition:** not selected for M2.
 
@@ -102,7 +103,7 @@ ADR-0006 therefore requires an E1 boundary with OS-level enforcement, write allo
 
 **Advantage:** minimal integration and a useful reference implementation.
 
-**Problem:** Pi can still expose native filesystem tools. Sandboxing `bash` alone does not prove that `read`, `write`, `edit`, `grep`, `find`, and `ls` use the same OS boundary. The example also allows a `--no-sandbox` switch and records initialization failure without itself defining an MNFS fail-closed Worker transition.
+**Problem:** Pi can still expose native filesystem tools. Sandboxing `bash` alone does not prove that `read`, `write`, `edit`, `grep`, `find`, and `ls` use the same OS boundary. The example also permits diagnostic disablement and does not define the MNFS fail-closed transition.
 
 **Disposition:** retain as an adversarial comparison, not as the accepted E1 design.
 
@@ -115,8 +116,8 @@ Pi starts with `--no-builtin-tools`. A reviewed first-party extension registers 
 - model/provider authentication remains in the trusted Pi process;
 - ordinary tool actions do not inherit full WSL user authority;
 - the active tool inventory is explicit;
-- policy hash, cwd, environment, command arguments, and evidence can be bound at one broker boundary;
-- the extension can fail closed before a tool action exists;
+- policy hash, cwd, environment, command arguments, and evidence bind at one broker boundary;
+- the extension can fail closed before a tool exists;
 - later M2 code can consume a narrow adapter rather than a third-party policy DSL.
 
 **Cost:** the extension is trusted first-party code and must be small, pinned, reviewed, and kept outside Worker write authority.
@@ -129,40 +130,39 @@ Pi starts with `--no-builtin-tools`. A reviewed first-party extension registers 
 Operator
   |
   v
-AS-02 orchestrator --------------------------+
-  |                                           |
-  | creates fixture + policy                  | writes raw evidence
-  v                                           v
-Disposable Git repository               artifacts/as-02/<run-id>/
-  |
+AS-02 orchestrator --------------------------------+
+  |                                                 |
+  | creates fixture, Treehouse lease and policy     | writes raw evidence
+  v                                                 v
+Disposable Git repository                MNFS runtime artifact store
+  |                                      artifacts/as-02/<run-id>/
   v
 Treehouse leased worktree
   |
-  +------------------- allowed write root
+  +------------------- only repository write root
   |
 Trusted Pi host process
   |  --no-builtin-tools
-  |  exact extension path outside worktree write authority
+  |  exact extension path outside Worker write authority
   v
 First-party AS-02 Pi extension
   |
-  | validates frozen policy hash
-  | validates cwd and environment allowlist
-  | registers brokered tools only after sandbox initialization
+  | validates frozen policy hash, cwd and environment
+  | registers brokered tools only after initialization
   v
 Sandbox Runtime 0.0.67
   |
-  | bubblewrap + network namespace + proxy + seccomp where available
+  | bubblewrap + network namespace/proxy + seccomp where supported
   v
-Broker helper process and child process tree
+Broker helper process and all child processes
   |
   v
-Worktree / controlled temp only
+Leased worktree / controlled attempt temp only
 ```
 
 ### 7.1 Trusted plane
 
-The following components are trusted for the spike:
+Trusted for the spike:
 
 - AS-02 orchestrator;
 - frozen effective policy;
@@ -173,28 +173,28 @@ The following components are trusted for the spike:
 - Treehouse adapter/CLI;
 - operating-system sandbox primitives.
 
-The disposable repository content, test prompts, child processes, generated files, and sentinel paths are untrusted test inputs.
+The disposable repository content, prompts, child processes, generated files, and sentinel resources are untrusted test inputs.
 
 ### 7.2 Extension boundary
 
 The extension must:
 
-1. load policy from a path outside the worktree write roots;
+1. load policy from a path outside Worker write roots;
 2. canonicalize and hash policy content before initialization;
 3. initialize Sandbox Runtime exactly once per Pi process;
 4. register no brokered tools until initialization succeeds;
 5. expose the effective policy hash and active tool inventory as evidence;
-6. reject a cwd outside the leased worktree;
-7. pass argument arrays rather than interpolated shell strings where the operation permits;
-8. provide an explicit error when the sandbox is unavailable;
-9. reset Sandbox Runtime on clean shutdown without treating cleanup failure as successful execution;
-10. never implement a fallback that executes directly on the host.
+6. reject a cwd that is not the exact leased worktree realpath;
+7. pass argument arrays rather than interpolated shell strings where possible;
+8. provide a named error when the sandbox is unavailable;
+9. reset Sandbox Runtime on clean shutdown without treating cleanup failure as execution success;
+10. never implement a direct-host fallback.
 
 The spike extension is not production code. Its purpose is to validate the adapter shape and boundary.
 
 ### 7.3 Brokered tool surface
 
-The prototype tool set is intentionally small:
+The prototype surface is intentionally small:
 
 ```text
 bash
@@ -206,16 +206,16 @@ find
 ls
 ```
 
-Pi built-ins are disabled. The extension registers replacement tools with the same user-facing purposes. Their implementations call a controlled helper process inside the sandbox rather than calling unrestricted Node filesystem APIs from the trusted extension.
+Pi built-ins are disabled. The extension registers replacement tools whose implementations call a controlled helper process inside the sandbox rather than unrestricted Node filesystem APIs in the trusted extension.
 
-`bash` remains necessary for development workflows, but execution uses an explicit cwd, constrained environment, no credentials, and the Sandbox Runtime process-tree boundary.
+`bash` remains necessary for development workflows, but runs with an explicit cwd, constrained environment, no credentials, and the Sandbox Runtime process-tree boundary.
 
 ### 7.4 Evidence boundary
 
-The sandboxed Worker cannot write its own final Verdict. Raw outputs are captured by the trusted orchestrator into a run directory outside Worker write authority:
+The sandboxed process cannot write its own final Verdict. Raw outputs are captured by the trusted orchestrator under the MNFS runtime artifact root, outside Worker write authority:
 
 ```text
-artifacts/as-02/<run-id>/
+${MNFS_HOME}/artifacts/as-02/<run-id>/
   environment.json
   provenance.json
   policy.json
@@ -228,7 +228,7 @@ artifacts/as-02/<run-id>/
   report.md
 ```
 
-A scenario record contains:
+A scenario record contains only references and digests for protected resources, never sentinel plaintext:
 
 ```ts
 interface ScenarioEvidence {
@@ -242,14 +242,14 @@ interface ScenarioEvidence {
   signal: string | null;
   stdoutRef: string;
   stderrRef: string;
-  observedFilesystem: Record<string, string>;
+  observedResourceDigests: Record<string, string>;
   policyHash: string;
   result: 'PASS' | 'FAIL' | 'BLOCKED' | 'INCONCLUSIVE';
   rationale: string;
 }
 ```
 
-The human report is derived from these records. It cannot replace missing raw evidence.
+The human report is derived from these records and cannot replace missing raw evidence.
 
 ## 8. Repository layout
 
@@ -293,6 +293,7 @@ spikes/as-02/
     performance.mjs
   tests/
     preflight.test.mjs
+    fixture.test.mjs
     policy.test.mjs
     evidence.test.mjs
     fail-closed.test.mjs
@@ -305,24 +306,35 @@ Selected evidence and the final acceptance report will be promoted under:
 docs/acceptance/2026-08-02-as-02-local-pi-sandbox-wsl2.md
 ```
 
-Generated raw artifacts remain outside canonical documentation unless the report explicitly promotes a small fixture or checksum.
+Generated raw artifacts remain outside canonical documentation unless the report promotes a specific checksum or small fixture.
 
 ## 9. Fixture design
 
-Each run creates a new temporary root under the Linux filesystem:
+Each run creates a new root on the Linux filesystem:
 
 ```text
 /tmp/mnfs-as-02/<run-id>/
   source-repo/
-  treehouse/
+  treehouse-root/
+  leased-worktree/
   fake-home/
+  controlled-home-sentinel/
   outside-write-root/
   active-policy/
   runtime-artifacts/
   controlled-sockets/
 ```
 
-The fixture creates all protected files before Sandbox Runtime initialization because Linux bind-mount protection cannot reliably deny creation of every non-existent mandatory path.
+The trusted setup creates protected files before Sandbox Runtime initialization because Linux bind-mount protection cannot reliably deny creation of every non-existent mandatory path.
+
+The harness discovers linked-worktree Git paths instead of assuming `.git` is a directory:
+
+```text
+git rev-parse --git-common-dir
+git rev-parse --git-dir
+git rev-parse --git-path config
+git rev-parse --git-path hooks
+```
 
 Synthetic sentinels include:
 
@@ -332,58 +344,93 @@ fake-home/.aws/credentials
 fake-home/.config/gcloud/application_default_credentials.json
 fake-home/.kube/config
 fake-home/.env
+controlled-home-sentinel/host-home-secret.txt
 outside-write-root/host-sentinel.txt
-source-repo/.mnfs/protected.json
-source-repo/.pi/security.json
-source-repo/.git/config
-source-repo/.git/hooks/pre-commit
+leased-worktree/.mnfs/protected.json
+leased-worktree/.pi/security.json
+leased-worktree/.env
+<git-common-dir>/config
+<git-common-dir>/hooks/pre-commit
 active-policy/e1-policy.json
 ```
 
-Each sentinel contains a unique run-specific marker. The harness checks both content confidentiality and post-run integrity without printing sentinel contents into normal logs.
+The disposable repository owns its Git metadata, so integrity checks never modify the real MNFS repository Git config or hooks.
 
-The environment passed to sandboxed processes uses `HOME=<fake-home>` and an explicit allowlist. The actual user HOME is never a test target.
+The fake HOME proves credential-shaped path denial. The real WSL user HOME is denied broadly, but the only absolute-home path accessed by a deny test is the dedicated synthetic `controlled-home-sentinel` created by trusted setup. No existing real-home content is opened.
+
+The sandboxed environment uses `HOME=<fake-home>` and an explicit allowlist.
+
+### 9.1 Controlled `/mnt/c` sentinel
+
+When `/mnt/c` exists and is writable by trusted setup, the orchestrator creates only:
+
+```text
+/mnt/c/mnfs-as-02/<run-id>/host-mount-sentinel.txt
+```
+
+The sandboxed process attempts to read and modify that controlled file. It never targets an existing user or Windows system file. If sandbox isolation unexpectedly permits mutation, the scenario is an immediate `REJECT`; the trusted orchestrator records the before/after digest and removes only the run-specific directory.
+
+If trusted setup cannot create the dedicated sentinel, S4 is `BLOCKED` rather than redirected to another host path.
 
 ## 10. Proposed E1 spike policy
 
-### 10.1 Filesystem
+### 10.1 Filesystem reads
 
-Read policy uses broad deny regions with explicit re-allow of required locations:
+Sandbox Runtime read policy is deny-then-allow. The effective policy denies broad sensitive roots and carves out only required paths:
 
 ```text
 denyRead:
-  - fake HOME root
+  - real WSL user HOME
+  - fake HOME
   - /mnt
-  - runtime state outside the run artifact references
   - active policy root
+  - MNFS runtime state not explicitly exposed as an artifact reference
 
 allowRead:
-  - leased worktree
-  - broker helper
-  - required system and toolchain paths
+  - exact leased worktree realpath
+  - exact broker helper path
   - controlled attempt temp
+  - required disposable Git common/worktree metadata for read-only Git operations
 ```
+
+System toolchain paths outside denied roots remain readable as required by Sandbox Runtime semantics. If a tool is installed under the real user HOME, its exact executable/library path must be identified and explicitly carved out; a broad HOME allow is prohibited.
+
+### 10.2 Filesystem writes
 
 Write policy is allow-only:
 
 ```text
 allowWrite:
-  - leased worktree
+  - exact leased worktree realpath
   - controlled attempt temp
 
 explicit denyWrite:
-  - active policy
-  - .mnfs
-  - .pi
-  - .git/config
-  - .git/hooks
-  - sentinel .env
+  - active policy root
+  - leased-worktree/.mnfs
+  - leased-worktree/.pi
+  - leased-worktree/.env
+  - linked-worktree .git pointer
+  - Git common dir and worktree metadata
   - outside-write-root
+  - real and fake HOME roots
+  - /mnt
 ```
 
-No write access is granted to package-manager global directories, the real user home, `/mnt`, `/usr`, `/etc`, or the MNFS operational SQLite location.
+No write access is granted to package-manager global directories, the real user home, `/mnt`, `/usr`, `/etc`, the source repository, or the MNFS operational SQLite location.
 
-### 10.2 Network
+### 10.3 Git compatibility
+
+A linked worktree requires read access to Git metadata outside the worktree. The policy therefore permits the minimum read paths discovered from Git while denying writes to them.
+
+Toolchain proof runs read-only Git with optional locks disabled:
+
+```text
+GIT_OPTIONAL_LOCKS=0 git --no-optional-locks status --short
+```
+
+Before and after digests cover disposable Git config, hooks, refs relevant to the fixture, worktree metadata, and index. Any metadata write is failure unless a scenario explicitly executes a trusted setup/cleanup operation outside the Worker boundary.
+
+### 10.4 Network
 
 Default policy:
 
@@ -395,60 +442,70 @@ Default policy:
 }
 ```
 
-The narrow-network scenario uses an explicit small allowlist and a separate policy hash. The test proves connectivity only to the declared target and continued denial elsewhere. It does not claim that a domain allowlist provides method-, account-, repository-, or mutation-level authority.
+The narrow-network scenario uses a separate policy hash:
 
-GitHub broad access is analyzed without credentials and without mutation. The conclusion is expected to remain: allowing `github.com` broadly is not sufficient write safety because domain filtering does not distinguish documentation reads from pushes, issues, gists, or uploads.
+```text
+allow GET/HEAD connectivity to registry.npmjs.org
+reject example.com and an undeclared raw TCP target
+```
 
-### 10.3 Unix sockets
+The test makes no authenticated request and performs no mutation. It proves only domain-level connectivity behavior.
 
-Unix sockets remain denied by default. On supported Linux architectures, the Sandbox Runtime seccomp filter is expected to block `AF_UNIX` socket creation. The spike records architecture, seccomp availability, warnings, and behavior.
+The broad-provider scenario permits `github.com` and `api.github.com` without credentials, performs safe reads, and records that domain filtering cannot distinguish documentation/metadata reads from pushes, issues, gists, uploads, HTTP methods, accounts, or repositories. Therefore broad GitHub allowance is never treated as mutation authority.
 
-The Docker socket, when present, is never opened successfully. If it does not exist, the harness creates a controlled Unix socket with the same class of access and marks Docker-specific evidence as `NOT_PRESENT` rather than claiming a direct Docker proof.
+### 10.5 Unix sockets
 
-### 10.4 Environment and credentials
+Unix sockets remain denied by default. On supported Linux architectures, Sandbox Runtime seccomp is expected to block `AF_UNIX` socket creation. The spike records architecture, seccomp availability, runtime warnings, and actual behavior.
 
-The sandboxed process receives a constructed environment allowlist, not `process.env` wholesale. It contains only the values required for the fixture and toolchain, such as:
+The Docker socket, when present, must not be opened. If it does not exist, the harness creates a controlled Unix socket and marks Docker-specific evidence `NOT_PRESENT` rather than claiming a direct Docker proof.
+
+An unsupported socket-enforcement architecture cannot receive `ACCEPT`; it may produce `ACCEPT_WITH_LIMITATIONS` only if M2 is explicitly constrained to a proven architecture and the controlled socket proof passes there.
+
+### 10.6 Environment and credentials
+
+The sandboxed process receives a constructed environment allowlist, not `process.env` wholesale:
 
 ```text
 PATH
 HOME=<fake-home>
-TMPDIR=<controlled temp>
+TMPDIR=<controlled attempt temp>
 LANG
 LC_ALL
-NODE_OPTIONS only when explicitly required
+GIT_OPTIONAL_LOCKS=0
+NODE_OPTIONS only when explicitly required and recorded
 ```
 
-Provider tokens, SSH agent variables, cloud variables, Docker variables, browser variables, Windows interop variables, and arbitrary user variables are excluded.
+Provider tokens, SSH agent variables, cloud variables, Docker variables, browser variables, Windows interop variables, arbitrary user variables, and Windows PATH entries are excluded.
 
 ## 11. Scenario matrix
 
 | Scenario | Proof | Expected result |
 |---|---|---|
 | S1 Worktree write | Create and modify a file inside leased worktree | Allowed; exact content observed |
-| S2 Host write escape | Write to outside-write-root and real parent paths | Denied; target unchanged |
-| S3 Credential read | Read synthetic `.ssh`, `.aws`, gcloud, kube, `.env` sentinels | Denied; marker absent from stdout/stderr |
-| S4 Windows mounts | Read and write under `/mnt/c` | Denied by default; no mutation |
+| S2 Host write escape | Write only to controlled outside roots under the run fixture | Denied; target unchanged |
+| S3 Credential read | Read fake-HOME credential paths and controlled real-HOME sentinel | Denied; marker absent from output |
+| S4 Windows mounts | Read/write the dedicated `/mnt/c/mnfs-as-02/<run-id>` sentinel | Denied; digest unchanged |
 | S5 Network default | HTTP, HTTPS, raw TCP, DNS-dependent request | Denied |
-| S6 Narrow allowlist | Reach one declared domain and reject an undeclared domain | Declared succeeds, undeclared fails |
-| S7 Broad provider risk | Inspect broad GitHub domain allowance without credentials | Classified insufficient for mutation authority |
-| S8 Unix sockets | Create/connect controlled socket and reach Docker socket when present | Denied or sandbox marked unsupported |
-| S9 Policy tamper | Modify policy, `.mnfs`, `.pi`, Git config/hooks, sentinel `.env` | Denied; hashes unchanged |
-| S10 Toolchain | `git status`, Node, npm, TypeScript, tests, file tools | Succeeds inside worktree |
+| S6 Narrow allowlist | Reach `registry.npmjs.org`; reject undeclared domains/target | Declared succeeds, undeclared fails |
+| S7 Broad provider risk | Safe reads under broad GitHub domains, no credentials | Classified insufficient for mutation authority |
+| S8 Unix sockets | Create/connect controlled socket and reach Docker socket when present | Denied or explicit unsupported result |
+| S9 Policy tamper | Modify policy, `.mnfs`, `.pi`, `.env`, Git config/hooks/metadata | Denied; digests unchanged |
+| S10 Toolchain | Read-only Git, Node, npm, TypeScript, tests, brokered file tools | Succeeds inside worktree |
 | S11 Child process | Parent spawns Node/shell children that repeat deny tests | Restrictions propagate |
-| S12 Violation observability | Capture exit, stderr, optional `strace`, target integrity | Sufficient diagnosis recorded |
-| S13 Fail closed | Invalid/missing sandbox primitive or deliberately invalid configuration | Tool does not run; sentinel side effect absent |
+| S12 Violation observability | Capture exit, stderr, optional `strace`, and resource digests | Sufficient diagnosis recorded |
+| S13 Fail closed | Missing primitive or invalid sandbox configuration | Tool does not run; sentinel absent |
 | S14 Performance | Baseline versus sandbox spawn and test commands | p50/p95/max and overhead recorded |
-| S15 Restart | New process and operator-assisted WSL restart checkpoint | Same policy hash and outcomes or explicit drift |
+| S15 Restart | New process and operator-assisted WSL restart checkpoint | Same policy hash/outcomes or explicit drift |
 
 ### 11.1 Pi comparison proof
 
-Two Pi configurations are tested:
+Two Pi configurations are tested.
 
 **Configuration A — upstream-equivalent `bash` override**
 
-- built-in tool inventory is recorded;
-- the test proves that native non-bash tools remain present unless disabled or overridden;
-- this configuration cannot receive an E1 acceptance Verdict.
+- record active tool inventory and source metadata;
+- prove native non-bash tools remain active unless disabled or replaced;
+- do not permit this configuration to receive an E1 acceptance Verdict.
 
 **Configuration B — brokered tools**
 
@@ -456,16 +513,16 @@ Two Pi configurations are tested:
 pi --no-builtin-tools --no-extensions -e <exact-extension-path>
 ```
 
-- only the reviewed extension tools are active;
+- only reviewed extension tools are active;
 - each tool binds to the same policy hash and leased cwd;
-- absence or failure of the extension leaves no repository-facing tool available;
-- functional scenarios are repeated through this configuration.
+- extension absence/failure leaves no repository-facing tool available;
+- functional scenarios repeat through this configuration.
 
-Model behavior is not the sole proof. Deterministic harness calls, tool inventory, side-effect inspection, and OS results remain authoritative.
+Model behavior is not the sole proof. Deterministic broker calls, active-tool inventory, side-effect inspection, and OS results remain authoritative.
 
 ## 12. Fail-closed design
 
-The fail-closed scenario deliberately supplies an invalid Sandbox Runtime dependency path or a configuration that cannot initialize. The candidate tool action attempts to create a unique sentinel inside the normally allowed worktree.
+The fail-closed scenario supplies a deliberately invalid Sandbox Runtime primitive path or invalid initialization configuration. The candidate tool action would create a unique sentinel inside the normally allowed worktree.
 
 Acceptance requires:
 
@@ -478,63 +535,57 @@ AND result is SANDBOX_UNAVAILABLE or equivalent named failure
 
 Any direct host fallback is an immediate `REJECT`.
 
-A `--no-sandbox` convenience flag is not part of the accepted Worker invocation. Disablement is an operator diagnostic procedure only and must not share the production Worker command path.
+A diagnostic disable path is not part of the accepted Worker invocation and must not share the production dispatch command.
 
 ## 13. Performance method
 
-Performance is measured rather than assumed.
-
 ### 13.1 Samples
 
-- 5 warm-up runs excluded from statistics;
-- 20 measured runs for trivial spawn;
-- 20 measured runs for a Node command;
-- 10 measured runs for a filesystem-heavy fixture command;
-- 5 measured runs for `npm run typecheck` or the fixed spike test suite;
-- baseline and sandbox run on the same fixture, process state, and WSL session.
+- 5 warm-up runs excluded;
+- 20 measured trivial spawns;
+- 20 measured Node commands;
+- 10 measured filesystem-heavy fixture commands;
+- 5 measured runs of `npm run typecheck` or the fixed spike suite;
+- baseline and sandbox use the same fixture and WSL session.
 
 ### 13.2 Metrics
 
 - wall-clock duration;
 - p50, p95, min, max;
-- process exit and signal;
+- exit and signal;
 - maximum resident set size when `/usr/bin/time -v` is available;
 - initialization cost separated from per-command cost;
 - repeated-execution behavior;
-- report size and diagnostic cost.
+- diagnostic/report cost.
 
 The report will not invent a pass threshold absent product evidence. Large overhead, unstable tail latency, or required broad exceptions can produce `ACCEPT_WITH_LIMITATIONS` or `REJECT` with explicit rationale.
 
 ## 14. Restart proof
 
-Restart proof has two levels.
-
 ### 14.1 New-process restart
 
-The harness completes phase one, exits, then a fresh Node/Pi process:
+A fresh Node/Pi process:
 
 - reloads the same frozen policy;
 - recomputes the same policy hash;
-- reconstructs fixture references from a checkpoint file;
-- repeats representative allow/deny/fail-closed scenarios.
+- reconstructs fixture references from a checkpoint;
+- repeats representative allow, deny, and fail-closed scenarios.
 
 ### 14.2 WSL restart
 
-A WSL distribution restart cannot be safely initiated by the sandboxed test process. The harness therefore emits an exact checkpoint command and stops.
+The sandboxed test process cannot initiate a WSL distribution restart. The harness emits an exact checkpoint command and stops.
 
-The Operator runs the documented Windows-side WSL restart, reopens Ubuntu, and executes the phase-two command. Phase two verifies:
+The Operator runs the documented Windows-side WSL restart, reopens Ubuntu, and executes phase two. Phase two verifies:
 
 - WSL distribution and kernel identity;
 - policy and dependency versions;
-- fixture/checkpoint integrity;
+- checkpoint and sentinel integrity;
 - representative S1, S3, S5, S9, S11, and S13 outcomes;
 - drift from phase one.
 
 The report distinguishes process restart proof from full WSL restart proof.
 
 ## 15. Error handling and classifications
-
-Named outcomes:
 
 ```text
 PREFLIGHT_FAILED
@@ -552,26 +603,25 @@ FAIL_OPEN_DETECTED
 RESTART_DRIFT
 ```
 
-A missing prerequisite is not converted to a passing skip. The report uses `BLOCKED` or `INCONCLUSIVE` and names the missing proof.
+A missing prerequisite is not a passing skip. The report uses `BLOCKED` or `INCONCLUSIVE` and names the missing proof.
 
 ## 16. Acceptance decision
 
 ### 16.1 `ACCEPT`
 
-All required deny scenarios pass, common M2 toolchain commands work, child restrictions propagate, policy hashes remain stable, socket enforcement is supported and proven, fail-closed is proven, restart proof is complete, and limitations do not require broad exceptions that invalidate E1.
+All required deny scenarios pass, common M2 toolchain commands work, child restrictions propagate, policy hashes remain stable, socket enforcement is supported and proven, fail-closed is proven, restart proof is complete, and no broad exception invalidates E1.
 
 ### 16.2 `ACCEPT_WITH_LIMITATIONS`
 
 No material bypass or fail-open exists, but M2 must adopt explicit constraints such as:
 
-- one supported WSL/Ubuntu/architecture combination;
-- a pinned Sandbox Runtime version;
+- one proven WSL/Ubuntu/architecture combination;
+- pinned Pi and Sandbox Runtime versions;
 - mandatory host preflight;
-- limited toolchain or cache roots;
+- limited toolchain/cache roots;
 - `strace`-assisted diagnostics;
 - no GitHub/provider egress;
-- no unsupported socket architecture;
-- revalidation on Pi/Sandbox Runtime upgrade.
+- revalidation on relevant upgrade.
 
 Every limitation becomes policy or an M2 entry criterion.
 
@@ -583,15 +633,15 @@ Any of the following is sufficient:
 - write escapes allowed roots;
 - network bypass succeeds;
 - Docker/privileged socket access succeeds;
-- active policy can be modified;
+- active policy or protected Git metadata can be modified;
 - a child process escapes;
 - sandbox failure executes on host;
-- ordinary M2 toolchain requires exceptions that materially collapse the boundary;
+- ordinary M2 toolchain requires exceptions that collapse the boundary;
 - restart changes effective policy without detection.
 
 ### 16.4 `BLOCKED`
 
-The canonical WSL2 host lacks required primitives or host policy prevents meaningful execution, and no approved adjustment has been made. `BLOCKED` does not authorize unrestricted M2 execution.
+The canonical WSL2 host lacks required primitives or host policy prevents meaningful execution, and no approved adjustment has been made. `BLOCKED` never authorizes unrestricted M2 execution.
 
 ## 17. Upgrade, disable, rollback, and removal
 
@@ -599,52 +649,50 @@ The canonical WSL2 host lacks required primitives or host policy prevents meanin
 
 Any change to Pi, Sandbox Runtime, Ubuntu/WSL kernel, Bubblewrap, Socat, seccomp behavior, extension code, broker helper, or policy requires:
 
-1. new provenance record;
-2. new policy/extension hash;
-3. rerun of all security scenarios;
+1. a new provenance record;
+2. new policy/extension hashes;
+3. all security scenarios rerun;
 4. performance comparison;
 5. explicit acceptance update.
 
-No automatic dependency range is used. The lockfile records exact transitive versions.
+No dependency range is used. Lockfiles record exact transitive versions and integrity.
 
 ### Disable
 
-The diagnostic harness may disable the candidate only to prove comparison or cleanup. Production M2 Worker dispatch must treat disabled/unavailable E1 as blocked.
+The diagnostic harness may disable the candidate only for comparison or cleanup. Production M2 dispatch must treat disabled/unavailable E1 as blocked.
 
 ### Rollback
 
-Rollback restores the last accepted exact dependency and policy hashes, reruns preflight and a representative proof set, and records the rollback in the acceptance report.
+Rollback restores the last accepted dependency and policy hashes, reruns preflight plus a representative proof set, and records the rollback.
 
 ### Removal conditions
 
-Replace or remove the candidate when:
+Replace or remove when:
 
 - a material bypass is found;
 - WSL2 support remains unstable;
-- the common toolchain needs broad filesystem/network/socket exceptions;
+- common toolchains need broad filesystem/network/socket exceptions;
 - violations cannot be diagnosed sufficiently;
 - Pi or Sandbox Runtime upgrades repeatedly break the boundary;
-- an alternative adapter demonstrates lower risk and complexity;
-- the product moves to an environment requiring a stronger E3/E4 boundary.
+- another adapter proves lower risk and complexity;
+- the product requires a stronger E3/E4 boundary.
 
 ## 18. Testing strategy
 
 Behavior changes follow TDD.
 
-Automated repository tests cover deterministic harness logic without requiring WSL sandbox primitives:
+Deterministic repository tests cover:
 
 - policy normalization and hashing;
 - environment allowlist construction;
-- sentinel redaction;
-- evidence schema;
-- report derivation;
+- worktree/common-dir discovery;
+- sentinel setup, digesting, redaction, and cleanup;
+- evidence schema and report derivation;
 - fail-closed wrapper logic using injected runners;
-- missing prerequisite classification;
+- missing-prerequisite classification;
 - restart checkpoint integrity.
 
-Real AS-02 tests run only on the canonical WSL2 host. They are not replaced by GitHub Actions because the spike specifically evaluates WSL2 behavior.
-
-GitHub Actions continues to run the normal repository `npm run verify` gate and deterministic spike tests. The WSL2 report records separately executed environment evidence.
+Real AS-02 tests run only on canonical WSL2. GitHub Actions cannot replace the WSL2 proof, but continues to run `npm run verify` plus deterministic spike tests.
 
 ## 19. Deliverables
 
@@ -661,7 +709,7 @@ GitHub Actions continues to run the normal repository `npm run verify` gate and 
 11. ADR-0006 evidence linkage.
 12. CAP-EXECUTION traceability/coverage update.
 13. Project status and worklog update.
-14. Draft PR for review; no Issue #8 closure until real WSL2 acceptance evidence is complete.
+14. Draft PR; Issue #8 remains open until real WSL2 acceptance evidence is complete.
 
 ## 20. Documentation and requirements impact
 
@@ -691,22 +739,24 @@ requirements_impact:
 
 ## 21. Source review basis
 
-Primary references reviewed for this design:
+Primary references reviewed:
 
 - Anthropic Sandbox Runtime repository and package documentation: Linux uses Bubblewrap, network namespaces/proxies, write allowlists, read deny/allow precedence, seccomp-based Unix-socket restrictions on supported architectures, and manual `strace`-based violation diagnosis on Linux.
-- Sandbox Runtime package version `0.0.67`, Apache-2.0, Beta Research Preview.
-- Pi coding-agent extension documentation: built-in tools are `read`, `bash`, `edit`, `write`, `grep`, `find`, and `ls`; `--no-builtin-tools` disables built-ins while preserving extension tools; extensions can register or override tools and inspect/set active tools.
-- Pi sandbox extension example: OS-level sandboxing is demonstrated by replacing `bash`, confirming its value as a pattern and its incompleteness as a full tool boundary unless other native tools are also handled.
+- Sandbox Runtime package `0.0.67`, Apache-2.0, Beta Research Preview.
+- Pi coding-agent extension documentation: built-ins are `read`, `bash`, `edit`, `write`, `grep`, `find`, and `ls`; `--no-builtin-tools` disables them while preserving extension tools; extensions can register/override tools and inspect/set the active inventory.
+- Pi sandbox extension example: OS-level sandboxing is demonstrated by replacing `bash`, making it a useful pattern but not a complete boundary while other native tools remain active.
 
-Exact URLs, commit identifiers, installed versions, and checksums will be recorded in `spikes/as-02/PROVENANCE.md` during implementation and real execution.
+Exact URLs, commits, installed versions, and checksums will be recorded in `spikes/as-02/PROVENANCE.md` during implementation and execution.
 
-## 22. Open decisions resolved by this design
+## 22. Open decisions resolved
 
-- The spike will not read real credentials.
-- The spike will not automatically weaken AppArmor or user-namespace policy.
+- No real credentials are read.
+- AppArmor/user-namespace policy is never weakened automatically.
 - Pi remains in the trusted host plane; repository-facing tools cross a broker boundary.
 - Built-in Pi tools are disabled for the accepted candidate.
-- A `bash`-only configuration is tested only as an adversarial comparison.
-- Raw evidence is written by the trusted orchestrator, not by the sandboxed process.
+- The `bash`-only configuration is adversarial comparison only.
+- Raw evidence is written by the trusted orchestrator.
+- Linked-worktree Git common/worktree metadata is discovered and protected explicitly.
+- `/mnt/c` proof uses only a dedicated run-specific sentinel.
 - Full WSL restart proof is operator-assisted and two-phase.
-- No M2 unblock follows automatically from a green spike.
+- A green spike never unblocks M2 automatically.

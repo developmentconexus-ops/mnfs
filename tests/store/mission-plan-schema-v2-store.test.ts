@@ -6,6 +6,7 @@ import test from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
 
 import { MnfsError } from '../../src/domain/errors.js';
+import { canonicalJson, hashPlanContent } from '../../src/domain/mission-plan.js';
 import { SqliteStore } from '../../src/store/sqlite-store.js';
 import { validPlanV1, validPlanV2 } from '../fixtures/mission-plans.js';
 
@@ -80,9 +81,6 @@ test('migration v3 preserves an approved v1 row and permits a later approved v2 
       JSON.stringify({ goal: 'Evolve the plan contract' }),
     );
   const historical = validPlanV1();
-  const historicalJson = JSON.stringify(historical);
-  const { createHash } = await import('node:crypto');
-  const historicalHash = `sha256:${createHash('sha256').update(JSON.stringify(JSON.parse(historicalJson), Object.keys(historical).sort())).digest('hex')}`;
   database
     .prepare(`
       INSERT INTO mission_plan_revisions
@@ -91,8 +89,8 @@ test('migration v3 preserves an approved v1 row and permits a later approved v2 
     `)
     .run(
       'MIS-001',
-      historicalHash,
-      historicalJson,
+      hashPlanContent(historical),
+      canonicalJson(historical),
       '2026-07-31T01:00:00.000Z',
       '2026-07-31T02:00:00.000Z',
     );
@@ -101,11 +99,12 @@ test('migration v3 preserves an approved v1 row and permits a later approved v2 
   const store = SqliteStore.open(databasePath);
   const approvedV1 = store.getLatestApprovedMissionPlan('MIS-001');
   assert.equal(approvedV1?.content.schemaVersion, 1);
+  assert.ok(approvedV1 !== undefined);
 
   const v2 = store.saveMissionPlanRevision({
     missionId: 'MIS-001',
     content: validPlanV2(),
-    expectedPreviousHash: approvedV1?.contentHash,
+    expectedPreviousHash: approvedV1.contentHash,
     createdAt: '2026-08-02T12:01:00.000Z',
   });
   const approvedV2 = store.approveMissionPlan({

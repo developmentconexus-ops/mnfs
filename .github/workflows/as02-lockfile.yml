@@ -7,6 +7,10 @@ on:
     paths:
       - .github/workflows/as02-lockfile.yml
       - spikes/as-02/package.json
+  pull_request:
+    paths:
+      - .github/workflows/as02-lockfile.yml
+      - spikes/as-02/package.json
 
 permissions:
   contents: read

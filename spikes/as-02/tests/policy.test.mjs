@@ -80,6 +80,7 @@ test('compiles a literal, fail-closed network-off policy for Linux', async (t) =
   assert.deepEqual(compiled.config.network, {
     allowedDomains: [],
     deniedDomains: [],
+    strictAllowlist: true,
     allowUnixSockets: [],
     allowAllUnixSockets: false,
     allowLocalBinding: false,

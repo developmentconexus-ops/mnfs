@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.5.2
+version: 1.6.0
 owners:
   - developmentconexus-ops
 related:
@@ -15,7 +15,10 @@ related:
   - ACCEPTANCE-CAP-EXECUTION-R3
   - ACCEPTANCE-MIS-002-REPLAN
   - ACCEPTANCE-M2-UNBLOCK
-tracking_issue: 9
+  - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
+  - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
+  - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
+tracking_issue: 16
 ---
 
 # Project status
@@ -24,9 +27,10 @@ tracking_issue: 9
 - **Canonical environment:** Ubuntu on WSL2; Windows remains the browser, terminal and desktop host
 - **Completed Product Milestones:** M0 — Foundation Walking Skeleton; M1 — Visual Mission Planning
 - **Architecture Baseline:** accepted and merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
-- **Current enabler:** M01 Milestone Microdesign under the approved M2 contract
-- **Implementation PR:** #14 — `plan/mis-002-replan` (draft; not merged)
-- **M2 state:** unblocked for R5 M01 microdesign only; implementation and Worker dispatch have not started
+- **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
+- **Current enabler:** Issue #16 — MCRM R5 research, Treehouse conformance and M01 Milestone Microdesign
+- **Current branch:** `design/mis-002-m01`
+- **M2 state:** unblocked for R5 M01 research, conformance and microdesign only; implementation and Worker dispatch have not started
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
 - **Historical contract:** revision 3 preserved at blob `6b79117fe66cd5c9c8142099828812f470ce20de`
 
@@ -41,7 +45,13 @@ tracking_issue: 9
 - [x] All 28 requirements allocated to exact approved criterion identities.
 - [x] MCRM R0-R4 mechanically PASS.
 - [x] Operator authorized M2 to enter R5 for M01 microdesign through the exact contract-bound token.
-- [ ] M01 microdesign written, reviewed and approved.
+- [x] PR #14 reviewed and integrated into `main`.
+- [x] M01 architecture research and validated source manifest published on the design branch.
+- [x] TC-01 Treehouse production-adapter conformance protocol proposed.
+- [x] M01 Milestone Microdesign proposed with coverage for all seven M01 requirements.
+- [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.
+- [ ] TC-01 findings incorporated into the final microdesign.
+- [ ] M01 microdesign adversarially reviewed and explicitly approved.
 - [ ] M01 implementation authorized after microdesign approval.
 
 ## Readiness result
@@ -52,33 +62,58 @@ R1 Applicability         PASS
 R2 Requirements          PASS
 R3 Capability Readiness  PASS
 R4 Contract Readiness    PASS
-R5 Milestone Microdesign NOT_STARTED
+R5 Milestone Microdesign IN_PROGRESS
 ```
+
+## Current R5 result
+
+```text
+Research coverage:       PUBLISHED
+TC-01 protocol:          PROPOSED / EXECUTION AUTHORIZED
+TC-01 Evidence:          NOT_STARTED
+M01 microdesign:         PROPOSED
+Design coverage:         7/7 M01 requirements proposed
+Blocking external input: Treehouse production-adapter conformance
+```
+
+The proposed design does not become implementation authority merely because every requirement has a design element. TC-01 must prove the exact Treehouse behavior, the final design must absorb its findings and the Operator must approve the resulting microdesign explicitly.
 
 ## Current authorization boundary
 
 ```text
-M01 microdesign:      AUTHORIZED
+M01 research:         AUTHORIZED
+TC-01 execution:      AUTHORIZED
+M01 microdesign:      AUTHORIZED for review
 M01 implementation:  PROHIBITED until microdesign approval
 Pi Worker dispatch:  PROHIBITED
 Automatic merge:     NOT AUTHORIZED
 ```
 
-The unblock decision did not alter the approved Mission contract or complete R5. A material change to the contract, `SEC-E1`, Capability, prerequisite or requirements triggers Replan/re-readiness before implementation.
+A material change to the approved Mission contract, `SEC-E1`, Capability, prerequisite or applicable requirements triggers Replan/re-readiness before implementation.
 
-## Canonical verification
+## Latest integrated verification
+
+PR #14 was verified on its GitHub merge commit using Ubuntu 24.04, Node.js 24.18.0 and npm 11.16.0:
 
 ```text
-Head:       dfa5b5898f69190612ec49f2e39378e997381843
-Workflow:   30855047324
-Job:        91823983012
-Command:    npm ci && npm run verify
-Result:     PASS
+Workflow:                          30855331321
+Job:                               91824893985
+npm ci:                            PASS — 0 vulnerabilities
+product tests:                     PASS — 95/95
+AS-02 deterministic tests:        PASS — 119/119
+documentation tooling:            PASS
+documentation validation:         PASS — 71 canonical IDs
 ```
+
+The design branch requires its own fresh documentation and CI proof before review readiness.
 
 ## Immediate next action
 
-1. Write the M01 Milestone Microdesign against approved MIS-002 revision 5.
-2. Review the microdesign adversarially and obtain its explicit approval.
-3. Begin implementation only after that separate approval.
-4. Keep Worker dispatch prohibited until the microdesign and its dispatch prerequisites are approved.
+1. Open the dedicated draft PR for Issue #16.
+2. Run documentation validation for the research, source manifest, TC-01 protocol and proposed microdesign.
+3. Execute TC-01 on canonical Ubuntu WSL2.
+4. Incorporate the observed Treehouse contract into the microdesign.
+5. Perform constructive and adversarial design review.
+6. Obtain explicit Operator approval of the final M01 microdesign.
+7. Create an Implementation Plan only after that approval.
+8. Keep implementation and Pi Worker dispatch prohibited until their separate gates pass.

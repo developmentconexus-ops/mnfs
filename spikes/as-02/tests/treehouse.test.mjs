@@ -158,7 +158,7 @@ test('returns the exact leased path without force or destructive commands', asyn
   assert.deepEqual(runner.calls[0], {
     file: 'treehouse',
     args: ['return', paths.leasedPath],
-    cwd: paths.repositoryPath,
+    cwd: paths.leasedPath,
     env: {
       PATH: process.env.PATH ?? '',
       HOME: process.env.HOME ?? '',

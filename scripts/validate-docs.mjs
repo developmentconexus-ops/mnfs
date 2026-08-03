@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -247,10 +248,47 @@ async function validateGeneratedFiles() {
 }
 
 async function validateHistoricalMission() {
-  const rel = '.mnfs/missions/MIS-002/plan.json';
-  if (!await exists(root, rel)) return;
-  const plan = await readJson(rel);
-  if (plan.revision !== 3 || plan.contentHash !== 'sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1') {
-    errors.push('Historical MIS-002 revision 3 was modified; use Replan instead.');
+  const historicalRel = '.mnfs/missions/MIS-002/history/revision-0003.json';
+  const currentRel = '.mnfs/missions/MIS-002/plan.json';
+
+  if (!await exists(root, historicalRel)) {
+    errors.push(`Missing historical Mission contract: ${historicalRel}`);
+    return;
+  }
+
+  let historicalText;
+  let historical;
+  try {
+    historicalText = await readFile(path.join(root, historicalRel), 'utf8');
+    historical = JSON.parse(historicalText);
+  } catch (error) {
+    errors.push(`${historicalRel}: invalid historical contract (${error.message})`);
+    return;
+  }
+
+  const historicalBlob = createHash('sha1')
+    .update(`blob ${Buffer.byteLength(historicalText)}\0`)
+    .update(historicalText)
+    .digest('hex');
+
+  if (historicalBlob !== '6b79117fe66cd5c9c8142099828812f470ce20de') {
+    errors.push('Historical MIS-002 revision 3 bytes changed.');
+  }
+  if (
+    historical.missionId !== 'MIS-002' ||
+    historical.revision !== 3 ||
+    historical.contentHash !== 'sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1'
+  ) {
+    errors.push('Historical MIS-002 revision 3 identity changed.');
+  }
+
+  if (!await exists(root, currentRel)) return;
+  const current = await readJson(currentRel);
+  const currentText = await readFile(path.join(root, currentRel), 'utf8');
+  if (current.revision === 3 && currentText !== historicalText) {
+    errors.push('Current MIS-002 revision 3 differs from its immutable historical snapshot.');
+  }
+  if (current.revision > 3 && current.content?.schemaVersion !== 2) {
+    errors.push('A post-revision-3 MIS-002 contract must use schemaVersion 2.');
   }
 }

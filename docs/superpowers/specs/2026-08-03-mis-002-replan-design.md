@@ -4,8 +4,8 @@ title: MIS-002 schema v2 Replan and M2 readiness reconciliation
 document_type: microdesign
 form: explanation
 authority: specification
-status: proposed
-version: 0.1.0
+status: accepted
+version: 1.0.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -475,7 +475,7 @@ Rejected for Issue #9. Although the roadmap allows isolated domain work while a 
 
 ## 17. Acceptance of this design
 
-This design is ready to transition to an implementation plan when the Operator confirms:
+This design is accepted by the Operator as the implementation-planning basis for Issue #9. It freezes:
 
 - two Mission Milestones;
 - the Feature decomposition and dependencies;

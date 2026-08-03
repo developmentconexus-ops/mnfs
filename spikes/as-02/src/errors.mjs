@@ -31,6 +31,7 @@ export const AS02_ERROR_CODES = Object.freeze([
   'EXTENSION_TRUST_BOUNDARY_INVALID',
   'EXTENSION_BROKER_FAILED',
   'EXTENSION_OUTPUT_REJECTED',
+  'PREFLIGHT_INVALID',
 ]);
 
 export class As02Error extends Error {

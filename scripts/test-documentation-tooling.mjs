@@ -30,15 +30,17 @@ function registryWithCapabilityStatus(status) {
 function approvedAllocationTraceability() {
   const data = structuredClone(traceability);
   for (const requirement of data.requirements) {
-    requirement.allocatedTo = (requirement.proposedAllocation ?? []).map((value) =>
-      value.replace(/^proposed:/u, ''),
-    );
+    if (!(requirement.allocatedTo?.length > 0)) {
+      requirement.allocatedTo = (requirement.proposedAllocation ?? []).map((value) =>
+        value.replace(/^proposed:/u, ''),
+      );
+    }
     requirement.proposedAllocation = [];
   }
   data.blockingItems = [];
   data.baseline.missionContract = {
     missionId: 'MIS-002',
-    currentRevision: 4,
+    currentRevision: 5,
     status: 'APPROVED_SCHEMA_V2',
   };
   return data;
@@ -51,7 +53,7 @@ function approvedContractFor(data) {
     .map((qualifiedId) => ({ qualifiedId }));
   return {
     missionId: 'MIS-002',
-    revision: 4,
+    revision: 5,
     contentHash: `sha256:${'a'.repeat(64)}`,
     approvedAt: '2026-08-03T00:00:00.000Z',
     content: {
@@ -138,7 +140,7 @@ assert.equal(base.R0.result, 'PASS');
 assert.equal(base.R1.result, 'PASS');
 assert.equal(base.R2.result, 'PASS');
 assert.equal(base.R3.result, 'PASS');
-assert.equal(base.R4.result, 'BLOCKED');
+assert.equal(base.R4.result, 'PASS');
 
 const capabilitySpec = parseFrontmatter(capabilitySpecText, 'docs/capabilities/CAP-EXECUTION/SPEC.md');
 assert.equal(capabilitySpec.metadata.status, 'accepted');
@@ -165,7 +167,7 @@ for (const id of ['CAP-EXEC-REQ-010', 'CAP-EXEC-REQ-011', 'CAP-EXEC-REQ-012', 'C
 assert.equal(traceability.blockingItems.some((item) => item.id === 'BLOCK-AS-02'), false);
 assert.equal(
   traceability.nextSequence[0],
-  'build complete deterministic MIS-002 schema v2 Replan candidate',
+  'review mechanical R0-R4 evidence',
 );
 
 assert.match(
@@ -184,7 +186,7 @@ assert.equal(validateJsonSchema(schemaCandidate, traceabilitySchema).length, 0);
 const acceptedRegistry = registryWithCapabilityStatus('accepted');
 const acceptedSpec = await evaluateReadiness(structuredClone(traceability), acceptedRegistry, { currentContract });
 assert.equal(acceptedSpec.R3.result, 'PASS');
-assert.equal(acceptedSpec.R4.result, 'BLOCKED');
+assert.equal(acceptedSpec.R4.result, 'PASS');
 
 const approvedData = approvedAllocationTraceability();
 const approvedContract = approvedContractFor(approvedData);
@@ -194,6 +196,17 @@ const approvedReadiness = await evaluateReadiness(approvedData, acceptedRegistry
 assert.equal(approvedReadiness.R2.result, 'PASS');
 assert.equal(approvedReadiness.R3.result, 'PASS');
 assert.equal(approvedReadiness.R4.result, 'PASS');
+
+const proposedOnly = structuredClone(approvedData);
+const approvedTarget = proposedOnly.requirements[0].allocatedTo[0];
+assert.ok(approvedTarget, 'approved fixture must include one criterion target');
+proposedOnly.requirements[0].allocatedTo = [];
+proposedOnly.requirements[0].proposedAllocation = [`proposed:${approvedTarget}`];
+const proposedOnlyReadiness = await evaluateReadiness(proposedOnly, acceptedRegistry, {
+  currentContract: approvedContract,
+});
+assert.equal(proposedOnlyReadiness.R2.result, 'PASS');
+assert.equal(proposedOnlyReadiness.R4.result, 'BLOCKED');
 
 const missingAllocation = structuredClone(approvedData);
 missingAllocation.requirements[0].allocatedTo = [];

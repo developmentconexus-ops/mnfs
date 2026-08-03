@@ -12,6 +12,10 @@ const registry = await loadDocumentRegistry(root);
 const traceability = JSON.parse(await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/TRACEABILITY.json'), 'utf8'));
 const metadataSchema = JSON.parse(await readFile(path.join(root, 'schemas/document-metadata.schema.json'), 'utf8'));
 
+const documentationWorkflow = await readFile(path.join(root, '.github/workflows/docs.yml'), 'utf8');
+assert.match(documentationWorkflow, /'policies\/\*\*'/u);
+assert.match(documentationWorkflow, /'scripts\/sec-e1-policy\.mjs'/u);
+
 const historicalMissionText = await readFile(
   path.join(root, '.mnfs/missions/MIS-002/history/revision-0003.json'),
   'utf8',
@@ -31,6 +35,10 @@ const withAbsolutePath = structuredClone(secE1);
 withAbsolutePath.filesystem.allowWriteScopes.push('/home/operator');
 assert.ok(validateSecE1(withAbsolutePath).some((error) => error.includes('symbolic scopes')));
 
+const withUnknownScope = structuredClone(secE1);
+withUnknownScope.filesystem.allowWriteScopes.push('ENTIRE_FILESYSTEM');
+assert.ok(validateSecE1(withUnknownScope).some((error) => error.includes('reviewed scopes')));
+
 const withNetwork = structuredClone(secE1);
 withNetwork.network.mode = 'ALLOWLIST';
 assert.ok(validateSecE1(withNetwork).some((error) => error.includes('DENY_ALL')));
@@ -42,6 +50,18 @@ assert.ok(validateSecE1(withCredential).some((error) => error.includes('NONE')))
 const withDifferentTools = structuredClone(secE1);
 withDifferentTools.tools = [...secE1.tools, 'web'];
 assert.ok(validateSecE1(withDifferentTools).some((error) => error.includes('seven-tool inventory')));
+
+const withFailOpen = structuredClone(secE1);
+withFailOpen.sandboxRuntime.failClosed = false;
+assert.ok(validateSecE1(withFailOpen).some((error) => error.includes('fail closed')));
+
+const withShell = structuredClone(secE1);
+withShell.process.shell = true;
+assert.ok(validateSecE1(withShell).some((error) => error.includes('shell must remain false')));
+
+const withBroaderEffect = structuredClone(secE1);
+withBroaderEffect.effects.maximumClass = 'X2';
+assert.ok(validateSecE1(withBroaderEffect).some((error) => error.includes('X1-or-lower')));
 
 const parsed = parseFrontmatter(`---\nid: DOC-TEST\ntitle: Test\ndocument_type: reference\nauthority: reference\nstatus: accepted\nowners:\n  - owner\n---\n\n# Test\n`, 'fixture.md');
 assert.deepEqual(parsed.metadata.owners, ['owner']);

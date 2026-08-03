@@ -12,30 +12,45 @@ const socket = net.connect({ host: '1.1.1.1', port: 443, timeout: 1500 }, () => 
 socket.on('error', done); socket.on('timeout', () => socket.destroy(new Error('timeout')));
 `;
 
-const NARROW_ALLOWLIST_CODE = `
-const https = require('node:https');
+const PROBE_HELPER = `
 function probe(url) {
   return new Promise((resolve) => {
-    const req = https.get(url, { timeout: 3000 }, (res) => { res.resume(); resolve(true); });
-    req.on('error', () => resolve(false));
-    req.on('timeout', () => { req.destroy(); resolve(false); });
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    const req = https.get(url, { timeout: 5000 }, (res) => {
+      res.resume();
+      finish({ reachable: true, statusCode: res.statusCode ?? null, errorCode: null });
+    });
+    req.on('error', (error) => finish({
+      reachable: false,
+      statusCode: null,
+      errorCode: typeof error?.code === 'string' ? error.code : null,
+    }));
+    req.on('timeout', () => req.destroy(Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' })));
   });
 }
+`;
+
+const NARROW_ALLOWLIST_CODE = `
+const https = require('node:https');
+${PROBE_HELPER}
 Promise.all([probe('https://registry.npmjs.org/'), probe('https://example.com/')]).then(([allowed, undeclared]) => {
   process.stdout.write(JSON.stringify({ allowed, undeclared }));
-  process.exit(allowed && !undeclared ? 0 : 24);
+  process.exit(allowed.reachable && !undeclared.reachable ? 0 : 24);
 });
 `;
 
 const GITHUB_OBSERVATION_CODE = `
 const https = require('node:https');
-const req = https.get('https://github.com/', { timeout: 3000 }, (res) => {
-  res.resume();
-  process.stdout.write(JSON.stringify({ reachable: true, statusCode: res.statusCode }));
-  process.exit(0);
+${PROBE_HELPER}
+probe('https://github.com/').then((github) => {
+  process.stdout.write(JSON.stringify({ github }));
+  process.exit(github.reachable ? 0 : 25);
 });
-req.on('error', () => process.exit(25));
-req.on('timeout', () => req.destroy(new Error('timeout')));
 `;
 
 export function networkScenarios(context) {
@@ -56,7 +71,7 @@ export function networkScenarios(context) {
       name: 'Narrow domain allowlist',
       expected: 'OBSERVE',
       policyKey: 'narrowNetwork',
-      argv: [process.execPath, '-e', NARROW_ALLOWLIST_CODE],
+      argv: [process.execPath, '--use-env-proxy', '-e', NARROW_ALLOWLIST_CODE],
       timeoutMs: 20_000,
       targetPaths: [],
       observedResources: [],
@@ -67,7 +82,7 @@ export function networkScenarios(context) {
       name: 'Broad GitHub domain risk',
       expected: 'OBSERVE',
       policyKey: 'githubBroad',
-      argv: [process.execPath, '-e', GITHUB_OBSERVATION_CODE],
+      argv: [process.execPath, '--use-env-proxy', '-e', GITHUB_OBSERVATION_CODE],
       timeoutMs: 15_000,
       targetPaths: [],
       observedResources: [],

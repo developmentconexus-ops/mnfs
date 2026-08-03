@@ -1,7 +1,7 @@
 ---
 id: DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
 title: MNFS Research — M01 Durable Execution and Lease Core
- document_type: research_report
+document_type: research_report
 form: explanation
 authority: research_historical
 status: published
@@ -44,54 +44,41 @@ explicit execution and security boundaries
 independent verification and acceptance
 ```
 
-The evidence supports keeping MNFS as its own domain control plane rather than reducing it to a wrapper around Pi, Treehouse, a terminal multiplexer or a generic workflow framework.
+MNFS should remain its own domain control plane rather than becoming a wrapper around Pi, Treehouse, terminal presentation or a generic workflow framework.
 
-The correct M01 boundary is:
+The correct M01 authority split is:
 
 ```text
 SQLite
 → semantic authority for Write Track, Attempt, Worker Run, Claim and Lease
 
 Treehouse
-→ physical authority for managed worktrees and external lease identity
+→ physical authority for managed worktrees and external Lease identity
 
 Git/filesystem
 → physical code-tree observations
 
 MNFS services
-→ transaction rules, contract binding, idempotency, fencing and Reconcile
+→ contract binding, transactions, idempotency, fencing and Reconcile
 ```
 
-The proposed M01 design should proceed with five corrections:
+The proposed design should proceed with five corrections:
 
-1. **Treehouse requires a production-adapter conformance protocol before implementation.** Its CLI is capable of stable lease identity and conditional release, but acquisition may fetch, status may heal internal metadata and return may reset a worktree.
-2. **Currentness should derive from lifecycle state and unique partial indexes**, not a second `is_current` flag that can diverge.
-3. **Contract binding should be enforced in both application logic and composite database relationships.**
-4. **One SQLite connection remains the transaction authority**, while persistence code is split into focused stores rather than extending one monolithic file indefinitely.
-5. **Pi and SEC-E1 production dispatch remain in M02.** M01 implements the durable identity and Lease foundation only.
+1. Treehouse requires a production-adapter conformance protocol before implementation.
+2. Currentness derives from lifecycle state and unique partial indexes, not a second `is_current` flag.
+3. Contract binding is enforced in application logic and relational constraints.
+4. One SQLite connection remains transaction authority while focused stores replace continued monolithic growth.
+5. Pi and production SEC-E1 dispatch remain in `MIS-002/M02`.
 
-No reviewed source justifies adopting a scheduler, Temporal, LangGraph, a message broker, distributed consensus, an ORM or a generic Saga engine for M01.
-
----
-
-# 2. Research questions
-
-This report evaluates:
-
-1. Is repository-owned doctrine and structured planning the correct foundation for an agentic development harness?
-2. Should operational lifecycle state remain in SQLite?
-3. Should Pi, Treehouse or another external tool own MNFS execution state?
-4. What recovery model is appropriate for one local Worker?
-5. What must be proven before using Treehouse as the production Lease adapter?
-6. Which abstractions are necessary now, and which are premature?
+No reviewed source justifies a scheduler, Temporal, LangGraph, message broker, distributed consensus, ORM or generic Saga engine for M01.
 
 ---
 
-# 3. Repository knowledge and contracts
+# 2. Repository knowledge and contracts
 
-OpenAI's harness-engineering report describes an agent-first repository in which human work moves from manual coding toward environment design, specification, tools, guardrails and feedback loops. It emphasizes working depth-first, turning missing capabilities into enforceable repository assets, and making repository knowledge the system of record. [openai-harness-engineering]
+OpenAI's harness-engineering report describes an agent-first repository in which human effort shifts toward environment design, specifications, tools, guardrails and feedback loops. It emphasizes depth-first capability growth and turning missing capabilities into repository-owned, enforceable assets. [openai-harness-engineering]
 
-This supports the MNFS chain:
+This supports the MNFS authority chain:
 
 ```text
 Product Blueprint
@@ -103,11 +90,11 @@ Product Blueprint
 → Evidence
 ```
 
-The result should not be interpreted as "more documentation is always better." The useful property is that architecture, constraints, commands and proof become discoverable and mechanically checkable without transcript dependence.
+The value is not documentation volume. The value is that architecture, constraints, commands and proof remain discoverable and mechanically checkable without transcript dependence.
 
-The Anthropic long-running-agent harness examples reinforce three compatible patterns: criteria begin in a failing state, evaluation is performed by a fresh context without write tools, and progress/handoff is persisted to disk and Git instead of living only in a conversation. [anthropic-long-running]
+Anthropic's long-running harness examples reinforce default-failing criteria, fresh evaluation contexts without write authority and durable progress/handoff artifacts. [anthropic-long-running]
 
-MNFS generalizes those patterns into durable domain objects:
+MNFS extends that pattern:
 
 ```text
 criterion default-fail
@@ -116,86 +103,60 @@ criterion default-fail
 → Gate Verdict
 ```
 
-This is stricter than trusting an agent's final message or test summary.
-
 ---
 
-# 4. Evaluation and proof architecture
+# 3. Evaluation and proof
 
-Anthropic's agent-evaluation guidance distinguishes transcript grading from outcome grading and recommends layered automated, model-based and human evaluation. It specifically treats code-based outcome verification as the first line of defense while reserving human and model judgment for the parts that need them. [anthropic-agent-evals]
+Anthropic's evaluation guidance distinguishes transcript grading from outcome grading and recommends code-based verification as the first line of defense. [anthropic-agent-evals]
 
-For M01, nearly every deciding criterion is deterministic:
+M01 criteria are predominantly deterministic:
 
 - database invariants;
 - transaction rollback;
-- content-hash binding;
+- exact contract-hash binding;
 - external Lease identity;
 - crash-window recovery;
 - dirty-worktree preservation;
 - stale-holder rejection;
 - divergence classification.
 
-Therefore M01 should prefer code-based tests, inspection and real WSL2 demonstrations. Model judgment is not needed for its Gate R5 or implementation proof.
-
-The result also validates the MNFS rule:
-
-> Worker output is an input to verification, not a Verdict.
+M01 therefore uses tests, inspection and real WSL2 demonstrations. Model self-assessment is not deciding Evidence.
 
 ---
 
-# 5. Pi boundary
+# 4. Pi boundary
 
-Pi provides the right extension surfaces for the future Worker runtime:
+Pi provides appropriate future runtime surfaces: lifecycle events, custom tools, commands, dynamic tool inventory, project-local extensions, builtin-tool disabling and explicit extension loading. [pi-extensions] [pi-usage]
 
-- lifecycle events;
-- custom tools;
-- commands;
-- dynamic tool inventory;
-- project-local extensions;
-- `--no-builtin-tools`;
-- explicit extension loading. [pi-extensions] [pi-usage]
-
-However, Pi extensions run with the full permissions of the host user. Its documentation explicitly treats extensions as trusted arbitrary code. [pi-extensions]
+Pi extensions are trusted code running with the host user's permissions. [pi-extensions]
 
 Consequences:
 
-1. Pi cannot be the MNFS security boundary.
-2. Pi Session state cannot be the execution lifecycle authority.
-3. Pi tools must be brokered through the approved Environment policy.
-4. M01 should persist Worker Run identity without launching Pi.
-5. M02 should load only the pinned auth integration and the exact reviewed MNFS extension, with built-ins and extension discovery disabled.
-
-This preserves Pi as a replaceable reasoning/runtime component instead of coupling product doctrine to one agent implementation.
+1. Pi is not the MNFS security boundary.
+2. Pi Session state is not lifecycle authority.
+3. Pi tools must be brokered under the approved Environment policy.
+4. M01 persists Worker Run identity without launching Pi.
+5. M02 loads only reviewed, pinned extensions and disables uncontrolled tool discovery.
 
 ---
 
-# 6. Comparison with orchestrators and agent distros
+# 5. Comparison with adjacent systems
 
-## 6.1 OpenAI Symphony
+## OpenAI Symphony
 
-Symphony validates several MNFS concepts:
+Symphony validates repository-owned workflow policy, per-item workspaces, attempts, reconciliation and operator-visible status. [openai-symphony]
 
-- repository-owned workflow policy;
-- isolated per-item workspace;
-- distinct run attempts;
-- typed lifecycle phases;
-- reconciliation before dispatch;
-- operator-visible observability;
-- no claim that process exit automatically means business completion. [openai-symphony]
+Its tracker/filesystem recovery model is appropriate for its scope, but MNFS requires exact durable Lease, Attempt, Worker Run and Claim identities. Symphony is therefore an orchestration reference, not the MNFS persistence model.
 
-Symphony intentionally permits restart recovery from tracker and filesystem without restoring exact in-memory scheduler state. That is appropriate for its tracker-driven service specification, but it does not satisfy MNFS M2, where Lease, Attempt, Worker Run and Claim identities must survive Lead replacement exactly.
+## Firstmate
 
-Therefore Symphony is a useful orchestration reference, not a persistence model for MNFS.
+Firstmate validates worktree-per-task operation, visible supervision and a single coordinating agent. [firstmate]
 
-## 6.2 Firstmate
+It is an agent distribution rather than a governed domain control plane. MNFS should reuse operational lessons while retaining its own contracts, lifecycle and Evidence model.
 
-Firstmate validates worktree-per-task, visible supervision and a single coordinating agent. It explicitly describes itself as an agent distribution rather than a harness or domain control plane. [firstmate]
+## Generic workflow frameworks
 
-MNFS should reuse operational and UX lessons from Firstmate while retaining its own lifecycle, contract and Evidence model.
-
-## 6.3 Generic workflow frameworks
-
-A checkpointed graph or workflow engine could store execution progress, but it would introduce a second lifecycle vocabulary beside MNFS:
+A checkpointed workflow framework would create a second lifecycle vocabulary beside MNFS:
 
 ```text
 framework thread/checkpoint/node state
@@ -203,26 +164,15 @@ versus
 MNFS Track/Attempt/Run/Claim/Lease state
 ```
 
-M01 contains one local Writer path and one external resource. A workflow framework would not eliminate the need to design the domain, crash windows, Treehouse fencing or database invariants. It would primarily add translation and operational dependencies.
-
-Disposition:
-
-```text
-use durable-execution concepts
-→ do not adopt a workflow framework in M01
-```
+It would not remove the need to design crash windows, Treehouse fencing or database invariants. M01 adopts durable-execution concepts without adopting a workflow engine.
 
 ---
 
-# 7. SQLite as local operational authority
+# 6. SQLite as operational authority
 
-SQLite directly supports the M01 consistency model.
+SQLite directly supports M01.
 
-## 7.1 One current entity by lifecycle state
-
-Unique partial indexes enforce uniqueness only for rows matching a predicate. This is the correct primitive for invariants such as one current non-terminal Attempt per Write Track. [sqlite-partial-index]
-
-Recommended form:
+Unique partial indexes enforce one non-terminal entity for a parent without duplicating currentness fields. [sqlite-partial-index]
 
 ```sql
 CREATE UNIQUE INDEX attempts_one_open_per_track
@@ -230,107 +180,86 @@ ON attempts(write_track_id)
 WHERE status = 'OPEN';
 ```
 
-This is preferable to storing both `status` and `is_current`.
+Composite foreign keys allow child entities to be bound to the same contract hash as their parent when a matching unique parent key exists. [sqlite-foreign-keys]
 
-## 7.2 Composite contract binding
-
-SQLite supports composite foreign keys when the parent key is a matching primary or unique key. [sqlite-foreign-keys]
-
-This allows the database to reject a Worker Run or Claim whose `contract_hash` differs from its parent Attempt.
-
-## 7.3 Transactions and concurrency
-
-The current product already uses:
-
-- WAL;
-- foreign keys;
-- short `BEGIN IMMEDIATE` transactions;
-- atomic state plus Event writes;
-- process-independent recovery.
-
-M01 remains a local, low-writer-concurrency workload. The limiting property that WAL permits only one writer at a time is acceptable because M01 explicitly excludes parallel Write Tracks.
+The current product already uses WAL, foreign keys, short `BEGIN IMMEDIATE` transactions, atomic state plus Event writes and fresh-process recovery. M01 excludes parallel Write Tracks, so SQLite's single-writer model remains appropriate.
 
 Disposition:
 
 ```text
 keep SQLite
-→ split persistence responsibilities
-→ preserve one connection and one transaction authority
+→ keep one connection and one transaction owner
+→ split focused persistence responsibilities
 ```
 
-PostgreSQL, Redis locks or distributed consensus are not justified.
+---
+
+# 7. Git worktree boundary
+
+Git documents that linked worktrees share repository state while retaining selected per-worktree metadata. It recommends resolving internal paths with Git commands rather than assumptions. [git-worktree]
+
+Therefore:
+
+- worktree isolation is not process, credential or network isolation;
+- source and linked worktree share sensitive Git metadata;
+- adapters resolve real paths explicitly;
+- cleanliness is inspected before release;
+- unclassified work is never silently discarded;
+- source checkout and Treehouse pool are observed separately.
 
 ---
 
-# 8. Git worktree boundary
+# 8. Treehouse findings
 
-Git documents that linked worktrees share most refs and repository configuration while keeping selected per-worktree metadata. It recommends using Git commands such as `git rev-parse --git-path` instead of assuming internal paths. [git-worktree]
-
-Consequences for M01:
-
-- a worktree is filesystem/code isolation, not process or credential isolation;
-- the source repository and linked worktree share sensitive Git metadata;
-- the adapter must discover and validate real paths;
-- worktree cleanliness must be inspected before release;
-- no release may silently discard unclassified work;
-- the Treehouse pool and source checkout must be observed separately.
-
-This confirms ADR-0003 and ADR-0006 rather than replacing either.
-
----
-
-# 9. Treehouse production-adapter findings
-
-Treehouse 2.1.x provides exactly the external identity primitives M01 needs:
+Treehouse 2.1.x provides the external primitives M01 needs:
 
 - durable process-independent Lease;
-- immutable external `lease_id`;
+- immutable `lease_id`;
 - optional holder;
-- JSON acquisition output;
-- JSON status output;
+- JSON acquisition and status;
 - conditional return using expected Lease ID and holder;
-- atomic internal state writes;
-- conservative recovery when state is corrupt. [treehouse-get] [treehouse-status] [treehouse-return] [treehouse-pool] [treehouse-state] [treehouse-changelog]
+- atomic internal state persistence;
+- conservative recovery after corrupt state. [treehouse-get] [treehouse-status] [treehouse-return] [treehouse-pool] [treehouse-state] [treehouse-changelog]
 
-But source inspection identifies material behavior that must be proven against the installed binary.
+Source inspection also identifies material behaviors that require TC-01 evidence.
 
-## 9.1 Acquisition may fetch
+## Acquisition may fetch
 
-When an `origin` remote exists, Treehouse acquisition may run `git fetch`. [treehouse-pool]
+When an `origin` exists, acquisition may invoke `git fetch`. [treehouse-pool]
 
-The fixed M2 Golden Proof denies network and credentials. Therefore its fixture must have no remote, or a future Treehouse capability must explicitly disable fetch. M01 must not normalize hidden network access.
+The fixed M2 proof denies network and credentials. Its fixture must therefore have no remote unless a future approved Treehouse capability disables fetch explicitly.
 
-## 9.2 Acquisition may touch ignore configuration
+## Acquisition may touch ignore configuration
 
-The CLI attempts to ensure the pool location is ignored. [treehouse-get]
+The CLI attempts to ensure that the pool location is ignored. [treehouse-get]
 
-TC-01 must prove the selected pool configuration does not modify the source checkout.
+TC-01 must prove the chosen configuration does not mutate the source checkout unexpectedly.
 
-## 9.3 Status can heal Treehouse metadata
+## Status may heal private Treehouse metadata
 
-Treehouse status/list may normalize its own state under the Treehouse lock. [treehouse-status] [treehouse-pool]
+Status/list may normalize Treehouse's own state under its lock. [treehouse-status] [treehouse-pool]
 
-MNFS Recovery remains read-only with respect to MNFS state and physical worktrees, but documentation must not falsely claim that invoking Treehouse status is byte-for-byte read-only for Treehouse's private metadata.
+MNFS Recovery remains read-only regarding MNFS state and physical work, but documentation must not claim Treehouse private metadata is byte-for-byte unchanged.
 
-## 9.4 Return is potentially destructive
+## Return is potentially destructive
 
-Treehouse return may detach and reset the worktree before clearing its reservation. Conditional release protects identity, but it does not replace MNFS preconditions. [treehouse-return] [treehouse-pool]
+Return may detach and reset the worktree before clearing its Lease. Conditional identity checks are necessary but insufficient. [treehouse-return] [treehouse-pool]
 
-MNFS must require:
+MNFS release requires:
 
 ```text
 correct internal Lease and generation
 AND matching external Lease ID and holder
 AND no active Worker Run
-AND no unpreserved Claim/work
+AND no unpreserved Claim or work
 AND clean worktree
 ```
 
-The production adapter must never use force.
+The adapter never uses force.
 
-## 9.5 External release is not assumed idempotent
+## External release is not assumed idempotent
 
-MNFS provides semantic idempotency through its Lease state and fresh status observation. It must not infer `ALREADY_RELEASED` from a broad regular expression over human stderr.
+Semantic idempotency comes from MNFS state plus fresh Treehouse observation. Human stderr is not authoritative and broad regex classification is prohibited.
 
 Conclusion:
 
@@ -338,34 +267,30 @@ Conclusion:
 
 ---
 
-# 10. Sandbox boundary
+# 9. Sandbox boundary
 
-Anthropic Sandbox Runtime provides OS-level filesystem and network enforcement using Bubblewrap on Linux and proxy-based network filtering. It also documents Linux-specific behavior for literal paths, Unix sockets, mandatory deny paths and user-namespace policy. [sandbox-runtime]
-
-The project is explicitly a Beta Research Preview whose APIs may change. [sandbox-runtime]
+Anthropic Sandbox Runtime supplies OS-level filesystem and network enforcement and documents Linux-specific limitations. It is explicitly a Beta Research Preview. [sandbox-runtime]
 
 Consequences:
 
-- keep exact version pinning;
-- bind policy hashes;
-- fail closed;
-- prohibit weaker modes for the accepted E1 path;
-- rerun Evidence after relevant dependency or host changes;
-- keep production E1 dispatch in M02;
-- do not let M01's domain design depend on Sandbox Runtime internals.
-
-This preserves adapter replaceability.
+- exact version pinning;
+- policy-hash binding;
+- fail-closed startup;
+- no weaker mode for accepted E1;
+- revalidation after relevant dependency or host change;
+- production dispatch remains in M02;
+- M01 domain design does not depend on Sandbox Runtime internals.
 
 ---
 
-# 11. Recommended M01 architecture
+# 10. Recommended architecture
 
 ```text
 CLI / future Lead
         |
         v
 ExecutionService ─────────────┐
-LeaseService ─────────────────┼── SqliteStore composition root
+LeaseService ─────────────────┼── shared SQLite composition root
 RecoveryService ──────────────┘          |
         |                                +── execution persistence
         |                                +── Event persistence
@@ -377,99 +302,66 @@ RecoveryService ──────────────┘          |
 
 Rules:
 
-1. Application services own workflows and transitions.
+1. Application services own workflows and state transitions.
 2. SQLite stores own local atomicity.
-3. Adapters return observations, not domain state.
-4. No external action occurs inside a SQLite transaction.
-5. Lease grant/release follow Intent–Action–Observation.
-6. Recovery compares expected semantic state with observed physical state.
-7. Repair is read-only by default and destructive action requires explicit authority.
-8. Worker process launch remains absent.
+3. Adapters return observations, never domain state.
+4. External actions never run inside SQLite transactions.
+5. Grant and release follow Intent–Action–Observation.
+6. Recovery compares semantic expectation with physical observation.
+7. Repair is read-only by default; destructive action requires explicit authority.
+8. No Pi process is launched in M01.
 
 ---
 
-# 12. Adopted design decisions
+# 11. Adopted decisions
 
-## D1 — No duplicate currentness flag
-
-Current Attempt and current Lease are derived from non-terminal lifecycle states and unique partial indexes.
-
-## D2 — Double contract enforcement
-
-Services verify the current approved contract, and the schema uses composite parent relationships to prevent mixed-hash children.
-
-## D3 — Focused execution store, shared connection
-
-The existing `SqliteStore` remains the composition root and public compatibility surface. New execution persistence moves into a focused module using the same `DatabaseSync` connection.
-
-## D4 — Event type registry instead of repeated hard-coded CHECK rebuilds
-
-M01 introduces several new Domain Event types and M02 will introduce more. A small seeded `event_types` table keeps database enforcement without converting the Events table into unrestricted text or repeatedly rebuilding it for each new type.
-
-This is not a generic event bus: payloads remain domain-owned and no delivery subsystem is added.
-
-## D5 — Treehouse identity used as external fencing input
-
-MNFS stores its own Lease identity and generation plus Treehouse `lease_id`, holder and path. Release validates both semantic and physical identity.
-
-## D6 — No hidden network in the Golden Proof
-
-TC-01 and M2 use a dedicated local fixture repository without `origin`.
-
-## D7 — No automatic orphan adoption or destruction
-
-Recovery classifies `LD-01` through `LD-05`, reports safe actions and preserves work. A retried grant may finalize an exact holder-matching `REQUESTED` intent; generic Recovery does not mutate.
-
-## D8 — Pi and E1 dispatch deferred to M02
-
-M01 persists Worker Run and Claim identity for domain continuity but performs no Pi launch.
+- **No duplicate currentness flag:** lifecycle states plus unique partial indexes define current entities.
+- **Double contract enforcement:** services validate current approval; composite relationships prevent mixed-hash children.
+- **Focused stores, shared connection:** retain one transaction authority while reducing file responsibility.
+- **Small Event type registry:** preserve database-enforced event names without rebuilding a hard-coded CHECK for every new milestone; this is not a broker or generic event bus.
+- **External fencing:** store internal Lease identity and generation with Treehouse Lease ID, holder and path.
+- **No hidden network:** TC-01 and M2 use a local fixture without `origin`.
+- **No automatic orphan adoption or destruction:** Recovery reports `LD-01` through `LD-05`; only a retried exact intent may complete its own adoption.
+- **Pi and E1 dispatch deferred:** Worker Run and Claim identity exist in M01, execution begins in M02.
 
 ---
 
-# 13. Rejected alternatives
+# 12. Rejected alternatives
 
 | Alternative | Disposition | Reason |
 |---|---|---|
-| Directly expand one monolithic `SqliteStore` file | Rejected | mixes M0/M1 persistence with external-operation workflows and Recovery |
-| Separate database per subsystem | Rejected | breaks atomic Event/state relationships and creates multiple authorities |
-| Treehouse state file as MNFS authority | Rejected | private external implementation and competing lifecycle semantics |
-| Parse human Treehouse output as state | Rejected | brittle and unnecessary when JSON identity surfaces exist |
-| One new worktree per retry | Rejected | violates Write Track/Attempt separation |
-| Generic Saga engine | Rejected | one real external operation and no second consumer |
-| Message broker/outbox | Rejected | no durable transport problem in M01 |
-| LangGraph/Temporal | Rejected | second workflow state model and premature infrastructure |
-| PostgreSQL/Redis | Rejected | local one-writer slice does not require distributed state |
-| Pi Session as recovery memory | Rejected | process/session state is replaceable and non-authoritative |
+| Expand one monolithic store file | Rejected | mixes persistence, external operations and Recovery |
+| Separate database per subsystem | Rejected | breaks atomic state/Event relationships |
+| Treehouse state file as MNFS authority | Rejected | private external implementation and competing semantics |
+| Parse human Treehouse output | Rejected | brittle; JSON identity surfaces exist |
+| New worktree per retry | Rejected | violates Write Track/Attempt separation |
+| Generic Saga or message broker | Rejected | no second proven consumer |
+| LangGraph or Temporal | Rejected | duplicate workflow-state model and premature infrastructure |
+| PostgreSQL or Redis | Rejected | local one-Writer slice does not require distributed state |
+| Pi Session as Recovery memory | Rejected | Session is replaceable and non-authoritative |
 | Unrestricted Worker followed by tests | Rejected | tests do not compensate for host authority or secret exposure |
 
 ---
 
-# 14. Risks that remain before R5 PASS
+# 13. Remaining R5 blockers
 
-## Blocking
+- TC-01 has not executed against the canonical installed Treehouse binary.
+- Exact holder, dirty-worktree and repeated-release behavior remains evidence to collect.
+- Final migration and adapter signatures require adversarial review after TC-01.
 
-- TC-01 has not yet executed against the installed canonical Treehouse binary.
-- Exact Treehouse holder constraints and repeated-release outputs remain observations to record, not assumptions.
-- The final migration and adapter signatures require adversarial review after TC-01.
-
-## Non-blocking for the design branch
-
-- Issue #15 repository-identity reattachment remains separate.
-- Production SEC-E1 and Pi process integration remain M02.
-- Generalized Receipt, Review and Integration remain later Product Milestones.
+Issue #15 remains separate. Production Pi/SEC-E1 integration remains M02. Generalized Receipt, Review and Integration remain later Product Milestones.
 
 ---
 
-# 15. Final recommendation
+# 14. Recommendation
 
-Proceed with a dedicated M01 R5 branch and draft PR containing:
+Proceed in the dedicated Issue #16 branch with:
 
-1. this research report and source manifest;
-2. TC-01 conformance protocol;
-3. proposed M01 microdesign;
-4. Design Coverage Matrix;
-5. tracking updates.
+1. this report and its validated source manifest;
+2. TC-01 production-adapter conformance protocol;
+3. proposed M01 microdesign and Design Coverage Matrix;
+4. project tracking updates.
 
-Execute TC-01 before approving the microdesign. If conformance fails materially, revise the adapter or improve Treehouse upstream rather than hiding the behavior behind parsing or broad exceptions.
+Execute TC-01 before approving the microdesign. A material conformance failure requires revising the adapter or improving Treehouse upstream rather than hiding behavior behind parsing or broad exceptions.
 
-Only after the final microdesign receives explicit Operator approval should MNFS create an implementation plan and begin F01 through TDD.
+Only after explicit Operator approval of the final microdesign may MNFS create an implementation plan and begin F01 through TDD.

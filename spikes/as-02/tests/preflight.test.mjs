@@ -99,6 +99,9 @@ test('reports a READY canonical WSL2 host without mutating policy', async () => 
 
 test('fails preflight outside WSL2 and when repository is under a Windows mount', async () => {
   const outside = dependencies({
+    outputs: {
+      'uname\0-a': processResult('Linux generic-host 6.8.0 x86_64 GNU/Linux\n'),
+    },
     dependencies: {
       env: { PATH: '/usr/bin:/bin' },
       readText: async (path) => path === '/proc/version' ? 'Linux generic' : TEXT_FILES[path] ?? '',

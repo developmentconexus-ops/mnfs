@@ -1,0 +1,9 @@
+{
+  "name": "@mnfs/as-02-pi-extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.18.0"
+  }
+}

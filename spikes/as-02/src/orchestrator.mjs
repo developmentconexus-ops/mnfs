@@ -166,7 +166,7 @@ export function buildCheckpointInput({
 
 async function resolveOperations(options) {
   if (options?.operations) return options.operations;
-  const module = await import('./orchestrator-runtime.mjs');
+  const module = await import('./orchestrator-runtime-durable.mjs');
   return module.createRuntimeOperations(options);
 }
 

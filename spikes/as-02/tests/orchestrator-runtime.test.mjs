@@ -11,7 +11,7 @@ import {
   createObservationReader,
   createRuntimeOperations,
   mountSentinelPath,
-} from '../src/orchestrator-runtime.mjs';
+} from '../src/orchestrator-runtime-durable.mjs';
 import { MISSING_RESOURCE_DIGEST } from '../src/scenario-runner.mjs';
 
 const HASH = `sha256:${'a'.repeat(64)}`;
@@ -91,6 +91,8 @@ test('persists the fixture before Treehouse acquisition can fail', async (t) => 
   const stateRoot = join(root, 'state');
   const fixtureRoot = join(root, 'fixture');
   const sourceRepo = join(fixtureRoot, 'source-repo');
+  let releaseCalls = 0;
+  let cleanupCalls = 0;
   await Promise.all([
     mkdir(repositoryPath, { recursive: true }),
     mkdir(homeDirectory, { recursive: true }),
@@ -113,6 +115,14 @@ test('persists the fixture before Treehouse acquisition can fail', async (t) => 
     acquireTreehouseLease: async () => {
       throw Object.assign(new Error('synthetic lease acquisition failure'), { code: 'TREEHOUSE_UNAVAILABLE' });
     },
+    releaseTreehouseLease: async () => {
+      releaseCalls += 1;
+      return { released: true };
+    },
+    cleanupFixture: async () => {
+      cleanupCalls += 1;
+      return { removed: true, integrity: 'PASS' };
+    },
   });
 
   await assert.rejects(
@@ -125,6 +135,11 @@ test('persists the fixture before Treehouse acquisition can fail', async (t) => 
   assert.equal(state.lease?.acquired, false);
   assert.equal(state.lease?.fixture?.root, fixtureRoot);
   assert.equal(state.lease?.fixture?.sourceRepo, sourceRepo);
+
+  const cleaned = await operations.cleanup({ runId: state.runId });
+  assert.equal(cleaned.status, 'CLEANED');
+  assert.equal(releaseCalls, 0);
+  assert.equal(cleanupCalls, 1);
 });
 
 test('persists acquired fixture and Treehouse lease before later phase-one discovery can fail', async (t) => {
@@ -136,6 +151,8 @@ test('persists acquired fixture and Treehouse lease before later phase-one disco
   const fixtureRoot = join(root, 'fixture');
   const sourceRepo = join(fixtureRoot, 'source-repo');
   const leasedPath = join(fixtureRoot, 'leased-worktree');
+  let releaseCalls = 0;
+  let cleanupCalls = 0;
   await Promise.all([
     mkdir(repositoryPath, { recursive: true }),
     mkdir(homeDirectory, { recursive: true }),
@@ -164,6 +181,16 @@ test('persists acquired fixture and Treehouse lease before later phase-one disco
     discoverGitMetadata: async () => {
       throw Object.assign(new Error('synthetic git discovery failure'), { code: 'GIT_METADATA_INVALID' });
     },
+    releaseTreehouseLease: async ({ lease }) => {
+      releaseCalls += 1;
+      assert.equal(lease.acquired, true);
+      assert.equal(lease.path, leasedPath);
+      return { released: true, status: 'RELEASED' };
+    },
+    cleanupFixture: async () => {
+      cleanupCalls += 1;
+      return { removed: true, integrity: 'PASS' };
+    },
   });
 
   await assert.rejects(
@@ -178,6 +205,11 @@ test('persists acquired fixture and Treehouse lease before later phase-one disco
   assert.equal(state.lease?.leaseId, 'lease-as02');
   assert.equal(state.lease?.fixture?.root, fixtureRoot);
   assert.equal(state.lease?.fixture?.sourceRepo, sourceRepo);
+
+  const cleaned = await operations.cleanup({ runId: state.runId });
+  assert.equal(cleaned.status, 'CLEANED');
+  assert.equal(releaseCalls, 1);
+  assert.equal(cleanupCalls, 1);
 });
 
 test('builds checkpoint input from stable scenario signatures only', () => {

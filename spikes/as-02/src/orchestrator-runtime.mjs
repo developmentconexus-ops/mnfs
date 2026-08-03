@@ -38,6 +38,11 @@ import {
   brokeredCandidateArgs,
   PI_ANTHROPIC_AUTH_VERSION,
 } from './pi-inventory.mjs';
+import {
+  createPiPilotChallenge,
+  evaluatePiPilot,
+  PI_PILOT_MODEL,
+} from './pi-pilot.mjs';
 import { runPerformanceSuite } from './performance.mjs';
 import { buildWorkerEnv, compilePolicy } from './policy.mjs';
 import { runPreflight } from './preflight.mjs';
@@ -338,31 +343,40 @@ async function runPiPilot({
   await mkdir(pilotRoot, { recursive: true, mode: 0o700 });
   const receiptPath = join(pilotRoot, 'extension-receipt.json');
   const eventsPath = join(pilotRoot, 'extension-events.jsonl');
-  const prompt = 'Use the read tool exactly once to read README.md. Then reply with only AS02_PI_PILOT_OK.';
+  const challenge = createPiPilotChallenge();
+  const challengePath = join(leasePath, challenge.relativePath);
+  await writeFile(challengePath, challenge.contents, { flag: 'wx', mode: 0o600 });
   const args = [
     '--print',
     '--no-session',
+    '--model',
+    PI_PILOT_MODEL,
     ...brokeredCandidateArgs(extensionPath),
-    prompt,
+    challenge.prompt,
   ];
-  const result = await processRunner({
-    file: 'pi',
-    args,
-    cwd: leasePath,
-    env: {
-      ...hostEnv,
-      MNFS_AS02_POLICY_PATH: policyPath,
-      MNFS_AS02_POLICY_HASH: policyHash,
-      MNFS_AS02_WORKTREE: leasePath,
-      MNFS_AS02_BROKER: brokerPath,
-      MNFS_AS02_OPERATION_ROOT: operationRoot,
-      MNFS_AS02_ARTIFACT_ROOT: artifactRoot,
-      MNFS_AS02_EXTENSION_RECEIPT: receiptPath,
-      MNFS_AS02_EXTENSION_EVENTS: eventsPath,
-    },
-    timeoutMs: 180_000,
-    killProcessGroup: true,
-  });
+  let result;
+  try {
+    result = await processRunner({
+      file: 'pi',
+      args,
+      cwd: leasePath,
+      env: {
+        ...hostEnv,
+        MNFS_AS02_POLICY_PATH: policyPath,
+        MNFS_AS02_POLICY_HASH: policyHash,
+        MNFS_AS02_WORKTREE: leasePath,
+        MNFS_AS02_BROKER: brokerPath,
+        MNFS_AS02_OPERATION_ROOT: operationRoot,
+        MNFS_AS02_ARTIFACT_ROOT: artifactRoot,
+        MNFS_AS02_EXTENSION_RECEIPT: receiptPath,
+        MNFS_AS02_EXTENSION_EVENTS: eventsPath,
+      },
+      timeoutMs: 180_000,
+      killProcessGroup: true,
+    });
+  } finally {
+    await rm(challengePath, { force: true });
+  }
   const stdout = redactOutput(result.stdout, secretMarkers, { maxBytes: 65_536 });
   const stderr = redactOutput(result.stderr, secretMarkers, { maxBytes: 65_536 });
   await atomicWrite(join(pilotRoot, 'stdout.bin'), stdout.bytes);
@@ -376,26 +390,27 @@ async function runPiPilot({
   } catch {
     // Missing trusted receipts make the pilot blocked rather than inferred from model text.
   }
-  const readEvents = events.filter((event) => event.tool === 'read' && event.result === 'SUCCEEDED');
-  const otherEvents = events.filter((event) => event.tool !== 'read');
-  const expectedTools = ['bash', 'read', 'write', 'edit', 'grep', 'find', 'ls'];
-  const status = result.exitCode === 0 &&
-    receipt?.policyHash === policyHash &&
-    JSON.stringify(receipt?.tools) === JSON.stringify(expectedTools) &&
-    readEvents.length === 1 &&
-    otherEvents.length === 0
-    ? 'PASS'
-    : 'BLOCKED';
+  const evaluation = evaluatePiPilot({
+    exitCode: result.exitCode,
+    policyHash,
+    receipt,
+    events,
+    stdout: stdout.bytes,
+    expectedOutput: challenge.expectedOutput,
+  });
   const evidence = {
     schemaVersion: 1,
-    status,
+    status: evaluation.status,
     exitCode: result.exitCode,
     signal: result.signal,
     policyHash,
+    model: PI_PILOT_MODEL,
+    challengeHash: challenge.challengeHash,
+    outputMatched: evaluation.outputMatched,
     receiptPresent: receipt !== null,
     tools: receipt?.tools ?? [],
-    successfulReadCalls: readEvents.length,
-    otherToolCalls: otherEvents.map((event) => event.tool),
+    successfulReadCalls: evaluation.successfulReadCalls,
+    otherToolCalls: evaluation.otherToolCalls,
     stdoutHash: hashBuffer(stdout.bytes),
     stderrHash: hashBuffer(stderr.bytes),
     stdoutRedactions: stdout.redactions,

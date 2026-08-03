@@ -19,13 +19,22 @@ function percentile(sorted, fraction) {
   return sorted[rank - 1];
 }
 
-export function summarizeSamples(samples) {
+function summarize(samples, { nonNegative }) {
   if (
     !Array.isArray(samples) ||
     samples.length === 0 ||
-    !samples.every((value) => typeof value === 'number' && Number.isFinite(value) && value >= 0)
+    !samples.every((value) => (
+      typeof value === 'number' &&
+      Number.isFinite(value) &&
+      (!nonNegative || value >= 0)
+    ))
   ) {
-    throw as02Error('PERFORMANCE_INVALID', 'Performance samples must be a non-empty array of finite non-negative milliseconds.');
+    throw as02Error(
+      'PERFORMANCE_INVALID',
+      nonNegative
+        ? 'Performance samples must be a non-empty array of finite non-negative milliseconds.'
+        : 'Performance overhead samples must be a non-empty array of finite milliseconds.',
+    );
   }
   const sorted = [...samples].sort((left, right) => left - right);
   const mean = sorted.reduce((total, value) => total + value, 0) / sorted.length;
@@ -39,14 +48,12 @@ export function summarizeSamples(samples) {
   };
 }
 
-function overhead(baseline, sandbox) {
-  return {
-    minMs: round(sandbox.minMs - baseline.minMs),
-    p50Ms: round(sandbox.p50Ms - baseline.p50Ms),
-    p95Ms: round(sandbox.p95Ms - baseline.p95Ms),
-    maxMs: round(sandbox.maxMs - baseline.maxMs),
-    meanMs: round(sandbox.meanMs - baseline.meanMs),
-  };
+export function summarizeSamples(samples) {
+  return summarize(samples, { nonNegative: true });
+}
+
+function summarizeOverheadSamples(samples) {
+  return summarize(samples, { nonNegative: false });
 }
 
 async function measureMode({ measure, benchmark, mode, measuredRuns }) {
@@ -70,7 +77,7 @@ async function measureMode({ measure, benchmark, mode, measuredRuns }) {
     });
     samples.push(value);
   }
-  return summarizeSamples(samples);
+  return samples;
 }
 
 export async function runPerformanceSuite({ measure }) {
@@ -80,19 +87,36 @@ export async function runPerformanceSuite({ measure }) {
 
   for (const [benchmark, profile] of Object.entries(PERFORMANCE_PROFILE.benchmarks)) {
     const entry = { baseline: null, sandbox: null, overhead: null };
+    const samples = { baseline: null, sandbox: null };
     for (const mode of ['baseline', 'sandbox']) {
       try {
-        entry[mode] = await measureMode({
+        samples[mode] = await measureMode({
           measure,
           benchmark,
           mode,
           measuredRuns: profile.measuredRuns,
         });
+        entry[mode] = summarizeSamples(samples[mode]);
       } catch (cause) {
         limitations.push(`${benchmark}/${mode}: ${cause instanceof Error ? cause.message : String(cause)}`);
       }
     }
-    if (entry.baseline && entry.sandbox) entry.overhead = overhead(entry.baseline, entry.sandbox);
+    if (samples.baseline && samples.sandbox) {
+      assertAs02(
+        samples.baseline.length === samples.sandbox.length,
+        'PERFORMANCE_INVALID',
+        'Baseline and sandbox performance sample counts must match.',
+        {
+          benchmark,
+          baselineCount: samples.baseline.length,
+          sandboxCount: samples.sandbox.length,
+        },
+      );
+      const pairedOverhead = samples.sandbox.map(
+        (sandboxValue, index) => sandboxValue - samples.baseline[index],
+      );
+      entry.overhead = summarizeOverheadSamples(pairedOverhead);
+    }
     benchmarks[benchmark] = entry;
   }
 

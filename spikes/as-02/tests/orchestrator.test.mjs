@@ -66,6 +66,8 @@ async function paths() {
 
 test('creates safe deterministic run ids and artifact roots', () => {
   assert.equal(createRunId({ now: new Date('2026-08-03T02:03:04.000Z'), random: () => 'a1b2c3' }), 'as02-20260803t020304z-a1b2c3');
+  assert.equal(createRunId({ now: new Date('2026-08-03T02:03:04.321Z'), random: () => 'a1b2c3' }), 'as02-20260803t020304321z-a1b2c3');
+  assert.match(createRunId({ now: new Date('2026-08-03T02:03:04.999Z'), random: () => 'a1b2c3' }), /^[a-z0-9]+(?:-[a-z0-9]+)*$/u);
   assert.equal(resolveAs02ArtifactBase({ MNFS_HOME: '/home/user/.mnfs-state' }, '/home/user'), '/home/user/.mnfs-state/artifacts/as-02');
   assert.equal(resolveAs02ArtifactBase({}, '/home/user'), '/home/user/.local/state/mnfs/artifacts/as-02');
   assert.throws(

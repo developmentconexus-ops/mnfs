@@ -64,10 +64,24 @@ The deterministic AS-02 suite asserts the exact main package integrity and every
   - `registerTool()` custom tools;
   - `session_shutdown` cleanup event;
   - `--no-builtin-tools` disables built-ins while keeping explicit extension tools;
-  - `--no-extensions -e <absolute-path>` loads one exact extension without discovered extensions.
+  - `--no-extensions` disables discovered extensions while repeated `-e` admits only named sources.
 - Built-in inventory reviewed for the comparison: `bash`, `read`, `write`, `edit`, `grep`, `find`, `ls`.
 - Package namespace is not imported by the AS-02 extension. The extension uses only the injected Pi API object and local JSON schemas, avoiding coupling to a mutable package namespace.
 - Exact installed version: observed by `pi --version` in the WSL2 preflight and promoted to the acceptance report. A final Verdict is forbidden until that evidence exists.
+
+## Pi Anthropic OAuth compatibility extension
+
+- Package: `@gotgenes/pi-anthropic-auth`
+- Exact admitted version: `2.0.1`
+- Source: `https://github.com/gotgenes/pi-anthropic-auth`
+- MNFS state: `CANDIDATE / HOST AUTH ADAPTER`
+- Purpose: allow the trusted Pi host to use an existing Anthropic Claude Pro/Max OAuth subscription instead of falling back to Anthropic extra usage.
+- Invocation admitted by AS-02: `-e npm:@gotgenes/pi-anthropic-auth@2.0.1`.
+- Discovery remains disabled. The pilot loads exactly two extension sources: this pinned auth adapter and the exact local AS-02 broker extension.
+- The adapter runs in the trusted host plane with the same user authority as Pi. It is not inside the Worker sandbox and is therefore part of the trusted computing base.
+- It must not add Worker filesystem or process tools. The authoritative Worker inventory remains exactly `bash`, `read`, `write`, `edit`, `grep`, `find`, and `ls`, all supplied by the first-party AS-02 extension.
+- The exact adapter version is a required restart-checkpoint dependency. Any change produces mechanical restart drift and requires a fresh AS-02 run.
+- The first canonical pilot without this explicit source initialized the sandbox correctly but was blocked before any tool call because Pi fell back to Anthropic extra usage. This failure established why auto-discovered interactive auth cannot be assumed by a `--no-extensions` acceptance run.
 
 ## Treehouse
 
@@ -100,4 +114,4 @@ The preflight records versions and availability without changing host policy:
 
 ## Upgrade and removal rule
 
-Any change to Pi, Sandbox Runtime, Treehouse, Ubuntu/WSL kernel, Bubblewrap, Socat, seccomp behavior, extension code, broker code or effective policy requires a fresh provenance record and rerun of the security scenarios. A material bypass, unstable WSL2 support, required broad exceptions or inadequate diagnostics rejects/removes the candidate instead of silently weakening E1.
+Any change to Pi, the Pi Anthropic OAuth adapter, Sandbox Runtime, Treehouse, Ubuntu/WSL kernel, Bubblewrap, Socat, seccomp behavior, extension code, broker code or effective policy requires a fresh provenance record and rerun of the security scenarios. A material bypass, unstable WSL2 support, required broad exceptions or inadequate diagnostics rejects/removes the candidate instead of silently weakening E1.

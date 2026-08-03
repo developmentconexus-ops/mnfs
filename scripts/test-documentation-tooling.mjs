@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { evaluateReadiness } from './generate-capability-coverage.mjs';
 import { loadDocumentRegistry, parseFrontmatter, resolveDocumentReference, validateJsonSchema } from './document-utils.mjs';
+import { hashSecE1Bytes, validateSecE1 } from './sec-e1-policy.mjs';
 
 const root = process.cwd();
 const registry = await loadDocumentRegistry(root);
@@ -20,6 +21,27 @@ const historicalMissionBlob = createHash('sha1')
   .update(historicalMissionText)
   .digest('hex');
 assert.equal(historicalMissionBlob, '6b79117fe66cd5c9c8142099828812f470ce20de');
+
+const secE1Bytes = await readFile(path.join(root, 'policies/SEC-E1.json'));
+const secE1 = JSON.parse(secE1Bytes.toString('utf8'));
+assert.deepEqual(validateSecE1(secE1), []);
+assert.match(hashSecE1Bytes(secE1Bytes), /^sha256:[a-f0-9]{64}$/u);
+
+const withAbsolutePath = structuredClone(secE1);
+withAbsolutePath.filesystem.allowWriteScopes.push('/home/operator');
+assert.ok(validateSecE1(withAbsolutePath).some((error) => error.includes('symbolic scopes')));
+
+const withNetwork = structuredClone(secE1);
+withNetwork.network.mode = 'ALLOWLIST';
+assert.ok(validateSecE1(withNetwork).some((error) => error.includes('DENY_ALL')));
+
+const withCredential = structuredClone(secE1);
+withCredential.credentials.mode = 'HOST';
+assert.ok(validateSecE1(withCredential).some((error) => error.includes('NONE')));
+
+const withDifferentTools = structuredClone(secE1);
+withDifferentTools.tools = [...secE1.tools, 'web'];
+assert.ok(validateSecE1(withDifferentTools).some((error) => error.includes('seven-tool inventory')));
 
 const parsed = parseFrontmatter(`---\nid: DOC-TEST\ntitle: Test\ndocument_type: reference\nauthority: reference\nstatus: accepted\nowners:\n  - owner\n---\n\n# Test\n`, 'fixture.md');
 assert.deepEqual(parsed.metadata.owners, ['owner']);

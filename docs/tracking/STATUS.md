@@ -5,13 +5,14 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.2.0
+version: 1.3.0
 owners:
   - developmentconexus-ops
 related:
   - DOC-DOCUMENTATION-MAP
   - DOC-CAPABILITY-ROADMAP
   - EVID-PLAN-CONTRACT-SCHEMA-V2
+  - ACCEPTANCE-CAP-EXECUTION-R3
 tracking_issue: 9
 ---
 
@@ -42,6 +43,7 @@ tracking_issue: 9
 - [x] `MIS-002` revision 3 preservation proved by exact Git blob SHA and content hash.
 - [x] PR #12 reviewed and merged.
 - [x] AS-02 accepted and cleaned on canonical WSL2.
+- [x] CAP-EXECUTION version 0.1.0 accepted; mechanical R3 PASS.
 - [ ] New `MIS-002` schema v2 revision reviewed in Lavish and approved.
 - [ ] MCRM R0–R4 mechanically rerun after the new approval.
 - [ ] Operator explicitly unblocks M2.
@@ -66,7 +68,7 @@ Evidence: `docs/acceptance/2026-08-02-plan-contract-schema-v2.md`.
 R0 Baseline              PASS
 R1 Applicability         PASS
 R2 Requirements          PASS
-R3 Capability Readiness  REVIEW_REQUIRED
+R3 Capability Readiness  PASS
 R4 Contract Readiness    BLOCKED
 ```
 
@@ -80,9 +82,8 @@ The schema portion of `CAP-EXEC-REQ-026` is implemented and verified, but the re
 
 ## Immediate next action
 
-1. Review and explicitly accept `CAP-EXECUTION` version 0.1.0.
-2. Execute Issue #9 — create the `MIS-002` schema-v2 Replan.
-3. Review the rendered contract in Lavish and approve the exact new hash.
-4. Replace proposed allocations with approved criterion identities.
-5. Mechanically rerun R0–R4.
-6. Begin M2 only after explicit Operator unblock.
+1. Build and save the complete deterministic `MIS-002` schema-v2 Replan candidate.
+2. Review the rendered contract in Lavish and approve the exact current hash.
+3. Replace proposed allocations with approved criterion identities.
+4. Mechanically rerun R0–R4.
+5. Begin M2 only after explicit Operator unblock.

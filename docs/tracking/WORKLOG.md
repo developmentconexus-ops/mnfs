@@ -179,3 +179,10 @@ owners:
 - Preserved CAP-EXECUTION as `proposed`; explicit R3 Operator review is still required.
 - Clarified M2 Minimal Deterministic Receipt versus generalized Receipt/Evidence capability in M5+.
 - Kept M2 blocked pending Capability acceptance, exact-hash Replan approval, R0–R4 recalculation and explicit Operator unblock.
+
+### CAP-EXECUTION R3 acceptance
+
+- Operator supplied exact token `CAP_EXECUTION_ACCEPT version=0.1.0`; CAP-EXECUTION was promoted to `accepted` while implementation remained `planned`.
+- Created canonical acceptance evidence `ACCEPTANCE-CAP-EXECUTION-R3`.
+- Mechanical readiness now reports R3 `PASS`; R4 remains `BLOCKED` by the missing approved schema-v2 Replan and exact criterion allocations.
+- No Worker implementation, dispatch or M2 unblock was authorized.

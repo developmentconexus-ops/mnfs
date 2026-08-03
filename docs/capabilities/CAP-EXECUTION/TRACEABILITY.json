@@ -707,8 +707,8 @@
   ],
   "readiness": {
     "R3": {
-      "result": "REVIEW_REQUIRED",
-      "reason": "Capability Spec remains proposed pending explicit Operator acceptance"
+      "result": "PASS",
+      "reason": "Capability Spec CAP-EXECUTION version 0.1.0 accepted by exact Operator token"
     },
     "R4": {
       "result": "BLOCKED",
@@ -738,9 +738,10 @@
     }
   ],
   "nextSequence": [
-    "review and accept CAP-EXECUTION",
-    "run MIS-002 schema v2 Replan through Lavish",
-    "approve exact new hash",
+    "build complete deterministic MIS-002 schema v2 Replan candidate",
+    "save revision through planning service against exact approved revision-3 hash",
+    "review current candidate in Lavish",
+    "approve exact current hash",
     "replace proposed allocations with approved criterion identities",
     "rerun R0-R4",
     "record explicit Operator M2 unblock decision"

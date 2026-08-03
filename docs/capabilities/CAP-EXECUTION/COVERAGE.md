@@ -95,9 +95,10 @@ Generator version: 3
 ## Required next sequence
 
 ```text
-review and accept CAP-EXECUTION
-→ run MIS-002 schema v2 Replan through Lavish
-→ approve exact new hash
+build complete deterministic MIS-002 schema v2 Replan candidate
+→ save revision through planning service against exact approved revision-3 hash
+→ review current candidate in Lavish
+→ approve exact current hash
 → replace proposed allocations with approved criterion identities
 → rerun R0-R4
 → record explicit Operator M2 unblock decision

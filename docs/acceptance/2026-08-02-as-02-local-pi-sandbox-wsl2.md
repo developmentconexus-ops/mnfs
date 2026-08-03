@@ -1,7 +1,7 @@
 ---
 id: ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2
 title: AS-02 Local Pi Sandbox on WSL2 Acceptance
- document_type: acceptance_report
+document_type: acceptance_report
 form: explanation
 authority: evidence
 status: accepted

@@ -2,11 +2,33 @@ import { spawn } from 'node:child_process';
 
 import { as02Error, assertAs02 } from './errors.mjs';
 
-export function runProcess({ file, args = [], cwd, env = {}, timeoutMs = 30_000, signal }) {
+function killChild(child, killProcessGroup) {
+  if (!child || child.killed) return;
+  if (killProcessGroup && process.platform !== 'win32' && Number.isInteger(child.pid)) {
+    try {
+      process.kill(-child.pid, 'SIGKILL');
+      return;
+    } catch {
+      // Fall through to the direct child when the process group is already gone.
+    }
+  }
+  child.kill('SIGKILL');
+}
+
+export function runProcess({
+  file,
+  args = [],
+  cwd,
+  env = {},
+  timeoutMs = 30_000,
+  signal,
+  killProcessGroup = false,
+}) {
   assertAs02(typeof file === 'string' && file.length > 0, 'PROCESS_FAILED', 'Process file is required.');
   assertAs02(Array.isArray(args) && args.every((value) => typeof value === 'string'), 'PROCESS_FAILED', 'Process args must be strings.');
   assertAs02(typeof cwd === 'string' && cwd.length > 0, 'PROCESS_FAILED', 'Process cwd is required.');
   assertAs02(Number.isInteger(timeoutMs) && timeoutMs > 0, 'PROCESS_FAILED', 'Process timeout must be a positive integer.');
+  assertAs02(typeof killProcessGroup === 'boolean', 'PROCESS_FAILED', 'killProcessGroup must be boolean.');
 
   const startedAt = new Date().toISOString();
 
@@ -15,13 +37,19 @@ export function runProcess({ file, args = [], cwd, env = {}, timeoutMs = 30_000,
     let timedOut = false;
     let timer;
     let child;
+    let abortListener;
     const stdout = [];
     const stderr = [];
+
+    const cleanup = () => {
+      clearTimeout(timer);
+      if (signal && abortListener) signal.removeEventListener('abort', abortListener);
+    };
 
     const finishReject = (error) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      cleanup();
       reject(error);
     };
 
@@ -33,6 +61,7 @@ export function runProcess({ file, args = [], cwd, env = {}, timeoutMs = 30_000,
         stdio: ['ignore', 'pipe', 'pipe'],
         signal,
         windowsHide: true,
+        detached: killProcessGroup && process.platform !== 'win32',
       });
     } catch (cause) {
       reject(as02Error('PROCESS_FAILED', `Failed to spawn ${file}.`, {
@@ -57,7 +86,7 @@ export function runProcess({ file, args = [], cwd, env = {}, timeoutMs = 30_000,
     child.once('close', (exitCode, closeSignal) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      cleanup();
       if (timedOut) {
         reject(as02Error('PROCESS_TIMEOUT', `Process ${file} exceeded ${timeoutMs} ms.`, {
           file,
@@ -76,9 +105,14 @@ export function runProcess({ file, args = [], cwd, env = {}, timeoutMs = 30_000,
       });
     });
 
+    if (signal) {
+      abortListener = () => killChild(child, killProcessGroup);
+      signal.addEventListener('abort', abortListener, { once: true });
+    }
+
     timer = setTimeout(() => {
       timedOut = true;
-      child.kill('SIGKILL');
+      killChild(child, killProcessGroup);
     }, timeoutMs);
     timer.unref?.();
   });

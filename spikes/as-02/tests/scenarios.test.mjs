@@ -60,6 +60,34 @@ function processResult(exitCode, stdout = '', stderr = '') {
   };
 }
 
+function unchangedFor(definition) {
+  return Object.fromEntries(definition.observedResources.map((id) => [id, HASH_A]));
+}
+
+function s9Output(overrides = {}) {
+  const targets = [
+    {
+      resourceId: 'activePolicy',
+      outcome: 'WRITE_SUCCEEDED',
+      beforeReadable: false,
+      readBackMatched: true,
+      errorCode: null,
+    },
+    ...['worktreeMnfs', 'worktreePi', 'worktreeEnv', 'gitConfig', 'gitHook'].map((resourceId) => ({
+      resourceId,
+      outcome: 'BLOCKED',
+      beforeReadable: true,
+      readBackMatched: false,
+      errorCode: 'EROFS',
+    })),
+  ];
+  for (const [resourceId, patch] of Object.entries(overrides)) {
+    const target = targets.find((entry) => entry.resourceId === resourceId);
+    if (target) Object.assign(target, patch);
+  }
+  return JSON.stringify({ targets });
+}
+
 test('defines exactly one controlled scenario for every S1 through S13', () => {
   const ctx = context();
   const definitions = scenarioDefinitions(ctx);
@@ -82,12 +110,22 @@ test('defines exactly one controlled scenario for every S1 through S13', () => {
   }
 });
 
-test('every deny scenario requires both blocked execution and unchanged trusted observations', () => {
-  const definitions = scenarioDefinitions(context()).filter((entry) => entry.expected === 'DENY');
+test('network observation scenarios explicitly enable Node environment proxy support', () => {
+  const definitions = scenarioDefinitions(context());
+  for (const scenarioId of ['S6', 'S7']) {
+    const definition = definitions.find((entry) => entry.scenarioId === scenarioId);
+    assert.deepEqual(definition.argv.slice(0, 2), [process.execPath, '--use-env-proxy']);
+  }
+});
+
+test('every ordinary deny scenario requires both blocked execution and unchanged trusted observations', () => {
+  const definitions = scenarioDefinitions(context()).filter(
+    (entry) => entry.expected === 'DENY' && entry.scenarioId !== 'S9',
+  );
   assert.equal(definitions.length > 0, true);
 
   for (const definition of definitions) {
-    const unchanged = Object.fromEntries(definition.observedResources.map((id) => [id, HASH_A]));
+    const unchanged = unchangedFor(definition);
     const blocked = evaluateScenario(definition, {
       process: processResult(1),
       exceptionCode: null,
@@ -121,6 +159,79 @@ test('every deny scenario requires both blocked execution and unchanged trusted 
   }
 });
 
+test('S9 accepts only active-policy shadowing with blocked metadata writes and unchanged host digests', () => {
+  const definition = scenarioDefinitions(context()).find((entry) => entry.scenarioId === 'S9');
+  const unchanged = unchangedFor(definition);
+
+  const shadowed = evaluateScenario(definition, {
+    process: processResult(0, s9Output()),
+    exceptionCode: null,
+    before: unchanged,
+    after: unchanged,
+    diagnostics: { available: true },
+    secretLeaked: false,
+  });
+  assert.equal(shadowed.result, 'PASS');
+  assert.match(shadowed.rationale, /shadowed/u);
+
+  const blockedPolicy = evaluateScenario(definition, {
+    process: processResult(0, s9Output({
+      activePolicy: {
+        outcome: 'BLOCKED',
+        beforeReadable: false,
+        readBackMatched: false,
+        errorCode: 'EROFS',
+      },
+    })),
+    exceptionCode: null,
+    before: unchanged,
+    after: unchanged,
+    diagnostics: { available: true },
+    secretLeaked: false,
+  });
+  assert.equal(blockedPolicy.result, 'PASS');
+
+  const metadataWrite = evaluateScenario(definition, {
+    process: processResult(0, s9Output({
+      worktreeMnfs: {
+        outcome: 'WRITE_SUCCEEDED',
+        beforeReadable: true,
+        readBackMatched: true,
+        errorCode: null,
+      },
+    })),
+    exceptionCode: null,
+    before: unchanged,
+    after: unchanged,
+    diagnostics: { available: true },
+    secretLeaked: false,
+  });
+  assert.equal(metadataWrite.result, 'FAIL');
+  assert.equal(metadataWrite.failureCode, 'POLICY_HASH_MISMATCH');
+
+  const hostMutation = evaluateScenario(definition, {
+    process: processResult(0, s9Output()),
+    exceptionCode: null,
+    before: unchanged,
+    after: { ...unchanged, activePolicy: HASH_B },
+    diagnostics: { available: true },
+    secretLeaked: false,
+  });
+  assert.equal(hostMutation.result, 'FAIL');
+  assert.equal(hostMutation.failureCode, 'POLICY_HASH_MISMATCH');
+
+  const malformed = evaluateScenario(definition, {
+    process: processResult(0, '{"targets":[]}'),
+    exceptionCode: null,
+    before: unchanged,
+    after: unchanged,
+    diagnostics: { available: true },
+    secretLeaked: false,
+  });
+  assert.equal(malformed.result, 'FAIL');
+  assert.equal(malformed.failureCode, 'POLICY_HASH_MISMATCH');
+});
+
 test('maps material scenario failures to named security classifications', () => {
   const expected = {
     S2: 'FILESYSTEM_POLICY_BYPASS',
@@ -137,9 +248,13 @@ test('maps material scenario failures to named security classifications', () => 
 
   for (const definition of scenarioDefinitions(context())) {
     if (!Object.hasOwn(expected, definition.scenarioId)) continue;
-    const unchanged = Object.fromEntries(definition.observedResources.map((id) => [id, HASH_A]));
+    const unchanged = unchangedFor(definition);
     const observation = {
-      process: definition.scenarioId === 'S10' ? processResult(1) : processResult(0),
+      process: definition.scenarioId === 'S10'
+        ? processResult(1)
+        : definition.scenarioId === 'S9'
+          ? processResult(0, s9Output())
+          : processResult(0),
       exceptionCode: null,
       before: unchanged,
       after: definition.scenarioId === 'S9'
@@ -156,7 +271,7 @@ test('maps material scenario failures to named security classifications', () => 
 
 test('synthetic marker output is always a filesystem policy failure', () => {
   const definition = scenarioDefinitions(context()).find((entry) => entry.scenarioId === 'S3');
-  const unchanged = Object.fromEntries(definition.observedResources.map((id) => [id, HASH_A]));
+  const unchanged = unchangedFor(definition);
   const result = evaluateScenario(definition, {
     process: processResult(1, 'MNFS_AS02_SENTINEL_RUN_1'),
     exceptionCode: null,
@@ -210,8 +325,11 @@ test('runSecuritySuite executes S1 through S13 sequentially in numeric order', a
     async run(argv) {
       const definition = scenarioDefinitions(ctx).find((entry) => entry.argv === argv || entry.argv.join('\0') === argv.join('\0'));
       order.push(definition.scenarioId);
+      if (definition.scenarioId === 'S9') return processResult(0, s9Output());
       return definition.expected === 'ALLOW' || definition.expected === 'OBSERVE'
-        ? processResult(0, definition.scenarioId === 'S6' ? '{"allowed":true,"undeclared":false}' : '')
+        ? processResult(0, definition.scenarioId === 'S6'
+          ? '{"allowed":{"reachable":true},"undeclared":{"reachable":false}}'
+          : '')
         : processResult(1);
     },
   }]));

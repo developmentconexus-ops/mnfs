@@ -169,3 +169,13 @@ owners:
   - documentation validation green with 62 canonical IDs.
 - Automated tests verify `.mnfs/missions/MIS-002/plan.json` remains revision 3 with Git blob SHA `6b79117fe66cd5c9c8142099828812f470ce20de` and content hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
 - M2 remains blocked. Next sequence is Issue #8 AS-02, Issue #9 Replan, exact-hash Operator approval, mechanical R0–R4 recalculation and explicit unblock.
+
+## 2026-08-03
+
+### Issue #9 — M2 readiness reconciliation
+
+- Integrated accepted AS-02 evidence into CAP-EXECUTION without claiming M2 implementation verification.
+- Removed the obsolete AS-02 blocker; the approved schema-v2 MIS-002 Replan remains the contract blocker.
+- Preserved CAP-EXECUTION as `proposed`; explicit R3 Operator review is still required.
+- Clarified M2 Minimal Deterministic Receipt versus generalized Receipt/Evidence capability in M5+.
+- Kept M2 blocked pending Capability acceptance, exact-hash Replan approval, R0–R4 recalculation and explicit Operator unblock.

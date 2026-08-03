@@ -32,7 +32,7 @@ tracking_issue: 6
 Source: docs/product/blueprint/*.md
 Generator: scripts/generate-product-blueprint.mjs
 Generator version: 2
-Source manifest hash: sha256:673b666b2accc1eca19a7991710b9d805b355e14dedfadf55d03bd757bcceba1
+Source manifest hash: sha256:a55bb14149af540c7d72a5e323261ad02feb14b20c4ec522b370d74859939363
 -->
 
 # MNFS Product Blueprint
@@ -1306,6 +1306,8 @@ Receipt é um registro imutável de verificação executada por autoridade contr
 
 É ligado ao critério, Claim, tree hash, ambiente e comando executado.
 
+M2 implementa apenas um Minimal Deterministic Receipt delimitado para o Golden Proof fixo: uma execução fria, runner-owned e vinculada ao contrato e result tree. Runners generalizados, Integration Receipts, QA adaptativa e Evidence Bundles permanecem capabilities de M5 e milestones posteriores.
+
 ---
 
 ## 2.18 Verdict
@@ -1570,7 +1572,7 @@ Status deve apresentar:
 | Correction | M3 |
 | Reviewer Verdict | M3 |
 | Integration Run | M4 |
-| Receipt | M5 |
+| Receipt | M2 — bounded Minimal Deterministic Receipt; M5+ — generalized Receipt/Evidence capability |
 | QA Journey | M5 |
 | Evidence Bundle | M5/M6 |
 | Defect Class | M5/M6 |

@@ -31,11 +31,20 @@
       "class": "STATE",
       "statement": "A Write Track shall have at most one current non-terminal Attempt.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-02", "DOC-PRODUCT-BLUEPRINT-08"],
-      "proposedAllocation": ["proposed:MIS-002/M01/AC-01"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-01"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["AttemptStore unique/current invariant"],
-      "verifiedBy": ["unit:FSM-current-attempt"],
+      "realizedBy": [
+        "AttemptStore unique/current invariant"
+      ],
+      "verifiedBy": [
+        "unit:FSM-current-attempt"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -45,11 +54,20 @@
       "class": "STATE",
       "statement": "Worker Run identity shall be separate from Attempt identity.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-02", "DOC-PRODUCT-BLUEPRINT-08"],
-      "proposedAllocation": ["proposed:MIS-002/M01/AC-02"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-02"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["WorkerRun entity and Attempt relation"],
-      "verifiedBy": ["unit:worker-run-replacement"],
+      "realizedBy": [
+        "WorkerRun entity and Attempt relation"
+      ],
+      "verifiedBy": [
+        "unit:worker-run-replacement"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -59,11 +77,22 @@
       "class": "QUALITY",
       "statement": "Worker completion shall not accept a Claim or close a Feature.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-01#pb-p4", "DOC-PRODUCT-BLUEPRINT-07", "ADR-0005"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-01"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p4",
+        "DOC-PRODUCT-BLUEPRINT-07",
+        "ADR-0005"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-01"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["ClaimService transition policy"],
-      "verifiedBy": ["unit:exit-does-not-accept", "DR-11"],
+      "realizedBy": [
+        "ClaimService transition policy"
+      ],
+      "verifiedBy": [
+        "unit:exit-does-not-accept",
+        "DR-11"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -73,11 +102,21 @@
       "class": "STATE",
       "statement": "Claim creation and its Domain Event shall commit atomically.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-07", "DOC-PRODUCT-BLUEPRINT-08", "ADR-0002"],
-      "proposedAllocation": ["proposed:MIS-002/M01/AC-03"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-07",
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "ADR-0002"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-03"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["ClaimService transaction"],
-      "verifiedBy": ["unit:claim-event-atomicity"],
+      "realizedBy": [
+        "ClaimService transaction"
+      ],
+      "verifiedBy": [
+        "unit:claim-event-atomicity"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -87,11 +126,20 @@
       "class": "CONSTRAINT",
       "statement": "Every Attempt, Worker Run and Claim shall bind to the exact Approved Contract hash.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-02", "DOC-PRODUCT-BLUEPRINT-09"],
-      "proposedAllocation": ["proposed:MIS-002/M01/AC-04"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-09"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-04"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["contract binding fields and validation"],
-      "verifiedBy": ["unit:contract-hash-conflict"],
+      "realizedBy": [
+        "contract binding fields and validation"
+      ],
+      "verifiedBy": [
+        "unit:contract-hash-conflict"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -101,11 +149,21 @@
       "class": "RECOVERY",
       "statement": "Treehouse acquisition and release shall use Intent–Action–Observation.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-08", "ADR-0003"],
-      "proposedAllocation": ["proposed:MIS-002/M01/AC-05"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "ADR-0003"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-05"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["LeaseService external operation protocol"],
-      "verifiedBy": ["unit:lease-crash-windows", "real:treehouse"],
+      "realizedBy": [
+        "LeaseService external operation protocol"
+      ],
+      "verifiedBy": [
+        "unit:lease-crash-windows",
+        "real:treehouse"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -115,11 +173,21 @@
       "class": "RECOVERY",
       "statement": "Lease release shall be idempotent and fenced by internal and external Lease identity.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-08", "ADR-0003"],
-      "proposedAllocation": ["proposed:MIS-002/M01/AC-06"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "ADR-0003"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-06"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["Lease generation/external ID validation"],
-      "verifiedBy": ["unit:release-idempotency", "DR-03"],
+      "realizedBy": [
+        "Lease generation/external ID validation"
+      ],
+      "verifiedBy": [
+        "unit:release-idempotency",
+        "DR-03"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -129,11 +197,20 @@
       "class": "RECOVERY",
       "statement": "Reconcile shall detect orphan worktrees and Leases without worktrees without destroying work automatically.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-08"],
-      "proposedAllocation": ["proposed:MIS-002/M01/AC-07"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M01/AC-07"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["RecoveryService divergence taxonomy"],
-      "verifiedBy": ["DR-04", "DR-05"],
+      "realizedBy": [
+        "RecoveryService divergence taxonomy"
+      ],
+      "verifiedBy": [
+        "DR-04",
+        "DR-05"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -143,11 +220,20 @@
       "class": "FUNCTIONAL",
       "statement": "The Pi Worker shall start with cwd set to the leased worktree.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-05", "DOC-PRODUCT-BLUEPRINT-12"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-02"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-05",
+        "DOC-PRODUCT-BLUEPRINT-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-02"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["PiProcessAdapter"],
-      "verifiedBy": ["integration:worker-cwd"],
+      "realizedBy": [
+        "PiProcessAdapter"
+      ],
+      "verifiedBy": [
+        "integration:worker-cwd"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -157,67 +243,124 @@
       "class": "SECURITY",
       "statement": "The Worker shall execute under the frozen E1 policy hash bound to its Attempt.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-01#pb-p14", "DOC-PRODUCT-BLUEPRINT-10", "ADR-0006"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-03"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p14",
+        "DOC-PRODUCT-BLUEPRINT-10",
+        "ADR-0006"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-03"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["SandboxPolicyResolver and Environment binding"],
-      "verifiedBy": ["AS-02/S09"],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": ["AS-02 not executed"]
+      "realizedBy": [
+        "SandboxPolicyResolver and Environment binding"
+      ],
+      "verifiedBy": [
+        "AS-02/S09"
+      ],
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-011",
       "class": "SECURITY",
       "statement": "The E1 boundary shall deny protected host and credential reads and writes outside allowed roots.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-10", "ADR-0006"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-04"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-10",
+        "ADR-0006"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-04"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["ProcessSandboxAdapter filesystem policy"],
-      "verifiedBy": ["AS-02/S02", "AS-02/S03", "AS-02/S04"],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": ["AS-02 not executed"]
+      "realizedBy": [
+        "ProcessSandboxAdapter filesystem policy"
+      ],
+      "verifiedBy": [
+        "AS-02/S02",
+        "AS-02/S03",
+        "AS-02/S04"
+      ],
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-012",
       "class": "SECURITY",
       "statement": "M2 Worker execution shall have no network access, credentials or X2+ external effects.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-10", "ADR-0007"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-05"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-10",
+        "ADR-0007"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-05"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["network/credential/effect policy"],
-      "verifiedBy": ["AS-02/S05", "inspection:no-credentials"],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": ["AS-02 not executed"]
+      "realizedBy": [
+        "network/credential/effect policy"
+      ],
+      "verifiedBy": [
+        "AS-02/S05",
+        "inspection:no-credentials"
+      ],
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-013",
       "class": "SECURITY",
       "statement": "Sandbox startup failure shall fail closed and prevent Worker start.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-10", "ADR-0006"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-06"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-10",
+        "ADR-0006"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-06"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["WorkerService sandbox prerequisite"],
-      "verifiedBy": ["AS-02/S13"],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": ["AS-02 not executed"]
+      "realizedBy": [
+        "WorkerService sandbox prerequisite"
+      ],
+      "verifiedBy": [
+        "AS-02/S13"
+      ],
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-014",
       "class": "CONTEXT",
       "statement": "Dispatch shall include a fresh Current Authority Snapshot.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-09", "ADR-0004"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-07"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-09",
+        "ADR-0004"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-07"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["AuthoritySnapshotService"],
-      "verifiedBy": ["unit:snapshot-freshness"],
+      "realizedBy": [
+        "AuthoritySnapshotService"
+      ],
+      "verifiedBy": [
+        "unit:snapshot-freshness"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -227,11 +370,20 @@
       "class": "CONTEXT",
       "statement": "The fixed Writer Pack shall declare target, contract, task, write-set, policy, output and termination.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-09", "DOC-PRODUCT-BLUEPRINT-12"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-08"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-09",
+        "DOC-PRODUCT-BLUEPRINT-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-08"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["M2 Writer Pack compiler"],
-      "verifiedBy": ["snapshot:writer-pack"],
+      "realizedBy": [
+        "M2 Writer Pack compiler"
+      ],
+      "verifiedBy": [
+        "snapshot:writer-pack"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -241,11 +393,21 @@
       "class": "FUNCTIONAL",
       "statement": "Worker process exit shall be recorded as an observation and shall not be the durable state mutation path.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-06", "DOC-PRODUCT-BLUEPRINT-08", "ADR-0005"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-09"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-06",
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "ADR-0005"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-09"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["PiProcessAdapter observation and MNFS CLI"],
-      "verifiedBy": ["unit:exit-observation"],
+      "realizedBy": [
+        "PiProcessAdapter observation and MNFS CLI"
+      ],
+      "verifiedBy": [
+        "unit:exit-observation"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -255,11 +417,21 @@
       "class": "RECOVERY",
       "statement": "A fresh Lead shall recover execution state without transcript, terminal scraping or OM.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-08", "DOC-PRODUCT-BLUEPRINT-09"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-10"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "DOC-PRODUCT-BLUEPRINT-09"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-10"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["RecoveryService"],
-      "verifiedBy": ["DR-01", "golden:fresh-lead"],
+      "realizedBy": [
+        "RecoveryService"
+      ],
+      "verifiedBy": [
+        "DR-01",
+        "golden:fresh-lead"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -269,11 +441,19 @@
       "class": "RECOVERY",
       "statement": "Late results from a superseded Attempt shall not mutate the current Attempt or Claim.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-08"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-11"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-11"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["Attempt fencing"],
-      "verifiedBy": ["DR-06"],
+      "realizedBy": [
+        "Attempt fencing"
+      ],
+      "verifiedBy": [
+        "DR-06"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -283,11 +463,19 @@
       "class": "QUALITY",
       "statement": "Deterministic verification shall produce a runner-owned Receipt bound to contract and result tree.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-07"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-12"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-07"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-12"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["MinimalVerificationService"],
-      "verifiedBy": ["integration:demo-receipt"],
+      "realizedBy": [
+        "MinimalVerificationService"
+      ],
+      "verifiedBy": [
+        "integration:demo-receipt"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -297,11 +485,21 @@
       "class": "QUALITY",
       "statement": "Only an MNFS Gate with valid Evidence and Authority shall accept the Claim.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-01#pb-p4", "DOC-PRODUCT-BLUEPRINT-07"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-13"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p4",
+        "DOC-PRODUCT-BLUEPRINT-07"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-13"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["ClaimAcceptanceGate"],
-      "verifiedBy": ["unit:acceptance-authority", "golden:m2"],
+      "realizedBy": [
+        "ClaimAcceptanceGate"
+      ],
+      "verifiedBy": [
+        "unit:acceptance-authority",
+        "golden:m2"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -311,11 +509,20 @@
       "class": "QUALITY",
       "statement": "Wrong contract hash, result tree or stale Evidence shall reject or block acceptance.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-07"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-14"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-07"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-14"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["Gate freshness validation"],
-      "verifiedBy": ["unit:wrong-tree", "unit:stale-receipt"],
+      "realizedBy": [
+        "Gate freshness validation"
+      ],
+      "verifiedBy": [
+        "unit:wrong-tree",
+        "unit:stale-receipt"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -325,11 +532,21 @@
       "class": "RECOVERY",
       "statement": "Resources and work shall remain preserved until acceptance or explicit abandonment, then release idempotently.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-06", "DOC-PRODUCT-BLUEPRINT-08"],
-      "proposedAllocation": ["proposed:MIS-002/M02/AC-15"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-06",
+        "DOC-PRODUCT-BLUEPRINT-08"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/M02/AC-15"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["Close/release orchestration"],
-      "verifiedBy": ["integration:preserve-before-release", "unit:release-idempotency"],
+      "realizedBy": [
+        "Close/release orchestration"
+      ],
+      "verifiedBy": [
+        "integration:preserve-before-release",
+        "unit:release-idempotency"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -339,11 +556,21 @@
       "class": "OPERABILITY",
       "statement": "All M2 commands shall provide stable human and JSON output, typed errors and a next action.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-05", "DOC-PRODUCT-BLUEPRINT-11"],
-      "proposedAllocation": ["proposed:MIS-002/AC-01"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-05",
+        "DOC-PRODUCT-BLUEPRINT-11"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-01"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["CLI command contracts"],
-      "verifiedBy": ["contract:cli-json", "snapshot:human-output"],
+      "realizedBy": [
+        "CLI command contracts"
+      ],
+      "verifiedBy": [
+        "contract:cli-json",
+        "snapshot:human-output"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -353,11 +580,19 @@
       "class": "OBSERVABILITY",
       "statement": "M2 shall persist Domain Events and references to logs, durations, errors and available token counters.",
       "level": "SHOULD",
-      "source": ["DOC-PRODUCT-BLUEPRINT-11"],
-      "proposedAllocation": ["proposed:MIS-002/AC-02"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-11"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-02"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["local telemetry and Artifact refs"],
-      "verifiedBy": ["inspection:events-telemetry"],
+      "realizedBy": [
+        "local telemetry and Artifact refs"
+      ],
+      "verifiedBy": [
+        "inspection:events-telemetry"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -367,11 +602,27 @@
       "class": "RECOVERY",
       "statement": "The required M2 Recovery and Security failure drills shall pass on canonical WSL2.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-08", "DOC-PRODUCT-BLUEPRINT-10", "DOC-PRODUCT-BLUEPRINT-12"],
-      "proposedAllocation": ["proposed:MIS-002/AC-03"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-08",
+        "DOC-PRODUCT-BLUEPRINT-10",
+        "DOC-PRODUCT-BLUEPRINT-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-03"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["failure drill suite"],
-      "verifiedBy": ["DR-01", "DR-03", "DR-04", "DR-05", "DR-06", "DR-11", "AS-02"],
+      "realizedBy": [
+        "failure drill suite"
+      ],
+      "verifiedBy": [
+        "DR-01",
+        "DR-03",
+        "DR-04",
+        "DR-05",
+        "DR-06",
+        "DR-11",
+        "AS-02"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -381,25 +632,50 @@
       "class": "CONTRACT",
       "statement": "The approved M2 Plan shall include Acceptance Criteria at Mission, Milestone and Feature levels and qualified identities.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-02", "DOC-PRODUCT-BLUEPRINT-07", "DOC-PRODUCT-BLUEPRINT-12"],
-      "proposedAllocation": ["proposed:MIS-002/AC-04"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-02",
+        "DOC-PRODUCT-BLUEPRINT-07",
+        "DOC-PRODUCT-BLUEPRINT-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-04"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["Mission Plan schema v2 and Replan"],
-      "verifiedBy": ["schema:plan-v2", "inspection:approved-revision"],
-      "evidencedBy": ["EVID-PLAN-CONTRACT-SCHEMA-V2"],
+      "realizedBy": [
+        "Mission Plan schema v2 and Replan"
+      ],
+      "verifiedBy": [
+        "schema:plan-v2",
+        "inspection:approved-revision"
+      ],
+      "evidencedBy": [
+        "EVID-PLAN-CONTRACT-SCHEMA-V2"
+      ],
       "state": "BLOCKED",
-      "blockers": ["Approved MIS-002 schema v2 Replan unavailable"]
+      "blockers": [
+        "Approved MIS-002 schema v2 Replan unavailable"
+      ]
     },
     {
       "id": "CAP-EXEC-REQ-027",
       "class": "DOCUMENTATION",
       "statement": "Implementation Claims shall declare requirements and documentation impact, and coverage shall remain current.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-01#pb-p17", "DOC-PRODUCT-BLUEPRINT-13", "DOC-MNFS-CAPABILITY-REALIZATION-METHOD"],
-      "proposedAllocation": ["proposed:MIS-002/AC-05"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-01#pb-p17",
+        "DOC-PRODUCT-BLUEPRINT-13",
+        "DOC-MNFS-CAPABILITY-REALIZATION-METHOD"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-05"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["Traceability manifest and Claim schema"],
-      "verifiedBy": ["docs:coverage-check"],
+      "realizedBy": [
+        "Traceability manifest and Claim schema"
+      ],
+      "verifiedBy": [
+        "docs:coverage-check"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -409,11 +685,21 @@
       "class": "CONSTRAINT",
       "statement": "No deciding M2 criterion shall depend on Herdr, OM, pi-link, remote execution or an external observability backend.",
       "level": "MUST",
-      "source": ["DOC-PRODUCT-BLUEPRINT-09", "DOC-PRODUCT-BLUEPRINT-11", "DOC-PRODUCT-BLUEPRINT-12"],
-      "proposedAllocation": ["proposed:MIS-002/AC-06"],
+      "source": [
+        "DOC-PRODUCT-BLUEPRINT-09",
+        "DOC-PRODUCT-BLUEPRINT-11",
+        "DOC-PRODUCT-BLUEPRINT-12"
+      ],
+      "proposedAllocation": [
+        "proposed:MIS-002/AC-06"
+      ],
       "allocatedTo": [],
-      "realizedBy": ["M2 exclusions and adapter optionality"],
-      "verifiedBy": ["inspection:dependency-boundary"],
+      "realizedBy": [
+        "M2 exclusions and adapter optionality"
+      ],
+      "verifiedBy": [
+        "inspection:dependency-boundary"
+      ],
       "evidencedBy": [],
       "state": "DESIGNED",
       "blockers": []
@@ -426,7 +712,7 @@
     },
     "R4": {
       "result": "BLOCKED",
-      "reason": "AS-02 and a newly approved MIS-002 schema v2 revision are unavailable"
+      "reason": "Approved MIS-002 schema v2 Replan unavailable"
     },
     "R5": {
       "result": "NOT_STARTED",
@@ -447,20 +733,17 @@
   },
   "blockingItems": [
     {
-      "id": "BLOCK-AS-02",
-      "statement": "Real local Pi sandbox behavior on canonical WSL2 is unproven."
-    },
-    {
       "id": "BLOCK-MIS-002-REPLAN",
       "statement": "Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS."
     }
   ],
   "nextSequence": [
-    "execute AS-02",
+    "review and accept CAP-EXECUTION",
     "run MIS-002 schema v2 Replan through Lavish",
     "approve exact new hash",
+    "replace proposed allocations with approved criterion identities",
     "rerun R0-R4",
-    "begin M2 implementation"
+    "record explicit Operator M2 unblock decision"
   ],
   "applicability": [
     {

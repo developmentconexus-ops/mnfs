@@ -5,14 +5,14 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.1.0
+version: 1.2.0
 owners:
   - developmentconexus-ops
 related:
   - DOC-DOCUMENTATION-MAP
   - DOC-CAPABILITY-ROADMAP
   - EVID-PLAN-CONTRACT-SCHEMA-V2
-tracking_issue: 7
+tracking_issue: 9
 ---
 
 # Project status
@@ -23,8 +23,8 @@ tracking_issue: 7
   - M0 — Foundation Walking Skeleton
   - M1 — Visual Mission Planning
 - **Architecture Baseline:** accepted and merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
-- **Current enabler:** Issue #7 — Mission Plan Contract schema v2
-- **Implementation PR:** #12 — `feat/plan-schema-v2`
+- **Current enabler:** Issue #9 — MIS-002 schema-v2 Replan and M2 readiness reconciliation
+- **Implementation PR:** #14 — `plan/mis-002-replan` (draft)
 - **M2 state:** blocked; Worker implementation has not started
 - **Historical M2 contract:** `.mnfs/missions/MIS-002/plan.json`, revision 3, preserved pending Replan
 
@@ -40,8 +40,8 @@ tracking_issue: 7
 - [x] Plan Contract schema v2 implemented and canonically verified in PR #12.
 - [x] Schema v1 reading, hashing, recovery and materialization preserved.
 - [x] `MIS-002` revision 3 preservation proved by exact Git blob SHA and content hash.
-- [ ] PR #12 reviewed and merged.
-- [ ] AS-02 executed on canonical WSL2.
+- [x] PR #12 reviewed and merged.
+- [x] AS-02 accepted and cleaned on canonical WSL2.
 - [ ] New `MIS-002` schema v2 revision reviewed in Lavish and approved.
 - [ ] MCRM R0–R4 mechanically rerun after the new approval.
 - [ ] Operator explicitly unblocks M2.
@@ -70,20 +70,19 @@ R3 Capability Readiness  REVIEW_REQUIRED
 R4 Contract Readiness    BLOCKED
 ```
 
-The schema portion of `CAP-EXEC-REQ-026` is implemented and verified, but the requirement itself remains `BLOCKED` because it requires an approved M2 Plan. R4 remains blocked by AS-02 and the missing approved `MIS-002` schema v2 Replan. No Gate is promoted merely because PR #12 is green.
+The schema portion of `CAP-EXEC-REQ-026` is implemented and verified, but the requirement itself remains `BLOCKED` because it requires an approved M2 Plan. R4 remains blocked only by the missing approved `MIS-002` schema v2 Replan. No Gate is promoted merely because PR #12 is green.
 
 ## Current blockers
 
-1. AS-02 has not run in the real canonical WSL2 environment.
-2. `MIS-002` revision 3 is immutable historical evidence; Issue #9 must create and approve a later schema v2 revision.
-3. MCRM R0–R4 must be recalculated after AS-02 and exact-hash Replan approval.
-4. The Operator has not explicitly unblocked M2.
+1. `MIS-002` revision 3 is immutable historical evidence; Issue #9 must create and approve a later schema-v2 revision.
+2. MCRM R0–R4 must be recalculated after exact-hash Replan approval.
+3. The Operator has not explicitly unblocked M2.
 
 ## Immediate next action
 
-1. Complete review and integration of PR #12 without modifying `MIS-002` revision 3.
-2. Execute Issue #8 — AS-02 on canonical WSL2.
-3. Execute Issue #9 — reconcile and Replan `MIS-002` as schema v2.
-4. Review the rendered contract in Lavish and approve the exact new hash.
+1. Review and explicitly accept `CAP-EXECUTION` version 0.1.0.
+2. Execute Issue #9 — create the `MIS-002` schema-v2 Replan.
+3. Review the rendered contract in Lavish and approve the exact new hash.
+4. Replace proposed allocations with approved criterion identities.
 5. Mechanically rerun R0–R4.
 6. Begin M2 only after explicit Operator unblock.

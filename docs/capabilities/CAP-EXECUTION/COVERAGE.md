@@ -36,10 +36,10 @@ Generator version: 3
 | Requirements with proposed allocation | 28/28 |
 | Requirements with approved allocation | 0/28 |
 | Requirements with verification method | 28/28 |
-| Designed | 23 |
-| Blocked | 5 |
+| Designed | 27 |
+| Blocked | 1 |
 | Verified | 0 |
-| Evidenced | 1 |
+| Evidenced | 5 |
 
 ## Readiness Gates
 
@@ -61,17 +61,17 @@ None.
 
 ## Blocking items
 
-1. **BLOCK-AS-02:** Real local Pi sandbox behavior on canonical WSL2 is unproven.
-2. **BLOCK-MIS-002-REPLAN:** Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS.
+1. **BLOCK-MIS-002-REPLAN:** Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS.
 
 ## Required next sequence
 
 ```text
-execute AS-02
+review and accept CAP-EXECUTION
 → run MIS-002 schema v2 Replan through Lavish
 → approve exact new hash
+→ replace proposed allocations with approved criterion identities
 → rerun R0-R4
-→ begin M2 implementation
+→ record explicit Operator M2 unblock decision
 ```
 
 ## Coverage interpretation

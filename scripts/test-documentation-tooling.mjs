@@ -11,6 +11,65 @@ const root = process.cwd();
 const registry = await loadDocumentRegistry(root);
 const traceability = JSON.parse(await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/TRACEABILITY.json'), 'utf8'));
 const metadataSchema = JSON.parse(await readFile(path.join(root, 'schemas/document-metadata.schema.json'), 'utf8'));
+const traceabilitySchema = JSON.parse(await readFile(path.join(root, 'schemas/capability-traceability.schema.json'), 'utf8'));
+const currentContract = JSON.parse(await readFile(path.join(root, '.mnfs/missions/MIS-002/plan.json'), 'utf8'));
+
+function registryWithCapabilityStatus(status) {
+  const documents = new Map(registry.documents);
+  const capability = documents.get('CAP-EXECUTION');
+  assert.ok(capability, 'CAP-EXECUTION must resolve in the document registry');
+  documents.set('CAP-EXECUTION', {
+    ...capability,
+    metadata: { ...capability.metadata, status },
+  });
+  return { ...registry, documents };
+}
+
+function approvedAllocationTraceability() {
+  const data = structuredClone(traceability);
+  for (const requirement of data.requirements) {
+    requirement.allocatedTo = (requirement.proposedAllocation ?? []).map((value) =>
+      value.replace(/^proposed:/u, ''),
+    );
+    requirement.proposedAllocation = [];
+  }
+  data.blockingItems = [];
+  data.baseline.missionContract = {
+    missionId: 'MIS-002',
+    currentRevision: 4,
+    status: 'APPROVED_SCHEMA_V2',
+  };
+  return data;
+}
+
+function approvedContractFor(data) {
+  const allocationIds = data.requirements.flatMap((requirement) => requirement.allocatedTo ?? []);
+  const criteria = (prefix) => allocationIds
+    .filter((id) => id.startsWith(prefix))
+    .map((qualifiedId) => ({ qualifiedId }));
+  return {
+    missionId: 'MIS-002',
+    revision: 4,
+    contentHash: `sha256:${'a'.repeat(64)}`,
+    approvedAt: '2026-08-03T00:00:00.000Z',
+    content: {
+      schemaVersion: 2,
+      acceptanceCriteria: criteria('MIS-002/AC-'),
+      milestones: [
+        {
+          qualifiedId: 'MIS-002/M01',
+          acceptanceCriteria: criteria('MIS-002/M01/AC-'),
+          features: [],
+        },
+        {
+          qualifiedId: 'MIS-002/M02',
+          acceptanceCriteria: criteria('MIS-002/M02/AC-'),
+          features: [],
+        },
+      ],
+    },
+  };
+}
 
 const documentationWorkflow = await readFile(path.join(root, '.github/workflows/docs.yml'), 'utf8');
 assert.match(documentationWorkflow, /'policies\/\*\*'/u);
@@ -71,10 +130,51 @@ assert.ok(validateJsonSchema({ ...parsed.metadata, owners: [] }, metadataSchema)
 assert.equal(resolveDocumentReference('DOC-PRODUCT-BLUEPRINT-01#pb-p4', registry).ok, true);
 assert.equal(resolveDocumentReference('DOC-NOT-REAL', registry).ok, false);
 
-const base = await evaluateReadiness(structuredClone(traceability), registry);
+const base = await evaluateReadiness(structuredClone(traceability), registry, { currentContract });
 assert.equal(base.R0.result, 'PASS');
 assert.equal(base.R1.result, 'PASS');
 assert.equal(base.R2.result, 'PASS');
+assert.equal(base.R3.result, 'REVIEW_REQUIRED');
+assert.equal(base.R4.result, 'BLOCKED');
+
+const schemaCandidate = structuredClone(traceability);
+for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];
+assert.equal(validateJsonSchema(schemaCandidate, traceabilitySchema).length, 0);
+
+const acceptedRegistry = registryWithCapabilityStatus('accepted');
+const acceptedSpec = await evaluateReadiness(structuredClone(traceability), acceptedRegistry, { currentContract });
+assert.equal(acceptedSpec.R3.result, 'PASS');
+assert.equal(acceptedSpec.R4.result, 'BLOCKED');
+
+const approvedData = approvedAllocationTraceability();
+const approvedContract = approvedContractFor(approvedData);
+const approvedReadiness = await evaluateReadiness(approvedData, acceptedRegistry, {
+  currentContract: approvedContract,
+});
+assert.equal(approvedReadiness.R2.result, 'PASS');
+assert.equal(approvedReadiness.R3.result, 'PASS');
+assert.equal(approvedReadiness.R4.result, 'PASS');
+
+const missingAllocation = structuredClone(approvedData);
+missingAllocation.requirements[0].allocatedTo = [];
+assert.equal(
+  (await evaluateReadiness(missingAllocation, acceptedRegistry, { currentContract: approvedContract })).R2.result,
+  'BLOCKED',
+);
+
+const proposedPrefixInApproved = structuredClone(approvedData);
+proposedPrefixInApproved.requirements[0].allocatedTo = ['proposed:MIS-002/M01/AC-01'];
+assert.equal(
+  (await evaluateReadiness(proposedPrefixInApproved, acceptedRegistry, { currentContract: approvedContract })).R2.result,
+  'BLOCKED',
+);
+
+const unresolvedEvidence = structuredClone(traceability);
+unresolvedEvidence.requirements[0].evidencedBy = ['DOC-NOT-REAL'];
+assert.equal(
+  (await evaluateReadiness(unresolvedEvidence, registry, { currentContract })).R2.result,
+  'BLOCKED',
+);
 
 const staleBaseline = structuredClone(traceability);
 staleBaseline.baseline.roadmap.version = '0.0.0';

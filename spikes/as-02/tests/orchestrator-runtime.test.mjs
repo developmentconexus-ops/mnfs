@@ -9,6 +9,7 @@ import {
   buildDependencySnapshot,
   buildInitialRunState,
   createObservationReader,
+  createRuntimeOperations,
   mountSentinelPath,
 } from '../src/orchestrator-runtime.mjs';
 import { MISSING_RESOURCE_DIGEST } from '../src/scenario-runner.mjs';
@@ -80,6 +81,59 @@ test('builds a strict recoverable initial run state before external execution', 
   assert.deepEqual(value.cleanup, { status: 'PENDING', attempts: 0 });
   assert.equal(value.checkpointPath, null);
   assert.equal(value.reportPath, null);
+});
+
+test('persists acquired fixture and Treehouse lease before later phase-one discovery can fail', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'mnfs-as02-durable-acquire-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const repositoryPath = join(root, 'repository');
+  const homeDirectory = join(root, 'home');
+  const stateRoot = join(root, 'state');
+  const fixtureRoot = join(root, 'fixture');
+  const sourceRepo = join(fixtureRoot, 'source-repo');
+  const leasedPath = join(fixtureRoot, 'leased-worktree');
+  await Promise.all([
+    mkdir(repositoryPath, { recursive: true }),
+    mkdir(homeDirectory, { recursive: true }),
+    mkdir(sourceRepo, { recursive: true }),
+    mkdir(leasedPath, { recursive: true }),
+  ]);
+
+  const operations = createRuntimeOperations({
+    repositoryPath,
+    homeDirectory,
+    env: { MNFS_HOME: stateRoot, PATH: '/usr/bin:/bin' },
+    now: () => '2026-08-03T02:03:04.000Z',
+    random: () => 'abc123',
+    createFixture: async () => ({
+      runId: 'as02-20260803t020304z-abc123',
+      root: fixtureRoot,
+      sourceRepo,
+      protectedResources: {},
+      protectedDigests: {},
+    }),
+    acquireTreehouseLease: async () => ({
+      path: leasedPath,
+      leaseId: 'lease-as02',
+      status: 'ACQUIRED',
+    }),
+    discoverGitMetadata: async () => {
+      throw Object.assign(new Error('synthetic git discovery failure'), { code: 'GIT_METADATA_INVALID' });
+    },
+  });
+
+  await assert.rejects(
+    () => operations.phaseOne({ preflight: preflight() }),
+    (error) => error?.code === 'GIT_METADATA_INVALID',
+  );
+
+  const state = await operations.latest();
+  assert.equal(state.status, 'FAILED');
+  assert.equal(state.lease?.acquired, true);
+  assert.equal(state.lease?.path, leasedPath);
+  assert.equal(state.lease?.leaseId, 'lease-as02');
+  assert.equal(state.lease?.fixture?.root, fixtureRoot);
+  assert.equal(state.lease?.fixture?.sourceRepo, sourceRepo);
 });
 
 test('builds checkpoint input from stable scenario signatures only', () => {

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -12,6 +13,7 @@ import {
 import { renderBlueprint } from './generate-product-blueprint.mjs';
 import { evaluateReadiness, renderApplicability, renderCoverage } from './generate-capability-coverage.mjs';
 import { renderRoadmap } from './generate-roadmap.mjs';
+import { hashSecE1Bytes, validateSecE1 } from './sec-e1-policy.mjs';
 
 const root = process.cwd();
 const errors = [];
@@ -29,6 +31,7 @@ const required = [
   'docs/research/LEGACY-MNFS-HARNESS-MAP.md',
   'docs/research/FIRSTMATE-INSPIRATION-MAP.md',
   'docs/roadmap.md',
+  'policies/SEC-E1.json',
   'schemas/document-metadata.schema.json',
   'schemas/capability-traceability.schema.json',
   'schemas/research-sources.schema.json',
@@ -93,7 +96,6 @@ for (const file of registry.markdownFiles) {
   }
 }
 
-// Registry may include aliases declared by the ADR index; merge real metadata for version checks.
 for (const [id, record] of metadataById) {
   if (!registry.documents.has(id)) registry.documents.set(id, { ...record, id, anchors: collectAnchors(record.content) });
 }
@@ -121,7 +123,6 @@ for (const { rel, metadata } of metadataById.values()) {
   }
 }
 
-// Supersession must be bidirectional when both sides are canonical documents.
 for (const [id, record] of metadataById) {
   for (const previous of record.metadata.supersedes ?? []) {
     const prior = metadataById.get(previous);
@@ -138,6 +139,7 @@ await validateAdrs();
 await validateTraceability();
 await validateGeneratedFiles();
 await validateHistoricalMission();
+await validateSecE1Policy();
 
 if (errors.length) {
   console.error('Documentation validation failed:');
@@ -247,10 +249,66 @@ async function validateGeneratedFiles() {
 }
 
 async function validateHistoricalMission() {
-  const rel = '.mnfs/missions/MIS-002/plan.json';
-  if (!await exists(root, rel)) return;
-  const plan = await readJson(rel);
-  if (plan.revision !== 3 || plan.contentHash !== 'sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1') {
-    errors.push('Historical MIS-002 revision 3 was modified; use Replan instead.');
+  const historicalRel = '.mnfs/missions/MIS-002/history/revision-0003.json';
+  const currentRel = '.mnfs/missions/MIS-002/plan.json';
+
+  if (!await exists(root, historicalRel)) {
+    errors.push(`Missing historical Mission contract: ${historicalRel}`);
+    return;
   }
+
+  let historicalText;
+  let historical;
+  try {
+    historicalText = await readFile(path.join(root, historicalRel), 'utf8');
+    historical = JSON.parse(historicalText);
+  } catch (error) {
+    errors.push(`${historicalRel}: invalid historical contract (${error.message})`);
+    return;
+  }
+
+  const historicalBlob = createHash('sha1')
+    .update(`blob ${Buffer.byteLength(historicalText)}\0`)
+    .update(historicalText)
+    .digest('hex');
+
+  if (historicalBlob !== '6b79117fe66cd5c9c8142099828812f470ce20de') {
+    errors.push('Historical MIS-002 revision 3 bytes changed.');
+  }
+  if (
+    historical.missionId !== 'MIS-002' ||
+    historical.revision !== 3 ||
+    historical.contentHash !== 'sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1'
+  ) {
+    errors.push('Historical MIS-002 revision 3 identity changed.');
+  }
+
+  if (!await exists(root, currentRel)) return;
+  const current = await readJson(currentRel);
+  const currentText = await readFile(path.join(root, currentRel), 'utf8');
+  if (current.revision === 3 && currentText !== historicalText) {
+    errors.push('Current MIS-002 revision 3 differs from its immutable historical snapshot.');
+  }
+  if (current.revision > 3 && current.content?.schemaVersion !== 2) {
+    errors.push('A post-revision-3 MIS-002 contract must use schemaVersion 2.');
+  }
+}
+
+async function validateSecE1Policy() {
+  const rel = 'policies/SEC-E1.json';
+  if (!await exists(root, rel)) return;
+
+  let bytes;
+  let value;
+  try {
+    bytes = await readFile(path.join(root, rel));
+    value = JSON.parse(bytes.toString('utf8'));
+  } catch (error) {
+    errors.push(`${rel}: invalid policy JSON (${error.message})`);
+    return;
+  }
+
+  for (const error of validateSecE1(value)) errors.push(`${rel}: ${error}`);
+  const hash = hashSecE1Bytes(bytes);
+  if (!/^sha256:[a-f0-9]{64}$/u.test(hash)) errors.push(`${rel}: invalid definition hash ${hash}`);
 }

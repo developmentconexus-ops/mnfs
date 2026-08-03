@@ -672,6 +672,8 @@ Receipt é um registro imutável de verificação executada por autoridade contr
 
 É ligado ao critério, Claim, tree hash, ambiente e comando executado.
 
+M2 implementa apenas um Minimal Deterministic Receipt delimitado para o Golden Proof fixo: uma execução fria, runner-owned e vinculada ao contrato e result tree. Runners generalizados, Integration Receipts, QA adaptativa e Evidence Bundles permanecem capabilities de M5 e milestones posteriores.
+
 ---
 
 ## 2.18 Verdict
@@ -936,7 +938,7 @@ Status deve apresentar:
 | Correction | M3 |
 | Reviewer Verdict | M3 |
 | Integration Run | M4 |
-| Receipt | M5 |
+| Receipt | M2 — bounded Minimal Deterministic Receipt; M5+ — generalized Receipt/Evidence capability |
 | QA Journey | M5 |
 | Evidence Bundle | M5/M6 |
 | Defect Class | M5/M6 |

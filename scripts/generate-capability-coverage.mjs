@@ -25,7 +25,37 @@ function gate(result, reason, errors = []) {
   return { result, reason, errors };
 }
 
-export async function evaluateReadiness(data, registry = null) {
+function collectCriterionIds(contract) {
+  const ids = new Set();
+  for (const criterion of contract?.content?.acceptanceCriteria ?? []) {
+    if (criterion?.qualifiedId) ids.add(criterion.qualifiedId);
+  }
+  for (const milestone of contract?.content?.milestones ?? []) {
+    for (const criterion of milestone.acceptanceCriteria ?? []) {
+      if (criterion?.qualifiedId) ids.add(criterion.qualifiedId);
+    }
+    for (const feature of milestone.features ?? []) {
+      for (const criterion of feature.acceptanceCriteria ?? []) {
+        if (criterion?.qualifiedId) ids.add(criterion.qualifiedId);
+      }
+    }
+  }
+  return ids;
+}
+
+async function resolveCurrentContract(data, options) {
+  if (Object.hasOwn(options, 'currentContract')) return options.currentContract;
+  const missionId = data.baseline?.missionContract?.missionId;
+  if (!missionId) return null;
+  try {
+    return JSON.parse(await readFile(path.join(root, '.mnfs/missions', missionId, 'plan.json'), 'utf8'));
+  } catch (error) {
+    if (error?.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+export async function evaluateReadiness(data, registry = null, options = {}) {
   registry ??= await loadDocumentRegistry(root);
   const reqs = data.requirements ?? [];
   const applicability = data.applicability ?? [];
@@ -76,20 +106,89 @@ export async function evaluateReadiness(data, registry = null) {
       const resolved = resolveDocumentReference(source, registry);
       if (!resolved.ok) r2Errors.push(`${requirement.id}: source ${source} ${resolved.reason}`);
     }
-    if (requirement.level === 'MUST' && !(requirement.proposedAllocation?.length > 0)) {
-      r2Errors.push(`${requirement.id}: MUST has no proposed allocation`);
+    for (const evidence of requirement.evidencedBy ?? []) {
+      const resolved = resolveDocumentReference(evidence, registry);
+      if (!resolved.ok) r2Errors.push(`${requirement.id}: evidence ${evidence} ${resolved.reason}`);
     }
-    if (requirement.level === 'MUST' && !(requirement.verifiedBy?.length > 0)) {
-      r2Errors.push(`${requirement.id}: MUST has no verification method`);
+    if (requirement.level === 'MUST') {
+      const hasPlanned = requirement.proposedAllocation?.length > 0;
+      const hasApproved = requirement.allocatedTo?.length > 0;
+      if (!hasPlanned && !hasApproved) {
+        r2Errors.push(`${requirement.id}: MUST has no planned or approved allocation`);
+      }
+      if ((requirement.allocatedTo ?? []).some((value) => value.startsWith('proposed:'))) {
+        r2Errors.push(`${requirement.id}: approved allocation contains proposed prefix`);
+      }
+      if (!(requirement.verifiedBy?.length > 0)) {
+        r2Errors.push(`${requirement.id}: MUST has no verification method`);
+      }
     }
   }
   if (!reqs.length) r2Errors.push('No capability requirements declared.');
   const r2 = r2Errors.length
     ? gate('BLOCKED', `${r2Errors.length} requirement traceability defect(s)`, r2Errors)
-    : gate('PASS', `${reqs.length} requirements are uniquely identified, sourced and proof-planned.`);
+    : gate('PASS', `${reqs.length} requirements are uniquely identified, sourced, allocated and proof-planned.`);
 
-  const computed = { R0: r0, R1: r1, R2: r2 };
-  for (const key of ['R3', 'R4', 'R5', 'R6', 'R7', 'R8']) {
+  const capability = resolveDocumentReference(data.capabilityId, registry);
+  const r3 = !capability.ok
+    ? gate('BLOCKED', `Capability Spec ${data.capabilityId} is unresolved.`, [capability.reason])
+    : capability.document.metadata?.status === 'accepted'
+      ? gate(
+          'PASS',
+          `Capability Spec ${data.capabilityId} version ${capability.document.metadata?.version ?? data.capabilityVersion} is accepted.`,
+        )
+      : gate(
+          'REVIEW_REQUIRED',
+          `Capability Spec ${data.capabilityId} remains ${capability.document.metadata?.status ?? 'unknown'}.`,
+        );
+
+  let r4;
+  if (r3.result !== 'PASS') {
+    r4 = gate('BLOCKED', 'Capability Readiness R3 must pass before Mission contract allocation can be ready.');
+  } else {
+    const contract = await resolveCurrentContract(data, options);
+    const r4Errors = [];
+    const expectedMissionId = data.baseline?.missionContract?.missionId;
+    if (!contract) {
+      r4Errors.push(`Approved Mission contract ${expectedMissionId ?? 'unknown'} is unavailable.`);
+    } else {
+      if (contract.missionId !== expectedMissionId) {
+        r4Errors.push(`Mission contract identity ${contract.missionId ?? 'missing'} does not match ${expectedMissionId}.`);
+      }
+      if (!Number.isInteger(contract.revision) || contract.revision < 4) {
+        r4Errors.push(`Mission contract revision ${contract.revision ?? 'missing'} is not a post-revision-3 Replan.`);
+      }
+      if (!contract.approvedAt) r4Errors.push('Mission contract has no approvedAt evidence.');
+      if (contract.content?.schemaVersion !== 2) r4Errors.push('Mission contract does not use schemaVersion 2.');
+
+      const criterionIds = collectCriterionIds(contract);
+      for (const requirement of reqs.filter((item) => item.level === 'MUST')) {
+        if (!(requirement.allocatedTo?.length > 0)) {
+          r4Errors.push(`${requirement.id}: no approved criterion allocation.`);
+          continue;
+        }
+        for (const target of requirement.allocatedTo) {
+          if (target.startsWith('proposed:')) {
+            r4Errors.push(`${requirement.id}: allocation still uses proposed prefix.`);
+          } else if (!criterionIds.has(target)) {
+            r4Errors.push(`${requirement.id}: allocated criterion ${target} is absent from the approved contract.`);
+          }
+        }
+      }
+    }
+    for (const blocker of data.blockingItems ?? []) {
+      r4Errors.push(`${blocker.id ?? 'BLOCKER'}: ${blocker.statement ?? 'blocking item remains open'}`);
+    }
+    r4 = r4Errors.length
+      ? gate('BLOCKED', `${r4Errors.length} Mission contract allocation defect(s)`, r4Errors)
+      : gate(
+          'PASS',
+          `Approved schema-v2 Mission contract revision ${contract.revision} allocates every MUST requirement to an existing criterion.`,
+        );
+  }
+
+  const computed = { R0: r0, R1: r1, R2: r2, R3: r3, R4: r4 };
+  for (const key of ['R5', 'R6', 'R7', 'R8']) {
     computed[key] = data.readiness?.[key] ?? gate('NOT_STARTED', 'No readiness disposition recorded.');
   }
   return computed;
@@ -122,7 +221,7 @@ related:
 <!-- GENERATED — DO NOT EDIT
 Source: docs/capabilities/${capabilityId}/TRACEABILITY.json
 Generator: scripts/generate-capability-coverage.mjs
-Generator version: 2
+Generator version: 3
 -->
 
 # ${capabilityId} Applicability Matrix
@@ -150,6 +249,7 @@ export async function renderCoverage(capabilityId = 'CAP-EXECUTION') {
     ['Applicability domains', data.applicability?.length ?? 0],
     ['Requirements with source', `${count(reqs, (r) => r.source?.length > 0)}/${reqs.length}`],
     ['Requirements with proposed allocation', `${count(reqs, (r) => r.proposedAllocation?.length > 0)}/${reqs.length}`],
+    ['Requirements with approved allocation', `${count(reqs, (r) => r.allocatedTo?.length > 0)}/${reqs.length}`],
     ['Requirements with verification method', `${count(reqs, (r) => r.verifiedBy?.length > 0)}/${reqs.length}`],
     ['Designed', count(reqs, (r) => r.state === 'DESIGNED')],
     ['Blocked', count(reqs, (r) => r.state === 'BLOCKED')],
@@ -187,7 +287,7 @@ related:
 <!-- GENERATED — DO NOT EDIT
 Source: docs/capabilities/${capabilityId}/TRACEABILITY.json
 Generator: scripts/generate-capability-coverage.mjs
-Generator version: 2
+Generator version: 3
 -->
 
 # ${capabilityId} Planning Coverage
@@ -220,7 +320,7 @@ ${next || 'No next sequence recorded.'}
 
 ## Coverage interpretation
 
-R0–R2 are computed from canonical document versions, the Applicability Matrix and requirement traceability. R3–R8 remain lifecycle dispositions until their corresponding work exists. This report does not claim implementation readiness unless R0–R4 pass.
+R0–R4 are computed from canonical document versions, applicability, requirement traceability, Capability metadata, the materialized approved Mission contract and exact criterion allocations. R5–R8 remain lifecycle dispositions until their corresponding work exists. This report does not claim implementation readiness unless R0–R4 pass.
 `;
 }
 

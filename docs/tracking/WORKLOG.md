@@ -169,3 +169,37 @@ owners:
   - documentation validation green with 62 canonical IDs.
 - Automated tests verify `.mnfs/missions/MIS-002/plan.json` remains revision 3 with Git blob SHA `6b79117fe66cd5c9c8142099828812f470ce20de` and content hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
 - M2 remains blocked. Next sequence is Issue #8 AS-02, Issue #9 Replan, exact-hash Operator approval, mechanical R0–R4 recalculation and explicit unblock.
+
+## 2026-08-03
+
+### Issue #9 — M2 readiness reconciliation
+
+- Integrated accepted AS-02 evidence into CAP-EXECUTION without claiming M2 implementation verification.
+- Removed the obsolete AS-02 blocker; the approved schema-v2 MIS-002 Replan remains the contract blocker.
+- Preserved CAP-EXECUTION as `proposed`; explicit R3 Operator review is still required.
+- Clarified M2 Minimal Deterministic Receipt versus generalized Receipt/Evidence capability in M5+.
+- Kept M2 blocked pending Capability acceptance, exact-hash Replan approval, R0–R4 recalculation and explicit Operator unblock.
+
+### CAP-EXECUTION R3 acceptance
+
+- Operator supplied exact token `CAP_EXECUTION_ACCEPT version=0.1.0`; CAP-EXECUTION was promoted to `accepted` while implementation remained `planned`.
+- Created canonical acceptance evidence `ACCEPTANCE-CAP-EXECUTION-R3`.
+- Mechanical readiness now reports R3 `PASS`; R4 remains `BLOCKED` by the missing approved schema-v2 Replan and exact criterion allocations.
+- No Worker implementation, dispatch or M2 unblock was authorized.
+
+
+### MIS-002 revision 5 approval and R4 allocation
+
+- Operator supplied exact approval token for `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3` after Lavish and adversarial review.
+- Planning service materialized MIS-002 revision 5 as the approved schema-v2 contract; revision 3 remains immutable history.
+- Converted all 28 proposed allocations to exact approved criterion identities and removed `BLOCK-MIS-002-REPLAN`.
+- Added acceptance evidence `ACCEPTANCE-MIS-002-REPLAN`; R0-R4 must pass mechanically with R5 NOT_STARTED.
+- M2 remains blocked pending a separate exact Operator decision; no Worker code, M01 microdesign or dispatch was authorized.
+
+### M2 R5 microdesign unblock
+
+- Operator supplied exact token `MNFS_UNBLOCK_M2 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 gates=R0,R1,R2,R3,R4`.
+- Recorded decision D-006 and evidence `ACCEPTANCE-M2-UNBLOCK`.
+- Authorized M2 to enter R5 for M01 microdesign only; R5 remains `NOT_STARTED` until that microdesign is written and reviewed.
+- M01 implementation and Pi Worker dispatch remain prohibited until a separately approved microdesign exists.
+- Material changes to the contract, SEC-E1, Capability, prerequisites or requirements trigger Replan/re-readiness before implementation.

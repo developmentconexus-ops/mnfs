@@ -4,7 +4,7 @@ title: Governed local Worker execution
 document_type: capability_spec
 form: explanation
 authority: specification
-status: proposed
+status: accepted
 implementation_status: planned
 version: 0.1.0
 owners:
@@ -25,7 +25,9 @@ related:
   - ADR-0003
   - ADR-0005
   - ADR-0006
+  - ACCEPTANCE-CAP-EXECUTION-R3
 tracking_issue: 6
+last_reviewed: 2026-08-03
 ---
 
 # CAP-EXECUTION — Governed local Worker execution
@@ -174,7 +176,7 @@ M2 target is E1:
 - sandbox startup fails closed;
 - logs and Artifacts contain no secrets.
 
-AS-02 must validate the real Pi + WSL2 boundary before M2 can close.
+AS-02 accepted the candidate real Pi + WSL2 boundary. Run `as02-20260803t144645276z-7048d3` completed with verdict `ACCEPT`, effective policy hash `sha256:886eb0f1fb5c2087d0b5bf16a51f399dc1ffb9a75aab16d4900a9ffe6ab57797`, WSL restart status `PASS` and an empty drift set (`no drift`). This evidence proves the candidate boundary; M2 must still bind and exercise the accepted `SEC-E1` definition in the actual execution flow.
 
 ## Interfaces
 
@@ -354,7 +356,9 @@ Rollback:
 - 2026-08-01: `MIS-002` revision 3 approved under pre-Blueprint architecture.
 - 2026-08-02: Product Blueprint and Capability Realization Method approved.
 - 2026-08-02: this Capability Spec proposed for the Architecture Baseline.
-- Next: schema/readiness work, AS-02, Replan and exact-hash approval.
+- 2026-08-03: AS-02 run `as02-20260803t144645276z-7048d3` accepted the local Pi E1 candidate boundary; restart `PASS`, no drift, cleanup complete.
+- 2026-08-03: Operator supplied `CAP_EXECUTION_ACCEPT version=0.1.0`; the Capability Spec was accepted for R3 while implementation remained `planned`.
+- Next: MIS-002 schema-v2 Replan, Lavish review and exact-hash approval.
 
 ## Open questions
 

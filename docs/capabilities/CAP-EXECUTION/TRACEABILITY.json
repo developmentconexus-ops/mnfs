@@ -21,8 +21,8 @@
     ],
     "missionContract": {
       "missionId": "MIS-002",
-      "currentRevision": 3,
-      "status": "REPLAN_REQUIRED"
+      "currentRevision": 5,
+      "status": "APPROVED_SCHEMA_V2"
     }
   },
   "requirements": [
@@ -35,8 +35,9 @@
         "DOC-PRODUCT-BLUEPRINT-02",
         "DOC-PRODUCT-BLUEPRINT-08"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M01/AC-01"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M01/AC-01"
       ],
       "realizedBy": [
         "AttemptStore unique/current invariant"
@@ -57,8 +58,9 @@
         "DOC-PRODUCT-BLUEPRINT-02",
         "DOC-PRODUCT-BLUEPRINT-08"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M01/AC-02"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M01/AC-02"
       ],
       "realizedBy": [
         "WorkerRun entity and Attempt relation"
@@ -80,8 +82,9 @@
         "DOC-PRODUCT-BLUEPRINT-07",
         "ADR-0005"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-01"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-01"
       ],
       "realizedBy": [
         "ClaimService transition policy"
@@ -104,8 +107,9 @@
         "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0002"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M01/AC-03"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M01/AC-03"
       ],
       "realizedBy": [
         "ClaimService transaction"
@@ -126,8 +130,9 @@
         "DOC-PRODUCT-BLUEPRINT-02",
         "DOC-PRODUCT-BLUEPRINT-09"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M01/AC-04"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M01/AC-04"
       ],
       "realizedBy": [
         "contract binding fields and validation"
@@ -148,8 +153,9 @@
         "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0003"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M01/AC-05"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M01/AC-05"
       ],
       "realizedBy": [
         "LeaseService external operation protocol"
@@ -171,8 +177,9 @@
         "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0003"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M01/AC-06"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M01/AC-06"
       ],
       "realizedBy": [
         "Lease generation/external ID validation"
@@ -193,8 +200,9 @@
       "source": [
         "DOC-PRODUCT-BLUEPRINT-08"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M01/AC-07"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M01/AC-07"
       ],
       "realizedBy": [
         "RecoveryService divergence taxonomy"
@@ -216,8 +224,9 @@
         "DOC-PRODUCT-BLUEPRINT-05",
         "DOC-PRODUCT-BLUEPRINT-12"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-02"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-02"
       ],
       "realizedBy": [
         "PiProcessAdapter"
@@ -239,8 +248,9 @@
         "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0006"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-03"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-03"
       ],
       "realizedBy": [
         "SandboxPolicyResolver and Environment binding"
@@ -248,11 +258,11 @@
       "verifiedBy": [
         "AS-02/S09"
       ],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": [
-        "AS-02 not executed"
-      ]
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-011",
@@ -263,8 +273,9 @@
         "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0006"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-04"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-04"
       ],
       "realizedBy": [
         "ProcessSandboxAdapter filesystem policy"
@@ -274,11 +285,11 @@
         "AS-02/S03",
         "AS-02/S04"
       ],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": [
-        "AS-02 not executed"
-      ]
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-012",
@@ -289,8 +300,9 @@
         "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0007"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-05"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-05"
       ],
       "realizedBy": [
         "network/credential/effect policy"
@@ -299,11 +311,11 @@
         "AS-02/S05",
         "inspection:no-credentials"
       ],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": [
-        "AS-02 not executed"
-      ]
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-013",
@@ -314,8 +326,9 @@
         "DOC-PRODUCT-BLUEPRINT-10",
         "ADR-0006"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-06"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-06"
       ],
       "realizedBy": [
         "WorkerService sandbox prerequisite"
@@ -323,11 +336,11 @@
       "verifiedBy": [
         "AS-02/S13"
       ],
-      "evidencedBy": [],
-      "state": "BLOCKED",
-      "blockers": [
-        "AS-02 not executed"
-      ]
+      "evidencedBy": [
+        "ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2"
+      ],
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-014",
@@ -338,8 +351,9 @@
         "DOC-PRODUCT-BLUEPRINT-09",
         "ADR-0004"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-07"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-07"
       ],
       "realizedBy": [
         "AuthoritySnapshotService"
@@ -360,8 +374,9 @@
         "DOC-PRODUCT-BLUEPRINT-09",
         "DOC-PRODUCT-BLUEPRINT-12"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-08"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-08"
       ],
       "realizedBy": [
         "M2 Writer Pack compiler"
@@ -383,8 +398,9 @@
         "DOC-PRODUCT-BLUEPRINT-08",
         "ADR-0005"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-09"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-09"
       ],
       "realizedBy": [
         "PiProcessAdapter observation and MNFS CLI"
@@ -405,8 +421,9 @@
         "DOC-PRODUCT-BLUEPRINT-08",
         "DOC-PRODUCT-BLUEPRINT-09"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-10"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-10"
       ],
       "realizedBy": [
         "RecoveryService"
@@ -427,8 +444,9 @@
       "source": [
         "DOC-PRODUCT-BLUEPRINT-08"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-11"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-11"
       ],
       "realizedBy": [
         "Attempt fencing"
@@ -448,8 +466,9 @@
       "source": [
         "DOC-PRODUCT-BLUEPRINT-07"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-12"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-12"
       ],
       "realizedBy": [
         "MinimalVerificationService"
@@ -470,8 +489,9 @@
         "DOC-PRODUCT-BLUEPRINT-01#pb-p4",
         "DOC-PRODUCT-BLUEPRINT-07"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-13"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-13"
       ],
       "realizedBy": [
         "ClaimAcceptanceGate"
@@ -492,8 +512,9 @@
       "source": [
         "DOC-PRODUCT-BLUEPRINT-07"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-14"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-14"
       ],
       "realizedBy": [
         "Gate freshness validation"
@@ -515,8 +536,9 @@
         "DOC-PRODUCT-BLUEPRINT-06",
         "DOC-PRODUCT-BLUEPRINT-08"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/M02/AC-15"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/M02/AC-15"
       ],
       "realizedBy": [
         "Close/release orchestration"
@@ -538,8 +560,9 @@
         "DOC-PRODUCT-BLUEPRINT-05",
         "DOC-PRODUCT-BLUEPRINT-11"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/AC-01"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/AC-01"
       ],
       "realizedBy": [
         "CLI command contracts"
@@ -560,8 +583,9 @@
       "source": [
         "DOC-PRODUCT-BLUEPRINT-11"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/AC-02"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/AC-02"
       ],
       "realizedBy": [
         "local telemetry and Artifact refs"
@@ -583,8 +607,9 @@
         "DOC-PRODUCT-BLUEPRINT-10",
         "DOC-PRODUCT-BLUEPRINT-12"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/AC-03"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/AC-03"
       ],
       "realizedBy": [
         "failure drill suite"
@@ -612,8 +637,9 @@
         "DOC-PRODUCT-BLUEPRINT-07",
         "DOC-PRODUCT-BLUEPRINT-12"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/AC-04"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/AC-04"
       ],
       "realizedBy": [
         "Mission Plan schema v2 and Replan"
@@ -623,12 +649,11 @@
         "inspection:approved-revision"
       ],
       "evidencedBy": [
-        "EVID-PLAN-CONTRACT-SCHEMA-V2"
+        "EVID-PLAN-CONTRACT-SCHEMA-V2",
+        "ACCEPTANCE-MIS-002-REPLAN"
       ],
-      "state": "BLOCKED",
-      "blockers": [
-        "Approved MIS-002 schema v2 Replan unavailable"
-      ]
+      "state": "DESIGNED",
+      "blockers": []
     },
     {
       "id": "CAP-EXEC-REQ-027",
@@ -640,8 +665,9 @@
         "DOC-PRODUCT-BLUEPRINT-13",
         "DOC-MNFS-CAPABILITY-REALIZATION-METHOD"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/AC-05"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/AC-05"
       ],
       "realizedBy": [
         "Traceability manifest and Claim schema"
@@ -649,7 +675,9 @@
       "verifiedBy": [
         "docs:coverage-check"
       ],
-      "evidencedBy": [],
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-REPLAN"
+      ],
       "state": "DESIGNED",
       "blockers": []
     },
@@ -663,8 +691,9 @@
         "DOC-PRODUCT-BLUEPRINT-11",
         "DOC-PRODUCT-BLUEPRINT-12"
       ],
-      "proposedAllocation": [
-        "proposed:MIS-002/AC-06"
+      "proposedAllocation": [],
+      "allocatedTo": [
+        "MIS-002/AC-06"
       ],
       "realizedBy": [
         "M2 exclusions and adapter optionality"
@@ -679,12 +708,12 @@
   ],
   "readiness": {
     "R3": {
-      "result": "REVIEW_REQUIRED",
-      "reason": "Capability Spec remains proposed pending explicit Operator acceptance"
+      "result": "PASS",
+      "reason": "Capability Spec CAP-EXECUTION version 0.1.0 accepted by exact Operator token"
     },
     "R4": {
-      "result": "BLOCKED",
-      "reason": "AS-02 and a newly approved MIS-002 schema v2 revision are unavailable"
+      "result": "PASS",
+      "reason": "Approved MIS-002 revision 5 schema-v2 contract allocates all 28 requirements to exact criteria"
     },
     "R5": {
       "result": "NOT_STARTED",
@@ -703,22 +732,11 @@
       "reason": "M2 has not started"
     }
   },
-  "blockingItems": [
-    {
-      "id": "BLOCK-AS-02",
-      "statement": "Real local Pi sandbox behavior on canonical WSL2 is unproven."
-    },
-    {
-      "id": "BLOCK-MIS-002-REPLAN",
-      "statement": "Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS."
-    }
-  ],
+  "blockingItems": [],
   "nextSequence": [
-    "execute AS-02",
-    "run MIS-002 schema v2 Replan through Lavish",
-    "approve exact new hash",
-    "rerun R0-R4",
-    "begin M2 implementation"
+    "review mechanical R0-R4 evidence",
+    "obtain explicit Operator M2 unblock",
+    "write M01 microdesign only after unblock"
   ],
   "applicability": [
     {

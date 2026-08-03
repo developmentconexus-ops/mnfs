@@ -17,7 +17,7 @@ related:
 <!-- GENERATED — DO NOT EDIT
 Source: docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
 Generator: scripts/generate-capability-coverage.mjs
-Generator version: 2
+Generator version: 3
 -->
 
 # CAP-EXECUTION Applicability Matrix

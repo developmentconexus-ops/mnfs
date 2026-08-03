@@ -18,7 +18,7 @@ related:
 <!-- GENERATED — DO NOT EDIT
 Source: docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
 Generator: scripts/generate-capability-coverage.mjs
-Generator version: 2
+Generator version: 3
 -->
 
 # CAP-EXECUTION Planning Coverage
@@ -33,12 +33,13 @@ Generator version: 2
 | Unassessed requirements | 0 |
 | Applicability domains | 23 |
 | Requirements with source | 28/28 |
-| Requirements with proposed allocation | 28/28 |
+| Requirements with proposed allocation | 0/28 |
+| Requirements with approved allocation | 28/28 |
 | Requirements with verification method | 28/28 |
-| Designed | 23 |
-| Blocked | 5 |
+| Designed | 28 |
+| Blocked | 0 |
 | Verified | 0 |
-| Evidenced | 1 |
+| Evidenced | 6 |
 
 ## Readiness Gates
 
@@ -46,9 +47,9 @@ Generator version: 2
 |---|---|---|
 | R0 | PASS | Blueprint, roadmap, ADR and Mission baseline bindings resolve to the declared versions. |
 | R1 | PASS | 23 impact domains assessed with explicit dispositions. |
-| R2 | PASS | 28 requirements are uniquely identified, sourced and proof-planned. |
-| R3 | REVIEW_REQUIRED | Capability Spec remains proposed pending explicit Operator acceptance |
-| R4 | BLOCKED | AS-02 and a newly approved MIS-002 schema v2 revision are unavailable |
+| R2 | PASS | 28 requirements are uniquely identified, sourced, allocated and proof-planned. |
+| R3 | PASS | Capability Spec CAP-EXECUTION version 0.1.0 is accepted. |
+| R4 | PASS | Approved schema-v2 Mission contract revision 5 allocates every MUST requirement to an existing criterion. |
 | R5 | NOT_STARTED | Approved Mission contract required |
 | R6 | NOT_STARTED | No implementation Claim |
 | R7 | NOT_STARTED | No verification Evidence |
@@ -60,19 +61,16 @@ None.
 
 ## Blocking items
 
-1. **BLOCK-AS-02:** Real local Pi sandbox behavior on canonical WSL2 is unproven.
-2. **BLOCK-MIS-002-REPLAN:** Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS.
+None.
 
 ## Required next sequence
 
 ```text
-execute AS-02
-→ run MIS-002 schema v2 Replan through Lavish
-→ approve exact new hash
-→ rerun R0-R4
-→ begin M2 implementation
+review mechanical R0-R4 evidence
+→ obtain explicit Operator M2 unblock
+→ write M01 microdesign only after unblock
 ```
 
 ## Coverage interpretation
 
-R0–R2 are computed from canonical document versions, the Applicability Matrix and requirement traceability. R3–R8 remain lifecycle dispositions until their corresponding work exists. This report does not claim implementation readiness unless R0–R4 pass.
+R0–R4 are computed from canonical document versions, applicability, requirement traceability, Capability metadata, the materialized approved Mission contract and exact criterion allocations. R5–R8 remain lifecycle dispositions until their corresponding work exists. This report does not claim implementation readiness unless R0–R4 pass.

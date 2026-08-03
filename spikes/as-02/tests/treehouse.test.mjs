@@ -64,6 +64,7 @@ test('acquires a durable lease with exact safe argv and one absolute stdout path
     cwd: paths.repositoryPath,
     env: {
       PATH: process.env.PATH ?? '',
+      HOME: process.env.HOME ?? '',
       GIT_OPTIONAL_LOCKS: '0',
     },
     timeoutMs: 30_000,
@@ -126,6 +127,7 @@ test('observes Treehouse status as opaque evidence instead of product state', as
     cwd: paths.repositoryPath,
     env: {
       PATH: process.env.PATH ?? '',
+      HOME: process.env.HOME ?? '',
       GIT_OPTIONAL_LOCKS: '0',
     },
     timeoutMs: 30_000,
@@ -159,6 +161,7 @@ test('returns the exact leased path without force or destructive commands', asyn
     cwd: paths.repositoryPath,
     env: {
       PATH: process.env.PATH ?? '',
+      HOME: process.env.HOME ?? '',
       GIT_OPTIONAL_LOCKS: '0',
     },
     timeoutMs: 30_000,

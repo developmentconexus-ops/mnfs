@@ -26,8 +26,8 @@ assert.deepEqual(candidate.milestones.map((milestone) => milestone.qualifiedId),
   'MIS-002/M01',
   'MIS-002/M02',
 ]);
-assert.equal(candidate.acceptanceCriteria.length, 6);
-assert.deepEqual(candidate.milestones.map((milestone) => milestone.acceptanceCriteria.length), [7, 15]);
+assert.equal(candidate.acceptanceCriteria.length, 7);
+assert.deepEqual(candidate.milestones.map((milestone) => milestone.acceptanceCriteria.length), [8, 16]);
 assert.equal(candidate.requirementRefs.length, 28);
 assert.deepEqual(
   candidate.requirementRefs,
@@ -45,6 +45,98 @@ for (const milestone of candidate.milestones) {
     assert.ok(feature.acceptanceCriteria.length > 0, `${feature.qualifiedId} needs criteria`);
   }
 }
+
+const missionGoldenProof = candidate.acceptanceCriteria.find(
+  (criterion) => criterion.qualifiedId === 'MIS-002/AC-07',
+);
+assert.ok(missionGoldenProof, 'Mission Golden Proof criterion is required');
+assert.deepEqual(missionGoldenProof.requirementRefs, candidate.requirementRefs);
+assert.match(missionGoldenProof.statement, /Golden Proof/iu);
+assert.match(missionGoldenProof.statement, /fresh Lead/iu);
+assert.match(missionGoldenProof.statement, /Minimal (Deterministic )?Receipt/iu);
+assert.match(missionGoldenProof.statement, /MNFS Gate/iu);
+assert.match(missionGoldenProof.statement, /release/iu);
+assert.equal(missionGoldenProof.verificationPlan.method, 'DEMONSTRATION');
+assert.equal(missionGoldenProof.verificationPlan.proofType, 'VERDICT');
+assert.equal(missionGoldenProof.verificationPlan.proofOwner, 'MNFS-GATE');
+
+const [m01, m02] = candidate.milestones;
+const m01Composition = m01.acceptanceCriteria.find(
+  (criterion) => criterion.qualifiedId === 'MIS-002/M01/AC-08',
+);
+assert.ok(m01Composition, 'M01 composition criterion is required');
+assert.deepEqual(m01Composition.requirementRefs, m01.requirementRefs);
+assert.match(m01Composition.statement, /SQLite/iu);
+assert.match(m01Composition.statement, /Domain Events/iu);
+assert.match(m01Composition.statement, /Treehouse/iu);
+assert.match(m01Composition.statement, /fresh (Lead|process)/iu);
+
+const m02Composition = m02.acceptanceCriteria.find(
+  (criterion) => criterion.qualifiedId === 'MIS-002/M02/AC-16',
+);
+assert.ok(m02Composition, 'M02 composition criterion is required');
+assert.deepEqual(m02Composition.requirementRefs, m02.requirementRefs);
+for (const phrase of [
+  'canonical Ubuntu WSL2',
+  'E1',
+  'Pi Worker',
+  'Claim',
+  'fresh Lead',
+  'Minimal Receipt',
+  'MNFS Gate',
+  'release',
+]) {
+  assert.match(m02Composition.statement, new RegExp(phrase, 'iu'));
+}
+
+const m01IdentityFeature = m01.features.find(
+  (feature) => feature.qualifiedId === 'MIS-002/M01/F01',
+);
+assert.ok(m01IdentityFeature);
+assert.equal(m01IdentityFeature.acceptanceCriteria.length, 5);
+const migrationCriterion = m01IdentityFeature.acceptanceCriteria.find(
+  (criterion) => /migration/iu.test(criterion.statement),
+);
+assert.ok(migrationCriterion, 'M01/F01 needs an explicit migration-preservation criterion');
+assert.match(migrationCriterion.statement, /M0\/M1/iu);
+assert.match(migrationCriterion.statement, /historical plan revisions/iu);
+assert.match(migrationCriterion.statement, /fresh process/iu);
+
+const failureDrillCriterion = candidate.acceptanceCriteria.find(
+  (criterion) => criterion.qualifiedId === 'MIS-002/AC-03',
+);
+assert.ok(failureDrillCriterion);
+for (const drill of [
+  'duplicate Lease',
+  'Intent persisted before external acquisition',
+  'external worktree created before semantic commit',
+  'orphan worktree',
+  'Lease without worktree',
+  'Worker exit without Claim',
+  'Lead crash',
+  'active Worker Run without process',
+  'late result from a superseded Attempt',
+  'stale Claim or Receipt',
+  'sandbox unavailable',
+  'sandbox violation',
+  'policy-definition mismatch',
+  'effective-policy mismatch',
+  'repeated release',
+  'release attempt by a stale Lease holder',
+]) {
+  assert.match(failureDrillCriterion.statement, new RegExp(drill, 'iu'));
+}
+
+assert.ok(
+  candidate.risks.some(
+    (risk) => /repo\.json/iu.test(risk.description) && /Issue #15/iu.test(risk.mitigation),
+  ),
+  'the discovered repository-identity recovery risk must be recorded',
+);
+assert.ok(
+  candidate.scope.excluded.some((item) => /repository-identity recovery command/iu.test(item)),
+  'the generalized recovery command must remain outside M2',
+);
 
 const criterionIds = new Set([
   ...candidate.acceptanceCriteria.map((criterion) => criterion.qualifiedId),

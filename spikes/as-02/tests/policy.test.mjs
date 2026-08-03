@@ -21,19 +21,19 @@ function createPath(root, relative, kind = 'directory') {
 
 function createPolicyFixture() {
   const root = mkdtempSync(join(tmpdir(), 'mnfs-as02-policy-'));
-  const worktreePath = createPath(root, 'worktree');
+  const realHome = createPath(root, 'real-home');
+  const worktreePath = createPath(realHome, 'worktrees/as02');
   const attemptTempPath = createPath(root, 'attempt-temp');
   const brokerPath = createPath(root, 'trusted/broker.mjs', 'file');
   const policyRoot = createPath(root, 'trusted/policy');
   const runtimeRoot = createPath(root, 'runtime');
-  const realHome = createPath(root, 'real-home');
   const fakeHome = createPath(root, 'fake-home');
   const mountRoot = createPath(root, 'mnt');
-  const gitCommon = createPath(root, 'git-common');
-  const gitDir = createPath(root, 'git-common/worktrees/as02');
-  const gitConfig = createPath(root, 'git-common/config', 'file');
-  const gitHooks = createPath(root, 'git-common/hooks');
-  const gitIndex = createPath(root, 'git-common/worktrees/as02/index', 'file');
+  const gitCommon = createPath(realHome, 'treehouse/git-common');
+  const gitDir = createPath(realHome, 'treehouse/git-common/worktrees/as02');
+  const gitConfig = createPath(realHome, 'treehouse/git-common/config', 'file');
+  const gitHooks = createPath(realHome, 'treehouse/git-common/hooks');
+  const gitIndex = createPath(realHome, 'treehouse/git-common/worktrees/as02/index', 'file');
   createPath(worktreePath, '.mnfs');
   createPath(worktreePath, '.pi');
   createPath(worktreePath, '.env', 'file');
@@ -98,12 +98,17 @@ test('compiles a literal, fail-closed network-off policy for Linux', async (t) =
     join(fixture.input.worktreePath, '.env'),
     join(fixture.input.worktreePath, '.git'),
     fixture.input.policyRoot,
-    fixture.input.realHome,
-    fixture.input.fakeHome,
-    fixture.input.mountRoot,
     ...fixture.input.gitDenyWritePaths,
   ]) {
     assert.equal(compiled.config.filesystem.denyWrite.includes(required), true, `missing denyWrite ${required}`);
+  }
+
+  for (const broadRoot of [fixture.input.realHome, fixture.input.fakeHome, fixture.input.mountRoot]) {
+    assert.equal(
+      compiled.config.filesystem.denyWrite.includes(broadRoot),
+      false,
+      `broad denyWrite would override a nested allowed worktree: ${broadRoot}`,
+    );
   }
 
   for (const required of [
@@ -177,10 +182,17 @@ test('constructs the Worker environment from an explicit allowlist', async (t) =
   });
 });
 
-test('rejects a stale policy hash', () => {
-  assert.doesNotThrow(() => assertPolicyHash('sha256:abc', 'sha256:abc'));
+test('requires full SHA-256 policy hashes and rejects stale values', () => {
+  const first = `sha256:${'a'.repeat(64)}`;
+  const second = `sha256:${'b'.repeat(64)}`;
+
+  assert.doesNotThrow(() => assertPolicyHash(first, first));
   assert.throws(
-    () => assertPolicyHash('sha256:abc', 'sha256:def'),
+    () => assertPolicyHash(first, second),
+    (error) => error?.code === 'POLICY_HASH_MISMATCH',
+  );
+  assert.throws(
+    () => assertPolicyHash('sha256:abc', 'sha256:abc'),
     (error) => error?.code === 'POLICY_HASH_MISMATCH',
   );
 });

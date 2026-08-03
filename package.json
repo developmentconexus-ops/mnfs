@@ -15,10 +15,12 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit",
     "test:unit": "npm run build --silent && node scripts/run-tests.mjs",
+    "test:as02": "node scripts/run-as02-tests.mjs",
+    "as02": "node spikes/as-02/src/cli.mjs",
     "docs:generate": "node scripts/generate-product-blueprint.mjs && node scripts/generate-roadmap.mjs && node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
     "docs:coverage": "node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
     "docs:check": "npm run docs:test && node scripts/validate-docs.mjs",
-    "verify": "npm run typecheck && npm run test:unit && npm run docs:check",
+    "verify": "npm run typecheck && npm run test:unit && npm run test:as02 && npm run docs:check",
     "doctor": "npm run build --silent && node bin/mnfs.mjs doctor",
     "docs:roadmap": "node scripts/generate-roadmap.mjs",
     "docs:test": "node scripts/test-documentation-tooling.mjs"

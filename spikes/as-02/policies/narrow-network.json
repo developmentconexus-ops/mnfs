@@ -1,0 +1,10 @@
+{
+  "allowedDomains": [
+    "registry.npmjs.org"
+  ],
+  "deniedDomains": [],
+  "strictAllowlist": true,
+  "allowUnixSockets": [],
+  "allowAllUnixSockets": false,
+  "allowLocalBinding": false
+}

@@ -32,16 +32,15 @@ function preflight() {
 
 test('resolves separate durable artifact and fixture roots from one Linux state root', () => {
   const env = { MNFS_HOME: '/home/user/.mnfs-state' };
-  assert.equal(
-    resolveAs02ArtifactBase(env, '/home/user'),
-    '/home/user/.mnfs-state/artifacts/as-02',
-  );
-  assert.equal(
-    resolveAs02FixtureBase(env, '/home/user'),
-    '/home/user/.mnfs-state/fixtures/as-02',
-  );
+  const artifactBase = resolveAs02ArtifactBase(env, '/home/user');
+  const fixtureBase = resolveAs02FixtureBase(env, '/home/user');
+  assert.equal(artifactBase, '/home/user/.mnfs-state/artifacts/as-02');
+  assert.equal(fixtureBase, '/home/user/.mnfs-state/fixtures/as-02');
+  assert.notEqual(artifactBase, fixtureBase);
+  assert.equal(artifactBase.includes('/fixtures/'), false);
+  assert.equal(fixtureBase.includes('/artifacts/'), false);
   assert.equal(resolveAs02FixtureBase({}, '/home/user'), '/home/user/.local/state/mnfs/fixtures/as-02');
-  assert.equal(resolveAs02FixtureBase(env, '/home/user').startsWith('/tmp/'), false);
+  assert.equal(fixtureBase.startsWith('/tmp/'), false);
 });
 
 test('phase one passes and persists the durable fixture root instead of /tmp', async (t) => {

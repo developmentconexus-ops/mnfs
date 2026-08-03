@@ -27,7 +27,12 @@ export function createRunId({ now = new Date(), random = () => randomUUID().repl
   assertAs02(now instanceof Date && !Number.isNaN(now.valueOf()), 'ORCHESTRATOR_PATH_INVALID', 'Run timestamp is invalid.');
   const suffix = random();
   assertAs02(typeof suffix === 'string' && /^[a-z0-9]{6,32}$/u.test(suffix), 'ORCHESTRATOR_PATH_INVALID', 'Run suffix is invalid.', { suffix });
-  const timestamp = now.toISOString().replaceAll('-', '').replaceAll(':', '').replace('.000', '').toLowerCase();
+  const timestamp = now.toISOString()
+    .replaceAll('-', '')
+    .replaceAll(':', '')
+    .replace('.000', '')
+    .replace('.', '')
+    .toLowerCase();
   return `as02-${timestamp}-${suffix}`;
 }
 

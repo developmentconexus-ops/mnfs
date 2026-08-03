@@ -1,10 +1,34 @@
 const TAMPER_CODE = `
 const fs = require('node:fs');
-let escaped = false;
-for (const path of process.argv.slice(1)) {
-  try { fs.writeFileSync(path, 'tamper-attempt\\n'); escaped = true; } catch {}
+const targets = JSON.parse(process.argv[1]);
+const payload = 'tamper-attempt\\n';
+const results = [];
+for (const target of targets) {
+  let beforeReadable = false;
+  try { fs.readFileSync(target.path); beforeReadable = true; } catch {}
+  try {
+    fs.writeFileSync(target.path, payload);
+    let readBackMatched = false;
+    try { readBackMatched = fs.readFileSync(target.path, 'utf8') === payload; } catch {}
+    results.push({
+      resourceId: target.resourceId,
+      outcome: 'WRITE_SUCCEEDED',
+      beforeReadable,
+      readBackMatched,
+      errorCode: null,
+    });
+  } catch (error) {
+    results.push({
+      resourceId: target.resourceId,
+      outcome: 'BLOCKED',
+      beforeReadable,
+      readBackMatched: false,
+      errorCode: typeof error?.code === 'string' ? error.code : null,
+    });
+  }
 }
-process.exit(escaped ? 0 : 23);
+process.stdout.write(JSON.stringify({ targets: results }));
+process.exit(0);
 `;
 
 const OBSERVABILITY_CODE = `
@@ -16,13 +40,13 @@ catch (error) { process.stderr.write(String(error && error.message || error)); p
 export function policyIntegrityScenarios(context) {
   const protectedResources = context.fixture.protectedResources;
   const tamperTargets = [
-    protectedResources.activePolicy,
-    protectedResources.worktreeMnfs,
-    protectedResources.worktreePi,
-    protectedResources.worktreeEnv,
-    protectedResources.gitConfig,
-    protectedResources.gitHook,
-  ];
+    ['activePolicy', protectedResources.activePolicy],
+    ['worktreeMnfs', protectedResources.worktreeMnfs],
+    ['worktreePi', protectedResources.worktreePi],
+    ['worktreeEnv', protectedResources.worktreeEnv],
+    ['gitConfig', protectedResources.gitConfig],
+    ['gitHook', protectedResources.gitHook],
+  ].map(([resourceId, path]) => ({ resourceId, path }));
 
   return [
     {
@@ -30,10 +54,10 @@ export function policyIntegrityScenarios(context) {
       name: 'Active policy and protected metadata tamper',
       expected: 'DENY',
       policyKey: 'networkOff',
-      argv: [process.execPath, '-e', TAMPER_CODE, '--', ...tamperTargets],
+      argv: [process.execPath, '-e', TAMPER_CODE, '--', JSON.stringify(tamperTargets)],
       timeoutMs: 10_000,
-      targetPaths: tamperTargets,
-      observedResources: ['activePolicy', 'worktreeMnfs', 'worktreePi', 'worktreeEnv', 'gitConfig', 'gitHook'],
+      targetPaths: tamperTargets.map((target) => target.path),
+      observedResources: tamperTargets.map((target) => target.resourceId),
       failureCode: 'POLICY_HASH_MISMATCH',
     },
     {

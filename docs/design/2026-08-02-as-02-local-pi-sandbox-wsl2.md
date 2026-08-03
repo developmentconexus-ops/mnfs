@@ -5,7 +5,7 @@ document_type: microdesign
 form: explanation
 authority: specification
 status: proposed
-version: 0.1.1
+version: 0.1.2
 owners:
   - developmentconexus-ops
 related:
@@ -313,17 +313,19 @@ Generated raw artifacts remain outside canonical documentation unless the report
 Each run creates a new root on the Linux filesystem:
 
 ```text
-/tmp/mnfs-as-02/<run-id>/
+${MNFS_HOME:-$HOME/.local/state/mnfs}/fixtures/as-02/<run-id>/
   source-repo/
-  treehouse-root/
-  leased-worktree/
+  treehouse/
   fake-home/
-  controlled-home-sentinel/
   outside-write-root/
   active-policy/
   runtime-artifacts/
-  controlled-sockets/
+  attempt-temp/
 ```
+
+The fixture root is durable across a full `wsl --terminate` cycle because S15 must re-read the source repository, Git metadata, synthetic sentinels, policies and operation roots after Ubuntu starts again. `createFixture()` has no implicit `/tmp` fallback; the orchestrator must supply the exact Linux state root.
+
+The controlled Unix socket is the only run resource intentionally placed under `/tmp`: `/tmp/mnfs-as02-<uid>/<run-hash>.sock`. It contains no state, is below Linux `sockaddr_un` pathname limits, is removed when each phase closes, is recreated mechanically from the run ID during `restart-resume`, and is excluded from the fixture manifest and restart checkpoint. A non-socket entry occupying that path fails closed and is never deleted.
 
 The trusted setup creates protected files before Sandbox Runtime initialization because Linux bind-mount protection cannot reliably deny creation of every non-existent mandatory path.
 
@@ -457,7 +459,7 @@ The broad-provider scenario permits `github.com` and `api.github.com` without cr
 
 Unix sockets remain denied by default. On supported Linux architectures, Sandbox Runtime seccomp is expected to block `AF_UNIX` socket creation. The spike records architecture, seccomp availability, runtime warnings, and actual behavior.
 
-The Docker socket, when present, must not be opened. If it does not exist, the harness creates a controlled Unix socket and marks Docker-specific evidence `NOT_PRESENT` rather than claiming a direct Docker proof.
+The Docker socket, when present, must not be opened. If it does not exist, the harness creates a controlled Unix socket and marks Docker-specific evidence `NOT_PRESENT` rather than claiming a direct Docker proof. The socket pathname is a short per-user `/tmp` path derived from the run ID; unlike fixture and checkpoint state, it is deliberately ephemeral and recreated after WSL restart.
 
 An unsupported socket-enforcement architecture cannot receive `ACCEPT`; it may produce `ACCEPT_WITH_LIMITATIONS` only if M2 is explicitly constrained to a proven architecture and the controlled socket proof passes there.
 

@@ -147,8 +147,14 @@ export async function digestResources(resourcePaths) {
   return result;
 }
 
-export async function createFixture({ baseRoot = '/tmp/mnfs-as-02', runId, runner = runProcess }) {
+export async function createFixture({ baseRoot, runId, runner = runProcess } = {}) {
   assertAs02(typeof runId === 'string' && RUN_ID_PATTERN.test(runId), 'INVALID_RUN_ID', 'Run ID must use lowercase letters, numbers and single hyphens.', { runId });
+  assertAs02(
+    typeof baseRoot === 'string' && isAbsolute(baseRoot) && baseRoot !== '/mnt' && !baseRoot.startsWith('/mnt/'),
+    'FIXTURE_PATH_ESCAPE',
+    'Fixture base root must be an explicit absolute Linux path outside /mnt.',
+    { baseRoot },
+  );
 
   const base = await realpath(baseRoot);
   const root = join(base, runId);

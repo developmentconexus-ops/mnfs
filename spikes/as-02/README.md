@@ -10,6 +10,9 @@ This directory contains the isolated acceptance harness for GitHub Issue #8. It 
 - Sandbox initialization failure blocks execution; there is no host fallback.
 - Raw evidence is written by the trusted orchestrator outside Worker write roots.
 - Fixture and Treehouse Lease acquisition are persisted before later work can fail, allowing explicit cleanup after interruption.
+- Restart-bound fixture state lives under `${MNFS_HOME:-$HOME/.local/state/mnfs}/fixtures/as-02`; it never relies on `/tmp`.
+- Only the controlled S8 Unix socket uses a short per-user `/tmp` pathname. It is stateless, recreated after restart and fails closed if occupied by a non-socket entry.
+- Mount and socket cleanup paths are derived from the run ID rather than trusted from nested state.
 - `.mnfs/missions/MIS-002/plan.json` is outside this spike and must remain unchanged.
 
 ## Deterministic tests

@@ -115,6 +115,17 @@ The preflight records versions and availability without changing host policy:
 - AppArmor user-namespace restriction;
 - Docker socket presence without opening it.
 
+## Canonical WSL2 failure-driven hardening
+
+The real Ubuntu WSL2 execution identified and corrected four lifecycle assumptions before acceptance:
+
+- a disposable source repository under `/tmp` does not survive `wsl --terminate`, which also invalidates Treehouse linked-worktree Git pointers; restart-bound fixture state is therefore under the durable MNFS Linux state root;
+- Pi extension discovery and interactive OAuth state cannot be assumed when `--no-extensions` is active; the exact OAuth adapter is loaded explicitly and version-bound;
+- custom broker paths must be propagated through the reduced Worker environment, and the Pi pilot must prove a real nonce-bound `read` call rather than accept copied model text;
+- Unix-domain socket pathnames have a platform length limit, so S8 uses a short stateless per-user `/tmp` pathname derived from the run ID while all restart evidence remains durable.
+
+Cleanup preserves completed substeps across retries. Run-scoped socket and mount cleanup paths are derived mechanically from the run ID, and a regular file or symlink occupying the controlled socket pathname is never removed automatically.
+
 ## Upgrade and removal rule
 
 Any change to Pi, the Pi Anthropic OAuth adapter, Sandbox Runtime, Treehouse, Ubuntu/WSL kernel, Bubblewrap, Socat, seccomp behavior, extension code, broker code or effective policy requires a fresh provenance record and rerun of the security scenarios. A material bypass, unstable WSL2 support, required broad exceptions or inadequate diagnostics rejects/removes the candidate instead of silently weakening E1.

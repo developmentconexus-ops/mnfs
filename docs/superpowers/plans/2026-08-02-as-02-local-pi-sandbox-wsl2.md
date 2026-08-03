@@ -58,7 +58,8 @@ tracking_issue: 8
 - `spikes/as-02/src/canonical-json.mjs` — stable recursive JSON serialization and SHA-256 hashing.
 - `spikes/as-02/src/policy.mjs` — compiles the frozen SRT policy and Worker environment.
 - `spikes/as-02/src/preflight.mjs` — observes WSL, toolchain, sandbox primitives and host policy without mutation.
-- `spikes/as-02/src/fixture.mjs` — creates and cleans controlled sentinels and disposable repository state.
+- `spikes/as-02/src/fixture.mjs` — creates and cleans durable controlled sentinels and disposable repository state under the Linux MNFS state root.
+- `spikes/as-02/src/controlled-socket.mjs` — derives, opens, recreates and cleans the short ephemeral Unix socket used only by S8.
 - `spikes/as-02/src/treehouse.mjs` — narrow Treehouse lease adapter.
 - `spikes/as-02/src/evidence.mjs` — validates, redacts and persists raw scenario evidence.
 - `spikes/as-02/src/sandbox-session.mjs` — fail-closed SRT initialization and command execution seam.
@@ -227,7 +228,7 @@ cleanupFixture(fixture) -> Promise<CleanupResult>
 Use only temporary directories and an injected runner. Assert:
 
 - run ID accepts only `[a-z0-9-]+` and path containment is enforced;
-- all fixture roots are below `/tmp/mnfs-as-02/<run-id>` except the optional controlled `/mnt/c/mnfs-as-02/<run-id>` sentinel;
+- all restart-bound fixture roots are below `${MNFS_HOME:-$HOME/.local/state/mnfs}/fixtures/as-02/<run-id>`; only the controlled Unix socket is ephemeral under a short per-user `/tmp` pathname, and the optional mount sentinel remains under `/mnt/c/mnfs-as-02/<run-id>`;
 - sentinels exist before policy compilation and contain unique markers;
 - normal evidence exposes only digest and logical resource ID, not marker plaintext;
 - linked-worktree metadata is discovered with `git rev-parse --git-common-dir`, `--git-dir`, `--git-path config`, `--git-path hooks` and `--git-path index`;

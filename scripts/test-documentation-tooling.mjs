@@ -130,21 +130,30 @@ assert.equal(validateJsonSchema(parsed.metadata, metadataSchema).length, 0);
 assert.ok(validateJsonSchema({ ...parsed.metadata, owners: [] }, metadataSchema).some((error) => error.includes('at least 1')));
 
 assert.equal(resolveDocumentReference('DOC-PRODUCT-BLUEPRINT-01#pb-p4', registry).ok, true);
+assert.equal(resolveDocumentReference('ACCEPTANCE-CAP-EXECUTION-R3', registry).ok, true);
 assert.equal(resolveDocumentReference('DOC-NOT-REAL', registry).ok, false);
 
 const base = await evaluateReadiness(structuredClone(traceability), registry, { currentContract });
 assert.equal(base.R0.result, 'PASS');
 assert.equal(base.R1.result, 'PASS');
 assert.equal(base.R2.result, 'PASS');
-assert.equal(base.R3.result, 'REVIEW_REQUIRED');
+assert.equal(base.R3.result, 'PASS');
 assert.equal(base.R4.result, 'BLOCKED');
 
 const capabilitySpec = parseFrontmatter(capabilitySpecText, 'docs/capabilities/CAP-EXECUTION/SPEC.md');
-assert.equal(capabilitySpec.metadata.status, 'proposed');
+assert.equal(capabilitySpec.metadata.status, 'accepted');
+assert.equal(capabilitySpec.metadata.implementation_status, 'planned');
+assert.equal(capabilitySpec.metadata.version, '0.1.0');
+assert.match(capabilitySpecText, /CAP_EXECUTION_ACCEPT version=0\.1\.0/u);
 assert.match(capabilitySpecText, /as02-20260803t144645276z-7048d3/u);
 assert.match(capabilitySpecText, /sha256:886eb0f1fb5c2087d0b5bf16a51f399dc1ffb9a75aab16d4900a9ffe6ab57797/u);
 assert.match(capabilitySpecText, /restart[^\n]*PASS/iu);
 assert.match(capabilitySpecText, /sem drift|no drift|drift[^\n]*0/iu);
+
+const proposedRegistry = registryWithCapabilityStatus('proposed');
+const proposedSpec = await evaluateReadiness(structuredClone(traceability), proposedRegistry, { currentContract });
+assert.equal(proposedSpec.R3.result, 'REVIEW_REQUIRED');
+assert.equal(proposedSpec.R4.result, 'BLOCKED');
 
 for (const id of ['CAP-EXEC-REQ-010', 'CAP-EXEC-REQ-011', 'CAP-EXEC-REQ-012', 'CAP-EXEC-REQ-013']) {
   const requirement = traceability.requirements.find((item) => item.id === id);

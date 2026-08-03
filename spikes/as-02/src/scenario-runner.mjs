@@ -1,3 +1,4 @@
+import { sha256Text } from './canonical-json.mjs';
 import { writeScenarioEvidence } from './evidence.mjs';
 import { as02Error, assertAs02 } from './errors.mjs';
 import { filesystemScenarios } from '../scenarios/filesystem.mjs';
@@ -9,6 +10,7 @@ import { childProcessScenarios } from '../scenarios/child-process.mjs';
 import { failClosedScenarios } from '../scenarios/fail-closed.mjs';
 
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
+export const MISSING_RESOURCE_DIGEST = sha256Text('MNFS-AS02:RESOURCE-MISSING');
 
 function ordered(definitions) {
   return [...definitions].sort(
@@ -43,6 +45,19 @@ function parseNarrowNetwork(stdout) {
   } catch {
     return false;
   }
+}
+
+function isMissing(value) {
+  return value === 'MISSING' || value === MISSING_RESOURCE_DIGEST;
+}
+
+function evidenceDigests(observation) {
+  return Object.fromEntries(
+    Object.entries(observation).map(([logicalId, value]) => [
+      logicalId,
+      value === 'MISSING' ? MISSING_RESOURCE_DIGEST : value,
+    ]),
+  );
 }
 
 export function scenarioDefinitions(context) {
@@ -89,8 +104,8 @@ export function evaluateScenario(definition, observation) {
   }
 
   if (definition.scenarioId === 'S1') {
-    const beforeMissing = observation.before?.allowedWrite === 'MISSING';
-    const afterCreated = typeof observation.after?.allowedWrite === 'string' && observation.after.allowedWrite !== 'MISSING';
+    const beforeMissing = isMissing(observation.before?.allowedWrite);
+    const afterCreated = typeof observation.after?.allowedWrite === 'string' && !isMissing(observation.after.allowedWrite);
     if (observation.process?.exitCode === 0 && beforeMissing && afterCreated) {
       return pass('Write inside the leased worktree succeeded and was observed by the trusted runner.');
     }
@@ -193,7 +208,7 @@ export async function runScenario(definition, context) {
     signal: processResult?.signal ?? null,
     stdoutRef: `commands/${definition.scenarioId}.stdout.bin`,
     stderrRef: `commands/${definition.scenarioId}.stderr.bin`,
-    observedFilesystem: { ...after },
+    observedFilesystem: evidenceDigests(after),
     policyHash,
     result: evaluation.result,
     rationale: evaluation.rationale,

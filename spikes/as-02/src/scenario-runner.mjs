@@ -10,6 +10,15 @@ import { childProcessScenarios } from '../scenarios/child-process.mjs';
 import { failClosedScenarios } from '../scenarios/fail-closed.mjs';
 
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
+const S9_RESOURCE_IDS = Object.freeze([
+  'activePolicy',
+  'worktreeMnfs',
+  'worktreePi',
+  'worktreeEnv',
+  'gitConfig',
+  'gitHook',
+]);
+const S9_METADATA_IDS = Object.freeze(S9_RESOURCE_IDS.filter((id) => id !== 'activePolicy'));
 export const MISSING_RESOURCE_DIGEST = sha256Text('MNFS-AS02:RESOURCE-MISSING');
 
 function ordered(definitions) {
@@ -41,10 +50,75 @@ function pass(rationale) {
 function parseNarrowNetwork(stdout) {
   try {
     const value = JSON.parse(stdout.toString('utf8'));
-    return value && value.allowed === true && value.undeclared === false;
+    return value?.allowed?.reachable === true && value?.undeclared?.reachable === false;
   } catch {
     return false;
   }
+}
+
+function parsePolicyTamper(stdout) {
+  try {
+    const value = JSON.parse(stdout.toString('utf8'));
+    if (!value || typeof value !== 'object' || !Array.isArray(value.targets)) return null;
+    if (value.targets.length !== S9_RESOURCE_IDS.length) return null;
+    const results = new Map();
+    for (const entry of value.targets) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null;
+      if (!S9_RESOURCE_IDS.includes(entry.resourceId) || results.has(entry.resourceId)) return null;
+      if (!['BLOCKED', 'WRITE_SUCCEEDED'].includes(entry.outcome)) return null;
+      if (typeof entry.beforeReadable !== 'boolean' || typeof entry.readBackMatched !== 'boolean') return null;
+      if (!(entry.errorCode === null || typeof entry.errorCode === 'string')) return null;
+      results.set(entry.resourceId, entry);
+    }
+    if (!S9_RESOURCE_IDS.every((resourceId) => results.has(resourceId))) return null;
+    return results;
+  } catch {
+    return null;
+  }
+}
+
+function evaluatePolicyTamper(definition, observation, unchanged) {
+  if (!unchanged) {
+    return failure(definition, 'A protected policy or metadata host digest changed during the tamper attempt.');
+  }
+  if (
+    observation.exceptionCode !== null ||
+    observation.process?.exitCode !== 0 ||
+    observation.process?.signal !== null
+  ) {
+    return failure(definition, 'The per-target policy tamper proof did not complete successfully.');
+  }
+  const outcomes = parsePolicyTamper(observation.process.stdout);
+  if (!outcomes) {
+    return failure(definition, 'The per-target policy tamper proof produced malformed or incomplete evidence.');
+  }
+
+  const activePolicy = outcomes.get('activePolicy');
+  const activePolicyProtected = activePolicy.beforeReadable === false && (
+    activePolicy.outcome === 'BLOCKED' ||
+    (
+      activePolicy.outcome === 'WRITE_SUCCEEDED' &&
+      activePolicy.readBackMatched === true
+    )
+  );
+  if (!activePolicyProtected) {
+    return failure(definition, 'The active policy was readable or its write behavior was not safely blocked/shadowed.');
+  }
+
+  const escapedMetadata = S9_METADATA_IDS.filter(
+    (resourceId) => outcomes.get(resourceId).outcome !== 'BLOCKED',
+  );
+  if (escapedMetadata.length > 0) {
+    return failure(
+      definition,
+      `Protected metadata writes succeeded for: ${escapedMetadata.join(', ')}.`,
+    );
+  }
+
+  const policyMode = activePolicy.outcome === 'BLOCKED' ? 'blocked' : 'shadowed';
+  return pass(
+    `Protected metadata writes were blocked; the unreadable active policy was ${policyMode} without host mutation, and all trusted digests remained unchanged.`,
+  );
 }
 
 function isMissing(value) {
@@ -128,6 +202,10 @@ export function evaluateScenario(definition, observation) {
       failureCode: definition.failureCode,
       rationale: 'Broad GitHub reachability could not be observed; no mutation authority was granted.',
     };
+  }
+
+  if (definition.scenarioId === 'S9') {
+    return evaluatePolicyTamper(definition, observation, unchanged);
   }
 
   if (definition.expected === 'ALLOW') {

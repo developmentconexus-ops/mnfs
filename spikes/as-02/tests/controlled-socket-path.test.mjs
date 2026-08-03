@@ -10,13 +10,12 @@ import {
   openControlledSocket,
 } from '../src/controlled-socket.mjs';
 
-function connect(path) {
+function readSocket(path) {
   return new Promise((resolve, reject) => {
     const socket = createConnection({ path });
-    socket.once('connect', () => {
-      socket.destroy();
-      resolve();
-    });
+    const chunks = [];
+    socket.on('data', (chunk) => chunks.push(chunk));
+    socket.once('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     socket.once('error', reject);
   });
 }
@@ -38,7 +37,7 @@ test('opens, closes and recreates the same controlled socket path', async (t) =>
 
   const first = await openControlledSocket(runId);
   assert.equal(first.path, path);
-  await connect(path);
+  assert.equal(await readSocket(path), 'AS02_CONTROLLED_SOCKET');
   await first.close();
 
   const missing = await cleanupControlledSocket(runId);
@@ -46,7 +45,7 @@ test('opens, closes and recreates the same controlled socket path', async (t) =>
 
   const second = await openControlledSocket(runId);
   assert.equal(second.path, path);
-  await connect(path);
+  assert.equal(await readSocket(path), 'AS02_CONTROLLED_SOCKET');
   await second.close();
 });
 

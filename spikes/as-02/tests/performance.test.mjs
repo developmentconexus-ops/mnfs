@@ -61,6 +61,7 @@ test('excludes warm-ups and reports baseline, sandbox and overhead independently
   assert.deepEqual(Object.keys(result.benchmarks), ['spawn', 'node', 'filesystem', 'test']);
   assert.equal(result.benchmarks.spawn.baseline.count, 20);
   assert.equal(result.benchmarks.spawn.sandbox.count, 20);
+  assert.equal(result.benchmarks.spawn.overhead.count, 20);
   assert.equal(result.benchmarks.filesystem.baseline.count, 10);
   assert.equal(result.benchmarks.test.sandbox.count, 5);
   assert.equal(result.benchmarks.spawn.baseline.maxMs < 10_000, true);
@@ -68,6 +69,32 @@ test('excludes warm-ups and reports baseline, sandbox and overhead independently
   assert.equal(result.benchmarks.test.overhead.p95Ms, 25);
   assert.deepEqual(result.limitations, []);
   assert.equal(Object.hasOwn(result, 'passed'), false);
+});
+
+test('summarizes paired overhead samples instead of subtracting independent summaries', async () => {
+  const result = await runPerformanceSuite({
+    measure: async ({ mode, warmup, index }) => {
+      if (warmup) return 1;
+      const baseline = index % 2 === 0 ? 100 : 1;
+      return mode === 'baseline' ? baseline : baseline + index;
+    },
+  });
+
+  assert.deepEqual(result.benchmarks.spawn.overhead, {
+    count: 20,
+    minMs: 0,
+    p50Ms: 9,
+    p95Ms: 18,
+    maxMs: 19,
+    meanMs: 9.5,
+  });
+  for (const entry of Object.values(result.benchmarks)) {
+    assert.equal(entry.overhead.minMs <= entry.overhead.p50Ms, true);
+    assert.equal(entry.overhead.p50Ms <= entry.overhead.p95Ms, true);
+    assert.equal(entry.overhead.p95Ms <= entry.overhead.maxMs, true);
+    assert.equal(entry.overhead.minMs <= entry.overhead.meanMs, true);
+    assert.equal(entry.overhead.meanMs <= entry.overhead.maxMs, true);
+  }
 });
 
 test('records measurement failures as limitations instead of inventing success', async () => {

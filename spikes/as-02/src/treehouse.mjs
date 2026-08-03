@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { isAbsolute } from 'node:path';
+import { dirname, isAbsolute } from 'node:path';
 import { realpath } from 'node:fs/promises';
 
 import { as02Error, assertAs02 } from './errors.mjs';
@@ -134,11 +134,13 @@ export async function inspectTreehouseLease({ repositoryPath, lease, runner = ru
 export async function releaseTreehouseLease({ lease, runner = runProcess, force = false }) {
   validateLease(lease);
   assertAs02(force === false, 'TREEHOUSE_FORCE_FORBIDDEN', 'AS-02 ordinary cleanup forbids forced Treehouse release.');
+  const poolPath = dirname(dirname(lease.path));
+  assertSafeStoredPath(poolPath, 'Treehouse pool path');
 
   const result = await runner({
     file: 'treehouse',
     args: ['return', lease.path],
-    cwd: lease.path,
+    cwd: poolPath,
     env: environment(),
     timeoutMs: 30_000,
   });
@@ -152,7 +154,8 @@ export async function releaseTreehouseLease({ lease, runner = runProcess, force 
   }
 
   const evidence = `${bounded(result.stdout)}\n${bounded(result.stderr)}`;
-  if (IDEMPOTENT_RELEASE_PATTERN.test(evidence)) {
+  const exactUnmanagedEvidence = evidence.includes(`worktree ${lease.path} is not managed by treehouse`);
+  if (IDEMPOTENT_RELEASE_PATTERN.test(evidence) || exactUnmanagedEvidence) {
     return {
       result: 'ALREADY_RELEASED',
       path: lease.path,

@@ -18,7 +18,7 @@ function state(overrides = {}) {
     updatedAt: '2026-08-03T02:03:04.000Z',
     repositoryPath: '/home/user/src/mnfs',
     artifactRoot: '/home/user/.local/state/mnfs/artifacts/as-02/as02-20260803t020304z-a1b2c3',
-    fixtureRoot: '/tmp/mnfs-as-02/as02-20260803t020304z-a1b2c3',
+    fixtureRoot: '/home/user/.local/state/mnfs/fixtures/as-02/as02-20260803t020304z-a1b2c3',
     lease: null,
     preflight: { status: 'READY' },
     policies: {},
@@ -67,7 +67,7 @@ test('writes state and latest index atomically and recovers in a fresh store', a
   assert.deepEqual(await fresh.latest(), state());
 });
 
-test('enforces allowed status transitions and increments cleanup attempts', async (t) => {
+test('enforces transitions and preserves completed cleanup steps across retries', async (t) => {
   const base = await mkdtemp(join(tmpdir(), 'mnfs-as02-run-store-'));
   t.after(() => rm(base, { recursive: true, force: true }));
   const store = await createRunStore(base);
@@ -92,8 +92,27 @@ test('enforces allowed status transitions and increments cleanup attempts', asyn
     attempts: 1,
     startedAt: '2026-08-03T02:11:00.000Z',
   });
+  await store.update(state().runId, (current) => ({
+    ...current,
+    updatedAt: '2026-08-03T02:11:30.000Z',
+    cleanup: {
+      ...current.cleanup,
+      status: 'FAILED',
+      lease: { result: 'RELEASED' },
+      fixture: { removed: true, integrity: 'PASS' },
+      finishedAt: '2026-08-03T02:11:30.000Z',
+      error: { code: 'SYNTHETIC', message: 'later cleanup step failed' },
+    },
+  }));
+
   const retry = await store.beginCleanup(state().runId, '2026-08-03T02:12:00.000Z');
-  assert.equal(retry.cleanup.attempts, 2);
+  assert.deepEqual(retry.cleanup, {
+    status: 'RUNNING',
+    attempts: 2,
+    startedAt: '2026-08-03T02:12:00.000Z',
+    lease: { result: 'RELEASED' },
+    fixture: { removed: true, integrity: 'PASS' },
+  });
 });
 
 test('refuses state path traversal and missing latest state', async (t) => {

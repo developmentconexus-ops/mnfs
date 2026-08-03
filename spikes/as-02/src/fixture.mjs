@@ -171,11 +171,10 @@ export async function createFixture({ baseRoot = '/tmp/mnfs-as-02', runId, runne
   const outsideWriteRoot = join(root, 'outside-write-root');
   const policyRoot = join(root, 'active-policy');
   const runtimeArtifacts = join(root, 'runtime-artifacts');
-  const controlledSockets = join(root, 'controlled-sockets');
   const attemptTemp = join(root, 'attempt-temp');
 
   try {
-    for (const path of [sourceRepo, worktreeParent, fakeHome, outsideWriteRoot, policyRoot, runtimeArtifacts, controlledSockets, attemptTemp]) {
+    for (const path of [sourceRepo, worktreeParent, fakeHome, outsideWriteRoot, policyRoot, runtimeArtifacts, attemptTemp]) {
       assertContained(root, path, 'fixture path');
       await mkdir(path, { recursive: true, mode: 0o700 });
     }
@@ -264,7 +263,6 @@ export async function createFixture({ baseRoot = '/tmp/mnfs-as-02', runId, runne
       outsideWriteRoot: await realpath(outsideWriteRoot),
       policyRoot: await realpath(policyRoot),
       runtimeArtifacts: await realpath(runtimeArtifacts),
-      controlledSockets: await realpath(controlledSockets),
       attemptTemp: await realpath(attemptTemp),
       marker,
       protectedResources,

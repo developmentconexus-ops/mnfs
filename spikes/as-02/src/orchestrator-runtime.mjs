@@ -1,5 +1,4 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { createServer } from 'node:net';
 import { homedir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +18,11 @@ import { performance } from 'node:perf_hooks';
 
 import { canonicalJson, sha256Text } from './canonical-json.mjs';
 import { as02Error, assertAs02 } from './errors.mjs';
+import {
+  cleanupControlledSocket as cleanupRunControlledSocket,
+  controlledSocketPath,
+  openControlledSocket as openRunControlledSocket,
+} from './controlled-socket.mjs';
 import {
   cleanupFixture,
   createFixture,
@@ -264,21 +268,6 @@ async function createMountSentinel(runId, marker) {
   await mkdir(directory, { recursive: true });
   await writeFile(path, `${marker}:windows-mount\n`, { flag: 'wx', mode: 0o600 });
   return { path, directory };
-}
-
-async function openControlledSocket(path) {
-  await rm(path, { force: true });
-  const server = createServer((socket) => socket.end('AS02_CONTROLLED_SOCKET'));
-  await new Promise((resolvePromise, reject) => {
-    server.once('error', reject);
-    server.listen(path, resolvePromise);
-  });
-  return {
-    async close() {
-      await new Promise((resolvePromise) => server.close(resolvePromise));
-      await rm(path, { force: true });
-    },
-  };
 }
 
 async function writePolicyDocuments(policyRoot, policies, workerEnv) {
@@ -563,6 +552,9 @@ export function createRuntimeOperations(options = {}) {
   const gitDiscovery = options.discoverGitMetadata ?? discoverGitMetadata;
   const securitySuite = options.runSecuritySuite ?? runSecuritySuite;
   const performanceSuite = options.measurePerformance ?? measurePerformance;
+  const controlledSocketOpen = options.openControlledSocket ?? openRunControlledSocket;
+  const controlledSocketCleanup = options.cleanupControlledSocket ?? cleanupRunControlledSocket;
+  const removeRunScopedPath = options.removeRunScopedPath ?? rm;
 
   let repositoryPath;
   let artifactBase;
@@ -645,8 +637,14 @@ export function createRuntimeOperations(options = {}) {
       const operationRoot = join(fixture.attemptTemp, 'operations');
       await mkdir(operationRoot, { recursive: true, mode: 0o700 });
       const mount = await createMountSentinel(runId, fixture.marker);
-      const controlledSocket = join(fixture.controlledSockets, 'probe.sock');
-      socket = await openControlledSocket(controlledSocket);
+      socket = await controlledSocketOpen(runId);
+      const controlledSocket = socket?.path;
+      assertAs02(
+        controlledSocket === controlledSocketPath(runId),
+        'ORCHESTRATOR_RUNTIME_INVALID',
+        'Controlled socket factory returned an unexpected run-scoped path.',
+        { expected: controlledSocketPath(runId), actual: controlledSocket },
+      );
       const workerEnv = buildWorkerEnv(env, {
         fakeHome: fixture.fakeHome,
         attemptTemp: fixture.attemptTemp,
@@ -838,8 +836,27 @@ export function createRuntimeOperations(options = {}) {
     const lease = state.lease;
     assertAs02(lease && typeof lease === 'object', 'ORCHESTRATOR_RUNTIME_INVALID', 'Stored lease context is missing.');
     const marker = await syntheticMarkerFromFixture(lease.fixture);
-    const controlledSocket = lease.controlledSocket;
-    const socket = await openControlledSocket(controlledSocket);
+    const controlledSocket = controlledSocketPath(state.runId);
+    const expectedMountSentinel = mountSentinelPath(state.runId);
+    assertAs02(
+      lease.controlledSocket === controlledSocket,
+      'ORCHESTRATOR_RUNTIME_INVALID',
+      'Stored controlled socket path does not match the run identity.',
+      { expected: controlledSocket, actual: lease.controlledSocket },
+    );
+    assertAs02(
+      lease.resources?.mountSentinel === expectedMountSentinel,
+      'ORCHESTRATOR_RUNTIME_INVALID',
+      'Stored mount sentinel path does not match the run identity.',
+      { expected: expectedMountSentinel, actual: lease.resources?.mountSentinel },
+    );
+    const socket = await controlledSocketOpen(state.runId);
+    assertAs02(
+      socket?.path === controlledSocket,
+      'ORCHESTRATOR_RUNTIME_INVALID',
+      'Controlled socket resume factory returned an unexpected path.',
+      { expected: controlledSocket, actual: socket?.path },
+    );
     const manager = await loadRuntime();
     const controller = await createController({
       manager,
@@ -1027,7 +1044,17 @@ export function createRuntimeOperations(options = {}) {
           cleanup: { ...current.cleanup, fixture: cleanObject(fixtureResult) },
         }));
       }
-      if (state.lease?.mountDirectory) await rm(state.lease.mountDirectory, { recursive: true, force: true });
+      let socketResult = state.cleanup.socket ?? null;
+      if (!socketResult) {
+        socketResult = await controlledSocketCleanup(runId);
+        state = await runStore.update(runId, (current) => ({
+          ...current,
+          updatedAt: now(),
+          cleanup: { ...current.cleanup, socket: cleanObject(socketResult) },
+        }));
+      }
+      const mountDirectory = dirname(mountSentinelPath(runId));
+      await removeRunScopedPath(mountDirectory, { recursive: true, force: true });
       state = await runStore.update(runId, (current) => ({
         ...current,
         status: 'CLEANED',

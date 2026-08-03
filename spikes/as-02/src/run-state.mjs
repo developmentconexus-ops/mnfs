@@ -184,15 +184,19 @@ export async function createRunStore(basePath) {
 
   async function beginCleanup(runId, startedAt) {
     iso(startedAt, 'cleanup startedAt');
-    return update(runId, (current) => ({
-      ...current,
-      updatedAt: startedAt,
-      cleanup: {
-        status: 'RUNNING',
-        attempts: current.cleanup.attempts + 1,
-        startedAt,
-      },
-    }));
+    return update(runId, (current) => {
+      const { finishedAt: _finishedAt, error: _error, ...completed } = current.cleanup;
+      return {
+        ...current,
+        updatedAt: startedAt,
+        cleanup: {
+          ...completed,
+          status: 'RUNNING',
+          attempts: current.cleanup.attempts + 1,
+          startedAt,
+        },
+      };
+    });
   }
 
   return Object.freeze({ base, save, load, latest, update, beginCleanup });

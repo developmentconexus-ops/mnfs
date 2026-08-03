@@ -40,6 +40,7 @@ test('builds the exact dependency snapshot required by restart proof', () => {
     node: 'v24.18.0',
     npm: '11.16.0',
     pi: 'pi 0.50.2',
+    piAnthropicAuth: '2.0.1',
     treehouse: 'treehouse 0.4.0',
     sandboxRuntime: '0.0.67',
     bwrap: 'bubblewrap 0.11.0',

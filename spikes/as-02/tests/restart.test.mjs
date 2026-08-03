@@ -18,6 +18,7 @@ function input(overrides = {}) {
       node: 'v24.18.0',
       npm: '11.16.0',
       pi: '0.50.2',
+      piAnthropicAuth: '2.0.1',
       treehouse: '0.4.0',
       sandboxRuntime: '0.0.67',
       bwrap: '0.11.0',
@@ -50,6 +51,7 @@ test('creates a deterministic hash-bound restart checkpoint', async () => {
   assert.equal(first.schemaVersion, 1);
   assert.equal(first.runId, 'run-1');
   assert.equal(first.policyHash, POLICY_HASH);
+  assert.equal(first.dependencies.piAnthropicAuth, '2.0.1');
   assert.equal(first.fixtureManifestHash, MANIFEST_HASH);
   assert.deepEqual(Object.keys(first.scenarioDigests), ['S1', 'S3', 'S5', 'S9', 'S11', 'S13']);
   assert.match(first.checkpointHash, /^sha256:[a-f0-9]{64}$/u);
@@ -71,7 +73,11 @@ test('detects policy, dependency, WSL, fixture and scenario drift mechanically',
   const checkpoint = await createRestartCheckpoint(input());
   const changed = input({
     policyHash: `sha256:${'f'.repeat(64)}`,
-    dependencies: { ...input().dependencies, pi: '0.51.0' },
+    dependencies: {
+      ...input().dependencies,
+      pi: '0.51.0',
+      piAnthropicAuth: '2.0.2',
+    },
     wsl: { ...input().wsl, uname: 'Linux changed-kernel x86_64' },
     fixtureManifestHash: `sha256:${'e'.repeat(64)}`,
     scenarioDigests: { ...input().scenarioDigests, S5: `sha256:${'e'.repeat(64)}` },
@@ -82,6 +88,7 @@ test('detects policy, dependency, WSL, fixture and scenario drift mechanically',
   assert.deepEqual(observation.drift.map((entry) => entry.field), [
     'policyHash',
     'dependencies.pi',
+    'dependencies.piAnthropicAuth',
     'wsl.uname',
     'fixtureManifestHash',
     'scenarioDigests.S5',
@@ -98,9 +105,15 @@ test('rejects tampered checkpoint content even when current state matches the ta
   );
 });
 
-test('rejects incomplete scenario digest sets and relative checkpoint paths', async () => {
+test('rejects incomplete scenario digest sets, missing auth identity and relative checkpoint paths', async () => {
   await assert.rejects(
     () => createRestartCheckpoint(input({ scenarioDigests: { S1: `sha256:${'1'.repeat(64)}` } })),
+    (error) => error?.code === 'RESTART_CHECKPOINT_INVALID',
+  );
+  const missingAuth = { ...input().dependencies };
+  delete missingAuth.piAnthropicAuth;
+  await assert.rejects(
+    () => createRestartCheckpoint(input({ dependencies: missingAuth })),
     (error) => error?.code === 'RESTART_CHECKPOINT_INVALID',
   );
   await assert.rejects(

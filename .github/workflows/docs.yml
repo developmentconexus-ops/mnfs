@@ -5,8 +5,10 @@ on:
     paths:
       - 'docs/**'
       - '.mnfs/**'
+      - 'policies/**'
       - 'schemas/**'
       - 'scripts/generate-*.mjs'
+      - 'scripts/sec-e1-policy.mjs'
       - 'scripts/validate-docs.mjs'
       - 'scripts/document-utils.mjs'
       - 'scripts/test-documentation-tooling.mjs'
@@ -23,8 +25,10 @@ on:
     paths:
       - 'docs/**'
       - '.mnfs/**'
+      - 'policies/**'
       - 'schemas/**'
       - 'scripts/generate-*.mjs'
+      - 'scripts/sec-e1-policy.mjs'
       - 'scripts/validate-docs.mjs'
       - 'scripts/document-utils.mjs'
       - 'scripts/test-documentation-tooling.mjs'

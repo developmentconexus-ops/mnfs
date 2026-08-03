@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.5.1
+version: 1.5.2
 owners:
   - developmentconexus-ops
 related:
@@ -69,9 +69,9 @@ The unblock decision did not alter the approved Mission contract or complete R5.
 ## Canonical verification
 
 ```text
-Head:       d4184c60c5790a63ac1946e21cd289b2fbee4b0e
-Workflow:   30854839307
-Job:        91823320545
+Head:       dfa5b5898f69190612ec49f2e39378e997381843
+Workflow:   30855047324
+Job:        91823983012
 Command:    npm ci && npm run verify
 Result:     PASS
 ```

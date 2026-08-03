@@ -23,6 +23,13 @@ function linuxAbsolute(path, label) {
   return path;
 }
 
+function resolveAs02StateRoot(env, homeDirectory) {
+  const home = linuxAbsolute(homeDirectory, 'Home directory');
+  return env.MNFS_HOME === undefined
+    ? join(home, '.local', 'state', 'mnfs')
+    : linuxAbsolute(env.MNFS_HOME, 'MNFS_HOME');
+}
+
 export function createRunId({ now = new Date(), random = () => randomUUID().replaceAll('-', '').slice(0, 6) } = {}) {
   assertAs02(now instanceof Date && !Number.isNaN(now.valueOf()), 'ORCHESTRATOR_PATH_INVALID', 'Run timestamp is invalid.');
   const suffix = random();
@@ -37,11 +44,11 @@ export function createRunId({ now = new Date(), random = () => randomUUID().repl
 }
 
 export function resolveAs02ArtifactBase(env = process.env, homeDirectory) {
-  const home = linuxAbsolute(homeDirectory, 'Home directory');
-  const stateRoot = env.MNFS_HOME === undefined
-    ? join(home, '.local', 'state', 'mnfs')
-    : linuxAbsolute(env.MNFS_HOME, 'MNFS_HOME');
-  return join(stateRoot, 'artifacts', 'as-02');
+  return join(resolveAs02StateRoot(env, homeDirectory), 'artifacts', 'as-02');
+}
+
+export function resolveAs02FixtureBase(env = process.env, homeDirectory) {
+  return join(resolveAs02StateRoot(env, homeDirectory), 'fixtures', 'as-02');
 }
 
 export function buildLeasedResources({ leasedPath, gitMetadata, baseResources, activePolicy }) {

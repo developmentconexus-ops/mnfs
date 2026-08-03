@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { evaluateReadiness } from './generate-capability-coverage.mjs';
@@ -9,6 +10,16 @@ const root = process.cwd();
 const registry = await loadDocumentRegistry(root);
 const traceability = JSON.parse(await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/TRACEABILITY.json'), 'utf8'));
 const metadataSchema = JSON.parse(await readFile(path.join(root, 'schemas/document-metadata.schema.json'), 'utf8'));
+
+const historicalMissionText = await readFile(
+  path.join(root, '.mnfs/missions/MIS-002/history/revision-0003.json'),
+  'utf8',
+);
+const historicalMissionBlob = createHash('sha1')
+  .update(`blob ${Buffer.byteLength(historicalMissionText)}\0`)
+  .update(historicalMissionText)
+  .digest('hex');
+assert.equal(historicalMissionBlob, '6b79117fe66cd5c9c8142099828812f470ce20de');
 
 const parsed = parseFrontmatter(`---\nid: DOC-TEST\ntitle: Test\ndocument_type: reference\nauthority: reference\nstatus: accepted\nowners:\n  - owner\n---\n\n# Test\n`, 'fixture.md');
 assert.deepEqual(parsed.metadata.owners, ['owner']);

@@ -49,7 +49,7 @@ Generator version: 3
 | R1 | PASS | 23 impact domains assessed with explicit dispositions. |
 | R2 | PASS | 28 requirements are uniquely identified, sourced, allocated and proof-planned. |
 | R3 | PASS | Capability Spec CAP-EXECUTION version 0.1.0 is accepted. |
-| R4 | BLOCKED | 30 Mission contract allocation defect(s) |
+| R4 | BLOCKED | 28 Mission contract allocation defect(s) |
 | R5 | NOT_STARTED | Approved Mission contract required |
 | R6 | NOT_STARTED | No implementation Claim |
 | R7 | NOT_STARTED | No verification Evidence |
@@ -57,8 +57,6 @@ Generator version: 3
 
 ## Computed gate defects
 
-- **R4:** Mission contract revision 3 is not a post-revision-3 Replan.
-- **R4:** Mission contract does not use schemaVersion 2.
 - **R4:** CAP-EXEC-REQ-001: no approved criterion allocation.
 - **R4:** CAP-EXEC-REQ-002: no approved criterion allocation.
 - **R4:** CAP-EXEC-REQ-003: no approved criterion allocation.

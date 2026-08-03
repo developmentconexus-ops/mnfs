@@ -121,7 +121,7 @@ test('factory is async and registers zero tools when sandbox initialization fail
   assert.deepEqual(pi.tools, []);
 });
 
-test('validates policy and trusted realpaths before registering exactly seven tools', async (t) => {
+test('validates policy and trusted realpaths before registering exactly seven prompt-visible tools', async (t) => {
   const paths = await fixture();
   t.after(() => rm(paths.root, { recursive: true, force: true }));
   const pi = fakePi();
@@ -140,6 +140,15 @@ test('validates policy and trusted realpaths before registering exactly seven to
 
   assert.deepEqual(pi.tools.map((tool) => tool.name), TOOLS);
   assert.equal(new Set(pi.tools.map((tool) => tool.name)).size, 7);
+  for (const tool of pi.tools) {
+    assert.equal(typeof tool.promptSnippet, 'string');
+    assert.equal(tool.promptSnippet.includes(tool.name), true);
+    assert.equal(Array.isArray(tool.promptGuidelines), true);
+    assert.equal(tool.promptGuidelines.length > 0, true);
+    assert.equal(tool.promptGuidelines.every((guideline) => guideline.includes(tool.name)), true);
+  }
+  const readTool = pi.tools.find((tool) => tool.name === 'read');
+  assert.match(readTool.promptGuidelines.join('\n'), /file contents|read the requested file/iu);
   assert.equal(session.calls.initialize, 1);
   assert.equal(sessionInput.expectedPolicyHash, paths.hash);
   assert.equal(sessionInput.cwd, paths.worktree);

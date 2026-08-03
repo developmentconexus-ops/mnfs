@@ -13,6 +13,8 @@ const traceability = JSON.parse(await readFile(path.join(root, 'docs/capabilitie
 const metadataSchema = JSON.parse(await readFile(path.join(root, 'schemas/document-metadata.schema.json'), 'utf8'));
 const traceabilitySchema = JSON.parse(await readFile(path.join(root, 'schemas/capability-traceability.schema.json'), 'utf8'));
 const currentContract = JSON.parse(await readFile(path.join(root, '.mnfs/missions/MIS-002/plan.json'), 'utf8'));
+const capabilitySpecText = await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/SPEC.md'), 'utf8');
+const domainModelText = await readFile(path.join(root, 'docs/product/blueprint/02-domain-model.md'), 'utf8');
 
 function registryWithCapabilityStatus(status) {
   const documents = new Map(registry.documents);
@@ -136,6 +138,32 @@ assert.equal(base.R1.result, 'PASS');
 assert.equal(base.R2.result, 'PASS');
 assert.equal(base.R3.result, 'REVIEW_REQUIRED');
 assert.equal(base.R4.result, 'BLOCKED');
+
+const capabilitySpec = parseFrontmatter(capabilitySpecText, 'docs/capabilities/CAP-EXECUTION/SPEC.md');
+assert.equal(capabilitySpec.metadata.status, 'proposed');
+assert.match(capabilitySpecText, /as02-20260803t144645276z-7048d3/u);
+assert.match(capabilitySpecText, /sha256:886eb0f1fb5c2087d0b5bf16a51f399dc1ffb9a75aab16d4900a9ffe6ab57797/u);
+assert.match(capabilitySpecText, /restart[^\n]*PASS/iu);
+assert.match(capabilitySpecText, /sem drift|no drift|drift[^\n]*0/iu);
+
+for (const id of ['CAP-EXEC-REQ-010', 'CAP-EXEC-REQ-011', 'CAP-EXEC-REQ-012', 'CAP-EXEC-REQ-013']) {
+  const requirement = traceability.requirements.find((item) => item.id === id);
+  assert.ok(requirement, `${id} must exist`);
+  assert.equal(requirement.state, 'DESIGNED');
+  assert.deepEqual(requirement.blockers, []);
+  assert.ok(requirement.evidencedBy.includes('ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2'));
+}
+assert.equal(traceability.blockingItems.some((item) => item.id === 'BLOCK-AS-02'), false);
+assert.equal(traceability.nextSequence[0], 'review and accept CAP-EXECUTION');
+
+assert.match(
+  domainModelText,
+  /\| Receipt \| M2 — bounded Minimal Deterministic Receipt; M5\+ — generalized Receipt\/Evidence capability \|/u,
+);
+assert.match(
+  domainModelText,
+  /M2 implementa apenas um Minimal Deterministic Receipt delimitado[^\n]*Golden Proof/iu,
+);
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];

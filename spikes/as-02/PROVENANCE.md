@@ -26,7 +26,33 @@ This record covers the third-party components admitted to the AS-02 spike. It do
   - broad domain allowlisting is not mutation authority;
   - Linux wrapped descriptors expose the host process environment, so MNFS discards that value and supplies its own Worker environment allowlist;
   - real WSL2 behavior must be revalidated on every accepted upgrade.
-- Lock integrity: generated and inspected in Task 12 before real execution; no package script is trusted implicitly.
+
+### Lock integrity
+
+The isolated `spikes/as-02/package-lock.json` was generated and verified on Ubuntu 24.04 with Node.js 24.18.0 by GitHub Actions run `30808419487`:
+
+```text
+npm install --package-lock-only --ignore-scripts
+npm ci --ignore-scripts
+```
+
+Both commands passed. The committed lockfile has SHA-256:
+
+```text
+85983de1e8089fe59f13a1f090a5587de0cd7ddc1e07a9c476677ccbbf73f2c0
+```
+
+The reviewed graph is:
+
+| Package | Exact locked version |
+|---|---:|
+| `@anthropic-ai/sandbox-runtime` | `0.0.67` |
+| `@pondwader/socks5-server` | `1.0.10` |
+| `commander` | `12.1.0` |
+| `node-forge` | `1.4.0` |
+| `zod` | `3.25.76` |
+
+The deterministic AS-02 suite asserts the exact main package integrity and every locked version. Package lifecycle scripts are not executed during installation.
 
 ## Pi coding agent
 
@@ -51,6 +77,7 @@ This record covers the third-party components admitted to the AS-02 spike. It do
   - `treehouse get --lease --lease-holder mnfs-as02-<run-id>`;
   - `treehouse status` as opaque evidence only;
   - `treehouse return <exact-leased-path>`.
+- Fixture creation and successful Lease acquisition are persisted immediately in the run state. Cleanup does not call `treehouse return` when acquisition never succeeded.
 - Destructive commands and forced release are outside ordinary AS-02 cleanup.
 - Exact installed version: observed by `treehouse --version` in the WSL2 preflight and promoted to the acceptance report.
 

@@ -9,6 +9,7 @@ This directory contains the isolated acceptance harness for GitHub Issue #8. It 
 - It never weakens AppArmor, user namespaces, `sysctl` settings or WSL configuration automatically.
 - Sandbox initialization failure blocks execution; there is no host fallback.
 - Raw evidence is written by the trusted orchestrator outside Worker write roots.
+- Fixture and Treehouse Lease acquisition are persisted before later work can fail, allowing explicit cleanup after interruption.
 - `.mnfs/missions/MIS-002/plan.json` is outside this spike and must remain unchanged.
 
 ## Deterministic tests
@@ -16,15 +17,25 @@ This directory contains the isolated acceptance harness for GitHub Issue #8. It 
 From the repository root:
 
 ```bash
-npm run test:as02
+npm ci
 npm run verify
 ```
 
 These tests verify harness logic without claiming WSL2 security acceptance.
 
+## Install the isolated runtime
+
+The Sandbox Runtime is intentionally not installed in the root package. Install the exact reviewed dependency graph from its dedicated lockfile:
+
+```bash
+npm ci --prefix spikes/as-02 --ignore-scripts
+```
+
+The lockfile pins Sandbox Runtime `0.0.67` and every transitive dependency with registry integrity hashes. The AS-02 preflight rejects a missing or different installed version.
+
 ## Real execution
 
-Real commands will be exposed through:
+The canonical sequence is:
 
 ```bash
 npm run as02 -- preflight
@@ -32,6 +43,9 @@ npm run as02 -- run
 npm run as02 -- restart-prepare
 npm run as02 -- restart-resume --checkpoint <absolute-path>
 npm run as02 -- report --run <run-id>
+npm run as02 -- cleanup --run <run-id>
 ```
 
-The real S1–S15 proof must run from the canonical Ubuntu WSL2 checkout on the Linux filesystem. GitHub Actions is not a substitute for that environment-specific evidence.
+`restart-prepare` prints the exact operator-assisted PowerShell and Ubuntu commands. The harness never terminates WSL automatically.
+
+The real S1–S15 proof must run from the canonical Ubuntu WSL2 checkout on the Linux filesystem. GitHub Actions is not a substitute for that environment-specific evidence. A green deterministic suite does not imply AS-02 acceptance; only the generated report and mechanical Verdict may do so.

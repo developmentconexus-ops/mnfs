@@ -32,6 +32,7 @@ export const AS02_ERROR_CODES = Object.freeze([
   'EXTENSION_BROKER_FAILED',
   'EXTENSION_OUTPUT_REJECTED',
   'PREFLIGHT_INVALID',
+  'SCENARIO_INVALID',
 ]);
 
 export class As02Error extends Error {

@@ -163,7 +163,10 @@ for (const id of ['CAP-EXEC-REQ-010', 'CAP-EXEC-REQ-011', 'CAP-EXEC-REQ-012', 'C
   assert.ok(requirement.evidencedBy.includes('ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2'));
 }
 assert.equal(traceability.blockingItems.some((item) => item.id === 'BLOCK-AS-02'), false);
-assert.equal(traceability.nextSequence[0], 'review and accept CAP-EXECUTION');
+assert.equal(
+  traceability.nextSequence[0],
+  'build complete deterministic MIS-002 schema v2 Replan candidate',
+);
 
 assert.match(
   domainModelText,

@@ -49,6 +49,43 @@ async function writeSentinel(path, marker, logicalId) {
   return path;
 }
 
+async function writeOfflineToolchainFixture(sourceRepo) {
+  await mkdir(join(sourceRepo, 'src'), { recursive: true });
+  await mkdir(join(sourceRepo, 'test'), { recursive: true });
+  await writeFile(join(sourceRepo, 'package.json'), `${JSON.stringify({
+    name: 'mnfs-as02-disposable-fixture',
+    version: '0.0.0',
+    private: true,
+    type: 'module',
+    scripts: {
+      test: 'node --test test/*.test.mjs',
+    },
+  }, null, 2)}\n`);
+  await writeFile(join(sourceRepo, 'tsconfig.json'), `${JSON.stringify({
+    compilerOptions: {
+      noEmit: true,
+      strict: true,
+      target: 'ES2022',
+      module: 'NodeNext',
+      moduleResolution: 'NodeNext',
+    },
+    include: ['src/**/*.ts'],
+  }, null, 2)}\n`);
+  await writeFile(join(sourceRepo, 'src', 'demo.ts'), [
+    "export const message: string = 'AS-02 toolchain ready';",
+    '',
+  ].join('\n'));
+  await writeFile(join(sourceRepo, 'test', 'demo.test.mjs'), [
+    "import assert from 'node:assert/strict';",
+    "import test from 'node:test';",
+    '',
+    "test('offline fixture executes under Node', () => {",
+    "  assert.equal('AS-02'.startsWith('AS'), true);",
+    '});',
+    '',
+  ].join('\n'));
+}
+
 function trustedEnv() {
   return {
     ...process.env,
@@ -170,6 +207,7 @@ export async function createFixture({ baseRoot = '/tmp/mnfs-as-02', runId, runne
     await writeSentinel(join(sourceRepo, '.pi', 'security.json'), marker, 'worktree-pi');
     await writeSentinel(join(sourceRepo, '.env'), marker, 'worktree-env');
     await writeFile(join(sourceRepo, 'fixture.txt'), 'allowed worktree file\n');
+    await writeOfflineToolchainFixture(sourceRepo);
 
     await checked(runner, {
       file: 'git',

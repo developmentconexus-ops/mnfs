@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { dirname, isAbsolute } from 'node:path';
-import { realpath } from 'node:fs/promises';
+import { access, realpath } from 'node:fs/promises';
 
 import { as02Error, assertAs02 } from './errors.mjs';
 import { runProcess } from './process-runner.mjs';
@@ -31,6 +31,15 @@ function assertSafeStoredPath(path, label) {
   assertAs02(typeof path === 'string' && isAbsolute(path), 'TREEHOUSE_INVALID_OUTPUT', `${label} must be an absolute path.`, { path });
   assertAs02(path !== '/mnt' && !path.startsWith('/mnt/'), 'TREEHOUSE_INVALID_OUTPUT', `${label} must be on the Linux filesystem.`, { path });
   assertAs02(!path.includes('\n') && !path.includes('\r'), 'TREEHOUSE_INVALID_OUTPUT', `${label} must contain one path.`, { path });
+}
+
+async function exists(path) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function canonicalRepository(repositoryPath) {
@@ -136,11 +145,12 @@ export async function releaseTreehouseLease({ lease, runner = runProcess, force 
   assertAs02(force === false, 'TREEHOUSE_FORCE_FORBIDDEN', 'AS-02 ordinary cleanup forbids forced Treehouse release.');
   const poolPath = dirname(dirname(lease.path));
   assertSafeStoredPath(poolPath, 'Treehouse pool path');
+  const cwd = await exists(lease.path) ? lease.path : poolPath;
 
   const result = await runner({
     file: 'treehouse',
     args: ['return', lease.path],
-    cwd: poolPath,
+    cwd,
     env: environment(),
     timeoutMs: 30_000,
   });

@@ -6,27 +6,29 @@ import test from 'node:test';
 
 import { releaseTreehouseLease } from '../src/treehouse.mjs';
 
-test('returns a persisted lease from the leased path after the disposable source repository is gone', async (t) => {
+test('treats a targeted Treehouse destroy as an idempotent lease release', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'mnfs-as02-treehouse-restart-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const repositoryPath = join(root, 'source-repo');
-  const leasedPath = join(root, 'treehouse', 'leased');
+  const poolPath = join(root, 'pool');
+  const leasedPath = join(poolPath, '1', 'source-repo');
   await Promise.all([
     mkdir(repositoryPath, { recursive: true }),
     mkdir(leasedPath, { recursive: true }),
   ]);
   await rm(repositoryPath, { recursive: true, force: true });
+  await rm(leasedPath, { recursive: true, force: true });
 
   const calls = [];
   const runner = async (spec) => {
     calls.push(spec);
     return {
-      exitCode: 0,
+      exitCode: 1,
       signal: null,
       stdout: Buffer.alloc(0),
-      stderr: Buffer.alloc(0),
-      startedAt: '2026-08-03T13:30:00.000Z',
-      finishedAt: '2026-08-03T13:30:00.010Z',
+      stderr: Buffer.from(`worktree ${leasedPath} is not managed by treehouse\n`),
+      startedAt: '2026-08-03T13:40:00.000Z',
+      finishedAt: '2026-08-03T13:40:00.010Z',
     };
   };
   const lease = {
@@ -40,7 +42,11 @@ test('returns a persisted lease from the leased path after the disposable source
   const result = await releaseTreehouseLease({ lease, runner });
 
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].cwd, leasedPath);
+  assert.equal(calls[0].cwd, poolPath);
   assert.deepEqual(calls[0].args, ['return', leasedPath]);
-  assert.equal(result.result, 'RELEASED');
+  assert.deepEqual(result, {
+    result: 'ALREADY_RELEASED',
+    path: leasedPath,
+    finishedAt: '2026-08-03T13:40:00.010Z',
+  });
 });

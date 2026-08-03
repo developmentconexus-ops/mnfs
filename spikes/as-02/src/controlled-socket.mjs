@@ -40,19 +40,15 @@ export function controlledSocketPath(runId, { uid = currentUid() } = {}) {
 async function ensureSocketRoot(path) {
   const root = dirname(path);
   const uid = currentUid();
-  try {
-    const info = await lstat(root);
-    assertAs02(info.isDirectory() && !info.isSymbolicLink(), 'CONTROLLED_SOCKET_INVALID', 'Controlled socket root must be a real directory.', { root });
-    assertAs02(info.uid === uid, 'CONTROLLED_SOCKET_INVALID', 'Controlled socket root must be owned by the current Linux user.', {
-      root,
-      expectedUid: uid,
-      actualUid: info.uid,
-    });
-    if ((info.mode & 0o077) !== 0) await chmod(root, 0o700);
-  } catch (cause) {
-    if (cause?.code !== 'ENOENT') throw cause;
-    await mkdir(root, { recursive: false, mode: 0o700 });
-  }
+  await mkdir(root, { recursive: true, mode: 0o700 });
+  const info = await lstat(root);
+  assertAs02(info.isDirectory() && !info.isSymbolicLink(), 'CONTROLLED_SOCKET_INVALID', 'Controlled socket root must be a real directory.', { root });
+  assertAs02(info.uid === uid, 'CONTROLLED_SOCKET_INVALID', 'Controlled socket root must be owned by the current Linux user.', {
+    root,
+    expectedUid: uid,
+    actualUid: info.uid,
+  });
+  if ((info.mode & 0o077) !== 0) await chmod(root, 0o700);
   return root;
 }
 

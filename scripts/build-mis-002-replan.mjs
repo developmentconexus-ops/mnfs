@@ -35,7 +35,7 @@ const CRITERION_STATEMENTS = new Map([
   [22, 'Work and resources remain preserved until acceptance or explicit abandonment and then release idempotently after safe disposition.'],
   [23, 'Every M2 command used by the Golden Proof provides stable human and JSON output, typed errors and a concrete next action.'],
   [24, 'M2 persists Domain Events and references to logs, durations, adapter errors and available token counters without requiring an external backend.'],
-  [25, 'Required Recovery and Security failure drills pass on canonical Ubuntu WSL2 and preserve content-addressed evidence.'],
+  [25, 'The required Recovery and Security drills pass on canonical Ubuntu WSL2 with content-addressed evidence: duplicate Lease; Intent persisted before external acquisition; external worktree created before semantic commit; orphan worktree; Lease without worktree; Worker exit without Claim; Lead crash; active Worker Run without process; late result from a superseded Attempt; stale Claim or Receipt; sandbox unavailable; sandbox violation; policy-definition mismatch; effective-policy mismatch; repeated release; and release attempt by a stale Lease holder.'],
   [26, 'The approved M2 contract contains qualified identities and independently decidable criteria at Mission, Milestone and Feature levels.'],
   [27, 'Claims and closeout evidence declare requirements and documentation impact, and generated coverage remains current.'],
   [28, 'The complete deciding proof succeeds without Herdr, Observational Memory, pi-link, remote execution or an external observability backend.'],
@@ -72,6 +72,12 @@ const verification = {
     proofType: 'VERDICT',
     proofOwner: 'MNFS-GATE',
   },
+  goldenVerdict: {
+    method: 'DEMONSTRATION',
+    owner: 'MNFS-RUNNER',
+    proofType: 'VERDICT',
+    proofOwner: 'MNFS-GATE',
+  },
 };
 
 function verificationFor(number) {
@@ -86,29 +92,56 @@ function qualifiedCriterion(ownerId, criterionId) {
   return `${ownerId}/${criterionId}`;
 }
 
+function customCriterion(
+  ownerId,
+  id,
+  statement,
+  requirementNumbers,
+  verificationPlan,
+) {
+  return {
+    id,
+    qualifiedId: qualifiedCriterion(ownerId, id),
+    statement,
+    requirementRefs: requirementNumbers.map(requirement),
+    verificationPlan: { ...verificationPlan },
+  };
+}
+
 function criteria(ownerId, numbers) {
   return numbers.map((number, index) => {
     const statement = CRITERION_STATEMENTS.get(number);
     if (!statement) throw new Error(`Missing criterion statement for ${requirement(number)}.`);
     const id = `AC-${String(index + 1).padStart(2, '0')}`;
-    return {
-      id,
-      qualifiedId: qualifiedCriterion(ownerId, id),
-      statement,
-      requirementRefs: [requirement(number)],
-      verificationPlan: { ...verificationFor(number) },
-    };
+    return customCriterion(ownerId, id, statement, [number], verificationFor(number));
   });
 }
 
-function feature(milestoneId, id, title, outcome, requirementNumbers, dependsOn = []) {
+function feature(
+  milestoneId,
+  id,
+  title,
+  outcome,
+  requirementNumbers,
+  dependsOn = [],
+  additionalCriteria = [],
+) {
   const qualifiedId = `${MISSION_ID}/${milestoneId}/${id}`;
   return {
     id,
     qualifiedId,
     title,
     outcome,
-    acceptanceCriteria: criteria(qualifiedId, requirementNumbers),
+    acceptanceCriteria: [
+      ...criteria(qualifiedId, requirementNumbers),
+      ...additionalCriteria.map((criterion) => customCriterion(
+        qualifiedId,
+        criterion.id,
+        criterion.statement,
+        criterion.requirementNumbers,
+        criterion.verificationPlan,
+      )),
+    ],
     requirementRefs: requirementNumbers.map(requirement),
     dependsOn,
   };
@@ -131,12 +164,45 @@ export function buildMis002Replan(securityPolicyHash) {
   const m02Requirements = [3, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
   const missionRequirements = [23, 24, 25, 26, 27, 28];
 
+  const missionAcceptanceCriteria = [
+    ...criteria(MISSION_ID, missionRequirements),
+    customCriterion(
+      MISSION_ID,
+      'AC-07',
+      'Mission Golden Proof: starting from the approved schema-v2 contract, MNFS creates one Write Track and current Attempt, persists and observes one Treehouse Lease, validates SEC-E1, compiles fresh authority, dispatches the fixed Pi Worker, persists and completes a Claim, terminates the Lead, recovers the same authoritative state with a fresh Lead, proves protected resources and network remained inaccessible, produces a runner-owned Minimal Deterministic Receipt, accepts only through the MNFS Gate, preserves evidence and completes idempotent Environment and Treehouse release.',
+      Array.from({ length: 28 }, (_, index) => index + 1),
+      verification.goldenVerdict,
+    ),
+  ];
+
+  const m01AcceptanceCriteria = [
+    ...criteria('MIS-002/M01', m01Requirements),
+    customCriterion(
+      'MIS-002/M01',
+      'AC-08',
+      'M01 composition proof: across crash windows and retries, SQLite lifecycle state and matching Domain Events remain coherent with the observed Treehouse worktree and Lease, and a fresh process recovers the same contract-bound identities without duplicate current work or destructive reconciliation.',
+      m01Requirements,
+      verification.demonstration,
+    ),
+  ];
+
+  const m02AcceptanceCriteria = [
+    ...criteria('MIS-002/M02', m02Requirements),
+    customCriterion(
+      'MIS-002/M02',
+      'AC-16',
+      'M02 composition proof on canonical Ubuntu WSL2: the E1 boundary, Pi Worker, durable Claim, fresh Lead recovery, runner-owned Minimal Receipt, MNFS Gate acceptance, evidence preservation and idempotent Environment and Treehouse release execute as one recoverable flow.',
+      m02Requirements,
+      verification.goldenVerdict,
+    ),
+  ];
+
   return {
     schemaVersion: 2,
     missionId: MISSION_ID,
     title: 'M2 governed one-Worker execution and recovery',
     goal: 'Prove that MNFS can execute one fixed deterministic Pi Writer task in a leased Treehouse worktree under SEC-E1, persist and recover authoritative execution state across Lead replacement, independently verify the result and accept it only through an MNFS Gate.',
-    acceptanceCriteria: criteria(MISSION_ID, missionRequirements),
+    acceptanceCriteria: missionAcceptanceCriteria,
     scope: {
       included: [
         'One Write Track with one current non-terminal Attempt and one Pi Worker Run at a time.',
@@ -158,10 +224,12 @@ export function buildMis002Replan(securityPolicyHash) {
         'Remote sandboxes, remote execution, Web Console or an external observability backend.',
         'Credential grants, network access and X2-or-higher external or production effects.',
         'Automatic merge, integration or release of unaccepted work.',
+        'A generalized repository-identity recovery command; it is tracked by Issue #15 and is not required for the bounded M2 Golden Proof.',
       ],
     },
     assumptions: [
       'The canonical execution environment is a Linux-owned checkout under Ubuntu WSL2.',
+      'The canonical checkout retains a valid .mnfs/repo.json bound to its existing runtime database; governed reattachment is tracked by Issue #15.',
       'Treehouse, Pi, Bubblewrap and the pinned Sandbox Runtime dependencies are available or fail closed before dispatch.',
       'The trusted provider host may use valid subscription OAuth, while the Worker receives no provider credential or arbitrary host environment variable.',
       'The fixed M2 task requires no network, credential or production effect.',
@@ -200,7 +268,7 @@ export function buildMis002Replan(securityPolicyHash) {
         qualifiedId: 'MIS-002/M01',
         title: 'Durable Execution and Lease Core',
         outcome: 'MNFS possesses a durable, contract-bound execution identity model and can acquire, observe, reconcile and release one Treehouse Lease through explicit external-operation semantics.',
-        acceptanceCriteria: criteria('MIS-002/M01', m01Requirements),
+        acceptanceCriteria: m01AcceptanceCriteria,
         requirementRefs: m01Requirements.map(requirement),
         dependsOn: [],
         features: [
@@ -210,6 +278,15 @@ export function buildMis002Replan(securityPolicyHash) {
             'Execution identity and persistence',
             'Write Track, Attempt, Worker Run and Claim identities persist with exact contract binding, optimistic versioning, typed conflicts and atomic Domain Events.',
             [1, 2, 4, 5],
+            [],
+            [
+              {
+                id: 'AC-05',
+                statement: 'Applying the M2 database migration to an existing M0/M1 SQLite database preserves repository identity, missions, Domain Events, historical plan revisions and exact approved content, and a fresh process recovers the migrated state.',
+                requirementNumbers: [],
+                verificationPlan: verification.test,
+              },
+            ],
           ),
           feature(
             'M01',
@@ -234,7 +311,7 @@ export function buildMis002Replan(securityPolicyHash) {
         qualifiedId: 'MIS-002/M02',
         title: 'Governed E1 Worker, Recovery and Acceptance',
         outcome: 'One Pi Worker executes the fixed deterministic task in a leased worktree under E1, produces a durable Claim, survives Lead replacement, receives runner-owned deterministic proof and is accepted only by an MNFS Gate.',
-        acceptanceCriteria: criteria('MIS-002/M02', m02Requirements),
+        acceptanceCriteria: m02AcceptanceCriteria,
         requirementRefs: m02Requirements.map(requirement),
         environmentBinding: environmentBinding(securityPolicyHash),
         dependsOn: ['MIS-002/M01'],
@@ -322,6 +399,11 @@ export function buildMis002Replan(securityPolicyHash) {
         id: 'R08',
         description: 'A provider, Pi, Sandbox Runtime or broker dependency changes behavior after the accepted proof.',
         mitigation: 'Pin reviewed versions, record dependency identity in Attempts and rerun security/recovery proof when a review trigger changes.',
+      },
+      {
+        id: 'R09',
+        description: 'Loss of .mnfs/repo.json disconnects an otherwise valid checkout from its existing authoritative runtime database.',
+        mitigation: 'Require a valid repository identity for the M2 Golden Proof, never run init over proven state, and implement governed read-only-first reattachment under Issue #15.',
       },
     ],
     questions: [

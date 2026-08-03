@@ -32,6 +32,7 @@ import {
   createRunId,
   createSwitchingSessionController,
   resolveAs02ArtifactBase,
+  resolveAs02FixtureBase,
   scenarioSignature,
 } from './orchestrator.mjs';
 import {
@@ -77,7 +78,6 @@ const RUN_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const MODULE_PATH = fileURLToPath(import.meta.url);
 const SPIKE_ROOT = resolve(dirname(MODULE_PATH), '..');
 const DEFAULT_REPOSITORY = resolve(SPIKE_ROOT, '..', '..');
-const FIXTURE_BASE = '/tmp/mnfs-as-02';
 
 function hashBuffer(buffer) {
   return `sha256:${createHash('sha256').update(buffer).digest('hex')}`;
@@ -566,14 +566,16 @@ export function createRuntimeOperations(options = {}) {
 
   let repositoryPath;
   let artifactBase;
+  let fixtureBase;
   let storePromise;
 
   async function paths() {
     if (!repositoryPath) {
       repositoryPath = linuxPath(await realpath(repositoryPathInput), 'Repository path');
       artifactBase = resolveAs02ArtifactBase(env, homeDirectory);
+      fixtureBase = resolveAs02FixtureBase(env, homeDirectory);
     }
-    return { repositoryPath, artifactBase };
+    return { repositoryPath, artifactBase, fixtureBase };
   }
 
   async function store() {
@@ -617,12 +619,12 @@ export function createRuntimeOperations(options = {}) {
 
   async function phaseOne({ preflight: readyPreflight }) {
     assertAs02(readyPreflight?.status === 'READY', 'PREFLIGHT_INVALID', 'Phase one requires READY preflight.');
-    const { repositoryPath: repo, artifactBase: base } = await paths();
-    await mkdir(FIXTURE_BASE, { recursive: true, mode: 0o700 });
+    const { repositoryPath: repo, artifactBase: base, fixtureBase: durableFixtureBase } = await paths();
+    await mkdir(durableFixtureBase, { recursive: true, mode: 0o700 });
     const runId = createRunId({ now: new Date(now()), random });
     const artifactRoot = join(base, runId);
     await mkdir(artifactRoot, { recursive: true, mode: 0o700 });
-    const fixtureRoot = join(FIXTURE_BASE, runId);
+    const fixtureRoot = join(durableFixtureBase, runId);
     const runStore = await store();
     await runStore.save(buildInitialRunState({
       runId,
@@ -636,7 +638,7 @@ export function createRuntimeOperations(options = {}) {
     let controller = null;
     let socket = null;
     try {
-      const fixture = await fixtureFactory({ baseRoot: FIXTURE_BASE, runId, runner: processRunner });
+      const fixture = await fixtureFactory({ baseRoot: durableFixtureBase, runId, runner: processRunner });
       const lease = await leaseAcquire({ repositoryPath: fixture.sourceRepo, runId, runner: processRunner });
       const gitMetadata = await gitDiscovery(lease.path, processRunner);
       const toolchain = await toolchainPaths(repo, env);

@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 1.0.0
+version: 1.1.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -16,43 +16,61 @@ source_of_truth_for:
   - canonical read paths
 related:
   - DOC-PRODUCT-BLUEPRINT
-  - GH-ISSUE-6
+  - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
+  - DOC-CAPABILITY-ROADMAP
+  - CAP-EXECUTION
+  - ACCEPTANCE-M2-UNBLOCK
+  - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
 review_triggers:
   - canonical document added, removed or superseded
   - documentation authority changes
-  - Product Milestone changes
-last_reviewed: 2026-08-02
-tracking_issue: 6
+  - Product Milestone or MCRM gate changes
+last_reviewed: 2026-08-03
+tracking_issue: 16
 ---
 
 # MNFS Documentation Map
 
-> **Status:** Accepted documentation authority map for the Architecture Baseline.  
-> This document indexes canonical sources. It does not redefine their content.
+> **Status:** Accepted documentation authority and discovery map.  
+> It indexes canonical sources and current read paths; it does not redefine their content.
 
 ---
 
-# 1. Current architecture phase
+# 1. Current product and architecture phase
 
 ```text
-AB1 — Architecture Baseline and Contract Reconciliation
+M0 — Foundation Walking Skeleton              ACCEPTED
+M1 — Visual Mission Planning                  ACCEPTED
+AB1 — Architecture Baseline/Reconciliation    CLOSED
+AS-02 — Local Pi Sandbox on WSL2              ACCEPTED
+M2 — Secure One-Worker Vertical Slice         COMMITTED
+MIS-002/M01 R5 Milestone Microdesign          IN_PROGRESS
 ```
 
 Current state:
 
-- M0 and M1 are accepted history;
-- Product Blueprint Sections 1–13 and the Capability Realization Method are approved;
-- Architecture Baseline PR #11 contains the canonical documentation package;
-- documentation CI is active and review corrections are being applied;
-- ADR-0004–ADR-0012, roadmap v2, research maps and CAP-EXECUTION are present;
-- MIS-002 revision 3 is preserved byte-for-byte and pending Replan;
-- M2 remains blocked by #7, #8, #9 and explicit Operator unblock.
+- Product Blueprint Sections 1–13, MCRM, Roadmap v2 and ADR-0001–ADR-0012 are accepted;
+- Architecture Baseline PR #11, Plan Contract schema-v2 PR #12, AS-02 PR #13 and MIS-002 reconciliation PR #14 are integrated in `main`;
+- `CAP-EXECUTION` version `0.1.0` is accepted with implementation status `planned`;
+- `MIS-002` revision 5 is the current approved schema-v2 contract;
+- all 28 capability requirements are allocated to exact approved criteria;
+- MCRM R0–R4 pass;
+- the Operator authorized M2 to enter R5 for M01 microdesign only;
+- Issue #16 and draft PR #17 own M01 research, Treehouse conformance and microdesign;
+- M01 implementation and Pi Worker dispatch remain prohibited.
 
-Tracking container:
+Current approved contract:
 
 ```text
-GitHub Issue #6
-[ARCH] Establish the complete MNFS product blueprint before M2
+Mission: MIS-002 revision 5
+Hash:    sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3
+```
+
+Historical revision 3 remains immutable:
+
+```text
+Blob: sha1:6b79117fe66cd5c9c8142099828812f470ce20de
+Hash: sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1
 ```
 
 ---
@@ -76,81 +94,72 @@ A10 Generated Projection
 Conflict precedence:
 
 ```text
-Accepted specific ADR
+accepted specific ADR
 → Product Blueprint
 → accepted Capability Spec
-→ scoped Approved Contract
-→ Standard / Policy / Profile
+→ scoped Approved Mission Contract
+→ Standard / Policy / Repository Profile
 → implementation Reference
 → Guidance
 → Tracking
 → Research / Historical
 ```
 
-A conflict must be resolved rather than silently selecting whichever document was read first.
+Research informs design but does not override accepted architecture. Tracking describes state but does not own product doctrine. A conflict must be resolved explicitly rather than selecting whichever document was read first.
 
 ---
 
-# 3. Storage boundaries
+# 3. Storage and authority boundaries
 
 ## Git
 
-Canonical human-readable product knowledge:
+Canonical human-readable product knowledge and accepted repository artifacts:
 
 - Product Blueprint;
 - ADRs;
 - Capability Specs;
 - Roadmap;
-- Standards;
-- Golden Paths;
+- Standards and Golden Paths;
 - Repository Profile source;
-- Reference;
-- Guidance;
-- Research;
-- selected Evidence.
+- references and guidance;
+- research and selected Evidence;
+- code and tests.
 
 ## `.mnfs/`
 
 Canonical machine-readable repository artifacts:
 
-- Repository ID;
-- Approved Mission Contracts;
+- Repository identity;
+- current Approved Mission Contract;
+- preserved historical Mission revisions;
 - accepted Evidence promoted to the repository;
-- Closeouts.
+- future Closeouts.
 
 ## SQLite
 
-Canonical operational state:
+Canonical local operational state:
 
-- active entities;
-- revisions;
-- Attempts;
-- Worker Runs;
-- Claims;
-- Receipts;
-- Findings;
-- Decisions;
-- Events;
-- Leases;
+- Missions and Plan revisions;
+- future Write Tracks, Leases, Attempts, Worker Runs and Claims;
+- Receipts, Findings, Decisions and Events as their milestones arrive;
 - runtime Artifact references.
 
 ## Runtime Artifact Store
 
-Generated and temporary:
+Generated or temporary:
 
-- logs;
-- prompts;
+- logs and command outputs;
+- prompts and Context Packs;
 - review HTML;
-- traces;
-- screenshots;
-- command outputs;
-- temporary Evidence.
+- traces and screenshots;
+- raw conformance/security Evidence.
 
 ## GitHub
 
 - Issue: tracking and discussion;
-- PR: proposed change and review;
-- merged canonical files: accepted result.
+- PR: proposed changes and review;
+- merged files: accepted repository result;
+- GitHub status never substitutes Operator domain authority.
 
 ---
 
@@ -158,60 +167,65 @@ Generated and temporary:
 
 | Path | Audience | Purpose | Authority |
 |---|---|---|---|
-| `README.md` | humans | product introduction and quick start | guidance |
-| `AGENTS.md` | agents | short bootstrap and hard rules | guidance/index |
-| `docs/DOCUMENTATION-MAP.md` | humans and agents | discovery, authority and read order | constitutional reference |
-| `docs/product/README.md` | architecture readers | Product Blueprint index/version | constitutional index |
-| `docs/product/PRODUCT-BLUEPRINT.md` | broad readers | generated complete publication | generated constitutional projection |
-| `docs/product/CAPABILITY-REALIZATION-METHOD.md` | planners and Leads | Blueprint-to-build traceability and readiness | Standard / Policy |
-| `docs/roadmap.md` | operators/contributors | capability sequence and proofs | product plan |
+| `README.md` | users | product introduction and quick start | guidance |
+| `AGENTS.md` | agents | concise bootstrap and hard rules | guidance/index |
+| `docs/DOCUMENTATION-MAP.md` | humans/agents | discovery, authority and read order | constitutional reference |
+| `docs/tracking/STATUS.md` | humans/agents | current program and gate state | tracking |
+| `docs/product/README.md` | architecture readers | Blueprint index and version | constitutional index |
+| `docs/product/PRODUCT-BLUEPRINT.md` | broad readers | generated complete Blueprint | generated constitutional projection |
+| `docs/product/CAPABILITY-REALIZATION-METHOD.md` | planners/Leads | Blueprint-to-build traceability and R0–R8 | standard/policy |
+| `docs/roadmap.md` | operators/contributors | capability sequence and Golden Proofs | generated product plan |
+| `docs/capabilities/CAP-EXECUTION/SPEC.md` | M2 designers | reusable governed execution design | accepted specification |
+| `.mnfs/missions/MIS-002/plan.json` | execution system | current exact M2 contract | approved contract |
 
 ---
 
-# 5. Product Blueprint sources
+# 5. Product Blueprint
 
-Proposed canonical editable paths:
+Editable constitutional sources:
 
-| Section | Path | Status |
-|---|---|---|
-| 1 Product Vision | `docs/product/blueprint/01-product-vision.md` | approved content |
-| 2 Domain Model | `docs/product/blueprint/02-domain-model.md` | approved content |
-| 3 Lifecycle and Flows | `docs/product/blueprint/03-lifecycle-flows.md` | approved content |
-| 4 Engineering System | `docs/product/blueprint/04-engineering-system.md` | approved content |
-| 5 System Architecture | `docs/product/blueprint/05-system-architecture.md` | approved content |
-| 6 Roles and Authority | `docs/product/blueprint/06-roles-authority.md` | approved content |
-| 7 Quality and Evidence | `docs/product/blueprint/07-quality-evidence.md` | approved content |
-| 8 State and Recovery | `docs/product/blueprint/08-state-recovery.md` | approved content |
-| 9 Context and Memory | `docs/product/blueprint/09-context-memory.md` | approved content |
-| 10 Security and Isolation | `docs/product/blueprint/10-security-isolation.md` | approved content |
-| 11 Operator and Observability | `docs/product/blueprint/11-operator-observability.md` | approved content |
-| 12 Capability Roadmap | `docs/product/blueprint/12-capability-roadmap.md` | approved content |
-| 13 Documentation Governance | `docs/product/blueprint/13-documentation-governance.md` | approved content |
+| Section | Path |
+|---|---|
+| 1 Product Vision | `docs/product/blueprint/01-product-vision.md` |
+| 2 Domain Model | `docs/product/blueprint/02-domain-model.md` |
+| 3 Lifecycle and Flows | `docs/product/blueprint/03-lifecycle-flows.md` |
+| 4 Engineering System | `docs/product/blueprint/04-engineering-system.md` |
+| 5 System Architecture | `docs/product/blueprint/05-system-architecture.md` |
+| 6 Roles and Authority | `docs/product/blueprint/06-roles-authority.md` |
+| 7 Quality and Evidence | `docs/product/blueprint/07-quality-evidence.md` |
+| 8 State and Recovery | `docs/product/blueprint/08-state-recovery.md` |
+| 9 Context and Memory | `docs/product/blueprint/09-context-memory.md` |
+| 10 Security and Isolation | `docs/product/blueprint/10-security-isolation.md` |
+| 11 Operator and Observability | `docs/product/blueprint/11-operator-observability.md` |
+| 12 Capability Roadmap | `docs/product/blueprint/12-capability-roadmap.md` |
+| 13 Documentation Governance | `docs/product/blueprint/13-documentation-governance.md` |
 
-Generated aggregate:
+Generated aggregates:
 
 ```text
 docs/product/PRODUCT-BLUEPRINT.md
+docs/roadmap.md
 ```
 
-The aggregate must not be edited directly.
+Generated files carry a `GENERATED — DO NOT EDIT` marker and must be regenerated from their source.
 
 ---
 
-# 6. ADR decision log
+# 6. Architecture decisions
 
-Current accepted ADRs:
+Canonical index:
 
-| ADR | Ownership |
+```text
+docs/adr/README.md
+```
+
+Accepted decisions:
+
+| ADR | Decision ownership |
 |---|---|
 | ADR-0001 | Pi-first WSL2 architecture |
-| ADR-0002 | SQLite current state plus append-only Events |
+| ADR-0002 | SQLite operational state plus append-only Events |
 | ADR-0003 | Worktree per concurrent Write Track |
-
-Architecture Baseline decisions published in PR #11:
-
-| ADR | Proposed decision |
-|---|---|
 | ADR-0004 | Memory strata and Session Observational Memory |
 | ADR-0005 | Durable coordination versus ephemeral transport |
 | ADR-0006 | Security planes and local execution isolation |
@@ -222,142 +236,140 @@ Architecture Baseline decisions published in PR #11:
 | ADR-0011 | Evaluation and Calibration framework |
 | ADR-0012 | Documentation authority and lifecycle |
 
-Canonical paths:
-
-```text
-docs/adr/README.md
-docs/adr/template.md
-docs/adr/0001-*.md
-```
+Accepted ADR semantics are not rewritten. A material decision change uses a superseding ADR.
 
 ---
 
 # 7. Capability Realization Method
 
-Canonical source:
+Canonical method:
 
 ```text
 docs/product/CAPABILITY-REALIZATION-METHOD.md
 ```
 
-It owns applicability, requirements derivation, bidirectional traceability, readiness gates R0–R8, orphan detection and Product Milestone closeout.
+It owns:
 
-Current first capability:
+- R0 Baseline;
+- R1 Applicability;
+- R2 Requirements;
+- R3 Capability Specification;
+- R4 Mission Contract Allocation;
+- R5 Milestone Microdesign;
+- R6 Build and Continuous Coverage;
+- R7 Verification and Validation;
+- R8 Closeout and Learning;
+- bidirectional traceability and orphan detection.
 
-```text
-docs/capabilities/CAP-EXECUTION/
-```
-
----
-
-# 7. Capability Specifications
-
-Proposed authority:
-
-```text
-docs/capabilities/CAP-*/SPEC.md
-```
-
-A Capability Spec owns reusable product design.
-
-A Mission Contract owns scoped implementation.
-
-Initial candidates:
+Current capability package:
 
 ```text
-CAP-EXECUTION
-CAP-ENGINEERING-SYSTEM
-CAP-REVIEW
-CAP-INTEGRATION
-CAP-QUALITY
-CAP-EXTERNAL-EFFECTS
-CAP-DELIVERY
-CAP-OBSERVABILITY
+docs/capabilities/CAP-EXECUTION/SPEC.md
+docs/capabilities/CAP-EXECUTION/APPLICABILITY.md
+docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
+docs/capabilities/CAP-EXECUTION/COVERAGE.md
 ```
 
-Create each only when its Product Milestone approaches execution.
+`TRACEABILITY.json` is the structured coverage source. `COVERAGE.md` is generated and must not be edited directly.
 
 ---
 
 # 8. Roadmap
 
-Current repository document:
+Canonical editable source:
+
+```text
+docs/product/blueprint/12-capability-roadmap.md
+```
+
+Generated projection:
 
 ```text
 docs/roadmap.md
 ```
 
-Current short M0–M6 content:
+The roadmap preserves M0/M1 as accepted history and sequences the trusted local harness, local software factory and future platform horizons through M12.
 
-```text
-status: current but scheduled for supersession
-```
-
-Proposed replacement:
-
-```text
-Product Blueprint Section 12
-→ source for roadmap v2
-```
-
-The replacement preserves M0 and M1 as accepted history and expands M2–M12.
+Product Milestone `M2` is distinct from Mission Milestones `MIS-002/M01` and `MIS-002/M02`.
 
 ---
 
 # 9. Mission Contracts
 
-Machine-readable path:
-
-```text
-.mnfs/missions/<mission-id>/plan.json
-```
-
-Current important artifact:
+Current contract:
 
 ```text
 .mnfs/missions/MIS-002/plan.json
-revision 3
+revision 5
+schemaVersion 2
+APPROVED
 ```
 
-Status:
+Historical snapshot:
 
 ```text
-historically approved
-architecturally stale
-preserve
-supersede through Replan
+.mnfs/missions/MIS-002/history/revision-0003.json
 ```
 
-Do not edit revision 3 manually.
+Rules:
+
+- approved revisions are immutable;
+- material change uses Replan;
+- execution entities bind to the exact approved content hash;
+- a draft Replan does not replace the latest approved contract;
+- no document or conversation silently edits the materialized contract.
 
 ---
 
-# 10. Engineering System
+# 10. Current M01 R5 package
 
-Future canonical sources:
+Tracking:
 
 ```text
-docs/standards/
-docs/golden-paths/
-docs/repository-profile/
+Issue #16
+Draft PR #17
+design/mis-002-m01
 ```
 
-Ownership:
+Research Evidence:
 
-| Concept | Owner |
-|---|---|
-| Engineering Standard | Standard file |
-| Golden Path | Path file |
-| Repository-specific binding | Repository Profile |
-| Effective binding for Mission | Context Pack / approved execution policy |
+```text
+docs/research/MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1.md
+docs/research/MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1.sources.json
+```
+
+External-tool conformance protocol:
+
+```text
+docs/design/2026-08-03-tc-01-treehouse-production-adapter-conformance.md
+```
+
+Proposed Milestone Microdesign:
+
+```text
+docs/design/2026-08-03-mis-002-m01-durable-execution-lease-core.md
+```
+
+Current interpretation:
+
+```text
+Research:            PUBLISHED
+TC-01 protocol:      PROPOSED / execution authorized
+TC-01 Evidence:      NOT_STARTED
+M01 microdesign:     PROPOSED
+R5:                  IN_PROGRESS
+M01 implementation: PROHIBITED
+```
+
+A proposed design does not become implementation authority merely because CI is green.
 
 ---
 
-# 11. Research reports
+# 11. Research
 
 Research is Evidence, not Authority.
 
-Published Architecture Baseline research reports:
+Architecture Baseline reports:
 
 ```text
 docs/research/MNFS-RESEARCH-PI-MEMORY-CONTEXT-MESSAGING-v1.md
@@ -367,68 +379,60 @@ docs/research/MNFS-RESEARCH-CAPABILITY-ROADMAP-v1.md
 docs/research/MNFS-RESEARCH-DOCUMENTATION-GOVERNANCE-v1.md
 ```
 
-Architecture source maps required by Issue #6:
+Architecture source maps:
 
 ```text
 docs/research/LEGACY-MNFS-HARNESS-MAP.md
 docs/research/FIRSTMATE-INSPIRATION-MAP.md
 ```
 
-These reports and maps are present in PR #11. Each published research report is paired with a validated `*.sources.json` manifest.
+Every published research report has a validated `*.sources.json` manifest. Adopted conclusions must be reflected in the owning Blueprint, ADR, Capability Spec, Contract or Microdesign.
 
 ---
 
 # 12. Design and implementation documents
 
-Current design material belongs under:
+Location:
 
 ```text
 docs/design/
+docs/superpowers/specs/
+docs/superpowers/plans/
 ```
 
-Purpose:
+Ownership:
 
-- Milestone microdesign;
-- implementation plan;
-- schema proposal;
-- test strategy.
+- Capability Spec owns reusable architecture;
+- Mission Contract owns bounded commitment;
+- Milestone Microdesign owns implementation design for the next Mission Milestone;
+- Implementation Plan owns TDD task sequencing;
+- a plan cannot repair or expand a deficient approved design silently.
 
-Authority:
-
-```text
-below Capability Spec and Mission Contract
-```
-
-A microdesign cannot change the Approved Contract or ADR.
+A microdesign cannot change an Approved Contract or accepted ADR. Material conflict triggers Replan or a new Decision.
 
 ---
 
 # 13. Tracking
 
-Current tracking belongs under:
+Location:
 
 ```text
 docs/tracking/
 ```
 
-Examples:
-
-- `STATUS.md`;
-- Product Milestone checklist;
-- implementation history;
-- release checklist.
-
-Completed tracking may move to:
+Canonical current-state sources:
 
 ```text
-docs/tracking/archive/
+docs/tracking/STATUS.md
+docs/tracking/WORKLOG.md
+docs/tracking/DECISIONS.md
 ```
 
-Tracking never owns architecture.
+Tracking never owns architecture. Completed tracking may move under `docs/tracking/archive/`.
 
 ---
 
-# 14. Human read paths
+# 14. Read paths
 
 ## New user
 
@@ -437,6 +441,7 @@ README
 → Documentation Map
 → Product Blueprint overview
 → Roadmap
+→ Status
 ```
 
 ## Contributor
@@ -445,33 +450,23 @@ README
 README
 → CONTRIBUTING
 → Documentation Map
+→ Status
 → relevant Capability Spec
+→ Approved Contract
+→ active Microdesign
 → related ADRs
 ```
-
-## Architecture contributor
-
-```text
-Documentation Map
-→ complete Blueprint
-→ ADR log
-→ Research
-→ active architecture issue
-```
-
----
-
-# 15. Agent read paths
 
 ## Lead
 
 ```text
 AGENTS.md
 → mnfs status
-→ Current Authority Snapshot
+→ Documentation Map
 → Approved Mission Contract
-→ Handoff/Context Pack
-→ relevant Spec and ADRs
+→ relevant Capability Spec/ADRs
+→ active Microdesign
+→ Handoff/Context Pack when implemented
 ```
 
 ## Writer
@@ -479,7 +474,7 @@ AGENTS.md
 ```text
 Current Authority Snapshot
 → Writer Pack
-→ exact code/contracts
+→ exact target, contract and write-set
 ```
 
 ## Reviewer
@@ -487,9 +482,8 @@ Current Authority Snapshot
 ```text
 Review Pack
 → fixed diff/SHA
-→ criteria
-→ Standards
-→ related Spec/ADR
+→ criteria and requirements
+→ related Spec/ADRs/Standards
 ```
 
 ## QA
@@ -501,11 +495,11 @@ QA Pack
 → expected observations
 ```
 
-Agents do not load the full Blueprint by default.
+Agents do not load the complete Blueprint by default. Architecture, planning and cross-cutting review may require broader context.
 
 ---
 
-# 16. Ownership
+# 15. Ownership and protected paths
 
 Initial owner:
 
@@ -513,7 +507,7 @@ Initial owner:
 developmentconexus-ops
 ```
 
-Paths requiring owner review:
+Owner review is required for:
 
 ```text
 /docs/product/
@@ -527,38 +521,39 @@ AGENTS.md
 .github/CODEOWNERS
 ```
 
-Operator approval remains a Domain Authority separate from Git write access.
+Operator approval is Domain Authority separate from Git write access or CI success.
 
 ---
 
-# 17. Documentation checks
+# 16. Documentation checks
 
-Initial required checks:
+Required checks include:
 
 ```text
-markdownlint
-link validation
 frontmatter schema
 unique document IDs
 relation target validation
-status validation
-owner validation
+status and owner validation
 ADR index and numbering
 supersession consistency
-Blueprint aggregate freshness
-Documentation Map coverage
-Mission Plan schema
-hierarchical IDs
+Blueprint/Roadmap/Coverage freshness
+Mission Plan schema and hierarchical IDs
+research source-manifest validation
+historical Mission preservation
+SEC-E1 exact-hash validation
 generated-file headers
 documentation-impact declaration
-accepted-doc placeholder check
+accepted-document placeholder checks
+relative-link and anchor validation
 ```
+
+Automation proves structural completeness. Human review determines semantic correctness.
 
 ---
 
-# 18. Documentation impact
+# 17. Change impact
 
-Every material PR/Claim declares:
+Every material PR or Claim declares:
 
 ```yaml
 documentation_impact:
@@ -566,88 +561,85 @@ documentation_impact:
   affected: []
   rationale: ""
   follow_up: null
+
+requirements_impact:
+  status: NONE | UPDATED | NEW_REQUIREMENT | REPLAN_REQUIRED
+  affected: []
+  rationale: ""
 ```
 
-A material change cannot use `NONE` without a specific rationale.
+`NONE` requires a specific rationale. A new requirement or contract conflict is classified before implementation continues.
 
 ---
 
-# 19. Superseded and historical sources
+# 18. Historical and generated sources
 
 Keep discoverable:
 
 - accepted ADRs later superseded;
 - rejected proposals;
 - historical Mission revisions;
-- legacy research;
-- architecture spike results;
+- prior research and spike results;
 - previous roadmap states through Git;
 - failed approaches with durable learning.
 
-Do not load them into normal execution Context Packs.
+Do not load historical artifacts into normal execution Context Packs unless explicitly relevant.
 
----
-
-# 20. Generated projections
+Generated projections include:
 
 | Projection | Source |
 |---|---|
-| `PRODUCT-BLUEPRINT.md` | 13 modular section files |
+| `PRODUCT-BLUEPRINT.md` | 13 Blueprint section files |
+| `roadmap.md` | Blueprint Section 12 |
+| `CAP-EXECUTION/COVERAGE.md` | `TRACEABILITY.json` plus canonical registry |
 | `review.html` | structured Plan Revision |
-| future CLI reference | command schemas/help |
-| future static site | canonical Markdown sources |
-| generated diagrams | structured source |
-
-Generated files carry a `DO NOT EDIT` header.
 
 ---
 
-# 21. Current documentation divergences
+# 19. Current divergences and blockers
 
-Before AB1 closes, resolve:
+Resolved since version 1.0.0:
 
-1. apply and verify the adversarial-review corrections on PR #11;
-2. merge the Architecture Baseline after all checks and review findings are closed;
-3. implement and verify Mission Plan schema v2 in #7;
-4. execute AS-02 on canonical WSL2 in #8;
-5. Replan and approve a superseding MIS-002 revision in #9;
-6. rerun MCRM R0–R4 against the approved contract;
-7. record explicit Operator unblock before M2 implementation.
+- Architecture Baseline merged;
+- Plan Contract schema v2 implemented;
+- AS-02 accepted;
+- `CAP-EXECUTION` accepted;
+- MIS-002 revision 5 approved;
+- all 28 requirements allocated;
+- R0–R4 passed;
+- explicit M2 R5 unblock recorded;
+- PR #14 integrated.
+
+Current R5 blockers:
+
+1. draft PR #17 must remain mechanically and semantically green;
+2. TC-01 must execute against the exact canonical Treehouse binary on WSL2;
+3. observed behavior must be incorporated into the proposed M01 microdesign;
+4. migration and adapter boundaries require constructive and adversarial review;
+5. the Operator must explicitly approve the final microdesign;
+6. an Implementation Plan may be written only after that approval.
+
+M01 implementation and Pi Worker dispatch are not authorized.
 
 ---
 
-# 22. Immediate next action
+# 20. Immediate next action
 
 ```text
-Correct and re-review PR #11, then merge the canonical Architecture Baseline.
+Complete PR #17 design review
+→ execute TC-01 on canonical WSL2
+→ reconcile findings into M01 microdesign
+→ obtain explicit Operator design approval
+→ write the M01 Implementation Plan
 ```
 
-M2 remains blocked until:
+Canonical current sources:
 
-- PR #11 is merged;
-- Plan Contract schema v2 is verified;
-- AS-02 is accepted;
-- MIS-002 is replanned and approved;
-- MCRM R0–R4 pass;
-- the Operator explicitly unblocks M2.
-
-
----
-
-# Current AB1 blockers
-
-The documentation system is being published, but AB1 remains open until:
-
-1. the architecture PR is reviewed and merged;
-2. Plan Contract schema v2 is implemented and verified;
-3. AS-02 runs on canonical WSL2;
-4. a new `MIS-002` revision is reviewed and approved;
-5. MCRM R0–R4 pass;
-6. the Operator explicitly unblocks M2.
-
-Canonical readiness sources:
-
-- `docs/capabilities/CAP-EXECUTION/COVERAGE.md`
-- `docs/design/PLAN-CONTRACT-SCHEMA-V2-READINESS.md`
-- `docs/design/AS-02-local-pi-sandbox-wsl2.md`
-- `docs/design/MIS-002-REPLAN-READINESS.md`
+```text
+docs/tracking/STATUS.md
+docs/capabilities/CAP-EXECUTION/COVERAGE.md
+.mnfs/missions/MIS-002/plan.json
+docs/research/MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1.md
+docs/design/2026-08-03-tc-01-treehouse-production-adapter-conformance.md
+docs/design/2026-08-03-mis-002-m01-durable-execution-lease-core.md
+```

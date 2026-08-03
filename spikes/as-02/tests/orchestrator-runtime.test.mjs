@@ -83,6 +83,50 @@ test('builds a strict recoverable initial run state before external execution', 
   assert.equal(value.reportPath, null);
 });
 
+test('persists the fixture before Treehouse acquisition can fail', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'mnfs-as02-durable-fixture-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const repositoryPath = join(root, 'repository');
+  const homeDirectory = join(root, 'home');
+  const stateRoot = join(root, 'state');
+  const fixtureRoot = join(root, 'fixture');
+  const sourceRepo = join(fixtureRoot, 'source-repo');
+  await Promise.all([
+    mkdir(repositoryPath, { recursive: true }),
+    mkdir(homeDirectory, { recursive: true }),
+    mkdir(sourceRepo, { recursive: true }),
+  ]);
+
+  const operations = createRuntimeOperations({
+    repositoryPath,
+    homeDirectory,
+    env: { MNFS_HOME: stateRoot, PATH: '/usr/bin:/bin' },
+    now: () => '2026-08-03T02:03:04.000Z',
+    random: () => 'abc123',
+    createFixture: async () => ({
+      runId: 'as02-20260803t020304z-abc123',
+      root: fixtureRoot,
+      sourceRepo,
+      protectedResources: {},
+      protectedDigests: {},
+    }),
+    acquireTreehouseLease: async () => {
+      throw Object.assign(new Error('synthetic lease acquisition failure'), { code: 'TREEHOUSE_UNAVAILABLE' });
+    },
+  });
+
+  await assert.rejects(
+    () => operations.phaseOne({ preflight: preflight() }),
+    (error) => error?.code === 'TREEHOUSE_UNAVAILABLE',
+  );
+
+  const state = await operations.latest();
+  assert.equal(state.status, 'FAILED');
+  assert.equal(state.lease?.acquired, false);
+  assert.equal(state.lease?.fixture?.root, fixtureRoot);
+  assert.equal(state.lease?.fixture?.sourceRepo, sourceRepo);
+});
+
 test('persists acquired fixture and Treehouse lease before later phase-one discovery can fail', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'mnfs-as02-durable-acquire-'));
   t.after(() => rm(root, { recursive: true, force: true }));

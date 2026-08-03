@@ -6,6 +6,7 @@ import test from 'node:test';
 
 import {
   BROKERED_TOOL_NAMES,
+  PI_ANTHROPIC_AUTH_SOURCE,
   PI_BUILTIN_TOOL_NAMES,
   bashOnlyInventory,
   brokeredCandidateArgs,
@@ -28,7 +29,7 @@ test('brokered candidate exposes only the reviewed seven-tool inventory', () => 
   assert.equal(new Set(brokeredCandidateInventory()).size, 7);
 });
 
-test('brokered Pi invocation disables discovered and built-in extensions before loading one exact file', async (t) => {
+test('brokered Pi invocation disables discovery and loads only pinned auth plus one exact AS-02 extension', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'mnfs-as02-pi-args-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const extensionDir = join(root, 'trusted');
@@ -37,9 +38,12 @@ test('brokered Pi invocation disables discovered and built-in extensions before 
   await writeFile(extension, 'export default () => {}');
   const exact = await realpath(extension);
 
+  assert.equal(PI_ANTHROPIC_AUTH_SOURCE, 'npm:@gotgenes/pi-anthropic-auth@2.0.1');
   assert.deepEqual(brokeredCandidateArgs(exact), [
     '--no-builtin-tools',
     '--no-extensions',
+    '-e',
+    PI_ANTHROPIC_AUTH_SOURCE,
     '-e',
     exact,
   ]);

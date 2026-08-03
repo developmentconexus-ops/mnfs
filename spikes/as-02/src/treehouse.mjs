@@ -138,7 +138,7 @@ export async function releaseTreehouseLease({ lease, runner = runProcess, force 
   const result = await runner({
     file: 'treehouse',
     args: ['return', lease.path],
-    cwd: lease.repositoryPath,
+    cwd: lease.path,
     env: environment(),
     timeoutMs: 30_000,
   });

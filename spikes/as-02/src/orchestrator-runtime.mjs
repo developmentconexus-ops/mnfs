@@ -34,7 +34,10 @@ import {
   resolveAs02ArtifactBase,
   scenarioSignature,
 } from './orchestrator.mjs';
-import { brokeredCandidateArgs } from './pi-inventory.mjs';
+import {
+  brokeredCandidateArgs,
+  PI_ANTHROPIC_AUTH_VERSION,
+} from './pi-inventory.mjs';
 import { runPerformanceSuite } from './performance.mjs';
 import { buildWorkerEnv, compilePolicy } from './policy.mjs';
 import { runPreflight } from './preflight.mjs';
@@ -122,6 +125,7 @@ export function buildDependencySnapshot(preflight) {
     node: tools.node?.version,
     npm: tools.npm?.version,
     pi: tools.pi?.version,
+    piAnthropicAuth: PI_ANTHROPIC_AUTH_VERSION,
     treehouse: tools.treehouse?.version,
     sandboxRuntime: EXPECTED_SRT_VERSION,
     bwrap: tools.bwrap?.version,

@@ -10,6 +10,7 @@ const REQUIRED_DEPENDENCIES = Object.freeze([
   'node',
   'npm',
   'pi',
+  'piAnthropicAuth',
   'treehouse',
   'sandboxRuntime',
   'bwrap',

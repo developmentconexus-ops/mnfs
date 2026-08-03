@@ -5,7 +5,7 @@ import { canonicalJson, sha256Text } from './canonical-json.mjs';
 import { as02Error, assertAs02 } from './errors.mjs';
 
 const LINUX_GLOB_PATTERN = /[*?\[\]]/u;
-const HASH_PATTERN = /^sha256:[a-f0-9]+$/u;
+const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 
 function exactPath(path, label) {
   assertAs02(typeof path === 'string' && path.length > 0, 'INVALID_POLICY_PATH', `${label} must be a non-empty path.`, { label });
@@ -100,9 +100,6 @@ export function compilePolicy(input) {
         ...protectedWorktreePaths,
         policyRoot,
         ...gitDenyWritePaths,
-        realHome,
-        fakeHome,
-        mountRoot,
       ]),
     },
     mandatoryDenySearchDepth: 10,

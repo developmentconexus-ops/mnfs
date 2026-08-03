@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.5.0
+version: 1.5.1
 owners:
   - developmentconexus-ops
 related:
@@ -65,6 +65,16 @@ Automatic merge:     NOT AUTHORIZED
 ```
 
 The unblock decision did not alter the approved Mission contract or complete R5. A material change to the contract, `SEC-E1`, Capability, prerequisite or requirements triggers Replan/re-readiness before implementation.
+
+## Canonical verification
+
+```text
+Head:       d4184c60c5790a63ac1946e21cd289b2fbee4b0e
+Workflow:   30854839307
+Job:        91823320545
+Command:    npm ci && npm run verify
+Result:     PASS
+```
 
 ## Immediate next action
 

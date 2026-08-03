@@ -10,8 +10,11 @@ const IDEMPOTENT_RELEASE_PATTERN = /(?:already\s+(?:returned|released)|not\s+fou
 const EVIDENCE_LIMIT = 4_096;
 
 function environment() {
+  const home = process.env.HOME ?? '';
+  assertSafeStoredPath(home, 'HOME');
   return {
     PATH: process.env.PATH ?? '',
+    HOME: home,
     GIT_OPTIONAL_LOCKS: '0',
   };
 }

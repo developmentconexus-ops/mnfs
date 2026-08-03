@@ -128,20 +128,16 @@ function validateWorkerEnv(value) {
   return result;
 }
 
-function promptGuideline(name) {
-  return name === 'read'
-    ? 'Use the read tool whenever the task requires file contents; read the requested file instead of answering from assumptions.'
-    : `Use the ${name} tool only for the explicitly requested bounded ${name} operation.`;
-}
-
 function toolDefinition(name, execute) {
-  const description = `Execute the bounded ${name} operation through the frozen AS-02 sandbox policy.`;
   return {
     name,
     label: `AS-02 ${name}`,
-    description,
-    promptSnippet: `${name}: ${description}`,
-    promptGuidelines: [promptGuideline(name)],
+    description: `Execute the bounded ${name} operation through the frozen AS-02 sandbox policy.`,
+    promptSnippet: `${name}: execute the reviewed ${name} operation inside the leased AS-02 worktree.`,
+    promptGuidelines: [
+      `Use ${name} only for paths and commands inside the leased AS-02 worktree.`,
+      'Never claim an operation succeeded unless the tool returns a successful result.',
+    ],
     parameters: TOOL_SCHEMAS[name],
     async execute(toolCallId, params, signal) {
       return execute(toolCallId, params, signal);
@@ -244,6 +240,11 @@ export function createAs02Extension(dependencies = {}) {
     assertPolicyHash(policyDocument.hash, computedHash);
     assertPolicyHash(config.MNFS_AS02_POLICY_HASH, computedHash);
     const workerEnv = validateWorkerEnv(policyDocument.workerEnv);
+    const brokerWorkerEnv = {
+      ...workerEnv,
+      MNFS_AS02_WORKTREE: worktree,
+      MNFS_AS02_OPERATION_ROOT: operationRoot,
+    };
 
     const manager = await loadRuntime();
     const session = createSession({
@@ -252,7 +253,7 @@ export function createAs02Extension(dependencies = {}) {
       policy: { config: policyDocument.config, hash: computedHash },
       expectedPolicyHash: computedHash,
       cwd: worktree,
-      workerEnv,
+      workerEnv: brokerWorkerEnv,
     });
     await session.initialize();
 

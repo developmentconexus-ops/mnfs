@@ -8,10 +8,12 @@ on:
       - 'policies/**'
       - 'schemas/**'
       - 'scripts/generate-*.mjs'
+      - 'scripts/build-mis-002-replan.mjs'
       - 'scripts/sec-e1-policy.mjs'
       - 'scripts/validate-docs.mjs'
       - 'scripts/document-utils.mjs'
       - 'scripts/test-documentation-tooling.mjs'
+      - 'scripts/test-mis-002-replan-builder.mjs'
       - 'README.md'
       - 'AGENTS.md'
       - 'package.json'
@@ -28,10 +30,12 @@ on:
       - 'policies/**'
       - 'schemas/**'
       - 'scripts/generate-*.mjs'
+      - 'scripts/build-mis-002-replan.mjs'
       - 'scripts/sec-e1-policy.mjs'
       - 'scripts/validate-docs.mjs'
       - 'scripts/document-utils.mjs'
       - 'scripts/test-documentation-tooling.mjs'
+      - 'scripts/test-mis-002-replan-builder.mjs'
 
 permissions:
   contents: read

@@ -18,7 +18,7 @@ related:
 <!-- GENERATED — DO NOT EDIT
 Source: docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
 Generator: scripts/generate-capability-coverage.mjs
-Generator version: 2
+Generator version: 3
 -->
 
 # CAP-EXECUTION Planning Coverage
@@ -34,6 +34,7 @@ Generator version: 2
 | Applicability domains | 23 |
 | Requirements with source | 28/28 |
 | Requirements with proposed allocation | 28/28 |
+| Requirements with approved allocation | 0/28 |
 | Requirements with verification method | 28/28 |
 | Designed | 23 |
 | Blocked | 5 |
@@ -46,9 +47,9 @@ Generator version: 2
 |---|---|---|
 | R0 | PASS | Blueprint, roadmap, ADR and Mission baseline bindings resolve to the declared versions. |
 | R1 | PASS | 23 impact domains assessed with explicit dispositions. |
-| R2 | PASS | 28 requirements are uniquely identified, sourced and proof-planned. |
-| R3 | REVIEW_REQUIRED | Capability Spec remains proposed pending explicit Operator acceptance |
-| R4 | BLOCKED | AS-02 and a newly approved MIS-002 schema v2 revision are unavailable |
+| R2 | PASS | 28 requirements are uniquely identified, sourced, allocated and proof-planned. |
+| R3 | REVIEW_REQUIRED | Capability Spec CAP-EXECUTION remains proposed. |
+| R4 | BLOCKED | Capability Readiness R3 must pass before Mission contract allocation can be ready. |
 | R5 | NOT_STARTED | Approved Mission contract required |
 | R6 | NOT_STARTED | No implementation Claim |
 | R7 | NOT_STARTED | No verification Evidence |
@@ -75,4 +76,4 @@ execute AS-02
 
 ## Coverage interpretation
 
-R0–R2 are computed from canonical document versions, the Applicability Matrix and requirement traceability. R3–R8 remain lifecycle dispositions until their corresponding work exists. This report does not claim implementation readiness unless R0–R4 pass.
+R0–R4 are computed from canonical document versions, applicability, requirement traceability, Capability metadata, the materialized approved Mission contract and exact criterion allocations. R5–R8 remain lifecycle dispositions until their corresponding work exists. This report does not claim implementation readiness unless R0–R4 pass.

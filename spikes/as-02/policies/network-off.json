@@ -1,0 +1,7 @@
+{
+  "allowedDomains": [],
+  "deniedDomains": [],
+  "allowUnixSockets": [],
+  "allowAllUnixSockets": false,
+  "allowLocalBinding": false
+}

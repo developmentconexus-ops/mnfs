@@ -1,6 +1,7 @@
 {
   "allowedDomains": [],
   "deniedDomains": [],
+  "strictAllowlist": true,
   "allowUnixSockets": [],
   "allowAllUnixSockets": false,
   "allowLocalBinding": false

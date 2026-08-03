@@ -88,6 +88,7 @@ export function compilePolicy(input) {
     network: {
       allowedDomains: domains(input.network?.allowedDomains ?? [], 'network.allowedDomains'),
       deniedDomains: domains(input.network?.deniedDomains ?? [], 'network.deniedDomains'),
+      strictAllowlist: true,
       allowUnixSockets: [],
       allowAllUnixSockets: false,
       allowLocalBinding: false,

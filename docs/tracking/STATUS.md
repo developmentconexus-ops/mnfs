@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.4.0
+version: 1.5.0
 owners:
   - developmentconexus-ops
 related:
@@ -14,6 +14,7 @@ related:
   - EVID-PLAN-CONTRACT-SCHEMA-V2
   - ACCEPTANCE-CAP-EXECUTION-R3
   - ACCEPTANCE-MIS-002-REPLAN
+  - ACCEPTANCE-M2-UNBLOCK
 tracking_issue: 9
 ---
 
@@ -23,9 +24,9 @@ tracking_issue: 9
 - **Canonical environment:** Ubuntu on WSL2; Windows remains the browser, terminal and desktop host
 - **Completed Product Milestones:** M0 — Foundation Walking Skeleton; M1 — Visual Mission Planning
 - **Architecture Baseline:** accepted and merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
-- **Current enabler:** Issue #9 — M2 readiness decision
-- **Implementation PR:** #14 — `plan/mis-002-replan` (draft)
-- **M2 state:** blocked pending explicit Operator unblock; Worker implementation has not started
+- **Current enabler:** M01 Milestone Microdesign under the approved M2 contract
+- **Implementation PR:** #14 — `plan/mis-002-replan` (draft; not merged)
+- **M2 state:** unblocked for R5 M01 microdesign only; implementation and Worker dispatch have not started
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
 - **Historical contract:** revision 3 preserved at blob `6b79117fe66cd5c9c8142099828812f470ce20de`
 
@@ -39,7 +40,9 @@ tracking_issue: 9
 - [x] MIS-002 revision 5 reviewed in Lavish and exact-hash approved.
 - [x] All 28 requirements allocated to exact approved criterion identities.
 - [x] MCRM R0-R4 mechanically PASS.
-- [ ] Operator explicitly unblocks M2 for R5 M01 microdesign.
+- [x] Operator authorized M2 to enter R5 for M01 microdesign through the exact contract-bound token.
+- [ ] M01 microdesign written, reviewed and approved.
+- [ ] M01 implementation authorized after microdesign approval.
 
 ## Readiness result
 
@@ -52,13 +55,20 @@ R4 Contract Readiness    PASS
 R5 Milestone Microdesign NOT_STARTED
 ```
 
-## Current blocker
+## Current authorization boundary
 
-The only remaining governance blocker is the separate Operator decision authorizing M2 to enter R5 microdesign. No Worker implementation or dispatch is authorized.
+```text
+M01 microdesign:      AUTHORIZED
+M01 implementation:  PROHIBITED until microdesign approval
+Pi Worker dispatch:  PROHIBITED
+Automatic merge:     NOT AUTHORIZED
+```
+
+The unblock decision did not alter the approved Mission contract or complete R5. A material change to the contract, `SEC-E1`, Capability, prerequisite or requirements triggers Replan/re-readiness before implementation.
 
 ## Immediate next action
 
-1. Present the final R0-R4 evidence packet and exact approved hash.
-2. Require the exact M2-unblock token.
-3. Record the decision without starting implementation automatically.
-4. After unblock, write M01 microdesign before any Worker dispatch.
+1. Write the M01 Milestone Microdesign against approved MIS-002 revision 5.
+2. Review the microdesign adversarially and obtain its explicit approval.
+3. Begin implementation only after that separate approval.
+4. Keep Worker dispatch prohibited until the microdesign and its dispatch prerequisites are approved.

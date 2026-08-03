@@ -23,7 +23,7 @@
     "verify": "npm run typecheck && npm run test:unit && npm run test:as02 && npm run docs:check",
     "doctor": "npm run build --silent && node bin/mnfs.mjs doctor",
     "docs:roadmap": "node scripts/generate-roadmap.mjs",
-    "docs:test": "npm run build --silent && node scripts/test-documentation-tooling.mjs && node scripts/test-mis-002-replan-builder.mjs"
+    "docs:test": "npm run build --silent && node scripts/test-documentation-tooling.mjs && node scripts/test-mis-002-replan-builder.mjs && node scripts/test-approved-mis-002-allocations.mjs"
   },
   "devDependencies": {
     "@types/node": "24.12.4",

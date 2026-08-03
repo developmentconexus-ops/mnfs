@@ -186,3 +186,12 @@ owners:
 - Created canonical acceptance evidence `ACCEPTANCE-CAP-EXECUTION-R3`.
 - Mechanical readiness now reports R3 `PASS`; R4 remains `BLOCKED` by the missing approved schema-v2 Replan and exact criterion allocations.
 - No Worker implementation, dispatch or M2 unblock was authorized.
+
+
+### MIS-002 revision 5 approval and R4 allocation
+
+- Operator supplied exact approval token for `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3` after Lavish and adversarial review.
+- Planning service materialized MIS-002 revision 5 as the approved schema-v2 contract; revision 3 remains immutable history.
+- Converted all 28 proposed allocations to exact approved criterion identities and removed `BLOCK-MIS-002-REPLAN`.
+- Added acceptance evidence `ACCEPTANCE-MIS-002-REPLAN`; R0-R4 must pass mechanically with R5 NOT_STARTED.
+- M2 remains blocked pending a separate exact Operator decision; no Worker code, M01 microdesign or dispatch was authorized.

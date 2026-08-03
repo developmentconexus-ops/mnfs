@@ -33,13 +33,13 @@ Generator version: 3
 | Unassessed requirements | 0 |
 | Applicability domains | 23 |
 | Requirements with source | 28/28 |
-| Requirements with proposed allocation | 28/28 |
-| Requirements with approved allocation | 0/28 |
+| Requirements with proposed allocation | 0/28 |
+| Requirements with approved allocation | 28/28 |
 | Requirements with verification method | 28/28 |
-| Designed | 27 |
-| Blocked | 1 |
+| Designed | 28 |
+| Blocked | 0 |
 | Verified | 0 |
-| Evidenced | 5 |
+| Evidenced | 6 |
 
 ## Readiness Gates
 
@@ -49,7 +49,7 @@ Generator version: 3
 | R1 | PASS | 23 impact domains assessed with explicit dispositions. |
 | R2 | PASS | 28 requirements are uniquely identified, sourced, allocated and proof-planned. |
 | R3 | PASS | Capability Spec CAP-EXECUTION version 0.1.0 is accepted. |
-| R4 | BLOCKED | 28 Mission contract allocation defect(s) |
+| R4 | PASS | Approved schema-v2 Mission contract revision 5 allocates every MUST requirement to an existing criterion. |
 | R5 | NOT_STARTED | Approved Mission contract required |
 | R6 | NOT_STARTED | No implementation Claim |
 | R7 | NOT_STARTED | No verification Evidence |
@@ -57,49 +57,18 @@ Generator version: 3
 
 ## Computed gate defects
 
-- **R4:** CAP-EXEC-REQ-001: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-002: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-003: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-004: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-005: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-006: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-007: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-008: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-009: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-010: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-011: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-012: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-013: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-014: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-015: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-016: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-017: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-018: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-019: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-020: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-021: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-022: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-023: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-025: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-026: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-027: no approved criterion allocation.
-- **R4:** CAP-EXEC-REQ-028: no approved criterion allocation.
-- **R4:** BLOCK-MIS-002-REPLAN: Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS.
+None.
 
 ## Blocking items
 
-1. **BLOCK-MIS-002-REPLAN:** Revision 3 must remain preserved and a new schema v2 revision must be approved through MNFS.
+None.
 
 ## Required next sequence
 
 ```text
-build complete deterministic MIS-002 schema v2 Replan candidate
-→ save revision through planning service against exact approved revision-3 hash
-→ review current candidate in Lavish
-→ approve exact current hash
-→ replace proposed allocations with approved criterion identities
-→ rerun R0-R4
-→ record explicit Operator M2 unblock decision
+review mechanical R0-R4 evidence
+→ obtain explicit Operator M2 unblock
+→ write M01 microdesign only after unblock
 ```
 
 ## Coverage interpretation

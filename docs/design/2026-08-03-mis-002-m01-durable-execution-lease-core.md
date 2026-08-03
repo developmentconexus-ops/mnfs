@@ -5,7 +5,7 @@ document_type: microdesign
 form: explanation
 authority: specification
 status: proposed
-version: 0.1.0
+version: 0.2.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -25,37 +25,37 @@ last_reviewed: 2026-08-03
 
 ## 1. Decision summary
 
-M01 will add the smallest durable execution foundation required by the approved M2 contract:
+M01 adds the smallest durable execution foundation required by the approved M2 contract:
 
 ```text
 contract-bound Write Track
 → one current Attempt
 → distinct Worker Run identity
-→ durable Claim transaction
+→ atomic durable Claim
 → Treehouse Lease Intent–Action–Observation
-→ fenced release
+→ fenced and non-destructive release
 → read-only Recovery/Reconcile
 ```
 
-The selected architecture is:
+Authority remains explicit:
 
 ```text
 SQLite
-→ authoritative semantic state and Domain Events
+→ semantic execution and Lease state
 
 Treehouse
-→ physical managed-worktree and external Lease state
+→ managed worktree and external Lease identity
 
 Git/filesystem
-→ observed code-tree state
+→ code-tree observations
 
-MNFS application services
-→ transitions, contract validation, idempotency, fencing and Recovery
+MNFS services
+→ contract validation, transitions, idempotency, fencing and Recovery
 ```
 
-M01 does not launch Pi. It persists the identity model that M02 will use for the real E1 Worker.
+M01 does not launch Pi. It persists the identities and invariants that M02 will consume for the real E1 Worker.
 
-This design remains `proposed`. R5 cannot pass until TC-01 produces acceptable canonical WSL2 evidence and the Operator explicitly approves the final microdesign.
+This design remains `proposed`. R5 cannot pass until TC-01 produces acceptable canonical WSL2 evidence, its findings are incorporated and the Operator explicitly approves the final microdesign.
 
 ## 2. Approved baseline
 
@@ -82,21 +82,35 @@ CAP-EXEC-REQ-007
 CAP-EXEC-REQ-008
 ```
 
-## 3. Outcome
+## 3. Outcome and proof boundary
 
-MNFS possesses a durable, contract-bound execution identity model and can acquire, observe, reconcile and release one Treehouse Lease through explicit external-operation semantics.
+M01 is successful when MNFS possesses a durable, contract-bound execution identity model and can acquire, observe, reconcile and release one Treehouse Lease through explicit external-operation semantics.
 
-The M01 composition proof demonstrates that:
+The proof must establish:
 
-- SQLite lifecycle state and matching Domain Events remain coherent;
-- one Write Track has at most one current non-terminal Attempt;
-- Worker Run replacement never rewrites Attempt identity;
-- Claim creation is atomic with its Event;
-- Attempt, Worker Run and Claim remain bound to the exact approved contract;
-- Lease grant and release survive all named crash windows;
-- stale holders cannot release a newer external Lease;
-- orphan worktrees and Leases without worktrees are reported without automatic destruction;
-- a fresh process recovers the same identities and safe next action.
+- one active Track for the bounded Feature;
+- at most one current non-terminal Attempt per Track;
+- Worker Run replacement without rewriting Attempt identity;
+- Claim and `CLAIM_OPENED` Event atomicity;
+- exact contract binding on Attempt, Worker Run, Lease and Claim;
+- all Lease grant/release crash windows;
+- internal and external release fencing;
+- no dirty or unclassified work destroyed;
+- orphan worktree and Lease-without-worktree reporting;
+- fresh-process recovery without transcript or terminal parsing.
+
+Claim and release are not falsely composed in one unsafe scenario. The canonical M01 proof uses **sequential isolated Tracks**:
+
+```text
+Track A
+→ proves Lease grant, crash recovery, fenced clean release and repeated-release idempotency
+
+Track B
+→ proves Worker Run identity, atomic Claim creation and fresh-process preservation
+→ remains preserved; product release waits for M02 Claim disposition
+```
+
+Only one Track is current at a time. Trusted test cleanup of disposable fixtures happens outside product semantics after Evidence is captured.
 
 ## 4. Non-goals
 
@@ -105,67 +119,58 @@ M01 does not implement:
 - Pi process launch;
 - production SEC-E1 Environment creation;
 - Current Authority Snapshot or Writer Pack;
-- Worker completion semantics;
-- deterministic Receipt or Claim Acceptance Gate;
-- multiple current Workers or parallel Write Tracks;
-- generic scheduler, Saga engine, workflow framework or message broker;
-- generalized resource reservation;
+- Worker completion;
+- Receipt or Claim Acceptance Gate;
+- Claim acceptance, rejection or verification transitions;
+- parallel Write Tracks or worker pools;
+- scheduler, Saga engine, workflow framework or message broker;
+- generalized resource reservations;
 - automatic orphan adoption or destruction;
 - Treehouse prune, destroy or force return;
 - remote execution;
-- Issue #15 repository-identity reattachment;
-- automatic merge or delivery.
+- Issue #15 repository-identity recovery;
+- merge, Integration or delivery.
 
-## 5. Options considered
-
-### 5.1 Extend the existing `SqliteStore` with all behavior
-
-Rejected. It would combine M0/M1 persistence, M2 execution state, external process calls and Recovery in one file and one responsibility boundary.
-
-### 5.2 Domain services plus focused stores and adapters
-
-Selected.
+## 5. Selected architecture
 
 ```text
 CLI / future Lead
         |
         v
 ExecutionService ─────────────┐
-ClaimService ─────────────────┼── shared SQLite composition root
+ClaimService ─────────────────┼── SqliteStore composition root
 LeaseService ─────────────────┤          |
-RecoveryService ──────────────┘          +── execution store
-        |                                +── Event store
+RecoveryService ──────────────┘          +── execution persistence
+        |                                +── Event persistence
         |                                +── approved-contract lookup
         |
         +── TreehouseAdapter
         +── GitWorktreeInspector
 ```
 
-### 5.3 Generic durable-workflow framework
+Rules:
 
-Rejected. It creates a second lifecycle model without removing the need to design MNFS identities, transactions, fencing, crash windows or Evidence.
+1. Application services own workflows and semantic transitions.
+2. SQLite repositories own local atomicity.
+3. Adapters return observations, never domain state.
+4. No external action runs inside a SQLite transaction.
+5. Grant and release use Intent–Action–Observation.
+6. Recovery compares expected semantic state with observed physical state.
+7. Generic Recovery is non-mutating.
+8. Destructive or ambiguous repair requires explicit authority.
 
-## 6. Authority boundaries
+Rejected alternatives:
 
-| Concern | Authority |
-|---|---|
-| Approved execution scope | approved Mission Contract |
-| Semantic lifecycle | MNFS SQLite |
-| Code tree and SHA | Git |
-| Physical managed worktree | Treehouse + Git |
-| Semantic Lease | MNFS SQLite |
-| External Lease ID/holder | Treehouse observation |
-| Process existence | operating system; M02 |
-| Worker Run lifecycle | MNFS SQLite |
-| Claim lifecycle | MNFS SQLite |
-| Acceptance | future MNFS Gate; M02 |
-| Human output | presentation only |
+- one monolithic store containing persistence and external operations;
+- separate database per subsystem;
+- Treehouse private state as MNFS authority;
+- human-output parsing as state;
+- new worktree per retry;
+- generic durable-workflow infrastructure.
 
-An adapter observation can cause a semantic transition only through a validated MNFS service operation.
+## 6. Domain identities
 
-## 7. Domain identities
-
-M01 uses stable human-readable identities allocated inside a SQLite write transaction.
+Stable public IDs are allocated inside SQLite write transactions:
 
 ```text
 Write Track:  WT-001
@@ -175,22 +180,20 @@ Claim:        WT-001/A01/CLM01
 Lease:        LSE-001
 ```
 
-A small `entity_sequences` table allocates the numeric components for:
+A narrow sequence table supports repository-wide IDs:
 
-```text
-WRITE_TRACK
-LEASE
+```sql
+CREATE TABLE entity_sequences (
+  kind TEXT PRIMARY KEY CHECK (kind IN ('WRITE_TRACK', 'LEASE')),
+  next_value INTEGER NOT NULL CHECK (next_value > 0)
+);
 ```
 
-Attempt, Worker Run and Claim ordinals are allocated relative to their parent.
+Attempt, Worker Run and Claim ordinals are allocated relative to the parent under the same write transaction. Timestamp is never the only identity or deduplication key.
 
-Timestamp is never the only identity or deduplication key.
+## 7. Lifecycle model
 
-## 8. Lifecycle model
-
-### 8.1 Write Track
-
-M01 persisted states:
+### Write Track
 
 ```text
 ACTIVE
@@ -198,9 +201,9 @@ CLAIMED
 ABANDONED
 ```
 
-`ACTIVE` is created with Attempt A01. Opening a Claim moves the Track to `CLAIMED` in the same transaction. Acceptance and Integration states belong to later milestones.
+`ACTIVE` is created atomically with Attempt A01. Opening a Claim moves the Track to `CLAIMED`. Later acceptance and integration states remain outside M01.
 
-### 8.2 Attempt
+### Attempt
 
 ```text
 OPEN
@@ -209,11 +212,9 @@ CLOSED
 CANCELLED
 ```
 
-Only `OPEN` is current and non-terminal in M01.
+Only `OPEN` is current and non-terminal. A replacement Worker Run stays inside the same Attempt. A new Attempt requires explicit supersession.
 
-A new Worker Run does not create a new Attempt. A new Attempt requires an explicit supersession decision.
-
-### 8.3 Worker Run
+### Worker Run
 
 ```text
 STARTING
@@ -224,9 +225,9 @@ LOST
 CANCELLED
 ```
 
-M01 persists identity, replacement history and typed transitions using fake process observations. Real Pi launch begins in M02.
+M01 persists identity and replacement history using injected process observations. Real Pi launch begins in M02.
 
-### 8.4 Claim
+### Claim
 
 The schema recognizes the accepted capability lifecycle:
 
@@ -240,9 +241,9 @@ SUPERSEDED
 ABANDONED
 ```
 
-M01 authorizes creation of `OPEN` Claims only. Later transitions remain prohibited until their owning M02 services exist.
+M01 authorizes `OPEN` creation only. It does not expose a product transition that would fake completion or acceptance merely to enable cleanup.
 
-### 8.5 Lease
+### Lease
 
 ```text
 REQUESTED
@@ -252,25 +253,15 @@ RELEASED
 DIVERGED
 ```
 
-`DIVERGED` remains non-terminal and blocks acquisition of another Lease for the same Track until explicit disposition.
+`DIVERGED` remains non-terminal and blocks a new Lease for the Track until explicit disposition.
 
-## 9. SQLite migration v4
+## 8. Migration v4
 
-Migration v4 is additive except for a controlled rebuild of the existing Events table.
+Migration v4 is additive except for a controlled Events-table rebuild. It is tested against empty, M0, M1/v3 and exact MIS-002 revision-5 databases.
 
-It must be tested against:
+### Event type registry
 
-- an empty database;
-- an M0 database;
-- an M1 schema-v2 database;
-- the exact approved MIS-002 revision 5 fixture;
-- migration failure rollback.
-
-### 9.1 Event type registry
-
-The existing Events table uses a hard-coded type `CHECK`. M01 introduces multiple types and M02 will introduce additional approved types.
-
-Migration v4 creates:
+The current Events table has a hard-coded type `CHECK`. M01 introduces several types and M02 will introduce more approved domain facts.
 
 ```sql
 CREATE TABLE event_types (
@@ -279,26 +270,9 @@ CREATE TABLE event_types (
 );
 ```
 
-It seeds existing and M01 event types, then rebuilds `events` with:
+Migration seeds existing and M01 types and rebuilds `events` so `type` references `event_types(type)`. The existing Event columns and sequence are preserved.
 
-```text
-type REFERENCES event_types(type)
-```
-
-The remaining Event shape stays stable:
-
-```text
-seq
-event_id
-type
-mission_id
-occurred_at
-payload_json
-```
-
-This registry is not a message broker or generic event bus. Payload ownership and semantic transitions remain explicit code.
-
-M01 Event types:
+M01 types:
 
 ```text
 WRITE_TRACK_OPENED
@@ -315,7 +289,9 @@ LEASE_DIVERGED
 RECOVERY_OBSERVED
 ```
 
-### 9.2 `write_tracks`
+This is a fixed registry, not a broker or generic event bus.
+
+### `write_tracks`
 
 ```text
 id                      TEXT PRIMARY KEY
@@ -330,9 +306,15 @@ updated_at              TEXT NOT NULL
 UNIQUE(id, contract_hash)
 ```
 
-A Write Track targets exactly one qualified Feature in M01. Multi-Feature tracks remain unimplemented until a real consumer requires them.
+```sql
+CREATE UNIQUE INDEX write_tracks_one_current_per_feature
+ON write_tracks(mission_id, feature_qualified_id)
+WHERE status IN ('ACTIVE', 'CLAIMED');
+```
 
-### 9.3 `attempts`
+M01 targets one qualified Feature per Track. Multi-Feature Tracks wait for a proven consumer.
+
+### `attempts`
 
 ```text
 id              TEXT PRIMARY KEY
@@ -349,17 +331,15 @@ FOREIGN KEY(write_track_id, contract_hash)
   REFERENCES write_tracks(id, contract_hash)
 ```
 
-Currentness invariant:
-
 ```sql
 CREATE UNIQUE INDEX attempts_one_open_per_track
 ON attempts(write_track_id)
 WHERE status = 'OPEN';
 ```
 
-No `is_current` column exists.
+There is no `is_current` column.
 
-### 9.4 `worker_runs`
+### `worker_runs`
 
 ```text
 id                  TEXT PRIMARY KEY
@@ -385,7 +365,7 @@ ON worker_runs(attempt_id)
 WHERE status IN ('STARTING', 'RUNNING', 'IDLE');
 ```
 
-### 9.5 `leases`
+### `leases`
 
 ```text
 id                  TEXT PRIMARY KEY
@@ -417,9 +397,9 @@ ON leases(write_track_id)
 WHERE status IN ('REQUESTED', 'ACTIVE', 'RELEASE_PENDING', 'DIVERGED');
 ```
 
-External fields remain null while `REQUESTED` has not been observed successfully.
+External fields remain null until a valid external observation exists.
 
-### 9.6 `claims`
+### `claims`
 
 ```text
 id                       TEXT PRIMARY KEY
@@ -431,7 +411,7 @@ contract_hash            TEXT NOT NULL
 ordinal                  INTEGER NOT NULL
 status                   TEXT NOT NULL
 base_sha                 TEXT NOT NULL
-result_tree_sha          TEXT
+result_tree_sha          TEXT NOT NULL
 claimed_criteria_json    TEXT NOT NULL CHECK (json_valid(claimed_criteria_json))
 version                  INTEGER NOT NULL DEFAULT 1
 created_at               TEXT NOT NULL
@@ -454,115 +434,84 @@ ON claims(attempt_id)
 WHERE status IN ('OPEN', 'COMPLETED_BY_WORKER', 'UNDER_VERIFICATION');
 ```
 
-M01 writes `OPEN` only.
+Application validation requires `base_sha` and `result_tree_sha` to be lowercase hexadecimal Git object IDs of 40 or 64 characters. Claimed criteria are a canonical non-empty array resolving to the Track's approved Feature.
 
-## 10. Transaction and concurrency rules
+## 9. Transactions and concurrency
 
-### 10.1 One transaction owner
+All repositories share one `DatabaseSync` connection owned by the current `SqliteStore` composition root. The focused execution store cannot open its own database.
 
-All repositories share one `DatabaseSync` connection owned by the existing `SqliteStore` composition root.
+Use short `BEGIN IMMEDIATE` transactions. Git, Treehouse, process and model calls never occur inside them.
 
-The new `SqliteExecutionStore` receives that connection and cannot open another database independently.
+Mutable entities carry `version`; updates use compare-and-swap. Zero affected rows produces `CONCURRENCY_CONFLICT`.
 
-### 10.2 Short local transactions
-
-Use `BEGIN IMMEDIATE` for coordinated writes. No Git, Treehouse, process or model operation runs inside a SQLite transaction.
-
-### 10.3 Optimistic concurrency
-
-Mutable entities carry `version`.
-
-Updates use compare-and-swap:
-
-```sql
-UPDATE ...
-SET ..., version = version + 1
-WHERE id = ? AND version = ?;
-```
-
-Zero affected rows produces `CONCURRENCY_CONFLICT`.
-
-### 10.4 Atomic local facts
-
-Related state and Event commit together.
-
-Examples:
+Atomic local operations include:
 
 ```text
-Write Track + Attempt A01
-→ one transaction with WRITE_TRACK_OPENED and ATTEMPT_OPENED
-
-Claim OPEN + Track CLAIMED + CLAIM_OPENED
-→ one transaction
+Write Track + Attempt A01 + two Events
+Claim OPEN + Track CLAIMED + CLAIM_OPENED Event
+state transition + matching Domain Event
 ```
 
-## 11. Contract binding
+Any insert/Event failure rolls back the complete semantic change.
+
+## 10. Contract binding
 
 `ExecutionService.openWriteTrack` loads the latest approved Mission Plan and requires:
 
-- Mission is `MIS-002`;
-- approved revision is 5 or a later explicitly compatible Replan;
-- exact current hash equals the supplied hash;
-- Milestone and Feature qualified identities exist;
+- Mission `MIS-002` is open;
+- exact supplied hash is the latest approved contract hash;
+- Milestone and Feature qualified identities resolve;
 - target belongs to `MIS-002/M01`;
-- requirement allocations for the target remain current.
+- requirement allocations remain current.
 
-Every Attempt, Worker Run, Lease and Claim copies the exact contract hash and is protected by composite parent relationships.
+Every Attempt, Worker Run, Lease and Claim copies that hash and is protected by composite parent relationships.
 
-A stale or mismatched hash fails before durable mutation with:
+A stale or mixed hash fails before durable mutation with:
 
 ```text
 EXECUTION_CONTRACT_CONFLICT
 ```
 
-A Replan does not rewrite existing entities. It makes new dispatch/preparation fail until the active work is explicitly reconciled.
+A Replan never rewrites existing runtime entities. New preparation is blocked until active work is explicitly reconciled.
 
-## 12. Application services
+## 11. Service boundaries
 
-### 12.1 `ExecutionService`
+### `ExecutionService`
 
-Responsibilities:
-
-- validate target against the approved contract;
-- open one Write Track and Attempt A01 atomically;
-- open replacement Worker Run identity under the same Attempt;
-- supersede an Attempt only through explicit policy input;
-- load complete Track state for status and Recovery.
+- validates the approved target;
+- opens one Track and Attempt A01 atomically;
+- creates replacement Worker Run identity under the same Attempt;
+- supports explicit Attempt supersession later without rewriting history;
+- returns complete Track state.
 
 It does not call Treehouse.
 
-### 12.2 `ClaimService`
+### `ClaimService`
 
 `openClaim` requires:
 
-- current Track and Attempt;
-- current Worker Run identity;
-- active matching Lease;
+- current Track, Attempt and Worker Run;
+- ACTIVE matching Lease;
 - exact contract hash;
-- valid base SHA and claimed criterion refs;
+- valid base/result Git object IDs;
+- claimed criteria owned by the Feature;
 - no current Claim.
 
-It inserts Claim, moves Track to `CLAIMED` and writes `CLAIM_OPENED` in one transaction.
+It inserts Claim, moves Track to `CLAIMED` and writes `CLAIM_OPENED` in one transaction. It cannot complete, accept, reject or abandon Claims in M01.
 
-It cannot complete or accept a Claim in M01.
+### `LeaseService`
 
-### 12.3 `LeaseService`
+Owns grant and release across SQLite and Treehouse. It is the only production component permitted to call `TreehouseAdapter`.
 
-Owns grant and release workflows across SQLite and Treehouse.
+### `RecoveryService`
 
-It is the only production component permitted to call `TreehouseAdapter`.
+Loads expected MNFS state, calls observation adapters and produces a read-only report. It never acquires, returns, prunes or destroys a worktree.
 
-### 12.4 `RecoveryService`
+## 12. Observation adapters
 
-Loads expected MNFS state, calls observation adapters and produces a read-only report.
+### Treehouse candidate
 
-It never calls Treehouse return, destroy, prune or acquisition.
-
-## 13. Treehouse adapter contract
-
-The candidate adapter is blocked on TC-01.
-
-Expected command surface at the accepted version:
+TC-01 must prove the installed binary supports:
 
 ```text
 treehouse get --lease --lease-holder <holder> --json
@@ -570,171 +519,143 @@ treehouse status --json
 treehouse return <path> --if-lease-id <id> --if-lease-holder <holder>
 ```
 
-Process rules:
+Process contract:
 
-- exact executable resolved during preflight;
-- exact supported version and executable hash;
-- argument arrays and `shell: false`;
-- stdin closed;
-- explicit cwd;
-- environment allowlist including `PATH`, `HOME`, `GIT_OPTIONAL_LOCKS=0`, `GIT_TERMINAL_PROMPT=0` and locale;
-- bounded stdout/stderr;
-- named timeout/spawn/exit/output errors;
-- strict JSON validation for acquisition and status;
+- pinned version and executable hash;
+- exact executable and argument arrays;
+- `shell: false` and closed stdin;
+- explicit cwd and bounded timeout;
+- environment allowlist with `PATH`, `HOME`, locale, `GIT_OPTIONAL_LOCKS=0`, `GIT_TERMINAL_PROMPT=0`;
+- bounded output artifact refs;
+- strict JSON acquisition/status validation;
 - no force, destroy or prune;
-- no regex-derived domain state;
-- no direct Git worktree fallback inside the same operation.
+- no human-output regex as domain state;
+- no direct Git-worktree fallback inside the same operation.
 
-The fixed M2 fixture has no `origin`; hidden fetch is not accepted.
+The fixed fixture has no `origin`; hidden fetch is not accepted.
 
-## 14. Lease grant — Intent–Action–Observation
+### `GitWorktreeInspector`
 
-### 14.1 Deterministic operation identity
+Uses argument arrays and explicit cwd for:
 
-For Track `WT-001`, generation 1:
+```text
+git rev-parse --show-toplevel
+git rev-parse --git-common-dir
+git rev-parse --git-dir
+git status --porcelain=v1 --untracked-files=all
+git rev-parse HEAD
+git rev-parse <tree-ish>^{tree}
+```
+
+It canonicalizes realpaths, uses optional locks disabled and returns structured observations. It never resets, cleans, commits or changes refs.
+
+## 13. Lease grant — Intent–Action–Observation
+
+For `WT-001`, generation 1:
 
 ```text
 idempotency_key = lease:grant:WT-001:g1
 holder = mnfs-<repo-hash>-lse001-g1
 ```
 
-The holder is lowercase, bounded and derived from Repository identity, internal Lease identity and generation.
+The holder is lowercase, bounded and deterministic.
 
-### 14.2 Flow
+Flow:
 
 ```text
-1. validate current Track, Attempt and contract
+1. validate Track, Attempt and contract
 2. transaction:
    - allocate LSE-001 generation 1
    - insert REQUESTED
    - emit LEASE_REQUESTED
 3. commit
-4. inspect Treehouse status for the exact holder
-5. if one exact matching Lease exists:
-   - validate identity and adopt the observation
+4. inspect status for exact holder
+5. if exactly one match exists, validate and use the observation
 6. otherwise execute get --lease --json
 7. validate realpath, Lease ID, holder and repository ownership
 8. transaction with expected Lease version:
    - REQUESTED → ACTIVE
-   - persist external identity and path
+   - persist external identity/path
    - emit LEASE_GRANTED
 9. return semantic Lease
 ```
 
-### 14.3 Crash windows
+Crash behavior:
 
-#### After Intent, before external acquisition
+- Intent without external Lease: same operation may acquire.
+- External Lease before semantic commit: exact deterministic holder is rediscovered and adopted by retrying the original grant operation.
+- Semantic commit before response: retry returns existing ACTIVE Lease.
+- Multiple matches or input conflict: report/mark DIVERGED; never acquire another worktree.
 
-Fresh retry finds `REQUESTED` and no matching holder. It may execute acquisition using the same operation identity.
+Generic Recovery does not perform adoption.
 
-#### After external acquisition, before semantic commit
+## 14. Lease release
 
-Fresh retry finds exactly one external Lease by deterministic holder and completes `REQUESTED → ACTIVE`. It does not call `get` again.
+Local preconditions:
 
-#### After semantic commit, before response
+- Lease ACTIVE with matching version/generation;
+- complete external Lease ID, holder and path;
+- no current Worker Run in `STARTING`, `RUNNING` or `IDLE`;
+- Track has no current Claim and no unclassified work;
+- Git inspector proves clean worktree;
+- fresh Treehouse observation matches exact external identity.
 
-Fresh retry returns the existing ACTIVE Lease.
+A dirty worktree returns `LEASE_RELEASE_BLOCKED_DIRTY` without calling Treehouse.
 
-#### Multiple matching holders or conflicting input
-
-Mark/report `DIVERGED`; do not acquire another worktree.
-
-## 15. Lease release
-
-### 15.1 Local preconditions
-
-Before creating release Intent:
-
-- semantic Lease is `ACTIVE`;
-- expected internal version and generation match;
-- external Lease ID, holder and path are complete;
-- no current Worker Run is `STARTING`, `RUNNING` or `IDLE`;
-- no unpreserved current Claim or unknown work exists;
-- Git inspector proves the worktree is clean;
-- current Treehouse observation matches exact external identity.
-
-A dirty worktree returns:
+Flow:
 
 ```text
-LEASE_RELEASE_BLOCKED_DIRTY
-```
-
-No Treehouse return command is invoked.
-
-### 15.2 Flow
-
-```text
-1. validate preconditions and fresh observation
+1. validate local and physical preconditions
 2. transaction:
    - ACTIVE → RELEASE_PENDING
    - emit LEASE_RELEASE_REQUESTED
 3. commit
 4. invoke conditional Treehouse return
 5. observe status again
-6. if the managed path is available with no Lease identity:
+6. if managed path is available with no Lease identity:
    transaction:
    - RELEASE_PENDING → RELEASED
    - emit LEASE_RELEASED
 7. otherwise persist/report DIVERGED
 ```
 
-### 15.3 Retry and idempotency
+Retry rules:
 
-- `RELEASED` returns the previous semantic result.
-- `RELEASE_PENDING` always observes before deciding whether to retry return.
-- a matching Lease still present may be retried with the same external fence;
-- a different Lease ID or holder is `LEASE_FENCE_CONFLICT` and never released;
-- a managed available path proves release completion;
-- a missing or unmanaged path is `LD-05`, not automatic success;
-- broad stderr patterns never decide idempotency.
+- RELEASED returns the prior semantic result.
+- RELEASE_PENDING observes before any retry.
+- Same matching external Lease may retry conditional return.
+- Different Lease ID or holder is `LEASE_FENCE_CONFLICT` and is never released.
+- Managed available path proves completion.
+- Missing or unmanaged path is `LD-05`, not automatic success.
+- stderr text never decides idempotency.
 
-## 16. Recovery and Reconcile
-
-### 16.1 Read-only default
+## 15. Recovery and Reconcile
 
 ```text
 mnfs recover
 mnfs recover --track WT-001
 ```
 
-reads MNFS state and observes Treehouse/Git. It performs no resource mutation.
+is read-only for MNFS state and physical worktrees.
 
-### 16.2 Classifications
+Classifications:
 
 | Code | Meaning | Default action |
 |---|---|---|
 | `HEALTHY` | semantic and physical identity match | none |
 | `ADOPTABLE` | REQUESTED Intent matches exactly one external holder | retry original grant operation |
-| `LD-01` | active/releasing semantic Lease but physical Lease absent | block protected action |
-| `LD-02` | MNFS-like external Lease/worktree with no semantic Lease | preserve and request decision |
+| `LD-01` | semantic Lease current but physical Lease absent | block protected action |
+| `LD-02` | MNFS-like external Lease/worktree without semantic Lease | preserve and request decision |
 | `LD-03` | external Lease ID differs | block release/dispatch |
 | `LD-04` | holder differs | block release/dispatch |
-| `LD-05` | path absent, unmanaged or not a valid linked worktree | preserve evidence and request decision |
+| `LD-05` | path absent, unmanaged or invalid | preserve Evidence and request decision |
 | `UNKNOWN` | observation insufficient | block rather than infer health |
 
-### 16.3 Report
+Reports include expected, observed, classification, severity, safe actions, recommended action and required authority. `RECOVERY_OBSERVED` may be emitted only by an explicit durable record command; plain `recover` does not mutate.
 
-```ts
-interface RecoveryReport {
-  repositoryId: string;
-  observedAt: string;
-  contractHash: string;
-  tracks: TrackRecoveryObservation[];
-  summary: {
-    healthy: number;
-    divergences: number;
-    blocked: number;
-  };
-}
-```
+## 16. CLI surface
 
-Each observation includes expected state, observed state, classification, severity, safe actions, recommended next action and required authority.
-
-A matching `REQUESTED` Lease is only adopted by retrying the original grant service with its idempotency key. Generic Recovery remains non-mutating.
-
-## 17. CLI surface
-
-M01 exposes only Operator/Lead operations required for its bounded proof:
+M01 exposes bounded Lead operations:
 
 ```text
 mnfs track open
@@ -753,13 +674,11 @@ mnfs lease release --lease LSE-001 --expected-version <n> [--json]
 mnfs recover [--track WT-001] [--json]
 ```
 
-Worker Run and Claim services are implemented behind typed application interfaces and exercised in automated tests. Their production CLI commands arrive with M02, when real Worker authority and output contracts exist.
+Worker Run and Claim services remain typed internal interfaces exercised by tests. Their production CLI arrives in M02 with real Worker authority and output contracts.
 
-Every exposed command provides stable human output, stable JSON, a typed error, exit class and exact next action.
+Every exposed command has stable human output, JSON, typed error, exit class and concrete next action.
 
-## 18. Error taxonomy
-
-Initial M01 codes:
+## 17. Error taxonomy
 
 ```text
 EXECUTION_TARGET_INVALID
@@ -779,157 +698,136 @@ TREEHOUSE_COMMAND_FAILED
 TREEHOUSE_TIMEOUT
 TREEHOUSE_OUTPUT_INVALID
 TREEHOUSE_OBSERVATION_CONFLICT
+GIT_WORKTREE_INVALID
 RECOVERY_DIVERGENCE
 ```
 
-Errors include bounded structured details and remediation. Raw external output is stored by artifact reference when needed, not copied unbounded into SQLite or CLI JSON.
+Errors contain bounded structured details and remediation. Raw external output is referenced as an artifact when needed.
 
-## 19. Design Coverage Matrix
+## 18. Design Coverage Matrix
 
 | Requirement | Design element | Failure behavior | Verification |
 |---|---|---|---|
-| `CAP-EXEC-REQ-001` | `attempts` lifecycle + unique partial index | second OPEN Attempt rolls back with typed conflict | unit, migration, fresh-process recovery |
-| `CAP-EXEC-REQ-002` | separate Attempt and Worker Run tables/identities | replacement creates new Run; old history immutable | unit transition and replacement tests |
-| `CAP-EXEC-REQ-004` | `ClaimService.openClaim` transaction | Event or state failure rolls back all mutations | injected Event conflict and rollback test |
-| `CAP-EXEC-REQ-005` | approval lookup + copied hash + composite relationships | stale or mixed hash rejected before commit | service, FK and Replan-staleness tests |
-| `CAP-EXEC-REQ-006` | `LeaseService` IAO protocol | crash leaves REQUESTED or recoverable external holder | unit crash-window matrix + TC-01 + real WSL2 |
-| `CAP-EXEC-REQ-007` | generation, idempotency key, external ID and holder conditional return | stale holder/ID cannot release; dirty work preserved | unit fencing + TC-01 S08-S11 |
-| `CAP-EXEC-REQ-008` | read-only `RecoveryService` and LD taxonomy | unknown/divergent state blocks; no destruction | DR-04, DR-05, fresh-process report test |
+| `CAP-EXEC-REQ-001` | Attempt lifecycle + partial unique index | second OPEN Attempt rolls back | unit, migration, fresh process |
+| `CAP-EXEC-REQ-002` | separate Attempt/Worker Run tables and IDs | replacement creates new Run; old history immutable | transition and replacement tests |
+| `CAP-EXEC-REQ-004` | `ClaimService.openClaim` transaction | Event or state failure rolls back all | injected conflict and rollback |
+| `CAP-EXEC-REQ-005` | approval lookup + copied hash + composite relations | stale/mixed hash rejected pre-commit | service, FK and Replan-stale tests |
+| `CAP-EXEC-REQ-006` | LeaseService IAO | crash leaves REQUESTED or exact recoverable holder | crash matrix, TC-01, WSL2 |
+| `CAP-EXEC-REQ-007` | generation, operation key, Lease ID and holder fence | stale holder/ID cannot release; dirty work preserved | unit + TC-01 S08-S11 |
+| `CAP-EXEC-REQ-008` | read-only Recovery and LD taxonomy | ambiguity blocks; no destruction | DR-04, DR-05, fresh-process report |
 
-No M01 requirement lacks a proposed design or verification element. TC-01 remains the blocking external-behavior proof.
+All seven requirements have a proposed design, failure behavior and proof. TC-01 remains the blocking external-behavior input.
 
-## 20. Test strategy
+## 19. Verification strategy
 
-Behavior changes follow red → observed failure → minimal green → refactor.
+Behavior work follows red → observed failure → minimal green → refactor.
 
-### 20.1 Domain and store tests
+### Deterministic tests
 
 - identity allocation and formatting;
 - lifecycle transition tables;
+- one current Track per Feature;
 - one OPEN Attempt per Track;
 - one current Worker Run per Attempt;
 - one current Lease per Track;
 - one current Claim per Attempt;
-- optimistic version conflict;
+- optimistic version conflicts;
 - composite contract mismatch;
-- Claim/Event atomicity;
-- Track/Attempt creation atomicity;
-- all invalid writes leave no Event or partial row.
+- Claim/Event and Track/Attempt atomicity;
+- invalid writes leave no partial row or Event.
 
-### 20.2 Migration tests
+### Migration tests
 
-- empty database to v4;
-- M0 v1 database to v4;
-- M1 v3 database to v4;
-- exact revision 3 history and revision 5 contract preserved;
-- existing Event sequence and payload preserved;
-- migration failure rolls back;
-- fresh process reads all preserved state.
+- empty, M0 and M1/v3 databases;
+- exact revision-3 history and revision-5 contract preserved;
+- Event sequence/payload preserved;
+- migration failure rollback;
+- fresh-process read after migration.
 
-### 20.3 Fake-adapter service tests
+### Fake-adapter service tests
 
-- every Lease crash window;
-- identical retry returns prior result;
-- same idempotency key with conflicting intent fails;
+- all grant/release crash windows;
+- retry returns previous semantic result;
+- conflicting operation intent fails;
 - multiple matching holders diverge;
 - stale internal version fails before external action;
-- stale external ID/holder never releases;
-- dirty worktree invokes no Treehouse command;
-- `RELEASE_PENDING` restart observes before retry;
-- missing path remains divergent;
+- stale external identity never releases;
+- dirty work invokes no return;
+- RELEASE_PENDING observes before retry;
+- missing path diverges;
 - Recovery makes no mutation.
 
-### 20.4 TC-01
+### TC-01
 
-Execute the proposed conformance protocol on canonical WSL2 before R5 approval.
+Execute the accepted protocol on canonical WSL2 before R5 approval.
 
-### 20.5 M01 canonical proof
+### Canonical M01 proof
 
 ```text
-process A
-→ open WT-001 + A01
-→ create WR01 identity
-→ persist Lease REQUESTED
-→ acquire exact Treehouse Lease
-→ create OPEN Claim atomically
-→ terminate process
+Scenario A — releasable Track
+process A1: open Track A + Attempt; grant Lease; terminate after named crash window
+process A2: recover same identities; reject duplicates; fenced clean release
+process A3: recover RELEASED; repeated release returns same semantic result
 
-process B
-→ recover same Track, Attempt, Run, Claim and Lease
-→ report healthy identity
-→ reject duplicate Attempt and Lease
-→ release only after clean/fenced checks
-
-process C
-→ recover RELEASED state
-→ repeated release returns same semantic result
-→ no duplicate rows, Events or physical Lease
+Scenario B — claimed Track
+process B1: open Track B + Attempt + Worker Run identity; grant Lease; create Claim atomically
+process B2: recover same Track, Attempt, Run, Lease and Claim; prove no duplicate current work
+product cleanup: none; fixture is preserved pending M02 disposition
+trusted test cleanup: only after Evidence, outside product semantics
 ```
 
 Pi and SEC-E1 are not invoked.
 
-## 21. Observability
+## 20. Observability and security
 
-M01 records locally:
+Record locally:
 
 - Domain Events;
-- operation timestamps and durations;
+- timestamps and durations;
 - adapter exit class;
-- bounded stdout/stderr artifact refs;
-- external executable/version/hash;
-- Recovery classification;
-- current entity versions;
-- next action.
+- bounded output artifact refs;
+- executable version/hash;
+- Recovery classifications;
+- entity versions and next action.
 
-No external telemetry backend is required.
+Security rules:
 
-## 22. Security
-
-- no Worker is launched;
-- Treehouse subprocess uses explicit executable, argv, cwd and environment;
+- no Worker launch;
+- exact subprocess argv/cwd/env;
 - no shell interpolation;
-- no credential environment allowlist beyond what TC-01 explicitly proves necessary;
-- fixed fixture has no `origin`;
-- adapter never uses force/destroy/prune;
-- external output is untrusted and strictly validated;
-- source checkout and worktree realpaths are verified;
-- missing or ambiguous identity fails closed;
-- logs and errors are bounded and contain no secret reads.
+- fixture without `origin`;
+- no force/destroy/prune;
+- external output untrusted and strictly validated;
+- source and worktree realpaths verified;
+- missing/ambiguous identity fails closed;
+- no secret reads or unbounded logs.
 
-## 23. Rollout and rollback
+## 21. Rollout and rollback
 
-### Rollout
+Rollout sequence:
 
 ```text
-1. TC-01 conformance
-2. final microdesign review and Operator approval
-3. implementation plan
-4. migration/domain with fake adapters
-5. real Treehouse grant
-6. real Recovery
-7. fenced release
-8. M01 composition proof
+TC-01
+→ final design review and Operator approval
+→ implementation plan
+→ migration/domain with fakes
+→ real grant
+→ real Recovery
+→ fenced release
+→ M01 composition proof
 ```
 
-### Disable
+Before canonical migration v4:
 
-A failed Treehouse preflight disables real Lease operations while preserving M0/M1 and fake-adapter tests.
-
-### Rollback
-
-Before applying migration v4 to a canonical runtime:
-
-- create a SQLite backup;
-- verify integrity;
+- create SQLite backup;
+- run integrity check;
 - record schema and contract hashes.
 
-If implementation must be disabled after migration, the runtime remains readable and M0/M1 planning remains available. Downgrading to a binary that cannot understand schema v4 is prohibited; rollback uses the database backup or a forward repair.
+If real Treehouse preflight fails, real Lease operations remain disabled while M0/M1 and fake-adapter verification continue.
 
-No automatic worktree cleanup occurs during rollback.
+A schema-v4 database is not opened for write by an older binary. Rollback uses the backup or a forward repair; it never performs automatic worktree cleanup.
 
-## 24. Target file boundaries
-
-Proposed production files:
+## 22. Target file boundaries
 
 ```text
 src/execution/ids.ts
@@ -951,20 +849,17 @@ src/store/migrations.ts
 src/store/sqlite-store.ts
 ```
 
-Corresponding tests mirror each responsibility. The implementation plan may refine exact names without changing architecture or authority.
+Tests mirror each responsibility. An implementation plan may refine filenames without changing authority or behavior.
 
-## 25. R5 gate
+## 23. R5 gate
 
 R5 remains `IN_PROGRESS` until:
 
 - TC-01 has an accepted or explicitly limited Verdict;
-- its findings are incorporated into this design;
-- every M01 criterion remains covered;
+- findings are incorporated;
 - migration and adapter signatures receive adversarial review;
-- no blocking external-tool question remains;
+- no external-tool decision remains open;
 - the Operator explicitly approves the final microdesign.
-
-Current boundary:
 
 ```text
 Research:            PUBLISHED
@@ -974,7 +869,7 @@ M01 implementation: PROHIBITED
 Pi Worker dispatch:  PROHIBITED
 ```
 
-## 26. Documentation and requirements impact
+## 24. Change impact
 
 ```yaml
 documentation_impact:
@@ -985,7 +880,7 @@ documentation_impact:
     - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
     - DOC-PROJECT-STATUS
     - TRACKING-WORKLOG
-  rationale: "R5 defines the bounded M01 state, transaction, adapter, Recovery and proof design."
+  rationale: "R5 defines bounded M01 state, transaction, adapter, Recovery and proof design."
   follow_up:
     issue: 16
 
@@ -999,5 +894,5 @@ requirements_impact:
     - CAP-EXEC-REQ-006
     - CAP-EXEC-REQ-007
     - CAP-EXEC-REQ-008
-  rationale: "Every M01 requirement now has a proposed design, failure behavior and verification element; TC-01 remains blocking Evidence."
+  rationale: "Every M01 requirement has a proposed design and proof; TC-01 remains blocking Evidence."
 ```

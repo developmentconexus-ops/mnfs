@@ -73,6 +73,7 @@ export function compilePolicy(input) {
   const mountRoot = exactPath(input.mountRoot, 'mountRoot');
   const gitReadPaths = exactPaths(input.gitReadPaths ?? [], 'gitReadPaths');
   const gitDenyWritePaths = exactPaths(input.gitDenyWritePaths ?? [], 'gitDenyWritePaths');
+  const trustedReadPaths = exactPaths(input.trustedReadPaths ?? [], 'trustedReadPaths');
 
   const protectedWorktreePaths = exactPaths(
     [
@@ -95,7 +96,13 @@ export function compilePolicy(input) {
     },
     filesystem: {
       denyRead: unique([realHome, fakeHome, mountRoot, policyRoot, runtimeRoot]),
-      allowRead: unique([worktreePath, brokerPath, attemptTempPath, ...gitReadPaths]),
+      allowRead: unique([
+        worktreePath,
+        brokerPath,
+        attemptTempPath,
+        ...gitReadPaths,
+        ...trustedReadPaths,
+      ]),
       allowWrite: unique([worktreePath, attemptTempPath]),
       denyWrite: unique([
         ...protectedWorktreePaths,

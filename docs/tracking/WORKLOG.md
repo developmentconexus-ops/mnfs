@@ -187,7 +187,6 @@ owners:
 - Mechanical readiness now reports R3 `PASS`; R4 remains `BLOCKED` by the missing approved schema-v2 Replan and exact criterion allocations.
 - No Worker implementation, dispatch or M2 unblock was authorized.
 
-
 ### MIS-002 revision 5 approval and R4 allocation
 
 - Operator supplied exact approval token for `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3` after Lavish and adversarial review.
@@ -203,3 +202,24 @@ owners:
 - Authorized M2 to enter R5 for M01 microdesign only; R5 remains `NOT_STARTED` until that microdesign is written and reviewed.
 - M01 implementation and Pi Worker dispatch remain prohibited until a separately approved microdesign exists.
 - Material changes to the contract, SEC-E1, Capability, prerequisites or requirements trigger Replan/re-readiness before implementation.
+
+### PR #14 integration
+
+- Re-ran the canonical GitHub merge-commit verification on Ubuntu 24.04 with Node.js 24.18.0 and npm 11.16.0.
+- `npm ci` passed with 0 vulnerabilities.
+- `npm run verify` passed with 95 product tests, 119 deterministic AS-02 tests, all documentation tooling checks and 71 canonical IDs validated.
+- Reviewed preservation of MIS-002 revision 3, revision 5 exact hash, 28/28 approved allocations and the M2 authorization boundary.
+- Marked PR #14 ready and merged it by squash into `main` at `dee12a9b53984d39045421c9586ee53665ebc5e5`.
+- The merge authorizes R5 design work only; no M01 implementation or Worker dispatch was inferred.
+
+### Issue #16 — M01 R5 research and design
+
+- Opened Issue #16 and branch `design/mis-002-m01` from the integrated PR #14 commit.
+- Published `MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1` with a validated primary-source manifest covering harness engineering, evaluation, Pi, Symphony, Firstmate, Git, SQLite, Sandbox Runtime and Treehouse.
+- Confirmed the MNFS control-plane architecture while rejecting a scheduler, generic Saga engine, message broker, ORM, LangGraph, Temporal, PostgreSQL and Redis for the bounded M01 slice.
+- Source review found that Treehouse provides stable Lease ID, holder, JSON status and conditional release, but acquisition may fetch, status may heal private metadata and return may reset a worktree.
+- Proposed TC-01 to test the exact installed Treehouse binary on canonical WSL2 before production adapter approval.
+- Proposed the M01 microdesign with shared SQLite transaction authority, focused execution stores, lifecycle-derived currentness, composite contract binding, Intent–Action–Observation, fenced release and read-only Recovery.
+- M01 Design Coverage now has a proposed design, failure behavior and verification element for `CAP-EXEC-REQ-001`, `002`, `004`, `005`, `006`, `007` and `008`.
+- R5 advanced from `NOT_STARTED` to `IN_PROGRESS`; TC-01 Evidence and explicit Operator microdesign approval remain blocking.
+- No production source code, migration, Pi launch, Treehouse Lease or Worker dispatch was created.

@@ -1,0 +1,77 @@
+name: Patch MIS-002 plan
+
+on:
+  push:
+    branches:
+      - plan/mis-002-replan
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: plan/mis-002-replan
+      - name: Patch plan
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/superpowers/plans/2026-08-03-mis-002-replan.md')
+          text = path.read_text()
+
+          frontmatter = '''---
+id: PLAN-MIS-002-REPLAN
+title: MIS-002 Schema v2 Replan Implementation Plan
+document_type: implementation_plan
+form: how_to
+authority: guidance
+status: current
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+related:
+  - DESIGN-MIS-002-REPLAN
+  - CAP-EXECUTION
+tracking_issue: 9
+last_reviewed: 2026-08-03
+---
+
+'''
+          if not text.startswith('---\n'):
+              text = frontmatter + text
+
+          old = 'Add `allocatedTo` to required fields. Existing traceability entries receive `"allocatedTo": []` during Task 4.'
+          new = 'Add `allocatedTo` to required fields. In this same task, before running schema or docs verification, add `"allocatedTo": []` to all 28 existing requirement objects in `TRACEABILITY.json`; Task 4 changes only semantic evidence and blockers.'
+          if old not in text:
+              raise SystemExit('Task 3 allocation sentence not found')
+          text = text.replace(old, new, 1)
+
+          old = '''- [ ] **Step 2: Add `allocatedTo: []` to all 28 requirements**
+
+Keep every existing `proposedAllocation` unchanged until exact Mission approval.'''
+          new = '''- [ ] **Step 2: Confirm transition fields before semantic edits**
+
+Assert every requirement already contains `"allocatedTo": []` from Task 3 and keep every existing `proposedAllocation` unchanged until exact Mission approval.'''
+          if old not in text:
+              raise SystemExit('Task 4 allocation step not found')
+          text = text.replace(old, new, 1)
+
+          old = 'Add CLI behavior that requires `--output`, reads `policies/SEC-E1.json`, computes `hashSecE1Bytes`, creates the parent directory, and writes pretty JSON plus one final newline.'
+          new = '''Add CLI behavior that requires `--output`, reads `policies/SEC-E1.json`, computes `hashSecE1Bytes`, creates the parent directory, and writes pretty JSON plus one final newline. Import `pathToFileURL` from `node:url` and guard all CLI side effects with `if (import.meta.url === pathToFileURL(process.argv[1]).href)` so `scripts/test-documentation-tooling.mjs` can import `buildMis002Replan` without writing files or exiting.'''
+          if old not in text:
+              raise SystemExit('Builder CLI sentence not found')
+          text = text.replace(old, new, 1)
+
+          path.write_text(text)
+          PY
+          rm .github/workflows/patch-mis002-plan.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/superpowers/plans/2026-08-03-mis-002-replan.md .github/workflows/patch-mis002-plan.yml
+          git commit -m "docs: fix MIS-002 implementation plan"
+          git push origin HEAD:plan/mis-002-replan

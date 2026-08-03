@@ -51,6 +51,13 @@ test('rejects unsafe run ids before creating any fixture path', async () => {
   }
 });
 
+test('requires an explicit durable fixture base instead of falling back to legacy tmp state', async () => {
+  await assert.rejects(
+    () => createFixture({ runId: 'fixture-no-base', runner: runProcess }),
+    (error) => error?.code === 'FIXTURE_PATH_ESCAPE',
+  );
+});
+
 test('creates synthetic sentinels before policy compilation and exposes digests only', async () => {
   const baseRoot = await mkdtemp(join(tmpdir(), 'mnfs-as02-fixture-base-'));
   const historicalPath = '.mnfs/missions/MIS-002/plan.json';

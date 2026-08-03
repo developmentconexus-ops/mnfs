@@ -128,11 +128,20 @@ function validateWorkerEnv(value) {
   return result;
 }
 
+function promptGuideline(name) {
+  return name === 'read'
+    ? 'Use the read tool whenever the task requires file contents; read the requested file instead of answering from assumptions.'
+    : `Use the ${name} tool only for the explicitly requested bounded ${name} operation.`;
+}
+
 function toolDefinition(name, execute) {
+  const description = `Execute the bounded ${name} operation through the frozen AS-02 sandbox policy.`;
   return {
     name,
     label: `AS-02 ${name}`,
-    description: `Execute the bounded ${name} operation through the frozen AS-02 sandbox policy.`,
+    description,
+    promptSnippet: `${name}: ${description}`,
+    promptGuidelines: [promptGuideline(name)],
     parameters: TOOL_SCHEMAS[name],
     async execute(toolCallId, params, signal) {
       return execute(toolCallId, params, signal);

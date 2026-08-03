@@ -43,7 +43,7 @@ test('resolves separate durable artifact and fixture roots from one Linux state 
   assert.equal(fixtureBase.startsWith('/tmp/'), false);
 });
 
-test('phase one passes and persists the durable fixture root instead of /tmp', async (t) => {
+test('phase one passes and persists the durable fixture root instead of the legacy tmp root', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'mnfs-as02-durable-root-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const repositoryPath = join(root, 'repository');
@@ -93,5 +93,5 @@ test('phase one passes and persists the durable fixture root instead of /tmp', a
   assert.equal(observedBaseRoot, expectedBase);
   assert.equal(state.fixtureRoot, join(expectedBase, state.runId));
   assert.equal(state.lease.fixture.baseRoot, expectedBase);
-  assert.equal(state.fixtureRoot.startsWith('/tmp/'), false);
+  assert.equal(state.fixtureRoot.startsWith('/tmp/mnfs-as-02/'), false);
 });

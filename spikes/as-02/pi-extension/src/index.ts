@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import {
+  appendFile,
   mkdir,
   readFile,
   realpath,
+  rename,
   rm,
   writeFile,
 } from 'node:fs/promises';
-import { isAbsolute, join, relative } from 'node:path';
+import { dirname, isAbsolute, join, relative } from 'node:path';
 
 import { canonicalJson, sha256Text } from '../../src/canonical-json.mjs';
 import { as02Error, assertAs02 } from '../../src/errors.mjs';
@@ -104,6 +106,13 @@ async function exactPath(value, label, realpathFn) {
   }
 }
 
+async function futureOutputPath(value, label, realpathFn) {
+  if (value === undefined) return null;
+  assertAs02(typeof value === 'string' && isAbsolute(value) && !/[\r\n]/u.test(value), 'EXTENSION_CONFIG_INVALID', `${label} must be one absolute path.`);
+  const parent = await exactPath(dirname(value), `${label} parent`, realpathFn);
+  return join(parent, value.slice(dirname(value).length + 1));
+}
+
 function validateWorkerEnv(value) {
   assertAs02(value && typeof value === 'object' && !Array.isArray(value), 'EXTENSION_CONFIG_INVALID', 'workerEnv must be an object.');
   const result = {};
@@ -164,14 +173,24 @@ function parseBrokerResult(processResult, policyHash) {
   };
 }
 
+async function atomicJson(path, value, dependencies) {
+  if (!path) return;
+  const temp = `${path}.tmp-${process.pid}-${randomUUID()}`;
+  await dependencies.writeFile(temp, `${canonicalJson(value)}\n`, { flag: 'wx', mode: 0o600 });
+  await dependencies.rename(temp, path);
+}
+
 export function createAs02Extension(dependencies = {}) {
   const env = dependencies.env ?? process.env;
   const readFileFn = dependencies.readFile ?? readFile;
   const realpathFn = dependencies.realpath ?? realpath;
   const mkdirFn = dependencies.mkdir ?? mkdir;
   const writeFileFn = dependencies.writeFile ?? writeFile;
+  const renameFn = dependencies.rename ?? rename;
+  const appendFileFn = dependencies.appendFile ?? appendFile;
   const rmFn = dependencies.rm ?? rm;
   const randomId = dependencies.randomId ?? (() => randomUUID());
+  const now = dependencies.now ?? (() => new Date().toISOString());
   const loadRuntime = dependencies.loadRuntime ?? loadSandboxRuntime;
   const createSession = dependencies.createSession ?? createSandboxSession;
   const processRunner = dependencies.processRunner ?? runProcess;
@@ -184,13 +203,18 @@ export function createAs02Extension(dependencies = {}) {
     const broker = await exactPath(config.MNFS_AS02_BROKER, 'Broker', realpathFn);
     const operationRoot = await exactPath(config.MNFS_AS02_OPERATION_ROOT, 'Operation root', realpathFn);
     const artifactRoot = await exactPath(config.MNFS_AS02_ARTIFACT_ROOT, 'Artifact root', realpathFn);
+    const receiptPath = await futureOutputPath(env.MNFS_AS02_EXTENSION_RECEIPT, 'Extension receipt', realpathFn);
+    const eventPath = await futureOutputPath(env.MNFS_AS02_EXTENSION_EVENTS, 'Extension events', realpathFn);
 
     for (const [label, trustedPath] of [
       ['Policy path', policyPath],
       ['Broker', broker],
       ['Operation root', operationRoot],
       ['Artifact root', artifactRoot],
+      ['Extension receipt', receiptPath],
+      ['Extension events', eventPath],
     ]) {
+      if (!trustedPath) continue;
       assertAs02(!inside(worktree, trustedPath), 'EXTENSION_TRUST_BOUNDARY_INVALID', `${label} must be outside Worker write authority.`, {
         worktree,
         trustedPath,
@@ -231,8 +255,30 @@ export function createAs02Extension(dependencies = {}) {
     });
 
     await mkdirFn(operationRoot, { recursive: true, mode: 0o700 });
+    await atomicJson(receiptPath, {
+      schemaVersion: 1,
+      type: 'startup',
+      initializedAt: now(),
+      policyHash: computedHash,
+      worktree,
+      broker,
+      tools: [...TOOL_NAMES],
+    }, { writeFile: writeFileFn, rename: renameFn });
 
-    async function executeTool(name, params, signal) {
+    async function recordToolEvent(toolCallId, tool) {
+      if (!eventPath) return;
+      await appendFileFn(eventPath, `${canonicalJson({
+        schemaVersion: 1,
+        type: 'tool_call',
+        toolCallId,
+        tool,
+        policyHash: computedHash,
+        finishedAt: now(),
+        result: 'SUCCEEDED',
+      })}\n`, { mode: 0o600 });
+    }
+
+    async function executeTool(name, toolCallId, params, signal) {
       const id = randomId();
       assertAs02(/^[A-Za-z0-9._-]+$/u.test(id), 'EXTENSION_CONFIG_INVALID', 'Operation ID is invalid.', { id });
       const operationPath = join(operationRoot, `${id}.json`);
@@ -243,17 +289,19 @@ export function createAs02Extension(dependencies = {}) {
           signal,
           timeoutMs: typeof params.timeoutMs === 'number' ? params.timeoutMs : 30_000,
         });
-        return parseBrokerResult(observed, computedHash);
+        const result = parseBrokerResult(observed, computedHash);
+        await recordToolEvent(toolCallId, name);
+        return result;
       } finally {
         await rmFn(operationPath, { force: true });
       }
     }
 
     for (const name of TOOL_NAMES) {
-      pi.registerTool(toolDefinition(name, (_toolCallId, params, signal) => executeTool(name, params, signal)));
+      pi.registerTool(toolDefinition(name, (toolCallId, params, signal) => executeTool(name, toolCallId, params, signal)));
     }
 
-    return { policyHash: computedHash, worktree, broker, operationRoot, artifactRoot };
+    return { policyHash: computedHash, worktree, broker, operationRoot, artifactRoot, receiptPath, eventPath };
   };
 }
 

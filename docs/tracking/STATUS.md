@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.6.1
+version: 1.6.2
 owners:
   - developmentconexus-ops
 related:
@@ -50,7 +50,11 @@ tracking_issue: 16
 - [x] M01 architecture research and validated source manifest published on the design branch.
 - [x] TC-01 Treehouse production-adapter conformance protocol proposed.
 - [x] M01 Milestone Microdesign proposed with coverage for all seven M01 requirements.
-- [ ] Draft PR #17 mechanical documentation and CI review complete.
+- [x] Draft PR #17 mechanical documentation and CI review complete.
+- [x] Documentation Map reconciled from obsolete AB1 state to current M01 R5 authority.
+- [x] Microdesign self-review resolved Claim/release, empty-Track disposition and current-Track invariants.
+- [ ] Operator reviews the written PR #17 design package.
+- [ ] TC-01 execution plan written after design-package review.
 - [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.
 - [ ] TC-01 findings incorporated into the final microdesign.
 - [ ] M01 microdesign adversarially reviewed and explicitly approved.
@@ -73,21 +77,23 @@ R5 Milestone Microdesign IN_PROGRESS
 Research coverage:       PUBLISHED
 TC-01 protocol:          PROPOSED / EXECUTION AUTHORIZED
 TC-01 Evidence:          NOT_STARTED
-M01 microdesign:         PROPOSED
+M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
+Mechanical verification: PASS
 Blocking external input: Treehouse production-adapter conformance
+Current human gate:      Operator review of PR #17 design package
 Design PR:               #17 DRAFT
 ```
 
-The proposed design does not become implementation authority merely because every requirement has a design element. TC-01 must prove the exact Treehouse behavior, the final design must absorb its findings and the Operator must approve the resulting microdesign explicitly.
+The proposed design does not become implementation authority merely because every requirement has a design element or CI is green. TC-01 must prove the exact Treehouse behavior, the final design must absorb its findings and the Operator must approve the resulting microdesign explicitly.
 
 ## Current authorization boundary
 
 ```text
 M01 research:         AUTHORIZED
-TC-01 execution:      AUTHORIZED
+TC-01 execution:      AUTHORIZED after its written execution plan
 M01 microdesign:      AUTHORIZED for review
-M01 implementation:  PROHIBITED until microdesign approval
+M01 implementation:  PROHIBITED until final microdesign approval
 Pi Worker dispatch:  PROHIBITED
 Automatic merge:     NOT AUTHORIZED
 ```
@@ -108,15 +114,33 @@ documentation tooling:            PASS
 documentation validation:         PASS — 71 canonical IDs
 ```
 
-PR #17 requires its own fresh documentation and CI proof before review readiness.
+## Latest design-branch verification
+
+PR #17 merge commit `45a9b5cc419870d4ced31d019d9400fc770c63d0` was verified on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
+
+```text
+Workflow:                          30860376984
+Job:                               91840828761
+npm ci:                            PASS — 0 vulnerabilities
+typecheck:                         PASS
+product tests:                     PASS — 95/95
+AS-02 deterministic tests:        PASS — 119/119
+documentation tooling:            PASS
+MIS-002 Replan builder:            PASS
+approved allocation tests:        PASS
+documentation validation:         PASS — 74 canonical IDs
+```
+
+This proof establishes mechanical integrity of the design package. It does not provide Treehouse TC-01 Evidence or approve R5.
 
 ## Immediate next action
 
-1. Complete mechanical documentation and CI validation for draft PR #17.
-2. Correct any metadata, relation, source-manifest or authority defects.
-3. Execute TC-01 on canonical Ubuntu WSL2.
-4. Incorporate the observed Treehouse contract into the microdesign.
-5. Perform constructive and adversarial design review.
-6. Obtain explicit Operator approval of the final M01 microdesign.
-7. Create an Implementation Plan only after that approval.
-8. Keep implementation and Pi Worker dispatch prohibited until their separate gates pass.
+1. Operator reviews the written PR #17 research, TC-01 protocol and M01 microdesign.
+2. Resolve any requested design changes.
+3. After design-package approval, write the detailed TC-01 implementation/execution plan.
+4. Execute TC-01 on canonical Ubuntu WSL2.
+5. Incorporate the observed Treehouse contract into the microdesign.
+6. Perform final constructive and adversarial design review.
+7. Obtain explicit Operator approval of the final M01 microdesign.
+8. Create the M01 Implementation Plan only after that approval.
+9. Keep M01 implementation and Pi Worker dispatch prohibited until their separate gates pass.

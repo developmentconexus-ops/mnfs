@@ -18,3 +18,4 @@ owners:
 | D-003 | 2026-07-31 | Use SQLite for local operational state and repository files for planning contracts and accepted evidence. | Operator | ADR-0002 |
 | D-004 | 2026-07-31 | Allocate worktrees per concurrent write track and reuse them for local corrections. | Operator | ADR-0003 |
 | D-005 | 2026-07-31 | FirstMate is a reference and laboratory, not the product's parent repository. | Operator | ADR-0001 |
+| D-006 | 2026-08-03 | Authorize M2 to enter R5 Milestone Microdesign under approved MIS-002 revision 5 (`sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`) after R0–R4 PASS. Scope is M01 microdesign only; Worker implementation and dispatch remain prohibited until that microdesign is separately approved. Material contract, policy, Capability, prerequisite or requirement changes trigger Replan/re-readiness. | Operator | — |

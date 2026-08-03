@@ -195,3 +195,11 @@ owners:
 - Converted all 28 proposed allocations to exact approved criterion identities and removed `BLOCK-MIS-002-REPLAN`.
 - Added acceptance evidence `ACCEPTANCE-MIS-002-REPLAN`; R0-R4 must pass mechanically with R5 NOT_STARTED.
 - M2 remains blocked pending a separate exact Operator decision; no Worker code, M01 microdesign or dispatch was authorized.
+
+### M2 R5 microdesign unblock
+
+- Operator supplied exact token `MNFS_UNBLOCK_M2 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 gates=R0,R1,R2,R3,R4`.
+- Recorded decision D-006 and evidence `ACCEPTANCE-M2-UNBLOCK`.
+- Authorized M2 to enter R5 for M01 microdesign only; R5 remains `NOT_STARTED` until that microdesign is written and reviewed.
+- M01 implementation and Pi Worker dispatch remain prohibited until a separately approved microdesign exists.
+- Material changes to the contract, SEC-E1, Capability, prerequisites or requirements trigger Replan/re-readiness before implementation.

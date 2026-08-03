@@ -66,6 +66,9 @@ The deterministic AS-02 suite asserts the exact main package integrity and every
   - `--no-builtin-tools` disables built-ins while keeping explicit extension tools;
   - `--no-extensions` disables discovered extensions while repeated `-e` admits only named sources.
 - Built-in inventory reviewed for the comparison: `bash`, `read`, `write`, `edit`, `grep`, `find`, `ls`.
+- Every first-party broker tool supplies `promptSnippet` and a tool-named `promptGuidelines` entry so the active custom inventory is visible in Pi's system prompt without enabling built-ins.
+- The canonical pilot pins `anthropic/claude-haiku-4-5`, creates a run-specific nonce file inside the leased worktree, requires exactly one `read` call, compares stdout to the nonce-bound file contents, removes the file in `finally`, and stores only its SHA-256 hash in Evidence.
+- A copied or guessed answer remains `BLOCKED` even when Pi exits zero; acceptance requires the trusted tool event and exact nonce-bound stdout together.
 - Package namespace is not imported by the AS-02 extension. The extension uses only the injected Pi API object and local JSON schemas, avoiding coupling to a mutable package namespace.
 - Exact installed version: observed by `pi --version` in the WSL2 preflight and promoted to the acceptance report. A final Verdict is forbidden until that evidence exists.
 

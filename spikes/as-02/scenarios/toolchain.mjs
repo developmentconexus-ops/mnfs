@@ -1,12 +1,17 @@
+function quote(value) {
+  return `'${String(value).replaceAll("'", `'"'"'`)}'`;
+}
+
 export function toolchainScenarios(context) {
+  const tscPath = context.toolchain?.tscPath ?? '/trusted/typescript/bin/tsc';
   const command = [
     'set -eu',
     'export GIT_OPTIONAL_LOCKS=0',
     'git --no-optional-locks status --short',
     'node --version',
     'npm --version',
-    'npx --no-install tsc --version',
-    'npm run test:as02 --silent',
+    `node ${quote(tscPath)} --noEmit -p tsconfig.json`,
+    'npm test --silent',
   ].join(' && ');
 
   return [

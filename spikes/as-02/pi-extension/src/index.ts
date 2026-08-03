@@ -129,15 +129,19 @@ function validateWorkerEnv(value) {
 }
 
 function toolDefinition(name, execute) {
+  const promptGuidelines = [
+    `Use ${name} only for paths and commands inside the leased AS-02 worktree.`,
+  ];
+  if (name === 'read') {
+    promptGuidelines.push('Use read to read the requested file contents before answering about that file.');
+  }
+  promptGuidelines.push(`Never claim a ${name} operation succeeded unless the ${name} tool returns a successful result.`);
   return {
     name,
     label: `AS-02 ${name}`,
     description: `Execute the bounded ${name} operation through the frozen AS-02 sandbox policy.`,
     promptSnippet: `${name}: execute the reviewed ${name} operation inside the leased AS-02 worktree.`,
-    promptGuidelines: [
-      `Use ${name} only for paths and commands inside the leased AS-02 worktree.`,
-      'Never claim an operation succeeded unless the tool returns a successful result.',
-    ],
+    promptGuidelines,
     parameters: TOOL_SCHEMAS[name],
     async execute(toolCallId, params, signal) {
       return execute(toolCallId, params, signal);

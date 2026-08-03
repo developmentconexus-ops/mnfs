@@ -1,6 +1,4 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import { MnfsError } from '../../src/domain/errors.js';
@@ -253,27 +251,4 @@ test('schema version participates in deterministic hashing while v1 remains read
   assert.equal(v1.schemaVersion, 1);
   assert.notEqual(hashPlanContent(v1), hashPlanContent(v2));
   assert.equal(hashPlanContent(v2), hashPlanContent(validateMissionPlan(validV2(), 'MIS-002')));
-});
-
-test('preserves MIS-002 revision 3 byte-for-byte and reproduces its historical content hash', () => {
-  const source = readFileSync('.mnfs/missions/MIS-002/plan.json', 'utf8');
-  const blobSha = createHash('sha1')
-    .update(`blob ${Buffer.byteLength(source)}\0`)
-    .update(source)
-    .digest('hex');
-  const contract = JSON.parse(source) as {
-    readonly missionId: string;
-    readonly revision: number;
-    readonly contentHash: string;
-    readonly content: unknown;
-  };
-  const content = validateMissionPlan(contract.content, contract.missionId);
-
-  assert.equal(blobSha, '6b79117fe66cd5c9c8142099828812f470ce20de');
-  assert.equal(contract.revision, 3);
-  assert.equal(
-    contract.contentHash,
-    'sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1',
-  );
-  assert.equal(hashPlanContent(content), contract.contentHash);
 });

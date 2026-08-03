@@ -147,13 +147,30 @@ const criterionIds = new Set([
     ),
   ]),
 ]);
-const proposedTargets = traceability.requirements.flatMap((requirement) =>
-  requirement.proposedAllocation.map((target) => target.replace(/^proposed:/u, '')),
-);
-assert.equal(proposedTargets.length, 28);
-for (const target of proposedTargets) {
-  assert.ok(criterionIds.has(target), `missing proposed target in candidate: ${target}`);
+
+const approvedTargets = [];
+for (const requirement of traceability.requirements) {
+  assert.deepEqual(
+    requirement.proposedAllocation ?? [],
+    [],
+    `${requirement.id} must have no proposed allocation after exact-hash approval`,
+  );
+  assert.equal(
+    requirement.allocatedTo?.length,
+    1,
+    `${requirement.id} must have exactly one approved criterion allocation`,
+  );
+  const [target] = requirement.allocatedTo;
+  assert.equal(
+    target.startsWith('proposed:'),
+    false,
+    `${requirement.id} approved allocation must not use the proposed prefix`,
+  );
+  assert.ok(criterionIds.has(target), `missing approved target in candidate: ${target}`);
+  approvedTargets.push(target);
 }
+assert.equal(approvedTargets.length, 28);
+assert.equal(new Set(approvedTargets).size, 28, 'approved allocation targets must be unique');
 
 assert.throws(
   () => buildMis002Replan('sha256:not-a-real-hash'),

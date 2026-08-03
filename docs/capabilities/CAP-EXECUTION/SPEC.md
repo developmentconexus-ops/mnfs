@@ -4,7 +4,7 @@ title: Governed local Worker execution
 document_type: capability_spec
 form: explanation
 authority: specification
-status: proposed
+status: accepted
 implementation_status: planned
 version: 0.1.0
 owners:
@@ -25,7 +25,9 @@ related:
   - ADR-0003
   - ADR-0005
   - ADR-0006
+  - ACCEPTANCE-CAP-EXECUTION-R3
 tracking_issue: 6
+last_reviewed: 2026-08-03
 ---
 
 # CAP-EXECUTION — Governed local Worker execution
@@ -355,7 +357,8 @@ Rollback:
 - 2026-08-02: Product Blueprint and Capability Realization Method approved.
 - 2026-08-02: this Capability Spec proposed for the Architecture Baseline.
 - 2026-08-03: AS-02 run `as02-20260803t144645276z-7048d3` accepted the local Pi E1 candidate boundary; restart `PASS`, no drift, cleanup complete.
-- Next: explicit Capability review, MIS-002 schema-v2 Replan and exact-hash approval.
+- 2026-08-03: Operator supplied `CAP_EXECUTION_ACCEPT version=0.1.0`; the Capability Spec was accepted for R3 while implementation remained `planned`.
+- Next: MIS-002 schema-v2 Replan, Lavish review and exact-hash approval.
 
 ## Open questions
 

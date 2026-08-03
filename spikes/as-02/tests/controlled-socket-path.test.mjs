@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createConnection } from 'node:net';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import test from 'node:test';
 
 import {
@@ -62,6 +62,22 @@ test('fails closed when the socket path is occupied by a regular file', async (t
     (error) => error?.code === 'CONTROLLED_SOCKET_PATH_OCCUPIED',
   );
   assert.equal(await readFile(path, 'utf8'), 'do-not-delete');
+});
+
+test('fails closed without following or deleting a symlink at the socket path', async (t) => {
+  const runId = 'as02-20260803t135149712z-a10003';
+  const path = controlledSocketPath(runId);
+  const target = join(dirname(path), 'protected-target.txt');
+  await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+  await writeFile(target, 'preserve-me', { mode: 0o600 });
+  await symlink(target, path);
+  t.after(() => rm(dirname(path), { recursive: true, force: true }));
+
+  await assert.rejects(
+    () => openControlledSocket(runId),
+    (error) => error?.code === 'CONTROLLED_SOCKET_PATH_OCCUPIED',
+  );
+  assert.equal(await readFile(target, 'utf8'), 'preserve-me');
 });
 
 test('rejects unsafe run ids before deriving or touching a socket path', async () => {

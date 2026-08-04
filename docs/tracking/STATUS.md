@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.16
+version: 1.8.17
 owners:
   - developmentconexus-ops
 related:
@@ -57,8 +57,7 @@ Implementation started:        YES — bounded by task gates
 Task 1:                        COMPLETE
 Task 2:                        COMPLETE
 Task 3:                        COMPLETE
-Task 4 RED:                    OBSERVED / EXPECTED FAILURE
-Task 4 GREEN:                  COMPLETE
+Task 4:                        COMPLETE
 Complete product suite:        124/124 PASS
 Task 5 RED:                    NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate

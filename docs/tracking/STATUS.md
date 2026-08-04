@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.7
+version: 1.8.8
 owners:
   - developmentconexus-ops
 related:
@@ -17,6 +17,7 @@ related:
   - ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER
   - REVIEW-MIS-002-M01-R5-FINAL
   - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
+  - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-PLAN-APPROVAL
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
   - PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
 tracking_issue: 16
@@ -30,7 +31,7 @@ tracking_issue: 16
 - **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — M01 implementation-plan review
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 1 RED
 - **Current design PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -57,32 +58,44 @@ Important findings:            8 found / 8 closed
 M01 microdesign:               ACCEPTED — version 0.6.1
 MCRM R5:                       PASS
 Replan required:               NO
-Implementation plan:           CURRENT — version 1.0.1 / REVIEW PENDING
-M01 production implementation: PROHIBITED
+Implementation plan:           CURRENT / APPROVED — version 1.0.1
+Implementation started:        NO
+Task 1 RED:                    NOT AUTHORIZED
+M01 production implementation: PROHIBITED pending Task 1 continuation
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            review and exact approval of implementation plan 1.0.1
+Current human gate:            explicit authorization for Task 1 RED only
 Design PR:                     #17 DRAFT
 ```
 
-## Operator approval
+## Operator decisions
 
-The Operator supplied:
+### Microdesign approval
 
 ```text
 MNFS_APPROVE_M01_MICRODESIGN version=0.6.1 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 treehouse=sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3
 ```
 
-Decision `D-007` and `ACCEPTANCE-MIS-002-M01-R5-APPROVAL` bind the exact microdesign, Mission contract and accepted Treehouse bytes. The approval authorizes only preparation and review of a separate TDD implementation plan.
+Recorded as `D-007` and `ACCEPTANCE-MIS-002-M01-R5-APPROVAL`.
 
-## Accepted M01 architecture
+### Implementation-plan approval
+
+```text
+MNFS_APPROVE_M01_IMPLEMENTATION_PLAN version=1.0.1 microdesign=0.6.1 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 treehouse=sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3
+```
+
+Recorded as `D-008` and `ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-PLAN-APPROVAL`.
+
+The plan approval accepts the ordered tasks, interfaces and proof gates. It does not start Task 1 and cannot be interpreted as authorization for later tasks, real Treehouse execution, M01 acceptance, M02 or merge.
+
+## Accepted architecture
 
 ```text
 Approved Mission Contract
 → exact scope and contract hash
 
 SQLite
-→ Track, Attempt, Run, Claim, Lease, idempotency and versioned Event authority
+→ Track, Attempt, Run, Claim, Lease, idempotency and payload-versioned Event authority
 
 Attempt-owned ExecutionSourceAdapter
 → exact-base independent Linux-local repository
@@ -98,7 +111,7 @@ MNFS services
 → transaction, ancestry, IAO, fencing and read-only Recovery
 ```
 
-## Accepted invariants
+## Frozen invariants
 
 - canonical checkout is never Treehouse cwd;
 - Attempt source is independent and exact-base;
@@ -131,11 +144,11 @@ Verdict:                   ACCEPT
 Cleanup:                   COMPLETED
 ```
 
-Treehouse remains accepted only inside the proved boundary. Any candidate, capability, command, host/tooling, environment-shape or source-boundary drift requires renewed conformance review.
+Any candidate, capability, command, host/tooling, environment-shape or source-boundary drift requires renewed conformance review.
 
-## Implementation plan 1.0.1
+## Approved implementation plan 1.0.1
 
-`PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` defines 14 ordered review gates:
+The plan defines fourteen ordered TDD gates:
 
 ```text
 domain/errors/fixtures
@@ -143,7 +156,7 @@ domain/errors/fixtures
 → transaction authority
 → maintenance/backup/version gate
 → migration v4/versioned Events
-→ execution persistence/ancestry/idempotency
+→ persistence/ancestry/idempotency
 → Track/Attempt/Run lifecycle
 → Git observation/independent source
 → exact Treehouse adapter
@@ -154,7 +167,7 @@ domain/errors/fixtures
 → deterministic and canonical WSL2 proof
 ```
 
-The plan maps every accepted invariant, all seven M01 requirements and all Task 14 Critical/Important corrections to explicit RED/GREEN and proof steps. Version 1.0.1 corrected the migration ordering, process-identity dependency and every placeholder found during self-review.
+Each task requires observed RED, minimal GREEN, focused and root verification, review and a bounded commit. No task authorizes its successor automatically.
 
 ## Current authorization boundary
 
@@ -164,21 +177,16 @@ TC-01:                      ACCEPTED
 Task 14 review:             COMPLETE
 Microdesign 0.6.1:          ACCEPTED
 R5:                         PASS
-Implementation plan 1.0.1:  WRITTEN / REVIEW PENDING
+Implementation plan 1.0.1:  APPROVED
 Task 1 RED:                  NOT AUTHORIZED
-M01 implementation:         PROHIBITED
+M01 implementation:         NOT STARTED / PROHIBITED pending continuation
+Real Treehouse execution:    PROHIBITED until the plan's final WSL2 gate
 Pi Worker dispatch:         PROHIBITED
 PR #17 merge:               NOT AUTHORIZED
 ```
 
-A material change to MIS-002, SEC-E1, CAP-EXECUTION, accepted Treehouse boundary, microdesign invariants or applicable requirements triggers Replan or renewed readiness review.
+A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boundary, microdesign invariants or applicable requirements triggers Replan or renewed readiness review.
 
 ## Immediate next action
 
-Review:
-
-```text
-docs/superpowers/plans/2026-08-04-mis-002-m01-durable-execution-lease-core-implementation.md
-```
-
-Then approve, request changes or reject exact plan version `1.0.1`. Stop before production implementation.
+Request or provide an explicit continuation for **Task 1 RED only**. Stop before writing production implementation unless that continuation is granted.

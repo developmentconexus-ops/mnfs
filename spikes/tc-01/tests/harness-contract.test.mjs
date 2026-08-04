@@ -10,7 +10,7 @@ test('root verification includes deterministic TC-01 tests and an explicit real 
   assert.match(packageJson.scripts.verify, /npm run test:tc01/u);
 
   const readme = await readFile('spikes/tc-01/README.md', 'utf8');
-  assert.match(readme, /deterministic tests do not invoke the real Treehouse binary/iu);
+  assert.match(readme, /deterministic tests do not invoke the (?:real|installed) Treehouse binary/iu);
   assert.match(readme, /npm run tc01 -- run/iu);
-  assert.match(readme, /never use.*--force/iu);
+  assert.match(readme, /never uses?.*--force/iu);
 });

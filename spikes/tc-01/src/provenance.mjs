@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
 import { access, readFile, realpath } from 'node:fs/promises';
-import { delimiter, isAbsolute, join } from 'node:path';
+import { delimiter, dirname, isAbsolute, join } from 'node:path';
 
 import { assertTc01, tc01Error } from './errors.mjs';
 import { assertLinuxOwnedAbsolutePath } from './paths.mjs';
@@ -15,6 +15,28 @@ const REQUIRED_CAPABILITIES = Object.freeze([
   'conditionalLeaseId',
   'conditionalHolder',
 ]);
+
+function controlledCommandEnvironment(executables) {
+  const directories = [];
+  for (const executable of executables) {
+    const directory = dirname(executable);
+    if (!directories.includes(directory)) directories.push(directory);
+  }
+  for (const directory of ['/usr/bin', '/bin']) {
+    if (!directories.includes(directory)) directories.push(directory);
+  }
+  return {
+    PATH: directories.join(delimiter),
+    LANG: 'C.UTF-8',
+    LC_ALL: 'C.UTF-8',
+    GIT_CONFIG_GLOBAL: '/dev/null',
+    GIT_CONFIG_NOSYSTEM: '1',
+    GIT_TERMINAL_PROMPT: '0',
+    NO_COLOR: '1',
+    TERM: 'dumb',
+    TREEHOUSE_NO_UPDATE_CHECK: '1',
+  };
+}
 
 export async function discoverTc01Environment(input = {}) {
   const cwd = assertLinuxOwnedAbsolutePath(input.cwd, 'TC-01 discovery cwd');
@@ -35,15 +57,17 @@ export async function discoverTc01Environment(input = {}) {
     { expectedTreehouseVersion },
   );
 
-  const commandEnv = {
-    ...env,
-    GIT_TERMINAL_PROMPT: '0',
-    NO_COLOR: '1',
-    TERM: 'dumb',
-    TREEHOUSE_NO_UPDATE_CHECK: '1',
-  };
+  const [unameExecutable, treehouseExecutable, gitExecutable] = await Promise.all([
+    resolveAbsoluteExecutable('uname', executableResolver, resolveRealpath),
+    resolveAbsoluteExecutable('treehouse', executableResolver, resolveRealpath),
+    resolveAbsoluteExecutable('git', executableResolver, resolveRealpath),
+  ]);
+  const commandEnv = controlledCommandEnvironment([
+    unameExecutable,
+    treehouseExecutable,
+    gitExecutable,
+  ]);
 
-  const unameExecutable = await resolveAbsoluteExecutable('uname', executableResolver, resolveRealpath);
   const kernelRelease = await commandText({
     file: unameExecutable,
     args: ['-r'],
@@ -68,7 +92,6 @@ export async function discoverTc01Environment(input = {}) {
     { id: osRelease.ID ?? null, versionId: osRelease.VERSION_ID ?? null },
   );
 
-  const treehouseExecutable = await resolveAbsoluteExecutable('treehouse', executableResolver, resolveRealpath);
   const treehouseBytes = await readRequiredFile(readBytes, treehouseExecutable, 'Treehouse executable');
   const treehouseExecutableHash = `sha256:${createHash('sha256').update(treehouseBytes).digest('hex')}`;
 
@@ -103,7 +126,6 @@ export async function discoverTc01Environment(input = {}) {
     conditionalHolder: returnFlags.has('--if-lease-holder'),
   };
 
-  const gitExecutable = await resolveAbsoluteExecutable('git', executableResolver, resolveRealpath);
   const gitOutput = await commandText({
     file: gitExecutable,
     args: ['--version'],

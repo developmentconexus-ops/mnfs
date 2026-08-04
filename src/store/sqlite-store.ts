@@ -16,6 +16,7 @@ import type {
   SaveMissionPlanRevisionInput,
 } from '../domain/types.js';
 import { applyMigrations } from './migrations.js';
+import { SqliteTransaction } from './sqlite-transaction.js';
 
 export interface OpenMissionInput {
   readonly missionId: string;
@@ -56,9 +57,11 @@ function planRevisionFromRow(row: Readonly<Record<string, unknown>>): MissionPla
 
 export class SqliteStore {
   readonly #database: DatabaseSync;
+  readonly #transactions: SqliteTransaction;
 
   private constructor(database: DatabaseSync) {
     this.#database = database;
+    this.#transactions = new SqliteTransaction(database);
   }
 
   static open(path: string): SqliteStore {
@@ -66,18 +69,6 @@ export class SqliteStore {
     const database = new DatabaseSync(path);
     applyMigrations(database);
     return new SqliteStore(database);
-  }
-
-  #transaction<T>(operation: () => T): T {
-    this.#database.exec('BEGIN IMMEDIATE');
-    try {
-      const result = operation();
-      this.#database.exec('COMMIT');
-      return result;
-    } catch (error) {
-      if (this.#database.isTransaction) this.#database.exec('ROLLBACK');
-      throw error;
-    }
   }
 
   #insertMissionAndEvent(input: OpenMissionInput): Mission {
@@ -149,11 +140,11 @@ export class SqliteStore {
   }
 
   openMission(input: OpenMissionInput): Mission {
-    return this.#transaction(() => this.#insertMissionAndEvent(input));
+    return this.#transactions.run(() => this.#insertMissionAndEvent(input));
   }
 
   openNextMission(input: OpenNextMissionInput): Mission {
-    return this.#transaction(() => {
+    return this.#transactions.run(() => {
       const row = this.#database
         .prepare(`
           SELECT COALESCE(MAX(CAST(substr(id, 5) AS INTEGER)), 0) + 1 AS next_number
@@ -174,7 +165,7 @@ export class SqliteStore {
   }
 
   saveMissionPlanRevision(input: SaveMissionPlanRevisionInput): MissionPlanRevision {
-    return this.#transaction(() => {
+    return this.#transactions.run(() => {
       this.#requireOpenMission(input.missionId);
       const contentHash = hashPlanContent(input.content);
       const current = this.#getCurrentMissionPlan(input.missionId);
@@ -270,7 +261,7 @@ export class SqliteStore {
   }
 
   approveMissionPlan(input: ApproveMissionPlanInput): MissionPlanRevision {
-    return this.#transaction(() => {
+    return this.#transactions.run(() => {
       this.#requireOpenMission(input.missionId);
       const current = this.#getCurrentMissionPlan(input.missionId);
       if (current === undefined) {

@@ -9,6 +9,7 @@ import {
 const HASH_A = `sha256:${'a'.repeat(64)}`;
 const HASH_B = `sha256:${'b'.repeat(64)}`;
 const HASH_C = `sha256:${'c'.repeat(64)}`;
+const DIRTY_BYTES = Buffer.from('tc01-dirty-sentinel\n', 'utf8');
 
 function deterministicClock() {
   let tick = 0;
@@ -27,17 +28,46 @@ function statusItem(lease) {
   };
 }
 
-function snapshot(label, digest) {
-  return { schemaVersion: 1, label, digest };
+function availableStatus(path) {
+  return {
+    name: 'oak',
+    path,
+    status: 'available',
+    leaseId: '',
+    leaseHolder: '',
+    leasedAt: null,
+    processes: [],
+  };
+}
+
+function snapshot(label, digest, { clean = true } = {}) {
+  return {
+    schemaVersion: 1,
+    label,
+    digest,
+    porcelainStatus: {
+      byteLength: clean ? 0 : 32,
+      sha256: clean ? HASH_A : HASH_C,
+    },
+  };
+}
+
+function processResult(exitCode, { stderr = '', stdout = '' } = {}) {
+  return {
+    startedAt: '2026-08-04T11:00:00.000Z',
+    finishedAt: '2026-08-04T11:00:00.001Z',
+    durationMs: 1,
+    exitCode,
+    signal: null,
+    stdout: Buffer.from(stdout),
+    stderr: Buffer.from(stderr),
+    timedOut: false,
+  };
 }
 
 function createHarness(overrides = {}) {
-  const lease = {
-    path: '/tmp/mnfs-tc01/pool/oak/source-repo',
-    leaseId: 'lease-001',
-    leaseHolder: 'mnfs-tc01-tc01-20260804-110000-a1b2c3d4',
-    leasedAt: '2026-08-04T11:00:00Z',
-  };
+  const leasePath = '/tmp/mnfs-tc01/pool/oak/source-repo';
+  const holder = 'mnfs-tc01-tc01-20260804-110000-a1b2c3d4';
   const provenance = {
     schemaVersion: 1,
     environment: 'WSL2',
@@ -67,6 +97,7 @@ function createHarness(overrides = {}) {
   const records = [];
   const calls = {
     acquire: 0,
+    acquireIds: [],
     freshAcquire: 0,
     originalStatus: 0,
     freshStatus: 0,
@@ -74,11 +105,14 @@ function createHarness(overrides = {}) {
     gitLog: 0,
     remotes: 0,
     commandEvidence: 0,
+    returns: [],
+    writes: [],
+    reads: [],
+    removes: [],
+    inspectedTargets: [],
   };
   const sourceBefore = snapshot('source', HASH_A);
   const sourceAfter = snapshot('source', HASH_A);
-  const worktreeBefore = snapshot('worktree', HASH_B);
-  const worktreeAfter = snapshot('worktree', HASH_B);
   const poolBefore = snapshot('pool', HASH_A);
   const poolAfter = snapshot('pool', HASH_B);
   const privateSnapshots = [
@@ -86,18 +120,46 @@ function createHarness(overrides = {}) {
     { state: 'PRESENT', digest: HASH_C },
   ];
   let privateIndex = 0;
+  let leaseSequence = 0;
+  let currentLease = null;
+  let dirtySentinel = null;
+
+  function nextLease() {
+    leaseSequence += 1;
+    return {
+      path: leasePath,
+      leaseId: `lease-${String(leaseSequence).padStart(3, '0')}`,
+      leaseHolder: holder,
+      leasedAt: `2026-08-04T11:00:${String(leaseSequence).padStart(2, '0')}Z`,
+    };
+  }
 
   const client = {
     async acquireLease() {
       calls.acquire += 1;
-      return lease;
+      currentLease = nextLease();
+      calls.acquireIds.push(currentLease.leaseId);
+      return { ...currentLease };
     },
     async observeStatus() {
       calls.originalStatus += 1;
-      return [statusItem(lease)];
+      return [currentLease ? statusItem(currentLease) : availableStatus(leasePath)];
     },
     findStatusByPath(status, path) {
       return status.find((item) => item.path === path) ?? null;
+    },
+    async returnLease(request) {
+      calls.returns.push({ ...request });
+      if (request.path.endsWith('/missing-worktree') || request.path.endsWith('/unmanaged-repo')) {
+        return processResult(1, { stderr: 'not managed' });
+      }
+      if (!currentLease) return processResult(1, { stderr: 'already available' });
+      if (dirtySentinel !== null) return processResult(0, { stderr: 'Aborted: worktree is dirty' });
+      if (request.leaseId !== currentLease.leaseId || request.holder !== currentLease.leaseHolder) {
+        return processResult(1, { stderr: 'lease precondition failed' });
+      }
+      currentLease = null;
+      return processResult(0, { stdout: 'returned' });
     },
   };
 
@@ -108,7 +170,7 @@ function createHarness(overrides = {}) {
     },
     async observeStatus() {
       calls.freshStatus += 1;
-      return [statusItem(lease)];
+      return [currentLease ? statusItem(currentLease) : availableStatus(leasePath)];
     },
     findStatusByPath(status, path) {
       return status.find((item) => item.path === path) ?? null;
@@ -118,10 +180,11 @@ function createHarness(overrides = {}) {
   const input = {
     fixture: {
       runId: 'tc01-20260804-110000-a1b2c3d4',
+      runRoot: '/tmp/mnfs-tc01',
       sourceRepo: '/tmp/mnfs-tc01/source-repo',
       poolRoot: '/tmp/mnfs-tc01/pool',
       gitLog: '/tmp/mnfs-tc01/artifacts/git-invocations.jsonl',
-      holder: lease.leaseHolder,
+      holder,
     },
     provenance,
     acceptedIdentity: currentIdentity,
@@ -144,8 +207,11 @@ function createHarness(overrides = {}) {
     },
     observers: {
       async snapshotRepository({ path, label }) {
-        if (path === lease.path) {
-          return label.includes('before') ? worktreeBefore : worktreeAfter;
+        if (path === leasePath) {
+          const suffix = currentLease?.leaseId ?? 'available';
+          return snapshot(label, dirtySentinel === null ? `worktree-${suffix}` : HASH_C, {
+            clean: dirtySentinel === null,
+          });
         }
         return label.includes('before') ? sourceBefore : sourceAfter;
       },
@@ -170,7 +236,7 @@ function createHarness(overrides = {}) {
           linked: true,
           sameCommonDir: true,
           sourceClean: true,
-          worktreeClean: true,
+          worktreeClean: dirtySentinel === null,
         };
       },
       async readGitInvocations() {
@@ -188,6 +254,29 @@ function createHarness(overrides = {}) {
         const value = privateSnapshots[Math.min(privateIndex, privateSnapshots.length - 1)];
         privateIndex += 1;
         return value;
+      },
+      async writeControlledFile({ path, bytes }) {
+        calls.writes.push(path);
+        dirtySentinel = Buffer.from(bytes);
+      },
+      async readControlledFile({ path }) {
+        calls.reads.push(path);
+        if (dirtySentinel === null) {
+          const error = new Error('missing controlled file');
+          error.code = 'ENOENT';
+          throw error;
+        }
+        return Buffer.from(dirtySentinel);
+      },
+      async removeControlledFile({ path }) {
+        calls.removes.push(path);
+        dirtySentinel = null;
+      },
+      async inspectReleaseTarget({ path }) {
+        calls.inspectedTargets.push(path);
+        if (path.endsWith('/missing-worktree')) return 'missing';
+        if (path.endsWith('/unmanaged-repo')) return 'unmanaged';
+        return 'managed';
       },
     },
     commandEvidence: {
@@ -226,31 +315,41 @@ function createHarness(overrides = {}) {
     now: deterministicClock(),
   };
 
+  const mergedInput = {
+    ...input,
+    ...overrides,
+    fixture: { ...input.fixture, ...(overrides.fixture ?? {}) },
+    observers: { ...input.observers, ...(overrides.observers ?? {}) },
+    client: { ...input.client, ...(overrides.client ?? {}) },
+    commandEvidence: { ...input.commandEvidence, ...(overrides.commandEvidence ?? {}) },
+  };
+
   return {
-    input: {
-      ...input,
-      ...overrides,
-      observers: { ...input.observers, ...(overrides.observers ?? {}) },
-      client: { ...input.client, ...(overrides.client ?? {}) },
-      commandEvidence: { ...input.commandEvidence, ...(overrides.commandEvidence ?? {}) },
-    },
+    input: mergedInput,
     calls,
-    lease,
     provenance,
     currentIdentity,
     records,
+    state: {
+      get currentLease() { return currentLease; },
+      set currentLease(value) { currentLease = value; },
+      get dirtySentinel() { return dirtySentinel; },
+      set dirtySentinel(value) { dirtySentinel = value; },
+    },
     snapshots: {
       sourceBefore,
       sourceAfter,
-      worktreeBefore,
-      worktreeAfter,
       poolBefore,
       poolAfter,
     },
   };
 }
 
-test('registers exactly S01-S15 and proves acquisition plus fresh-process recovery once', async () => {
+function byId(records) {
+  return Object.fromEntries(records.map((record) => [record.scenarioId, record]));
+}
+
+test('registers exactly S01-S15 and proves acquisition, release isolation, recovery and classification', async () => {
   assert.deepEqual(TC01_SCENARIO_IDS, Array.from(
     { length: 15 },
     (_, index) => `TC01-S${String(index + 1).padStart(2, '0')}`,
@@ -259,36 +358,35 @@ test('registers exactly S01-S15 and proves acquisition plus fresh-process recove
 
   const harness = createHarness();
   const result = await runTc01Scenarios(harness.input);
+  const scenarios = byId(result);
 
   assert.deepEqual(result.map((record) => record.scenarioId), TC01_SCENARIO_IDS);
   assert.deepEqual(harness.records, result);
   assert.deepEqual(
     Object.fromEntries(result.map((record) => [record.scenarioId, record.result])),
-    {
-      'TC01-S01': 'PASS',
-      'TC01-S02': 'PASS',
-      'TC01-S03': 'PASS',
-      'TC01-S04': 'PASS',
-      'TC01-S05': 'PASS',
-      'TC01-S06': 'PASS',
-      'TC01-S07': 'BLOCKED',
-      'TC01-S08': 'BLOCKED',
-      'TC01-S09': 'BLOCKED',
-      'TC01-S10': 'BLOCKED',
-      'TC01-S11': 'BLOCKED',
-      'TC01-S12': 'BLOCKED',
-      'TC01-S13': 'PASS',
-      'TC01-S14': 'PASS',
-      'TC01-S15': 'PASS',
-    },
+    Object.fromEntries(TC01_SCENARIO_IDS.map((id) => [id, 'PASS'])),
   );
-  assert.equal(harness.calls.acquire, 1);
+  assert.equal(harness.calls.acquire, 5);
+  assert.deepEqual(harness.calls.acquireIds, ['lease-001', 'lease-002', 'lease-003', 'lease-004', 'lease-005']);
+  assert.equal(new Set(harness.calls.acquireIds).size, 5);
   assert.equal(harness.calls.freshAcquire, 0);
   assert.equal(harness.calls.freshStatus, 1);
-  assert.equal(harness.calls.linkedProof, 1);
-  assert.equal(result[12].observations.limitation, 'TREEHOUSE_PRIVATE_STATE_NORMALIZATION');
-  assert.equal(result[13].observations.commandCount, 1);
-  assert.equal(result[14].observations.stale, false);
+  assert.equal(harness.calls.linkedProof, 5);
+  assert.equal(harness.calls.returns.length, 10);
+  assert.equal(scenarios['TC01-S07'].observations.releasedLeaseId, 'lease-001');
+  assert.equal(scenarios['TC01-S08'].observations.staleLeaseId, 'stale-lease-002');
+  assert.equal(scenarios['TC01-S09'].observations.staleHolder, `${harness.input.fixture.holder}-stale`);
+  assert.equal(scenarios['TC01-S10'].observations.sentinelPreserved, true);
+  assert.equal(scenarios['TC01-S10'].observations.releaseExitCode, 0);
+  assert.equal(scenarios['TC01-S11'].observations.classification, 'ALREADY_RELEASED');
+  assert.equal(scenarios['TC01-S11'].observations.rawReturnInvoked, false);
+  assert.deepEqual(scenarios['TC01-S12'].observations.classifications, {
+    missing: 'DIVERGED_MISSING_PATH',
+    unmanaged: 'TREEHOUSE_UNMANAGED_PATH',
+  });
+  assert.equal(scenarios['TC01-S13'].observations.limitation, 'TREEHOUSE_PRIVATE_STATE_NORMALIZATION');
+  assert.equal(scenarios['TC01-S14'].observations.commandCount, 1);
+  assert.equal(scenarios['TC01-S15'].observations.stale, false);
 });
 
 test('a material S02 failure blocks dependent S03-S13 but still executes S14 and S15', async () => {
@@ -304,31 +402,135 @@ test('a material S02 failure blocks dependent S03-S13 but still executes S14 and
   });
 
   const result = await runTc01Scenarios(harness.input);
-  const byId = Object.fromEntries(result.map((record) => [record.scenarioId, record]));
+  const scenarios = byId(result);
 
-  assert.equal(byId['TC01-S01'].result, 'PASS');
-  assert.equal(byId['TC01-S02'].result, 'FAIL');
+  assert.equal(scenarios['TC01-S01'].result, 'PASS');
+  assert.equal(scenarios['TC01-S02'].result, 'FAIL');
   for (let index = 3; index <= 13; index += 1) {
     const id = `TC01-S${String(index).padStart(2, '0')}`;
-    assert.equal(byId[id].result, 'BLOCKED', id);
-    assert.equal(byId[id].observations.blockedBy, 'TC01-S02', id);
+    assert.equal(scenarios[id].result, 'BLOCKED', id);
+    assert.equal(scenarios[id].observations.blockedBy, 'TC01-S02', id);
   }
-  assert.equal(byId['TC01-S14'].result, 'PASS');
-  assert.equal(byId['TC01-S15'].result, 'PASS');
+  assert.equal(scenarios['TC01-S14'].result, 'PASS');
+  assert.equal(scenarios['TC01-S15'].result, 'PASS');
   assert.equal(harness.calls.freshStatus, 0);
   assert.equal(harness.calls.gitLog, 0);
   assert.equal(harness.calls.remotes, 0);
   assert.equal(harness.calls.commandEvidence, 1);
 });
 
+test('S07 fails when command exit is zero but the exact Lease remains present', async () => {
+  const harness = createHarness({
+    client: {
+      async returnLease(request) {
+        harness.calls.returns.push({ ...request });
+        if (request.leaseId === 'lease-001') return processResult(0, { stdout: 'returned' });
+        return processResult(1);
+      },
+    },
+  });
+
+  const result = await runTc01Scenarios(harness.input);
+  const scenarios = byId(result);
+
+  assert.equal(scenarios['TC01-S07'].result, 'FAIL');
+  assert.match(scenarios['TC01-S07'].rationale, /fresh status|lease/i);
+  assert.equal(scenarios['TC01-S08'].result, 'BLOCKED');
+  assert.equal(scenarios['TC01-S13'].result, 'BLOCKED');
+});
+
+test('S08 requires non-zero stale-ID rejection and unchanged Lease plus worktree state', async () => {
+  const harness = createHarness({
+    client: {
+      async returnLease(request) {
+        harness.calls.returns.push({ ...request });
+        if (request.leaseId === 'stale-lease-002') return processResult(0, { stderr: 'unexpected success' });
+        const active = harness.state.currentLease;
+        if (active && request.leaseId === active.leaseId && request.holder === active.leaseHolder) {
+          harness.state.currentLease = null;
+          return processResult(0);
+        }
+        return processResult(1);
+      },
+    },
+  });
+
+  const result = await runTc01Scenarios(harness.input);
+  const scenarios = byId(result);
+
+  assert.equal(scenarios['TC01-S08'].result, 'FAIL');
+  assert.match(scenarios['TC01-S08'].rationale, /non-zero|stale/i);
+  assert.equal(scenarios['TC01-S09'].result, 'BLOCKED');
+  assert.equal(harness.state.currentLease?.leaseId, 'lease-002');
+});
+
+test('S09 fails when a wrong holder changes the current Lease despite a non-zero process exit', async () => {
+  const harness = createHarness({
+    client: {
+      async returnLease(request) {
+        harness.calls.returns.push({ ...request });
+        const active = harness.state.currentLease;
+        if (active && request.holder.endsWith('-stale')) {
+          harness.state.currentLease = null;
+          return processResult(1, { stderr: 'precondition failed after mutation' });
+        }
+        if (active && request.leaseId === active.leaseId && request.holder === active.leaseHolder) {
+          harness.state.currentLease = null;
+          return processResult(0);
+        }
+        return processResult(1);
+      },
+    },
+  });
+
+  const result = await runTc01Scenarios(harness.input);
+  const scenarios = byId(result);
+
+  assert.equal(scenarios['TC01-S09'].result, 'FAIL');
+  assert.match(scenarios['TC01-S09'].rationale, /holder|lease/i);
+  assert.equal(scenarios['TC01-S10'].result, 'BLOCKED');
+});
+
+test('S10 fails when a dirty non-force return removes the sentinel or releases the Lease', async () => {
+  const harness = createHarness({
+    client: {
+      async returnLease(request) {
+        harness.calls.returns.push({ ...request });
+        const active = harness.state.currentLease;
+        if (active?.leaseId === 'lease-004' && harness.state.dirtySentinel !== null) {
+          harness.state.dirtySentinel = null;
+          harness.state.currentLease = null;
+          return processResult(0, { stdout: 'returned and reset' });
+        }
+        if (active && request.leaseId === active.leaseId && request.holder === active.leaseHolder) {
+          harness.state.currentLease = null;
+          return processResult(0);
+        }
+        return processResult(1);
+      },
+    },
+  });
+
+  const result = await runTc01Scenarios(harness.input);
+  const scenarios = byId(result);
+
+  assert.equal(scenarios['TC01-S10'].result, 'FAIL');
+  assert.match(scenarios['TC01-S10'].rationale, /dirty|sentinel|lease/i);
+  assert.equal(scenarios['TC01-S11'].result, 'BLOCKED');
+  assert.equal(scenarios['TC01-S13'].result, 'BLOCKED');
+});
+
 test('S13 fails when private-state mutation coincides with Lease or worktree mutation', async () => {
   const harness = createHarness({
     observers: {
       async snapshotRepository({ path, label }) {
-        if (path === harness.lease.path && label.includes('after')) {
-          return snapshot('worktree', HASH_C);
+        if (path.endsWith('/pool/oak/source-repo') && label.includes('after-private')) {
+          return snapshot('worktree', HASH_C, { clean: false });
         }
-        if (path === harness.lease.path) return harness.snapshots.worktreeBefore;
+        if (path.endsWith('/pool/oak/source-repo')) {
+          const active = harness.state.currentLease;
+          return snapshot(label, `worktree-${active?.leaseId ?? 'available'}`);
+        }
         return label.includes('before') ? harness.snapshots.sourceBefore : harness.snapshots.sourceAfter;
       },
     },

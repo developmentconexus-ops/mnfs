@@ -9,11 +9,12 @@ import {
   validateMissionPlan,
   type MissionPlanRevision,
 } from '../domain/mission-plan.js';
-import type {
-  ApproveMissionPlanInput,
-  Mission,
-  MissionEvent,
-  SaveMissionPlanRevisionInput,
+import {
+  MISSION_EVENT_TYPES_V1,
+  type ApproveMissionPlanInput,
+  type Mission,
+  type MissionEvent,
+  type SaveMissionPlanRevisionInput,
 } from '../domain/types.js';
 import { EventStore } from './event-store.js';
 import { inspectSupportedDatabaseSchema } from './sqlite-maintenance.js';
@@ -33,6 +34,135 @@ export interface OpenNextMissionInput {
 }
 
 const CURRENT_WRITE_SCHEMA_VERSION = 4;
+
+const CURRENT_WRITE_TABLE_COLUMNS = {
+  schema_migrations: ['version', 'applied_at'],
+  missions: ['id', 'goal', 'status', 'opened_at'],
+  events: [
+    'seq',
+    'event_id',
+    'type',
+    'payload_schema_version',
+    'mission_id',
+    'occurred_at',
+    'payload_json',
+  ],
+  mission_plan_revisions: [
+    'mission_id',
+    'revision',
+    'status',
+    'content_hash',
+    'content_json',
+    'created_at',
+    'approved_at',
+  ],
+  event_types: ['type', 'payload_schema_version'],
+  write_tracks: [
+    'id',
+    'mission_id',
+    'milestone_qualified_id',
+    'feature_qualified_id',
+    'contract_hash',
+    'status',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  attempts: [
+    'id',
+    'write_track_id',
+    'ordinal',
+    'contract_hash',
+    'git_object_format',
+    'base_commit_sha',
+    'source_status',
+    'source_path',
+    'source_fingerprint',
+    'status',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  worker_runs: [
+    'id',
+    'attempt_id',
+    'ordinal',
+    'contract_hash',
+    'status',
+    'process_boot_id',
+    'process_id',
+    'process_start_ticks',
+    'process_started_at',
+    'exit_code',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  leases: [
+    'id',
+    'write_track_id',
+    'attempt_id',
+    'contract_hash',
+    'generation',
+    'status',
+    'grant_idempotency_key',
+    'grant_input_hash',
+    'release_idempotency_key',
+    'release_input_hash',
+    'holder',
+    'external_lease_id',
+    'worktree_path',
+    'external_leased_at',
+    'action_kind',
+    'action_token',
+    'action_phase',
+    'action_owner_boot_id',
+    'action_owner_pid',
+    'action_owner_start_ticks',
+    'action_runner_boot_id',
+    'action_runner_pid',
+    'action_runner_start_ticks',
+    'action_started_ref',
+    'action_result_ref',
+    'release_requested_at',
+    'release_observed_at',
+    'last_observed_at',
+    'last_error_code',
+    'last_error_ref',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  claims: [
+    'id',
+    'write_track_id',
+    'attempt_id',
+    'worker_run_id',
+    'lease_id',
+    'contract_hash',
+    'ordinal',
+    'status',
+    'idempotency_key',
+    'input_hash',
+    'base_commit_sha',
+    'result_tree_sha',
+    'claimed_criteria_json',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+} as const;
+
+const CURRENT_WRITE_INDEXES = [
+  'events_mission_seq_idx',
+  'mission_plan_approved_revision_idx',
+  'write_tracks_one_current_per_feature',
+  'attempts_one_open_per_track',
+  'worker_runs_one_current_per_attempt',
+  'leases_one_current_per_track',
+  'leases_one_action_token',
+  'claims_one_current_per_attempt',
+] as const;
 
 function missionFromRow(row: Readonly<Record<string, unknown>>): Mission {
   return {
@@ -59,6 +189,60 @@ function planRevisionFromRow(row: Readonly<Record<string, unknown>>): MissionPla
   };
 }
 
+function quoteIdentifier(identifier: string): string {
+  return `"${identifier.replaceAll('"', '""')}"`;
+}
+
+function sameStrings(actual: readonly string[], expected: readonly string[]): boolean {
+  return actual.length === expected.length
+    && actual.every((value, index) => value === expected[index]);
+}
+
+function requireCurrentWriteSchemaShape(database: DatabaseSync): void {
+  for (const [tableName, expectedColumns] of Object.entries(CURRENT_WRITE_TABLE_COLUMNS)) {
+    const actualColumns = database.prepare(`PRAGMA table_info(${quoteIdentifier(tableName)})`)
+      .all()
+      .map((row) => String(row.name));
+    if (!sameStrings(actualColumns, expectedColumns)) {
+      throw new MnfsError(
+        'SCHEMA_VERSION_UNSUPPORTED',
+        `SQLite schema v4 table ${tableName} has columns [${actualColumns.join(', ')}], expected [${
+          expectedColumns.join(', ')
+        }].`,
+      );
+    }
+  }
+
+  const indexNames = new Set(database.prepare(`
+    SELECT name
+    FROM sqlite_master
+    WHERE type = 'index'
+  `).all().map((row) => String(row.name)));
+  for (const indexName of CURRENT_WRITE_INDEXES) {
+    if (!indexNames.has(indexName)) {
+      throw new MnfsError(
+        'SCHEMA_VERSION_UNSUPPORTED',
+        `SQLite schema v4 is missing required index ${indexName}.`,
+      );
+    }
+  }
+
+  const registeredEventTypes = database.prepare(`
+    SELECT type, payload_schema_version
+    FROM event_types
+    ORDER BY type, payload_schema_version
+  `).all().map((row) => `${String(row.type)}@${Number(row.payload_schema_version)}`);
+  const expectedEventTypes = [...MISSION_EVENT_TYPES_V1]
+    .sort()
+    .map((eventType) => `${eventType}@1`);
+  if (!sameStrings(registeredEventTypes, expectedEventTypes)) {
+    throw new MnfsError(
+      'SCHEMA_VERSION_UNSUPPORTED',
+      'SQLite schema v4 Event registry does not match the accepted version-1 registry.',
+    );
+  }
+}
+
 function requireCurrentWriteSchema(database: DatabaseSync): void {
   const schema = inspectSupportedDatabaseSchema(database, true);
   if (schema.schemaVersion !== CURRENT_WRITE_SCHEMA_VERSION) {
@@ -67,6 +251,7 @@ function requireCurrentWriteSchema(database: DatabaseSync): void {
       `This MNFS writer supports schema ${CURRENT_WRITE_SCHEMA_VERSION}, not ${schema.schemaVersion}.`,
     );
   }
+  requireCurrentWriteSchemaShape(database);
 }
 
 export class SqliteStore {

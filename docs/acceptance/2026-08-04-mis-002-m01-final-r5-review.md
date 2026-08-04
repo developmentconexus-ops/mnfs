@@ -4,7 +4,7 @@ title: MIS-002 M01 Final R5 Constructive and Adversarial Review
 document_type: design_review
 form: explanation
 authority: evidence
-status: current
+status: accepted
 version: 1.0.0
 owners:
   - developmentconexus-ops
@@ -40,7 +40,7 @@ APROVÁVEL
 OPERATOR_DECISION_REQUIRED
 ```
 
-This recommendation is Evidence, not approval. It does not authorize M01 implementation, Pi dispatch or PR merge.
+This accepted review Evidence is not approval of the proposed microdesign. It does not authorize M01 implementation, Pi dispatch or PR merge.
 
 ## 2. Authorities reviewed
 

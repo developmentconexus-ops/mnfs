@@ -1,6 +1,6 @@
 import { lstatSync, realpathSync } from 'node:fs';
 import { TextDecoder } from 'node:util';
-import { dirname, isAbsolute } from 'node:path';
+import { dirname, isAbsolute, sep } from 'node:path';
 
 import { assertTc01, tc01Error } from './errors.mjs';
 import { assertLinuxOwnedAbsolutePath } from './paths.mjs';
@@ -57,6 +57,27 @@ function controlledOutputPath(value, label) {
   return safe;
 }
 
+function assertContained(root, value, label, code = 'TC01_INVALID_INPUT') {
+  const prefix = `${root}${sep}`;
+  assertTc01(
+    value !== root && value.startsWith(prefix),
+    code,
+    `${label} must remain contained by its TC-01 boundary.`,
+    { label, root, value },
+  );
+  return value;
+}
+
+function prepareFixture(fixture) {
+  assertTc01(fixture && typeof fixture === 'object' && !Array.isArray(fixture), 'TC01_INVALID_INPUT', 'Treehouse fixture is required.');
+  const runRoot = existingCanonicalPath(fixture.runRoot, 'TC-01 run root', 'directory');
+  const sourceRepo = assertContained(runRoot, existingCanonicalPath(fixture.sourceRepo, 'Treehouse source repository', 'directory'), 'Treehouse source repository');
+  const poolRoot = assertContained(runRoot, existingCanonicalPath(fixture.poolRoot, 'Treehouse pool root', 'directory'), 'Treehouse pool root');
+  const artifactsRoot = assertContained(runRoot, existingCanonicalPath(fixture.artifactsRoot, 'Treehouse artifacts root', 'directory'), 'Treehouse artifacts root');
+  const fakeHome = assertContained(runRoot, existingCanonicalPath(fixture.fakeHome, 'Treehouse fake HOME', 'directory'), 'Treehouse fake HOME');
+  return { runRoot, sourceRepo, poolRoot, artifactsRoot, fakeHome };
+}
+
 function assertExactKeys(value, expected, label) {
   assertTc01(value && typeof value === 'object' && !Array.isArray(value), 'TC01_TREEHOUSE_INVALID_OUTPUT', `${label} must be an object.`);
   const actual = Object.keys(value).sort(compareCodeUnits);
@@ -109,7 +130,7 @@ function parseJson(bytes, label) {
   }
 }
 
-function canonicalObservedPath(value, label) {
+function canonicalObservedPath(value, label, poolRoot) {
   outputString(value, label);
   let safe;
   try {
@@ -131,7 +152,7 @@ function canonicalObservedPath(value, label) {
     });
   }
   assertTc01(real === value, 'TC01_TREEHOUSE_INVALID_OUTPUT', `${label} must be one canonical realpath.`, { value, real });
-  return real;
+  return assertContained(poolRoot, real, label, 'TC01_TREEHOUSE_INVALID_OUTPUT');
 }
 
 function commandFailure(command, result) {
@@ -146,17 +167,17 @@ function commandFailure(command, result) {
 
 function prepareClient(input) {
   assertTc01(input && typeof input === 'object' && !Array.isArray(input), 'TC01_INVALID_INPUT', 'Treehouse client input must be an object.');
+  const fixture = prepareFixture(input.fixture);
   const environment = buildTreehouseEnvironment(input);
   const treehouseExecutable = existingCanonicalPath(input.treehouseExecutable, 'Treehouse executable', 'file');
-  const sourceRepo = existingCanonicalPath(input.fixture.sourceRepo, 'Treehouse source repository', 'directory');
   const run = input.run ?? runProcess;
   assertTc01(typeof run === 'function', 'TC01_INVALID_INPUT', 'Treehouse process runner is required.');
-  return { environment, treehouseExecutable, sourceRepo, run };
+  return { environment, treehouseExecutable, sourceRepo: fixture.sourceRepo, fixture, run };
 }
 
 async function invokeTreehouse(input, args) {
   const prepared = prepareClient(input);
-  return prepared.run({
+  const result = await prepared.run({
     file: prepared.treehouseExecutable,
     args,
     cwd: prepared.sourceRepo,
@@ -165,28 +186,35 @@ async function invokeTreehouse(input, args) {
     stdoutLimitBytes: TREEHOUSE_OUTPUT_LIMIT_BYTES,
     stderrLimitBytes: TREEHOUSE_OUTPUT_LIMIT_BYTES,
   });
+  return { result, fixture: prepared.fixture };
 }
 
 export function buildTreehouseEnvironment(input) {
   assertTc01(input && typeof input === 'object' && !Array.isArray(input), 'TC01_INVALID_INPUT', 'Treehouse environment input must be an object.');
-  assertTc01(input.fixture && typeof input.fixture === 'object' && !Array.isArray(input.fixture), 'TC01_INVALID_INPUT', 'Treehouse fixture is required.');
-
-  const sourceRepo = existingCanonicalPath(input.fixture.sourceRepo, 'Treehouse source repository', 'directory');
-  const fakeHome = existingCanonicalPath(input.fixture.fakeHome, 'Treehouse fake HOME', 'directory');
-  const gitWrapperDir = existingCanonicalPath(input.gitWrapperDir, 'Git wrapper directory', 'directory');
+  const fixture = prepareFixture(input.fixture);
+  const gitWrapperDir = assertContained(
+    fixture.runRoot,
+    existingCanonicalPath(input.gitWrapperDir, 'Git wrapper directory', 'directory'),
+    'Git wrapper directory',
+  );
   const treehouseExecutable = existingCanonicalPath(input.treehouseExecutable, 'Treehouse executable', 'file');
   const realGit = existingCanonicalPath(input.realGit, 'Real Git executable', 'file');
-  const gitLog = controlledOutputPath(input.gitLog, 'Git invocation log');
+  const gitLog = assertContained(
+    fixture.artifactsRoot,
+    controlledOutputPath(input.gitLog, 'Git invocation log'),
+    'Git invocation log',
+  );
 
-  assertTc01(sourceRepo !== fakeHome, 'TC01_INVALID_INPUT', 'Treehouse source repository and fake HOME must be distinct.');
+  assertTc01(fixture.sourceRepo !== fixture.fakeHome, 'TC01_INVALID_INPUT', 'Treehouse source repository and fake HOME must be distinct.');
 
   return {
     PATH: `${gitWrapperDir}:${dirname(treehouseExecutable)}:${dirname(realGit)}:/usr/bin:/bin`,
-    HOME: fakeHome,
+    HOME: fixture.fakeHome,
     LANG: 'C.UTF-8',
     LC_ALL: 'C.UTF-8',
     GIT_TERMINAL_PROMPT: '0',
     GIT_OPTIONAL_LOCKS: '0',
+    GIT_CONFIG_GLOBAL: '/dev/null',
     GIT_CONFIG_NOSYSTEM: '1',
     TREEHOUSE_NO_UPDATE_CHECK: '1',
     TC01_REAL_GIT: realGit,
@@ -196,13 +224,13 @@ export function buildTreehouseEnvironment(input) {
 
 export async function acquireTreehouseLease(input) {
   const holder = assertControlledString(input?.holder, 'Treehouse lease holder');
-  const result = await invokeTreehouse(input, ['get', '--lease', '--lease-holder', holder, '--json']);
+  const { result, fixture } = await invokeTreehouse(input, ['get', '--lease', '--lease-holder', holder, '--json']);
   if (result.exitCode !== 0) throw commandFailure('get', result);
 
   const value = parseJson(result.stdout, 'Treehouse acquisition stdout');
   assertExactKeys(value, ['path', 'lease_id', 'lease_holder', 'leased_at'], 'Treehouse acquisition');
 
-  const path = canonicalObservedPath(value.path, 'Treehouse acquisition path');
+  const path = canonicalObservedPath(value.path, 'Treehouse acquisition path', fixture.poolRoot);
   const leaseId = outputString(value.lease_id, 'Treehouse acquisition lease_id');
   const leaseHolder = outputString(value.lease_holder, 'Treehouse acquisition lease_holder');
   const leasedAt = outputDate(value.leased_at, 'Treehouse acquisition leased_at');
@@ -215,19 +243,19 @@ export async function acquireTreehouseLease(input) {
 }
 
 export async function observeTreehouseStatus(input) {
-  const result = await invokeTreehouse(input, ['status', '--json']);
+  const { result, fixture } = await invokeTreehouse(input, ['status', '--json']);
   if (result.exitCode !== 0) throw commandFailure('status', result);
 
   const value = parseJson(result.stdout, 'Treehouse status stdout');
   assertTc01(Array.isArray(value), 'TC01_TREEHOUSE_INVALID_OUTPUT', 'Treehouse status must be a JSON array.');
   const seenPaths = new Set();
 
-  return value.map((item, index) => {
+  const status = value.map((item, index) => {
     assertExactKeys(item, ['name', 'path', 'status', 'lease_id', 'lease_holder', 'leased_at', 'processes'], `Treehouse status item ${index}`);
     const name = outputString(item.name, `Treehouse status item ${index} name`);
-    const path = canonicalObservedPath(item.path, `Treehouse status item ${index} path`);
-    const status = outputString(item.status, `Treehouse status item ${index} status`);
-    assertTc01(STATUS_VALUES.has(status), 'TC01_TREEHOUSE_INVALID_OUTPUT', 'Treehouse status item has an unknown status.', { index, status });
+    const path = canonicalObservedPath(item.path, `Treehouse status item ${index} path`, fixture.poolRoot);
+    const statusValue = outputString(item.status, `Treehouse status item ${index} status`);
+    assertTc01(STATUS_VALUES.has(statusValue), 'TC01_TREEHOUSE_INVALID_OUTPUT', 'Treehouse status item has an unknown status.', { index, status: statusValue });
     const leaseId = outputString(item.lease_id, `Treehouse status item ${index} lease_id`, { allowEmpty: true });
     const leaseHolder = outputString(item.lease_holder, `Treehouse status item ${index} lease_holder`, { allowEmpty: true });
     const leasedAt = item.leased_at === null ? null : outputDate(item.leased_at, `Treehouse status item ${index} leased_at`);
@@ -246,27 +274,34 @@ export async function observeTreehouseStatus(input) {
       };
     });
 
-    if (status === 'leased') {
+    if (statusValue === 'leased') {
       assertTc01(leaseId.length > 0 && leasedAt !== null, 'TC01_TREEHOUSE_INVALID_OUTPUT', 'A leased Treehouse item requires lease identity and timestamp.', { index, path });
     } else {
       assertTc01(leaseId === '' && leaseHolder === '' && leasedAt === null, 'TC01_TREEHOUSE_INVALID_OUTPUT', 'A non-leased Treehouse item must not carry lease metadata.', {
         index,
         path,
-        status,
+        status: statusValue,
       });
     }
 
     assertTc01(!seenPaths.has(path), 'TC01_TREEHOUSE_INVALID_OUTPUT', 'Treehouse status contains duplicate canonical paths.', { path });
     seenPaths.add(path);
-    return { name, path, status, leaseId, leaseHolder, leasedAt, processes };
+    return { name, path, status: statusValue, leaseId, leaseHolder, leasedAt, processes };
   });
+  return status.sort((left, right) => compareCodeUnits(left.path, right.path));
 }
 
 export async function returnTreehouseLease(input) {
-  const path = controlledOutputPath(input?.path, 'Treehouse return path');
+  const fixture = prepareFixture(input?.fixture);
+  const path = assertContained(
+    fixture.runRoot,
+    controlledOutputPath(input?.path, 'Treehouse return path'),
+    'Treehouse return path',
+  );
   const leaseId = assertControlledString(input?.leaseId, 'Treehouse return lease ID');
   const holder = assertControlledString(input?.holder, 'Treehouse return holder');
-  return invokeTreehouse(input, ['return', path, '--if-lease-id', leaseId, '--if-lease-holder', holder]);
+  const { result } = await invokeTreehouse(input, ['return', path, '--if-lease-id', leaseId, '--if-lease-holder', holder]);
+  return result;
 }
 
 export function findStatusByPath(status, expectedPath) {

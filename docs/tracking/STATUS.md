@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.6.3
+version: 1.6.4
 owners:
   - developmentconexus-ops
 related:
@@ -56,7 +56,9 @@ tracking_issue: 16
 - [x] Documentation Map reconciled from obsolete AB1 state to current M01 R5 authority.
 - [x] Microdesign self-review resolved Claim/release, empty-Track disposition and current-Track invariants.
 - [x] Operator approved the written R5 design package for TC-01 planning.
-- [x] Detailed TC-01 implementation and canonical WSL2 execution plan written.
+- [x] TC-01 protocol accepted as version 0.2.0 for harness implementation and WSL2 execution planning.
+- [x] Detailed TC-01 implementation and canonical WSL2 execution plan version 1.0.1 written and self-reviewed.
+- [ ] Fresh CI validates the exact head containing the approval Evidence, accepted protocol, plan and tracking updates.
 - [ ] Operator reviews the TC-01 implementation/execution plan.
 - [ ] TC-01 deterministic harness implementation authorized after plan review.
 - [ ] TC-01 harness implemented and deterministically verified.
@@ -81,24 +83,24 @@ R5 Milestone Microdesign IN_PROGRESS
 ```text
 Research coverage:       PUBLISHED
 R5 design package:       OPERATOR APPROVED FOR TC-01 PLANNING
-TC-01 protocol:          ACCEPTED FOR IMPLEMENTATION/EXECUTION PLANNING
-TC-01 plan:              CURRENT — awaiting Operator review
+TC-01 protocol:          ACCEPTED — version 0.2.0
+TC-01 plan:              CURRENT — version 1.0.1, awaiting Operator review
 TC-01 harness:           NOT_STARTED
 TC-01 Evidence:          NOT_STARTED
 M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
-Mechanical verification: PASS
 Blocking external input: Treehouse production-adapter conformance
 Current human gate:      Operator review of the TC-01 implementation/execution plan
 Design PR:               #17 DRAFT
 ```
 
-The design-package approval authorizes creation of the TC-01 plan. It does not approve the final M01 microdesign, authorize the TC-01 harness build without plan review, establish Treehouse conformance or complete R5.
+The design-package approval authorizes the TC-01 plan and protocol. It does not approve the final M01 microdesign, authorize harness implementation before plan review, establish Treehouse conformance or complete R5.
 
 ## Current authorization boundary
 
 ```text
 M01 research:         AUTHORIZED
+TC-01 protocol:       ACCEPTED
 TC-01 plan:           WRITTEN / AWAITING REVIEW
 TC-01 harness build:  PROHIBITED until plan review
 TC-01 WSL2 execution: AUTHORIZED only after a reviewed, CI-green harness exists
@@ -141,7 +143,7 @@ approved allocation tests:        PASS
 documentation validation:         PASS — 74 canonical IDs
 ```
 
-The new acceptance Evidence and TC-01 plan require a fresh CI proof on the current PR head before the plan is considered mechanically validated.
+The current head requires fresh CI before the TC-01 plan is considered mechanically validated.
 
 ## Immediate next action
 

@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.12
+version: 1.8.13
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 3 GREEN
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 4 RED
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -48,7 +48,6 @@ R5 Milestone Microdesign PASS
 ## Current M01 result
 
 ```text
-Research coverage:             PUBLISHED
 CAP-EXECUTION:                 ACCEPTED — version 0.1.0
 MIS-002 contract:              APPROVED — revision 5 / exact hash
 TC-01 canonical Evidence:      ACCEPT — 15/15 PASS, cleanup COMPLETED
@@ -57,13 +56,14 @@ Implementation plan:           CURRENT / APPROVED — version 1.0.1
 Implementation started:        YES — bounded by task gates
 Task 1:                        COMPLETE
 Task 2:                        COMPLETE
-Complete product suite:        112/112 PASS before Task 3 RED
 Task 3 RED:                    OBSERVED / EXPECTED FAILURE
-Task 3 GREEN:                  NOT AUTHORIZED
+Task 3 GREEN:                  COMPLETE
+Complete product suite:        116/116 PASS
+Task 4 RED:                    NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 3 GREEN only
+Current human gate:            explicit authorization for Task 4 RED only
 PR:                            #17 DRAFT
 ```
 
@@ -77,49 +77,25 @@ MNFS_AUTHORIZE_M01_TASK_1_GREEN plan=1.0.1 microdesign=0.6.1 red=65bd4e2c410d4d1
 MNFS_AUTHORIZE_M01_TASK_2_RED plan=1.0.1 microdesign=0.6.1 task1=ec6505d7207d252aeef77d72192c401f460b4816
 MNFS_AUTHORIZE_M01_TASK_2_GREEN plan=1.0.1 microdesign=0.6.1 red=01a1e5deabbe5388f83f83d13effe9e1a220fed0
 MNFS_AUTHORIZE_M01_TASK_3_RED plan=1.0.1 microdesign=0.6.1 task2=ff4d345720c2a14623ec1777fc5f318c9d96d685
+MNFS_AUTHORIZE_M01_TASK_3_GREEN plan=1.0.1 microdesign=0.6.1 red=9e109da918cb3cf8567a057684564d6cfe60ca7e
 ```
 
-Task 3 RED authority did not extend to Task 3 GREEN, store refactoring, migrations, Treehouse, Pi or merge.
+Task 3 authority did not extend to Task 4, maintenance mode, backup, migrations, Treehouse, Pi or merge.
 
-## Task 1 implementation
+## Completed implementation
 
-Created:
+### Task 1 — execution domain
 
 ```text
 src/execution/ids.ts
 src/execution/model.ts
 src/execution/transitions.ts
-```
-
-Modified:
-
-```text
 src/domain/errors.ts
 ```
 
 Task 1 established canonical parent-relative IDs, immutable execution models, fail-closed lifecycle transitions and the accepted M01 typed-error vocabulary.
 
-## Task 1 verification
-
-```text
-RED head:                 65bd4e2c410d4d1566f5fef0da33f29e35657489
-RED synthetic merge:      684d82f1508459bb649c7a115032eb93650f39d2
-RED workflow/job:          30936460300 / 92083735544
-RED result:                TypeScript PASS; legacy 95/95 PASS; M01 0/4 expected failure
-
-GREEN head:               ec6505d7207d252aeef77d72192c401f460b4816
-GREEN synthetic merge:    cc8f99ce5773665fdbef3e205cceccadc74398df
-GREEN workflow/job:        30937517215 / 92087281731
-GREEN result:              PASS
-Product tests:             99/99
-AS-02 tests:               119/119
-TC-01 tests:               78/78
-Documentation validation:  93 canonical IDs
-```
-
-## Task 2 implementation
-
-Created:
+### Task 2 — trusted runtime primitives
 
 ```text
 src/runtime/process-runner.ts
@@ -127,87 +103,31 @@ src/runtime/durable-artifact.ts
 src/adapters/process-identity.ts
 ```
 
-Task 2 established:
+Task 2 established bounded shell-free process execution, immutable crash-durable Artifact publication and Linux process identity bound to boot ID, PID and start ticks.
 
-- one Linux-only shell-free process runner with explicit cwd/environment and closed stdin;
-- byte-preserved stdout/stderr with exact independent limits;
-- detached process-group termination through `SIGTERM`, a fixed grace period and `SIGKILL`;
-- immutable durable Artifact publication with exclusive same-directory temp files;
-- exact-byte idempotency and different-byte conflict;
-- no-follow regular-file reads, symlink rejection and requested file mode;
-- publication ordering `write → temp fsync → close → publish → directory fsync`;
-- Linux process identity from boot ID, PID and `/proc/<pid>/stat` start ticks;
-- `undefined` only when the process stat path is genuinely absent.
-
-The default Artifact publisher uses an atomic no-overwrite hard-link publication behind the approved `rename` operation seam, then removes the temporary name before directory fsync. This preserves immutable-final semantics without allowing POSIX rename overwrite.
-
-## Task 2 verification
-
-### Primary RED
+### Task 3 — shared SQLite transaction authority
 
 ```text
-RED head:                 01a1e5deabbe5388f83f83d13effe9e1a220fed0
-RED synthetic merge:      96bd5d775eb41738a04a11a45694d7c90319d545
-RED workflow/job:          30940060412 / 92095880696
-TypeScript:                PASS
-Prior product tests:       99/99 PASS
-Task 2 tests:              0/12 expected failure
-Failure cause:             process-runner, durable-artifact and process-identity modules absent
+src/store/sqlite-transaction.ts
+src/store/sqlite-store.ts
 ```
 
-### Initial GREEN
+Task 3 established:
 
-```text
-GREEN head:               2d8bd2c23d6820e6c9b3d7be735971cf657ce2cd
-GREEN synthetic merge:    a803878057c06b6a0940e95e4706e8650748e482
-GREEN workflow/job:        30941072301 / 92099270524
-Product tests:             111/111 PASS
-AS-02 tests:               119/119 PASS
-TC-01 tests:               78/78 PASS
-Documentation validation:  93 canonical IDs
-```
+- one shared synchronous authority for all existing `SqliteStore` write operations;
+- `BEGIN IMMEDIATE` before user code;
+- retry only while transaction acquisition returns SQLite busy;
+- exact bounded delays `5`, `10` and `20` milliseconds;
+- `CONCURRENCY_CONFLICT` after the fourth busy acquisition attempt;
+- callback execution exactly once after successful acquisition;
+- one commit on success;
+- rollback only while `database.isTransaction` is true;
+- no callback, commit or transaction retry after user code starts;
+- no schema, SQL, migration or public API change.
 
-### Post-GREEN adversarial correction
+## Task 3 verification
 
-Review found that the `SIGTERM → SIGKILL` grace timer was unreferenced. In a fresh CLI process the group leader could exit, leaving no active handle while `runProcess()` still awaited the grace period; Node then exited with unsettled top-level await.
-
-```text
-Review RED head:          776fa49efc1d055bf54b01e44231822c58591e82
-Review synthetic merge:   4eb0d32bf079eff8ae1fedd08689983f4fbec0f5
-Review workflow/job:      30941290183 / 92100002922
-Review result:            111 PASS / 1 expected FAIL
-Observed exit:            13 — unsettled top-level await
-
-Corrected GREEN head:     ff4d345720c2a14623ec1777fc5f318c9d96d685
-Corrected synthetic merge:25d303d52b9e5215aa46f4b9a26960622e19efad
-Corrected workflow/job:   30941416873 / 92100440270
-Product tests:             112/112 PASS
-AS-02 tests:               119/119 PASS
-TC-01 tests:               78/78 PASS
-Documentation validation:  93 canonical IDs
-```
-
-## Task 3 RED contract
-
-Added only:
-
-```text
-tests/store/sqlite-transaction.test.ts
-```
-
-The four tests require:
-
-- one `BEGIN IMMEDIATE`, one callback execution and one `COMMIT` on success;
-- rollback of a real SQLite write when user code throws;
-- retry of only `BEGIN IMMEDIATE` after exact delays `5`, `10` and `20` milliseconds;
-- `CONCURRENCY_CONFLICT` after the fourth busy `BEGIN` attempt;
-- zero callback executions when transaction acquisition never succeeds;
-- no retry after user code starts, even when the callback throws `SQLITE_BUSY`;
-- propagation of the original callback error after one rollback.
-
-No Task 3 production module or SqliteStore refactor was created.
-
-## Task 3 RED verification
+### RED
 
 ```text
 RED head:                 9e109da918cb3cf8567a057684564d6cfe60ca7e
@@ -216,10 +136,22 @@ RED workflow/job:          30942340332 / 92103635626
 TypeScript:                PASS
 Prior product tests:       112/112 PASS
 Task 3 tests:              0/4 expected failure
-Product total:             112 PASS / 4 FAIL
 Failure cause:             sqlite-transaction module absent
-AS-02 / TC-01 / docs:      NOT RUN — root verify stopped after expected unit RED
 ```
+
+### GREEN
+
+```text
+GREEN head:               2ed7e6d620f771dd1399421d06527911a2ffea0c
+GREEN synthetic merge:    cb475aa10babba1c265bfa7b2688a9ec5f63af8e
+GREEN workflow/job:        30943310015 / 92106917795
+Product tests:             116/116 PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation:  93 canonical IDs
+```
+
+Post-GREEN scope review compared `1e603452...` to `2ed7e6d6...` and found only the new transaction authority plus the bounded store refactor: 7 additions and 16 deletions in `sqlite-store.ts`, with no schema or SQL change.
 
 ## Frozen boundaries
 
@@ -241,9 +173,9 @@ The accepted design invariants remain unchanged:
 ```text
 Task 1:                    COMPLETE
 Task 2:                    COMPLETE
-Task 3 RED:                OBSERVED / COMPLETE
-Task 3 GREEN:              NOT AUTHORIZED
-Task 4 and later:          NOT AUTHORIZED
+Task 3:                    COMPLETE
+Task 4 RED:                NOT AUTHORIZED
+Task 4 GREEN and later:    NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 PR #17 merge:              NOT AUTHORIZED
@@ -253,4 +185,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 3 GREEN only**. Stop before creating `SqliteTransaction` or refactoring `SqliteStore` unless that continuation is granted.
+Request or provide an explicit continuation for **Task 4 RED only**. Stop before creating the SQLite maintenance gate, backup or schema-version checks unless that continuation is granted.

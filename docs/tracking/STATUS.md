@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.18
+version: 1.8.19
 owners:
   - developmentconexus-ops
 related:
@@ -28,10 +28,10 @@ tracking_issue: 16
 - **Program:** Pi-first MNFS
 - **Canonical environment:** Ubuntu on WSL2; Windows remains the browser, terminal and desktop host
 - **Completed Product Milestones:** M0 — Foundation Walking Skeleton; M1 — Visual Mission Planning
-- **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
+- **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 5 GREEN
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 6 RED
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -58,13 +58,16 @@ Task 1:                        COMPLETE
 Task 2:                        COMPLETE
 Task 3:                        COMPLETE
 Task 4:                        COMPLETE
-Complete product suite:        124/124 PASS before Task 5 RED
-Task 5 RED:                    OBSERVED / EXPECTED FAILURE
-Task 5 GREEN:                  NOT AUTHORIZED
+Task 5:                        COMPLETE
+Complete product suite:        136/136 PASS
+AS-02:                         119/119 PASS
+TC-01:                         78/78 PASS
+Documentation validation:      PASS — 93 canonical IDs
+Task 6 RED:                    NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 5 GREEN only
+Current human gate:            explicit authorization for Task 6 RED only
 PR:                            #17 DRAFT
 ```
 
@@ -82,9 +85,10 @@ MNFS_AUTHORIZE_M01_TASK_3_GREEN plan=1.0.1 microdesign=0.6.1 red=9e109da918cb3cf
 MNFS_AUTHORIZE_M01_TASK_4_RED plan=1.0.1 microdesign=0.6.1 task3=2ed7e6d620f771dd1399421d06527911a2ffea0c
 MNFS_AUTHORIZE_M01_TASK_4_GREEN plan=1.0.1 microdesign=0.6.1 red=a163c8d3512f6f9a2583156e5f3e64f32ecde45b
 MNFS_AUTHORIZE_M01_TASK_5_RED plan=1.0.1 microdesign=0.6.1 task4=d0172cc2c141cec6004f10caa9859bced9ac8d1c
+MNFS_AUTHORIZE_M01_TASK_5_GREEN plan=1.0.1 microdesign=0.6.1 red=e38592a97485bac91c713dbd648c391bdb029357
 ```
 
-Task 5 RED authority did not extend to Task 5 GREEN, migration implementation, Treehouse, Pi, M01 acceptance or merge.
+Task 5 authority did not extend to Task 6, real Treehouse execution, Pi dispatch, M01 acceptance or merge.
 
 ## Completed implementation
 
@@ -116,159 +120,51 @@ src/store/sqlite-transaction.ts
 src/store/sqlite-store.ts
 ```
 
-Task 3 established:
+Task 3 established one shared `BEGIN IMMEDIATE` authority with bounded `SQLITE_BUSY` retry before user code only, callback execution exactly once, one commit on success and rollback while the connection remains in a transaction.
 
-- one shared synchronous authority for all existing `SqliteStore` write operations;
-- `BEGIN IMMEDIATE` before user code;
-- retry only while transaction acquisition returns SQLite busy;
-- exact bounded delays `5`, `10` and `20` milliseconds;
-- `CONCURRENCY_CONFLICT` after the fourth busy acquisition attempt;
-- callback execution exactly once after successful acquisition;
-- one commit on success;
-- rollback only while `database.isTransaction` is true;
-- no callback, commit or transaction retry after user code starts;
-- no schema, SQL, migration or public API change.
-
-## Task 3 verification
-
-### RED
+### Task 4 — maintenance gate and consistent backup
 
 ```text
-RED head:                 9e109da918cb3cf8567a057684564d6cfe60ca7e
-RED synthetic merge:      4612c6c5bdf10a5a654b3658dafc3dc734561c20
-RED workflow/job:          30942340332 / 92103635626
-TypeScript:                PASS
-Prior product tests:       112/112 PASS
-Task 3 tests:              0/4 expected failure
-Failure cause:             sqlite-transaction module absent
+src/store/sqlite-maintenance.ts
+src/store/sqlite-store.ts
+tests/store/sqlite-maintenance-boundary.test.ts
 ```
 
-### GREEN
+Task 4 established an exclusive durable maintenance lock, no age-based takeover, fail-closed malformed/symlink handling, consistent `node:sqlite backup()` Evidence and schema/version readiness checks separated from store opening.
 
-```text
-GREEN head:               2ed7e6d620f771dd1399421d06527911a2ffea0c
-GREEN synthetic merge:    cb475aa10babba1c265bfa7b2688a9ec5f63af8e
-GREEN workflow/job:        30943310015 / 92106917795
-Product tests:             116/116 PASS
-AS-02 tests:               119/119 PASS
-TC-01 tests:               78/78 PASS
-Documentation validation:  93 canonical IDs
-```
-
-Post-GREEN scope review compared `1e603452...` to `2ed7e6d6...` and found only the new transaction authority plus the bounded store refactor: 7 additions and 16 deletions in `sqlite-store.ts`, with no schema or SQL change.
-
-## Task 4 implementation
+### Task 5 — migration v4, versioned Events and execution schema
 
 Created:
 
 ```text
-src/store/sqlite-maintenance.ts
-tests/store/sqlite-maintenance-boundary.test.ts
+src/store/event-store.ts
 ```
 
 Modified:
 
 ```text
+src/store/migrations.ts
 src/store/sqlite-store.ts
+src/domain/types.ts
 ```
 
-Task 4 established:
+Task 5 established:
 
-- an exclusive `<database>.maintenance.lock` with canonical owner metadata, mode `0600`, file fsync and parent-directory fsync;
-- no lock takeover based on age and fail-closed handling for malformed, symlink or non-regular lock paths;
-- ownership-preserving durable release with parent-directory fsync;
-- consistent `node:sqlite backup()` from an open WAL source connection;
-- immutable no-overwrite backup publication, mode `0600`, file/directory fsync and SHA-256 Evidence;
-- reopened backup `PRAGMA integrity_check = ok`, migration inventory, user version, table counts and approved contract hashes;
-- schema inspection for supported v3 and v4 matrices, with gaps and future versions rejected using `SCHEMA_VERSION_UNSUPPORTED`;
-- `ensureDatabaseReady()` separated from store opening;
-- `SqliteStore.openCurrent()` that never applies migrations implicitly and rechecks schema after opening the writable connection;
-- an explicit pre-v4 writer fence: the current writer accepts schema 3 only, while maintenance inspection can read schema 4 for migration/backup planning.
+- atomic migration v4 from empty, M0/v1, M1/v3 and exact MIS-002 revision-5 databases;
+- byte-preserving Event rebuild with immutable `payload_schema_version = 1` history;
+- `event_types(type, payload_schema_version)` seeded with all 19 accepted version-1 Event types;
+- required Event payload version without a default, creating the downgrade write fence;
+- one `EventStore` for canonical versioned Event appends and reads;
+- exact `write_tracks`, `attempts`, `worker_runs`, `leases` and `claims` tables;
+- partial indexes for current Track, Attempt, Run, Lease, Lease action token and Claim;
+- composite foreign keys proving Track → Attempt → Run/Lease → Claim ancestry;
+- rollback of the complete migration when migration-4 finalization fails;
+- exact v4 writer-shape validation: versions alone cannot masquerade as a complete schema;
+- ordinary store opening never migrates an existing pre-v4 database implicitly.
 
-`ensureDatabaseReady({ writeMode: true })` means exclusive maintenance/readiness inspection under the maintenance lock. It does not by itself authorize ordinary domain writes against every readable schema. `SqliteStore.openCurrent()` remains the final binary write-capability fence and currently accepts schema 3 only. Task 5 must promote the writer capability after migration v4 is implemented and verified.
-
-No Task 5 schema, migration, Event or execution table was created by Task 4.
-
-## Task 4 verification
+## Task 5 verification
 
 ### Primary RED
-
-```text
-RED head:                 a163c8d3512f6f9a2583156e5f3e64f32ecde45b
-RED synthetic merge:      67b164045583eba860fa927b26519ff7885a4c07
-RED workflow/job:          30944704469 / 92111672286
-TypeScript:                PASS
-Prior product tests:       116/116 PASS
-Task 4 tests:              0/7 expected failure
-Failure cause:             sqlite-maintenance module absent
-```
-
-### Initial GREEN and focused correction
-
-The initial implementation passed six of seven Task 4 tests. The injected durability seam returned no persisted read during release, while the first implementation required a reread result. The production boundary already delegated missing-path behavior to exclusive filesystem removal, so the release contract was corrected without weakening changed-owner rejection.
-
-```text
-Initial GREEN head:       b7c3145335328320913c99d777b0f5032a4f3a31
-Synthetic merge:          3345742b9895b04c7b1b83882daec994b1b044c0
-Workflow/job:             30946090318 / 92116316689
-Result:                   122 PASS / 1 FAIL
-
-Corrected GREEN head:     808dd4901287b2a617fecb22241a9e179912d4dc
-Synthetic merge:          f88a7dc35aeee0ddf011995dfa6e9be0c763f39f
-Workflow/job:             30946292534 / 92116985716
-Product tests:            123/123 PASS
-AS-02 tests:              119/119 PASS
-TC-01 tests:              78/78 PASS
-Documentation validation: 93 canonical IDs
-```
-
-### Post-GREEN adversarial writer fence
-
-Review found that the schema inspector correctly recognized v4 for read/backup purposes, but the still-pre-v4 `SqliteStore.openCurrent()` also accepted it for writes. A separate RED proved the downgrade gap, and the writer was fenced to schema 3 until Task 5 promotes the current write schema.
-
-```text
-Boundary RED head:        24b8dbf924e4b394f139fa2fa4e2a1a07b3dfbcd
-Synthetic merge:          6b59775fd3635fe12475f8824a7c4e4780764f76
-Workflow/job:             30946515167 / 92117734647
-Result:                   123 PASS / 1 expected FAIL
-Failure cause:            pre-v4 openCurrent accepted readable v4 schema
-
-Final GREEN head:         d0172cc2c141cec6004f10caa9859bced9ac8d1c
-Synthetic merge:          3b42f58128f5e0d04246383fb8c62676ba3a0c2c
-Workflow/job:             30946633663 / 92118136010
-Product tests:            124/124 PASS
-AS-02 tests:              119/119 PASS
-TC-01 tests:              78/78 PASS
-Documentation validation: 93 canonical IDs
-```
-
-Post-GREEN scope review compared `9e0e5d14...` to `d0172cc2...` and found only `sqlite-maintenance.ts`, the bounded `sqlite-store.ts` opening refactor and the writer-fence regression test. `migrations.ts`, schema and Task 5 files remained unchanged.
-
-## Task 5 RED contract
-
-Added only:
-
-```text
-tests/store/migration-v4.test.ts
-```
-
-The ten tests require:
-
-- empty, M0/v1, M1/v3 and exact MIS-002 revision-5 databases to migrate to `[1,2,3,4]` and `user_version = 4` without changing Mission, Event or plan-revision historical bytes;
-- every historical Event to receive `payload_schema_version = 1` while preserving `seq`, IDs, timestamps and payload JSON bytes;
-- `event_types(type,payload_schema_version)` seeded with all 19 accepted version-1 Event types;
-- `events.payload_schema_version` required without a default and protected by a composite Event-type foreign key;
-- rebuilt Event indexes plus clean `foreign_key_check` and `integrity_check`;
-- exact `write_tracks`, `attempts`, `worker_runs`, `leases` and `claims` columns;
-- six accepted partial current-row/action-token indexes and composite ancestry keys;
-- cross-Attempt Worker Run and cross-Track Lease attachment to a Claim rejected by SQLite foreign keys;
-- Mission/Plan mutations to append payload version `1`, canonical JSON and expose `payloadSchemaVersion` on reads;
-- a pre-v4 mutation omitting the required Event version to fail and roll back its Mission row;
-- an injected failure when migration `4` is recorded to restore the complete v3 schema and historical rows.
-
-No production file, migration, Event type or execution table was created.
-
-## Task 5 RED verification
 
 ```text
 RED head:                 e38592a97485bac91c713dbd648c391bdb029357
@@ -278,20 +174,105 @@ TypeScript:                PASS
 Prior product tests:       124/124 PASS
 Task 5 tests:              0/10 expected failure
 Product total:             124 PASS / 10 FAIL
-AS-02 / TC-01 / docs:      NOT RUN — root verify stopped after expected unit RED
 ```
 
-Observed failure partition:
+### Initial GREEN
 
 ```text
-4  migration history fixtures lack migration 4
-1  Event registry/rebuild absent
-1  execution tables/indexes absent
-1  composite ancestry proof blocked by absent v4
-1  payloadSchemaVersion/canonical Event append absent
-1  downgrade Event-column fence absent
-1  migration-4 rollback injection never reached
+Initial product head:      27a040d1c44d1a77f611ffa556c02bd0178434ec
+Initial workflow/job:      30953020369 / 92139458011
+Task 5 tests:              10/10 PASS
+Result:                    131 PASS / 3 legacy expectation FAIL
 ```
+
+The three remaining failures were legacy assumptions about the pre-v4 writer, an old-format backup fixture and Event reads without `payloadSchemaVersion`. They were updated without weakening the Task 5 RED contracts.
+
+### Complete primary GREEN
+
+```text
+GREEN head:                eb6e3a3251a6d6bdce8eff809619ceaa2d6f905e
+GREEN synthetic merge:     23941c15b69a7fa94c4547be794d8000ada0e47c
+GREEN workflow/job:         30953397122 / 92140684893
+Product tests:              134/134 PASS
+AS-02 tests:                119/119 PASS
+TC-01 tests:                78/78 PASS
+Documentation validation:  PASS — 93 canonical IDs
+```
+
+### Adversarial v4-shape fence
+
+Review found that `[1,2,3,4]` plus `user_version = 4` could identify an incomplete database as v4.
+
+```text
+Boundary RED head:         4af7b25f66099d02e59b2f0b744e9db90df93436
+Boundary workflow/job:     30953670766 / 92141563012
+Result:                    135 prior PASS / 1 expected FAIL
+Failure cause:             openCurrent accepted version-only v4 metadata
+
+Boundary GREEN head:       8c3dcbf31e9e999f23a70bb89ba0f8a34d77f012
+Boundary synthetic merge:  b0476e52ed2adfcb5a670bb2c2786a39668c9fad
+Boundary workflow/job:     30953827577 / 92142076020
+Product tests:             135/135 PASS
+AS-02 / TC-01 / docs:      PASS
+```
+
+The current writer now requires the exact v4 tables, columns, indexes and Event registry in addition to version metadata.
+
+### Adversarial implicit-migration fence
+
+Review found that ordinary CLI composition still called `SqliteStore.open()`, which could upgrade an existing v3 database without the Task 4 maintenance lock and verified backup.
+
+```text
+Implicit-migration RED:    1b54ab7586f48bc89e2f8eedeaa524575ff6d096
+RED synthetic merge:       e376b629e38a9ad4ebd2ff3b96be4ea79ba2102c
+RED workflow/job:          30954083673 / 92142905324
+Result:                    135 prior PASS / 1 expected FAIL
+Failure cause:             SqliteStore.open migrated v3 implicitly
+
+Final GREEN head:          ea459368fe1346c2cb2d6e9d37b3bb25a0c54903
+Final synthetic merge:     b1d009c0a0fc8d845d3aa0d923c29a2ce1477a57
+Final workflow/job:        30954418043 / 92143978176
+Product tests:             136/136 PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation: PASS — 93 canonical IDs
+```
+
+Current opening behavior:
+
+```text
+new database path       → create and verify schema v4
+existing exact v4       → open without migration
+existing v1/v2/v3       → SCHEMA_VERSION_UNSUPPORTED; no mutation
+incomplete/future v4    → SCHEMA_VERSION_UNSUPPORTED; no mutation
+```
+
+`applyMigrations()` remains available to the explicit maintenance authority and migration tests. Ordinary product commands do not use it to upgrade an existing database. The operator-facing maintenance migration command/composition is not implemented or authorized yet; existing pre-v4 runtime databases remain preserved and fail closed.
+
+## Scope review
+
+Compared pre-GREEN `d71274e10956062751ba7e1a913510484f5db2c6` to functional GREEN `ea459368fe1346c2cb2d6e9d37b3bb25a0c54903`.
+
+Changed product files:
+
+```text
+src/domain/types.ts
+src/store/event-store.ts
+src/store/migrations.ts
+src/store/sqlite-store.ts
+```
+
+Changed tests only to implement the Task 5 contracts and reconcile explicit migration boundaries:
+
+```text
+tests/store/mission-plan-schema-v2-store.test.ts
+tests/store/mission-plan-store.test.ts
+tests/store/sqlite-maintenance-boundary.test.ts
+tests/store/sqlite-maintenance.test.ts
+tests/store/sqlite-store.test.ts
+```
+
+No Task 6 store, service, allocation, idempotency or CAS method was introduced.
 
 ## Frozen boundaries
 
@@ -315,12 +296,13 @@ Task 1:                    COMPLETE
 Task 2:                    COMPLETE
 Task 3:                    COMPLETE
 Task 4:                    COMPLETE
-Task 5 RED:                OBSERVED / COMPLETE
-Task 5 GREEN:              NOT AUTHORIZED
-Task 6 and later:          NOT AUTHORIZED
-Migration v4 implementation: NOT AUTHORIZED
+Task 5:                    COMPLETE
+Task 6 RED:                NOT AUTHORIZED
+Task 6 GREEN and later:    NOT AUTHORIZED
+Existing pre-v4 migration: NOT EXPOSED TO ORDINARY PRODUCT COMMANDS
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
+M01 acceptance:            NOT AUTHORIZED
 PR #17 merge:              NOT AUTHORIZED
 ```
 
@@ -328,4 +310,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 5 GREEN only**. Stop before modifying migrations, Events, domain Event types, `SqliteStore` or execution tables unless that continuation is granted.
+Request or provide an explicit continuation for **Task 6 RED only**. Stop before creating `execution-store.ts`, adding allocation/idempotency/CAS methods or beginning execution lifecycle services unless that continuation is granted.

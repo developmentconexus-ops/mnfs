@@ -1,27 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import {
-  existsSync,
-  lstatSync,
-  readFileSync,
-  realpathSync,
-} from 'node:fs';
-import {
-  mkdir,
-  readFile,
-  rename,
-  rm,
-  writeFile,
-} from 'node:fs/promises';
-import {
-  basename,
-  dirname,
-  isAbsolute,
-  join,
-  normalize,
-  relative,
-  resolve,
-  sep,
-} from 'node:path';
+import { existsSync, lstatSync, readFileSync, realpathSync } from 'node:fs';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { basename, dirname, isAbsolute, join, normalize, resolve, sep } from 'node:path';
 
 import { canonicalJson, sha256Bytes } from './canonical-json.mjs';
 import { assertTc01, tc01Error } from './errors.mjs';
@@ -34,27 +14,9 @@ const RESULTS = new Set(['PASS', 'FAIL', 'BLOCKED', 'INCONCLUSIVE']);
 const EXCERPT_LIMIT = 4_096;
 const ALL_SCENARIOS = Array.from({ length: 15 }, (_, index) => `TC01-S${String(index + 1).padStart(2, '0')}`);
 const SCENARIO_KEYS = [
-  'argv',
-  'cwd',
-  'executableHash',
-  'executablePath',
-  'exitCode',
-  'expected',
-  'finishedAt',
-  'observations',
-  'rationale',
-  'result',
-  'scenarioId',
-  'signal',
-  'startedAt',
-  'stderrExcerpt',
-  'stderrHash',
-  'stderrRef',
-  'stdoutExcerpt',
-  'stdoutHash',
-  'stdoutRef',
-  'timeoutMs',
-  'version',
+  'argv', 'cwd', 'executableHash', 'executablePath', 'exitCode', 'expected', 'finishedAt',
+  'observations', 'rationale', 'result', 'scenarioId', 'signal', 'startedAt', 'stderrExcerpt',
+  'stderrHash', 'stderrRef', 'stdoutExcerpt', 'stdoutHash', 'stdoutRef', 'timeoutMs', 'version',
 ].sort(compareCodeUnits);
 
 function compareCodeUnits(left, right) {
@@ -67,6 +29,32 @@ function isPlainObject(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const prototype = Object.getPrototypeOf(value);
   return prototype === Object.prototype || prototype === null;
+}
+
+function evidencePath(value, label) {
+  try {
+    return assertLinuxOwnedAbsolutePath(value, label);
+  } catch (error) {
+    if (error?.code === 'TC01_EVIDENCE_INVALID') throw error;
+    throw tc01Error('TC01_EVIDENCE_INVALID', `${label} is not a valid Linux-owned absolute path.`, {
+      label,
+      value,
+      causeCode: error?.code ?? null,
+      causeMessage: error instanceof Error ? error.message : String(error),
+    });
+  }
+}
+
+function evidenceRunId(value) {
+  try {
+    return validateRunId(value);
+  } catch (error) {
+    throw tc01Error('TC01_EVIDENCE_INVALID', 'Evidence run id is invalid.', {
+      value,
+      causeCode: error?.code ?? null,
+      causeMessage: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 function assertExactKeys(value, expected, label) {
@@ -124,7 +112,7 @@ function canonicalBytes(value) {
 }
 
 async function writeAtomic(path, bytes) {
-  const destination = assertLinuxOwnedAbsolutePath(path, 'Evidence destination');
+  const destination = evidencePath(path, 'Evidence destination');
   await mkdir(dirname(destination), { recursive: true });
   const temporary = join(dirname(destination), `.${basename(destination)}.${process.pid}.${randomUUID()}.tmp`);
   try {
@@ -161,7 +149,7 @@ function validateArtifactRef(ref, artifactsRoot, scenarioId, label) {
     { label, ref, scenarioId },
   );
 
-  const root = assertLinuxOwnedAbsolutePath(artifactsRoot, 'Evidence artifacts root');
+  const root = evidencePath(artifactsRoot, 'Evidence artifacts root');
   const absolute = resolve(root, ref);
   assertTc01(
     absolute.startsWith(`${root}${sep}`),
@@ -179,12 +167,13 @@ function validateArtifactRef(ref, artifactsRoot, scenarioId, label) {
 
 function validateProcessSpec(spec) {
   assertTc01(isPlainObject(spec), 'TC01_EVIDENCE_INVALID', 'Command process spec must be an object.');
-  const file = assertLinuxOwnedAbsolutePath(spec.file, 'Evidence command executable');
-  const cwd = assertLinuxOwnedAbsolutePath(spec.cwd, 'Evidence command cwd');
+  const file = evidencePath(spec.file, 'Evidence command executable');
+  const cwd = evidencePath(spec.cwd, 'Evidence command cwd');
   assertTc01(file === spec.file, 'TC01_EVIDENCE_INVALID', 'Command executable must be canonical.', { actual: spec.file, canonical: file });
   assertTc01(cwd === spec.cwd, 'TC01_EVIDENCE_INVALID', 'Command cwd must be canonical.', { actual: spec.cwd, canonical: cwd });
   assertTc01(
-    Array.isArray(spec.args) && spec.args.length > 0 && spec.args.every((value) => typeof value === 'string' && !value.includes('\n') && !value.includes('\r')),
+    Array.isArray(spec.args) && spec.args.length > 0
+      && spec.args.every((value) => typeof value === 'string' && !value.includes('\n') && !value.includes('\r')),
     'TC01_EVIDENCE_INVALID',
     'Command argv must be a non-empty newline-free string array.',
     { args: spec.args },
@@ -196,7 +185,12 @@ function validateProcessSpec(spec) {
     'Command environment values must be strings.',
   );
   for (const label of ['timeoutMs', 'stdoutLimitBytes', 'stderrLimitBytes']) {
-    assertTc01(Number.isSafeInteger(spec[label]) && spec[label] > 0, 'TC01_EVIDENCE_INVALID', `${label} must be a positive safe integer.`, { label, value: spec[label] });
+    assertTc01(
+      Number.isSafeInteger(spec[label]) && spec[label] > 0,
+      'TC01_EVIDENCE_INVALID',
+      `${label} must be a positive safe integer.`,
+      { label, value: spec[label] },
+    );
   }
   return { file, cwd };
 }
@@ -222,14 +216,15 @@ export function validateScenarioEvidence(value, artifactsRoot) {
   validateTimestamp(value.finishedAt, 'Scenario finishedAt');
   assertTc01(Date.parse(value.finishedAt) >= Date.parse(value.startedAt), 'TC01_EVIDENCE_INVALID', 'Scenario finishedAt precedes startedAt.');
 
-  const executablePath = assertLinuxOwnedAbsolutePath(value.executablePath, 'Scenario executable');
-  const cwd = assertLinuxOwnedAbsolutePath(value.cwd, 'Scenario cwd');
+  const executablePath = evidencePath(value.executablePath, 'Scenario executable');
+  const cwd = evidencePath(value.cwd, 'Scenario cwd');
   assertTc01(executablePath === value.executablePath, 'TC01_EVIDENCE_INVALID', 'Scenario executable path must be canonical.');
   assertTc01(cwd === value.cwd, 'TC01_EVIDENCE_INVALID', 'Scenario cwd must be canonical.');
   validateHash(value.executableHash, 'Scenario executable hash');
   assertTc01(typeof value.version === 'string' && value.version.length > 0, 'TC01_EVIDENCE_INVALID', 'Scenario version is required.');
   assertTc01(
-    Array.isArray(value.argv) && value.argv.length > 0 && value.argv.every((item) => typeof item === 'string' && !item.includes('\n') && !item.includes('\r')),
+    Array.isArray(value.argv) && value.argv.length > 0
+      && value.argv.every((item) => typeof item === 'string' && !item.includes('\n') && !item.includes('\r')),
     'TC01_EVIDENCE_INVALID',
     'Scenario argv must be a non-empty newline-free string array.',
   );
@@ -255,9 +250,9 @@ export function validateScenarioEvidence(value, artifactsRoot) {
 
 export async function createEvidenceStore(fixture) {
   assertTc01(isPlainObject(fixture), 'TC01_EVIDENCE_INVALID', 'Evidence fixture must be an object.');
-  validateRunId(fixture.runId);
-  const runRoot = assertLinuxOwnedAbsolutePath(fixture.runRoot, 'Evidence run root');
-  const artifactsRoot = assertLinuxOwnedAbsolutePath(fixture.artifactsRoot, 'Evidence artifacts root');
+  evidenceRunId(fixture.runId);
+  const runRoot = evidencePath(fixture.runRoot, 'Evidence run root');
+  const artifactsRoot = evidencePath(fixture.artifactsRoot, 'Evidence artifacts root');
   assertTc01(runRoot === fixture.runRoot, 'TC01_EVIDENCE_INVALID', 'Evidence run root must be canonical.');
   assertTc01(artifactsRoot === fixture.artifactsRoot, 'TC01_EVIDENCE_INVALID', 'Evidence artifacts root must be canonical.');
   assertTc01(artifactsRoot.startsWith(`${runRoot}${sep}`), 'TC01_EVIDENCE_INVALID', 'Evidence artifacts root escaped the fixture run root.');
@@ -344,15 +339,7 @@ export async function createEvidenceStore(fixture) {
         stderrExcerpt,
       };
       await writeAtomic(join(artifactsRoot, metadataRef), canonicalBytes(metadata));
-      return {
-        metadataRef,
-        stdoutRef,
-        stderrRef,
-        stdoutHash,
-        stderrHash,
-        stdoutExcerpt,
-        stderrExcerpt,
-      };
+      return { metadataRef, stdoutRef, stderrRef, stdoutHash, stderrHash, stdoutExcerpt, stderrExcerpt };
     },
 
     async writeScenario(record) {

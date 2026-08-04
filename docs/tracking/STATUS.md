@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.6.7
+version: 1.6.8
 owners:
   - developmentconexus-ops
 related:
@@ -57,7 +57,7 @@ tracking_issue: 16
 - [x] TC-01 protocol accepted as version 0.2.0 for harness implementation and WSL2 execution planning.
 - [x] Detailed TC-01 implementation and canonical WSL2 execution plan version 1.0.3 written and self-reviewed.
 - [x] Historical MIS-002 revision 3 hash references revalidated after documentation updates.
-- [ ] Exact PR #17 head containing plan version 1.0.3 passes canonical CI.
+- [ ] Exact PR #17 consolidated head passes canonical CI.
 - [ ] Operator reviews and explicitly approves the TC-01 implementation/execution plan.
 - [ ] TC-01 deterministic harness implementation authorized after plan approval.
 - [ ] TC-01 harness implemented and deterministically verified.
@@ -83,13 +83,13 @@ R5 Milestone Microdesign IN_PROGRESS
 Research coverage:       PUBLISHED
 R5 design package:       OPERATOR APPROVED FOR TC-01 PLANNING
 TC-01 protocol:          ACCEPTED — version 0.2.0
-TC-01 plan:              CURRENT — version 1.0.3, exact-head CI pending
+TC-01 plan:              CURRENT — version 1.0.3, consolidated-head CI pending
 TC-01 harness:           NOT_STARTED
 TC-01 Evidence:          NOT_STARTED
 M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
 Blocking external input: Treehouse production-adapter conformance
-Current human gate:      Operator approval of the TC-01 implementation/execution plan after exact-head CI
+Current human gate:      Operator approval of the TC-01 implementation/execution plan after consolidated-head CI
 Design PR:               #17 DRAFT
 ```
 
@@ -100,7 +100,7 @@ The design-package approval authorizes the TC-01 protocol and planning. It does 
 ```text
 M01 research:         AUTHORIZED
 TC-01 protocol:       ACCEPTED
-TC-01 plan:           WRITTEN / SELF-REVIEWED / AWAITING EXACT-HEAD CI AND OPERATOR APPROVAL
+TC-01 plan:           WRITTEN / SELF-REVIEWED / AWAITING CONSOLIDATED-HEAD CI AND OPERATOR APPROVAL
 TC-01 harness build:  PROHIBITED until plan approval
 TC-01 WSL2 execution: AUTHORIZED only after a reviewed, CI-green harness exists
 M01 microdesign:      PROPOSED, NOT FINAL
@@ -142,11 +142,11 @@ approved allocation tests:        PASS
 documentation validation:         PASS — 76 canonical IDs
 ```
 
-Plan version 1.0.3 added a complete executable RED process-runner test and requires a fresh exact-head proof before implementation authorization.
+Plan version 1.0.3 added a complete executable RED process-runner test and requires a fresh consolidated-head proof before implementation authorization.
 
 ## Immediate next action
 
-1. Complete exact-head CI for PR #17 plan version 1.0.3.
+1. Complete consolidated-head CI for PR #17 plan version 1.0.3.
 2. Operator reviews `docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md` version 1.0.3.
 3. Resolve requested plan changes.
 4. After plan approval, implement the deterministic TC-01 harness task-by-task with TDD and focused reviews.

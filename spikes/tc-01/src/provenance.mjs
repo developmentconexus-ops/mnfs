@@ -95,7 +95,7 @@ export async function discoverTc01Environment(input = {}) {
   const treehouseBytes = await readRequiredFile(readBytes, treehouseExecutable, 'Treehouse executable');
   const treehouseExecutableHash = `sha256:${createHash('sha256').update(treehouseBytes).digest('hex')}`;
 
-  const treehouseVersion = await commandText({
+  const treehouseVersionOutput = await commandText({
     file: treehouseExecutable,
     args: ['--version'],
     cwd,
@@ -103,12 +103,7 @@ export async function discoverTc01Environment(input = {}) {
     processRunner,
     label: 'treehouse --version',
   });
-  assertTc01(
-    treehouseVersion === expectedTreehouseVersion,
-    'TC01_VERSION_MISMATCH',
-    'Treehouse version does not match the accepted TC-01 candidate.',
-    { actual: treehouseVersion, expected: expectedTreehouseVersion },
-  );
+  const treehouseVersion = canonicalTreehouseVersion(treehouseVersionOutput, expectedTreehouseVersion);
 
   const [getHelp, statusHelp, returnHelp] = await Promise.all([
     commandHelp(treehouseExecutable, ['get', '--help'], cwd, commandEnv, processRunner),
@@ -174,6 +169,17 @@ export function validateTreehouseCapabilities(provenance) {
     { missingCapabilities },
   );
   return provenance;
+}
+
+function canonicalTreehouseVersion(actual, expected) {
+  const match = /^v?(\d+\.\d+\.\d+)$/u.exec(actual);
+  assertTc01(
+    match !== null && match[1] === expected,
+    'TC01_VERSION_MISMATCH',
+    'Treehouse version does not match the accepted TC-01 candidate.',
+    { actual, expected },
+  );
+  return match[1];
 }
 
 async function resolveExecutableFromPath(name, env) {

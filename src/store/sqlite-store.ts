@@ -17,6 +17,7 @@ import {
   type SaveMissionPlanRevisionInput,
 } from '../domain/types.js';
 import { EventStore } from './event-store.js';
+import { ExecutionStore } from './execution-store.js';
 import { inspectSupportedDatabaseSchema } from './sqlite-maintenance.js';
 import { applyMigrations } from './migrations.js';
 import { SqliteTransaction } from './sqlite-transaction.js';
@@ -258,11 +259,13 @@ export class SqliteStore {
   readonly #database: DatabaseSync;
   readonly #transactions: SqliteTransaction;
   readonly #events: EventStore;
+  readonly execution: ExecutionStore;
 
   private constructor(database: DatabaseSync) {
     this.#database = database;
     this.#transactions = new SqliteTransaction(database);
     this.#events = new EventStore(database);
+    this.execution = new ExecutionStore(database, this.#transactions, this.#events);
   }
 
   static open(path: string): SqliteStore {

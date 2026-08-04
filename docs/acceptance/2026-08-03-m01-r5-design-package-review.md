@@ -5,7 +5,7 @@ document_type: acceptance_report
 form: explanation
 authority: evidence
 status: accepted
-version: 1.0.2
+version: 1.0.3
 owners:
   - developmentconexus-ops
 related:
@@ -46,16 +46,17 @@ The approval confirms that the design direction is suitable for the next governe
 
 ## Approved next action
 
-The approved next action was completed by writing and mechanically verifying:
+The approved next action was completed by writing:
 
 ```text
 docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md
-version 1.0.2
+version 1.0.3
 ```
 
 The plan:
 
 - follows TDD for deterministic harness behavior;
+- includes an executable first RED test for the process boundary rather than pseudocode-only placeholders;
 - uses only disposable Linux-owned fixtures;
 - produces structured Evidence outside Worker authority;
 - separates deterministic CI proof from real WSL2 proof;
@@ -63,21 +64,13 @@ The plan:
 - stops before production adapter or M01 implementation work;
 - requires separate Operator approval before harness implementation begins.
 
-Mechanical plan-package proof:
-
-```text
-Workflow:                  30865311721
-Job:                       91855751914
-Product tests:             95/95 PASS
-AS-02 tests:               119/119 PASS
-Documentation validation: 76 canonical IDs PASS
-```
+An earlier plan-package revision passed workflow `30865311721`, job `91855751914`, with 95/95 product tests, 119/119 AS-02 tests and 76 canonical documentation IDs. Version 1.0.3 requires its own exact-head CI before implementation authorization.
 
 ## Current authority boundary
 
 ```text
 TC-01 protocol:            ACCEPTED — version 0.2.0
-TC-01 implementation plan: WRITTEN / VERIFIED — version 1.0.2, awaiting Operator approval
+TC-01 implementation plan: WRITTEN — version 1.0.3, awaiting exact-head CI and Operator approval
 TC-01 harness build:        PROHIBITED until plan approval
 TC-01 WSL2 execution:       AUTHORIZED after a reviewed, CI-green harness exists
 M01 microdesign:            PROPOSED, NOT FINAL

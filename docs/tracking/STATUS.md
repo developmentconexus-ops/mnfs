@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.10
+version: 1.8.11
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 2 GREEN
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 3 RED
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -55,16 +55,15 @@ TC-01 canonical Evidence:      ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:               ACCEPTED — version 0.6.1
 Implementation plan:           CURRENT / APPROVED — version 1.0.1
 Implementation started:        YES — bounded by task gates
-Task 1 RED:                    OBSERVED / EXPECTED FAILURE
-Task 1 GREEN:                  COMPLETE
-Task 1 product tests:          4/4 PASS
-Complete product suite:        99/99 PASS before Task 2 RED
+Task 1:                        COMPLETE
 Task 2 RED:                    OBSERVED / EXPECTED FAILURE
-Task 2 GREEN:                  NOT AUTHORIZED
+Task 2 GREEN:                  COMPLETE
+Complete product suite:        112/112 PASS
+Task 3 RED:                    NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 2 GREEN only
+Current human gate:            explicit authorization for Task 3 RED only
 PR:                            #17 DRAFT
 ```
 
@@ -76,9 +75,10 @@ D-008  implementation plan 1.0.1 approved
 MNFS_AUTHORIZE_M01_TASK_1_RED plan=1.0.1 microdesign=0.6.1
 MNFS_AUTHORIZE_M01_TASK_1_GREEN plan=1.0.1 microdesign=0.6.1 red=65bd4e2c410d4d1566f5fef0da33f29e35657489
 MNFS_AUTHORIZE_M01_TASK_2_RED plan=1.0.1 microdesign=0.6.1 task1=ec6505d7207d252aeef77d72192c401f460b4816
+MNFS_AUTHORIZE_M01_TASK_2_GREEN plan=1.0.1 microdesign=0.6.1 red=01a1e5deabbe5388f83f83d13effe9e1a220fed0
 ```
 
-Task 2 RED authority did not extend to Task 2 GREEN, Task 3, SQLite changes, Treehouse, Pi or merge.
+Task 2 authority did not extend to Task 3, SQLite changes, Treehouse, Pi or merge.
 
 ## Task 1 implementation
 
@@ -96,17 +96,7 @@ Modified:
 src/domain/errors.ts
 ```
 
-Task 1 established:
-
-- canonical parent-relative IDs for Write Track, Attempt, Worker Run and Claim;
-- canonical Lease IDs;
-- positive safe-integer and canonical-padding validation;
-- explicit parent/ancestry validation at the identity boundary;
-- immutable M01 entity/status interfaces;
-- fail-closed Write Track, Attempt, source, Worker Run and Lease transition tables;
-- the complete accepted M01 typed-error vocabulary.
-
-It introduced no filesystem, subprocess, Git, SQLite, Treehouse, Pi or network behavior.
+Task 1 established canonical parent-relative IDs, immutable execution models, fail-closed lifecycle transitions and the accepted M01 typed-error vocabulary.
 
 ## Task 1 verification
 
@@ -126,32 +116,33 @@ TC-01 tests:               78/78
 Documentation validation:  93 canonical IDs
 ```
 
-## Task 2 RED contract
+## Task 2 implementation
 
-Added only tests:
+Created:
 
 ```text
-tests/runtime/process-runner.test.ts
-tests/runtime/durable-artifact.test.ts
-tests/adapters/process-identity.test.ts
+src/runtime/process-runner.ts
+src/runtime/durable-artifact.ts
+src/adapters/process-identity.ts
 ```
 
-The contract requires:
+Task 2 established:
 
-- raw stdout/stderr byte preservation;
-- closed stdin and explicit cwd/environment without parent leakage;
-- exact output-byte limits and fail-closed spawn behavior;
-- Linux descendant process-group termination on timeout;
-- exact immutable Artifact bytes and requested file mode;
-- durable publication order `write → temp fsync → close → rename → directory fsync`;
-- symlink rejection and no visible partial final;
-- `/proc/<pid>/stat` field 22 parsing with spaces and parentheses in process names;
-- process identity bound to boot ID, PID and start ticks;
-- `undefined` only for a genuinely absent process.
+- one Linux-only shell-free process runner with explicit cwd/environment and closed stdin;
+- byte-preserved stdout/stderr with exact independent limits;
+- detached process-group termination through `SIGTERM`, a fixed grace period and `SIGKILL`;
+- immutable durable Artifact publication with exclusive same-directory temp files;
+- exact-byte idempotency and different-byte conflict;
+- no-follow regular-file reads, symlink rejection and requested file mode;
+- publication ordering `write → temp fsync → close → publish → directory fsync`;
+- Linux process identity from boot ID, PID and `/proc/<pid>/stat` start ticks;
+- `undefined` only when the process stat path is genuinely absent.
 
-No production module was created for Task 2.
+The default Artifact publisher uses an atomic no-overwrite hard-link publication behind the approved `rename` operation seam, then removes the temporary name before directory fsync. This preserves immutable-final semantics without allowing POSIX rename overwrite.
 
-## Task 2 RED verification
+## Task 2 verification
+
+### Primary RED
 
 ```text
 RED head:                 01a1e5deabbe5388f83f83d13effe9e1a220fed0
@@ -160,9 +151,39 @@ RED workflow/job:          30940060412 / 92095880696
 TypeScript:                PASS
 Prior product tests:       99/99 PASS
 Task 2 tests:              0/12 expected failure
-Product total:             99 PASS / 12 FAIL
 Failure cause:             process-runner, durable-artifact and process-identity modules absent
-AS-02 / TC-01 / docs:      NOT RUN — root verify stopped after expected unit RED
+```
+
+### Initial GREEN
+
+```text
+GREEN head:               2d8bd2c23d6820e6c9b3d7be735971cf657ce2cd
+GREEN synthetic merge:    a803878057c06b6a0940e95e4706e8650748e482
+GREEN workflow/job:        30941072301 / 92099270524
+Product tests:             111/111 PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation:  93 canonical IDs
+```
+
+### Post-GREEN adversarial correction
+
+Review found that the `SIGTERM → SIGKILL` grace timer was unreferenced. In a fresh CLI process the group leader could exit, leaving no active handle while `runProcess()` still awaited the grace period; Node then exited with unsettled top-level await.
+
+```text
+Review RED head:          776fa49efc1d055bf54b01e44231822c58591e82
+Review synthetic merge:   4eb0d32bf079eff8ae1fedd08689983f4fbec0f5
+Review workflow/job:      30941290183 / 92100002922
+Review result:            111 PASS / 1 expected FAIL
+Observed exit:            13 — unsettled top-level await
+
+Corrected GREEN head:     ff4d345720c2a14623ec1777fc5f318c9d96d685
+Corrected synthetic merge:25d303d52b9e5215aa46f4b9a26960622e19efad
+Corrected workflow/job:   30941416873 / 92100440270
+Product tests:             112/112 PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation:  93 canonical IDs
 ```
 
 ## Frozen boundaries
@@ -184,9 +205,9 @@ The accepted design invariants remain unchanged:
 
 ```text
 Task 1:                    COMPLETE
-Task 2 RED:                OBSERVED / COMPLETE
-Task 2 GREEN:              NOT AUTHORIZED
-Task 3 and later:          NOT AUTHORIZED
+Task 2:                    COMPLETE
+Task 3 RED:                NOT AUTHORIZED
+Task 3 GREEN and later:    NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 PR #17 merge:              NOT AUTHORIZED
@@ -196,4 +217,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 2 GREEN only**. Stop before implementing the process runner, durable Artifact writer or Linux process identity unless that continuation is granted.
+Request or provide an explicit continuation for **Task 3 RED only**. Stop before modifying SQLite transaction authority unless that continuation is granted.

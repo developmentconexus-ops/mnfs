@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import test from 'node:test';
 
 const PROCESS_RUNNER_SPECIFIER = '../../src/runtime/' + 'process-runner.js';
@@ -172,4 +174,37 @@ test('terminates the complete Linux descendant process group on timeout', async 
     assert.equal(Number.isSafeInteger(descendantPid) && descendantPid > 0, true);
     await waitForProcessExit(descendantPid);
   });
+});
+
+test('keeps the termination grace period alive until a fresh process receives its result', () => {
+  const moduleUrl = pathToFileURL(
+    path.resolve('dist/src/runtime/process-runner.js'),
+  ).href;
+  const script = `
+    import { runProcess } from ${JSON.stringify(moduleUrl)};
+    const result = await runProcess({
+      executable: process.execPath,
+      args: ['-e', 'setInterval(() => {}, 1000)'],
+      cwd: process.cwd(),
+      env: {},
+      timeoutMs: 50,
+      stdoutLimitBytes: 64,
+      stderrLimitBytes: 64,
+    });
+    process.stdout.write(result.timedOut ? 'settled' : 'not-timed-out');
+  `;
+
+  const fresh = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', script],
+    {
+      cwd: process.cwd(),
+      env: {},
+      encoding: 'utf8',
+      timeout: 5_000,
+    },
+  );
+
+  assert.equal(fresh.status, 0, fresh.stderr);
+  assert.equal(fresh.stdout, 'settled');
 });

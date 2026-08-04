@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.6.8
+version: 1.6.9
 owners:
   - developmentconexus-ops
 related:

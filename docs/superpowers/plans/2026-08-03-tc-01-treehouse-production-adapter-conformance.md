@@ -5,7 +5,7 @@ document_type: implementation_plan
 form: how_to
 authority: guidance
 status: current
-version: 1.0.0
+version: 1.0.1
 owners:
   - developmentconexus-ops
 related:
@@ -119,7 +119,7 @@ import test from 'node:test';
 
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
 
- test('root verification includes deterministic TC-01 tests and an explicit real command', async () => {
+test('root verification includes deterministic TC-01 tests and an explicit real command', async () => {
   assert.equal(packageJson.scripts['test:tc01'], 'node scripts/run-tc01-tests.mjs');
   assert.equal(packageJson.scripts.tc01, 'node spikes/tc-01/src/cli.mjs');
   assert.match(packageJson.scripts.verify, /npm run test:tc01/u);
@@ -130,8 +130,6 @@ const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
   assert.match(readme, /never use.*--force/iu);
 });
 ```
-
-Remove the single accidental leading space before `test(` when writing the file.
 
 - [ ] **Step 2: Verify RED**
 

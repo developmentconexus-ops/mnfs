@@ -1,10 +1,9 @@
 import { pathToFileURL } from 'node:url';
 
 import { canonicalJson } from './canonical-json.mjs';
-import { parseTc01Args } from './cli-core.mjs';
+import { assertTc01 } from './errors.mjs';
+import { assertLinuxOwnedAbsolutePath, validateRunId } from './paths.mjs';
 import { cleanupTc01, reportTc01, runTc01 } from './orchestrator.mjs';
-
-export { parseTc01Args } from './cli-core.mjs';
 
 const USAGE = `Usage:
   npm run tc01 -- run [--run-id <id>] [--state-root <absolute-linux-path>] [--json]
@@ -12,34 +11,70 @@ const USAGE = `Usage:
   npm run tc01 -- cleanup --run-root <absolute-linux-path> [--json]
 `;
 
-const SAFE_DETAIL_FIELDS = Object.freeze([
-  'actual',
-  'blockers',
-  'expected',
-  'identityChangedFields',
-  'missingCapabilities',
-  'runRoot',
-]);
-
-function isPlainObject(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
-  const prototype = Object.getPrototypeOf(value);
-  return prototype === Object.prototype || prototype === null;
+function requireArgv(argv) {
+  assertTc01(Array.isArray(argv) && argv.every((value) => typeof value === 'string'), 'TC01_INVALID_INPUT', 'TC-01 argv must be a string array.');
+  assertTc01(argv.length > 0, 'TC01_INVALID_INPUT', 'A TC-01 command is required.');
+  return argv;
 }
 
-function safeErrorDetails(error) {
-  if (!isPlainObject(error?.details)) return null;
-  const details = {};
-  for (const field of SAFE_DETAIL_FIELDS) {
-    const value = error.details[field];
-    if (typeof value === 'string') details[field] = value;
-    else if (Array.isArray(value) && value.every((item) => typeof item === 'string')) details[field] = [...value];
+function parseFlags(argv, allowed) {
+  const values = {};
+  const seen = new Set();
+  for (let index = 0; index < argv.length; index += 1) {
+    const token = argv[index];
+    assertTc01(token.startsWith('--'), 'TC01_INVALID_INPUT', 'Unexpected positional TC-01 argument.', { token });
+    assertTc01(Object.hasOwn(allowed, token), 'TC01_INVALID_INPUT', 'Unknown TC-01 flag.', { token });
+    assertTc01(!seen.has(token), 'TC01_INVALID_INPUT', 'Duplicate TC-01 flag.', { token });
+    seen.add(token);
+    if (allowed[token] === 'boolean') {
+      values[token] = true;
+      continue;
+    }
+    const value = argv[index + 1];
+    assertTc01(typeof value === 'string' && value.length > 0 && !value.startsWith('--'), 'TC01_INVALID_INPUT', 'TC-01 flag value is missing.', { token });
+    values[token] = value;
+    index += 1;
   }
-  return Object.keys(details).length === 0 ? null : details;
+  return values;
+}
+
+export function parseTc01Args(rawArgv) {
+  const argv = requireArgv(rawArgv);
+  const [command, ...rest] = argv;
+  assertTc01(['run', 'report', 'cleanup'].includes(command), 'TC01_INVALID_INPUT', 'Unknown TC-01 command.', { command });
+
+  if (command === 'run') {
+    const flags = parseFlags(rest, {
+      '--run-id': 'value',
+      '--state-root': 'value',
+      '--json': 'boolean',
+    });
+    return {
+      command,
+      json: flags['--json'] === true,
+      runId: flags['--run-id'] === undefined ? null : validateRunId(flags['--run-id']),
+      stateRoot: flags['--state-root'] === undefined
+        ? null
+        : assertLinuxOwnedAbsolutePath(flags['--state-root'], 'TC-01 state root'),
+    };
+  }
+
+  const flags = parseFlags(rest, {
+    '--run-root': 'value',
+    '--json': 'boolean',
+  });
+  assertTc01(typeof flags['--run-root'] === 'string', 'TC01_INVALID_INPUT', `${command} requires --run-root.`);
+  return {
+    command,
+    json: flags['--json'] === true,
+    runRoot: assertLinuxOwnedAbsolutePath(flags['--run-root'], 'TC-01 run root'),
+  };
 }
 
 function humanSummary(summary) {
-  const lines = [`TC-01 ${summary.command} completed.`];
+  const lines = [
+    `TC-01 ${summary.command} completed.`,
+  ];
   if (summary.verdict) lines.push(`Verdict: ${summary.verdict}`);
   if (summary.runId) lines.push(`Run ID: ${summary.runId}`);
   if (summary.runRoot) lines.push(`Run root: ${summary.runRoot}`);
@@ -51,13 +86,11 @@ function humanSummary(summary) {
 }
 
 function operationalError(error) {
-  const details = safeErrorDetails(error);
   return {
     ok: false,
     error: {
       code: typeof error?.code === 'string' ? error.code : 'TC01_COMMAND_FAILED',
       message: error instanceof Error ? error.message : String(error),
-      ...(details === null ? {} : { details }),
     },
   };
 }

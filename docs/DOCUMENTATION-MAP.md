@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 1.4.0
+version: 1.4.1
 owners:
   - developmentconexus-ops
 approvers:
@@ -22,6 +22,7 @@ related:
   - ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER
   - REVIEW-MIS-002-M01-R5-FINAL
   - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
+  - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-PLAN-APPROVAL
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
   - PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
 review_triggers:
@@ -42,7 +43,8 @@ tracking_issue: 16
 M2 — Secure One-Worker Vertical Slice
 MIS-002/M01 — Durable Execution and Lease Core
 MCRM R5 — PASS
-M01 implementation plan — REVIEW PENDING
+M01 implementation plan 1.0.1 — APPROVED
+M01 implementation — NOT STARTED
 ```
 
 Current state:
@@ -51,14 +53,14 @@ Current state:
 - Product Blueprint Sections 1–13, ADR-0001–ADR-0012 and the Capability Realization Method are accepted;
 - CAP-EXECUTION version 0.1.0 is accepted;
 - MIS-002 revision 5 is the approved schema-v2 contract at `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`;
-- R0–R5 pass for the exact accepted M01 microdesign version 0.6.1;
+- R0–R5 pass for accepted M01 microdesign version 0.6.1;
 - PR #14 is integrated in `main` at `dee12a9b53984d39045421c9586ee53665ebc5e5`;
 - Issue #16 and draft PR #17 own the current M01 work;
 - canonical TC-01 WSL2 Evidence is `ACCEPT`, S01–S15 all `PASS`, cleanup `COMPLETED`;
 - final R5 review closed all 3 Critical and all 8 Important findings;
 - Operator decision `D-007` accepted microdesign 0.6.1 and closed R5;
-- implementation plan 1.0.1 is current and awaiting exact Operator approval;
-- Task 1 RED, production implementation, Pi dispatch and automatic merge remain prohibited.
+- Operator decision `D-008` approved implementation plan 1.0.1;
+- Task 1 RED, later tasks, real implementation proof, Pi dispatch and automatic merge require separate authority.
 
 ## 2. Authority hierarchy
 
@@ -85,7 +87,7 @@ accepted specific ADR
 → scoped Approved Mission Contract
 → accepted Milestone Microdesign
 → Standard / Policy / Profile
-→ approved implementation plan
+→ Operator-approved implementation plan
 → implementation Reference
 → other Guidance
 → Tracking
@@ -204,6 +206,7 @@ AGENTS.md
 → docs/acceptance/2026-08-04-mis-002-m01-r5-approval.md
 → docs/design/2026-08-03-mis-002-m01-durable-execution-lease-core.md
 → docs/superpowers/plans/2026-08-04-mis-002-m01-durable-execution-lease-core-implementation.md
+→ docs/acceptance/2026-08-04-mis-002-m01-implementation-plan-approval.md
 ```
 
 Current authority:
@@ -215,9 +218,9 @@ TC-01 runtime Evidence:   accepted Evidence
 Final R5 review:          accepted Evidence
 M01 microdesign:          accepted specification version 0.6.1
 MCRM R5:                  PASS
-M01 implementation plan: current guidance version 1.0.1 / review pending
-Task 1 RED:               prohibited until plan approval and continuation
-M01 production code:      prohibited
+M01 implementation plan: current guidance version 1.0.1 / Operator approved
+Task 1 RED:               prohibited until separate continuation
+M01 production code:      not started
 Pi Worker dispatch:       prohibited
 ```
 
@@ -275,9 +278,10 @@ docs/acceptance/2026-08-03-tc-01-treehouse-production-adapter.md
 docs/acceptance/2026-08-04-tc-01-task-12-deterministic-adversarial-review.md
 docs/acceptance/2026-08-04-mis-002-m01-final-r5-review.md
 docs/acceptance/2026-08-04-mis-002-m01-r5-approval.md
+docs/acceptance/2026-08-04-mis-002-m01-implementation-plan-approval.md
 ```
 
-Tracking never owns architecture. Evidence records observations and authority decisions; a plan needs its own approval before execution.
+Tracking never owns architecture. Evidence records observations and authority decisions; each implementation task still requires its own continuation when the approved plan says so.
 
 ## 10. Human and agent read paths
 
@@ -293,7 +297,7 @@ README → Documentation Map → Product Blueprint → Roadmap
 README → CONTRIBUTING → Documentation Map → relevant Spec/ADR → active contract/design/plan
 ```
 
-### Lead or implementation planner
+### Lead or implementation coordinator
 
 ```text
 AGENTS.md
@@ -302,7 +306,7 @@ AGENTS.md
 → Approved Mission Contract
 → Capability Spec and TRACEABILITY
 → accepted microdesign
-→ current implementation plan
+→ approved implementation plan and approval Evidence
 ```
 
 ### Writer during authorized implementation
@@ -310,11 +314,11 @@ AGENTS.md
 ```text
 accepted microdesign
 → approved implementation plan
-→ exact current task/interfaces/tests
+→ exact authorized task/interfaces/tests
 → current code and contract
 ```
 
-Agents do not load the entire Blueprint by default, but architecture and planning work must follow the current package read order.
+Agents do not load the entire Blueprint by default, but architecture and implementation work must follow the current package read order.
 
 ## 11. Ownership and checks
 
@@ -349,19 +353,18 @@ Generated projections include `PRODUCT-BLUEPRINT.md`, `roadmap.md`, CAP-EXECUTIO
 
 ## 13. Current divergence and immediate gate
 
-No unresolved authority-map blocker remains from AB1, the MIS-002 Replan, TC-01 or MCRM R5.
+No unresolved authority-map blocker remains from AB1, the MIS-002 Replan, TC-01, MCRM R5 or implementation-plan review.
 
 Current gate:
 
 ```text
-review PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE version 1.0.1
-→ exact Operator approval, requested changes or rejection
+explicit Operator continuation for M01 Task 1 RED only
 ```
 
-Only after an exact plan approval and a separate continuation may Task 1 RED begin.
+That continuation does not authorize later tasks or real Treehouse execution.
 
 ```text
-M01 production implementation: PROHIBITED
-Pi Worker dispatch:             PROHIBITED
-PR #17 merge:                   NOT AUTHORIZED
+M01 implementation:  NOT STARTED
+Pi Worker dispatch:   PROHIBITED
+PR #17 merge:         NOT AUTHORIZED
 ```

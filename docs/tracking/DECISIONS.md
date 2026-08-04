@@ -7,6 +7,10 @@ authority: tracking
 status: current
 owners:
   - developmentconexus-ops
+related:
+  - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
+  - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
+  - PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
 ---
 
 # Decision register

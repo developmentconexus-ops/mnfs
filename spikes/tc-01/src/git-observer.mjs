@@ -33,6 +33,12 @@ function normalizedRelative(root, path) {
   return relative(root, path).split(sep).join('/');
 }
 
+function compareLexical(left, right) {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
+}
+
 async function invokeGit({ gitFile, repoPath, env, run, args }) {
   const result = await run({
     file: gitFile,
@@ -99,7 +105,7 @@ export async function snapshotPathTree({ root, excludeGit = false }) {
 
   async function walk(directory) {
     const children = await readdir(directory, { withFileTypes: true });
-    children.sort((left, right) => left.name.localeCompare(right.name, 'en'));
+    children.sort((left, right) => compareLexical(left.name, right.name));
 
     for (const child of children) {
       if (excludeGit && child.name === '.git') continue;
@@ -145,7 +151,7 @@ export async function snapshotPathTree({ root, excludeGit = false }) {
   }
 
   await walk(safeRoot);
-  entries.sort((left, right) => left.path.localeCompare(right.path, 'en'));
+  entries.sort((left, right) => compareLexical(left.path, right.path));
   return {
     schemaVersion: SNAPSHOT_SCHEMA_VERSION,
     root: await realpath(safeRoot),

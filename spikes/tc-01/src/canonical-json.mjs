@@ -1,4 +1,9 @@
 import { createHash } from 'node:crypto';
+import { TextDecoder } from 'node:util';
+
+import { tc01Error } from './errors.mjs';
+
+const UTF8_DECODER = new TextDecoder('utf-8', { fatal: true });
 
 function compareCodeUnits(left, right) {
   if (left < right) return -1;
@@ -63,4 +68,28 @@ export function sha256Bytes(value) {
     throw new TypeError('sha256Bytes requires a string, Buffer or Uint8Array.');
   }
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+}
+
+export function parseJsonBytesStrict(value, label = 'JSON', code = 'TC01_EVIDENCE_INVALID') {
+  if (!Buffer.isBuffer(value) && !(value instanceof Uint8Array)) {
+    throw tc01Error(code, `${label} must be supplied as bytes.`, { label });
+  }
+  let text;
+  try {
+    text = UTF8_DECODER.decode(value);
+  } catch (error) {
+    throw tc01Error(code, `${label} is not valid UTF-8.`, {
+      label,
+      cause: error instanceof Error ? error.message : String(error),
+    });
+  }
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw tc01Error(code, `${label} is not exactly one JSON value.`, {
+      label,
+      excerpt: text.slice(0, 4_096),
+      cause: error instanceof Error ? error.message : String(error),
+    });
+  }
 }

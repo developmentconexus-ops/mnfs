@@ -5,7 +5,7 @@ document_type: acceptance_report
 form: explanation
 authority: evidence
 status: accepted
-version: 1.0.0
+version: 1.0.1
 owners:
   - developmentconexus-ops
 related:
@@ -13,6 +13,7 @@ related:
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
+  - PLAN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
 tracking_issue: 16
 last_reviewed: 2026-08-03
 ---
@@ -45,7 +46,13 @@ The approval confirms that the design direction is suitable for the next governe
 
 ## Approved next action
 
-Write a detailed implementation and execution plan for TC-01 that:
+The approved next action was completed by writing:
+
+```text
+docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md
+```
+
+The plan:
 
 - follows TDD for deterministic harness behavior;
 - uses only disposable Linux-owned fixtures;
@@ -53,14 +60,15 @@ Write a detailed implementation and execution plan for TC-01 that:
 - separates deterministic CI proof from real WSL2 proof;
 - records the exact Treehouse executable, version and hash;
 - stops before production adapter or M01 implementation work;
-- requires a fresh review before execution when the plan materially changes the accepted protocol.
+- requires separate Operator review before harness implementation begins.
 
 ## Current authority boundary
 
 ```text
-TC-01 implementation plan: AUTHORIZED
-TC-01 harness build:        NOT YET STARTED
-TC-01 WSL2 execution:       AUTHORIZED after plan review
+TC-01 protocol:            ACCEPTED — version 0.2.0
+TC-01 implementation plan: WRITTEN — version 1.0.1, awaiting review
+TC-01 harness build:        PROHIBITED until plan review
+TC-01 WSL2 execution:       AUTHORIZED after a reviewed, CI-green harness exists
 M01 microdesign:            PROPOSED, NOT FINAL
 M01 implementation:         PROHIBITED
 Pi Worker dispatch:         PROHIBITED
@@ -71,9 +79,10 @@ PR #17 merge:               NOT AUTHORIZED
 
 R5 may pass only after:
 
-1. the TC-01 harness is implemented and deterministically verified;
-2. TC-01 executes against the pinned canonical WSL2 Treehouse binary;
-3. the resulting Evidence receives an explicit Verdict;
-4. the M01 microdesign incorporates every accepted limitation or rejection;
-5. constructive and adversarial reviews find no unresolved design blocker;
-6. the Operator explicitly approves the final M01 microdesign.
+1. the TC-01 plan is reviewed;
+2. the TC-01 harness is implemented and deterministically verified;
+3. TC-01 executes against the pinned canonical WSL2 Treehouse binary;
+4. the resulting Evidence receives an explicit Verdict;
+5. the M01 microdesign incorporates every accepted limitation or rejection;
+6. constructive and adversarial reviews find no unresolved design blocker;
+7. the Operator explicitly approves the final M01 microdesign.

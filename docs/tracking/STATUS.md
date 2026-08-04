@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.6.2
+version: 1.6.3
 owners:
   - developmentconexus-ops
 related:
@@ -15,9 +15,11 @@ related:
   - ACCEPTANCE-CAP-EXECUTION-R3
   - ACCEPTANCE-MIS-002-REPLAN
   - ACCEPTANCE-M2-UNBLOCK
+  - ACCEPTANCE-M01-R5-DESIGN-PACKAGE-REVIEW
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
+  - PLAN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
 tracking_issue: 16
 ---
 
@@ -53,12 +55,15 @@ tracking_issue: 16
 - [x] Draft PR #17 mechanical documentation and CI review complete.
 - [x] Documentation Map reconciled from obsolete AB1 state to current M01 R5 authority.
 - [x] Microdesign self-review resolved Claim/release, empty-Track disposition and current-Track invariants.
-- [ ] Operator reviews the written PR #17 design package.
-- [ ] TC-01 execution plan written after design-package review.
+- [x] Operator approved the written R5 design package for TC-01 planning.
+- [x] Detailed TC-01 implementation and canonical WSL2 execution plan written.
+- [ ] Operator reviews the TC-01 implementation/execution plan.
+- [ ] TC-01 deterministic harness implementation authorized after plan review.
+- [ ] TC-01 harness implemented and deterministically verified.
 - [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.
 - [ ] TC-01 findings incorporated into the final microdesign.
 - [ ] M01 microdesign adversarially reviewed and explicitly approved.
-- [ ] M01 implementation authorized after microdesign approval.
+- [ ] M01 implementation authorized after final microdesign approval.
 
 ## Readiness result
 
@@ -75,24 +80,29 @@ R5 Milestone Microdesign IN_PROGRESS
 
 ```text
 Research coverage:       PUBLISHED
-TC-01 protocol:          PROPOSED / EXECUTION AUTHORIZED
+R5 design package:       OPERATOR APPROVED FOR TC-01 PLANNING
+TC-01 protocol:          ACCEPTED FOR IMPLEMENTATION/EXECUTION PLANNING
+TC-01 plan:              CURRENT — awaiting Operator review
+TC-01 harness:           NOT_STARTED
 TC-01 Evidence:          NOT_STARTED
 M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
 Mechanical verification: PASS
 Blocking external input: Treehouse production-adapter conformance
-Current human gate:      Operator review of PR #17 design package
+Current human gate:      Operator review of the TC-01 implementation/execution plan
 Design PR:               #17 DRAFT
 ```
 
-The proposed design does not become implementation authority merely because every requirement has a design element or CI is green. TC-01 must prove the exact Treehouse behavior, the final design must absorb its findings and the Operator must approve the resulting microdesign explicitly.
+The design-package approval authorizes creation of the TC-01 plan. It does not approve the final M01 microdesign, authorize the TC-01 harness build without plan review, establish Treehouse conformance or complete R5.
 
 ## Current authorization boundary
 
 ```text
 M01 research:         AUTHORIZED
-TC-01 execution:      AUTHORIZED after its written execution plan
-M01 microdesign:      AUTHORIZED for review
+TC-01 plan:           WRITTEN / AWAITING REVIEW
+TC-01 harness build:  PROHIBITED until plan review
+TC-01 WSL2 execution: AUTHORIZED only after a reviewed, CI-green harness exists
+M01 microdesign:      PROPOSED, NOT FINAL
 M01 implementation:  PROHIBITED until final microdesign approval
 Pi Worker dispatch:  PROHIBITED
 Automatic merge:     NOT AUTHORIZED
@@ -116,11 +126,11 @@ documentation validation:         PASS — 71 canonical IDs
 
 ## Latest design-branch verification
 
-PR #17 merge commit `45a9b5cc419870d4ced31d019d9400fc770c63d0` was verified on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
+PR #17 head before the design-package approval and TC-01 plan was verified on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
 
 ```text
-Workflow:                          30860376984
-Job:                               91840828761
+Workflow:                          30860520084
+Job:                               91841258199
 npm ci:                            PASS — 0 vulnerabilities
 typecheck:                         PASS
 product tests:                     PASS — 95/95
@@ -131,16 +141,18 @@ approved allocation tests:        PASS
 documentation validation:         PASS — 74 canonical IDs
 ```
 
-This proof establishes mechanical integrity of the design package. It does not provide Treehouse TC-01 Evidence or approve R5.
+The new acceptance Evidence and TC-01 plan require a fresh CI proof on the current PR head before the plan is considered mechanically validated.
 
 ## Immediate next action
 
-1. Operator reviews the written PR #17 research, TC-01 protocol and M01 microdesign.
-2. Resolve any requested design changes.
-3. After design-package approval, write the detailed TC-01 implementation/execution plan.
-4. Execute TC-01 on canonical Ubuntu WSL2.
-5. Incorporate the observed Treehouse contract into the microdesign.
-6. Perform final constructive and adversarial design review.
-7. Obtain explicit Operator approval of the final M01 microdesign.
-8. Create the M01 Implementation Plan only after that approval.
-9. Keep M01 implementation and Pi Worker dispatch prohibited until their separate gates pass.
+1. Run fresh documentation and CI validation for the exact PR #17 head containing the approval Evidence and TC-01 plan.
+2. Operator reviews `docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md`.
+3. Resolve requested plan changes.
+4. After plan approval, implement the deterministic TC-01 harness task-by-task with TDD and focused reviews.
+5. Require a CI-green harness before canonical WSL2 execution.
+6. Execute TC-01 on canonical Ubuntu WSL2.
+7. Incorporate the observed Treehouse contract into the M01 microdesign.
+8. Perform final constructive and adversarial design review.
+9. Obtain explicit Operator approval of the final M01 microdesign.
+10. Create the M01 production Implementation Plan only after that final approval.
+11. Keep M01 implementation and Pi Worker dispatch prohibited until their separate gates pass.

@@ -24,7 +24,7 @@ import {
 } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { canonicalJson, sha256Bytes } from './canonical-json.mjs';
+import { canonicalJson, parseJsonBytesStrict, sha256Bytes } from './canonical-json.mjs';
 import { assertTc01, tc01Error } from './errors.mjs';
 import { createEvidenceStore as createEvidenceStoreDefault } from './evidence.mjs';
 import { createFixture as createFixtureDefault, loadFixture } from './fixture.mjs';
@@ -55,6 +55,12 @@ const OUTPUT_LIMIT_BYTES = 65_536;
 const INTERNAL_TIMEOUT_MS = 1;
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const WRAPPER_SOURCE = fileURLToPath(new URL('../bin/git', import.meta.url));
+const BLOCKING_PROVENANCE_CODES = new Set([
+  'TC01_LINUX_FILESYSTEM_REQUIRED',
+  'TC01_NOT_WSL2',
+  'TC01_TOOL_MISSING',
+  'TC01_VERSION_MISMATCH',
+]);
 const COMMAND_SHAPES = Object.freeze({
   acquire: ['get', '--lease', '--lease-holder', '<holder>', '--json'],
   status: ['status', '--json'],
@@ -154,13 +160,7 @@ async function readRegularFile(path, label) {
 }
 
 function parseJsonBytes(bytes, label) {
-  try {
-    return JSON.parse(Buffer.from(bytes).toString('utf8'));
-  } catch (error) {
-    throw tc01Error('TC01_EVIDENCE_INVALID', `${label} is not valid JSON.`, {
-      cause: error instanceof Error ? error.message : String(error),
-    });
-  }
+  return parseJsonBytesStrict(bytes, label, 'TC01_EVIDENCE_INVALID');
 }
 
 async function resolveExecutable(name, env = process.env) {
@@ -185,26 +185,25 @@ function observerEnvironment(fixture, realGit) {
     HOME: fixture.fakeHome,
     LANG: 'C.UTF-8',
     LC_ALL: 'C.UTF-8',
+    GIT_CONFIG_GLOBAL: '/dev/null',
     GIT_CONFIG_NOSYSTEM: '1',
     GIT_TERMINAL_PROMPT: '0',
     GIT_OPTIONAL_LOCKS: '0',
   };
 }
 
-function provenanceEnvironment(fixture) {
+function provenanceEnvironment() {
   return {
     PATH: process.env.PATH ?? '/usr/local/bin:/usr/bin:/bin',
-    HOME: fixture.fakeHome,
-    LANG: 'C.UTF-8',
-    LC_ALL: 'C.UTF-8',
   };
 }
 
 function expectedEnvironmentKeySets() {
   return [
     [
+      'GIT_CONFIG_GLOBAL',
+      'GIT_CONFIG_NOSYSTEM',
       'GIT_TERMINAL_PROMPT',
-      'HOME',
       'LANG',
       'LC_ALL',
       'NO_COLOR',
@@ -213,6 +212,7 @@ function expectedEnvironmentKeySets() {
       'TREEHOUSE_NO_UPDATE_CHECK',
     ],
     [
+      'GIT_CONFIG_GLOBAL',
       'GIT_CONFIG_NOSYSTEM',
       'GIT_OPTIONAL_LOCKS',
       'GIT_TERMINAL_PROMPT',
@@ -222,6 +222,7 @@ function expectedEnvironmentKeySets() {
       'PATH',
     ],
     [
+      'GIT_CONFIG_GLOBAL',
       'GIT_CONFIG_NOSYSTEM',
       'GIT_OPTIONAL_LOCKS',
       'GIT_TERMINAL_PROMPT',
@@ -334,8 +335,8 @@ async function createDefaultRuntime({ fixture, evidenceStore }) {
   }
 
   function executableVersion(path) {
-    if (activeProvenance && path === activeProvenance.treehouseExecutable) return activeProvenance.treehouseVersion;
-    if (activeProvenance && path === realGit) return activeProvenance.gitVersion;
+    if (activeProvenance?.treehouseExecutable && path === activeProvenance.treehouseExecutable) return activeProvenance.treehouseVersion;
+    if (activeProvenance?.gitVersion && path === realGit) return activeProvenance.gitVersion;
     if (path === process.execPath) return process.version;
     return 'observed';
   }
@@ -404,7 +405,7 @@ async function createDefaultRuntime({ fixture, evidenceStore }) {
       written.push({ ...command, artifact });
     }
 
-    let primary = written.find((entry) => activeProvenance && entry.spec.file === activeProvenance.treehouseExecutable) ?? written[0];
+    let primary = written.find((entry) => activeProvenance?.treehouseExecutable && entry.spec.file === activeProvenance.treehouseExecutable) ?? written[0];
     if (!primary) primary = await internalScenarioArtifacts(outcome.scenarioId);
 
     return {
@@ -524,10 +525,18 @@ async function createDefaultRuntime({ fixture, evidenceStore }) {
   return {
     commandShapeHash: TC01_COMMAND_SHAPE_HASH,
     expectedEnvironmentKeySets: expectedEnvironmentKeySets(),
+    async captureSourceBaseline() {
+      return snapshotRepository({
+        gitFile: realGit,
+        repoPath: fixture.sourceRepo,
+        env: observerEnvironment(fixture, realGit),
+        run: recordedRun,
+      });
+    },
     async discoverProvenance() {
       activeProvenance = await discoverTc01Environment({
         cwd: fixture.sourceRepo,
-        env: provenanceEnvironment(fixture),
+        env: provenanceEnvironment(),
         runProcess: recordedRun,
       });
       return activeProvenance;
@@ -552,7 +561,7 @@ async function createDefaultRuntime({ fixture, evidenceStore }) {
           const text = await invokeGitText(path, ['remote']);
           return text ? text.split(/\r?\n/u).filter(Boolean) : [];
         },
-        snapshotPrivateState: () => snapshotPathTree({ root: fixture.fakeHome }),
+        snapshotPrivateState: () => snapshotPathTree({ root: fixture.poolRoot }),
         async writeControlledFile({ path, bytes }) {
           const safe = controlledPath(path, 'controlled-uncommitted.txt');
           assertTc01(Buffer.isBuffer(bytes), 'TC01_EVIDENCE_INVALID', 'Controlled file bytes must be a Buffer.');
@@ -631,12 +640,14 @@ async function loadFinalizedRunDefault({ runRoot }) {
   assertTc01(environment.runId === fixture.runId, 'TC01_EVIDENCE_INVALID', 'TC-01 environment run ID does not match the fixture.');
   assertTc01(isPlainObject(environment.provenance), 'TC01_EVIDENCE_INVALID', 'TC-01 environment provenance is missing.');
   assertTc01(HASH_PATTERN.test(environment.commandShapeHash), 'TC01_EVIDENCE_INVALID', 'TC-01 command-shape hash is missing.');
+  assertTc01(isPlainObject(environment.sourceBaseline), 'TC01_EVIDENCE_INVALID', 'TC-01 source baseline is missing.');
   const store = await createEvidenceStoreDefault(fixture);
   const scenarios = await store.readScenarios();
   assertTc01(scenarios.length === manifest.scenarioCount, 'TC01_EVIDENCE_INVALID', 'TC-01 scenario count does not match the manifest.');
   return {
     fixture,
     provenance: environment.provenance,
+    sourceBaseline: environment.sourceBaseline,
     scenarios,
     scenariosHash: manifest.scenariosHash,
     commandShapeHash: environment.commandShapeHash,
@@ -671,6 +682,32 @@ function nextActionFor(verdict, runRoot, reportPath, cleanup) {
   return `Review ${reportPath}, then run cleanup --run-root ${runRoot}.`;
 }
 
+function blockedProvenance(error) {
+  return {
+    schemaVersion: 1,
+    status: 'BLOCKED',
+    environment: null,
+    ubuntuRelease: null,
+    kernelRelease: null,
+    nodeVersion: process.version,
+    gitVersion: null,
+    treehouseVersion: null,
+    treehouseExecutable: null,
+    treehouseExecutableHash: null,
+    capabilities: {
+      leaseJson: false,
+      statusJson: false,
+      conditionalLeaseId: false,
+      conditionalHolder: false,
+    },
+    capturedAt: new Date().toISOString(),
+    error: {
+      code: typeof error?.code === 'string' ? error.code : 'TC01_TOOL_MISSING',
+      message: error instanceof Error ? error.message : String(error),
+    },
+  };
+}
+
 function resolveDependencies(overrides = {}) {
   return {
     resolveStateRoot: ({ stateRoot }) => stateRoot
@@ -699,7 +736,16 @@ export async function runTc01(input = {}, dependencyOverrides = {}) {
   const evidenceStore = await dependencies.createEvidenceStore(fixture);
   const runtime = await dependencies.createRuntime({ fixture, evidenceStore });
   assertTc01(HASH_PATTERN.test(runtime.commandShapeHash), 'TC01_EVIDENCE_INVALID', 'TC-01 runtime command-shape hash is invalid.');
-  const provenance = await runtime.discoverProvenance();
+  const sourceBaseline = typeof runtime.captureSourceBaseline === 'function'
+    ? await runtime.captureSourceBaseline()
+    : null;
+  let provenance;
+  try {
+    provenance = await runtime.discoverProvenance();
+  } catch (error) {
+    if (!BLOCKING_PROVENANCE_CODES.has(error?.code)) throw error;
+    provenance = blockedProvenance(error);
+  }
   const acceptedIdentity = {
     treehouseExecutableHash: provenance.treehouseExecutableHash,
     treehouseVersion: provenance.treehouseVersion,
@@ -712,6 +758,7 @@ export async function runTc01(input = {}, dependencyOverrides = {}) {
     schemaVersion: 1,
     runId,
     provenance,
+    sourceBaseline,
     commandShapeHash: runtime.commandShapeHash,
     acceptedIdentity,
     expectedEnvironmentKeySets: runtime.expectedEnvironmentKeySets ?? expectedEnvironmentKeySets(),
@@ -761,65 +808,153 @@ export async function reportTc01(input, dependencyOverrides = {}) {
   };
 }
 
-async function assessCleanupSafetyDefault({ bundle, verdict }) {
-  const blockers = [];
+function identityChangedFields(bundle, current, currentCommandShapeHash) {
+  const fields = [
+    'treehouseExecutable',
+    'treehouseExecutableHash',
+    'treehouseVersion',
+    'gitVersion',
+    'kernelRelease',
+    'ubuntuRelease',
+    'nodeVersion',
+  ];
+  const changed = fields.filter((field) => bundle.provenance[field] !== current[field]);
+  if (bundle.commandShapeHash !== currentCommandShapeHash) changed.push('commandShapeHash');
+  return changed.sort(compareCodeUnits);
+}
+
+function defaultCleanupTargets({ bundle }) {
   const fixture = bundle.fixture;
-  const cleanupTargets = [
+  const blockers = [];
+  for (const path of [
     fixture.sourceRepo,
     fixture.poolRoot,
     fixture.snapshotsRoot,
     fixture.fakeHome,
     fixture.gitWrapperRoot,
     join(fixture.runRoot, 'unmanaged-repo'),
-  ];
-  for (const path of cleanupTargets) {
+  ]) {
     try {
       assertContained(fixture.runRoot, path, 'TC-01 cleanup target');
     } catch {
       blockers.push('UNRECOGNIZED_RUN_PATH');
     }
   }
-  if (verdict.verdict === 'REJECT' || verdict.verdict === 'BLOCKED') blockers.push(`VERDICT_${verdict.verdict}`);
+  return [...new Set(blockers)].sort(compareCodeUnits);
+}
 
-  try {
-    const realGit = await resolveExecutable('git');
-    const cleanupLog = join(fixture.artifactsRoot, 'cleanup-git-invocations.jsonl');
-    const common = {
-      fixture: { ...fixture, gitLog: cleanupLog },
-      treehouseExecutable: bundle.provenance.treehouseExecutable,
-      realGit,
-      gitWrapperDir: fixture.gitWrapperRoot,
-      gitLog: cleanupLog,
-      run: runProcess,
-    };
-    const status = await observeTreehouseStatus(common);
-    if (status.some((item) => item.status === 'leased' && item.leaseHolder.startsWith('mnfs-tc01-'))) blockers.push('LIVE_LEASE');
-    for (const item of status) {
-      if (!item.path.startsWith(`${fixture.poolRoot}${sep}`) || !existsSync(item.path)) continue;
-      const snapshot = await snapshotRepository({
+function defaultCleanupDependencies(bundle) {
+  const fixture = bundle.fixture;
+  return {
+    currentCommandShapeHash: TC01_COMMAND_SHAPE_HASH,
+    validateCleanupTargets: defaultCleanupTargets,
+    discoverCurrentProvenance: () => discoverTc01Environment({
+      cwd: fixture.sourceRepo,
+      env: provenanceEnvironment(),
+      runProcess,
+    }),
+    async observeStatus({ currentProvenance }) {
+      const realGit = await resolveExecutable('git');
+      const cleanupLog = join(fixture.artifactsRoot, 'cleanup-git-invocations.jsonl');
+      return observeTreehouseStatus({
+        fixture: { ...fixture, gitLog: cleanupLog },
+        treehouseExecutable: currentProvenance.treehouseExecutable,
+        realGit,
+        gitWrapperDir: fixture.gitWrapperRoot,
+        gitLog: cleanupLog,
+        run: runProcess,
+      });
+    },
+    async snapshotManagedWorktree({ path }) {
+      const realGit = await resolveExecutable('git');
+      return snapshotRepository({
         gitFile: realGit,
-        repoPath: item.path,
+        repoPath: path,
         env: observerEnvironment(fixture, realGit),
         run: runProcess,
       });
-      if (snapshot.porcelainStatus.byteLength !== 0) blockers.push('DIRTY_WORKTREE');
-    }
-    if (existsSync(fixture.sourceRepo)) {
-      const source = await snapshotRepository({
+    },
+    async snapshotSource() {
+      const realGit = await resolveExecutable('git');
+      return snapshotRepository({
         gitFile: realGit,
         repoPath: fixture.sourceRepo,
         env: observerEnvironment(fixture, realGit),
         run: runProcess,
       });
-      if (source.head.text !== fixture.initialCommit || source.porcelainStatus.byteLength !== 0) blockers.push('SOURCE_CHANGED');
-    } else {
-      blockers.push('SOURCE_CHANGED');
-    }
-  } catch (error) {
-    blockers.push(error?.code === 'TC01_TREEHOUSE_INVALID_OUTPUT' ? 'STATUS_INVALID' : 'STATUS_UNAVAILABLE');
+    },
+    compareSourceSnapshots: compareRepositorySnapshots,
+  };
+}
+
+export async function assessTc01CleanupSafety({ bundle, verdict }, dependencyOverrides = {}) {
+  assertTc01(isPlainObject(bundle) && isPlainObject(verdict), 'TC01_CLEANUP_BLOCKED', 'TC-01 cleanup review input is invalid.');
+  const dependencies = { ...defaultCleanupDependencies(bundle), ...dependencyOverrides };
+  const blockers = [];
+  const targetBlockers = await dependencies.validateCleanupTargets({ bundle, verdict });
+  if (Array.isArray(targetBlockers)) blockers.push(...targetBlockers);
+  if (verdict.verdict === 'REJECT' || verdict.verdict === 'BLOCKED') blockers.push(`VERDICT_${verdict.verdict}`);
+  if (blockers.length > 0) {
+    return { safe: false, blockers: [...new Set(blockers)].sort(compareCodeUnits) };
   }
 
-  return { safe: blockers.length === 0, blockers: [...new Set(blockers)].sort(compareCodeUnits) };
+  let currentProvenance;
+  try {
+    currentProvenance = await dependencies.discoverCurrentProvenance({ bundle, verdict });
+  } catch (error) {
+    return {
+      safe: false,
+      blockers: ['EVIDENCE_IDENTITY_DRIFT'],
+      identityError: {
+        code: error?.code ?? null,
+        message: error instanceof Error ? error.message : String(error),
+      },
+    };
+  }
+  const changedFields = identityChangedFields(bundle, currentProvenance, dependencies.currentCommandShapeHash);
+  if (changedFields.length > 0) {
+    return {
+      safe: false,
+      blockers: ['EVIDENCE_IDENTITY_DRIFT'],
+      identityChangedFields: changedFields,
+    };
+  }
+
+  let status;
+  try {
+    status = await dependencies.observeStatus({ bundle, verdict, currentProvenance });
+  } catch (error) {
+    return {
+      safe: false,
+      blockers: [error?.code === 'TC01_TREEHOUSE_INVALID_OUTPUT' ? 'STATUS_INVALID' : 'STATUS_UNAVAILABLE'],
+    };
+  }
+  if (status.some((item) => item.status === 'leased' && item.leaseHolder.startsWith('mnfs-tc01-'))) blockers.push('LIVE_LEASE');
+  for (const item of status) {
+    if (!item.path.startsWith(`${bundle.fixture.poolRoot}${sep}`) || !existsSync(item.path)) continue;
+    const worktree = await dependencies.snapshotManagedWorktree({ path: item.path, bundle, verdict });
+    if (worktree.porcelainStatus.byteLength !== 0) blockers.push('DIRTY_WORKTREE');
+  }
+
+  let sourceComparison = null;
+  if (!isPlainObject(bundle.sourceBaseline) || !existsSync(bundle.fixture.sourceRepo)) {
+    blockers.push('SOURCE_CHANGED');
+  } else {
+    const source = await dependencies.snapshotSource({ bundle, verdict });
+    sourceComparison = dependencies.compareSourceSnapshots(bundle.sourceBaseline, source);
+    if (sourceComparison?.equal !== true) blockers.push('SOURCE_CHANGED');
+  }
+
+  return {
+    safe: blockers.length === 0,
+    blockers: [...new Set(blockers)].sort(compareCodeUnits),
+    identityChangedFields: changedFields,
+    sourceComparison,
+  };
+}
+
+async function assessCleanupSafetyDefault(input) {
+  return assessTc01CleanupSafety(input);
 }
 
 async function removeEphemeralPathsDefault({ fixture }) {

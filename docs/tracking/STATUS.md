@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.17
+version: 1.8.18
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 5 RED
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 5 GREEN
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -58,12 +58,13 @@ Task 1:                        COMPLETE
 Task 2:                        COMPLETE
 Task 3:                        COMPLETE
 Task 4:                        COMPLETE
-Complete product suite:        124/124 PASS
-Task 5 RED:                    NOT AUTHORIZED
+Complete product suite:        124/124 PASS before Task 5 RED
+Task 5 RED:                    OBSERVED / EXPECTED FAILURE
+Task 5 GREEN:                  NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 5 RED only
+Current human gate:            explicit authorization for Task 5 GREEN only
 PR:                            #17 DRAFT
 ```
 
@@ -80,9 +81,10 @@ MNFS_AUTHORIZE_M01_TASK_3_RED plan=1.0.1 microdesign=0.6.1 task2=ff4d345720c2a14
 MNFS_AUTHORIZE_M01_TASK_3_GREEN plan=1.0.1 microdesign=0.6.1 red=9e109da918cb3cf8567a057684564d6cfe60ca7e
 MNFS_AUTHORIZE_M01_TASK_4_RED plan=1.0.1 microdesign=0.6.1 task3=2ed7e6d620f771dd1399421d06527911a2ffea0c
 MNFS_AUTHORIZE_M01_TASK_4_GREEN plan=1.0.1 microdesign=0.6.1 red=a163c8d3512f6f9a2583156e5f3e64f32ecde45b
+MNFS_AUTHORIZE_M01_TASK_5_RED plan=1.0.1 microdesign=0.6.1 task4=d0172cc2c141cec6004f10caa9859bced9ac8d1c
 ```
 
-Task 4 authority did not extend to Task 5, migration v4, Treehouse, Pi, M01 acceptance or merge.
+Task 5 RED authority did not extend to Task 5 GREEN, migration implementation, Treehouse, Pi, M01 acceptance or merge.
 
 ## Completed implementation
 
@@ -185,7 +187,7 @@ Task 4 established:
 
 `ensureDatabaseReady({ writeMode: true })` means exclusive maintenance/readiness inspection under the maintenance lock. It does not by itself authorize ordinary domain writes against every readable schema. `SqliteStore.openCurrent()` remains the final binary write-capability fence and currently accepts schema 3 only. Task 5 must promote the writer capability after migration v4 is implemented and verified.
 
-No Task 5 schema, migration, Event or execution table was created.
+No Task 5 schema, migration, Event or execution table was created by Task 4.
 
 ## Task 4 verification
 
@@ -242,6 +244,55 @@ Documentation validation: 93 canonical IDs
 
 Post-GREEN scope review compared `9e0e5d14...` to `d0172cc2...` and found only `sqlite-maintenance.ts`, the bounded `sqlite-store.ts` opening refactor and the writer-fence regression test. `migrations.ts`, schema and Task 5 files remained unchanged.
 
+## Task 5 RED contract
+
+Added only:
+
+```text
+tests/store/migration-v4.test.ts
+```
+
+The ten tests require:
+
+- empty, M0/v1, M1/v3 and exact MIS-002 revision-5 databases to migrate to `[1,2,3,4]` and `user_version = 4` without changing Mission, Event or plan-revision historical bytes;
+- every historical Event to receive `payload_schema_version = 1` while preserving `seq`, IDs, timestamps and payload JSON bytes;
+- `event_types(type,payload_schema_version)` seeded with all 19 accepted version-1 Event types;
+- `events.payload_schema_version` required without a default and protected by a composite Event-type foreign key;
+- rebuilt Event indexes plus clean `foreign_key_check` and `integrity_check`;
+- exact `write_tracks`, `attempts`, `worker_runs`, `leases` and `claims` columns;
+- six accepted partial current-row/action-token indexes and composite ancestry keys;
+- cross-Attempt Worker Run and cross-Track Lease attachment to a Claim rejected by SQLite foreign keys;
+- Mission/Plan mutations to append payload version `1`, canonical JSON and expose `payloadSchemaVersion` on reads;
+- a pre-v4 mutation omitting the required Event version to fail and roll back its Mission row;
+- an injected failure when migration `4` is recorded to restore the complete v3 schema and historical rows.
+
+No production file, migration, Event type or execution table was created.
+
+## Task 5 RED verification
+
+```text
+RED head:                 e38592a97485bac91c713dbd648c391bdb029357
+RED synthetic merge:      3d274f7c2e96d73fdd656b765347b5cba0b3341b
+RED workflow/job:          30948252320 / 92123531426
+TypeScript:                PASS
+Prior product tests:       124/124 PASS
+Task 5 tests:              0/10 expected failure
+Product total:             124 PASS / 10 FAIL
+AS-02 / TC-01 / docs:      NOT RUN — root verify stopped after expected unit RED
+```
+
+Observed failure partition:
+
+```text
+4  migration history fixtures lack migration 4
+1  Event registry/rebuild absent
+1  execution tables/indexes absent
+1  composite ancestry proof blocked by absent v4
+1  payloadSchemaVersion/canonical Event append absent
+1  downgrade Event-column fence absent
+1  migration-4 rollback injection never reached
+```
+
 ## Frozen boundaries
 
 The accepted design invariants remain unchanged:
@@ -264,9 +315,10 @@ Task 1:                    COMPLETE
 Task 2:                    COMPLETE
 Task 3:                    COMPLETE
 Task 4:                    COMPLETE
-Task 5 RED:                NOT AUTHORIZED
-Task 5 GREEN and later:    NOT AUTHORIZED
-Migration v4:              NOT AUTHORIZED
+Task 5 RED:                OBSERVED / COMPLETE
+Task 5 GREEN:              NOT AUTHORIZED
+Task 6 and later:          NOT AUTHORIZED
+Migration v4 implementation: NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 PR #17 merge:              NOT AUTHORIZED
@@ -276,4 +328,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 5 RED only**. Stop before modifying migrations, Events, domain Event types or execution tables unless that continuation is granted.
+Request or provide an explicit continuation for **Task 5 GREEN only**. Stop before modifying migrations, Events, domain Event types, `SqliteStore` or execution tables unless that continuation is granted.

@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.6.6
+version: 1.6.7
 owners:
   - developmentconexus-ops
 related:
@@ -56,6 +56,7 @@ tracking_issue: 16
 - [x] Operator approved the written R5 design package for TC-01 planning.
 - [x] TC-01 protocol accepted as version 0.2.0 for harness implementation and WSL2 execution planning.
 - [x] Detailed TC-01 implementation and canonical WSL2 execution plan version 1.0.3 written and self-reviewed.
+- [x] Historical MIS-002 revision 3 hash references revalidated after documentation updates.
 - [ ] Exact PR #17 head containing plan version 1.0.3 passes canonical CI.
 - [ ] Operator reviews and explicitly approves the TC-01 implementation/execution plan.
 - [ ] TC-01 deterministic harness implementation authorized after plan approval.

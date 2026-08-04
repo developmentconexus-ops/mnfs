@@ -111,7 +111,7 @@ owners:
 - Added `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md` as the exact dogfood protocol.
 - The pilot planned the smallest M2 one-worker slice: Pi worker, leased Treehouse worktree, durable CLAIM and lead restart recovery, with Herdr explicitly optional.
 - Pi, Lavish feedback, multiple structured revisions, exact-hash approval and fresh-process recovery succeeded.
-- The accepted `MIS-002` revision 3 was committed with hash `sha256:f95ffded37af764e5f76775ec6bbdda69d563824908cf8c1`.
+- The accepted `MIS-002` revision 3 was committed with hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
 - The pilot exposed two integration defects: revision-specific HTML paths lost Lavish continuity, and raw Mermaid source rendered without a runtime.
 
 ## 2026-08-01

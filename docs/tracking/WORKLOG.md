@@ -203,23 +203,24 @@ owners:
 - M01 implementation and Pi Worker dispatch remain prohibited until a separately approved microdesign exists.
 - Material changes to the contract, SEC-E1, Capability, prerequisites or requirements trigger Replan/re-readiness before implementation.
 
-### PR #14 integration
+### PR #14 integration and M01 R5 design package
 
-- Re-ran the canonical GitHub merge-commit verification on Ubuntu 24.04 with Node.js 24.18.0 and npm 11.16.0.
-- `npm ci` passed with 0 vulnerabilities.
-- `npm run verify` passed with 95 product tests, 119 deterministic AS-02 tests, all documentation tooling checks and 71 canonical IDs validated.
-- Reviewed preservation of MIS-002 revision 3, revision 5 exact hash, 28/28 approved allocations and the M2 authorization boundary.
-- Marked PR #14 ready and merged it by squash into `main` at `dee12a9b53984d39045421c9586ee53665ebc5e5`.
-- The merge authorizes R5 design work only; no M01 implementation or Worker dispatch was inferred.
+- Reviewed PR #14 against the approved contract, historical revision preservation, exact allocations and canonical CI.
+- Marked PR #14 ready and merged it into `main` by squash at `dee12a9b53984d39045421c9586ee53665ebc5e5`.
+- Opened Issue #16, branch `design/mis-002-m01` and draft PR #17 dedicated to M01 R5.
+- Published the M01 harness-architecture research report and validated source manifest.
+- Proposed TC-01 for exact Treehouse production-adapter conformance.
+- Proposed M01 microdesign version 0.3.0 with design coverage for all seven M01 requirements.
+- Reconciled the Documentation Map from obsolete AB1 blockers to current R5 state.
+- Self-review corrected Claim/release composition, empty-Track disposition, current-Track exclusivity, entity sequences and Claim result ownership.
+- PR #17 mechanical verification passed with 95 product tests, 119 AS-02 tests and 74 canonical documentation IDs.
 
-### Issue #16 — M01 R5 research and design
+### M01 design-package approval and TC-01 plan
 
-- Opened Issue #16 and branch `design/mis-002-m01` from the integrated PR #14 commit.
-- Published `MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1` with a validated primary-source manifest covering harness engineering, evaluation, Pi, Symphony, Firstmate, Git, SQLite, Sandbox Runtime and Treehouse.
-- Confirmed the MNFS control-plane architecture while rejecting a scheduler, generic Saga engine, message broker, ORM, LangGraph, Temporal, PostgreSQL and Redis for the bounded M01 slice.
-- Source review found that Treehouse provides stable Lease ID, holder, JSON status and conditional release, but acquisition may fetch, status may heal private metadata and return may reset a worktree.
-- Proposed TC-01 to test the exact installed Treehouse binary on canonical WSL2 before production adapter approval.
-- Proposed the M01 microdesign with shared SQLite transaction authority, focused execution stores, lifecycle-derived currentness, composite contract binding, Intent–Action–Observation, fenced release and read-only Recovery.
-- M01 Design Coverage now has a proposed design, failure behavior and verification element for `CAP-EXEC-REQ-001`, `002`, `004`, `005`, `006`, `007` and `008`.
-- R5 advanced from `NOT_STARTED` to `IN_PROGRESS`; TC-01 Evidence and explicit Operator microdesign approval remain blocking.
-- No production source code, migration, Pi launch, Treehouse Lease or Worker dispatch was created.
+- Operator responded `Aprovado` to the explicit PR #17 design-package review gate.
+- Added `ACCEPTANCE-M01-R5-DESIGN-PACKAGE-REVIEW`, accepting the research direction and TC-01 protocol for implementation/execution planning while keeping the M01 microdesign proposed.
+- Promoted the TC-01 protocol to `accepted` version 0.2.0; no Treehouse conformance claim was made.
+- Wrote the detailed TC-01 implementation and WSL2 execution plan under `docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md`.
+- The plan separates deterministic CI tests from real Treehouse execution and defines TDD tasks, scenario coverage S01–S15, Evidence, cleanup, Verdict and final R5 review.
+- TC-01 harness implementation remains blocked pending review of the written plan.
+- M01 production implementation and Pi Worker dispatch remain prohibited.

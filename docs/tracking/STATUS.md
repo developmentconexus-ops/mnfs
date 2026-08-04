@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.15
+version: 1.8.16
 owners:
   - developmentconexus-ops
 related:
@@ -183,6 +183,8 @@ Task 4 established:
 - `ensureDatabaseReady()` separated from store opening;
 - `SqliteStore.openCurrent()` that never applies migrations implicitly and rechecks schema after opening the writable connection;
 - an explicit pre-v4 writer fence: the current writer accepts schema 3 only, while maintenance inspection can read schema 4 for migration/backup planning.
+
+`ensureDatabaseReady({ writeMode: true })` means exclusive maintenance/readiness inspection under the maintenance lock. It does not by itself authorize ordinary domain writes against every readable schema. `SqliteStore.openCurrent()` remains the final binary write-capability fence and currently accepts schema 3 only. Task 5 must promote the writer capability after migration v4 is implemented and verified.
 
 No Task 5 schema, migration, Event or execution table was created.
 

@@ -171,11 +171,64 @@ function createSchemaFixture(
 }
 
 function createV3BackupSource(databasePath: string): DatabaseSync {
-  const store = SqliteStore.open(databasePath);
-  store.close();
-
   const database = new DatabaseSync(databasePath);
-  database.exec('PRAGMA wal_autocheckpoint = 0; PRAGMA user_version = 3;');
+  database.exec(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA foreign_keys = ON;
+    PRAGMA wal_autocheckpoint = 0;
+
+    CREATE TABLE schema_migrations (
+      version INTEGER PRIMARY KEY,
+      applied_at TEXT NOT NULL
+    );
+
+    CREATE TABLE missions (
+      id TEXT PRIMARY KEY,
+      goal TEXT NOT NULL CHECK (length(trim(goal)) > 0),
+      status TEXT NOT NULL CHECK (status IN ('OPEN', 'CLOSED')),
+      opened_at TEXT NOT NULL
+    );
+
+    CREATE TABLE events (
+      seq INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id TEXT NOT NULL UNIQUE,
+      type TEXT NOT NULL CHECK (
+        type IN ('MISSION_OPENED', 'PLAN_REVISION_SAVED', 'PLAN_APPROVED')
+      ),
+      mission_id TEXT NOT NULL REFERENCES missions(id),
+      occurred_at TEXT NOT NULL,
+      payload_json TEXT NOT NULL CHECK (json_valid(payload_json))
+    );
+
+    CREATE INDEX events_mission_seq_idx ON events (mission_id, seq);
+
+    CREATE TABLE mission_plan_revisions (
+      mission_id TEXT NOT NULL REFERENCES missions(id),
+      revision INTEGER NOT NULL CHECK (revision > 0),
+      status TEXT NOT NULL CHECK (status IN ('DRAFT', 'SUPERSEDED', 'APPROVED')),
+      content_hash TEXT NOT NULL CHECK (content_hash GLOB 'sha256:*'),
+      content_json TEXT NOT NULL CHECK (json_valid(content_json)),
+      created_at TEXT NOT NULL,
+      approved_at TEXT,
+      PRIMARY KEY (mission_id, revision),
+      UNIQUE (mission_id, content_hash),
+      CHECK (
+        (status = 'APPROVED' AND approved_at IS NOT NULL)
+        OR (status != 'APPROVED' AND approved_at IS NULL)
+      )
+    );
+
+    CREATE INDEX mission_plan_approved_revision_idx
+    ON mission_plan_revisions (mission_id, revision DESC)
+    WHERE status = 'APPROVED';
+
+    INSERT INTO schema_migrations (version, applied_at) VALUES
+      (1, '2026-07-31T18:40:00.000Z'),
+      (2, '2026-08-01T09:00:00.000Z'),
+      (3, '2026-08-02T09:00:00.000Z');
+
+    PRAGMA user_version = 3;
+  `);
   database.prepare(`
     INSERT INTO missions (id, goal, status, opened_at)
     VALUES (?, ?, 'OPEN', ?)

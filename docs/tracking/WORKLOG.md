@@ -111,7 +111,7 @@ owners:
 - Added `docs/acceptance/2026-07-31-m1.9-pi-lavish-pilot.md` as the exact dogfood protocol.
 - The pilot planned the smallest M2 one-worker slice: Pi worker, leased Treehouse worktree, durable CLAIM and lead restart recovery, with Herdr explicitly optional.
 - Pi, Lavish feedback, multiple structured revisions, exact-hash approval and fresh-process recovery succeeded.
-- The accepted `MIS-002` revision 3 was committed with hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
+- The accepted `MIS-002` revision 3 was committed with hash `sha256:f95ffded37af764e5f76775ec6bbdda69d563824908cf8c1`.
 - The pilot exposed two integration defects:
   - each revision used a different HTML path, so Lavish opened a new session/tab and lost conversation continuity;
   - the dependency panel displayed raw Mermaid source because no Mermaid runtime was loaded.
@@ -167,7 +167,7 @@ owners:
   - 94 tests passed, 0 failed;
   - documentation tooling tests green;
   - documentation validation green with 62 canonical IDs.
-- Automated tests verify `.mnfs/missions/MIS-002/plan.json` remains revision 3 with Git blob SHA `6b79117fe66cd5c9c8142099828812f470ce20de` and content hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
+- Automated tests verify `.mnfs/missions/MIS-002/plan.json` remains revision 3 with Git blob SHA `6b79117fe66cd5c9c8142099828812f470ce20de` and content hash `sha256:f95ffded37af764e5f76775ec6bbdda69d563824908cf8c1`.
 - M2 remains blocked. Next sequence is Issue #8 AS-02, Issue #9 Replan, exact-hash Operator approval, mechanical R0–R4 recalculation and explicit unblock.
 
 ## 2026-08-03
@@ -220,7 +220,9 @@ owners:
 - Operator responded `Aprovado` to the explicit PR #17 design-package review gate.
 - Added `ACCEPTANCE-M01-R5-DESIGN-PACKAGE-REVIEW`, accepting the research direction and TC-01 protocol for implementation/execution planning while keeping the M01 microdesign proposed.
 - Promoted the TC-01 protocol to `accepted` version 0.2.0; no Treehouse conformance claim was made.
-- Wrote the detailed TC-01 implementation and WSL2 execution plan under `docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md`.
+- Wrote and self-reviewed the detailed TC-01 implementation and WSL2 execution plan, now version 1.0.3, under `docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md`.
 - The plan separates deterministic CI tests from real Treehouse execution and defines TDD tasks, scenario coverage S01–S15, Evidence, cleanup, Verdict and final R5 review.
-- TC-01 harness implementation remains blocked pending review of the written plan.
+- Version 1.0.3 strengthens the first process-boundary TDD task with complete executable RED tests for byte preservation, timeout, output limits and spawn failure.
+- Exact-head CI remains required before the plan can receive Operator approval.
+- TC-01 harness implementation remains blocked pending explicit plan approval.
 - M01 production implementation and Pi Worker dispatch remain prohibited.

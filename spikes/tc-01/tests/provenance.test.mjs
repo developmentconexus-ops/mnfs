@@ -113,6 +113,32 @@ test('binds exact executable bytes, version and required capabilities', async (t
   assert.equal(validateTreehouseCapabilities(provenance), provenance);
 });
 
+test('provenance commands use an exact Linux-only PATH and isolated Git configuration', async (t) => {
+  const fixture = await provenanceFixture(t);
+  const calls = [];
+  await discoverTc01Environment(discoveryInput(fixture, {
+    env: {
+      PATH: `${fixture.root}:/mnt/c/Windows/System32:/untrusted/bin`,
+      GIT_CONFIG_GLOBAL: '/tmp/user-gitconfig',
+      SECRET_VALUE: 'must-not-propagate',
+    },
+    runProcess: async (spec) => {
+      calls.push(spec);
+      return fixture.runner(spec);
+    },
+  }));
+
+  assert.equal(calls.length >= 6, true);
+  for (const call of calls) {
+    assert.equal(call.env.PATH.includes('/mnt/'), false);
+    assert.equal(call.env.PATH.includes('/untrusted/'), false);
+    assert.equal(call.env.GIT_CONFIG_GLOBAL, '/dev/null');
+    assert.equal(call.env.GIT_CONFIG_NOSYSTEM, '1');
+    assert.equal(call.env.SECRET_VALUE, undefined);
+    assert.equal(call.env.HOME, undefined);
+  }
+});
+
 test('requires one absolute Treehouse executable realpath', async (t) => {
   const fixture = await provenanceFixture(t);
   await assert.rejects(

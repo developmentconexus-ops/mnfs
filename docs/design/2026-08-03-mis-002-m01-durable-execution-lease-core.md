@@ -5,7 +5,7 @@ document_type: microdesign
 form: explanation
 authority: specification
 status: proposed
-version: 0.3.0
+version: 0.4.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -16,9 +16,10 @@ related:
   - CAP-EXECUTION
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
+  - ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER
   - ACCEPTANCE-M2-UNBLOCK
 tracking_issue: 16
-last_reviewed: 2026-08-03
+last_reviewed: 2026-08-04
 ---
 
 # MIS-002/M01 — Durable Execution and Lease Core
@@ -55,7 +56,7 @@ MNFS services
 
 M01 does not launch Pi. It persists the identities and invariants that M02 will consume for the real E1 Worker.
 
-This design remains `proposed`. R5 cannot pass until TC-01 produces acceptable WSL2 evidence, its findings are incorporated and the Operator explicitly approves the final microdesign.
+TC-01 has now produced canonical WSL2 `ACCEPT` Evidence for the pinned Treehouse candidate. This design remains `proposed`: R5 cannot pass until the accepted runtime findings receive the final constructive/adversarial review and the Operator explicitly approves this exact microdesign version.
 
 ## 2. Approved baseline
 
@@ -68,6 +69,7 @@ Capability:          CAP-EXECUTION 0.1.0 accepted
 SEC-E1 definition:   sha256:f3dfca19f39bdd733f414831834a380b997e4938c10669c89a034cd9ad9c2471
 R0-R4:               PASS
 R5:                  IN_PROGRESS
+TC-01 Verdict:       ACCEPT
 ```
 
 M01 owns `CAP-EXEC-REQ-001`, `002`, `004`, `005`, `006`, `007` and `008`.
@@ -404,7 +406,17 @@ Loads expected state and adapter observations; produces a read-only report. It n
 
 ## 10. Observation adapters
 
-TC-01 must prove the exact installed Treehouse binary supports:
+Canonical TC-01 Evidence accepted the exact installed Treehouse candidate for the bounded M01 physical Lease contract:
+
+```text
+Treehouse semantic version:       2.1.1
+Observed executable realpath:     /usr/local/bin/treehouse
+Treehouse executable SHA-256:     sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3
+Accepted command-shape SHA-256:   sha256:f2077cfd037cbaefdcfc94385a0cfeb7e1647ef294ca8ceee3cd61a1b109dc84
+Canonical Verdict:                ACCEPT — 15/15 PASS, no limitation
+```
+
+Accepted commands:
 
 ```text
 treehouse get --lease --lease-holder <holder> --json
@@ -414,17 +426,24 @@ treehouse return <path> --if-lease-id <id> --if-lease-holder <holder>
 
 Treehouse process contract:
 
-- pinned version and executable hash;
-- exact argv, `shell: false`, closed stdin;
-- explicit cwd, timeout and bounded output;
-- allowlisted environment with `PATH`, `HOME`, locale, `GIT_OPTIONAL_LOCKS=0`, `GIT_TERMINAL_PROMPT=0`;
-- strict JSON for acquisition/status;
-- no force, destroy or prune;
-- no stderr regex as state;
-- no direct Git fallback inside the same operation;
-- fixed fixture without `origin`.
+- resolve one executable realpath and hash its exact bytes before use;
+- accept only semantic version `2.1.1`; one lowercase raw `v` prefix may be canonicalized;
+- require `get --lease --lease-holder --json`, `status --json`, `return --if-lease-id` and `return --if-lease-holder` capabilities;
+- require exact argv, `shell: false`, closed stdin;
+- use explicit cwd, timeout and bounded output;
+- use an allowlisted environment with Linux-only `PATH`, controlled `HOME`, locale, `GIT_OPTIONAL_LOCKS=0`, `GIT_TERMINAL_PROMPT=0` and disabled global/system Git configuration;
+- parse acquisition/status as strict UTF-8 JSON;
+- use fresh status and Git/filesystem observations for semantic decisions;
+- never use force, destroy or broad prune;
+- never use stderr regex as state;
+- never use direct Git fallback inside the same operation;
+- use a Linux-owned fixed fixture without `origin` for conformance proof.
 
-`GitWorktreeInspector` uses read-only argv for `rev-parse`, `status --porcelain`, HEAD and tree resolution. It canonicalizes realpaths and never resets, cleans, commits or changes refs.
+Freshness is mandatory before production reuse. A change in Treehouse bytes/version/capabilities, Git, Node, Ubuntu/WSL identity or command shape invalidates accepted Evidence and returns the adapter to review.
+
+The observed realpath is Evidence, not a globally hard-coded install location. Production resolves and records its actual realpath, but the executable bytes must match the accepted SHA-256 unless a new conformance review accepts another candidate.
+
+`GitWorktreeInspector` uses read-only argv for `rev-parse`, `status --porcelain`, HEAD and tree resolution. It canonicalizes realpaths and never resets, cleans, commits or changes refs. Repository snapshot equality uses canonical JSON so object key order is irrelevant while array order and every byte/hash/mode remain semantic.
 
 ## 11. Lease grant IAO
 
@@ -565,11 +584,11 @@ Raw output is stored by bounded Artifact reference when necessary.
 | REQ-002 | separate Attempt/Run IDs | new Run preserves Attempt/history | replacement tests |
 | REQ-004 | Claim transaction | Event/state failure rolls back | injected conflict |
 | REQ-005 | approval lookup + hash + composite FKs | stale/mixed hash rejected | service/FK/Replan tests |
-| REQ-006 | Lease IAO | REQUESTED or recoverable holder after crash | crash matrix/TC-01/WSL2 |
-| REQ-007 | generation + operation key + external fence | stale ID/holder cannot release; dirty preserved | unit + TC-01 S08–S11 |
+| REQ-006 | Lease IAO | REQUESTED or recoverable holder after crash | crash matrix + accepted TC-01 WSL2 Evidence |
+| REQ-007 | generation + operation key + external fence | stale ID/holder cannot release; dirty preserved | unit + accepted TC-01 S08–S11 |
 | REQ-008 | read-only Recovery + LD taxonomy | ambiguity blocks; no destruction | DR-04/DR-05/fresh process |
 
-All seven have proposed design, failure behavior and proof. TC-01 remains blocking.
+All seven requirements have proposed design, failure behavior and a verification route. TC-01 has closed the external adapter uncertainty with `ACCEPT`; the final Task 14 design review and explicit Operator decision remain blocking.
 
 ## 17. Verification
 
@@ -588,7 +607,8 @@ Deterministic coverage:
 - exact revision-3/revision-5 preservation;
 - every grant/release crash window;
 - stale fence and dirty-worktree behavior;
-- Recovery non-mutation.
+- Recovery non-mutation;
+- mandatory Treehouse freshness and command-shape validation.
 
 Canonical proof:
 
@@ -624,8 +644,8 @@ Security:
 Rollout:
 
 ```text
-TC-01
-→ final review/Operator approval
+accepted TC-01 Evidence
+→ final constructive/adversarial review and Operator approval
 → implementation plan
 → domain/migration with fakes
 → real grant/recovery/release
@@ -660,27 +680,31 @@ Tests mirror responsibilities. The implementation plan may refine filenames with
 
 ## 20. R5 gate and impact
 
-R5 remains `IN_PROGRESS` until TC-01 Verdict, finding reconciliation, adversarial review and explicit Operator approval.
+R5 remains `IN_PROGRESS` until this reconciled microdesign receives final constructive and adversarial review and explicit Operator approval.
 
 ```text
-Research:            PUBLISHED
-TC-01 protocol:      PROPOSED / EXECUTION AUTHORIZED
-M01 microdesign:     PROPOSED
-M01 implementation: PROHIBITED
-Pi Worker dispatch:  PROHIBITED
+Research:                    PUBLISHED
+TC-01 protocol:              ACCEPTED
+TC-01 canonical Evidence:    ACCEPT — 15/15 PASS, cleanup COMPLETED
+Treehouse adapter candidate: ACCEPTED FOR BOUNDED M01 DESIGN
+M01 microdesign:             PROPOSED — version 0.4.0
+M01 implementation:          PROHIBITED
+Pi Worker dispatch:          PROHIBITED
+Current gate:                Task 14 final R5 design review
 ```
 
 ```yaml
 documentation_impact:
   status: UPDATED
   affected:
+    - ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER
     - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
     - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
     - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
     - DOC-DOCUMENTATION-MAP
     - DOC-PROJECT-STATUS
     - TRACKING-WORKLOG
-  rationale: "R5 defines bounded M01 state, transactions, adapters, Recovery and proof."
+  rationale: "Canonical WSL2 Evidence accepts the pinned Treehouse adapter candidate and binds exact freshness and command-shape invariants into M01 design."
   follow_up:
     issue: 16
 
@@ -694,5 +718,5 @@ requirements_impact:
     - CAP-EXEC-REQ-006
     - CAP-EXEC-REQ-007
     - CAP-EXEC-REQ-008
-  rationale: "Every M01 requirement has proposed design and proof; TC-01 remains blocking Evidence."
+  rationale: "Every M01 requirement retains proposed design and proof; REQ-006/007 now have accepted real adapter Evidence while final R5 approval remains pending."
 ```

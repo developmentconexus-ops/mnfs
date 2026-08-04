@@ -22,13 +22,15 @@ test('opening the store applies migration v1 with required tables and pragmas', 
     WHERE type = 'table' AND name IN ('schema_migrations', 'missions', 'events')
     ORDER BY name
   `).all().map((row) => (row as { name: string }).name);
-  const migration = db.prepare('SELECT version FROM schema_migrations').get() as { version: number };
+  const migration = db.prepare('SELECT version FROM schema_migrations ORDER BY version DESC').get() as {
+    version: number;
+  };
   const foreignKeys = db.prepare('PRAGMA foreign_keys').get() as { foreign_keys: number };
   const journal = db.prepare('PRAGMA journal_mode').get() as { journal_mode: string };
   db.close();
 
   assert.deepEqual(tables, ['events', 'missions', 'schema_migrations']);
-  assert.equal(migration.version, 1);
+  assert.equal(migration.version, 4);
   assert.equal(foreignKeys.foreign_keys, 1);
   assert.equal(journal.journal_mode.toLowerCase(), 'wal');
 });
@@ -56,6 +58,7 @@ test('openMission commits the mission and matching event in one transaction', ()
       seq: 1,
       eventId: 'EVT-MIS-001-OPEN',
       type: 'MISSION_OPENED',
+      payloadSchemaVersion: 1,
       missionId: 'MIS-001',
       occurredAt: '2026-07-31T18:40:00.000Z',
       payload: { goal: 'Prove durable mission state' },

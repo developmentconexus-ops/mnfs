@@ -15,6 +15,7 @@ import type {
   MissionEvent,
   SaveMissionPlanRevisionInput,
 } from '../domain/types.js';
+import { inspectSupportedDatabaseSchema } from './sqlite-maintenance.js';
 import { applyMigrations } from './migrations.js';
 import { SqliteTransaction } from './sqlite-transaction.js';
 
@@ -69,6 +70,26 @@ export class SqliteStore {
     const database = new DatabaseSync(path);
     applyMigrations(database);
     return new SqliteStore(database);
+  }
+
+  static openCurrent(path: string): SqliteStore {
+    let verifier: DatabaseSync | undefined;
+    try {
+      verifier = new DatabaseSync(path, { readOnly: true });
+      inspectSupportedDatabaseSchema(verifier, true);
+    } finally {
+      verifier?.close();
+    }
+
+    const database = new DatabaseSync(path);
+    try {
+      inspectSupportedDatabaseSchema(database, true);
+      database.exec('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
+      return new SqliteStore(database);
+    } catch (error) {
+      database.close();
+      throw error;
+    }
   }
 
   #insertMissionAndEvent(input: OpenMissionInput): Mission {

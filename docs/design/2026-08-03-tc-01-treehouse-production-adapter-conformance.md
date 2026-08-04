@@ -4,15 +4,18 @@ title: TC-01 Treehouse Production Adapter Conformance
 document_type: microdesign
 form: explanation
 authority: specification
-status: proposed
-version: 0.1.0
+status: accepted
+version: 0.2.0
 owners:
   - developmentconexus-ops
+approvers:
+  - operator
 related:
   - CAP-EXECUTION
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - ACCEPTANCE-AS-02-LOCAL-PI-SANDBOX-WSL2
   - ACCEPTANCE-M2-UNBLOCK
+  - ACCEPTANCE-M01-R5-DESIGN-PACKAGE-REVIEW
 tracking_issue: 16
 last_reviewed: 2026-08-03
 ---
@@ -449,12 +452,17 @@ requirements_impact:
   rationale: "These requirements depend on exact acquisition, external identity, release fencing and observation behavior."
 ```
 
-## 11. Current authority
+## 11. Approval and current authority
+
+The Operator accepted this protocol for implementation and canonical WSL2 execution planning through `ACCEPTANCE-M01-R5-DESIGN-PACKAGE-REVIEW`.
 
 ```text
-Protocol review:      AUTHORIZED
-Protocol execution:   AUTHORIZED
-Production adapter:   PROHIBITED
-M01 implementation:  PROHIBITED
-Pi Worker dispatch:   PROHIBITED
+Protocol status:       ACCEPTED
+Implementation plan:   WRITTEN, SEPARATE REVIEW REQUIRED
+Protocol execution:    AUTHORIZED after a reviewed, CI-green harness exists
+Production adapter:    PROHIBITED
+M01 implementation:    PROHIBITED
+Pi Worker dispatch:    PROHIBITED
 ```
+
+Acceptance of this protocol does not establish Treehouse conformance and does not approve the final M01 microdesign.

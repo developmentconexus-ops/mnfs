@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.7.5
+version: 1.7.6
 owners:
   - developmentconexus-ops
 related:
@@ -20,6 +20,7 @@ related:
   - ACCEPTANCE-TC-01-TASK-02-SAFE-PROCESS-RUNNER
   - ACCEPTANCE-TC-01-TASK-03-DISPOSABLE-GIT-FIXTURE
   - ACCEPTANCE-TC-01-TASK-04-PROVENANCE-AND-CAPABILITIES
+  - ACCEPTANCE-TC-01-TASK-05-TRUSTED-GIT-OBSERVATION
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
@@ -68,7 +69,9 @@ tracking_issue: 16
 - [x] TC-01 Task 3 completed through two observed RED/GREEN cycles and full canonical CI.
 - [x] Operator authorized continuation to Task 4.
 - [x] TC-01 Task 4 completed through observed RED, focused GREEN and full canonical CI.
-- [ ] TC-01 Task 5 — trusted Git wrapper and repository observations — not started.
+- [x] Operator authorized continuation to Task 5.
+- [x] TC-01 Task 5 completed through observed RED, an adversarial GREEN correction and full canonical CI.
+- [ ] TC-01 Task 6 — strict Treehouse JSON client — not started.
 - [ ] TC-01 deterministic harness implementation complete.
 - [ ] TC-01 harness receives full CI-green review before real execution.
 - [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.
@@ -98,12 +101,13 @@ TC-01 Task 1:            ACCEPTED
 TC-01 Task 2:            ACCEPTED
 TC-01 Task 3:            ACCEPTED
 TC-01 Task 4:            ACCEPTED
-TC-01 Task 5:            NOT_STARTED
+TC-01 Task 5:            ACCEPTED
+TC-01 Task 6:            NOT_STARTED
 TC-01 real Evidence:     NOT_STARTED
 M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
 Blocking external input: Treehouse production-adapter conformance
-Current human gate:      continuation to TC-01 Task 5
+Current human gate:      continuation to TC-01 Task 6
 Design PR:               #17 DRAFT
 ```
 
@@ -119,7 +123,8 @@ TC-01 Task 1:         ACCEPTED
 TC-01 Task 2:         ACCEPTED
 TC-01 Task 3:         ACCEPTED
 TC-01 Task 4:         ACCEPTED
-TC-01 Task 5:         NOT_STARTED
+TC-01 Task 5:         ACCEPTED
+TC-01 Task 6:         NOT_STARTED
 TC-01 WSL2 execution: AUTHORIZED only after a reviewed, CI-green complete harness exists
 M01 microdesign:      PROPOSED, NOT FINAL
 M01 implementation:  PROHIBITED until final microdesign approval
@@ -143,29 +148,29 @@ documentation tooling:            PASS
 documentation validation:         PASS — 71 canonical IDs
 ```
 
-## Latest TC-01 Task 4 verification
+## Latest TC-01 Task 5 verification
 
-PR #17 merge commit `888dbb2995bade50661eb2c598349616b1bfe3a0` verified TC-01 Task 4 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
+PR #17 merge commit `99f5f5aec1bda71c88641443e790048adfea4fdd` verified TC-01 Task 5 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
 
 ```text
-Workflow:                          30872545594
-Job:                               91877325060
+Workflow:                          30873985549
+Job:                               91881568504
 npm ci:                            PASS — 0 vulnerabilities
 typecheck:                         PASS
 product tests:                     PASS — 95/95
 AS-02 deterministic tests:        PASS — 119/119
-TC-01 deterministic tests:        PASS — 18/18
+TC-01 deterministic tests:        PASS — 23/23
 documentation tooling:            PASS
 MIS-002 Replan builder:            PASS
 approved allocation tests:        PASS
-documentation validation:         PASS — 79 canonical IDs
+documentation validation:         PASS — 80 canonical IDs
 ```
 
-This proof establishes deterministic provenance and capability discovery. It does not invoke Treehouse acquisition, create a real Lease or validate runtime lifecycle behavior.
+This proof establishes trusted Git invocation logging and field-level repository/filesystem observations. It does not invoke Treehouse acquisition, create a real Lease or validate runtime lifecycle behavior.
 
 ## Immediate next action
 
-1. Review `ACCEPTANCE-TC-01-TASK-04-PROVENANCE-AND-CAPABILITIES`.
-2. Continue with Task 5 of the approved TC-01 plan only after the next governed continuation.
-3. Task 5 must add a trusted Git wrapper and repository/filesystem observations through a fresh RED/GREEN TDD cycle.
+1. Review `ACCEPTANCE-TC-01-TASK-05-TRUSTED-GIT-OBSERVATION`.
+2. Continue with Task 6 of the approved TC-01 plan only after the next governed continuation.
+3. Task 6 must implement the strict Treehouse JSON client through a fresh RED/GREEN TDD cycle.
 4. Keep the full real Treehouse scenario suite, M01 implementation and Pi Worker dispatch prohibited until their later gates pass.

@@ -5,7 +5,7 @@ document_type: microdesign
 form: explanation
 authority: specification
 status: proposed
-version: 0.5.0
+version: 0.6.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -31,11 +31,12 @@ M01 adds the smallest durable execution foundation required by the approved M2 c
 ```text
 contract-bound Write Track
 → one current Attempt
+→ Attempt-owned no-origin execution source
 → distinct Worker Run identity
 → atomic durable Claim
-→ local no-origin execution source
 → Treehouse Lease Intent–Action–Observation
-→ fenced and non-destructive release
+→ trusted action helper and external fencing
+→ non-destructive release
 → read-only Recovery/Reconcile
 ```
 
@@ -49,13 +50,16 @@ SQLite
 → semantic execution, idempotency and Lease state
 
 Git
-→ source commit, result tree and code observations
+→ canonical base commit, result tree and code observations
 
 ExecutionSourceAdapter
-→ Track-owned local backing repository with no remote
+→ Attempt-owned independent local Git repository with no remote
 
 Treehouse
 → managed worktree and external Lease identity
+
+LeaseActionRunner
+→ one bounded external Treehouse invocation and durable raw result
 
 MNFS services
 → validation, transactions, action ownership, fencing and Recovery
@@ -63,9 +67,9 @@ MNFS services
 
 M01 does not launch Pi. It persists the identities and invariants that M02 will consume for the real E1 Worker.
 
-TC-01 produced canonical WSL2 `ACCEPT` Evidence for Treehouse `2.1.1` under the exact no-origin, controlled-HOME boundary. Version `0.5.0` makes that same boundary mandatory for production use. This design remains `proposed` until the Operator explicitly approves this exact version.
+TC-01 produced canonical WSL2 `ACCEPT` Evidence for Treehouse `2.1.1` under a no-origin, controlled-HOME boundary. Version `0.6.0` makes that same boundary mandatory for production use and closes the final R5 review findings. This design remains `proposed` until the Operator explicitly approves this exact version.
 
-## 2. Approved baseline
+## 2. Approved baseline and owned requirements
 
 ```text
 Mission:             MIS-002
@@ -91,7 +95,7 @@ CAP-EXEC-REQ-007
 CAP-EXEC-REQ-008
 ```
 
-M01 is constrained to one qualified Feature per Write Track. The broader Blueprint cardinalities remain future capability.
+M01 is constrained to one qualified Feature per Write Track. Multiple Features per Track, parallel Tracks and generic resource reservations remain later capability.
 
 ## 3. Outcome and proof boundary
 
@@ -100,12 +104,14 @@ M01 proves:
 - one current Track for the bounded Feature;
 - at most one current non-terminal Attempt per Track;
 - Worker Run replacement without rewriting Attempt identity;
-- Claim and matching Event atomicity;
-- exact contract and lineage binding across Track, Attempt, Run, Lease and Claim;
+- Claim and matching Domain Event atomicity;
+- exact contract and ancestry binding across Track, Attempt, Run, Lease and Claim;
 - exact Attempt base commit and validated Claim result tree;
-- no-origin local execution-source materialization without changing the canonical checkout;
-- every Lease grant/release crash window;
-- single-owner external action and duplicate acquisition prevention;
+- idempotent Attempt-owned source materialization without mutating the canonical checkout;
+- no-origin, independent Git object storage and controlled hook/config boundary;
+- every source, Lease grant and Lease release crash window;
+- at most one live helper for one external action token;
+- no automatic repetition of an inconclusive acquisition;
 - internal and external release fencing;
 - no dirty or unclassified work destroyed;
 - orphan worktree and Lease-without-worktree reporting;
@@ -115,12 +121,12 @@ Canonical proof uses sequential Tracks:
 
 ```text
 Track A
-→ local execution source
+→ Attempt A01 + independent local source
 → grant/recovery/fenced clean release
 → explicit empty-Track abandonment
 
 Track B
-→ local execution source
+→ Attempt A01 + independent local source
 → Worker Run identity + atomic Claim
 → preserved for M02 disposition
 ```
@@ -131,7 +137,7 @@ Trusted test-fixture cleanup happens after Evidence and outside product semantic
 
 M01 does not implement Pi launch, production SEC-E1 creation, Current Authority Snapshot, Writer Pack, Worker completion, Receipt, Gate, Claim disposition, parallel Tracks, scheduler, generic lock service, Saga/workflow engine, broker, remote execution, credentials, network effects, destructive Recovery, Treehouse force/destroy/prune, Integration, delivery or Issue #15.
 
-The Lease action owner is a narrow M01 safety mechanism, not a generic resource-reservation capability.
+The Lease action token and helper are narrow external-operation safety mechanisms, not a reusable scheduler or resource registry.
 
 ## 5. Architecture and authority
 
@@ -149,6 +155,7 @@ RecoveryService ──────────────┘          +── e
         +── ExecutionSourceAdapter
         +── TreehouseAdapter
         +── GitWorktreeInspector
+        +── LeaseActionRunner
         +── ProcessIdentityInspector
 ```
 
@@ -157,9 +164,9 @@ Rules:
 1. services own semantic workflows;
 2. stores own local atomicity;
 3. adapters return observations, never domain state;
-4. no external action occurs inside the domain SQLite transaction;
-5. grant/release use Intent–Action–Observation;
-6. an external action has one durable owner at a time;
+4. no Git, filesystem scan, Treehouse action or process wait occurs inside a domain transaction;
+5. source preparation and Lease grant/release use explicit Intent–Action–Observation;
+6. one external action token has at most one live trusted helper;
 7. Recovery is non-mutating by default;
 8. ambiguous or destructive repair requires explicit authority;
 9. the canonical checkout is observed but never used as Treehouse backing repository;
@@ -170,50 +177,73 @@ Rules:
 | execution scope | Approved Mission Contract |
 | semantic lifecycle | MNFS SQLite |
 | canonical source commit | Git in canonical checkout |
-| execution backing repository | MNFS-owned local Git repository |
+| execution backing repository | MNFS-owned independent local Git repository |
 | physical worktree | Treehouse + Git |
 | semantic Lease | MNFS SQLite |
 | external Lease ID/holder | Treehouse observation |
-| process identity for action ownership | Linux process observation |
+| external action execution | trusted LeaseActionRunner observation |
+| process identity | Linux boot ID + PID + start ticks |
 | Worker Run lifecycle | MNFS SQLite |
 | Claim lifecycle | MNFS SQLite |
 | acceptance | M02 MNFS Gate |
 
-## 6. Production execution-source boundary
+## 6. Attempt-owned execution source
 
-Treehouse must never run directly against the canonical checkout because that checkout normally has `origin`, while the accepted TC-01 boundary has no remote and no network or credential behavior.
+Treehouse must never run directly against the canonical checkout. The canonical checkout normally has `origin`; the accepted TC-01 boundary had no remote, no network and no credential behavior.
 
 `ExecutionSourceAdapter.prepare` receives:
 
 ```text
 repository ID
 Track ID
+Attempt ID
 canonical checkout path
 exact approved base commit SHA
 Git object format
 ```
 
-It creates or reopens a deterministic Track-owned repository below the Linux MNFS runtime root:
+It creates or reopens:
 
 ```text
-<runtime-root>/execution-sources/<track-id>/source
+<runtime-root>/execution-sources/<track-id>/<attempt-id>/source
+```
+
+### Source Intent–Action–Observation
+
+```text
+1. transaction: Attempt source_status = REQUESTED + EXECUTION_SOURCE_REQUESTED
+2. create a sibling temporary repository under the same Linux parent
+3. transfer only local Git objects using an explicit controlled Git environment
+4. create local main at the exact base commit and materialize a clean working tree
+5. remove every remote and reject executable hooks or inherited hook paths
+6. verify independent common dir/object database, no alternates and no hardlinks to canonical objects
+7. verify exact object format, HEAD, HEAD^{tree}, clean status and zero remotes
+8. compare the canonical checkout snapshot before/after
+9. atomically rename the completed temporary source to the final deterministic path
+10. transaction: source_status = READY + fingerprint + EXECUTION_SOURCE_READY
 ```
 
 Required properties:
 
-- materialized only through local Git object transfer from the canonical checkout;
-- no network protocol and no credential helper;
-- no configured remotes after preparation;
-- exactly one local `main` base ref and detached/clean base commit observation;
-- exact `base_commit_sha` and `HEAD^{tree}` verified;
-- canonical checkout snapshot equal before and after preparation;
-- Linux-owned path, no symlink escape and no `/mnt` path;
-- reusable only while Track, contract hash, object format and base commit remain exact;
-- preserved until explicit Track disposition.
+- Linux-owned path with no symlink or `/mnt` escape;
+- only local object transfer; no URL, network protocol or credential helper;
+- `GIT_CONFIG_GLOBAL=/dev/null`, `GIT_CONFIG_NOSYSTEM=1`, prompts disabled and controlled empty hooks path;
+- no remote, alternates file, shared common directory, borrowed object store or hardlinked object file;
+- local `main` points to the exact base commit and is the clean current branch expected by Treehouse;
+- exact `base_commit_sha`, `HEAD^{tree}` and object format verified;
+- canonical checkout byte/Git snapshot equal before and after;
+- final path is immutable for the Attempt and preserved until explicit Track disposition.
 
-Treehouse receives this local repository as cwd. Its pool and HOME are Track-owned runtime paths. Treehouse user configuration is generated by MNFS under the controlled HOME and contains only the absolute pool root and approved non-hook settings. `XDG_CONFIG_HOME`, global Git config, system Git config and arbitrary host environment variables are absent or explicitly controlled. User-level Treehouse hooks cannot participate.
+Crash handling:
 
-A mismatch, remote, unexpected config, changed base, changed canonical checkout or source-path escape fails before acquisition.
+- REQUESTED with no final path: remove only a recognized Track-scoped incomplete temp after inspection, then retry;
+- complete final path with matching fingerprint: commit READY without rebuilding;
+- conflicting final path, unexpected remote/config/object sharing or canonical source mutation: mark source `DIVERGED` and preserve;
+- source READY can never be silently repointed to another base.
+
+Attempt supersession requires no current Run, Claim or Lease and creates a new Attempt-owned source. It never resets the prior source in place.
+
+Treehouse receives the READY source as cwd. Pool, HOME, XDG config and empty hooks directory are Attempt-owned runtime paths. Treehouse user config contains only the absolute pool root and approved non-hook settings. Arbitrary host variables and user-level Treehouse hooks cannot participate.
 
 ## 7. Identities and lifecycle
 
@@ -250,7 +280,7 @@ ABANDONED
 - no current Worker Run;
 - no current Lease, or latest Lease `RELEASED`;
 - no unclassified work;
-- preserved required Evidence.
+- preserved required Evidence and source observations.
 
 Lease release never silently closes a Track.
 
@@ -263,7 +293,15 @@ CLOSED
 CANCELLED
 ```
 
-Only `OPEN` is current. Attempt owns `git_object_format` and `base_commit_sha`. Supersession atomically transitions the prior Attempt, creates the next ordinal and records both Events.
+Independent source state:
+
+```text
+REQUESTED
+READY
+DIVERGED
+```
+
+Only `OPEN` is current. Attempt owns object format, exact base commit, source path and source fingerprint. Supersession atomically transitions the prior Attempt, creates the next ordinal and records both Events after physical preconditions prove no current resource or unclassified work.
 
 ### Worker Run
 
@@ -290,7 +328,7 @@ SUPERSEDED
 ABANDONED
 ```
 
-M01 authorizes `OPEN` creation only. A Claim is bound to the exact Track lineage, current Attempt, selected Worker Run, active Lease, Attempt base commit and a verified Git tree object. It does not receive a fake disposition for cleanup.
+M01 authorizes `OPEN` creation only. A Claim is bound to the exact Track, current Attempt, selected Worker Run, active Lease, Attempt base commit and a verified Git tree object. It does not receive a fake disposition for cleanup.
 
 ### Lease
 
@@ -302,19 +340,19 @@ RELEASED
 DIVERGED
 ```
 
-`DIVERGED` remains current and blocks another Lease until explicit disposition.
+A Lease belongs to one Track and the exact current Attempt/source generation. `DIVERGED` remains current and blocks another Lease until explicit disposition.
 
 ## 8. Migration v4 and downgrade boundary
 
-Migration v4 is additive except for the controlled `events` rebuild. It is tested against empty, M0, M1/v3 and exact revision-5 databases.
+Migration v4 is additive except for a controlled `events` rebuild. It is tested against empty, M0, M1/v3 and exact revision-5 databases.
 
 Before mutation:
 
 1. close other MNFS writers;
 2. create a byte-for-byte SQLite backup outside the migration transaction;
-3. record database hash, schema version, approved contract hashes and row counts;
+3. record database hash, schema/user version, approved contract hashes and row counts;
 4. run `PRAGMA integrity_check` and require `ok`;
-5. require the applied migration set to be exactly supported and gap-free;
+5. require the applied migration set to be supported, ordered and gap-free;
 6. reject a database newer than this binary in write mode.
 
 The Events rebuild follows the SQLite generalized table-rebuild sequence:
@@ -322,12 +360,12 @@ The Events rebuild follows the SQLite generalized table-rebuild sequence:
 1. create and seed `event_types`;
 2. create `events_v4` with final constraints;
 3. copy every existing Event with `payload_schema_version = 1` and preserved `seq`;
-4. compare counts, IDs, payload hashes and sequence bounds;
+4. compare counts, Event IDs, payload hashes and sequence bounds;
 5. drop old `events`;
 6. rename `events_v4` to `events`;
 7. recreate indexes;
 8. run `PRAGMA foreign_key_check` and `PRAGMA integrity_check` before commit;
-9. insert schema migration version 4 in the same transaction.
+9. insert migration 4 and set `PRAGMA user_version = 4` in the same maintenance operation.
 
 ### Versioned Event registry
 
@@ -347,7 +385,7 @@ FOREIGN KEY(type, payload_schema_version)
   REFERENCES event_types(type, payload_schema_version)
 ```
 
-There is deliberately no default. Pre-v4 binaries omit this required column; every supported M0/M1 mutation already commits its matching Event in the same transaction, so the Event insert fails and the legacy mutation rolls back. This is the concrete downgrade write fence. Direct out-of-band SQL is not a supported product interface.
+There is deliberately no default. Pre-v4 binaries omit this required column; every supported M0/M1 mutation commits its matching Event in the same transaction, so Event insertion fails and the legacy mutation rolls back. This is the concrete downgrade write fence. Direct out-of-band SQL is not a supported product interface.
 
 Existing version-1 types:
 
@@ -364,6 +402,9 @@ WRITE_TRACK_OPENED
 WRITE_TRACK_ABANDONED
 ATTEMPT_OPENED
 ATTEMPT_SUPERSEDED
+EXECUTION_SOURCE_REQUESTED
+EXECUTION_SOURCE_READY
+EXECUTION_SOURCE_DIVERGED
 WORKER_RUN_OPENED
 WORKER_RUN_STATE_CHANGED
 CLAIM_OPENED
@@ -376,9 +417,9 @@ LEASE_DIVERGED
 RECOVERY_OBSERVED
 ```
 
-Event payload version is immutable per Event. Adding a future payload version inserts another registry row; it never rewrites historical Events.
+Event payload version is immutable per Event. A future version adds another registry row and never rewrites history.
 
-Rollback after schema v4 restores the recorded backup. Running a pre-v4 writer against the migrated database is prohibited even though its supported command mutations fail closed.
+Rollback after schema v4 restores the recorded backup. Running a pre-v4 writer against the migrated database is prohibited even though supported old command mutations fail closed.
 
 ## 9. Relational model
 
@@ -390,7 +431,6 @@ mission_id              TEXT NOT NULL REFERENCES missions(id)
 milestone_qualified_id  TEXT NOT NULL
 feature_qualified_id    TEXT NOT NULL
 contract_hash           TEXT NOT NULL
-git_object_format       TEXT NOT NULL CHECK IN ('sha1', 'sha256')
 status                  TEXT NOT NULL
 version                 INTEGER NOT NULL DEFAULT 1
 created_at              TEXT NOT NULL
@@ -408,17 +448,25 @@ WHERE status IN ('ACTIVE', 'CLAIMED');
 
 ```text
 id, write_track_id, ordinal, contract_hash,
-git_object_format, base_commit_sha, status,
-version, created_at, updated_at
+git_object_format, base_commit_sha,
+source_status, source_path, source_fingerprint,
+status, version, created_at, updated_at
 UNIQUE(write_track_id, ordinal)
 UNIQUE(id, contract_hash)
 UNIQUE(id, write_track_id, contract_hash)
 UNIQUE(id, contract_hash, base_commit_sha)
 FOREIGN KEY(write_track_id, contract_hash)
   REFERENCES write_tracks(id, contract_hash)
+CHECK (git_object_format IN ('sha1', 'sha256'))
 ```
 
-`base_commit_sha` is validated as a commit object in the Track execution source and its length must match `git_object_format`.
+State rules:
+
+- REQUESTED source: final identity may be null, but deterministic expected path is derivable;
+- READY source: absolute contained path and fingerprint are required;
+- DIVERGED source: all observations and error Artifact refs are preserved;
+- SHA length must match object format;
+- base SHA resolves as a commit in both canonical repository and READY source.
 
 ```sql
 CREATE UNIQUE INDEX attempts_one_open_per_track
@@ -440,7 +488,7 @@ FOREIGN KEY(attempt_id, contract_hash)
   REFERENCES attempts(id, contract_hash)
 ```
 
-State-dependent validation requires complete process identity for `RUNNING` and `IDLE`; `EXITED` requires a recorded exit observation. PID alone is never a fence.
+Complete process identity is required for `RUNNING` and `IDLE`; `EXITED` requires an exit observation. PID alone is never a fence.
 
 ```sql
 CREATE UNIQUE INDEX worker_runs_one_current_per_attempt
@@ -451,32 +499,52 @@ WHERE status IN ('STARTING', 'RUNNING', 'IDLE');
 ### `leases`
 
 ```text
-id, write_track_id, contract_hash, generation, status,
+id, write_track_id, attempt_id, contract_hash, generation, status,
 grant_idempotency_key, grant_input_hash,
+release_idempotency_key, release_input_hash,
 holder, external_lease_id, worktree_path, external_leased_at,
-action_kind, action_token,
+action_kind, action_token, action_phase,
 action_owner_boot_id, action_owner_pid, action_owner_start_ticks,
+action_runner_boot_id, action_runner_pid, action_runner_start_ticks,
+action_started_ref, action_result_ref,
 release_requested_at, release_observed_at,
 last_observed_at, last_error_code, last_error_ref,
 version, created_at, updated_at
 UNIQUE(write_track_id, generation)
 UNIQUE(grant_idempotency_key)
+UNIQUE(release_idempotency_key)
 UNIQUE(external_lease_id)
 UNIQUE(id, contract_hash)
 UNIQUE(id, write_track_id, contract_hash)
+UNIQUE(id, attempt_id, write_track_id, contract_hash)
 FOREIGN KEY(write_track_id, contract_hash)
   REFERENCES write_tracks(id, contract_hash)
+FOREIGN KEY(attempt_id, write_track_id, contract_hash)
+  REFERENCES attempts(id, write_track_id, contract_hash)
 ```
 
-`grant_input_hash` binds Track, generation, contract hash, base commit, holder, execution-source identity, Treehouse candidate and command-shape hash. Same key with different input is `LEASE_IDEMPOTENCY_CONFLICT`.
+`grant_input_hash` binds Track, Attempt, generation, contract hash, base commit, source fingerprint, holder, Treehouse candidate and command-shape hash.
 
-Lease invariants:
+`release_input_hash` binds Lease identity, expected version/generation, Attempt/source, external ID, holder, path, Treehouse candidate and command-shape hash.
 
-- `REQUESTED`: semantic intent exists; external identity may be absent; one action owner or none;
-- `ACTIVE`: exact external ID, holder, path and leased timestamp are present; action owner cleared;
-- `RELEASE_PENDING`: external identity retained and release intent persisted;
-- `RELEASED`: external identity retained for audit, release observation recorded, action owner cleared;
-- `DIVERGED`: all known semantic and physical observations are preserved.
+Same key/same input returns the prior semantic outcome. Same key/different input is `LEASE_IDEMPOTENCY_CONFLICT`.
+
+Lease state rules:
+
+- `REQUESTED`: grant intent exists; external identity may be absent;
+- `ACTIVE`: exact external ID, holder, path and leased timestamp are present;
+- `RELEASE_PENDING`: external identity retained and release intent/key persisted;
+- `RELEASED`: external identity retained for audit and release observation recorded;
+- `DIVERGED`: every known semantic, helper and physical observation is preserved.
+
+Action state rules:
+
+- `action_kind` is `GRANT` or `RELEASE` only while an action is unresolved;
+- `action_phase` is `CLAIMED`, `STARTED` or `FINISHED`;
+- token is unique and binds the exact input hash;
+- `STARTED` requires a durable started Artifact written before Treehouse invocation;
+- `FINISHED` requires a bounded result Artifact;
+- action fields clear only with semantic completion; divergence preserves them.
 
 ```sql
 CREATE UNIQUE INDEX leases_one_current_per_track
@@ -505,15 +573,15 @@ FOREIGN KEY(attempt_id, write_track_id, contract_hash)
   REFERENCES attempts(id, write_track_id, contract_hash)
 FOREIGN KEY(worker_run_id, attempt_id, contract_hash)
   REFERENCES worker_runs(id, attempt_id, contract_hash)
-FOREIGN KEY(lease_id, write_track_id, contract_hash)
-  REFERENCES leases(id, write_track_id, contract_hash)
+FOREIGN KEY(lease_id, attempt_id, write_track_id, contract_hash)
+  REFERENCES leases(id, attempt_id, write_track_id, contract_hash)
 FOREIGN KEY(attempt_id, contract_hash, base_commit_sha)
   REFERENCES attempts(id, contract_hash, base_commit_sha)
 ```
 
-These keys prove both exact contract and exact ancestry. A same-contract entity from another Track or Attempt cannot be attached to the Claim.
+These keys prove exact contract and exact ancestry. A same-contract entity from another Track or Attempt cannot be attached to a Claim.
 
-`result_tree_sha` must resolve as a Git `tree` object in the exact Track execution source. `claimed_criteria_json` is a canonical non-empty, duplicate-free array of criteria owned by the approved qualified Feature.
+`result_tree_sha` must resolve as a Git `tree` object in the exact READY execution source. `claimed_criteria_json` is a canonical non-empty, duplicate-free array of criteria owned by the approved qualified Feature.
 
 ```sql
 CREATE UNIQUE INDEX claims_one_current_per_attempt
@@ -525,79 +593,88 @@ WHERE status IN ('OPEN', 'COMPLETED_BY_WORKER', 'UNDER_VERIFICATION');
 
 All domain persistence shares one `DatabaseSync` connection owned by `SqliteStore`. Focused stores cannot open another domain database.
 
-Use short `BEGIN IMMEDIATE` transactions. A competing writer can receive `SQLITE_BUSY`; retries are bounded with small jitter and end in a typed error. Mutable rows carry `version`; updates use compare-and-swap and zero rows produce `CONCURRENCY_CONFLICT`.
+Use short `BEGIN IMMEDIATE` transactions. `SQLITE_BUSY` retries are bounded with small jitter and end in a typed error. Mutable rows carry `version`; updates use compare-and-swap and zero rows produce `CONCURRENCY_CONFLICT`.
 
 Atomic operations:
 
 ```text
 Track + Attempt A01 + Events
+Attempt source intent/state + Event
 Attempt supersession + new Attempt + Events
 old current Run terminalization + replacement Run + Events
 Track abandonment + Event
 Claim OPEN + Track CLAIMED + Event
 Lease intent/state transition + Event
+Lease action-token claim + Event
 ```
 
-Every idempotent command stores an input hash. Same key and same input returns the prior semantic result. Same key and different input fails. Event IDs are allocated once with the semantic operation and retries do not append duplicate facts.
+Every idempotent command stores an input hash. Same key/same input returns the prior semantic result. Same key/different input fails. Event IDs are allocated once with the semantic operation and retries do not append duplicate facts.
 
 No model, Git, Treehouse, filesystem scan or process wait occurs inside the domain transaction.
 
-## 11. Lease action ownership
+## 11. Trusted LeaseActionRunner
 
-A durable Lease intent does not itself authorize every caller to perform the external action.
+A durable Lease intent does not authorize every caller to invoke Treehouse. Only a trusted helper bound to the committed action token may execute one external command.
 
-Before `get` or `return`, `LeaseService` claims one action owner using a CAS transaction and records:
+### Claim and launch
 
 ```text
-action_kind
-action_token
-Linux boot ID
-PID
-process start ticks
-LEASE_ACTION_CLAIMED Event
+1. LeaseService CAS-claims action_kind + action_token + exact input hash
+2. record owner Lead boot ID/PID/start ticks and LEASE_ACTION_CLAIMED
+3. spawn the fixed LeaseActionRunner with a token-scoped operation file
+4. runner writes and fsyncs STARTED Artifact before invoking Treehouse
+5. runner records its boot ID/PID/start ticks in the Artifact
+6. runner invokes exactly one accepted Treehouse command
+7. runner writes bounded raw result + FINISHED Artifact and exits
+8. LeaseService or a fresh process observes helper Artifact, Treehouse and Git
+9. semantic transaction commits outcome or divergence
 ```
 
-Rules:
+The runner does not mutate domain SQLite. Its operation file is immutable, run-scoped, outside Worker authority and contains only exact argv/cwd/env hashes and Artifact destinations.
 
-- only the caller whose exact action token was committed may invoke Treehouse;
-- another caller with the same idempotency key observes the current owner;
-- exact live owner → `LEASE_OPERATION_IN_PROGRESS`, no external action;
-- owner absent or PID/start identity changed → fresh process may CAS takeover after first observing Treehouse state;
-- owner identity unknown → block; never use a time-only expiry;
-- if exact external Lease already exists, recovery commits the semantic outcome without another `get`;
-- if release already completed physically, recovery commits `RELEASED` without another `return`;
-- action ownership is cleared only with observed semantic completion or recorded divergence.
+### Recovery rules
 
-This is Lease-specific coordination and cannot be reused as a generic scheduler or resource registry.
+- exact live Lead before helper launch blocks takeover;
+- exact live helper blocks every competing action;
+- owner dead and no helper/STARTED Artifact means the action was not started; after fresh status observation a caller may CAS a new token;
+- STARTED Artifact means Treehouse may have been invoked;
+- GRANT STARTED with no decisive exact Lease outcome is `UNKNOWN` and is never automatically invoked again;
+- GRANT STARTED with one exact matching Lease commits `ACTIVE` without another `get`;
+- RELEASE STARTED observes first; conditional return may be retried only when the exact current Lease remains, no helper is live and the same release input/fence still holds;
+- FINISHED result is advisory until fresh Treehouse/Git state confirms semantics;
+- missing, conflicting or non-bijective helper/process evidence blocks;
+- clock age alone never authorizes takeover.
+
+This closes the parent-death/child-survival window while remaining a narrow M01 mechanism.
 
 ## 12. Service boundaries
 
 ### `ExecutionService`
 
-- resolve the exact latest approved contract and qualified target;
+- resolve exact latest approved contract and qualified target;
 - resolve canonical Git object format and exact base commit;
 - open Track and A01 atomically;
-- prepare/revalidate the Track-owned no-origin execution source;
-- replace a Worker Run atomically without rewriting Attempt identity;
-- supersede an Attempt atomically when explicitly authorized;
-- abandon an empty Track only after resource and Evidence guards;
-- load the complete Track lineage.
+- resume or prepare the Attempt-owned independent no-origin source;
+- replace Worker Run atomically without rewriting Attempt identity;
+- supersede Attempt atomically only after physical/resource guards;
+- abandon empty Track only after resource, source and Evidence guards;
+- load complete Track lineage.
 
 ### `ClaimService`
 
-`openClaim` requires expected versions for Track, Attempt, Run and Lease; exact current lineage; exact contract hash; Attempt base commit; active matching Lease; result SHA resolving to a tree in the execution source; criteria owned by the Feature; and no current Claim.
+`openClaim` requires expected versions for Track, Attempt, Run and Lease; exact current ancestry; exact contract; Attempt base commit; READY source; active matching Lease; result SHA resolving to a tree in that source; criteria owned by the Feature; and no current Claim.
 
 It inserts Claim, moves Track to `CLAIMED` and writes `CLAIM_OPENED` in one transaction. Same idempotency key/input returns the existing Claim; conflicting input fails. No other Claim transition exists in M01.
 
 ### `LeaseService`
 
-Only production component permitted to call `TreehouseAdapter`. It owns execution-source preflight, action ownership, grant/release IAO, semantic observation and fencing.
+Only component permitted to prepare a Treehouse operation and consume LeaseActionRunner results. It owns source preflight, action-token ownership, grant/release IAO, semantic observation and fencing.
 
 ### `RecoveryService`
 
-Loads expected state and adapter observations and produces a read-only report. It never acquires, returns, prunes, destroys, clears an action owner or changes semantic state.
+Loads expected state, source/helper/process/Treehouse/Git observations and produces a read-only report. It never creates a source, claims an action token, launches a helper, acquires, returns, prunes, destroys, clears ownership or changes semantic state.
 
-Original operation services may apply narrowly defined repairs after re-observing current state and acquiring the exact action ownership.
+Original operation services may apply narrowly defined repairs only after fresh observation and exact idempotency/fencing validation.
 
 ## 13. Observation adapters
 
@@ -611,7 +688,7 @@ Accepted command-shape SHA-256:   sha256:f2077cfd037cbaefdcfc94385a0cfeb7e1647ef
 Canonical Verdict:                ACCEPT — 15/15 PASS, no limitation
 ```
 
-Accepted commands:
+Accepted Treehouse commands:
 
 ```text
 treehouse get --lease --lease-holder <holder> --json
@@ -625,17 +702,17 @@ Treehouse process contract:
 - one lowercase raw `v` prefix may be canonicalized; other version text fails;
 - exact argv, `shell: false`, closed stdin, explicit cwd, timeout and bounded output;
 - controlled Linux-only PATH;
-- Track-owned HOME and Treehouse user config with no hooks;
+- Attempt-owned HOME, XDG config, pool and empty hooks directory;
 - disabled global/system Git configuration and credential prompts;
-- no arbitrary host environment, XDG config, Windows path or mount;
+- no arbitrary host environment, Windows path or mount;
 - strict UTF-8 JSON for acquisition/status;
 - fresh status plus Git/filesystem observations for semantic decisions;
 - no force, destroy, broad prune, stderr-state inference or Git fallback;
-- cwd is always the verified no-origin execution source.
+- cwd is always the verified READY no-origin source.
 
 Any change in candidate bytes/version/capabilities, Git, Node, Ubuntu/WSL identity, environment shape or command shape invalidates reuse and returns the adapter to conformance review.
 
-The observed executable path is Evidence, not a globally fixed installation path; production resolves the path but requires the accepted bytes.
+The observed executable path is Evidence, not a fixed install path; production resolves the path but requires the accepted bytes.
 
 ### Git observation boundary
 
@@ -648,60 +725,63 @@ git rev-parse --git-common-dir
 git rev-parse --show-object-format
 git status --porcelain=v1 -z --untracked-files=all
 git worktree list --porcelain
+git remote
 git cat-file -e <sha>^{commit}
 git cat-file -e <sha>^{tree}
 git cat-file -t <sha>
 ```
 
-It does not use `write-tree`, reset, clean, checkout, commit, fetch or ref mutation. Materializing a future Worker result tree belongs to a separate trusted M02 operation, not this inspector.
+It does not use `write-tree`, reset, clean, checkout, commit, fetch or ref mutation. Future Worker-result tree materialization belongs to a separate trusted M02 operation.
 
 Repository and observation equality use canonical JSON: object key order is irrelevant; array order, paths, modes, bytes and hashes remain semantic.
 
 ## 14. Lease grant IAO
 
-For `WT-001`, generation 1:
+For `WT-001/A01`, generation 1:
 
 ```text
-grant_idempotency_key = lease:grant:WT-001:g1
+grant_idempotency_key = lease:grant:WT-001:A01:g1
 holder = mnfs-<repo-id-hash>-lse001-g1
 ```
 
 Flow:
 
 ```text
-1. validate Track, Attempt, contract, base and Treehouse freshness
-2. prepare/revalidate no-origin execution source and controlled HOME/pool
+1. validate Track, current Attempt, READY source, contract, base and Treehouse freshness
+2. validate controlled HOME/pool/config and source fingerprint
 3. transaction: insert/reuse LSE-001 REQUESTED + LEASE_REQUESTED
-4. observe Treehouse by deterministic holder
+4. observe Treehouse by deterministic holder and exact source ownership
 5. one exact match → validate and commit ACTIVE
-6. no match → claim exact action owner
-7. invoke JSON acquisition once
-8. validate path containment, linked-worktree ownership, Lease ID, holder and source
+6. no match → claim action token and launch trusted helper
+7. helper records STARTED and invokes JSON acquisition once
+8. observe helper result, path containment, linked-worktree ownership, Lease ID, holder and source
 9. fresh status and Git observation
-10. transaction: REQUESTED → ACTIVE + external identity + LEASE_GRANTED; clear owner
+10. transaction: REQUESTED → ACTIVE + external identity + LEASE_GRANTED
 ```
 
 Crash windows:
 
-- Intent only: original retry observes, claims owner and may acquire.
-- Owner claimed before action: live owner blocks another action; dead owner can be safely taken over.
-- External Lease before semantic commit: deterministic holder and fresh status recover the exact allocation without another acquisition.
-- Commit before response: retry returns ACTIVE.
-- Multiple external matches, conflicting input or ambiguous owner: DIVERGED or blocked; no further acquisition.
+- Intent only: retry observes and may safely claim a token.
+- Token claimed before helper STARTED: exact live owner blocks; dead owner with no helper/start Artifact can be replaced after observation.
+- Helper STARTED before external completion: another `get` is prohibited until the outcome is decisive.
+- External Lease before semantic commit: exact holder/status recovers allocation without another acquisition.
+- Commit before response: same key/input returns ACTIVE.
+- Multiple matches, conflicting input, helper ambiguity or non-bijective identity: DIVERGED/UNKNOWN; no further acquisition.
 
-Generic Recovery never adopts or claims action ownership.
+Generic Recovery never adopts or claims an action token.
 
 ## 15. Lease release
 
 Preconditions:
 
 - ACTIVE Lease with expected version and generation;
-- exact internal ID, external ID, holder, path and source identity;
+- exact Track, Attempt, source, internal ID, external ID, holder and path;
+- matching release idempotency key/input;
 - Treehouse freshness unchanged;
 - no current Worker Run and no matching live process;
 - no current Claim;
-- worktree path is the exact linked worktree;
-- Git status is clean and source/worktree observations contain no unclassified mutation;
+- exact linked worktree;
+- clean Git status and no unclassified source/worktree mutation;
 - fresh Treehouse status matches the exact Lease.
 
 Dirty or ambiguous work returns `LEASE_RELEASE_BLOCKED_DIRTY` or `LEASE_RELEASE_BLOCKED_UNKNOWN` without invoking Treehouse.
@@ -709,25 +789,25 @@ Dirty or ambiguous work returns `LEASE_RELEASE_BLOCKED_DIRTY` or `LEASE_RELEASE_
 Flow:
 
 ```text
-1. reconcile local and physical preconditions
-2. transaction: ACTIVE → RELEASE_PENDING + LEASE_RELEASE_REQUESTED
-3. claim exact RELEASE action owner
-4. conditional Treehouse return
-5. fresh status and Git/filesystem observation
+1. reconcile semantic, helper and physical preconditions
+2. transaction: ACTIVE → RELEASE_PENDING + release key/hash + LEASE_RELEASE_REQUESTED
+3. claim RELEASE action token and launch helper
+4. helper records STARTED and performs conditional return
+5. fresh helper/status/Git/filesystem observation
 6. managed path available with no Lease:
-   transaction RELEASE_PENDING → RELEASED + LEASE_RELEASED; clear owner
+   transaction RELEASE_PENDING → RELEASED + LEASE_RELEASED
 7. different identity, missing/unmanaged path or insufficient observation:
-   transaction → DIVERGED + LEASE_DIVERGED; preserve work and owner evidence
+   transaction → DIVERGED + LEASE_DIVERGED; preserve work and action evidence
 ```
 
 Retry:
 
-- RELEASED returns the prior semantic result.
+- RELEASED with same key/input returns prior result.
+- same key with different input conflicts.
 - RELEASE_PENDING always observes before considering another return.
-- exact live action owner blocks a competing caller.
-- dead owner may be taken over only after observation and CAS.
-- matching current Lease may retry the same conditional return.
-- different ID, holder, generation or path is `LEASE_FENCE_CONFLICT`.
+- exact live helper blocks a competing caller.
+- STARTED release can retry the conditional command only under the exact same fence and decisive observation rules.
+- different ID, holder, generation, Attempt, source or path is `LEASE_FENCE_CONFLICT`.
 - managed available path proves completion.
 - missing/unmanaged path is `LD-05`, never automatic success.
 
@@ -737,26 +817,30 @@ After release, the empty Track remains `ACTIVE` until explicit abandonment.
 
 `mnfs recover [--track WT-001]` is read-only.
 
-Reconcile canonicalizes every path, validates containment and compares current semantic Leases with Treehouse status using this order:
+Reconcile canonicalizes paths, validates containment and compares semantic Leases with helper, Treehouse, Git and process observations in this order:
 
-1. exact external Lease ID;
-2. exact holder and path as corroborating fields;
-3. exact Git common directory and execution-source ownership;
-4. process list and worktree state.
+1. exact action token/helper process and Artifact chain;
+2. exact external Lease ID;
+3. exact holder and path as corroborating fields;
+4. exact Git common directory and Attempt source ownership;
+5. process list and worktree state.
 
-External IDs, paths and holders must map one-to-one. Duplicate IDs, duplicate paths, multiple holder matches, malformed status items or path escapes are `UNKNOWN`/`DIVERGED`; no first-match selection is allowed.
+External IDs, paths, holders and helper tokens must map one-to-one. Duplicate IDs, duplicate paths, multiple holder matches, multiple helpers, malformed items or path escapes are `UNKNOWN`/`DIVERGED`; no first-match selection is allowed.
 
 | Code | Meaning | Default action |
 |---|---|---|
-| `HEALTHY` | exact semantic/physical identity match | none |
-| `ADOPTABLE` | REQUESTED plus same input has exactly one matching external Lease | original grant retry may commit |
+| `HEALTHY` | exact semantic/helper/physical identity match | none |
+| `ADOPTABLE` | REQUESTED same-input grant has exactly one matching external Lease | original grant retry may commit |
 | `LD-01` | current semantic Lease, external Lease absent | block |
 | `LD-02` | MNFS-like external worktree/Lease without semantic owner | preserve/operator decision |
 | `LD-03` | external Lease ID differs | block |
 | `LD-04` | holder differs | block |
 | `LD-05` | path missing, unmanaged, escaped or not a real linked worktree | preserve/operator decision |
 | `LD-06` | duplicate or non-bijective external identity | preserve/operator decision |
-| `UNKNOWN` | observation insufficient or action owner cannot be proven | block |
+| `LD-07` | action/helper state inconclusive | preserve/wait/operator decision |
+| `SD-01` | source REQUESTED but final source absent | original source operation may retry |
+| `SD-02` | source path/fingerprint/base/config differs | preserve/operator decision |
+| `UNKNOWN` | observation insufficient | block |
 
 Reports contain expected state, every observed candidate, observation hashes, severity, safe actions, recommendation and required authority. Plain recovery changes nothing.
 
@@ -794,6 +878,7 @@ EXECUTION_CONTRACT_CONFLICT
 EXECUTION_SOURCE_INVALID
 EXECUTION_SOURCE_CHANGED
 EXECUTION_SOURCE_REMOTE_PRESENT
+EXECUTION_SOURCE_SHARED_OBJECTS
 SCHEMA_VERSION_UNSUPPORTED
 SCHEMA_MIGRATION_INVALID
 WRITE_TRACK_CONFLICT
@@ -808,6 +893,7 @@ LEASE_CONFLICT
 LEASE_IDEMPOTENCY_CONFLICT
 LEASE_OPERATION_IN_PROGRESS
 LEASE_OPERATION_OWNER_UNKNOWN
+LEASE_ACTION_INCONCLUSIVE
 LEASE_FENCE_CONFLICT
 LEASE_RELEASE_BLOCKED_DIRTY
 LEASE_RELEASE_BLOCKED_UNKNOWN
@@ -824,21 +910,21 @@ RECOVERY_DIVERGENCE
 
 Raw output is stored only by bounded Artifact reference when required.
 
-## 19. Design coverage matrix
+## 19. Constructive coverage matrix
 
-| Requirement | Design | Failure | Verification |
+| Requirement | Final proposed design | Failure behavior | Required proof |
 |---|---|---|---|
-| REQ-001 | Attempt lifecycle + unique partial index + atomic supersession | duplicate OPEN rollback | unit/migration/fresh process |
-| REQ-002 | separate Attempt/Run IDs + atomic replacement | new Run preserves Attempt/history | replacement and late-owner tests |
-| REQ-004 | Claim/Track/Event transaction + idempotency | Event/state failure rolls back | injected conflict and duplicate-key tests |
-| REQ-005 | exact approval lookup + base commit + lineage FKs | stale contract, cross-lineage or wrong base rejected | service/FK/Replan tests |
-| REQ-006 | no-origin source + action ownership + Lease IAO | every owner/action crash window classified | unit matrix + accepted TC-01 Evidence |
-| REQ-007 | generation + input hash + process/action fence + external fence | stale caller cannot release; dirty preserved | unit matrix + TC-01 S08–S11 |
-| REQ-008 | bijective read-only Reconcile + LD taxonomy | ambiguity blocks and preserves | DR-04/DR-05/duplicate identity/fresh process |
+| REQ-001 | Attempt lifecycle, unique partial index, atomic supersession | duplicate OPEN or stale version rolls back | unit, migration and fresh process |
+| REQ-002 | separate Attempt/Run IDs and atomic Run replacement | replacement preserves Attempt/history; stale Run fenced | replacement and process-identity tests |
+| REQ-004 | Claim + Track + versioned Event transaction and idempotency | Event/state failure leaves no mutation | injected rollback and duplicate-key tests |
+| REQ-005 | approval lookup, exact base, ancestry FKs and tree validation | stale contract, cross-lineage, wrong base/tree rejected | service, FK, Git object and Replan tests |
+| REQ-006 | source IAO + helper-backed Lease IAO | every source/token/helper/action crash window classified | unit matrix + accepted TC-01 Evidence |
+| REQ-007 | generation, grant/release input hashes, helper/process/external fences | stale caller cannot release; inconclusive action blocks; dirty preserved | unit matrix + TC-01 S08–S11 |
+| REQ-008 | source/helper/Lease one-to-one read-only Reconcile | ambiguity blocks and preserves | DR-04/DR-05, duplicate identity and fresh process |
 
-All seven requirements now have exact state, service, failure and proof coverage. The external candidate uncertainty is closed; explicit Operator approval of this version remains the R5 gate.
+All seven requirements have exact final proposed state, service, failure and proof coverage. The remaining R5 gate is the Operator decision on this version.
 
-## 20. Verification
+## 20. Verification requirements
 
 TDD is mandatory.
 
@@ -848,59 +934,70 @@ TDD is mandatory.
 - backup and preflight failure;
 - Event IDs, sequence, payloads and counts preserved;
 - `payload_schema_version` copied as 1;
-- all indexes and FKs recreated;
+- indexes and foreign keys recreated;
 - `foreign_key_check` and `integrity_check` pass;
 - migration rollback leaves v3 unchanged;
-- pre-v4 command write fails and its transaction rolls back;
+- pre-v4 command write fails and transaction rolls back;
 - newer schema rejected in write mode;
 - fresh v4 process recovers exact M0/M1 state.
 
 ### Domain and relational integrity
 
-- ID allocation and lifecycle transitions;
+- ID allocation and every legal/illegal transition;
 - one current Track/Feature, Attempt/Track, Run/Attempt, Lease/Track and Claim/Attempt;
+- atomic Attempt supersession and Run replacement;
 - cross-Track Lease and cross-Attempt Run cannot attach to Claim;
 - Attempt base commit and Claim base equality;
-- result SHA must be a tree in the exact source;
+- result SHA must be a tree in the exact READY source;
 - Track abandonment guards;
 - optimistic conflicts;
 - Claim/Event and Track/Attempt atomicity;
-- idempotency same-input replay and different-input conflict.
+- grant/release/Claim same-input replay and different-input conflict.
 
-### Execution source and adapters
+### Execution source
 
-- canonical checkout unchanged before/after source preparation;
+- canonical checkout unchanged before/after;
 - local transfer works with network disabled and credential helpers rejected;
-- prepared source has no remote and exact base;
-- controlled HOME contains no hooks or inherited config;
-- Treehouse never receives canonical checkout cwd;
-- mandatory candidate freshness and command-shape validation;
-- read-only Git allowlist contains no `write-tree`, fetch or mutation.
+- no remote, alternates, shared common dir, hardlinked objects or executable hooks;
+- current `main`, exact base/object format/tree and clean status;
+- REQUESTED crash, complete-temp, matching-final and conflicting-final cases;
+- controlled HOME/XDG/config contains no inherited hooks;
+- Treehouse never receives canonical checkout cwd.
 
-### Lease and Recovery
+### Action helper and Lease
 
-- every grant/release crash window;
+- operation file exact and immutable;
+- STARTED durable before Treehouse invocation;
+- FINISHED bounded and advisory;
+- parent death before spawn, during spawn, after STARTED, after Treehouse and after semantic commit;
+- surviving helper is discovered by token and process identity;
 - two simultaneous same-key grants invoke Treehouse at most once;
-- live action owner blocks; dead exact owner can be taken over; unknown owner blocks;
-- external completion before semantic commit is recovered without duplicate action;
-- stale internal/external fence rejected;
-- dirty and ambiguous work preserved;
-- exact one-to-one reconciliation;
-- duplicate ID/path/holder classified, never first-matched;
-- Recovery is byte-for-byte non-mutating.
+- an inconclusive STARTED grant never causes a second `get`;
+- exact external completion is semantically recovered;
+- conditional release retry remains fenced;
+- stale internal/external/source/helper fence rejected;
+- dirty and ambiguous work preserved.
 
-### Canonical proof
+### Recovery
+
+- exact one-to-one matching;
+- duplicate ID/path/holder/helper classified, never first-matched;
+- source and Lease divergences reported independently;
+- Recovery is byte-for-byte non-mutating;
+- output includes every candidate, Evidence refs and concrete authority/next action.
+
+### Canonical M01 proof
 
 ```text
 Scenario A
-A1 open Track + Attempt at exact base; materialize no-origin source; grant
-A2 terminate at each named owner/action window; fresh process reconciles
+A1 open Track + Attempt at exact base; materialize independent no-origin source; grant
+A2 terminate at every source/helper/action window; fresh process reconciles
 A3 fenced clean release; explicit Track abandonment
 A4 recover ABANDONED Track and RELEASED Lease; repeated release is idempotent
 
 Scenario B
-B1 open next Track + Attempt + Run identity; materialize source; grant
-B2 atomic Claim bound to exact lineage, base and result tree
+B1 open next Track + Attempt + Run; materialize source; grant
+B2 atomic Claim bound to exact ancestry, base and result tree
 B3 fresh process recovers identical Track/Attempt/Run/Lease/Claim
 product cleanup: none; preserved for M02
 trusted test-fixture cleanup: after Evidence, outside product semantics
@@ -910,35 +1007,34 @@ Pi and production SEC-E1 dispatch remain absent.
 
 ## 21. Observability, security and rollback
 
-Record Domain Events with payload version, durations, adapter exit classes, bounded Artifact refs, execution-source identity, Treehouse version/hash, action-owner identity, Recovery classifications, entity versions and next action.
+Record versioned Domain Events, durations, adapter exit classes, bounded Artifact refs, source fingerprint, Treehouse version/hash, action token/helper identity, Recovery classifications, entity versions and concrete next action.
 
 Security invariants:
 
 - canonical checkout is never Treehouse cwd;
-- no-origin execution source;
-- local object transfer only;
-- no network or credential helper;
-- controlled HOME/config with no Treehouse hooks;
+- Attempt source has no remotes, shared objects, alternates or executable hooks;
+- local object transfer only, network and credential helpers disabled;
+- controlled HOME/XDG/config/hook path;
 - exact argv/cwd/env and no shell interpolation;
 - no force, destroy or prune;
 - strict untrusted-output validation;
 - realpath and ownership verification;
-- ambiguous identity fails closed;
+- ambiguous or inconclusive identity fails closed;
 - no secret reads or unbounded logs.
 
 Rollout:
 
 ```text
 accepted TC-01 Evidence
-→ final review and Operator approval of 0.5.0
+→ final review and Operator approval of 0.6.0
 → separate implementation plan
 → migration/domain with fakes
-→ execution-source proof
+→ source/helper proofs
 → real grant/recovery/release
 → M01 composition proof
 ```
 
-Rollback restores the pre-migration backup or performs a separately reviewed forward repair. It never performs automatic worktree cleanup. Execution sources and worktrees remain preserved until explicit safe disposition.
+Rollback restores the pre-migration backup or performs a separately reviewed forward repair. It never automatically removes a source or worktree. Execution sources, helper Artifacts and worktrees remain preserved until explicit safe disposition.
 
 ## 22. Target files
 
@@ -952,6 +1048,7 @@ src/adapters/execution-source.ts
 src/adapters/treehouse.ts
 src/adapters/git-worktree.ts
 src/adapters/process-identity.ts
+src/runtime/lease-action-runner.ts
 src/services/execution-service.ts
 src/services/claim-service.ts
 src/services/lease-service.ts
@@ -964,7 +1061,7 @@ src/store/migrations.ts
 src/store/sqlite-store.ts
 ```
 
-Tests mirror responsibilities. The implementation plan may refine filenames without changing behavior, authority or the no-origin boundary.
+Tests mirror responsibilities. The implementation plan may refine filenames without changing behavior, authority or the proved no-origin boundary.
 
 ## 23. R5 gate and impact
 
@@ -975,10 +1072,11 @@ Research:                    PUBLISHED
 TC-01 protocol:              ACCEPTED
 TC-01 canonical Evidence:    ACCEPT — 15/15 PASS, cleanup COMPLETED
 Treehouse candidate:         ACCEPTED ONLY INSIDE PROVED BOUNDARY
-M01 microdesign:             PROPOSED — version 0.5.0
+Task 14 review:              COMPLETE / OPERATOR DECISION PENDING
+M01 microdesign:             PROPOSED — version 0.6.0
 M01 implementation:          PROHIBITED
 Pi Worker dispatch:          PROHIBITED
-Current gate:                explicit Operator decision on version 0.5.0
+Current gate:                explicit Operator decision on version 0.6.0
 ```
 
 ```yaml
@@ -992,7 +1090,7 @@ documentation_impact:
     - DOC-PRODUCT-BLUEPRINT-08
     - DOC-PROJECT-STATUS
     - TRACKING-WORKLOG
-  rationale: "Final R5 review closes the production no-origin boundary, relational lineage, migration downgrade fence, Lease action ownership and exact Recovery matching."
+  rationale: "Final R5 review closes the production no-origin/source boundary, versioned Events, relational ancestry, migration downgrade fence, trusted action-helper crash windows and exact Recovery matching."
   follow_up:
     issue: 16
 

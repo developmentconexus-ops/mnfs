@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.7.1
+version: 1.7.2
 owners:
   - developmentconexus-ops
 related:
@@ -17,6 +17,7 @@ related:
   - ACCEPTANCE-M2-UNBLOCK
   - ACCEPTANCE-M01-R5-DESIGN-PACKAGE-REVIEW
   - ACCEPTANCE-TC-01-TASK-01-HARNESS-REGISTRATION
+  - ACCEPTANCE-TC-01-TASK-02-SAFE-PROCESS-RUNNER
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
@@ -59,7 +60,9 @@ tracking_issue: 16
 - [x] TC-01 implementation and canonical WSL2 execution plan version 1.0.3 written, self-reviewed and CI-verified.
 - [x] Operator approved TC-01 plan version 1.0.3 and authorized Task 1.
 - [x] TC-01 Task 1 completed through observed RED, focused GREEN and full canonical CI.
-- [ ] Operator authorizes Task 2 — safe process runner and stable error model.
+- [x] Operator authorized Task 2.
+- [x] TC-01 Task 2 completed through observed RED, focused GREEN and full canonical CI.
+- [ ] TC-01 Task 3 — run-scoped paths and disposable Git fixture — started.
 - [ ] TC-01 deterministic harness implementation complete.
 - [ ] TC-01 harness receives full CI-green review before real execution.
 - [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.
@@ -86,12 +89,13 @@ R5 design package:       OPERATOR APPROVED FOR TC-01 PLANNING
 TC-01 protocol:          ACCEPTED — version 0.2.0
 TC-01 plan:              APPROVED — version 1.0.3
 TC-01 Task 1:            ACCEPTED
-TC-01 Task 2:            NOT_STARTED
+TC-01 Task 2:            ACCEPTED
+TC-01 Task 3:            NOT_STARTED
 TC-01 real Evidence:     NOT_STARTED
 M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
 Blocking external input: Treehouse production-adapter conformance
-Current human gate:      authorization to begin TC-01 Task 2
+Current human gate:      continuation to TC-01 Task 3
 Design PR:               #17 DRAFT
 ```
 
@@ -104,7 +108,8 @@ M01 research:         AUTHORIZED
 TC-01 protocol:       ACCEPTED
 TC-01 plan:           APPROVED
 TC-01 Task 1:         ACCEPTED
-TC-01 Task 2:         REQUIRES EXPLICIT CONTINUATION
+TC-01 Task 2:         ACCEPTED
+TC-01 Task 3:         NOT_STARTED
 TC-01 WSL2 execution: AUTHORIZED only after a reviewed, CI-green complete harness exists
 M01 microdesign:      PROPOSED, NOT FINAL
 M01 implementation:  PROHIBITED until final microdesign approval
@@ -128,30 +133,29 @@ documentation tooling:            PASS
 documentation validation:         PASS — 71 canonical IDs
 ```
 
-## Latest TC-01 Task 1 verification
+## Latest TC-01 Task 2 verification
 
-PR #17 merge commit `63372a37149f23d5245bf09fb04ce37659965718` verified TC-01 Task 1 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
+PR #17 merge commit `c54f2b7ba9aec27d3da862493c505423f804f00c` verified TC-01 Task 2 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
 
 ```text
-Workflow:                          30866223522
-Job:                               91858565049
+Workflow:                          30867719857
+Job:                               91863068568
 npm ci:                            PASS — 0 vulnerabilities
 typecheck:                         PASS
 product tests:                     PASS — 95/95
 AS-02 deterministic tests:        PASS — 119/119
-TC-01 deterministic tests:        PASS — 1/1
+TC-01 deterministic tests:        PASS — 5/5
 documentation tooling:            PASS
 MIS-002 Replan builder:            PASS
 approved allocation tests:        PASS
-documentation validation:         PASS — 76 canonical IDs
+documentation validation:         PASS — 77 canonical IDs
 ```
 
-This proof establishes only the deterministic harness-registration boundary. It does not invoke or validate the real Treehouse binary.
+This proof establishes the deterministic process-execution boundary. It does not invoke or validate the real Treehouse binary.
 
 ## Immediate next action
 
-1. Operator reviews `ACCEPTANCE-TC-01-TASK-01-HARNESS-REGISTRATION`.
-2. Operator explicitly authorizes Task 2 of the approved TC-01 plan.
-3. Implement the safe process runner and stable error model through a fresh RED/GREEN TDD cycle.
-4. Run focused tests and full `npm run verify` before Task 2 acceptance.
-5. Keep real Treehouse execution, M01 implementation and Pi Worker dispatch prohibited until their later gates pass.
+1. Review `ACCEPTANCE-TC-01-TASK-02-SAFE-PROCESS-RUNNER`.
+2. Continue with Task 3 of the approved TC-01 plan only after the next governed continuation.
+3. Task 3 must create run-scoped Linux path validation and disposable Git fixtures through fresh RED/GREEN TDD cycles.
+4. Keep real Treehouse execution, M01 implementation and Pi Worker dispatch prohibited until their later gates pass.

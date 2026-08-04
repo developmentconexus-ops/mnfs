@@ -76,7 +76,7 @@ test('creates one isolated deterministic Git fixture with no origin', async (t) 
   assert.equal(await readFile(join(fixture.sourceRepo, 'fixture-sentinel.txt'), 'utf8'), 'tc01-fixture-sentinel\n');
   assert.equal(
     await readFile(join(fixture.sourceRepo, 'treehouse.toml'), 'utf8'),
-    `max_trees = 2\nroot = "${fixture.poolRoot}"\n`,
+    `max_trees = 2\nroot = ${JSON.stringify(fixture.poolRoot)}\n`,
   );
 
   assert.equal(await git(fixture.sourceRepo, fixture.fakeHome, ['rev-list', '--count', 'HEAD']), '1');
@@ -92,6 +92,25 @@ test('creates one isolated deterministic Git fixture with no origin', async (t) 
   const recovered = await loadFixture(fixture.runRoot);
   assert.deepEqual(recovered, fixture);
   assert.deepEqual(JSON.parse(await readFile(join(fixture.runRoot, 'fixture.json'), 'utf8')), fixture);
+});
+
+test('encodes quote and backslash characters safely in treehouse TOML', async (t) => {
+  const base = await mkdtemp(join(tmpdir(), 'mnfs-tc01-toml-'));
+  t.after(() => rm(base, { recursive: true, force: true }));
+  const stateRoot = join(base, 'state-"quoted\\root');
+  await mkdir(stateRoot);
+
+  const fixture = await createFixture({
+    stateRoot,
+    runId: RUN_ID,
+    gitFile: 'git',
+    pathEnv: process.env.PATH ?? '/usr/bin:/bin',
+    run: runProcess,
+    now: () => NOW,
+  });
+
+  const config = await readFile(join(fixture.sourceRepo, 'treehouse.toml'), 'utf8');
+  assert.equal(config, `max_trees = 2\nroot = ${JSON.stringify(fixture.poolRoot)}\n`);
 });
 
 test('refuses an existing non-empty run root without deleting its content', async (t) => {

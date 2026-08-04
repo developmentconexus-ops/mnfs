@@ -5,7 +5,7 @@ document_type: implementation_plan
 form: how_to
 authority: guidance
 status: current
-version: 1.0.0
+version: 1.0.1
 owners:
   - developmentconexus-ops
 related:
@@ -25,113 +25,34 @@ last_reviewed: 2026-08-04
 
 **Goal:** Implement the accepted `MIS-002/M01` durable execution, independent source, Treehouse Lease, Claim and read-only Recovery foundation without launching Pi or implementing M02 acceptance behavior.
 
-**Architecture:** SQLite remains the sole semantic authority through one `SqliteStore` connection and focused stores sharing a bounded transaction object. Each Attempt receives an independent Linux-local Git source at its exact base commit; Treehouse 2.1.1 operates only inside that no-origin controlled-HOME boundary. External grant and release actions use durable intent, a token-bound `LeaseActionRunner`, fresh Treehouse/Git observations and fenced semantic commits.
+**Architecture:** SQLite remains the sole semantic authority through one `SqliteStore` connection and focused stores sharing one transaction object. Each Attempt receives an independent Linux-local Git source at its exact base commit; Treehouse 2.1.1 operates only inside that no-origin controlled-HOME boundary. External grant and release actions use durable intent, a token-bound `LeaseActionRunner`, fresh Treehouse/Git observations and fenced semantic commits.
 
-**Tech Stack:** Node.js 24.18.0+, TypeScript 5.9 with strict/noUncheckedIndexedAccess/exactOptionalPropertyTypes, `node:sqlite`, `node:test`, Git CLI, Treehouse 2.1.1, Ubuntu WSL2, canonical JSON and SHA-256.
+**Tech Stack:** Node.js 24.18.0+, TypeScript 5.9 strict mode, `node:sqlite`, `node:test`, Git CLI, Treehouse 2.1.1, Ubuntu WSL2, canonical JSON and SHA-256.
 
 ## Global Constraints
 
 - Govern all work by approved MIS-002 revision 5: `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`.
-- Implement exactly `CAP-EXEC-REQ-001`, `002`, `004`, `005`, `006`, `007` and `008`; do not pull M02 requirements into M01.
+- Implement exactly `CAP-EXEC-REQ-001`, `002`, `004`, `005`, `006`, `007` and `008`.
 - Preserve accepted microdesign `DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` version `0.6.1`.
-- Keep one `DatabaseSync` connection and one transaction authority per command; focused stores may not open databases.
-- Use `BEGIN IMMEDIATE`, bounded `SQLITE_BUSY` retry and optimistic row versions; never loop indefinitely.
-- Every semantic mutation and matching versioned Domain Event commits in the same SQLite transaction.
-- Never perform Git, filesystem scans, Treehouse actions, process waits or model calls inside a domain transaction.
-- The canonical checkout is read-only and is never Treehouse cwd.
-- Every Attempt source is Linux-owned, independent, exact-base, no-origin, no-alternates, no shared common directory and no hardlinked canonical object.
-- Treehouse execution requires candidate SHA-256 `c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`, semantic version `2.1.1`, accepted capabilities and accepted command shapes.
-- Treehouse receives controlled HOME/XDG/config/hooks, Linux-only PATH, disabled global/system Git configuration, closed stdin, bounded output, timeout and `shell: false`.
-- Never use Treehouse force, destroy, broad prune, human stderr as state or a direct Git fallback in the same Lease operation.
-- A `LeaseActionRunner` STARTED grant with inconclusive outcome never causes an automatic second `treehouse get`.
-- Dirty, ambiguous, stale, escaped, duplicate or unclassified work is preserved and blocks destructive action.
-- Plain `mnfs recover` is byte-for-byte non-mutating for SQLite, sources, worktrees, Treehouse state and helper state.
-- M01 may create only Claim `OPEN`; completion, Receipt, Gate and acceptance belong to M02.
-- Pi launch, production SEC-E1 creation, Authority Snapshot, Writer Pack, Integration, QA and delivery remain prohibited.
-- Real Treehouse commands run only after all deterministic gates pass and only from an explicit canonical WSL2 acceptance task.
+- Keep one `DatabaseSync` connection and one transaction authority per command.
+- Use `BEGIN IMMEDIATE`, bounded `SQLITE_BUSY` retry and optimistic row versions.
+- Commit every semantic mutation and matching versioned Domain Event atomically.
+- Never execute Git, Treehouse, filesystem scans, process waits or model calls inside a domain transaction.
+- Never use the canonical checkout as Treehouse cwd.
+- Every Attempt source is Linux-owned, exact-base, no-origin, no-alternates, no shared common directory and no hardlinked canonical object.
+- Require Treehouse SHA-256 `c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`, version `2.1.1`, accepted capabilities and accepted command shapes.
+- Treehouse receives controlled HOME/XDG/config/hooks, Linux-only PATH, disabled global/system Git config, closed stdin, bounded output, timeout and `shell: false`.
+- Never use force, destroy, broad prune, stderr text as state or direct Git fallback inside the same Lease operation.
+- Never automatically repeat `treehouse get` after durable STARTED evidence with an inconclusive outcome.
+- Preserve dirty, ambiguous, stale, escaped, duplicate and unclassified work.
+- Keep plain `mnfs recover` byte-for-byte non-mutating for domain SQLite and managed resources.
+- M01 may create Claim `OPEN` only. Pi, SEC-E1 production creation, Worker completion, Receipt, Gate, Integration, QA and delivery remain outside scope.
+- Run real Treehouse commands only in the final explicit WSL2 acceptance task after all deterministic gates pass.
 - Keep PR #17 draft and unmerged. Automatic merge is not authorized.
 
 ---
 
-## Target File Set
-
-### New production files
-
-```text
-src/execution/ids.ts
-src/execution/model.ts
-src/execution/transitions.ts
-src/store/sqlite-transaction.ts
-src/store/sqlite-maintenance.ts
-src/store/event-store.ts
-src/store/execution-store.ts
-src/adapters/process-identity.ts
-src/adapters/git-worktree.ts
-src/adapters/execution-source.ts
-src/adapters/treehouse.ts
-src/runtime/durable-artifact.ts
-src/runtime/lease-action-protocol.ts
-src/runtime/lease-action-runner.ts
-src/runtime/lease-action-entry.ts
-src/services/execution-service.ts
-src/services/claim-service.ts
-src/services/lease-service.ts
-src/services/recovery-service.ts
-bin/mnfs-lease-action.mjs
-```
-
-### New tests
-
-```text
-tests/execution/ids.test.ts
-tests/execution/transitions.test.ts
-tests/store/sqlite-transaction.test.ts
-tests/store/sqlite-maintenance.test.ts
-tests/store/migration-v4.test.ts
-tests/store/execution-store.test.ts
-tests/adapters/process-identity.test.ts
-tests/adapters/git-worktree.test.ts
-tests/adapters/execution-source.test.ts
-tests/adapters/treehouse.test.ts
-tests/runtime/durable-artifact.test.ts
-tests/runtime/lease-action-protocol.test.ts
-tests/runtime/lease-action-runner.test.ts
-tests/services/execution-service.test.ts
-tests/services/claim-service.test.ts
-tests/services/lease-service-grant.test.ts
-tests/services/lease-service-release.test.ts
-tests/services/recovery-service.test.ts
-tests/cli/execution-args.test.ts
-tests/cli/execution-main.test.ts
-tests/integration/m01-fresh-process.test.ts
-tests/integration/m01-composition.test.ts
-```
-
-### Existing files modified
-
-```text
-package.json
-src/domain/errors.ts
-src/domain/types.ts
-src/store/migrations.ts
-src/store/sqlite-store.ts
-src/runtime/paths.ts
-src/cli/args.ts
-src/cli/main.ts
-src/cli/entry.ts
-tests/store/sqlite-store.test.ts
-tests/cli/args.test.ts
-tests/cli/main.test.ts
-docs/DOCUMENTATION-MAP.md
-docs/tracking/STATUS.md
-docs/tracking/WORKLOG.md
-```
-
----
-
-## Frozen Public Types
-
-The tasks may split implementation details, but these public shapes remain stable unless a reviewed plan revision changes them.
+## Frozen Public Interfaces
 
 ```ts
 export type WriteTrackId = `WT-${string}`;
@@ -144,7 +65,6 @@ export type WriteTrackStatus = 'ACTIVE' | 'CLAIMED' | 'ABANDONED';
 export type AttemptStatus = 'OPEN' | 'SUPERSEDED' | 'CLOSED' | 'CANCELLED';
 export type SourceStatus = 'REQUESTED' | 'READY' | 'DIVERGED';
 export type WorkerRunStatus = 'STARTING' | 'RUNNING' | 'IDLE' | 'EXITED' | 'LOST' | 'CANCELLED';
-export type ClaimStatus = 'OPEN';
 export type LeaseStatus = 'REQUESTED' | 'ACTIVE' | 'RELEASE_PENDING' | 'RELEASED' | 'DIVERGED';
 export type LeaseActionKind = 'GRANT' | 'RELEASE';
 export type LeaseActionPhase = 'CLAIMED' | 'STARTED' | 'FINISHED';
@@ -201,66 +121,67 @@ export interface OpenClaimInput {
 
 ---
 
-### Task 1: Domain identities, models, transitions and error vocabulary
+### Task 1: Domain model, identities, transitions, errors and test fixtures
 
 **Files:**
 - Create: `src/execution/ids.ts`
 - Create: `src/execution/model.ts`
 - Create: `src/execution/transitions.ts`
 - Modify: `src/domain/errors.ts`
-- Test: `tests/execution/ids.test.ts`
-- Test: `tests/execution/transitions.test.ts`
+- Create: `tests/support/m01-fixtures.ts`
+- Create: `tests/execution/ids.test.ts`
+- Create: `tests/execution/transitions.test.ts`
 
 **Interfaces:**
-- Consumes: accepted type shapes and lifecycle states from microdesign 0.6.1.
-- Produces: branded string validators, immutable entity interfaces, transition guards and complete stable M01 error codes.
+- Produces exact entity types, ID formatters/validators, lifecycle guards and reusable deterministic builders.
 
-- [ ] **Step 1: Write identity RED tests**
+- [ ] **Step 1: Write failing identity tests**
 
 ```ts
-test('allocates stable parent-relative execution identities', () => {
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {
+  formatAttemptId,
+  formatClaimId,
+  formatLeaseId,
+  formatWorkerRunId,
+  formatWriteTrackId,
+  requireWorkerRunId,
+} from '../../src/execution/ids.js';
+
+test('formats stable parent-relative M01 identities', () => {
   assert.equal(formatWriteTrackId(1), 'WT-001');
   assert.equal(formatAttemptId('WT-001', 1), 'WT-001/A01');
   assert.equal(formatWorkerRunId('WT-001/A01', 2), 'WT-001/A01/WR02');
   assert.equal(formatClaimId('WT-001/A01', 3), 'WT-001/A01/CLM03');
   assert.equal(formatLeaseId(7), 'LSE-007');
-});
-
-test('rejects malformed and cross-parent identities', () => {
-  assert.throws(() => requireAttemptId('A01'));
   assert.throws(() => requireWorkerRunId('WT-002/A01/WR01', 'WT-001/A01'));
 });
 ```
 
 - [ ] **Step 2: Run RED**
 
-Run:
-
 ```bash
 npm run build --silent && node --test dist/tests/execution/ids.test.js
 ```
 
-Expected: FAIL because `src/execution/ids.ts` does not exist.
+Expected: module-not-found failure for `src/execution/ids.ts`.
 
-- [ ] **Step 3: Implement exact ID formatting and validation**
+- [ ] **Step 3: Implement exact ID functions**
 
 ```ts
-const WRITE_TRACK = /^WT-(\d{3,})$/;
-const ATTEMPT = /^(WT-\d{3,})\/A(\d{2,})$/;
-const WORKER_RUN = /^(WT-\d{3,}\/A\d{2,})\/WR(\d{2,})$/;
-const CLAIM = /^(WT-\d{3,}\/A\d{2,})\/CLM(\d{2,})$/;
-const LEASE = /^LSE-(\d{3,})$/;
-
-export function formatWriteTrackId(value: number): WriteTrackId {
-  return `WT-${String(requirePositiveInteger(value)).padStart(3, '0')}`;
-}
+const WRITE_TRACK_PATTERN = /^WT-(\d{3,})$/;
+const ATTEMPT_PATTERN = /^(WT-\d{3,})\/A(\d{2,})$/;
+const WORKER_RUN_PATTERN = /^(WT-\d{3,}\/A\d{2,})\/WR(\d{2,})$/;
+const CLAIM_PATTERN = /^(WT-\d{3,}\/A\d{2,})\/CLM(\d{2,})$/;
+const LEASE_PATTERN = /^LSE-(\d{3,})$/;
 ```
 
-Implement equivalent exact formatters and parent-aware validators for Attempt, Run, Claim and Lease.
+Every formatter rejects non-positive/non-integer input. Every validator returns the branded string and verifies the expected parent when supplied.
 
-- [ ] **Step 4: Write transition RED tests**
+- [ ] **Step 4: Write and implement transition tests**
 
-Cover every legal and illegal transition. At minimum:
+Use exhaustive tables. Examples:
 
 ```ts
 assert.equal(requireAttemptTransition('OPEN', 'SUPERSEDED'), 'SUPERSEDED');
@@ -269,26 +190,17 @@ assert.equal(requireLeaseTransition('ACTIVE', 'RELEASE_PENDING'), 'RELEASE_PENDI
 assert.throws(() => requireLeaseTransition('DIVERGED', 'ACTIVE'));
 ```
 
-- [ ] **Step 5: Implement immutable entity interfaces and transition tables**
+Implement literal transition maps and immutable entity interfaces. Persist timestamps as ISO strings and versions as positive integers.
 
-Use literal transition maps:
+- [ ] **Step 5: Add the complete accepted M01 error union**
 
-```ts
-const ATTEMPT_TRANSITIONS = {
-  OPEN: new Set(['SUPERSEDED', 'CLOSED', 'CANCELLED']),
-  SUPERSEDED: new Set(),
-  CLOSED: new Set(),
-  CANCELLED: new Set(),
-} as const;
-```
+Copy the exact codes from accepted microdesign section 18 into `MnfsErrorCode`. Domain errors use exit code 1; parser misuse remains exit code 2.
 
-Model every persisted timestamp and version explicitly; do not use `Date` objects in domain entities.
+- [ ] **Step 6: Add deterministic fixture builders**
 
-- [ ] **Step 6: Add all accepted M01 error codes**
+`tests/support/m01-fixtures.ts` exports fixed timestamps, contract/Treehouse hashes, IDs, entity builders and a `withTemporaryDirectory` helper. Builders reject unknown override keys through TypeScript typing.
 
-Extend `MnfsErrorCode` with the exact codes listed in microdesign section 18. Give usage errors exit code 2 only at the parser boundary; domain failures remain exit code 1.
-
-- [ ] **Step 7: Run focused and root tests**
+- [ ] **Step 7: Verify**
 
 ```bash
 npm run typecheck
@@ -296,73 +208,189 @@ npm run build --silent && node --test dist/tests/execution/ids.test.js dist/test
 npm run test:unit
 ```
 
-Expected: PASS with all pre-M01 tests unchanged.
-
 - [ ] **Step 8: Commit**
 
 ```bash
-git add src/execution src/domain/errors.ts tests/execution
+git add src/execution src/domain/errors.ts tests/support/m01-fixtures.ts tests/execution
 git commit -m "feat: define M01 execution domain"
 ```
 
 ---
 
-### Task 2: Shared SQLite transaction and versioned Event boundary
+### Task 2: Production process runner, durable Artifact writer and process identity
+
+**Files:**
+- Create: `src/runtime/process-runner.ts`
+- Create: `src/runtime/durable-artifact.ts`
+- Create: `src/adapters/process-identity.ts`
+- Create: `tests/runtime/process-runner.test.ts`
+- Create: `tests/runtime/durable-artifact.test.ts`
+- Create: `tests/adapters/process-identity.test.ts`
+
+**Interfaces:**
+
+```ts
+export interface ProcessSpec {
+  readonly executable: string;
+  readonly args: readonly string[];
+  readonly cwd: string;
+  readonly env: Readonly<Record<string, string>>;
+  readonly timeoutMs: number;
+  readonly stdoutLimitBytes: number;
+  readonly stderrLimitBytes: number;
+}
+
+export interface ProcessResult {
+  readonly exitCode: number | null;
+  readonly signal: NodeJS.Signals | null;
+  readonly stdout: Buffer;
+  readonly stderr: Buffer;
+  readonly timedOut: boolean;
+}
+```
+
+- [ ] **Step 1: Write runner RED tests**
+
+Prove raw-byte stdout/stderr preservation, closed stdin, `shell: false`, exact cwd/env, output bounds, spawn failure and Linux process-group timeout that kills a grandchild.
+
+- [ ] **Step 2: Implement the bounded runner**
+
+Use `spawn` with `detached: true` on Linux. On timeout/output overflow send `SIGTERM` to `-pid`, wait the fixed grace period, then send `SIGKILL` to `-pid`. Never retry or fall back.
+
+- [ ] **Step 3: Write durable-write RED test**
+
+Require this observed order:
+
+```text
+open exclusive temp
+write complete bytes
+fsync temp
+close temp
+rename temp to final
+fsync parent directory
+```
+
+- [ ] **Step 4: Implement immutable durable Artifact publication**
+
+Expose `writeDurableFile(path, bytes, mode)` and `readRegularFileNoSymlink(path)`. An existing final file succeeds only when its exact bytes match; otherwise throw `INTERNAL_ERROR`.
+
+- [ ] **Step 5: Write and implement process identity tests**
+
+Parse boot ID and `/proc/<pid>/stat` field 22 correctly even when process names contain spaces and parentheses. `observe(pid)` returns `undefined` only for a genuinely absent process. Equality requires boot ID, PID and start ticks.
+
+- [ ] **Step 6: Verify and commit**
+
+```bash
+npm run typecheck
+npm run build --silent && node --test dist/tests/runtime/process-runner.test.js dist/tests/runtime/durable-artifact.test.js dist/tests/adapters/process-identity.test.js
+npm run test:unit
+git add src/runtime src/adapters/process-identity.ts tests/runtime tests/adapters/process-identity.test.ts
+git commit -m "feat: add trusted runtime primitives"
+```
+
+---
+
+### Task 3: Shared SQLite transaction authority
 
 **Files:**
 - Create: `src/store/sqlite-transaction.ts`
-- Create: `src/store/event-store.ts`
 - Modify: `src/store/sqlite-store.ts`
-- Modify: `src/domain/types.ts`
-- Test: `tests/store/sqlite-transaction.test.ts`
+- Create: `tests/store/sqlite-transaction.test.ts`
 - Modify: `tests/store/sqlite-store.test.ts`
 
 **Interfaces:**
-- Consumes: one existing `DatabaseSync` opened by `SqliteStore`.
-- Produces: `SqliteTransaction.run<T>()`, bounded busy retry, `EventStore.append()` and version-aware Event reads without opening another connection.
-
-- [ ] **Step 1: Write RED for one shared connection and rollback**
 
 ```ts
-test('focused stores share one transaction and roll back state plus event', () => {
-  const harness = openStoreHarness();
-  assert.throws(() => harness.transaction.run(() => {
-    harness.database.prepare("INSERT INTO missions ...").run(...);
-    harness.events.append(invalidDuplicateEvent);
-  }));
-  assert.equal(harness.database.prepare('SELECT count(*) AS n FROM missions').get().n, 0);
-});
+export class SqliteTransaction {
+  constructor(
+    readonly database: DatabaseSync,
+    readonly sleep: (milliseconds: number) => void,
+  );
+  run<T>(operation: () => T): T;
+}
 ```
 
-- [ ] **Step 2: Run RED**
+- [ ] **Step 1: Write RED for commit, rollback and bounded busy retry**
+
+Prove transaction success, rollback after state insert, no retry after user code starts and `SQLITE_BUSY` delays exactly `5`, `10`, `20` milliseconds before `CONCURRENCY_CONFLICT`.
+
+- [ ] **Step 2: Implement `BEGIN IMMEDIATE` authority**
+
+Retry only the `BEGIN IMMEDIATE` call. Once it succeeds, execute user code exactly once. Commit once; rollback only while `database.isTransaction` is true.
+
+- [ ] **Step 3: Refactor `SqliteStore` without schema change**
+
+Replace private transaction logic with one shared `SqliteTransaction`. Keep all existing v3 Event SQL and public behavior unchanged in this task.
+
+- [ ] **Step 4: Verify and commit**
 
 ```bash
-npm run build --silent && node --test dist/tests/store/sqlite-transaction.test.js
+npm run typecheck
+npm run build --silent && node --test dist/tests/store/sqlite-transaction.test.js dist/tests/store/sqlite-store.test.js
+npm run test:unit
+git add src/store/sqlite-transaction.ts src/store/sqlite-store.ts tests/store
+git commit -m "refactor: centralize SQLite transaction authority"
 ```
 
-Expected: FAIL because transaction and Event stores do not exist.
+---
 
-- [ ] **Step 3: Implement bounded `SqliteTransaction`**
+### Task 4: Maintenance gate, consistent backup and schema-version checks
+
+**Files:**
+- Create: `src/store/sqlite-maintenance.ts`
+- Modify: `src/store/sqlite-store.ts`
+- Create: `tests/store/sqlite-maintenance.test.ts`
+
+**Interfaces:**
 
 ```ts
-export interface SqliteTransactionOptions {
-  readonly maxBusyAttempts: number;
-  readonly sleep: (milliseconds: number) => void;
-}
-
-export class SqliteTransaction {
-  constructor(readonly database: DatabaseSync, readonly options: SqliteTransactionOptions) {}
-
-  run<T>(operation: () => T): T {
-    // BEGIN IMMEDIATE; retry only SQLITE_BUSY before operation execution;
-    // COMMIT on success; ROLLBACK on failure; never retry user code after it started.
-  }
-}
+export async function ensureDatabaseReady(input: {
+  readonly databasePath: string;
+  readonly writeMode: boolean;
+  readonly processIdentity: ProcessIdentity;
+  readonly now: string;
+}): Promise<DatabaseReadiness>;
 ```
 
-Use deterministic test sleeps and a production synchronous sleep implemented with `Atomics.wait` on a private `SharedArrayBuffer`. Retry delays are exactly `5`, `10`, `20` milliseconds and then `CONCURRENCY_CONFLICT`.
+- [ ] **Step 1: Write maintenance lock RED tests**
 
-- [ ] **Step 4: Implement `EventStore` with payload version**
+Use `<database>.maintenance.lock`, exclusive create mode `0600`, canonical owner metadata and file/directory fsync. A second owner, malformed file or symlink blocks; age alone never steals the lock.
+
+- [ ] **Step 2: Write backup RED tests**
+
+Use `node:sqlite backup()` to create a consistent destination. Reopen it, require `integrity_check = ok`, hash it and record user version, migration rows, table counts and approved contract hashes.
+
+- [ ] **Step 3: Implement schema support checks**
+
+Before v4 accept only applied `[1,2,3]` and `user_version` `0` or `3`. After v4 accept `[1,2,3,4]` and `user_version = 4`. Reject gaps and newer schemas in write mode with `SCHEMA_VERSION_UNSUPPORTED`.
+
+- [ ] **Step 4: Separate readiness from store opening**
+
+`SqliteStore.openCurrent(path)` opens only a schema already verified current. CLI/service composition must call and await `ensureDatabaseReady` before opening write mode. Test-only creation uses the same readiness function.
+
+- [ ] **Step 5: Verify and commit**
+
+```bash
+npm run typecheck
+npm run build --silent && node --test dist/tests/store/sqlite-maintenance.test.js
+npm run test:unit
+git add src/store/sqlite-maintenance.ts src/store/sqlite-store.ts tests/store/sqlite-maintenance.test.ts
+git commit -m "feat: add SQLite maintenance and backup gate"
+```
+
+---
+
+### Task 5: Migration v4, versioned Events and execution schema
+
+**Files:**
+- Create: `src/store/event-store.ts`
+- Modify: `src/store/migrations.ts`
+- Modify: `src/store/sqlite-store.ts`
+- Modify: `src/domain/types.ts`
+- Create: `tests/store/migration-v4.test.ts`
+- Modify: `tests/store/sqlite-store.test.ts`
+
+**Interfaces:**
 
 ```ts
 export interface AppendEventInput {
@@ -375,507 +403,230 @@ export interface AppendEventInput {
 }
 ```
 
-Insert canonical JSON and expose `listEvents()` including `payloadSchemaVersion`.
+- [ ] **Step 1: Build four exact RED database fixtures**
 
-- [ ] **Step 5: Refactor existing mission/plan operations**
+Create empty, M0, M1/v3 and exact MIS-002 revision-5 databases. Capture Event IDs/seq/payload bytes/timestamps, Mission rows, plan revisions and approved hashes before migration.
 
-Replace `SqliteStore.#transaction` and direct Event SQL with the shared transaction and Event store. Keep existing public methods and output shapes except that `MissionEvent` now includes `payloadSchemaVersion: 1`.
+- [ ] **Step 2: Write RED for the generalized Events rebuild**
 
-- [ ] **Step 6: Verify old behavior and pre-v4 compatibility fixture**
+Require `event_types(type,payload_schema_version)`, required Event payload version without default, preserved rows with version `1`, rebuilt indexes and valid FKs.
 
-```bash
-npm run typecheck
-npm run build --silent && node --test dist/tests/store/sqlite-transaction.test.js dist/tests/store/sqlite-store.test.js
-npm run test:unit
-```
+- [ ] **Step 3: Write RED for execution tables**
 
-- [ ] **Step 7: Commit**
+Require exact columns/checks/unique parent tuples/partial indexes from accepted microdesign section 9. Insert cross-Track/cross-Attempt Claim ancestry and expect FK failure.
 
-```bash
-git add src/store/sqlite-transaction.ts src/store/event-store.ts src/store/sqlite-store.ts src/domain/types.ts tests/store
-git commit -m "refactor: centralize SQLite transactions and events"
-```
+- [ ] **Step 4: Implement migration v4**
 
----
+Create `events_v4`, copy and verify historical rows, drop old events, rename, recreate indexes, create execution tables, run `foreign_key_check` and `integrity_check`, insert migration 4 and set `user_version = 4` in the same maintenance operation.
 
-### Task 3: Migration maintenance gate, consistent backup and schema-version fencing
+- [ ] **Step 5: Implement `EventStore` and refactor existing mutations**
 
-**Files:**
-- Create: `src/store/sqlite-maintenance.ts`
-- Modify: `src/store/migrations.ts`
-- Modify: `src/store/sqlite-store.ts`
-- Test: `tests/store/sqlite-maintenance.test.ts`
+All Mission/Plan/M01 Event writes use `payload_schema_version = 1` and canonical JSON through the shared transaction. `MissionEvent` includes `payloadSchemaVersion`.
 
-**Interfaces:**
-- Consumes: database path, open `DatabaseSync`, supported schema version `4`.
-- Produces: maintenance lock, consistent backup metadata, ordered/gap-free version validation and read/write mode gates.
+- [ ] **Step 6: Prove downgrade and rollback**
 
-- [ ] **Step 1: Write maintenance RED tests**
+A compiled pre-v4 mutation helper against a v4 copy must fail its required Event insert and roll back its Mission/Plan mutation. An injected migration failure must leave v3 unchanged and migration 4 absent.
 
-Prove:
-
-```ts
-await createVerifiedBackup({ source, destination, expectedUserVersion: 3 });
-assert.equal(openBackup(destination).integrityCheck, 'ok');
-assert.throws(() => assertSupportedSchema({ applied: [1, 3], userVersion: 3, write: true }));
-assert.throws(() => assertSupportedSchema({ applied: [1, 2, 3, 4, 5], userVersion: 5, write: true }));
-```
-
-Also start a second maintenance acquisition against the same database path and expect `SCHEMA_MIGRATION_INVALID` without mutation.
-
-- [ ] **Step 2: Run RED**
-
-```bash
-npm run build --silent && node --test dist/tests/store/sqlite-maintenance.test.js
-```
-
-- [ ] **Step 3: Implement maintenance lock**
-
-Use an exclusive lock file beside the database:
-
-```text
-<database>.maintenance.lock
-```
-
-Create with `openSync(path, 'wx', 0o600)`, write canonical owner metadata, fsync file and directory, and remove only when the same process identity owns it. An existing or malformed lock blocks; no age-only stealing.
-
-- [ ] **Step 4: Implement verified `node:sqlite backup()` flow**
-
-```ts
-export async function createVerifiedBackup(input: {
-  readonly source: DatabaseSync;
-  readonly sourcePath: string;
-  readonly destinationPath: string;
-}): Promise<BackupEvidence>;
-```
-
-After `backup()`: fsync destination, reopen it, require `PRAGMA integrity_check = ok`, record SHA-256, size, user version, migration rows, mission/plan/event counts and exact approved contract hashes.
-
-- [ ] **Step 5: Implement schema support checks**
-
-Require applied versions to equal `[1, 2, 3]` before migration or `[1, 2, 3, 4]` after. Read mode may open an equal supported schema only; write mode rejects anything newer or gapful.
-
-- [ ] **Step 6: Verify**
-
-```bash
-npm run typecheck
-npm run build --silent && node --test dist/tests/store/sqlite-maintenance.test.js
-npm run test:unit
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add src/store/sqlite-maintenance.ts src/store/migrations.ts src/store/sqlite-store.ts tests/store/sqlite-maintenance.test.ts
-git commit -m "feat: add migration maintenance and backup gate"
-```
-
----
-
-### Task 4: Migration v4 Events rebuild and execution schema
-
-**Files:**
-- Modify: `src/store/migrations.ts`
-- Test: `tests/store/migration-v4.test.ts`
-- Modify: `tests/store/sqlite-store.test.ts`
-
-**Interfaces:**
-- Consumes: v3 database under maintenance gate and verified backup.
-- Produces: schema v4, payload-versioned Events, execution tables/indexes/FKs, migration row 4 and `user_version = 4`.
-
-- [ ] **Step 1: Write RED fixtures**
-
-Create four input databases:
-
-```text
-empty new database
-M0 database with MISSION_OPENED
-M1/v3 database with plan revisions and approvals
-exact MIS-002 revision-5 database preserving revision 3 history
-```
-
-Assert migration preserves Event IDs, seq, payload bytes, timestamps, mission rows, every plan revision and approved hashes.
-
-- [ ] **Step 2: Write schema and downgrade RED tests**
-
-Require tables/indexes/FKs from microdesign section 9. Open a copied v4 database with a compiled pre-v4 insert helper and prove its mission mutation rolls back because the required Event payload version is absent.
-
-- [ ] **Step 3: Run RED**
-
-```bash
-npm run build --silent && node --test dist/tests/store/migration-v4.test.js
-```
-
-- [ ] **Step 4: Implement the generalized Events rebuild**
-
-Use `events_v4`; never rename the old table first. Copy with literal payload version `1`, verify counts/hashes/seq bounds, drop old table, rename, recreate indexes, run `foreign_key_check` and `integrity_check`, then write migration 4 and user version.
-
-- [ ] **Step 5: Create execution tables and constraints**
-
-Implement the accepted columns, state checks, unique parent tuples and partial indexes exactly. Include:
-
-```sql
-UNIQUE(id, write_track_id, contract_hash)
-UNIQUE(id, attempt_id, contract_hash)
-UNIQUE(id, attempt_id, write_track_id, contract_hash)
-```
-
-and the Claim ancestry FKs from microdesign 0.6.1.
-
-- [ ] **Step 6: Prove transaction rollback**
-
-Inject a failure after `events_v4` population and require the original v3 schema/data to remain intact and migration 4 absent.
-
-- [ ] **Step 7: Verify**
+- [ ] **Step 7: Verify and commit**
 
 ```bash
 npm run typecheck
 npm run build --silent && node --test dist/tests/store/migration-v4.test.js dist/tests/store/sqlite-store.test.js
 npm run verify
-```
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add src/store/migrations.ts tests/store/migration-v4.test.ts tests/store/sqlite-store.test.ts
+git add src/store/event-store.ts src/store/migrations.ts src/store/sqlite-store.ts src/domain/types.ts tests/store
 git commit -m "feat: add M01 schema migration v4"
 ```
 
 ---
 
-### Task 5: ExecutionStore relational persistence and idempotency
+### Task 6: ExecutionStore persistence, ancestry and idempotency
 
 **Files:**
 - Create: `src/store/execution-store.ts`
 - Modify: `src/store/sqlite-store.ts`
-- Test: `tests/store/execution-store.test.ts`
+- Create: `tests/store/execution-store.test.ts`
 
-**Interfaces:**
-- Consumes: shared `DatabaseSync`, `SqliteTransaction`, `EventStore`, accepted domain models.
-- Produces: transaction-scoped insert/load/CAS primitives; no external adapter calls and no independent transaction ownership.
+- [ ] **Step 1: Write RED for allocation/current-row invariants**
 
-- [ ] **Step 1: Write RED for sequence allocation and relational invariants**
+Prove `WT-001`, `LSE-001`, parent-relative Attempt/Run/Claim ordinals and one current Track/Feature, Attempt/Track, Run/Attempt, Lease/Track and Claim/Attempt.
 
-Prove sequential `WT-001`, `LSE-001`, parent-relative ordinals and unique current rows. Insert deliberate cross-Track and cross-Attempt Claim references through SQL and require FK failure.
+- [ ] **Step 2: Write RED for ancestry and base binding**
 
-- [ ] **Step 2: Write RED for idempotency**
+Direct SQL attempts to attach another Track's Lease or another Attempt's Run to a Claim must fail. Claim base must match its Attempt composite key.
 
-```ts
-assert.deepEqual(store.insertClaim(first), store.insertClaim(first));
-assert.throws(() => store.insertClaim({ ...first, resultTreeSha: otherTree }), {
-  code: 'CLAIM_IDEMPOTENCY_CONFLICT',
-});
-```
+- [ ] **Step 3: Write RED for idempotency and CAS**
 
-Cover grant and release key/input pairs equivalently.
+Same key/same input returns prior semantic row. Same key/different canonical input throws the matching conflict. Every mutable update uses expected version and zero rows means `CONCURRENCY_CONFLICT`.
 
-- [ ] **Step 3: Implement row codecs and exact queries**
+- [ ] **Step 4: Implement strict row codecs and focused methods**
 
-Create private row converters that validate enum fields and nullable state combinations. A malformed persisted row throws `INTERNAL_ERROR`; it is never silently coerced.
+Malformed persisted enum/state/nullability combinations throw `INTERNAL_ERROR`; no coercion or fallback. Stores share `database`, `transaction` and `events` from `SqliteStore` and never open another connection.
 
-- [ ] **Step 4: Implement CAS methods**
-
-Each mutable update includes `WHERE id = ? AND version = ?` and increments the version. Zero changed rows throws `CONCURRENCY_CONFLICT`.
-
-- [ ] **Step 5: Integrate into `SqliteStore` composition root**
-
-Expose focused stores through service construction, not public raw database access:
-
-```ts
-store.execution
-store.events
-store.transaction
-```
-
-Keep fields readonly and connection-owned by `SqliteStore`.
-
-- [ ] **Step 6: Verify**
+- [ ] **Step 5: Verify and commit**
 
 ```bash
 npm run typecheck
 npm run build --silent && node --test dist/tests/store/execution-store.test.js
 npm run test:unit
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
 git add src/store/execution-store.ts src/store/sqlite-store.ts tests/store/execution-store.test.ts
 git commit -m "feat: persist M01 execution entities"
 ```
 
 ---
 
-### Task 6: ExecutionService Track, Attempt and Worker Run lifecycle
+### Task 7: ExecutionService Track, Attempt and Worker Run lifecycle
 
 **Files:**
 - Create: `src/services/execution-service.ts`
-- Test: `tests/services/execution-service.test.ts`
+- Create: `tests/services/execution-service.test.ts`
 
-**Interfaces:**
-- Consumes: approved plan lookup, Git base observation interface, ExecutionStore and EventStore.
-- Produces: `openWriteTrack`, `replaceWorkerRun`, `supersedeAttempt`, `abandonWriteTrack`, `getWriteTrack`.
+- [ ] **Step 1: Write exact-authority RED tests**
 
-- [ ] **Step 1: Write RED for exact contract and target binding**
+Reject non-latest contract hash, unknown qualified target, target outside M01, missing requirement allocation and base SHA that is not a Git commit.
 
-Reject:
+- [ ] **Step 2: Write atomic Track/A01 RED test**
 
-```text
-non-latest approved contract hash
-unknown Mission/Milestone/Feature
-Feature outside M01
-criterion allocation mismatch
-base SHA not a commit
-```
+`openWriteTrack` commits Track, A01, `WRITE_TRACK_OPENED` and `ATTEMPT_OPENED` together. Duplicate Event injection leaves no Track or Attempt.
 
-- [ ] **Step 2: Write RED for atomic Track + Attempt**
+- [ ] **Step 3: Implement Track/A01 and input replay**
 
-`openWriteTrack` creates Track, A01, `WRITE_TRACK_OPENED`, `ATTEMPT_OPENED` in one transaction. Inject duplicate Event ID and prove no Track or Attempt remains.
-
-- [ ] **Step 3: Implement `openWriteTrack`**
-
-Canonical input hash includes mission, milestone, feature, contract, object format and base commit. Repeating same key/input returns the existing lineage; different input conflicts.
+Canonical input binds target, contract, object format and base commit. Same key/input returns existing lineage; different input conflicts.
 
 - [ ] **Step 4: Implement atomic Run replacement**
 
-```ts
-replaceWorkerRun({ attemptId, expectedAttemptVersion, previousRunDisposition, occurredAt })
-```
-
-If a current Run exists, terminalize it and insert the next ordinal with two Events in one transaction. A stale expected version changes nothing.
+Terminalize the current Run and create the next Run/Event pair in one transaction. Preserve Attempt identity. Stale expected version changes nothing.
 
 - [ ] **Step 5: Implement Attempt supersession and Track abandonment guards**
 
-Supersession requires no current Run, Claim or Lease and source/worktree observations classified clean/preserved. Abandonment requires the accepted guards and preserved Evidence.
+Supersession requires no current Run/Claim/Lease and clean preserved source/worktree observations. Abandonment requires all accepted guards and never releases resources implicitly.
 
-- [ ] **Step 6: Verify**
+- [ ] **Step 6: Verify and commit**
 
 ```bash
 npm run typecheck
 npm run build --silent && node --test dist/tests/services/execution-service.test.js
 npm run test:unit
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
 git add src/services/execution-service.ts tests/services/execution-service.test.ts
-git commit -m "feat: add execution lifecycle service"
+git commit -m "feat: add M01 execution lifecycle service"
 ```
 
 ---
 
-### Task 7: Linux process identity and read-only Git observation
+### Task 8: Read-only Git observation and independent Attempt source
 
 **Files:**
-- Create: `src/adapters/process-identity.ts`
 - Create: `src/adapters/git-worktree.ts`
-- Test: `tests/adapters/process-identity.test.ts`
-- Test: `tests/adapters/git-worktree.test.ts`
-
-**Interfaces:**
-- Produces: exact boot/PID/start-ticks observation and strict read-only Git/source/worktree snapshots.
-
-- [ ] **Step 1: Write process identity RED tests**
-
-Use `/proc` fixture files to prove parsing of `/proc/sys/kernel/random/boot_id` and field 22 of `/proc/<pid>/stat`, including process names containing spaces and parentheses. PID reuse with different start ticks must compare unequal.
-
-- [ ] **Step 2: Implement `ProcessIdentityInspector`**
-
-```ts
-export interface ProcessIdentityInspector {
-  current(): ProcessIdentity;
-  observe(pid: number): ProcessIdentity | undefined;
-  equals(left: ProcessIdentity, right: ProcessIdentity): boolean;
-}
-```
-
-Reject non-Linux and mounted control paths with typed errors.
-
-- [ ] **Step 3: Write Git observation RED tests**
-
-Prove exact commands only, NUL-delimited status parsing, duplicate worktree/path rejection, SHA/object type validation and canonical snapshots. Add a spy test that fails if `write-tree`, fetch, checkout, reset, clean, commit or ref mutation is requested.
-
-- [ ] **Step 4: Implement strict Git runner boundary**
-
-Use `spawn` argument arrays, controlled env, closed stdin, bounds/timeouts and raw bytes. Provide:
-
-```ts
-observeRepository(path)
-observeWorktrees(sourcePath)
-requireCommit(sourcePath, sha)
-requireTree(sourcePath, sha)
-```
-
-- [ ] **Step 5: Verify**
-
-```bash
-npm run typecheck
-npm run build --silent && node --test dist/tests/adapters/process-identity.test.js dist/tests/adapters/git-worktree.test.js
-npm run test:unit
-```
-
-- [ ] **Step 6: Commit**
-
-```bash
-git add src/adapters/process-identity.ts src/adapters/git-worktree.ts tests/adapters
-git commit -m "feat: add trusted process and Git observation"
-```
-
----
-
-### Task 8: Attempt-owned independent execution source
-
-**Files:**
 - Create: `src/adapters/execution-source.ts`
 - Modify: `src/runtime/paths.ts`
-- Test: `tests/adapters/execution-source.test.ts`
+- Create: `tests/adapters/git-worktree.test.ts`
+- Create: `tests/adapters/execution-source.test.ts`
 
-**Interfaces:**
-- Consumes: canonical checkout, Attempt identity/base/object format, Git observer, runtime root.
-- Produces: `ExecutionSourceObservation` with READY fingerprint or typed divergence; never calls Treehouse.
+- [ ] **Step 1: Write Git observer RED tests**
 
-- [ ] **Step 1: Add safe path derivation RED tests**
+Permit only exact read operations: `rev-parse`, `status --porcelain=v1 -z --untracked-files=all`, `worktree list --porcelain`, `remote`, and `cat-file`. Reject duplicate paths and any request for `write-tree`, fetch, checkout, reset, clean, commit or ref mutation.
 
-```ts
-resolveExecutionSourceRoot(runtimeRoot, 'WT-001/A01')
-// => <runtimeRoot>/execution-sources/WT-001/A01/source
-```
+- [ ] **Step 2: Implement canonical Git observations**
 
-Reject malformed IDs, `/mnt`, symlink escapes and an existing unrecognized final path.
+Expose `observeRepository`, `observeWorktrees`, `requireCommit` and `requireTree` using the production process runner and controlled Git env.
 
-- [ ] **Step 2: Write network-off materialization RED test**
+- [ ] **Step 3: Write source-path and network-off RED tests**
 
-Create a canonical repo with an `origin` pointing to an executable trap. Run source preparation with credential helper and network proxy traps. Require success without invoking any trap.
+Derive `<runtime>/execution-sources/<track>/<attempt>/source`; reject malformed IDs, mounts, symlinks and unrecognized existing finals. Create network/credential traps and require local source preparation without invoking them.
 
-- [ ] **Step 3: Implement local independent transfer**
-
-Use an explicit local Git command sequence that copies objects, never shares them. One acceptable frozen sequence is:
+- [ ] **Step 4: Implement exact local transfer sequence**
 
 ```text
-git clone --no-hardlinks --no-checkout --no-local <canonical-path> <temp-path>
-git -C <temp-path> remote remove origin
-git -C <temp-path> checkout -B main <base-sha>
+git init --object-format=<format> <temp>
+git -C <temp> -c protocol.file.allow=always fetch --no-tags --no-write-fetch-head <canonical-absolute-path> <base-sha>
+git -C <temp> update-ref refs/heads/main <base-sha>
+git -C <temp> checkout -B main <base-sha>
 ```
 
-Before accepting this sequence in code, the tests must prove no alternates, no shared common dir and no canonical/temp object inode equality. If the installed Git does not satisfy the proof, fail and revise the plan rather than weakening the checks.
+Use disabled global/system config, empty hooks, no credential helper and no proxy variables. Do not persist a remote.
 
-- [ ] **Step 4: Implement controlled config and fingerprint**
+- [ ] **Step 5: Verify independent storage and fingerprint**
 
-Set empty hooks path, remove remotes, verify object format/base/tree/status/config, hash the canonical observation and source observation into one canonical fingerprint, then atomically rename temp to final.
+Require zero remotes, no alternates, distinct common/object dirs, no identical `(device,inode)` for loose/pack/index object files, exact base/tree/object format and clean status. Verify canonical checkout snapshots before/after are identical. Publish temp-to-final atomically and persist READY only after observation.
 
-- [ ] **Step 5: Implement crash recovery cases**
+- [ ] **Step 6: Implement crash classifications**
 
-Recognized temp metadata contains Track, Attempt, contract, base and nonce. Only matching incomplete temp may be removed. Matching complete final commits READY; conflict marks DIVERGED and preserves.
+Recognized incomplete temp may be removed after inspection. Matching complete final commits READY. Conflicting final/source/config/base becomes DIVERGED and is preserved.
 
-- [ ] **Step 6: Prove canonical checkout unchanged and object independence**
-
-Snapshot Git/config/filesystem before and after. Sample every loose object and all pack/index files; matching inode/device with canonical storage fails `EXECUTION_SOURCE_SHARED_OBJECTS`.
-
-- [ ] **Step 7: Verify**
+- [ ] **Step 7: Verify and commit**
 
 ```bash
 npm run typecheck
-npm run build --silent && node --test dist/tests/adapters/execution-source.test.js
+npm run build --silent && node --test dist/tests/adapters/git-worktree.test.js dist/tests/adapters/execution-source.test.js
 npm run test:unit
-```
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add src/adapters/execution-source.ts src/runtime/paths.ts tests/adapters/execution-source.test.ts
-git commit -m "feat: materialize independent Attempt sources"
+git add src/adapters/git-worktree.ts src/adapters/execution-source.ts src/runtime/paths.ts tests/adapters
+git commit -m "feat: create independent Attempt execution sources"
 ```
 
 ---
 
-### Task 9: Production Treehouse adapter inside the accepted TC-01 boundary
+### Task 9: Production Treehouse adapter
 
 **Files:**
 - Create: `src/adapters/treehouse.ts`
-- Test: `tests/adapters/treehouse.test.ts`
+- Create: `tests/adapters/treehouse.test.ts`
 
-**Interfaces:**
-- Consumes: READY source, Attempt-owned HOME/XDG/pool/hooks, exact candidate provenance.
-- Produces: strict acquisition/status/release observations; no semantic decisions.
+- [ ] **Step 1: Port TC-01 strict parser RED cases to TypeScript**
 
-- [ ] **Step 1: Port strict parser RED tests from TC-01**
+Cover invalid UTF-8, extra JSON, non-zero exit, duplicate paths, mismatched holder/ID, mounted/escaped paths and inconsistent status items.
 
-Rewrite as production TypeScript tests. Cover invalid UTF-8, extra JSON, duplicate paths, mismatched holder/ID, non-zero exit, mounted/escaped paths and contaminated output.
+- [ ] **Step 2: Write candidate freshness RED tests**
 
-- [ ] **Step 2: Write freshness RED tests**
+Executable bytes, semantic version, capabilities, Git, Node, WSL identity, environment shape and command-shape drift must fail before a protected operation.
 
-Any change in executable bytes, version, capabilities, Git, Node, WSL identity, env shape or command shape must fail before the protected command.
+- [ ] **Step 3: Implement controlled provenance and environment**
 
-- [ ] **Step 3: Implement candidate discovery and controlled environment**
-
-Use exact semantic version `2.1.1`, accepted SHA, capability inspection and generated Treehouse config. The environment is constructed from an allowlist and contains no inherited HOME, XDG, credentials, proxy or arbitrary variable.
+Resolve the executable path, hash bytes, accept only `2.1.1` with optional lowercase raw `v`, require accepted capabilities and build an allowlisted environment with Attempt-owned HOME/XDG/pool/hooks.
 
 - [ ] **Step 4: Implement exact operations**
 
 ```ts
-acquire({ sourcePath, holder, controlPaths }): Promise<TreehouseLeaseObservation>
-status({ sourcePath, controlPaths }): Promise<readonly TreehouseStatusItem[]>
-release({ sourcePath, worktreePath, leaseId, holder, controlPaths }): Promise<ProcessObservation>
+acquire(input): Promise<TreehouseLeaseObservation>;
+status(input): Promise<readonly TreehouseStatusItem[]>;
+release(input): Promise<ProcessResult>;
 ```
 
-Release process output remains advisory until status/Git observation.
+Use only accepted argv. Release output remains advisory until fresh status/Git observation.
 
-- [ ] **Step 5: Static anti-pattern test**
+- [ ] **Step 5: Add static anti-pattern test**
 
-Read `src/adapters/treehouse.ts` and fail on `--force`, `destroy`, `prune`, `shell: true`, `exec(`, broad `process.env` spread or stderr regex classification.
+Fail on `--force`, `destroy`, `prune`, `shell: true`, `exec(`, inherited environment spread, stderr regex state or canonical checkout cwd.
 
-- [ ] **Step 6: Verify**
+- [ ] **Step 6: Verify and commit**
 
 ```bash
 npm run typecheck
 npm run build --silent && node --test dist/tests/adapters/treehouse.test.js
 npm run test:unit
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
 git add src/adapters/treehouse.ts tests/adapters/treehouse.test.ts
 git commit -m "feat: add production Treehouse adapter"
 ```
 
 ---
 
-### Task 10: Durable Artifact writer and Lease action protocol
+### Task 10: Lease action protocol and trusted helper
 
 **Files:**
-- Create: `src/runtime/durable-artifact.ts`
 - Create: `src/runtime/lease-action-protocol.ts`
-- Test: `tests/runtime/durable-artifact.test.ts`
-- Test: `tests/runtime/lease-action-protocol.test.ts`
+- Create: `src/runtime/lease-action-runner.ts`
+- Create: `src/runtime/lease-action-entry.ts`
+- Create: `bin/mnfs-lease-action.mjs`
+- Modify: `package.json`
+- Create: `tests/runtime/lease-action-protocol.test.ts`
+- Create: `tests/runtime/lease-action-runner.test.ts`
 
 **Interfaces:**
-- Produces: canonical immutable operation files and crash-durable STARTED/FINISHED Artifact readers/writers.
-
-- [ ] **Step 1: Write durability RED test**
-
-Spy on file operations and require:
-
-```text
-exclusive temp create
-write all bytes
-fsync temp
-close
-rename
-fsync parent directory
-```
-
-Existing final files are immutable and cause conflict unless bytes/hash exactly match.
-
-- [ ] **Step 2: Define strict operation schema**
 
 ```ts
 export interface LeaseActionOperation {
   readonly schemaVersion: 1;
   readonly actionToken: string;
   readonly kind: 'GRANT' | 'RELEASE';
-  readonly treehouseExecutable: string;
+  readonly executable: string;
   readonly argv: readonly string[];
   readonly cwd: string;
   readonly env: Readonly<Record<string, string>>;
@@ -887,592 +638,266 @@ export interface LeaseActionOperation {
 }
 ```
 
-Validate exact action-specific argv and contained Artifact paths. Operation files are mode `0400` after publication.
+- [ ] **Step 1: Write protocol RED tests**
 
-- [ ] **Step 3: Define STARTED and FINISHED records**
+Validate exact action argv/cwd/env hashes, token/path containment, immutable mode `0400`, fatal UTF-8, one JSON value and no symlink targets.
 
-STARTED includes token, process identity, operation SHA and timestamp. FINISHED includes process result metadata plus stdout/stderr Artifact refs and hashes; complete raw outputs remain bounded separate files.
+- [ ] **Step 2: Define STARTED and FINISHED records**
 
-- [ ] **Step 4: Implement strict readers**
+STARTED binds token, operation hash and helper process identity. FINISHED binds token, process metadata and bounded stdout/stderr Artifact hashes/refs.
 
-Fatal UTF-8, one JSON value, schema validation, canonical path containment, token/hash match and symlink refusal.
+- [ ] **Step 3: Write STARTED-before-spawn and exactly-once RED tests**
 
-- [ ] **Step 5: Verify**
+The injected spawn checks that STARTED is already durably readable. Re-running the same operation performs zero additional Treehouse calls.
 
-```bash
-npm run typecheck
-npm run build --silent && node --test dist/tests/runtime/durable-artifact.test.js dist/tests/runtime/lease-action-protocol.test.js
-npm run test:unit
-```
+- [ ] **Step 4: Implement helper and executable entry**
 
-- [ ] **Step 6: Commit**
+The helper never opens MNFS SQLite. It validates operation ownership/mode, writes STARTED, invokes exactly one process, writes bounded outputs/FINISHED and exits with a stable class. Descendant process groups die on timeout.
 
-```bash
-git add src/runtime/durable-artifact.ts src/runtime/lease-action-protocol.ts tests/runtime
-git commit -m "feat: define durable Lease action protocol"
-```
-
----
-
-### Task 11: Trusted LeaseActionRunner executable
-
-**Files:**
-- Create: `src/runtime/lease-action-runner.ts`
-- Create: `src/runtime/lease-action-entry.ts`
-- Create: `bin/mnfs-lease-action.mjs`
-- Modify: `package.json`
-- Test: `tests/runtime/lease-action-runner.test.ts`
-
-**Interfaces:**
-- Consumes: one immutable operation file path.
-- Produces: one STARTED record before external invocation and one FINISHED record after; never opens MNFS SQLite.
-
-- [ ] **Step 1: Write RED for STARTED-before-spawn ordering**
-
-Inject a runner whose spawn assertion requires the STARTED file to exist and validate. The test fails if spawn happens first.
-
-- [ ] **Step 2: Write RED for exactly one invocation**
-
-Run the helper twice against the same operation. The second process must detect immutable existing STARTED/FINISHED records and perform zero Treehouse calls.
-
-- [ ] **Step 3: Implement the helper**
-
-```ts
-export async function runLeaseAction(operationPath: string, dependencies: RunnerDependencies): Promise<number>;
-```
-
-Open operation with no symlink following, validate mode/ownership/containment, write STARTED, spawn one process group with closed stdin and bounds, write stdout/stderr plus FINISHED, return a stable exit class.
-
-- [ ] **Step 4: Implement timeout/process-group termination**
-
-Port the reviewed Linux process-group behavior from TC-01 into focused production code; do not import spike modules. Prove descendants die on timeout.
-
-- [ ] **Step 5: Wire executable**
-
-`bin/mnfs-lease-action.mjs` imports compiled `dist/src/runtime/lease-action-entry.js`. Add a private package script used only by tests; do not add a user-facing CLI command.
-
-- [ ] **Step 6: Verify**
+- [ ] **Step 5: Verify and commit**
 
 ```bash
 npm run typecheck
-npm run build --silent && node --test dist/tests/runtime/lease-action-runner.test.js
+npm run build --silent && node --test dist/tests/runtime/lease-action-protocol.test.js dist/tests/runtime/lease-action-runner.test.js
 npm run verify
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add src/runtime/lease-action-runner.ts src/runtime/lease-action-entry.ts bin/mnfs-lease-action.mjs package.json tests/runtime/lease-action-runner.test.ts
+git add src/runtime/lease-action-protocol.ts src/runtime/lease-action-runner.ts src/runtime/lease-action-entry.ts bin/mnfs-lease-action.mjs package.json tests/runtime
 git commit -m "feat: add trusted Lease action runner"
 ```
 
 ---
 
-### Task 12: LeaseService grant Intent–Action–Observation
+### Task 11: LeaseService grant and release IAO
 
 **Files:**
 - Create: `src/services/lease-service.ts`
-- Test: `tests/services/lease-service-grant.test.ts`
+- Create: `tests/services/lease-service-grant.test.ts`
+- Create: `tests/services/lease-service-release.test.ts`
 
-**Interfaces:**
-- Consumes: ExecutionStore, ExecutionSourceAdapter, TreehouseAdapter, Git observer, process inspector, action protocol/spawner.
-- Produces: idempotent `grantLease(input): Promise<Lease>`.
+- [ ] **Step 1: Write grant crash-window RED matrix**
 
-- [ ] **Step 1: Write RED crash-window matrix**
+Cover intent only, token before helper, STARTED before result, external Lease before semantic commit, commit before response, exact existing match, duplicate matches, same-key conflict and two concurrent callers. Count external calls; no safe case exceeds one.
 
-Use a table-driven test for:
+- [ ] **Step 2: Implement grant intent, observation and action claim**
 
-```text
-intent only
-claimed token before helper
-helper STARTED before Treehouse result
-external Lease before semantic commit
-semantic commit before response
-one exact existing holder match
-multiple matches
-same key/different input
-two concurrent same-key calls
-```
+Canonical input binds Track/Attempt/generation/contract/base/source/holder/candidate/command shape. Insert/reuse REQUESTED plus Event, observe first, commit one exact match, otherwise CAS-claim token and publish/spawn helper.
 
-Count Treehouse calls; every safe case is exactly 0 or 1, never 2.
+- [ ] **Step 3: Implement grant completion rules**
 
-- [ ] **Step 2: Implement grant input hash and deterministic holder**
+Only fresh exact Treehouse/Git state commits ACTIVE. STARTED with no decisive outcome throws `LEASE_ACTION_INCONCLUSIVE` and preserves state. Same key/different input conflicts.
 
-Canonical input binds Track, Attempt, generation, contract, base, source fingerprint, holder, Treehouse candidate and command shape. Holder uses repository identity hash plus Lease/generation and contains only safe characters.
+- [ ] **Step 4: Prove concurrent at-most-once**
 
-- [ ] **Step 3: Implement intent transaction**
+Use two independent `SqliteStore` instances and a token-claim barrier. Require one acquisition and one ACTIVE Lease.
 
-Insert/reuse `REQUESTED` Lease plus `LEASE_REQUESTED`. Same key/input returns current semantic row; conflict fails.
+- [ ] **Step 5: Write release RED matrix**
 
-- [ ] **Step 4: Implement observe-before-action**
+Cover wrong internal/external/source/helper fence, tracked/untracked/ignored changes, live Run, current Claim, pending retry, surviving helper, physical release before semantic commit, missing/unmanaged path, duplicate identity and idempotency conflict.
 
-Fresh status first. One exact matching external Lease validates and commits ACTIVE; duplicates or inconsistent identity become DIVERGED/UNKNOWN without acquisition.
+- [ ] **Step 6: Implement release preflight and conditional helper action**
 
-- [ ] **Step 5: Implement token claim and helper launch**
+Observe exact ancestry, process absence, source/worktree, Git/filesystem and Treehouse state before `ACTIVE → RELEASE_PENDING`. Publish only `return <path> --if-lease-id <id> --if-lease-holder <holder>`.
 
-Persist expected paths and owner identity with `LEASE_ACTION_CLAIMED`, publish operation, spawn helper, then observe helper/status/Git. A STARTED inconclusive grant returns `LEASE_ACTION_INCONCLUSIVE` and preserves all state.
+- [ ] **Step 7: Implement release classification**
 
-- [ ] **Step 6: Implement semantic completion**
+Managed available path with no Lease commits RELEASED. Exact Lease still present may allow only same-fence conditional retry after helper absence. Missing/unmanaged/ambiguous/drift becomes DIVERGED and preserves work/evidence.
 
-Only fresh exact physical observation moves `REQUESTED → ACTIVE`, records external fields and `LEASE_GRANTED`. FINISHED exit code alone never decides success.
+- [ ] **Step 8: Add no-destruction static test and verify**
 
-- [ ] **Step 7: Prove concurrent at-most-once**
-
-Use two independent `SqliteStore` instances against one database and a barrier around token claim. Assert one external acquisition and one ACTIVE Lease.
-
-- [ ] **Step 8: Verify**
+Fail on reset, clean, force, destroy, prune or product deletion of source/worktree paths.
 
 ```bash
 npm run typecheck
-npm run build --silent && node --test dist/tests/services/lease-service-grant.test.js
+npm run build --silent && node --test dist/tests/services/lease-service-grant.test.js dist/tests/services/lease-service-release.test.js
 npm run test:unit
-```
-
-- [ ] **Step 9: Commit**
-
-```bash
-git add src/services/lease-service.ts tests/services/lease-service-grant.test.ts
-git commit -m "feat: implement fenced Lease grant"
+git add src/services/lease-service.ts tests/services/lease-service-grant.test.ts tests/services/lease-service-release.test.ts
+git commit -m "feat: implement fenced Lease lifecycle"
 ```
 
 ---
 
-### Task 13: LeaseService conditional release and preservation
-
-**Files:**
-- Modify: `src/services/lease-service.ts`
-- Test: `tests/services/lease-service-release.test.ts`
-
-**Interfaces:**
-- Produces: idempotent `releaseLease(input): Promise<Lease>` with no destructive fallback.
-
-- [ ] **Step 1: Write release RED matrix**
-
-Cover:
-
-```text
-clean exact release
-wrong internal generation
-wrong external ID
-wrong holder
-wrong Attempt/source/path
-dirty tracked file
-untracked file
-ignored file discovered by filesystem observation
-live current Run
-current Claim
-RELEASE_PENDING retry
-helper STARTED and surviving
-physical release before semantic commit
-missing/unmanaged path
-duplicate status identity
-same key/different input
-```
-
-- [ ] **Step 2: Implement full preflight**
-
-Load exact ancestry and expected version, verify no current Run/Claim, process absence, source fingerprint, worktree containment, clean Git plus unclassified filesystem checks and fresh exact Treehouse status before writing release intent.
-
-- [ ] **Step 3: Implement release intent/key**
-
-`ACTIVE → RELEASE_PENDING` plus release key/hash and `LEASE_RELEASE_REQUESTED` in one transaction.
-
-- [ ] **Step 4: Implement helper-backed conditional return**
-
-Publish exact `return <path> --if-lease-id <id> --if-lease-holder <holder>` operation. Never add `--force` or another command.
-
-- [ ] **Step 5: Implement post-observation classification**
-
-Managed available path with no Lease commits RELEASED. Exact Lease still present may allow a same-fence conditional retry only when helper is not live. Missing/unmanaged, identity drift or ambiguity commits DIVERGED and preserves work/evidence.
-
-- [ ] **Step 6: Verify static no-destruction contract**
-
-Source scan fails on reset, clean, force, destroy, prune or deletion of worktree/source paths inside product release code.
-
-- [ ] **Step 7: Verify**
-
-```bash
-npm run typecheck
-npm run build --silent && node --test dist/tests/services/lease-service-release.test.js
-npm run test:unit
-```
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add src/services/lease-service.ts tests/services/lease-service-release.test.ts
-git commit -m "feat: implement fenced Lease release"
-```
-
----
-
-### Task 14: ClaimService atomic OPEN Claim
+### Task 12: ClaimService and read-only RecoveryService
 
 **Files:**
 - Create: `src/services/claim-service.ts`
-- Test: `tests/services/claim-service.test.ts`
-
-**Interfaces:**
-- Consumes: exact current Track/Attempt/Run/Lease lineage, approved criteria lookup, READY source Git validation.
-- Produces: idempotent `openClaim(input): Claim` only.
-
-- [ ] **Step 1: Write RED validation matrix**
-
-Reject stale versions, non-current Attempt/Run, inactive or cross-lineage Lease, wrong contract/base, SHA not a tree, tree absent from exact source, empty/duplicate/out-of-Feature criteria and existing current Claim.
-
-- [ ] **Step 2: Write atomicity RED**
-
-Inject Event uniqueness failure and Track CAS failure; prove Claim row, Track state and Event all roll back.
-
-- [ ] **Step 3: Implement canonical input hash**
-
-Bind exact lineage IDs, versions, contract, base, result tree and sorted criterion identities. Preserve criterion array canonical order after duplicate-free validation.
-
-- [ ] **Step 4: Implement one transaction**
-
-Insert Claim `OPEN`, transition Track `ACTIVE → CLAIMED`, append `CLAIM_OPENED`, increment versions and return the Claim. Same key/input replays; different input conflicts.
-
-- [ ] **Step 5: Prove M02 boundaries**
-
-Static test requires no public method for Claim completion, verification, acceptance, rejection or abandonment in M01.
-
-- [ ] **Step 6: Verify**
-
-```bash
-npm run typecheck
-npm run build --silent && node --test dist/tests/services/claim-service.test.js
-npm run test:unit
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add src/services/claim-service.ts tests/services/claim-service.test.ts
-git commit -m "feat: open atomic durable Claims"
-```
-
----
-
-### Task 15: Read-only RecoveryService and deterministic report
-
-**Files:**
 - Create: `src/services/recovery-service.ts`
-- Test: `tests/services/recovery-service.test.ts`
+- Create: `tests/services/claim-service.test.ts`
+- Create: `tests/services/recovery-service.test.ts`
 
-**Interfaces:**
-- Consumes: semantic state plus source/helper/process/Treehouse/Git observations.
-- Produces: deterministic `RecoveryReport` and optional content-addressed report Artifact outside domain state.
+- [ ] **Step 1: Write Claim RED validation/atomicity matrix**
 
-- [ ] **Step 1: Write RED taxonomy tests**
+Reject stale versions, non-current lineage, cross-lineage Lease, wrong contract/base, non-tree/missing tree, empty/duplicate/out-of-Feature criteria and current Claim. Inject Event and CAS failures and prove no Claim/Track/Event partial mutation.
 
-Cover `HEALTHY`, `ADOPTABLE`, `LD-01` through `LD-07`, `SD-01`, `SD-02` and `UNKNOWN`. Duplicate ID/path/holder/helper must preserve every candidate and never select the first.
+- [ ] **Step 2: Implement Claim OPEN transaction**
 
-- [ ] **Step 2: Write non-mutation RED**
+Canonical input binds exact IDs/versions/contract/base/tree/criteria. Insert Claim OPEN, transition Track ACTIVE→CLAIMED and append `CLAIM_OPENED` atomically. Same key/input replays; conflict fails. Expose no completion/acceptance methods.
 
-Hash database, source, worktree, helper artifacts and Treehouse status before/after `recover`. Require exact equality and no Domain Event growth.
+- [ ] **Step 3: Write Recovery taxonomy and non-mutation RED tests**
 
-- [ ] **Step 3: Implement one-to-one matching**
+Cover `HEALTHY`, `ADOPTABLE`, `LD-01`–`LD-07`, `SD-01`, `SD-02`, `UNKNOWN`, duplicate identity and multiple helper candidates. Hash SQLite/resources before and after and require equality/no Event growth.
 
-Index status by external ID, canonical path and holder. Any non-bijective mapping is a divergence. Corroborate with common directory and Attempt source fingerprint.
+- [ ] **Step 4: Implement deterministic one-to-one Recovery report**
 
-- [ ] **Step 4: Implement report shape**
+Index candidates by token, external ID, canonical path and holder. Non-bijective maps are divergence. Output every candidate, blocker, safe action, required authority and concrete next action; optional Artifact uses canonical JSON hash outside domain state.
 
-```ts
-export interface RecoveryReport {
-  readonly schemaVersion: 1;
-  readonly observedAt: string;
-  readonly repositoryId: string;
-  readonly trackId?: WriteTrackId;
-  readonly expected: readonly RecoveryExpected[];
-  readonly observed: readonly RecoveryCandidate[];
-  readonly classifications: readonly RecoveryClassification[];
-  readonly blockers: readonly string[];
-  readonly safeActions: readonly string[];
-  readonly requiredAuthority: 'NONE' | 'ORIGINAL_OPERATION' | 'OPERATOR';
-  readonly nextAction: string;
-}
-```
+- [ ] **Step 5: Add static Recovery boundary test and verify**
 
-Sort by qualified identity and canonical path. Hash canonical JSON when writing an Artifact.
-
-- [ ] **Step 5: Prove no repair API**
-
-Static test fails if RecoveryService imports ExecutionStore mutation methods, action runner spawn, Treehouse acquire/release or filesystem removal.
-
-- [ ] **Step 6: Verify**
+Fail if Recovery imports mutation methods, helper spawn, acquire/release or removal.
 
 ```bash
 npm run typecheck
-npm run build --silent && node --test dist/tests/services/recovery-service.test.js
+npm run build --silent && node --test dist/tests/services/claim-service.test.js dist/tests/services/recovery-service.test.js
 npm run test:unit
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add src/services/recovery-service.ts tests/services/recovery-service.test.ts
-git commit -m "feat: add read-only execution recovery"
+git add src/services/claim-service.ts src/services/recovery-service.ts tests/services
+git commit -m "feat: add Claims and read-only Recovery"
 ```
 
 ---
 
-### Task 16: M01 CLI contracts and production composition
+### Task 13: M01 CLI and production composition root
 
 **Files:**
 - Modify: `src/cli/args.ts`
 - Modify: `src/cli/main.ts`
 - Modify: `src/cli/entry.ts`
 - Modify: `src/runtime/paths.ts`
-- Test: `tests/cli/execution-args.test.ts`
-- Test: `tests/cli/execution-main.test.ts`
+- Create: `tests/cli/execution-args.test.ts`
+- Create: `tests/cli/execution-main.test.ts`
 - Modify: `tests/cli/args.test.ts`
 - Modify: `tests/cli/main.test.ts`
 
-**Interfaces:**
-- Produces exact commands from microdesign section 17 with human/JSON output, typed errors, stable exit class and concrete next action.
+- [ ] **Step 1: Write strict parser RED tests**
 
-- [ ] **Step 1: Write parser RED tests**
-
-Accepted forms:
+Accept only:
 
 ```text
-track open --mission MIS-002 --milestone M01 --feature F01 --contract sha256:... --base <sha> --idempotency-key <key> [--json]
+track open --mission MIS-002 --milestone M01 --feature F01 --contract <hash> --base <sha> --idempotency-key <key> [--json]
 track show --track WT-001 [--json]
-track abandon --track WT-001 --expected-version <n> [--json]
-lease grant --track WT-001 --expected-version <n> --idempotency-key <key> [--json]
+track abandon --track WT-001 --expected-version <positive-int> [--json]
+lease grant --track WT-001 --expected-version <positive-int> --idempotency-key <key> [--json]
 lease show --lease LSE-001 [--json]
-lease release --lease LSE-001 --expected-version <n> --idempotency-key <key> [--json]
+lease release --lease LSE-001 --expected-version <positive-int> --idempotency-key <key> [--json]
 recover [--track WT-001] [--json]
 ```
 
-Reject duplicates, unknown flags, missing values, invalid positive integers, malformed IDs/hashes and positional extras.
+Reject duplicate/unknown flags, missing values, malformed IDs/hashes/integers and positional extras.
 
-- [ ] **Step 2: Extend `ParsedCommand` and usage**
+- [ ] **Step 2: Extend the existing strict command union**
 
-Keep the existing strict union. Do not add a generic map/router framework.
+Do not add a router framework or DI container. Keep one explicit branch per command.
 
-- [ ] **Step 3: Write CLI dependency/output RED tests**
+- [ ] **Step 3: Write output/dependency RED tests**
 
-For every command, assert one service invocation, stable JSON, human identity/version/hash visibility and a concrete next command. Errors preserve MnfsError code and remediation.
+Assert one service call, stable JSON, human identity/version/hash visibility, typed error and concrete next action for every command.
 
-- [ ] **Step 4: Implement `runCli` branches**
+- [ ] **Step 4: Compose production dependencies**
 
-Use typed inputs and explicit formatters. `recover` human output lists classifications and next action without hiding candidates.
+Await `ensureDatabaseReady`, open one current `SqliteStore`, build focused services/adapters and close after command completion. Do not discover Treehouse for commands that do not need it.
 
-- [ ] **Step 5: Compose production services in `entry.ts`**
-
-Open one `SqliteStore`, construct focused stores/services/adapters with runtime paths, close after awaited command completion. Do not initialize Treehouse for commands that do not require it.
-
-- [ ] **Step 6: Verify**
+- [ ] **Step 5: Verify and commit**
 
 ```bash
 npm run typecheck
 npm run build --silent && node --test dist/tests/cli/execution-args.test.js dist/tests/cli/execution-main.test.js dist/tests/cli/args.test.js dist/tests/cli/main.test.js
 npm run verify
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
 git add src/cli src/runtime/paths.ts tests/cli
 git commit -m "feat: expose M01 execution CLI"
 ```
 
 ---
 
-### Task 17: Fresh-process and deterministic M01 composition proof
+### Task 14: Fresh-process deterministic composition, real WSL2 proof and closeout gate
 
 **Files:**
 - Create: `tests/integration/m01-fresh-process.test.ts`
 - Create: `tests/integration/m01-composition.test.ts`
-- Modify: `package.json` only when an explicit focused script is useful; root `test:unit` must continue discovering all compiled tests.
+- Create after successful canonical run: `docs/acceptance/2026-08-04-mis-002-m01-implementation.md`
+- Modify after proof: `docs/capabilities/CAP-EXECUTION/TRACEABILITY.json`
+- Regenerate after proof: `docs/capabilities/CAP-EXECUTION/COVERAGE.md`
+- Modify after proof: `docs/DOCUMENTATION-MAP.md`
+- Modify after proof: `docs/tracking/STATUS.md`
+- Modify after proof: `docs/tracking/WORKLOG.md`
+- Modify after proof: PR #17 description
 
-**Interfaces:**
-- Consumes: complete deterministic M01 implementation with fake Treehouse/action process boundaries.
-- Produces: proof of recovery, crash windows, no duplicates and preserved M0/M1 history across independent Node processes.
+- [ ] **Step 1: Implement deterministic Scenario A across independent processes**
 
-- [ ] **Step 1: Build a revision-5 fixture**
+Create exact revision-5 SQLite/Git fixture and fake strict Treehouse. Open Track/A01, create independent source, grant, terminate at every source/token/helper/action window, recover fresh, release cleanly, abandon Track and prove repeated release idempotency.
 
-Create a real temporary canonical Git repo and runtime database containing M0/M1 state plus exact approved MIS-002 revision 5. Use fake Treehouse executables that implement strict JSON and action counters.
+- [ ] **Step 2: Implement deterministic Scenario B**
 
-- [ ] **Step 2: Implement Scenario A subprocess proof**
+Open second Track/A01/WR01, create source, grant, open Claim against exact tree/criteria, close process and recover identical lineage with no duplicate current entity. Keep Claim OPEN and resources preserved for M02.
 
-Across independent CLI processes:
+- [ ] **Step 3: Prove migration/downgrade/fresh binary**
 
-```text
-open Track/A01 at exact base
-materialize independent source
-grant Lease
-terminate at each source/token/helper/action window
-recover with a fresh process
-complete fenced release
-abandon Track
-repeat release and recover final state
-```
+Migrate a v3 copy, compare all historical rows/hashes and reopen current. Run compiled pre-v4 helper against a v4 copy and prove rollback/no drift.
 
-Assert canonical repo unchanged, at-most-one acquisition per grant intent and no product cleanup of preserved sources outside explicit fixture teardown.
-
-- [ ] **Step 3: Implement Scenario B subprocess proof**
-
-```text
-open second Track/A01/WR01
-materialize source
-grant Lease
-open Claim against exact tree and criteria
-close process
-fresh process recovers identical lineage and no duplicate current entity
-```
-
-Claim remains OPEN and resources preserved for M02.
-
-- [ ] **Step 4: Prove migration and downgrade in a fresh binary process**
-
-Copy a v3 database, invoke current CLI to migrate, reopen and compare historical rows. Invoke a compiled pre-v4 mutation helper and prove rollback/no row drift.
-
-- [ ] **Step 5: Run full deterministic gate**
+- [ ] **Step 4: Run deterministic global gate and adversarial scan**
 
 ```bash
 npm ci
 npm run verify
 ```
 
-Record Node/npm/Git versions, product count, AS-02 count, TC-01 count, total M01 tests, docs count and exact head.
+Record product/AS-02/TC-01/M01/docs counts and exact head. Fail source scan on project-root Treehouse cwd, environment spread, force/destroy/prune, Recovery mutation, Claim acceptance or Pi import.
 
-- [ ] **Step 6: Adversarial source scan**
+- [ ] **Step 5: Perform canonical WSL2 preflight**
 
-Fail on production Treehouse cwd equal to project root, inherited environment spread, force/destroy/prune, automatic removal during Recovery, Claim acceptance methods or Pi imports in M01 files.
+Require Linux-owned clean exact head, full gate, Treehouse accepted SHA/version/capabilities and no host/command-shape drift.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Execute real production Scenario A only**
+
+Use a disposable canonical source with `origin`; prove production source becomes independent/no-origin and real Treehouse is invoked only through `LeaseActionRunner`/`LeaseService`. Run source REQUESTED, token-before-STARTED, STARTED grant, external-before-commit, release-pending and physical-before-semantic crash drills with fresh-process reconciliation.
+
+- [ ] **Step 7: Preserve Evidence and perform trusted fixture cleanup**
+
+Release only exact clean disposable Lease, finalize Evidence first, remove only registered fixture resources and retain acceptance report plus hashes. An inconclusive grant remains preserved and blocks cleanup.
+
+- [ ] **Step 8: Promote only observed traceability and request Operator acceptance**
+
+Update each M01 requirement's `realizedBy`, `verifiedBy`, `evidencedBy` and state only to the proof achieved. Run final exact-head GitHub Actions. Present all seven criteria, migration/rollback, runtime proof, limitations and PR diff. Do not mark M01 complete, merge PR #17 or start M02 without a separate exact Operator decision.
+
+- [ ] **Step 9: Commit deterministic tests and later proof docs separately**
 
 ```bash
-git add tests/integration package.json
+git add tests/integration
 git commit -m "test: prove M01 fresh-process composition"
 ```
 
----
-
-### Task 18: Canonical WSL2 adapter proof, documentation and implementation gate
-
-**Files:**
-- Create: `docs/acceptance/2026-08-XX-mis-002-m01-durable-execution-lease-core.md`
-- Modify: `docs/capabilities/CAP-EXECUTION/TRACEABILITY.json`
-- Regenerate: `docs/capabilities/CAP-EXECUTION/COVERAGE.md`
-- Modify: `docs/DOCUMENTATION-MAP.md`
-- Modify: `docs/tracking/STATUS.md`
-- Modify: `docs/tracking/WORKLOG.md`
-- Modify: PR #17 description
-
-**Interfaces:**
-- Consumes: exact-head deterministic implementation and accepted Treehouse candidate.
-- Produces: canonical M01 Evidence and an explicit Operator gate; does not start M02.
-
-- [ ] **Step 1: Preflight exact candidate and checkout**
-
-Require canonical Ubuntu WSL2, Linux-owned checkout, clean exact branch head, full `npm ci && npm run verify`, Treehouse 2.1.1 accepted SHA and no candidate drift.
-
-- [ ] **Step 2: Execute only the approved real Scenario A**
-
-Use a disposable M01 product fixture with an `origin` on the canonical source and prove the production `ExecutionSourceAdapter` creates an independent no-origin Attempt source. Invoke real Treehouse only through `LeaseActionRunner` and the production `LeaseService`.
-
-- [ ] **Step 3: Perform real crash drills**
-
-At minimum:
-
-```text
-source REQUESTED before final rename
-helper claimed before STARTED
-helper STARTED during grant
-external Lease before semantic commit
-release pending before helper
-physical release before semantic commit
-```
-
-A fresh CLI process must classify and continue safely. An inconclusive started grant must stop and preserve rather than issue another `get`.
-
-- [ ] **Step 4: Verify release and cleanup boundary**
-
-Release only the exact clean disposable Lease. Preserve all product Evidence first. Trusted fixture cleanup removes only registered disposable paths and retains the acceptance report and hashes.
-
-- [ ] **Step 5: Promote Evidence and traceability**
-
-For each M01 requirement, update `realizedBy`, `verifiedBy`, `evidencedBy` and state only to the level actually proved. Do not claim M02 or full CAP-EXECUTION graduation.
-
-- [ ] **Step 6: Run final exact-head CI**
-
-```bash
-npm ci
-npm run verify
-```
-
-Wait for GitHub Actions on the PR synthetic merge commit and record all counts, versions and canonical IDs.
-
-- [ ] **Step 7: Request explicit implementation acceptance**
-
-Present:
-
-```text
-M01 deterministic proof
-M01 canonical WSL2 proof
-all seven criterion results
-migration/rollback evidence
-remaining limitations
-PR diff and CI
-```
-
-Do not mark M01 complete, merge PR #17 or start M02 without a separate exact Operator decision.
-
-- [ ] **Step 8: Commit documentation**
+After the real proof:
 
 ```bash
 git add docs .mnfs
-# Include generated coverage only when its source traceability changed.
 git commit -m "docs: record M01 implementation evidence"
 ```
 
 ---
 
-## Plan Self-Review Checklist
+## Self-Review
 
-### Spec coverage
+### Coverage map
 
-| Accepted microdesign area | Plan task |
+| Accepted design area | Task |
 |---|---|
-| IDs, states, errors | 1 |
-| one transaction/Event authority | 2 |
-| maintenance/backup/version gate | 3 |
-| migration v4 and schema | 4 |
-| persistence/FKs/idempotency | 5 |
-| Track/Attempt/Run lifecycle | 6 |
-| process and Git observation | 7 |
-| independent no-origin source | 8 |
-| exact Treehouse adapter | 9 |
-| durable action protocol | 10 |
-| trusted helper | 11 |
-| grant IAO | 12 |
-| release IAO and preservation | 13 |
-| Claim OPEN atomicity | 14 |
-| read-only Recovery | 15 |
-| CLI/composition root | 16 |
-| fresh-process deterministic proof | 17 |
-| real WSL2 proof and closeout gate | 18 |
+| IDs, states, errors and fixtures | 1 |
+| process/durability/process identity | 2 |
+| transaction authority | 3 |
+| maintenance/backup/version gate | 4 |
+| migration v4 and versioned Events | 5 |
+| persistence, ancestry and idempotency | 6 |
+| Track/Attempt/Run lifecycle | 7 |
+| independent source and Git observation | 8 |
+| exact Treehouse boundary | 9 |
+| durable action helper | 10 |
+| grant/release IAO and fencing | 11 |
+| Claim OPEN and read-only Recovery | 12 |
+| CLI/composition | 13 |
+| deterministic plus real proof and closeout gate | 14 |
 
-All seven M01 requirements and every Critical/Important Task 14 correction have at least one implementation task and one explicit proof.
+Every M01 requirement and every Task 14 Critical/Important correction has an implementation task and explicit proof.
 
-### Explicitly absent
+### Placeholder and scope scan
 
-```text
-Pi imports or process launch
-SEC-E1 production creation
-Worker completion
-Claim transition beyond OPEN
-Receipt
-Gate/Verdict
-Integration or delivery
-scheduler, broker or generic action registry
-force/destroy/prune
-automatic Recovery repair
-```
+The plan contains no `TODO`, `TBD`, symbolic date, deferred implementation phrase or unspecified test request. It explicitly excludes Pi, SEC-E1 production creation, Claim completion, Receipt, Gate, Integration, scheduler, broker, force/destroy/prune and automatic Recovery repair.
 
 ### Execution boundary
 
-This plan is ready for review, not execution. Production implementation remains prohibited until the Operator approves this exact plan version and separately authorizes the first TDD task.
+This plan is ready for review, not execution. Production implementation remains prohibited until the Operator approves exact plan version `1.0.1` and separately authorizes Task 1 RED.

@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.8
+version: 1.8.9
 owners:
   - developmentconexus-ops
 related:
@@ -31,8 +31,8 @@ tracking_issue: 16
 - **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 1 RED
-- **Current design PR:** #17 — `design/mis-002-m01` (draft; unmerged)
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 2 RED
+- **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
 
@@ -52,141 +52,106 @@ Research coverage:             PUBLISHED
 CAP-EXECUTION:                 ACCEPTED — version 0.1.0
 MIS-002 contract:              APPROVED — revision 5 / exact hash
 TC-01 canonical Evidence:      ACCEPT — 15/15 PASS, cleanup COMPLETED
-Task 14 final review:          COMPLETE / APROVÁVEL
-Critical findings:             3 found / 3 closed
-Important findings:            8 found / 8 closed
 M01 microdesign:               ACCEPTED — version 0.6.1
-MCRM R5:                       PASS
-Replan required:               NO
 Implementation plan:           CURRENT / APPROVED — version 1.0.1
-Implementation started:        NO
-Task 1 RED:                    NOT AUTHORIZED
-M01 production implementation: PROHIBITED pending Task 1 continuation
+Implementation started:        YES — bounded by task gates
+Task 1 RED:                    OBSERVED / EXPECTED FAILURE
+Task 1 GREEN:                  COMPLETE
+Task 1 product tests:          4/4 PASS
+Complete product suite:        99/99 PASS
+Task 2 RED:                    NOT AUTHORIZED
+Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 1 RED only
-Design PR:                     #17 DRAFT
+Current human gate:            explicit authorization for Task 2 RED only
+PR:                            #17 DRAFT
 ```
 
-## Operator decisions
-
-### Microdesign approval
+## Operator authority chain
 
 ```text
-MNFS_APPROVE_M01_MICRODESIGN version=0.6.1 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 treehouse=sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3
+D-007  microdesign 0.6.1 approved
+D-008  implementation plan 1.0.1 approved
+MNFS_AUTHORIZE_M01_TASK_1_RED plan=1.0.1 microdesign=0.6.1
+MNFS_AUTHORIZE_M01_TASK_1_GREEN plan=1.0.1 microdesign=0.6.1 red=65bd4e2c410d4d1566f5fef0da33f29e35657489
 ```
 
-Recorded as `D-007` and `ACCEPTANCE-MIS-002-M01-R5-APPROVAL`.
+Task 1 authority did not extend to Task 2, SQLite changes, process execution, Treehouse, Pi or merge.
 
-### Implementation-plan approval
+## Task 1 implementation
+
+Created:
 
 ```text
-MNFS_APPROVE_M01_IMPLEMENTATION_PLAN version=1.0.1 microdesign=0.6.1 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 treehouse=sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3
+src/execution/ids.ts
+src/execution/model.ts
+src/execution/transitions.ts
 ```
 
-Recorded as `D-008` and `ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-PLAN-APPROVAL`.
-
-The plan approval accepts the ordered tasks, interfaces and proof gates. It does not start Task 1 and cannot be interpreted as authorization for later tasks, real Treehouse execution, M01 acceptance, M02 or merge.
-
-## Accepted architecture
+Modified:
 
 ```text
-Approved Mission Contract
-→ exact scope and contract hash
-
-SQLite
-→ Track, Attempt, Run, Claim, Lease, idempotency and payload-versioned Event authority
-
-Attempt-owned ExecutionSourceAdapter
-→ exact-base independent Linux-local repository
-→ zero remotes, no hardlinks, no alternates, controlled hooks/config
-
-Treehouse 2.1.1
-→ physical managed-worktree and external Lease identity
-
-Trusted LeaseActionRunner
-→ one token-bound external invocation with durable STARTED/FINISHED Evidence
-
-MNFS services
-→ transaction, ancestry, IAO, fencing and read-only Recovery
+src/domain/errors.ts
 ```
 
-## Frozen invariants
+Task 1 established:
+
+- canonical parent-relative IDs for Write Track, Attempt, Worker Run and Claim;
+- canonical Lease IDs;
+- positive safe-integer and canonical-padding validation;
+- explicit parent/ancestry validation at the identity boundary;
+- immutable M01 entity/status interfaces;
+- fail-closed Write Track, Attempt, source, Worker Run and Lease transition tables;
+- the complete accepted M01 typed-error vocabulary.
+
+It introduced no filesystem, subprocess, Git, SQLite, Treehouse, Pi or network behavior.
+
+## Task 1 verification
+
+```text
+RED head:                 65bd4e2c410d4d1566f5fef0da33f29e35657489
+RED synthetic merge:      684d82f1508459bb649c7a115032eb93650f39d2
+RED workflow/job:          30936460300 / 92083735544
+RED result:                TypeScript PASS; legacy 95/95 PASS; M01 0/4 expected failure
+
+GREEN head:               ec6505d7207d252aeef77d72192c401f460b4816
+GREEN synthetic merge:    cc8f99ce5773665fdbef3e205cceccadc74398df
+GREEN workflow/job:        30937517215 / 92087281731
+GREEN result:              PASS
+Product tests:             99/99
+AS-02 tests:               119/119
+TC-01 tests:               78/78
+Documentation validation:  93 canonical IDs
+```
+
+## Frozen boundaries
+
+The accepted design invariants remain unchanged:
 
 - canonical checkout is never Treehouse cwd;
-- Attempt source is independent and exact-base;
-- Treehouse HOME/XDG/config/hooks are controlled;
-- every state mutation and versioned Event is atomic;
+- every Attempt owns an independent exact-base Linux-local source;
+- Treehouse uses controlled HOME/XDG/config/hooks and the accepted candidate;
+- state mutation and payload-versioned Event commit atomically;
 - relational keys prove exact Track → Attempt → Run/Lease → Claim ancestry;
-- Claim result is a real Git tree in the exact Attempt source;
-- grant, release and Claim idempotency bind unique keys to canonical input hashes;
-- LeaseActionRunner records STARTED before one external call;
-- inconclusive STARTED grant never automatically repeats `treehouse get`;
-- release is conditional and fully fenced;
+- action STARTED is durable before one external invocation;
+- inconclusive grant never automatically repeats `treehouse get`;
 - dirty, ambiguous and unclassified work is preserved;
 - plain Recovery performs no domain or resource mutation;
 - M01 creates Claim `OPEN` only and contains no Pi dispatch, Receipt or Gate.
 
-## Canonical Treehouse Evidence
-
-```text
-Run ID:                    tc01-20260804-144054-4315b6f2
-Environment:               Ubuntu 26.04 on WSL2
-Kernel:                    6.18.33.2-microsoft-standard-WSL2
-Node.js:                   v24.18.0
-Git:                       2.53.0
-Treehouse version:         2.1.1
-Treehouse realpath:        /usr/local/bin/treehouse
-Treehouse SHA-256:         sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3
-Command-shape SHA-256:     sha256:f2077cfd037cbaefdcfc94385a0cfeb7e1647ef294ca8ceee3cd61a1b109dc84
-Scenarios SHA-256:         sha256:0588e88c8d694a60fd9a5e00e34af71175531c2b6187b61e0bfc89a0cf174f90
-Verdict:                   ACCEPT
-Cleanup:                   COMPLETED
-```
-
-Any candidate, capability, command, host/tooling, environment-shape or source-boundary drift requires renewed conformance review.
-
-## Approved implementation plan 1.0.1
-
-The plan defines fourteen ordered TDD gates:
-
-```text
-domain/errors/fixtures
-→ process/durability/process identity
-→ transaction authority
-→ maintenance/backup/version gate
-→ migration v4/versioned Events
-→ persistence/ancestry/idempotency
-→ Track/Attempt/Run lifecycle
-→ Git observation/independent source
-→ exact Treehouse adapter
-→ durable action helper
-→ grant/release IAO
-→ Claim OPEN/read-only Recovery
-→ CLI/composition
-→ deterministic and canonical WSL2 proof
-```
-
-Each task requires observed RED, minimal GREEN, focused and root verification, review and a bounded commit. No task authorizes its successor automatically.
-
 ## Current authorization boundary
 
 ```text
-M01 research:               AUTHORIZED / COMPLETE
-TC-01:                      ACCEPTED
-Task 14 review:             COMPLETE
-Microdesign 0.6.1:          ACCEPTED
-R5:                         PASS
-Implementation plan 1.0.1:  APPROVED
-Task 1 RED:                  NOT AUTHORIZED
-M01 implementation:         NOT STARTED / PROHIBITED pending continuation
-Real Treehouse execution:    PROHIBITED until the plan's final WSL2 gate
-Pi Worker dispatch:         PROHIBITED
-PR #17 merge:               NOT AUTHORIZED
+Task 1:                    COMPLETE
+Task 2 RED:                NOT AUTHORIZED
+Later tasks:               NOT AUTHORIZED
+Real Treehouse execution:  NOT AUTHORIZED
+Pi Worker dispatch:        PROHIBITED
+PR #17 merge:              NOT AUTHORIZED
 ```
 
 A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boundary, microdesign invariants or applicable requirements triggers Replan or renewed readiness review.
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 1 RED only**. Stop before writing production implementation unless that continuation is granted.
+Request or provide an explicit continuation for **Task 2 RED only**. Stop before implementing the process runner, durable Artifact writer or Linux process identity unless that continuation is granted.

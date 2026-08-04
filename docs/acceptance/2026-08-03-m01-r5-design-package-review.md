@@ -5,7 +5,7 @@ document_type: acceptance_report
 form: explanation
 authority: evidence
 status: accepted
-version: 1.0.6
+version: 1.0.7
 owners:
   - developmentconexus-ops
 related:
@@ -14,6 +14,7 @@ related:
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
   - PLAN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
+  - ACCEPTANCE-TC-01-TASK-01-HARNESS-REGISTRATION
 tracking_issue: 16
 last_reviewed: 2026-08-03
 ---
@@ -28,7 +29,15 @@ After reviewing the Issue #16 / PR #17 design package, the Operator supplied the
 Aprovado
 ```
 
-The response applies to the review gate explicitly presented in the preceding project checkpoint: approval of the written research, TC-01 conformance protocol and proposed M01 microdesign package so that the detailed TC-01 implementation and execution plan may be authored.
+The response applied to approval of the written research, TC-01 conformance protocol and proposed M01 microdesign package so that the detailed TC-01 implementation and execution plan could be authored.
+
+The Operator later answered the explicit gate approving TC-01 plan version `1.0.3` and authorizing Task 1 with:
+
+```text
+Apogaro
+```
+
+In the direct context of the approval question, this was interpreted as approval of the plan and authorization to begin Task 1. No later task is authorized by that response.
 
 ## Decision
 
@@ -38,15 +47,16 @@ Authority:          Operator
 Mission:            MIS-002 revision 5
 Contract:           sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3
 Research report:    accepted as R5 Evidence
-TC-01 protocol:     accepted for implementation and canonical WSL2 execution planning
+TC-01 protocol:     accepted for harness implementation and canonical WSL2 execution planning
+TC-01 plan:         approved at version 1.0.3
 M01 microdesign:    remains proposed pending TC-01 Evidence and final review
 ```
 
-The approval confirms that the design direction is suitable for the next governed step. It does not assert that the installed Treehouse binary conforms, does not complete R5 and does not authorize M01 production implementation.
+The approvals confirm that the design direction and TC-01 plan are suitable for governed execution. They do not assert that the installed Treehouse binary conforms, do not complete R5 and do not authorize M01 production implementation.
 
-## Approved next action
+## Approved next action and execution state
 
-The approved next action was completed by writing:
+The approved plan is:
 
 ```text
 docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md
@@ -56,23 +66,24 @@ version 1.0.3
 The plan:
 
 - follows TDD for deterministic harness behavior;
-- includes an executable first RED test for the process boundary rather than pseudocode-only placeholders;
+- includes an executable first RED test for the harness boundary;
 - uses only disposable Linux-owned fixtures;
 - produces structured Evidence outside Worker authority;
 - separates deterministic CI proof from real WSL2 proof;
 - records the exact Treehouse executable, version and hash;
 - stops before production adapter or M01 implementation work;
-- requires separate Operator approval before harness implementation begins.
+- requires focused review between tasks.
 
-An earlier plan-package revision passed workflow `30865311721`, job `91855751914`, with 95/95 product tests, 119/119 AS-02 tests and 76 canonical documentation IDs. Version 1.0.3 requires its own consolidated-head CI before implementation authorization.
+Task 1 was implemented through a verified RED/GREEN cycle and accepted in `ACCEPTANCE-TC-01-TASK-01-HARNESS-REGISTRATION`.
 
 ## Current authority boundary
 
 ```text
 TC-01 protocol:            ACCEPTED — version 0.2.0
-TC-01 implementation plan: WRITTEN — version 1.0.3, awaiting consolidated-head CI and Operator approval
-TC-01 harness build:        PROHIBITED until plan approval
-TC-01 WSL2 execution:       AUTHORIZED after a reviewed, CI-green harness exists
+TC-01 implementation plan: APPROVED — version 1.0.3
+TC-01 Task 1:              ACCEPTED
+TC-01 Task 2:              NOT_STARTED / REQUIRES EXPLICIT CONTINUATION
+TC-01 WSL2 execution:      AUTHORIZED only after a reviewed, CI-green complete harness exists
 M01 microdesign:            PROPOSED, NOT FINAL
 M01 implementation:         PROHIBITED
 Pi Worker dispatch:         PROHIBITED
@@ -83,10 +94,9 @@ PR #17 merge:               NOT AUTHORIZED
 
 R5 may pass only after:
 
-1. the TC-01 plan is explicitly approved;
-2. the TC-01 harness is implemented and deterministically verified;
-3. TC-01 executes against the pinned canonical WSL2 Treehouse binary;
-4. the resulting Evidence receives an explicit Verdict;
-5. the M01 microdesign incorporates every accepted limitation or rejection;
-6. constructive and adversarial reviews find no unresolved design blocker;
-7. the Operator explicitly approves the final M01 microdesign.
+1. the TC-01 deterministic harness is implemented and verified task-by-task;
+2. TC-01 executes against the pinned canonical WSL2 Treehouse binary;
+3. the resulting Evidence receives an explicit Verdict;
+4. the M01 microdesign incorporates every accepted limitation or rejection;
+5. constructive and adversarial reviews find no unresolved design blocker;
+6. the Operator explicitly approves the final M01 microdesign.

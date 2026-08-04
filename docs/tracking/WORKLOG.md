@@ -276,3 +276,33 @@ owners:
 - Deterministic harness status became `IMPLEMENTED / DETERMINISTICALLY VERIFIED / PRE-WSL2 REVIEWED`.
 - Real canonical WSL2 Evidence remains `NOT_STARTED`; Treehouse conformance is not established.
 - Task 13 requires a separate explicit Operator continuation. PR #17 remains draft and unmerged; R5 remains `IN_PROGRESS`.
+
+### TC-01 Task 13 — real canonical WSL2 conformance run
+
+- Operator explicitly authorized Task 13 and updated the canonical `~/src/mnfs` checkout on `design/mis-002-m01`.
+- Baseline verification passed on the exact authorized head before the real run.
+- Canonical host provenance was Ubuntu 26.04 on WSL2 kernel `6.18.33.2-microsoft-standard-WSL2`, Node.js `v24.18.0`, npm `12.0.2` and Git `2.53.0`.
+- Installed Treehouse resolved to `/usr/local/bin/treehouse`, returned raw version `v2.1.1` and had SHA-256 `c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`.
+- The real preflight exposed a version-presentation defect: the harness expected `2.1.1` text and rejected the installed `v2.1.1` output.
+- TDD corrected only strict version presentation: one lowercase `v` prefix is canonicalized, while different versions or extra text remain blocked and exact bytes remain hash-bound.
+  - RED workflow `30919284889`, job `92025350483`: 75 PASS / 1 expected FAIL.
+  - GREEN workflow `30919527946`, job `92026176091`: 76/76 TC-01 PASS.
+- The canonical run `tc01-20260804-144054-4315b6f2` produced `ACCEPT`; every scenario S01-S15 passed and no limitation was recorded.
+- A fresh-process `report` invocation revalidated the manifest and artifact hashes and independently reproduced `ACCEPT`.
+- Accepted command-shape hash: `sha256:f2077cfd037cbaefdcfc94385a0cfeb7e1647ef294ca8ceee3cd61a1b109dc84`.
+- Accepted scenarios hash: `sha256:0588e88c8d694a60fd9a5e00e34af71175531c2b6187b61e0bfc89a0cf174f90`.
+- The first cleanup attempt correctly failed closed and removed nothing, but its read-only diagnosis reported false `SOURCE_CHANGED` even though every HEAD, status, config, refs, tracked-tree and working-tree hash was identical.
+- Root-cause analysis found property-order-sensitive `JSON.stringify` equality across a serialized baseline and a freshly constructed snapshot.
+- TDD changed snapshot equality to canonical JSON, preserving array order and all real byte/hash/mode changes:
+  - RED workflow `30923142365`, job `92038588740`: 76 PASS / 1 expected FAIL.
+  - GREEN workflow `30923366842`, job `92039349604`: 77/77 TC-01 PASS.
+- A separate TDD cycle exposed safe structured cleanup blockers through JSON while continuing to exclude raw stderr, Buffers and environment values:
+  - RED workflow `30923469530`, job `92039702478`: 77 PASS / 1 expected FAIL.
+  - GREEN workflow `30923659755`, job `92040355347`: 78/78 TC-01 PASS.
+- The second cleanup review revalidated current provenance, Treehouse identity, command shape, status, absence of live TC-01 Leases, worktree cleanliness, complete source baseline and path containment.
+- Cleanup returned `COMPLETED`; only `source-repo`, `pool-root`, `snapshots`, `fake-home`, `git-wrapper` and `unmanaged-repo` were removed.
+- `fixture.json`, all finalized Evidence, report, Verdict, cleanup state and command artifacts remained preserved under the Linux-owned run root.
+- Final artifact hashes were recorded in `ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER`.
+- Reconciled M01 microdesign version 0.4.0 now binds Treehouse 2.1.1, executable SHA-256, required capabilities, accepted command shape and mandatory freshness invalidation.
+- Task 13 closed the physical adapter uncertainty but did not approve the complete M01 microdesign.
+- Task 14 final constructive/adversarial review and an explicit Operator decision remain required; M01 implementation, Pi Worker dispatch and automatic PR merge remain prohibited.

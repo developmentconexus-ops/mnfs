@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile, readdir, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
+import { parseJsonBytesStrict } from './canonical-json.mjs';
 import { assertTc01, tc01Error } from './errors.mjs';
 import { assertLinuxOwnedAbsolutePath, resolveTc01RunRoot, validateRunId } from './paths.mjs';
 import { runProcess } from './process-runner.mjs';
@@ -13,6 +14,7 @@ function gitEnv(fakeHome, pathEnv) {
   return {
     HOME: fakeHome,
     PATH: pathEnv,
+    GIT_CONFIG_GLOBAL: '/dev/null',
     GIT_CONFIG_NOSYSTEM: '1',
     GIT_TERMINAL_PROMPT: '0',
     GIT_AUTHOR_DATE: '2000-01-01T00:00:00Z',
@@ -123,7 +125,7 @@ export async function createFixture({
   await Promise.all([
     writeFile(join(sourceRepo, 'README.md'), 'TC-01 disposable fixture\n', 'utf8'),
     writeFile(join(sourceRepo, 'fixture-sentinel.txt'), 'tc01-fixture-sentinel\n', 'utf8'),
-    writeFile(join(sourceRepo, 'treehouse.toml'), `max_trees = 2\nroot = "${poolRoot}"\n`, 'utf8'),
+    writeFile(join(sourceRepo, 'treehouse.toml'), `max_trees = 2\nroot = ${JSON.stringify(poolRoot)}\n`, 'utf8'),
   ]);
 
   const env = gitEnv(fakeHome, pathEnv);
@@ -170,8 +172,13 @@ export async function loadFixture(runRoot) {
   const safeRunRoot = assertLinuxOwnedAbsolutePath(runRoot, 'TC-01 run root');
   let value;
   try {
-    value = JSON.parse(await readFile(join(safeRunRoot, 'fixture.json'), 'utf8'));
+    value = parseJsonBytesStrict(
+      await readFile(join(safeRunRoot, 'fixture.json')),
+      'TC-01 fixture metadata',
+      'TC01_FIXTURE_INVALID',
+    );
   } catch (error) {
+    if (error?.code === 'TC01_FIXTURE_INVALID') throw error;
     throw tc01Error('TC01_FIXTURE_INVALID', 'Unable to load TC-01 fixture metadata.', {
       runRoot: safeRunRoot,
       cause: error instanceof Error ? error.message : String(error),

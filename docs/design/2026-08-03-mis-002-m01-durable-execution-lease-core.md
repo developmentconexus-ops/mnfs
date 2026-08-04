@@ -5,7 +5,7 @@ document_type: microdesign
 form: explanation
 authority: specification
 status: proposed
-version: 0.6.0
+version: 0.6.1
 owners:
   - developmentconexus-ops
 approvers:
@@ -67,7 +67,7 @@ MNFS services
 
 M01 does not launch Pi. It persists the identities and invariants that M02 will consume for the real E1 Worker.
 
-TC-01 produced canonical WSL2 `ACCEPT` Evidence for Treehouse `2.1.1` under a no-origin, controlled-HOME boundary. Version `0.6.0` makes that same boundary mandatory for production use and closes the final R5 review findings. This design remains `proposed` until the Operator explicitly approves this exact version.
+TC-01 produced canonical WSL2 `ACCEPT` Evidence for Treehouse `2.1.1` under a no-origin, controlled-HOME boundary. Version `0.6.1` makes that same boundary mandatory for production use and closes the final R5 review findings. This design remains `proposed` until the Operator explicitly approves this exact version.
 
 ## 2. Approved baseline and owned requirements
 
@@ -167,7 +167,7 @@ Rules:
 4. no Git, filesystem scan, Treehouse action or process wait occurs inside a domain transaction;
 5. source preparation and Lease grant/release use explicit Intent–Action–Observation;
 6. one external action token has at most one live trusted helper;
-7. Recovery is non-mutating by default;
+7. plain Recovery is byte-for-byte non-mutating;
 8. ambiguous or destructive repair requires explicit authority;
 9. the canonical checkout is observed but never used as Treehouse backing repository;
 10. production behavior must remain inside the accepted TC-01 boundary.
@@ -233,6 +233,8 @@ Required properties:
 - exact `base_commit_sha`, `HEAD^{tree}` and object format verified;
 - canonical checkout byte/Git snapshot equal before and after;
 - final path is immutable for the Attempt and preserved until explicit Track disposition.
+
+The implementation must select local Git transfer flags that copy object storage rather than relying on the local-clone hardlink default. It must reject `--shared`, reference/alternate borrowing and any resulting `.git/objects/info/alternates` entry.
 
 Crash handling:
 
@@ -348,12 +350,13 @@ Migration v4 is additive except for a controlled `events` rebuild. It is tested 
 
 Before mutation:
 
-1. close other MNFS writers;
-2. create a byte-for-byte SQLite backup outside the migration transaction;
-3. record database hash, schema/user version, approved contract hashes and row counts;
-4. run `PRAGMA integrity_check` and require `ok`;
-5. require the applied migration set to be supported, ordered and gap-free;
-6. reject a database newer than this binary in write mode.
+1. acquire an MNFS maintenance gate and close other MNFS writers;
+2. use `node:sqlite` `backup()` against the open source connection to create a consistent backup outside the migration transaction;
+3. fsync, hash, reopen and run `PRAGMA integrity_check` on the backup;
+4. record source database hash, schema/user version, approved contract hashes and row counts;
+5. run `PRAGMA integrity_check` on the source and require `ok`;
+6. require the applied migration set to be supported, ordered and gap-free;
+7. reject a database newer than this binary in write mode.
 
 The Events rebuild follows the SQLite generalized table-rebuild sequence:
 
@@ -414,12 +417,13 @@ LEASE_GRANTED
 LEASE_RELEASE_REQUESTED
 LEASE_RELEASED
 LEASE_DIVERGED
-RECOVERY_OBSERVED
 ```
+
+Plain `mnfs recover` emits no Domain Event and performs no SQLite write. Its Recovery Report is a content-addressed read-only Artifact. An explicitly authorized repair records the semantic state Event that it actually applies; no generic observation Event is used to smuggle mutation into Recovery.
 
 Event payload version is immutable per Event. A future version adds another registry row and never rewrites history.
 
-Rollback after schema v4 restores the recorded backup. Running a pre-v4 writer against the migrated database is prohibited even though supported old command mutations fail closed.
+Rollback after schema v4 restores the verified backup. Running a pre-v4 writer against the migrated database is prohibited even though supported old command mutations fail closed.
 
 ## 9. Relational model
 
@@ -544,6 +548,7 @@ Action state rules:
 - token is unique and binds the exact input hash;
 - `STARTED` requires a durable started Artifact written before Treehouse invocation;
 - `FINISHED` requires a bounded result Artifact;
+- expected Artifact paths are persisted when the token is claimed, before helper spawn;
 - action fields clear only with semantic completion; divergence preserves them.
 
 ```sql
@@ -620,14 +625,15 @@ A durable Lease intent does not authorize every caller to invoke Treehouse. Only
 
 ```text
 1. LeaseService CAS-claims action_kind + action_token + exact input hash
-2. record owner Lead boot ID/PID/start ticks and LEASE_ACTION_CLAIMED
-3. spawn the fixed LeaseActionRunner with a token-scoped operation file
-4. runner writes and fsyncs STARTED Artifact before invoking Treehouse
-5. runner records its boot ID/PID/start ticks in the Artifact
-6. runner invokes exactly one accepted Treehouse command
-7. runner writes bounded raw result + FINISHED Artifact and exits
-8. LeaseService or a fresh process observes helper Artifact, Treehouse and Git
-9. semantic transaction commits outcome or divergence
+2. persist expected STARTED/FINISHED Artifact paths and owner Lead identity
+3. record LEASE_ACTION_CLAIMED in the same transaction
+4. spawn the fixed LeaseActionRunner with a token-scoped immutable operation file
+5. runner writes and fsyncs STARTED Artifact before invoking Treehouse
+6. runner records its boot ID/PID/start ticks in that Artifact
+7. runner invokes exactly one accepted Treehouse command
+8. runner writes bounded raw result + FINISHED Artifact and exits
+9. LeaseService or a fresh process observes helper Artifact, Treehouse and Git
+10. semantic transaction commits outcome or divergence
 ```
 
 The runner does not mutate domain SQLite. Its operation file is immutable, run-scoped, outside Worker authority and contains only exact argv/cwd/env hashes and Artifact destinations.
@@ -672,7 +678,7 @@ Only component permitted to prepare a Treehouse operation and consume LeaseActio
 
 ### `RecoveryService`
 
-Loads expected state, source/helper/process/Treehouse/Git observations and produces a read-only report. It never creates a source, claims an action token, launches a helper, acquires, returns, prunes, destroys, clears ownership or changes semantic state.
+Loads expected state, source/helper/process/Treehouse/Git observations and produces a content-addressed read-only Recovery Report. It never creates a source, claims an action token, launches a helper, acquires, returns, prunes, destroys, clears ownership, emits a Domain Event or changes semantic state.
 
 Original operation services may apply narrowly defined repairs only after fresh observation and exact idempotency/fencing validation.
 
@@ -842,7 +848,7 @@ External IDs, paths, holders and helper tokens must map one-to-one. Duplicate ID
 | `SD-02` | source path/fingerprint/base/config differs | preserve/operator decision |
 | `UNKNOWN` | observation insufficient | block |
 
-Reports contain expected state, every observed candidate, observation hashes, severity, safe actions, recommendation and required authority. Plain recovery changes nothing.
+Reports contain expected state, every observed candidate, observation hashes, severity, safe actions, recommendation and required authority. Plain recovery changes nothing and writes only its requested output stream/Artifact outside domain state.
 
 ## 17. CLI
 
@@ -931,7 +937,7 @@ TDD is mandatory.
 ### Migration
 
 - empty, M0, M1/v3 and exact revision-5 databases;
-- backup and preflight failure;
+- maintenance gate, consistent backup and backup verification;
 - Event IDs, sequence, payloads and counts preserved;
 - `payload_schema_version` copied as 1;
 - indexes and foreign keys recreated;
@@ -967,6 +973,7 @@ TDD is mandatory.
 ### Action helper and Lease
 
 - operation file exact and immutable;
+- expected Artifact paths persisted before spawn;
 - STARTED durable before Treehouse invocation;
 - FINISHED bounded and advisory;
 - parent death before spawn, during spawn, after STARTED, after Treehouse and after semantic commit;
@@ -983,7 +990,7 @@ TDD is mandatory.
 - exact one-to-one matching;
 - duplicate ID/path/holder/helper classified, never first-matched;
 - source and Lease divergences reported independently;
-- Recovery is byte-for-byte non-mutating;
+- Recovery is byte-for-byte non-mutating for SQLite and managed resources;
 - output includes every candidate, Evidence refs and concrete authority/next action.
 
 ### Canonical M01 proof
@@ -1007,7 +1014,7 @@ Pi and production SEC-E1 dispatch remain absent.
 
 ## 21. Observability, security and rollback
 
-Record versioned Domain Events, durations, adapter exit classes, bounded Artifact refs, source fingerprint, Treehouse version/hash, action token/helper identity, Recovery classifications, entity versions and concrete next action.
+Record versioned Domain Events, durations, adapter exit classes, bounded Artifact refs, source fingerprint, Treehouse version/hash, action token/helper identity, Recovery Report hashes, entity versions and concrete next action.
 
 Security invariants:
 
@@ -1026,7 +1033,7 @@ Rollout:
 
 ```text
 accepted TC-01 Evidence
-→ final review and Operator approval of 0.6.0
+→ final review and Operator approval of 0.6.1
 → separate implementation plan
 → migration/domain with fakes
 → source/helper proofs
@@ -1034,7 +1041,7 @@ accepted TC-01 Evidence
 → M01 composition proof
 ```
 
-Rollback restores the pre-migration backup or performs a separately reviewed forward repair. It never automatically removes a source or worktree. Execution sources, helper Artifacts and worktrees remain preserved until explicit safe disposition.
+Rollback restores the verified pre-migration backup or performs a separately reviewed forward repair. It never automatically removes a source or worktree. Execution sources, helper Artifacts and worktrees remain preserved until explicit safe disposition.
 
 ## 22. Target files
 
@@ -1073,10 +1080,10 @@ TC-01 protocol:              ACCEPTED
 TC-01 canonical Evidence:    ACCEPT — 15/15 PASS, cleanup COMPLETED
 Treehouse candidate:         ACCEPTED ONLY INSIDE PROVED BOUNDARY
 Task 14 review:              COMPLETE / OPERATOR DECISION PENDING
-M01 microdesign:             PROPOSED — version 0.6.0
+M01 microdesign:             PROPOSED — version 0.6.1
 M01 implementation:          PROHIBITED
 Pi Worker dispatch:          PROHIBITED
-Current gate:                explicit Operator decision on version 0.6.0
+Current gate:                explicit Operator decision on version 0.6.1
 ```
 
 ```yaml
@@ -1090,7 +1097,7 @@ documentation_impact:
     - DOC-PRODUCT-BLUEPRINT-08
     - DOC-PROJECT-STATUS
     - TRACKING-WORKLOG
-  rationale: "Final R5 review closes the production no-origin/source boundary, versioned Events, relational ancestry, migration downgrade fence, trusted action-helper crash windows and exact Recovery matching."
+  rationale: "Final R5 review closes the production no-origin/source boundary, consistent migration backup, versioned Events, relational ancestry, downgrade fence, trusted action-helper crash windows and exact read-only Recovery matching."
   follow_up:
     issue: 16
 

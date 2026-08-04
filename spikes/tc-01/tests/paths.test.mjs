@@ -44,6 +44,22 @@ test('accepts Linux-owned absolute paths and rejects relative or mounted paths',
   }
 });
 
+test('rejects control characters before resolving a filesystem path', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'mnfs-tc01-control-path-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+
+  for (const invalid of [
+    `${root}/line\nbreak`,
+    `${root}/carriage\rreturn`,
+    `${root}/nul\0byte`,
+  ]) {
+    assert.throws(
+      () => assertLinuxOwnedAbsolutePath(invalid, 'state root'),
+      (error) => error?.code === 'TC01_INVALID_INPUT' && /control/iu.test(error.message),
+    );
+  }
+});
+
 test('rejects a path whose existing parent resolves below /mnt', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'mnfs-tc01-symlink-'));
   t.after(() => rm(root, { recursive: true, force: true }));

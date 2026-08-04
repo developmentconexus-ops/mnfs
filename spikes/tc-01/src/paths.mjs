@@ -4,6 +4,7 @@ import { basename, dirname, isAbsolute, join, normalize, resolve, sep } from 'no
 import { assertTc01 } from './errors.mjs';
 
 const RUN_ID = /^tc01-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}$/u;
+const PATH_CONTROL_CHARACTERS = /[\r\n\0]/u;
 
 function resolveThroughExistingParent(value) {
   let current = normalize(resolve(value));
@@ -35,7 +36,13 @@ export function validateRunId(value) {
 
 export function assertLinuxOwnedAbsolutePath(value, label = 'path') {
   assertTc01(
-    typeof value === 'string' && isAbsolute(value),
+    typeof value === 'string' && !PATH_CONTROL_CHARACTERS.test(value),
+    'TC01_INVALID_INPUT',
+    `${label} contains a forbidden control character.`,
+    { label, value },
+  );
+  assertTc01(
+    isAbsolute(value),
     'TC01_INVALID_INPUT',
     `${label} must be an absolute Linux path.`,
     { label, value },

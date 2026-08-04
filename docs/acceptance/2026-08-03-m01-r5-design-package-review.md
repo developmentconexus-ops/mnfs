@@ -5,7 +5,7 @@ document_type: acceptance_report
 form: explanation
 authority: evidence
 status: accepted
-version: 1.0.1
+version: 1.0.2
 owners:
   - developmentconexus-ops
 related:
@@ -46,10 +46,11 @@ The approval confirms that the design direction is suitable for the next governe
 
 ## Approved next action
 
-The approved next action was completed by writing:
+The approved next action was completed by writing and mechanically verifying:
 
 ```text
 docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md
+version 1.0.2
 ```
 
 The plan:
@@ -60,14 +61,24 @@ The plan:
 - separates deterministic CI proof from real WSL2 proof;
 - records the exact Treehouse executable, version and hash;
 - stops before production adapter or M01 implementation work;
-- requires separate Operator review before harness implementation begins.
+- requires separate Operator approval before harness implementation begins.
+
+Mechanical plan-package proof:
+
+```text
+Workflow:                  30865311721
+Job:                       91855751914
+Product tests:             95/95 PASS
+AS-02 tests:               119/119 PASS
+Documentation validation: 76 canonical IDs PASS
+```
 
 ## Current authority boundary
 
 ```text
 TC-01 protocol:            ACCEPTED — version 0.2.0
-TC-01 implementation plan: WRITTEN — version 1.0.1, awaiting review
-TC-01 harness build:        PROHIBITED until plan review
+TC-01 implementation plan: WRITTEN / VERIFIED — version 1.0.2, awaiting Operator approval
+TC-01 harness build:        PROHIBITED until plan approval
 TC-01 WSL2 execution:       AUTHORIZED after a reviewed, CI-green harness exists
 M01 microdesign:            PROPOSED, NOT FINAL
 M01 implementation:         PROHIBITED
@@ -79,7 +90,7 @@ PR #17 merge:               NOT AUTHORIZED
 
 R5 may pass only after:
 
-1. the TC-01 plan is reviewed;
+1. the TC-01 plan is explicitly approved;
 2. the TC-01 harness is implemented and deterministically verified;
 3. TC-01 executes against the pinned canonical WSL2 Treehouse binary;
 4. the resulting Evidence receives an explicit Verdict;

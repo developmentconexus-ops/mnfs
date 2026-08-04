@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.7.2
+version: 1.7.3
 owners:
   - developmentconexus-ops
 related:
@@ -62,7 +62,7 @@ tracking_issue: 16
 - [x] TC-01 Task 1 completed through observed RED, focused GREEN and full canonical CI.
 - [x] Operator authorized Task 2.
 - [x] TC-01 Task 2 completed through observed RED, focused GREEN and full canonical CI.
-- [ ] TC-01 Task 3 — run-scoped paths and disposable Git fixture — started.
+- [ ] TC-01 Task 3 — run-scoped paths and disposable Git fixture — not started.
 - [ ] TC-01 deterministic harness implementation complete.
 - [ ] TC-01 harness receives full CI-green review before real execution.
 - [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.

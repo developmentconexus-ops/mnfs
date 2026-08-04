@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.19
+version: 1.8.20
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 6 RED
+- **Current enabler:** Issue #16 — Operator decision on Task 6 schema/composition review blockers
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -59,15 +59,18 @@ Task 2:                        COMPLETE
 Task 3:                        COMPLETE
 Task 4:                        COMPLETE
 Task 5:                        COMPLETE
-Complete product suite:        136/136 PASS
+Task 6 RED:                    OBSERVED / COMPLETE
+Task 6 functional GREEN:       143/143 PASS
+Task 6 contract review:        BLOCKED — R6-01 / R6-02
+Task 6 COMPLETE:               NO
+Task 7 and later:              NOT AUTHORIZED
 AS-02:                         119/119 PASS
 TC-01:                         78/78 PASS
 Documentation validation:      PASS — 93 canonical IDs
-Task 6 RED:                    NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 6 RED only
+Current human gate:            explicit Operator decision on bounded correction or Replan
 PR:                            #17 DRAFT
 ```
 
@@ -86,9 +89,11 @@ MNFS_AUTHORIZE_M01_TASK_4_RED plan=1.0.1 microdesign=0.6.1 task3=2ed7e6d620f771d
 MNFS_AUTHORIZE_M01_TASK_4_GREEN plan=1.0.1 microdesign=0.6.1 red=a163c8d3512f6f9a2583156e5f3e64f32ecde45b
 MNFS_AUTHORIZE_M01_TASK_5_RED plan=1.0.1 microdesign=0.6.1 task4=d0172cc2c141cec6004f10caa9859bced9ac8d1c
 MNFS_AUTHORIZE_M01_TASK_5_GREEN plan=1.0.1 microdesign=0.6.1 red=e38592a97485bac91c713dbd648c391bdb029357
+MNFS_AUTHORIZE_M01_TASK_6_RED plan=1.0.1 microdesign=0.6.1 task5=ea459368fe1346c2cb2d6e9d37b3bb25a0c54903
+MNFS_AUTHORIZE_M01_TASK_6_GREEN plan=1.0.1 microdesign=0.6.1 red=b7a98a1972038bbd1d631f8e669959247256223b
 ```
 
-Task 5 authority did not extend to Task 6, real Treehouse execution, Pi dispatch, M01 acceptance or merge.
+Task 6 authority allowed only `src/store/execution-store.ts` and the bounded `src/store/sqlite-store.ts` composition change. It did not authorize migration/schema correction, microdesign change, Task 7, real Treehouse execution, Pi dispatch, M01 acceptance or merge.
 
 ## Completed implementation
 
@@ -134,108 +139,25 @@ Task 4 established an exclusive durable maintenance lock, no age-based takeover,
 
 ### Task 5 — migration v4, versioned Events and execution schema
 
-Created:
-
 ```text
 src/store/event-store.ts
-```
-
-Modified:
-
-```text
 src/store/migrations.ts
 src/store/sqlite-store.ts
 src/domain/types.ts
 ```
 
-Task 5 established:
-
-- atomic migration v4 from empty, M0/v1, M1/v3 and exact MIS-002 revision-5 databases;
-- byte-preserving Event rebuild with immutable `payload_schema_version = 1` history;
-- `event_types(type, payload_schema_version)` seeded with all 19 accepted version-1 Event types;
-- required Event payload version without a default, creating the downgrade write fence;
-- one `EventStore` for canonical versioned Event appends and reads;
-- exact `write_tracks`, `attempts`, `worker_runs`, `leases` and `claims` tables;
-- partial indexes for current Track, Attempt, Run, Lease, Lease action token and Claim;
-- composite foreign keys proving Track → Attempt → Run/Lease → Claim ancestry;
-- rollback of the complete migration when migration-4 finalization fails;
-- exact v4 writer-shape validation: versions alone cannot masquerade as a complete schema;
-- ordinary store opening never migrates an existing pre-v4 database implicitly.
+Task 5 established atomic migration v4, byte-preserving versioned Events, the 19-type Event registry, execution entity tables, partial current-row indexes, composite relational ancestry, downgrade fencing, strict v4 schema-shape checks and fail-closed ordinary opening for pre-v4 stores.
 
 ## Task 5 verification
 
-### Primary RED
-
 ```text
-RED head:                 e38592a97485bac91c713dbd648c391bdb029357
-RED synthetic merge:      3d274f7c2e96d73fdd656b765347b5cba0b3341b
-RED workflow/job:          30948252320 / 92123531426
-TypeScript:                PASS
-Prior product tests:       124/124 PASS
-Task 5 tests:              0/10 expected failure
-Product total:             124 PASS / 10 FAIL
-```
-
-### Initial GREEN
-
-```text
-Initial product head:      27a040d1c44d1a77f611ffa556c02bd0178434ec
-Initial workflow/job:      30953020369 / 92139458011
-Task 5 tests:              10/10 PASS
-Result:                    131 PASS / 3 legacy expectation FAIL
-```
-
-The three remaining failures were legacy assumptions about the pre-v4 writer, an old-format backup fixture and Event reads without `payloadSchemaVersion`. They were updated without weakening the Task 5 RED contracts.
-
-### Complete primary GREEN
-
-```text
-GREEN head:                eb6e3a3251a6d6bdce8eff809619ceaa2d6f905e
-GREEN synthetic merge:     23941c15b69a7fa94c4547be794d8000ada0e47c
-GREEN workflow/job:         30953397122 / 92140684893
-Product tests:              134/134 PASS
-AS-02 tests:                119/119 PASS
-TC-01 tests:                78/78 PASS
-Documentation validation:  PASS — 93 canonical IDs
-```
-
-### Adversarial v4-shape fence
-
-Review found that `[1,2,3,4]` plus `user_version = 4` could identify an incomplete database as v4.
-
-```text
-Boundary RED head:         4af7b25f66099d02e59b2f0b744e9db90df93436
-Boundary workflow/job:     30953670766 / 92141563012
-Result:                    135 prior PASS / 1 expected FAIL
-Failure cause:             openCurrent accepted version-only v4 metadata
-
-Boundary GREEN head:       8c3dcbf31e9e999f23a70bb89ba0f8a34d77f012
-Boundary synthetic merge:  b0476e52ed2adfcb5a670bb2c2786a39668c9fad
-Boundary workflow/job:     30953827577 / 92142076020
-Product tests:             135/135 PASS
-AS-02 / TC-01 / docs:      PASS
-```
-
-The current writer now requires the exact v4 tables, columns, indexes and Event registry in addition to version metadata.
-
-### Adversarial implicit-migration fence
-
-Review found that ordinary CLI composition still called `SqliteStore.open()`, which could upgrade an existing v3 database without the Task 4 maintenance lock and verified backup.
-
-```text
-Implicit-migration RED:    1b54ab7586f48bc89e2f8eedeaa524575ff6d096
-RED synthetic merge:       e376b629e38a9ad4ebd2ff3b96be4ea79ba2102c
-RED workflow/job:          30954083673 / 92142905324
-Result:                    135 prior PASS / 1 expected FAIL
-Failure cause:             SqliteStore.open migrated v3 implicitly
-
-Final GREEN head:          ea459368fe1346c2cb2d6e9d37b3bb25a0c54903
-Final synthetic merge:     b1d009c0a0fc8d845d3aa0d923c29a2ce1477a57
-Final workflow/job:        30954418043 / 92143978176
-Product tests:             136/136 PASS
-AS-02 tests:               119/119 PASS
-TC-01 tests:               78/78 PASS
-Documentation validation: PASS — 93 canonical IDs
+Primary RED:               e38592a97485bac91c713dbd648c391bdb029357
+Primary RED workflow/job:  30948252320 / 92123531426
+Primary GREEN:             eb6e3a3251a6d6bdce8eff809619ceaa2d6f905e
+Primary GREEN workflow:    30953397122 / 92140684893
+Shape-fence RED/GREEN:     4af7b25f... → 8c3dcbf3...
+Implicit-migration fence:  1b54ab75... → ea459368...
+Final Task 5 product:      136/136 PASS
 ```
 
 Current opening behavior:
@@ -247,32 +169,89 @@ existing v1/v2/v3       → SCHEMA_VERSION_UNSUPPORTED; no mutation
 incomplete/future v4    → SCHEMA_VERSION_UNSUPPORTED; no mutation
 ```
 
-`applyMigrations()` remains available to the explicit maintenance authority and migration tests. Ordinary product commands do not use it to upgrade an existing database. The operator-facing maintenance migration command/composition is not implemented or authorized yet; existing pre-v4 runtime databases remain preserved and fail closed.
+## Task 6 implementation
 
-## Scope review
-
-Compared pre-GREEN `d71274e10956062751ba7e1a913510484f5db2c6` to functional GREEN `ea459368fe1346c2cb2d6e9d37b3bb25a0c54903`.
-
-Changed product files:
+Created:
 
 ```text
-src/domain/types.ts
-src/store/event-store.ts
-src/store/migrations.ts
+src/store/execution-store.ts
+tests/store/execution-store.test.ts
+```
+
+Modified:
+
+```text
 src/store/sqlite-store.ts
 ```
 
-Changed tests only to implement the Task 5 contracts and reconcile explicit migration boundaries:
+The functional implementation provides:
+
+- one focused `SqliteStore.execution` instance sharing the existing database, transaction and Event authorities;
+- deterministic global and parent-relative ID allocation under `BEGIN IMMEDIATE`;
+- current-row conflict translation for Track, Attempt, Worker Run, Lease and Claim;
+- exact Claim ancestry and Attempt base binding;
+- Lease and Claim same-key/same-input replay with conflicting-input rejection;
+- expected-version compare-and-swap for all mutable execution entities;
+- strict fail-closed codecs for persisted identities, enums, hashes, process state, Lease nullability and Claim criteria;
+- no second SQLite connection, transaction authority, Domain Event workflow, filesystem, Git, Treehouse or Pi behavior.
+
+## Task 6 verification
+
+### RED
 
 ```text
-tests/store/mission-plan-schema-v2-store.test.ts
-tests/store/mission-plan-store.test.ts
-tests/store/sqlite-maintenance-boundary.test.ts
-tests/store/sqlite-maintenance.test.ts
-tests/store/sqlite-store.test.ts
+RED head:                 b7a98a1972038bbd1d631f8e669959247256223b
+RED synthetic merge:      7d6510740ff6c794f81e69f035ba00d80f620a50
+RED workflow/job:          30955596905 / 92147742698
+TypeScript:                PASS
+Prior product tests:       136/136 PASS
+Task 6 tests:              0/7 expected failure
 ```
 
-No Task 6 store, service, allocation, idempotency or CAS method was introduced.
+### Functional GREEN
+
+```text
+Functional GREEN head:    839851d8d0d267b6ff235eae6c241c6ee38c5291
+Synthetic merge:          48758649c298e815b64d9390b940f4c8c36def54
+Workflow/job:              30956920940 / 92152041470
+Product tests:             143/143 PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation: PASS — 93 canonical IDs
+```
+
+## Task 6 contract-review blockers
+
+### R6-01 — accepted sequence relation is missing
+
+Accepted microdesign 0.6.1 requires:
+
+```sql
+CREATE TABLE entity_sequences (
+  kind TEXT PRIMARY KEY CHECK (kind IN ('WRITE_TRACK', 'LEASE')),
+  next_value INTEGER NOT NULL CHECK (next_value > 0)
+);
+```
+
+The current migration v4 does not create this table. The functional store uses transactionally serialized `MAX(id) + 1` allocation instead. That behavior passes deterministic tests but is not the accepted relational model. Correcting it requires a migration/schema change outside Task 6 authority, or an explicit Replan that changes the accepted microdesign.
+
+### R6-02 — Task 7 atomic-composition seam is absent
+
+Task 7 requires one transaction to commit Track, A01, `WRITE_TRACK_OPENED` and `ATTEMPT_OPENED`. Current Task 6 allocation methods each acquire their own transaction, and `EventStore`/transaction composition is not exposed to the future service. The implementation therefore needs a bounded transaction-composition seam before Task 7 can be implemented without changing the Task 7 file scope or creating nested transactions.
+
+R6-01 and R6-02 are review blockers, not failing deterministic tests. Task 6 remains incomplete until the Operator authorizes a bounded correction or Replan and the correction receives its own RED/GREEN Evidence.
+
+## Scope review
+
+Compared Task 6 RED `b7a98a1972038bbd1d631f8e669959247256223b` to functional GREEN `839851d8d0d267b6ff235eae6c241c6ee38c5291`.
+
+```text
+src/store/execution-store.ts   added
+src/store/sqlite-store.ts      +3 lines
+other product files            unchanged
+migration/schema files         unchanged
+Task 7/service files           absent
+```
 
 ## Frozen boundaries
 
@@ -297,9 +276,11 @@ Task 2:                    COMPLETE
 Task 3:                    COMPLETE
 Task 4:                    COMPLETE
 Task 5:                    COMPLETE
-Task 6 RED:                NOT AUTHORIZED
-Task 6 GREEN and later:    NOT AUTHORIZED
-Existing pre-v4 migration: NOT EXPOSED TO ORDINARY PRODUCT COMMANDS
+Task 6 functional GREEN:   VERIFIED
+Task 6 COMPLETE:           BLOCKED — R6-01 / R6-02
+Task 7 and later:          NOT AUTHORIZED
+Migration/schema change:   NOT AUTHORIZED
+Microdesign change:        NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 M01 acceptance:            NOT AUTHORIZED
@@ -310,4 +291,9 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 6 RED only**. Stop before creating `execution-store.ts`, adding allocation/idempotency/CAS methods or beginning execution lifecycle services unless that continuation is granted.
+Obtain one explicit Operator decision:
+
+1. authorize a bounded corrective RED/GREEN that amends migration v4 with `entity_sequences` and adds the Task 7 transaction-composition seam; or
+2. initiate Replan to replace those accepted microdesign requirements.
+
+Stop before either path until explicit authority is recorded.

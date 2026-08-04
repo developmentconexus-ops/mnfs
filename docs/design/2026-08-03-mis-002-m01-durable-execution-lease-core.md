@@ -4,7 +4,7 @@ title: MIS-002 M01 Durable Execution and Lease Core
 document_type: microdesign
 form: explanation
 authority: specification
-status: proposed
+status: accepted
 version: 0.6.1
 owners:
   - developmentconexus-ops
@@ -17,6 +17,8 @@ related:
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER
+  - REVIEW-MIS-002-M01-R5-FINAL
+  - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
   - ACCEPTANCE-M2-UNBLOCK
 tracking_issue: 16
 last_reviewed: 2026-08-04
@@ -67,7 +69,15 @@ MNFS services
 
 M01 does not launch Pi. It persists the identities and invariants that M02 will consume for the real E1 Worker.
 
-TC-01 produced canonical WSL2 `ACCEPT` Evidence for Treehouse `2.1.1` under a no-origin, controlled-HOME boundary. Version `0.6.1` makes that same boundary mandatory for production use and closes the final R5 review findings. This design remains `proposed` until the Operator explicitly approves this exact version.
+TC-01 produced canonical WSL2 `ACCEPT` Evidence for Treehouse `2.1.1` under a no-origin, controlled-HOME boundary. Version `0.6.1` makes that same boundary mandatory for production use and closes the final R5 review findings.
+
+The Operator approved this exact version with:
+
+```text
+MNFS_APPROVE_M01_MICRODESIGN version=0.6.1 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 treehouse=sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3
+```
+
+The approval closes R5 and authorizes only preparation and review of a separate TDD implementation plan. Production implementation, Pi dispatch and automatic merge remain prohibited.
 
 ## 2. Approved baseline and owned requirements
 
@@ -79,8 +89,9 @@ Approved contract:   sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d
 Capability:          CAP-EXECUTION 0.1.0 accepted
 SEC-E1 definition:   sha256:f3dfca19f39bdd733f414831834a380b997e4938c10669c89a034cd9ad9c2471
 R0-R4:               PASS
-R5:                  IN_PROGRESS
+R5:                  PASS
 TC-01 Verdict:       ACCEPT
+Microdesign:         ACCEPTED — version 0.6.1
 ```
 
 M01 owns exactly:
@@ -918,7 +929,7 @@ Raw output is stored only by bounded Artifact reference when required.
 
 ## 19. Constructive coverage matrix
 
-| Requirement | Final proposed design | Failure behavior | Required proof |
+| Requirement | Accepted design | Failure behavior | Required proof |
 |---|---|---|---|
 | REQ-001 | Attempt lifecycle, unique partial index, atomic supersession | duplicate OPEN or stale version rolls back | unit, migration and fresh process |
 | REQ-002 | separate Attempt/Run IDs and atomic Run replacement | replacement preserves Attempt/history; stale Run fenced | replacement and process-identity tests |
@@ -928,7 +939,7 @@ Raw output is stored only by bounded Artifact reference when required.
 | REQ-007 | generation, grant/release input hashes, helper/process/external fences | stale caller cannot release; inconclusive action blocks; dirty preserved | unit matrix + TC-01 S08–S11 |
 | REQ-008 | source/helper/Lease one-to-one read-only Reconcile | ambiguity blocks and preserves | DR-04/DR-05, duplicate identity and fresh process |
 
-All seven requirements have exact final proposed state, service, failure and proof coverage. The remaining R5 gate is the Operator decision on this version.
+All seven requirements have exact accepted state, service, failure and proof coverage. R5 is complete; implementation remains gated by a separately approved plan.
 
 ## 20. Verification requirements
 
@@ -1033,8 +1044,8 @@ Rollout:
 
 ```text
 accepted TC-01 Evidence
-→ final review and Operator approval of 0.6.1
-→ separate implementation plan
+→ accepted M01 microdesign 0.6.1
+→ separate implementation plan and Operator approval
 → migration/domain with fakes
 → source/helper proofs
 → real grant/recovery/release
@@ -1070,20 +1081,22 @@ src/store/sqlite-store.ts
 
 Tests mirror responsibilities. The implementation plan may refine filenames without changing behavior, authority or the proved no-origin boundary.
 
-## 23. R5 gate and impact
+## 23. R5 decision and impact
 
-R5 remains `IN_PROGRESS` until the Operator explicitly approves this exact microdesign version.
+R5 is `PASS` for the exact approved microdesign version `0.6.1`.
 
 ```text
 Research:                    PUBLISHED
 TC-01 protocol:              ACCEPTED
 TC-01 canonical Evidence:    ACCEPT — 15/15 PASS, cleanup COMPLETED
 Treehouse candidate:         ACCEPTED ONLY INSIDE PROVED BOUNDARY
-Task 14 review:              COMPLETE / OPERATOR DECISION PENDING
-M01 microdesign:             PROPOSED — version 0.6.1
+Task 14 review:              COMPLETE / APROVÁVEL
+M01 microdesign:             ACCEPTED — version 0.6.1
+R5 Milestone Microdesign:    PASS
+M01 implementation plan:     AUTHORIZED FOR PREPARATION / NOT APPROVED
 M01 implementation:          PROHIBITED
 Pi Worker dispatch:          PROHIBITED
-Current gate:                explicit Operator decision on version 0.6.1
+Current gate:                separate implementation-plan review and Operator approval
 ```
 
 ```yaml
@@ -1091,13 +1104,16 @@ documentation_impact:
   status: UPDATED
   affected:
     - ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER
+    - REVIEW-MIS-002-M01-R5-FINAL
+    - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
     - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
     - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
     - DOC-PRODUCT-BLUEPRINT-02
     - DOC-PRODUCT-BLUEPRINT-08
     - DOC-PROJECT-STATUS
+    - TRACKING-DECISIONS
     - TRACKING-WORKLOG
-  rationale: "Final R5 review closes the production no-origin/source boundary, consistent migration backup, versioned Events, relational ancestry, downgrade fence, trusted action-helper crash windows and exact read-only Recovery matching."
+  rationale: "Operator approval accepts the exact 0.6.1 state, migration, independent source, relational ancestry, helper-backed IAO, fencing and read-only Recovery design and closes MCRM R5."
   follow_up:
     issue: 16
 
@@ -1111,5 +1127,5 @@ requirements_impact:
     - CAP-EXEC-REQ-006
     - CAP-EXEC-REQ-007
     - CAP-EXEC-REQ-008
-  rationale: "Every M01 requirement has exact final proposed state, service, failure and verification coverage; implementation remains prohibited pending Operator approval."
+  rationale: "Every M01 requirement has accepted state, service, failure and verification coverage; implementation remains prohibited until a separate TDD plan is approved."
 ```

@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
@@ -267,10 +267,15 @@ export class SqliteStore {
 
   static open(path: string): SqliteStore {
     mkdirSync(dirname(path), { recursive: true });
+    const databaseAlreadyExists = existsSync(path);
     const database = new DatabaseSync(path);
     try {
-      applyMigrations(database);
-      requireCurrentWriteSchema(database);
+      if (databaseAlreadyExists) {
+        requireCurrentWriteSchema(database);
+      } else {
+        applyMigrations(database);
+        requireCurrentWriteSchema(database);
+      }
       return new SqliteStore(database);
     } catch (error) {
       database.close();

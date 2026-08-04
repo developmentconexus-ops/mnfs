@@ -221,8 +221,58 @@ owners:
 - Added `ACCEPTANCE-M01-R5-DESIGN-PACKAGE-REVIEW`, accepting the research direction and TC-01 protocol for implementation/execution planning while keeping the M01 microdesign proposed.
 - Promoted the TC-01 protocol to `accepted` version 0.2.0; no Treehouse conformance claim was made.
 - Wrote and self-reviewed the detailed TC-01 implementation and WSL2 execution plan, now version 1.0.3, under `docs/superpowers/plans/2026-08-03-tc-01-treehouse-production-adapter-conformance.md`.
-- The plan separates deterministic CI tests from real Treehouse execution and defines TDD tasks, scenario coverage S01–S15, Evidence, cleanup, Verdict and final R5 review.
+- The plan separates deterministic CI tests from real Treehouse execution and defines TDD tasks, scenario coverage S01-S15, Evidence, cleanup, Verdict and final R5 review.
 - Version 1.0.3 strengthens the first process-boundary TDD task with complete executable RED tests for byte preservation, timeout, output limits and spawn failure.
 - Exact-head CI remains required before the plan can receive Operator approval.
 - TC-01 harness implementation remains blocked pending explicit plan approval.
 - M01 production implementation and Pi Worker dispatch remain prohibited.
+
+## 2026-08-04
+
+### TC-01 Tasks 1-11 — deterministic harness implementation
+
+- Operator approved TC-01 plan version 1.0.3 and authorized implementation task-by-task.
+- Registered `npm run test:tc01` and the explicit `npm run tc01 -- <command>` boundary in root verification.
+- Added a bounded shell-free process runner, stable TC-01 errors and raw-byte stdout/stderr handling.
+- Added Linux-owned run paths, a deterministic disposable Git fixture with no remote and a run-scoped Treehouse pool.
+- Added exact provenance for WSL2, Ubuntu, Node, Git, Treehouse version, executable realpath/SHA-256 and required command capabilities.
+- Added a trusted Git wrapper and independent source/pool/worktree observations.
+- Added a strict Treehouse client for acquisition, status and conditional return; command exit remained advisory until fresh state observation.
+- Added canonical JSON, command artifacts, scenario aggregates, immutable manifest, deterministic Verdict and secret-free Markdown/machine reports.
+- Implemented S01-S15 orchestration with one acquisition per mutation-heavy scenario, fresh-client recovery, stale-ID/holder fencing, dirty-work preservation, repeated-release classification and freshness invalidation.
+- Added strict `run`, `report` and `cleanup` commands with JSON/human output and fail-closed cleanup.
+- Every task used observed RED before GREEN and exact-head GitHub Actions verification.
+- Task 11 ended with 95 product tests, 119 AS-02 tests and 60 TC-01 tests green.
+- No installed Treehouse binary was invoked; M01 implementation and Pi Worker dispatch remained prohibited.
+
+### TC-01 Task 12 — complete deterministic adversarial review
+
+- Operator requested a full adversarial review against the Product Blueprint, Capability Roadmap, Capability Realization Method, ADR-0005, TC-01 protocol, M01 microdesign and current primary documentation.
+- Reviewed the pinned Treehouse 2.1.1 candidate source at commit `939cb59ba0bd69036ae52fc19b5b41e0a3f167d3`.
+- Added executable RED tests for process descendants, path control characters, TOML encoding, run/pool containment, provenance isolation, strict UTF-8, finalized S01 BLOCKED Evidence, cleanup freshness/full source baseline, truthful blocked reports and adjacent private-state observation.
+- Canonical RED workflow `30913196584` / job `92004727217` produced 60 PASS and 9 expected FAIL; no accepted TC-01 behavior regressed.
+- Corrected Critical findings:
+  - process timeouts now terminate the complete Linux process group;
+  - cleanup rediscoveries now reject changed Treehouse bytes/version before status or deletion.
+- Corrected Important findings:
+  - known provenance failures become finalized S01 `BLOCKED` Evidence;
+  - cleanup compares a complete source baseline rather than only HEAD/status;
+  - Treehouse control, return and observed worktree paths remain inside run/pool boundaries;
+  - TOML paths are safely encoded;
+  - JSON boundaries use fatal UTF-8 decoding;
+  - provenance commands receive an exact reduced environment;
+  - S13 observes real pool private state immediately around status;
+  - fixture and Evidence publication use write, file `fsync`, rename and directory `fsync` durability.
+- Mapped every S01-S15 scenario to deciding implementation and named tests in `spikes/tc-01/README.md`.
+- Published `ACCEPTANCE-TC-01-TASK-12-DETERMINISTIC-ADVERSARIAL-REVIEW`.
+- Final implementation proof at head `2e1d73ef1c970694c5c50f8a2db4bc3c00db22be`, synthetic merge `e219df0b492fe45b529389df27f0e82edb8cf859`, workflow `30916499733`, job `92015860083`:
+  - npm audit: 0 vulnerabilities;
+  - typecheck: PASS;
+  - product: 95/95;
+  - AS-02: 119/119;
+  - TC-01: 75/75;
+  - documentation tooling, Replan builder and approved allocations: PASS;
+  - documentation validation: 87 canonical IDs.
+- Deterministic harness status became `IMPLEMENTED / DETERMINISTICALLY VERIFIED / PRE-WSL2 REVIEWED`.
+- Real canonical WSL2 Evidence remains `NOT_STARTED`; Treehouse conformance is not established.
+- Task 13 requires a separate explicit Operator continuation. PR #17 remains draft and unmerged; R5 remains `IN_PROGRESS`.

@@ -216,7 +216,8 @@ function processIdentity(
   entity: string,
 ): ProcessIdentity | undefined {
   const bootId = optionalString(row, `${prefix}_boot_id`, entity);
-  const pid = optionalInteger(row, `${prefix}_pid`, entity);
+  const pidKey = prefix === 'process' ? 'process_id' : `${prefix}_pid`;
+  const pid = optionalInteger(row, pidKey, entity);
   const startTicks = optionalString(row, `${prefix}_start_ticks`, entity);
   const count = [bootId, pid, startTicks].filter((value) => value !== undefined).length;
   if (count === 0) return undefined;
@@ -967,8 +968,8 @@ export class ExecutionStore {
 
         const criteria = uniqueCriteria(input.claimedCriterionIds);
         const writeTrackId = requireWriteTrackId(input.writeTrackId);
-        const attemptId = requireAttemptId(input.attemptId, writeTrackId);
-        const workerRunId = requireWorkerRunId(input.workerRunId, attemptId);
+        const attemptId = requireAttemptId(input.attemptId);
+        const workerRunId = requireWorkerRunId(input.workerRunId);
         const leaseId = requireLeaseId(input.leaseId);
         const attempt = this.getAttempt(attemptId);
         const run = this.getWorkerRun(workerRunId);

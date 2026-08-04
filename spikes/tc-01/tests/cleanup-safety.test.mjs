@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
 
 import { assessTc01CleanupSafety } from '../src/orchestrator.mjs';
@@ -27,59 +30,68 @@ function provenance(hash = HASH_A) {
   };
 }
 
-function snapshot(localConfigHash = HASH_A) {
+function snapshot(root, localConfigHash = HASH_A) {
   return {
     schemaVersion: 1,
-    root: '/state/fixtures/tc-01/run/source-repo',
+    root,
     head: { sha256: HASH_A, byteLength: 41, text: 'a'.repeat(40) },
     porcelainStatus: { sha256: HASH_A, byteLength: 0 },
     localConfig: { sha256: localConfigHash, byteLength: 10 },
     refs: { sha256: HASH_A, byteLength: 10 },
     trackedTree: { sha256: HASH_A, byteLength: 41, text: 'b'.repeat(40) },
-    workingTree: { schemaVersion: 1, root: '/state/fixtures/tc-01/run/source-repo', digest: HASH_A, entries: [] },
+    workingTree: { schemaVersion: 1, root, digest: HASH_A, entries: [] },
   };
 }
 
-function bundle() {
+function bundle(runRoot, sourceRepo) {
   return {
     fixture: {
       runId: 'tc01-20260804-123456-a1b2c3d4',
-      runRoot: '/state/fixtures/tc-01/run',
-      sourceRepo: '/state/fixtures/tc-01/run/source-repo',
-      poolRoot: '/state/fixtures/tc-01/run/pool-root',
-      artifactsRoot: '/state/fixtures/tc-01/run/artifacts',
-      snapshotsRoot: '/state/fixtures/tc-01/run/snapshots',
-      fakeHome: '/state/fixtures/tc-01/run/fake-home',
-      gitWrapperRoot: '/state/fixtures/tc-01/run/git-wrapper',
+      runRoot,
+      sourceRepo,
+      poolRoot: join(runRoot, 'pool-root'),
+      artifactsRoot: join(runRoot, 'artifacts'),
+      snapshotsRoot: join(runRoot, 'snapshots'),
+      fakeHome: join(runRoot, 'fake-home'),
+      gitWrapperRoot: join(runRoot, 'git-wrapper'),
       holder: 'mnfs-tc01-tc01-20260804-123456-a1b2c3d4',
       initialCommit: 'a'.repeat(40),
     },
     provenance: provenance(),
     commandShapeHash: HASH_A,
-    sourceBaseline: snapshot(),
+    sourceBaseline: snapshot(sourceRepo),
   };
 }
 
 const verdict = { verdict: 'ACCEPT' };
 
-function baseDependencies(overrides = {}) {
+function baseDependencies(sourceRepo, overrides = {}) {
   return {
     currentCommandShapeHash: HASH_A,
     validateCleanupTargets: () => [],
     discoverCurrentProvenance: async () => provenance(),
     observeStatus: async () => [],
     snapshotManagedWorktree: async () => ({ porcelainStatus: { byteLength: 0 } }),
-    snapshotSource: async () => snapshot(),
+    snapshotSource: async () => snapshot(sourceRepo),
     compareSourceSnapshots: () => ({ equal: true, changedFields: [], changes: {} }),
     ...overrides,
   };
 }
 
-test('cleanup stops before status when the current Treehouse identity differs from the finalized Verdict', async () => {
+async function cleanupFixture(t) {
+  const runRoot = await mkdtemp(join(tmpdir(), 'mnfs-tc01-cleanup-review-'));
+  t.after(() => rm(runRoot, { recursive: true, force: true }));
+  const sourceRepo = join(runRoot, 'source-repo');
+  await mkdir(sourceRepo);
+  return { runRoot, sourceRepo };
+}
+
+test('cleanup stops before status when the current Treehouse identity differs from the finalized Verdict', async (t) => {
+  const fixture = await cleanupFixture(t);
   let statusCalls = 0;
   const assessment = await assessTc01CleanupSafety(
-    { bundle: bundle(), verdict },
-    baseDependencies({
+    { bundle: bundle(fixture.runRoot, fixture.sourceRepo), verdict },
+    baseDependencies(fixture.sourceRepo, {
       discoverCurrentProvenance: async () => provenance(HASH_B),
       observeStatus: async () => {
         statusCalls += 1;
@@ -93,11 +105,12 @@ test('cleanup stops before status when the current Treehouse identity differs fr
   assert.equal(statusCalls, 0);
 });
 
-test('cleanup compares the complete finalized source baseline, not only HEAD and porcelain status', async () => {
+test('cleanup compares the complete finalized source baseline, not only HEAD and porcelain status', async (t) => {
+  const fixture = await cleanupFixture(t);
   const assessment = await assessTc01CleanupSafety(
-    { bundle: bundle(), verdict },
-    baseDependencies({
-      snapshotSource: async () => snapshot(HASH_B),
+    { bundle: bundle(fixture.runRoot, fixture.sourceRepo), verdict },
+    baseDependencies(fixture.sourceRepo, {
+      snapshotSource: async () => snapshot(fixture.sourceRepo, HASH_B),
       compareSourceSnapshots: (before, after) => ({
         equal: before.localConfig.sha256 === after.localConfig.sha256,
         changedFields: ['localConfig'],

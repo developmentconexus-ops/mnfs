@@ -42,14 +42,17 @@ async function clientFixture(t) {
   t.after(() => rm(root, { recursive: true, force: true }));
 
   const sourceRepo = join(root, 'source-repo');
+  const poolRoot = join(root, 'pool-root');
+  const artifactsRoot = join(root, 'artifacts');
   const fakeHome = join(root, 'fake-home');
   const wrapperDir = join(root, 'git-wrapper');
   const treehouseDir = join(root, 'treehouse-bin');
   const realGitDir = join(root, 'real-git-bin');
-  const leasedPath = join(root, 'pool-root', 'tree-1', 'source-repo');
+  const leasedPath = join(poolRoot, 'tree-1', 'source-repo');
 
   await Promise.all([
     mkdir(sourceRepo, { recursive: true }),
+    mkdir(artifactsRoot, { recursive: true }),
     mkdir(fakeHome, { recursive: true }),
     mkdir(wrapperDir, { recursive: true }),
     mkdir(treehouseDir, { recursive: true }),
@@ -60,7 +63,7 @@ async function clientFixture(t) {
   const treehouseExecutable = join(treehouseDir, 'treehouse');
   const realGit = join(realGitDir, 'git');
   const wrapperGit = join(wrapperDir, 'git');
-  const gitLog = join(root, 'git-invocations.jsonl');
+  const gitLog = join(artifactsRoot, 'git-invocations.jsonl');
   await Promise.all([
     writeFile(treehouseExecutable, 'treehouse-binary-fixture\n', 'utf8'),
     writeFile(realGit, 'git-binary-fixture\n', 'utf8'),
@@ -69,7 +72,13 @@ async function clientFixture(t) {
 
   return {
     root,
-    fixture: { sourceRepo, fakeHome },
+    fixture: {
+      runRoot: await realpath(root),
+      sourceRepo: await realpath(sourceRepo),
+      poolRoot: await realpath(poolRoot),
+      artifactsRoot: await realpath(artifactsRoot),
+      fakeHome: await realpath(fakeHome),
+    },
     treehouseExecutable,
     realGit,
     gitWrapperDir: wrapperDir,
@@ -123,6 +132,7 @@ test('builds the exact isolated Treehouse environment and command shapes', async
     LC_ALL: 'C.UTF-8',
     GIT_TERMINAL_PROMPT: '0',
     GIT_OPTIONAL_LOCKS: '0',
+    GIT_CONFIG_GLOBAL: '/dev/null',
     GIT_CONFIG_NOSYSTEM: '1',
     TREEHOUSE_NO_UPDATE_CHECK: '1',
     TC01_REAL_GIT: fixture.realGit,

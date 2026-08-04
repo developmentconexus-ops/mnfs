@@ -12,6 +12,7 @@ export async function runProcess(spec) {
   const stderrLimitBytes = spec.stderrLimitBytes ?? DEFAULT_OUTPUT_LIMIT;
   const startedAt = new Date().toISOString();
   const startedMs = Date.now();
+  const useProcessGroup = process.platform !== 'win32';
 
   return new Promise((resolve, reject) => {
     let settled = false;
@@ -28,6 +29,7 @@ export async function runProcess(spec) {
       cwd: spec.cwd,
       env: spec.env,
       shell: false,
+      detached: useProcessGroup,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
@@ -41,11 +43,25 @@ export async function runProcess(spec) {
       stderr: Buffer.concat(stderrChunks, stderrBytes),
     });
 
+    const signalProcessTree = (signal) => {
+      if (!child.pid) return;
+      try {
+        if (useProcessGroup) process.kill(-child.pid, signal);
+        else child.kill(signal);
+      } catch (error) {
+        if (error?.code !== 'ESRCH') throw error;
+      }
+    };
+
     const requestTermination = () => {
       if (child.exitCode !== null || child.signalCode !== null) return;
-      child.kill('SIGTERM');
+      signalProcessTree('SIGTERM');
       killHandle = setTimeout(() => {
-        if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+        try {
+          signalProcessTree('SIGKILL');
+        } catch {
+          // Close handling below remains authoritative; a missing group is already terminated.
+        }
       }, KILL_GRACE_MS);
       killHandle.unref?.();
     };
@@ -145,7 +161,12 @@ export async function runProcess(spec) {
     });
 
     timeoutHandle = setTimeout(() => {
-      if (settled || terminalError) return;
+      if (
+        settled
+        || terminalError
+        || child.exitCode !== null
+        || child.signalCode !== null
+      ) return;
       timedOut = true;
       requestTermination();
     }, spec.timeoutMs);

@@ -5,7 +5,7 @@ document_type: implementation_plan
 form: how_to
 authority: guidance
 status: current
-version: 1.0.1
+version: 1.0.2
 owners:
   - developmentconexus-ops
 related:
@@ -272,16 +272,16 @@ interface ProcessResult {
 
 - [ ] **Step 1: Write RED tests for exact process behavior**
 
-Cover these independent tests:
+Cover these independent tests with complete bodies that create real temporary child scripts, invoke `runProcess` and assert exact output, timeout, limit and spawn-failure fields:
 
-```js
-test('runs with shell false, closed stdin and preserves stdout and stderr bytes', async () => {});
-test('terminates a command at the exact timeout and reports TC01_PROCESS_TIMEOUT', async () => {});
-test('fails when stdout or stderr exceeds the configured bound', async () => {});
-test('reports spawn failure without trying another executable', async () => {});
+```text
+runs with shell false, closed stdin and preserves stdout and stderr bytes
+terminates a command at the exact timeout and reports TC01_PROCESS_TIMEOUT
+fails when stdout or stderr exceeds the configured bound
+reports spawn failure without trying another executable
 ```
 
-Use temporary Node scripts as real child processes. The first script writes `Buffer.from([0x41, 0x00, 0x42])` to stdout and `warning\n` to stderr. The timeout script runs an interval without exiting. The output-limit script writes 2,048 bytes with a configured 1,024-byte limit.
+The first child writes `Buffer.from([0x41, 0x00, 0x42])` to stdout and `warning\n` to stderr. The timeout child runs an interval without exiting. The output-limit child writes 2,048 bytes with a configured 1,024-byte limit.
 
 - [ ] **Step 2: Verify RED**
 

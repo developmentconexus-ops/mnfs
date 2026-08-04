@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.7.7
+version: 1.7.8
 owners:
   - developmentconexus-ops
 related:
@@ -22,6 +22,7 @@ related:
   - ACCEPTANCE-TC-01-TASK-04-PROVENANCE-AND-CAPABILITIES
   - ACCEPTANCE-TC-01-TASK-05-TRUSTED-GIT-OBSERVATION
   - ACCEPTANCE-TC-01-TASK-06-STRICT-TREEHOUSE-CLIENT
+  - ACCEPTANCE-TC-01-TASK-07-ATOMIC-EVIDENCE-STORE
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
@@ -75,7 +76,9 @@ tracking_issue: 16
 - [x] Operator authorized continuation to Task 6.
 - [x] TC-01 Task 6 completed through observed RED, focused GREEN and full canonical CI.
 - [x] Task 6 recorded fail-closed environment clarifications for Treehouse update suppression and Git system-config isolation.
-- [ ] TC-01 Task 7 — atomic Evidence store and canonical hashing — not started.
+- [x] Operator authorized continuation to Task 7.
+- [x] TC-01 Task 7 completed through observed RED, an adversarial stable-error correction and full canonical CI.
+- [ ] TC-01 Task 8 — scenario registry and acquisition/recovery orchestration — not started.
 - [ ] TC-01 deterministic harness implementation complete.
 - [ ] TC-01 harness receives full CI-green review before real execution.
 - [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.
@@ -107,18 +110,21 @@ TC-01 Task 3:            ACCEPTED
 TC-01 Task 4:            ACCEPTED
 TC-01 Task 5:            ACCEPTED
 TC-01 Task 6:            ACCEPTED
-TC-01 Task 7:            NOT_STARTED
+TC-01 Task 7:            ACCEPTED
+TC-01 Task 8:            NOT_STARTED
 TC-01 real Evidence:     NOT_STARTED
 M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
 Blocking external input: Treehouse production-adapter conformance
-Current human gate:      continuation to TC-01 Task 7
+Current human gate:      continuation to TC-01 Task 8
 Design PR:               #17 DRAFT
 ```
 
 The design-package and plan approvals authorize only the governed TC-01 harness work. They do not establish Treehouse conformance, approve the final M01 microdesign or authorize M01 production implementation.
 
 Task 6 clarified the execution environment by adding `TREEHOUSE_NO_UPDATE_CHECK=1` and `GIT_CONFIG_NOSYSTEM=1`. This fail-closed correction must be retained in later plan and microdesign reconciliation; it grants no additional external authority.
+
+Task 7 established canonical JSON, atomic command/scenario/environment writes, exact artifact hash verification and an immutable final manifest. It also reclassifies lower-level path and run-ID failures as `TC01_EVIDENCE_INVALID` while preserving their causes.
 
 ## Current authorization boundary
 
@@ -132,7 +138,8 @@ TC-01 Task 3:         ACCEPTED
 TC-01 Task 4:         ACCEPTED
 TC-01 Task 5:         ACCEPTED
 TC-01 Task 6:         ACCEPTED
-TC-01 Task 7:         NOT_STARTED
+TC-01 Task 7:         ACCEPTED
+TC-01 Task 8:         NOT_STARTED
 TC-01 WSL2 execution: AUTHORIZED only after a reviewed, CI-green complete harness exists
 M01 microdesign:      PROPOSED, NOT FINAL
 M01 implementation:  PROHIBITED until final microdesign approval
@@ -156,29 +163,29 @@ documentation tooling:            PASS
 documentation validation:         PASS — 71 canonical IDs
 ```
 
-## Latest TC-01 Task 6 verification
+## Latest TC-01 Task 7 verification
 
-PR #17 merge commit `8d61392dda87cbde75fa11a82e82416e015603b2` verified TC-01 Task 6 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
+PR #17 merge commit `442ff6ebd9e7ac908b140c511e0a7a2f033fa2af` verified TC-01 Task 7 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
 
 ```text
-Workflow:                          30874524629
-Job:                               91883185057
+Workflow:                          30875296666
+Job:                               91885443067
 npm ci:                            PASS — 0 vulnerabilities
 typecheck:                         PASS
 product tests:                     PASS — 95/95
 AS-02 deterministic tests:        PASS — 119/119
-TC-01 deterministic tests:        PASS — 29/29
+TC-01 deterministic tests:        PASS — 35/35
 documentation tooling:            PASS
 MIS-002 Replan builder:            PASS
 approved allocation tests:        PASS
-documentation validation:         PASS — 81 canonical IDs
+documentation validation:         PASS — 82 canonical IDs
 ```
 
-This proof establishes the strict Treehouse process/JSON boundary and release non-classification rule. It does not invoke Treehouse acquisition, create a real Lease or validate runtime lifecycle behavior.
+This proof establishes canonical hashing, atomic Evidence storage, artifact containment, exact S01-S15 completeness and post-finalization immutability. It does not invoke Treehouse acquisition, create a real Lease or validate runtime lifecycle behavior.
 
 ## Immediate next action
 
-1. Review `ACCEPTANCE-TC-01-TASK-06-STRICT-TREEHOUSE-CLIENT`.
-2. Continue with Task 7 of the approved TC-01 plan only after the next governed continuation.
-3. Task 7 must implement canonical JSON and atomic Evidence storage through a fresh RED/GREEN TDD cycle.
+1. Review `ACCEPTANCE-TC-01-TASK-07-ATOMIC-EVIDENCE-STORE`.
+2. Continue with Task 8 of the approved TC-01 plan only after the next governed continuation.
+3. Task 8 must implement the scenario registry and deterministic acquisition/recovery orchestration through fresh RED/GREEN TDD cycles.
 4. Keep the full real Treehouse scenario suite, M01 implementation and Pi Worker dispatch prohibited until their later gates pass.

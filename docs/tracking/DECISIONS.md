@@ -9,6 +9,7 @@ owners:
   - developmentconexus-ops
 related:
   - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
+  - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-PLAN-APPROVAL
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
   - PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
 ---
@@ -24,3 +25,4 @@ related:
 | D-005 | 2026-07-31 | FirstMate is a reference and laboratory, not the product's parent repository. | Operator | ADR-0001 |
 | D-006 | 2026-08-03 | Authorize M2 to enter R5 Milestone Microdesign under approved MIS-002 revision 5 (`sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`) after R0–R4 PASS. Scope is M01 microdesign only; Worker implementation and dispatch remain prohibited until that microdesign is separately approved. Material contract, policy, Capability, prerequisite or requirement changes trigger Replan/re-readiness. | Operator | — |
 | D-007 | 2026-08-04 | Approve `DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` version 0.6.1 under approved MIS-002 revision 5 (`sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`) and accepted Treehouse bytes (`sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`). MCRM R5 becomes PASS. Only preparation and review of a separate TDD implementation plan are authorized; production implementation, Pi dispatch and automatic merge remain prohibited. | Operator | — |
+| D-008 | 2026-08-04 | Approve `PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` version 1.0.1 under accepted microdesign 0.6.1, approved MIS-002 revision 5 (`sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`) and accepted Treehouse bytes (`sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`). The plan sequence and TDD proof gates are approved. Task 1 RED, production implementation, real Treehouse execution beyond the plan gate, Pi dispatch and automatic merge remain prohibited until separately authorized. | Operator | — |

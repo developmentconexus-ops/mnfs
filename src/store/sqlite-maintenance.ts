@@ -236,7 +236,7 @@ export function createMaintenanceLockManager(
         async release(): Promise<void> {
           if (released) return;
           const current = await operations.readRegularIfExists(maintenancePath);
-          if (current === undefined || !current.equals(ownerBytes)) {
+          if (current !== undefined && !current.equals(ownerBytes)) {
             throw maintenanceError(
               'CONCURRENCY_CONFLICT',
               `SQLite maintenance lock ownership changed before release: ${maintenancePath}.`,

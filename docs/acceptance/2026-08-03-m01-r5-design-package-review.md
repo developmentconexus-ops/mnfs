@@ -5,7 +5,7 @@ document_type: acceptance_report
 form: explanation
 authority: evidence
 status: accepted
-version: 1.0.5
+version: 1.0.6
 owners:
   - developmentconexus-ops
 related:

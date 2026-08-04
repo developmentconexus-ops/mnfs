@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.6
+version: 1.8.7
 owners:
   - developmentconexus-ops
 related:
@@ -57,11 +57,11 @@ Important findings:            8 found / 8 closed
 M01 microdesign:               ACCEPTED — version 0.6.1
 MCRM R5:                       PASS
 Replan required:               NO
-Implementation plan:           CURRENT — version 1.0.0 / REVIEW PENDING
+Implementation plan:           CURRENT — version 1.0.1 / REVIEW PENDING
 M01 production implementation: PROHIBITED
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            review and exact approval of implementation plan 1.0.0
+Current human gate:            review and exact approval of implementation plan 1.0.1
 Design PR:                     #17 DRAFT
 ```
 
@@ -133,49 +133,45 @@ Cleanup:                   COMPLETED
 
 Treehouse remains accepted only inside the proved boundary. Any candidate, capability, command, host/tooling, environment-shape or source-boundary drift requires renewed conformance review.
 
-## Implementation plan 1.0.0
+## Implementation plan 1.0.1
 
-`PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` defines 18 independent TDD gates:
+`PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` defines 14 ordered review gates:
 
 ```text
-domain/errors
-→ transaction/events
-→ maintenance/backup
-→ migration v4
-→ execution persistence
+domain/errors/fixtures
+→ process/durability/process identity
+→ transaction authority
+→ maintenance/backup/version gate
+→ migration v4/versioned Events
+→ execution persistence/ancestry/idempotency
 → Track/Attempt/Run lifecycle
-→ process/Git observation
-→ independent source
-→ Treehouse adapter
-→ durable action protocol
-→ LeaseActionRunner
-→ grant
-→ release
-→ Claim OPEN
-→ read-only Recovery
-→ CLI
-→ deterministic composition
-→ canonical WSL2 Evidence
+→ Git observation/independent source
+→ exact Treehouse adapter
+→ durable action helper
+→ grant/release IAO
+→ Claim OPEN/read-only Recovery
+→ CLI/composition
+→ deterministic and canonical WSL2 proof
 ```
 
-The plan has complete mapping to all seven M01 requirements and every Task 14 Critical/Important correction. It is not approved for execution yet.
+The plan maps every accepted invariant, all seven M01 requirements and all Task 14 Critical/Important corrections to explicit RED/GREEN and proof steps. Version 1.0.1 corrected the migration ordering, process-identity dependency and every placeholder found during self-review.
 
 ## Current authorization boundary
 
 ```text
-M01 research:             AUTHORIZED / COMPLETE
-TC-01:                    ACCEPTED
-Task 14 review:           COMPLETE
-Microdesign 0.6.1:        ACCEPTED
-R5:                       PASS
-Implementation plan 1.0.0: WRITTEN / REVIEW PENDING
-First implementation RED: NOT AUTHORIZED
-M01 implementation:       PROHIBITED
-Pi Worker dispatch:       PROHIBITED
-PR #17 merge:             NOT AUTHORIZED
+M01 research:               AUTHORIZED / COMPLETE
+TC-01:                      ACCEPTED
+Task 14 review:             COMPLETE
+Microdesign 0.6.1:          ACCEPTED
+R5:                         PASS
+Implementation plan 1.0.1:  WRITTEN / REVIEW PENDING
+Task 1 RED:                  NOT AUTHORIZED
+M01 implementation:         PROHIBITED
+Pi Worker dispatch:         PROHIBITED
+PR #17 merge:               NOT AUTHORIZED
 ```
 
-A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boundary, microdesign invariants or applicable requirements triggers Replan or renewed readiness review.
+A material change to MIS-002, SEC-E1, CAP-EXECUTION, accepted Treehouse boundary, microdesign invariants or applicable requirements triggers Replan or renewed readiness review.
 
 ## Immediate next action
 
@@ -185,4 +181,4 @@ Review:
 docs/superpowers/plans/2026-08-04-mis-002-m01-durable-execution-lease-core-implementation.md
 ```
 
-Then approve, request changes or reject exact plan version `1.0.0`. Stop before production implementation.
+Then approve, request changes or reject exact plan version `1.0.1`. Stop before production implementation.

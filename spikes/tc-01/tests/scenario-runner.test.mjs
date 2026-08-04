@@ -384,9 +384,31 @@ test('registers exactly S01-S15 and proves acquisition, release isolation, recov
     missing: 'DIVERGED_MISSING_PATH',
     unmanaged: 'TREEHOUSE_UNMANAGED_PATH',
   });
-  assert.equal(scenarios['TC01-S13'].observations.limitation, 'TREEHOUSE_PRIVATE_STATE_NORMALIZATION');
+  assert.equal(scenarios['TC01-S13'].observations.privateStateChanged, false);
+  assert.equal(scenarios['TC01-S13'].observations.limitation, undefined);
   assert.equal(scenarios['TC01-S14'].observations.commandCount, 1);
   assert.equal(scenarios['TC01-S15'].observations.stale, false);
+});
+
+test('S13 records adjacent private-state normalization as a limitation when Lease and repositories remain intact', async () => {
+  const harness = createHarness({
+    observers: {
+      async snapshotPrivateState({ label }) {
+        return label === 'S13-private-after-status'
+          ? { state: 'PRESENT', digest: HASH_C }
+          : { state: 'PRESENT', digest: HASH_A };
+      },
+    },
+  });
+
+  const result = await runTc01Scenarios(harness.input);
+  const s13 = result.find((record) => record.scenarioId === 'TC01-S13');
+
+  assert.equal(s13.result, 'PASS');
+  assert.equal(s13.observations.privateStateChanged, true);
+  assert.equal(s13.observations.sourceUnchanged, true);
+  assert.equal(s13.observations.worktreeUnchanged, true);
+  assert.equal(s13.observations.limitation, 'TREEHOUSE_PRIVATE_STATE_NORMALIZATION');
 });
 
 test('a material S02 failure blocks dependent S03-S13 but still executes S14 and S15', async () => {
@@ -523,6 +545,11 @@ test('S10 fails when a dirty non-force return removes the sentinel or releases t
 test('S13 fails when private-state mutation coincides with Lease or worktree mutation', async () => {
   const harness = createHarness({
     observers: {
+      async snapshotPrivateState({ label }) {
+        return label === 'S13-private-after-status'
+          ? { state: 'PRESENT', digest: HASH_C }
+          : { state: 'PRESENT', digest: HASH_A };
+      },
       async snapshotRepository({ path, label }) {
         if (path.endsWith('/pool/oak/source-repo') && label.includes('after-private')) {
           return snapshot('worktree', HASH_C, { clean: false });

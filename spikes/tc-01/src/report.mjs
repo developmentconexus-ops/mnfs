@@ -41,6 +41,11 @@ function requireString(value, label) {
   return value;
 }
 
+function requireOptionalString(value, label) {
+  if (value === null) return null;
+  return requireString(value, label);
+}
+
 function requireHash(value, label) {
   assertTc01(
     typeof value === 'string' && HASH_PATTERN.test(value),
@@ -51,9 +56,36 @@ function requireHash(value, label) {
   return value;
 }
 
+function requireOptionalHash(value, label) {
+  if (value === null) return null;
+  return requireHash(value, label);
+}
+
 function validateProvenance(provenance) {
   assertTc01(isPlainObject(provenance), 'TC01_EVIDENCE_INVALID', 'TC-01 report provenance must be an object.');
   assertTc01(provenance.schemaVersion === 1, 'TC01_EVIDENCE_INVALID', 'TC-01 report provenance schema is unsupported.');
+  assertTc01(isPlainObject(provenance.capabilities), 'TC01_EVIDENCE_INVALID', 'TC-01 provenance capabilities must be an object.');
+
+  if (provenance.status === 'BLOCKED') {
+    assertTc01(isPlainObject(provenance.error), 'TC01_EVIDENCE_INVALID', 'Blocked TC-01 provenance requires an error object.');
+    requireString(provenance.error.code, 'Blocked TC-01 provenance error code');
+    requireString(provenance.error.message, 'Blocked TC-01 provenance error message');
+    requireString(provenance.nodeVersion, 'TC-01 provenance nodeVersion');
+    requireString(provenance.capturedAt, 'TC-01 provenance capturedAt');
+    for (const field of [
+      'environment',
+      'ubuntuRelease',
+      'kernelRelease',
+      'gitVersion',
+      'treehouseVersion',
+      'treehouseExecutable',
+    ]) {
+      requireOptionalString(provenance[field], `TC-01 provenance ${field}`);
+    }
+    requireOptionalHash(provenance.treehouseExecutableHash, 'TC-01 Treehouse executable hash');
+    return provenance;
+  }
+
   for (const field of [
     'environment',
     'ubuntuRelease',
@@ -66,7 +98,6 @@ function validateProvenance(provenance) {
     requireString(provenance[field], `TC-01 provenance ${field}`);
   }
   requireHash(provenance.treehouseExecutableHash, 'TC-01 Treehouse executable hash');
-  assertTc01(isPlainObject(provenance.capabilities), 'TC01_EVIDENCE_INVALID', 'TC-01 provenance capabilities must be an object.');
   return provenance;
 }
 
@@ -243,7 +274,7 @@ function markdownText(value) {
 }
 
 function markdownCode(value) {
-  return `\`${markdownText(value)}\``;
+  return `\`${value === null ? 'NOT_OBSERVED' : markdownText(value)}\``;
 }
 
 function renderIssueSection(title, entries, emptyText) {
@@ -287,10 +318,14 @@ export function renderTc01Report(input) {
     `| Treehouse version | ${markdownCode(normalized.provenance.treehouseVersion)} |`,
     `| Treehouse executable | ${markdownCode(normalized.provenance.treehouseExecutable)} |`,
     `| Treehouse executable SHA-256 | ${markdownCode(normalized.provenance.treehouseExecutableHash)} |`,
-    '',
-    '## Limitations',
-    '',
   ];
+  if (normalized.provenance.status === 'BLOCKED') {
+    lines.push(
+      `| Provenance status | ${markdownCode('BLOCKED')} |`,
+      `| Blocking error | ${markdownCode(normalized.provenance.error.code)} — ${markdownText(normalized.provenance.error.message)} |`,
+    );
+  }
+  lines.push('', '## Limitations', '');
 
   if (verdict.limitations.length === 0) {
     lines.push('No explicit limitation was recorded.', '');

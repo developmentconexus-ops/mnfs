@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.14
+version: 1.8.15
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 4 GREEN
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 5 RED
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -57,13 +57,14 @@ Implementation started:        YES — bounded by task gates
 Task 1:                        COMPLETE
 Task 2:                        COMPLETE
 Task 3:                        COMPLETE
-Complete product suite:        116/116 PASS before Task 4 RED
 Task 4 RED:                    OBSERVED / EXPECTED FAILURE
-Task 4 GREEN:                  NOT AUTHORIZED
+Task 4 GREEN:                  COMPLETE
+Complete product suite:        124/124 PASS
+Task 5 RED:                    NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 4 GREEN only
+Current human gate:            explicit authorization for Task 5 RED only
 PR:                            #17 DRAFT
 ```
 
@@ -79,9 +80,10 @@ MNFS_AUTHORIZE_M01_TASK_2_GREEN plan=1.0.1 microdesign=0.6.1 red=01a1e5deabbe538
 MNFS_AUTHORIZE_M01_TASK_3_RED plan=1.0.1 microdesign=0.6.1 task2=ff4d345720c2a14623ec1777fc5f318c9d96d685
 MNFS_AUTHORIZE_M01_TASK_3_GREEN plan=1.0.1 microdesign=0.6.1 red=9e109da918cb3cf8567a057684564d6cfe60ca7e
 MNFS_AUTHORIZE_M01_TASK_4_RED plan=1.0.1 microdesign=0.6.1 task3=2ed7e6d620f771dd1399421d06527911a2ffea0c
+MNFS_AUTHORIZE_M01_TASK_4_GREEN plan=1.0.1 microdesign=0.6.1 red=a163c8d3512f6f9a2583156e5f3e64f32ecde45b
 ```
 
-Task 4 RED authority did not extend to Task 4 GREEN, maintenance implementation, store refactoring, migrations, Treehouse, Pi or merge.
+Task 4 authority did not extend to Task 5, migration v4, Treehouse, Pi, M01 acceptance or merge.
 
 ## Completed implementation
 
@@ -154,30 +156,39 @@ Documentation validation:  93 canonical IDs
 
 Post-GREEN scope review compared `1e603452...` to `2ed7e6d6...` and found only the new transaction authority plus the bounded store refactor: 7 additions and 16 deletions in `sqlite-store.ts`, with no schema or SQL change.
 
-## Task 4 RED contract
+## Task 4 implementation
 
-Added only:
+Created:
 
 ```text
-tests/store/sqlite-maintenance.test.ts
+src/store/sqlite-maintenance.ts
+tests/store/sqlite-maintenance-boundary.test.ts
 ```
 
-The seven tests require:
+Modified:
 
-- exclusive `<database>.maintenance.lock` publication with mode `0600`;
-- canonical owner metadata, file fsync and parent-directory fsync;
-- durable lock removal with parent-directory fsync;
-- a second owner blocked even when the existing lock is old;
-- malformed and symlink locks rejected without mutation;
-- a consistent `node:sqlite` backup from an open WAL source connection;
-- reopened backup `integrity_check = ok`, SHA-256, migration rows, table counts and approved contract hashes;
-- supported matrices `[1,2,3]` with `user_version` `0` or `3`, and `[1,2,3,4]` with `user_version = 4`;
-- migration gaps and future schemas rejected in write mode with `SCHEMA_VERSION_UNSUPPORTED`;
-- `SqliteStore.openCurrent(path)` refusing unverified schema without applying migrations implicitly.
+```text
+src/store/sqlite-store.ts
+```
 
-No Task 4 production module, backup, maintenance lock or `SqliteStore` refactor was created.
+Task 4 established:
 
-## Task 4 RED verification
+- an exclusive `<database>.maintenance.lock` with canonical owner metadata, mode `0600`, file fsync and parent-directory fsync;
+- no lock takeover based on age and fail-closed handling for malformed, symlink or non-regular lock paths;
+- ownership-preserving durable release with parent-directory fsync;
+- consistent `node:sqlite backup()` from an open WAL source connection;
+- immutable no-overwrite backup publication, mode `0600`, file/directory fsync and SHA-256 Evidence;
+- reopened backup `PRAGMA integrity_check = ok`, migration inventory, user version, table counts and approved contract hashes;
+- schema inspection for supported v3 and v4 matrices, with gaps and future versions rejected using `SCHEMA_VERSION_UNSUPPORTED`;
+- `ensureDatabaseReady()` separated from store opening;
+- `SqliteStore.openCurrent()` that never applies migrations implicitly and rechecks schema after opening the writable connection;
+- an explicit pre-v4 writer fence: the current writer accepts schema 3 only, while maintenance inspection can read schema 4 for migration/backup planning.
+
+No Task 5 schema, migration, Event or execution table was created.
+
+## Task 4 verification
+
+### Primary RED
 
 ```text
 RED head:                 a163c8d3512f6f9a2583156e5f3e64f32ecde45b
@@ -186,10 +197,49 @@ RED workflow/job:          30944704469 / 92111672286
 TypeScript:                PASS
 Prior product tests:       116/116 PASS
 Task 4 tests:              0/7 expected failure
-Product total:             116 PASS / 7 FAIL
 Failure cause:             sqlite-maintenance module absent
-AS-02 / TC-01 / docs:      NOT RUN — root verify stopped after expected unit RED
 ```
+
+### Initial GREEN and focused correction
+
+The initial implementation passed six of seven Task 4 tests. The injected durability seam returned no persisted read during release, while the first implementation required a reread result. The production boundary already delegated missing-path behavior to exclusive filesystem removal, so the release contract was corrected without weakening changed-owner rejection.
+
+```text
+Initial GREEN head:       b7c3145335328320913c99d777b0f5032a4f3a31
+Synthetic merge:          3345742b9895b04c7b1b83882daec994b1b044c0
+Workflow/job:             30946090318 / 92116316689
+Result:                   122 PASS / 1 FAIL
+
+Corrected GREEN head:     808dd4901287b2a617fecb22241a9e179912d4dc
+Synthetic merge:          f88a7dc35aeee0ddf011995dfa6e9be0c763f39f
+Workflow/job:             30946292534 / 92116985716
+Product tests:            123/123 PASS
+AS-02 tests:              119/119 PASS
+TC-01 tests:              78/78 PASS
+Documentation validation: 93 canonical IDs
+```
+
+### Post-GREEN adversarial writer fence
+
+Review found that the schema inspector correctly recognized v4 for read/backup purposes, but the still-pre-v4 `SqliteStore.openCurrent()` also accepted it for writes. A separate RED proved the downgrade gap, and the writer was fenced to schema 3 until Task 5 promotes the current write schema.
+
+```text
+Boundary RED head:        24b8dbf924e4b394f139fa2fa4e2a1a07b3dfbcd
+Synthetic merge:          6b59775fd3635fe12475f8824a7c4e4780764f76
+Workflow/job:             30946515167 / 92117734647
+Result:                   123 PASS / 1 expected FAIL
+Failure cause:            pre-v4 openCurrent accepted readable v4 schema
+
+Final GREEN head:         d0172cc2c141cec6004f10caa9859bced9ac8d1c
+Synthetic merge:          3b42f58128f5e0d04246383fb8c62676ba3a0c2c
+Workflow/job:             30946633663 / 92118136010
+Product tests:            124/124 PASS
+AS-02 tests:              119/119 PASS
+TC-01 tests:              78/78 PASS
+Documentation validation: 93 canonical IDs
+```
+
+Post-GREEN scope review compared `9e0e5d14...` to `d0172cc2...` and found only `sqlite-maintenance.ts`, the bounded `sqlite-store.ts` opening refactor and the writer-fence regression test. `migrations.ts`, schema and Task 5 files remained unchanged.
 
 ## Frozen boundaries
 
@@ -212,9 +262,10 @@ The accepted design invariants remain unchanged:
 Task 1:                    COMPLETE
 Task 2:                    COMPLETE
 Task 3:                    COMPLETE
-Task 4 RED:                OBSERVED / COMPLETE
-Task 4 GREEN:              NOT AUTHORIZED
-Task 5 and later:          NOT AUTHORIZED
+Task 4:                    COMPLETE
+Task 5 RED:                NOT AUTHORIZED
+Task 5 GREEN and later:    NOT AUTHORIZED
+Migration v4:              NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 PR #17 merge:              NOT AUTHORIZED
@@ -224,4 +275,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 4 GREEN only**. Stop before creating `sqlite-maintenance.ts`, adding `openCurrent`, producing a backup or changing store-open behavior unless that continuation is granted.
+Request or provide an explicit continuation for **Task 5 RED only**. Stop before modifying migrations, Events, domain Event types or execution tables unless that continuation is granted.

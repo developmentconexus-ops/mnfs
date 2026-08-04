@@ -31,6 +31,8 @@ export interface OpenNextMissionInput {
   readonly openedAt: string;
 }
 
+const CURRENT_WRITE_SCHEMA_VERSION = 3;
+
 function missionFromRow(row: Readonly<Record<string, unknown>>): Mission {
   return {
     id: String(row.id),
@@ -56,6 +58,16 @@ function planRevisionFromRow(row: Readonly<Record<string, unknown>>): MissionPla
   };
 }
 
+function requireCurrentWriteSchema(database: DatabaseSync): void {
+  const schema = inspectSupportedDatabaseSchema(database, true);
+  if (schema.schemaVersion !== CURRENT_WRITE_SCHEMA_VERSION) {
+    throw new MnfsError(
+      'SCHEMA_VERSION_UNSUPPORTED',
+      `This MNFS writer supports schema ${CURRENT_WRITE_SCHEMA_VERSION}, not ${schema.schemaVersion}.`,
+    );
+  }
+}
+
 export class SqliteStore {
   readonly #database: DatabaseSync;
   readonly #transactions: SqliteTransaction;
@@ -76,14 +88,14 @@ export class SqliteStore {
     let verifier: DatabaseSync | undefined;
     try {
       verifier = new DatabaseSync(path, { readOnly: true });
-      inspectSupportedDatabaseSchema(verifier, true);
+      requireCurrentWriteSchema(verifier);
     } finally {
       verifier?.close();
     }
 
     const database = new DatabaseSync(path);
     try {
-      inspectSupportedDatabaseSchema(database, true);
+      requireCurrentWriteSchema(database);
       database.exec('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
       return new SqliteStore(database);
     } catch (error) {

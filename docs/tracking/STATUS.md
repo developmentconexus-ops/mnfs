@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.11
+version: 1.8.12
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture Baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 3 RED
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 3 GREEN
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -56,14 +56,14 @@ M01 microdesign:               ACCEPTED — version 0.6.1
 Implementation plan:           CURRENT / APPROVED — version 1.0.1
 Implementation started:        YES — bounded by task gates
 Task 1:                        COMPLETE
-Task 2 RED:                    OBSERVED / EXPECTED FAILURE
-Task 2 GREEN:                  COMPLETE
-Complete product suite:        112/112 PASS
-Task 3 RED:                    NOT AUTHORIZED
+Task 2:                        COMPLETE
+Complete product suite:        112/112 PASS before Task 3 RED
+Task 3 RED:                    OBSERVED / EXPECTED FAILURE
+Task 3 GREEN:                  NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 3 RED only
+Current human gate:            explicit authorization for Task 3 GREEN only
 PR:                            #17 DRAFT
 ```
 
@@ -76,9 +76,10 @@ MNFS_AUTHORIZE_M01_TASK_1_RED plan=1.0.1 microdesign=0.6.1
 MNFS_AUTHORIZE_M01_TASK_1_GREEN plan=1.0.1 microdesign=0.6.1 red=65bd4e2c410d4d1566f5fef0da33f29e35657489
 MNFS_AUTHORIZE_M01_TASK_2_RED plan=1.0.1 microdesign=0.6.1 task1=ec6505d7207d252aeef77d72192c401f460b4816
 MNFS_AUTHORIZE_M01_TASK_2_GREEN plan=1.0.1 microdesign=0.6.1 red=01a1e5deabbe5388f83f83d13effe9e1a220fed0
+MNFS_AUTHORIZE_M01_TASK_3_RED plan=1.0.1 microdesign=0.6.1 task2=ff4d345720c2a14623ec1777fc5f318c9d96d685
 ```
 
-Task 2 authority did not extend to Task 3, SQLite changes, Treehouse, Pi or merge.
+Task 3 RED authority did not extend to Task 3 GREEN, store refactoring, migrations, Treehouse, Pi or merge.
 
 ## Task 1 implementation
 
@@ -186,6 +187,40 @@ TC-01 tests:               78/78 PASS
 Documentation validation:  93 canonical IDs
 ```
 
+## Task 3 RED contract
+
+Added only:
+
+```text
+tests/store/sqlite-transaction.test.ts
+```
+
+The four tests require:
+
+- one `BEGIN IMMEDIATE`, one callback execution and one `COMMIT` on success;
+- rollback of a real SQLite write when user code throws;
+- retry of only `BEGIN IMMEDIATE` after exact delays `5`, `10` and `20` milliseconds;
+- `CONCURRENCY_CONFLICT` after the fourth busy `BEGIN` attempt;
+- zero callback executions when transaction acquisition never succeeds;
+- no retry after user code starts, even when the callback throws `SQLITE_BUSY`;
+- propagation of the original callback error after one rollback.
+
+No Task 3 production module or SqliteStore refactor was created.
+
+## Task 3 RED verification
+
+```text
+RED head:                 9e109da918cb3cf8567a057684564d6cfe60ca7e
+RED synthetic merge:      4612c6c5bdf10a5a654b3658dafc3dc734561c20
+RED workflow/job:          30942340332 / 92103635626
+TypeScript:                PASS
+Prior product tests:       112/112 PASS
+Task 3 tests:              0/4 expected failure
+Product total:             112 PASS / 4 FAIL
+Failure cause:             sqlite-transaction module absent
+AS-02 / TC-01 / docs:      NOT RUN — root verify stopped after expected unit RED
+```
+
 ## Frozen boundaries
 
 The accepted design invariants remain unchanged:
@@ -206,8 +241,9 @@ The accepted design invariants remain unchanged:
 ```text
 Task 1:                    COMPLETE
 Task 2:                    COMPLETE
-Task 3 RED:                NOT AUTHORIZED
-Task 3 GREEN and later:    NOT AUTHORIZED
+Task 3 RED:                OBSERVED / COMPLETE
+Task 3 GREEN:              NOT AUTHORIZED
+Task 4 and later:          NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 PR #17 merge:              NOT AUTHORIZED
@@ -217,4 +253,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 3 RED only**. Stop before modifying SQLite transaction authority unless that continuation is granted.
+Request or provide an explicit continuation for **Task 3 GREEN only**. Stop before creating `SqliteTransaction` or refactoring `SqliteStore` unless that continuation is granted.

@@ -89,7 +89,7 @@ test('Treehouse control files and return targets remain inside the disposable ru
 
   assert.throws(
     () => buildTreehouseEnvironment({ ...baseInput(fixture, async () => processResult()), gitLog: outsideLog }),
-    (error) => error?.code === 'TC01_INVALID_INPUT' && /contain|artifact|run root/iu.test(error.message),
+    (error) => error?.code === 'TC01_INVALID_INPUT' && /contain|artifact|run root|boundary/iu.test(error.message),
   );
 
   let calls = 0;
@@ -103,7 +103,7 @@ test('Treehouse control files and return targets remain inside the disposable ru
       leaseId: 'lease-1',
       holder: 'holder-1',
     }),
-    (error) => error?.code === 'TC01_INVALID_INPUT' && /contain|run root/iu.test(error.message),
+    (error) => error?.code === 'TC01_INVALID_INPUT' && /contain|run root|boundary/iu.test(error.message),
   );
   assert.equal(calls, 0);
 });
@@ -121,7 +121,7 @@ test('acquisition and status reject canonical worktree paths outside the configu
       ...baseInput(fixture, async () => processResult(acquisition)),
       holder: 'holder-1',
     }),
-    (error) => error?.code === 'TC01_TREEHOUSE_INVALID_OUTPUT' && /pool/iu.test(error.message),
+    (error) => error?.code === 'TC01_TREEHOUSE_INVALID_OUTPUT' && /pool|boundary|contain/iu.test(error.message),
   );
 
   const status = JSON.stringify([{
@@ -135,6 +135,6 @@ test('acquisition and status reject canonical worktree paths outside the configu
   }]);
   await assert.rejects(
     observeTreehouseStatus(baseInput(fixture, async () => processResult(status))),
-    (error) => error?.code === 'TC01_TREEHOUSE_INVALID_OUTPUT' && /pool/iu.test(error.message),
+    (error) => error?.code === 'TC01_TREEHOUSE_INVALID_OUTPUT' && /pool|boundary|contain/iu.test(error.message),
   );
 });

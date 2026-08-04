@@ -197,25 +197,18 @@ owners:
 - Operator explicitly authorized the final R5 design review.
 - Mapped all seven M01-owned requirements to exact contract criteria, state, service boundaries, typed failure and verification routes.
 - Constructive coverage completed for `CAP-EXEC-REQ-001`, `002`, `004`, `005`, `006`, `007` and `008`; no orphan and no M02 requirement pulled into implementation scope.
-- The adversarial pass found three Critical issues before implementation planning:
-  - canonical checkout with `origin` escaped the no-origin TC-01 boundary;
-  - inherited Treehouse HOME/XDG config could execute unreviewed hooks;
-  - durable REQUESTED intent did not prevent duplicate `get` when callers raced or a Lead died while its child survived.
-- Version 0.6.1 closes those findings with an Attempt-owned independent execution source, controlled HOME/config/hooks and a trusted LeaseActionRunner that records STARTED before one external invocation.
-- The review found and closed eight Important issues:
-  - contract hash without exact entity ancestry;
-  - mutable Event payload-version interpretation;
-  - incomplete migration/downgrade mechanism and WAL-safe backup;
-  - under-specified Git commit/tree identity and observational `write-tree` use;
-  - grant/release/Claim idempotency without unique input binding;
-  - first-match Reconcile under duplicate external identity;
-  - read-only Recovery contradicted by a generic observation Event;
-  - local Git clones could share canonical objects through hardlinks or alternates.
-- Migration v4 now requires a maintenance gate, consistent `node:sqlite backup()`, backup verification, generalized SQLite table rebuild, payload-versioned Events, foreign-key/integrity checks and a concrete pre-v4 write fence.
-- Composite foreign keys now prove exact Track → Attempt → Run/Lease → Claim ancestry and exact Attempt base commit.
-- Grant and release now persist separate unique idempotency keys/input hashes and action-helper Evidence.
-- Inconclusive STARTED acquisition is preserved and blocked; it never automatically invokes a second `treehouse get`.
-- Plain Recovery now produces a content-addressed report and performs no domain mutation or generic observation Event.
+- The adversarial pass found and closed three Critical issues: canonical checkout with `origin` escaped the TC-01 boundary; inherited Treehouse HOME/XDG hooks; and duplicate grant risk under concurrent callers or parent-death/child-survival.
+- The review found and closed eight Important issues: ancestry, Event payload version, migration/downgrade/backup, Git commit/tree identity, idempotency input binding, duplicate Reconcile identity, read-only Recovery contradiction and shared Git objects.
+- Microdesign 0.6.1 introduced Attempt-owned independent sources, controlled config/hooks, a durable LeaseActionRunner, versioned Events, exact ancestry FKs, canonical input hashes and byte-for-byte non-mutating Recovery.
 - Published `REVIEW-MIS-002-M01-R5-FINAL` with recommendation `APROVÁVEL`, 3/3 Critical closed, 8/8 Important closed and no Replan requirement.
-- Reconciled Documentation Map and STATUS to microdesign version 0.6.1 and the exact Operator decision gate.
-- R5 remains `IN_PROGRESS`; M01 implementation, Pi dispatch and automatic merge remain prohibited.
+
+### M01 R5 approval and implementation planning
+
+- Operator supplied exact token `MNFS_APPROVE_M01_MICRODESIGN version=0.6.1 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 treehouse=sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`.
+- Recorded `D-007` and `ACCEPTANCE-MIS-002-M01-R5-APPROVAL`.
+- Promoted microdesign 0.6.1 to `accepted` and MCRM R5 to `PASS`.
+- The approval authorized only preparation and review of a separate TDD implementation plan; code, Pi dispatch and automatic merge remained prohibited.
+- Wrote `PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` version 1.0.0 with implementation/proof gates.
+- Self-review found Event migration ordering, maintenance/process-identity ordering and placeholder defects before execution.
+- Revised the plan to version 1.0.1 with 14 ordered gates, exact interfaces, no symbolic dates or deferred placeholders, complete seven-requirement mapping and explicit proof for every Task 14 Critical/Important correction.
+- Plan 1.0.1 is current and awaiting an exact Operator approval. Task 1 RED remains unauthorized; PR #17 remains draft and unmerged.

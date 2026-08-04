@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.7.9
+version: 1.8.0
 owners:
   - developmentconexus-ops
 related:
@@ -24,6 +24,7 @@ related:
   - ACCEPTANCE-TC-01-TASK-06-STRICT-TREEHOUSE-CLIENT
   - ACCEPTANCE-TC-01-TASK-07-ATOMIC-EVIDENCE-STORE
   - ACCEPTANCE-TC-01-TASK-08-ACQUISITION-RECOVERY-ORCHESTRATION
+  - ACCEPTANCE-TC-01-TASK-09-RELEASE-FENCING-PRESERVATION
   - DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1
   - DESIGN-TC-01-TREEHOUSE-PRODUCTION-ADAPTER-CONFORMANCE
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
@@ -65,24 +66,14 @@ tracking_issue: 16
 - [x] TC-01 protocol accepted as version 0.2.0.
 - [x] TC-01 implementation and canonical WSL2 execution plan version 1.0.3 written, self-reviewed and CI-verified.
 - [x] Operator approved TC-01 plan version 1.0.3 and authorized Task 1.
-- [x] TC-01 Task 1 completed through observed RED, focused GREEN and full canonical CI.
-- [x] Operator authorized Task 2.
-- [x] TC-01 Task 2 completed through observed RED, focused GREEN and full canonical CI.
-- [x] Operator authorized continuation to Task 3.
-- [x] TC-01 Task 3 completed through two observed RED/GREEN cycles and full canonical CI.
-- [x] Operator authorized continuation to Task 4.
-- [x] TC-01 Task 4 completed through observed RED, focused GREEN and full canonical CI.
-- [x] Operator authorized continuation to Task 5.
-- [x] TC-01 Task 5 completed through observed RED, an adversarial GREEN correction and full canonical CI.
-- [x] Operator authorized continuation to Task 6.
-- [x] TC-01 Task 6 completed through observed RED, focused GREEN and full canonical CI.
-- [x] Task 6 recorded fail-closed environment clarifications for Treehouse update suppression and Git system-config isolation.
-- [x] Operator authorized continuation to Task 7.
-- [x] TC-01 Task 7 completed through observed RED, an adversarial stable-error correction and full canonical CI.
-- [x] Operator authorized continuation to Task 8.
-- [x] TC-01 Task 8 completed through observed RED, focused GREEN and full canonical CI.
-- [x] Task 8 established exact S01-S15 ordering, dependency blocking, single-acquisition recovery, process-contract inspection and freshness invalidation.
-- [ ] TC-01 Task 9 — release, fencing and work-preservation scenarios — not started.
+- [x] TC-01 Tasks 1-8 completed through observed RED/GREEN cycles and full canonical CI.
+- [x] Task 6 recorded fail-closed Treehouse update suppression and Git system-config isolation.
+- [x] Task 7 established canonical JSON, atomic Evidence, artifact containment and immutable finalization.
+- [x] Task 8 established exact S01-S15 ordering, dependency blocking, fresh-client recovery, process-contract inspection and freshness invalidation.
+- [x] Operator authorized continuation to Task 9.
+- [x] TC-01 Task 9 completed through an observed five-failure RED, focused GREEN and full canonical CI.
+- [x] Task 9 replaced S07-S12 blockers with deterministic release, fencing, dirty-work preservation, repeated-release and divergence classifications.
+- [ ] TC-01 Task 10 — Verdict derivation and deterministic reports — not started.
 - [ ] TC-01 deterministic harness implementation complete.
 - [ ] TC-01 harness receives full CI-green review before real execution.
 - [ ] TC-01 executed on canonical WSL2 against the pinned installed Treehouse binary.
@@ -116,12 +107,13 @@ TC-01 Task 5:            ACCEPTED
 TC-01 Task 6:            ACCEPTED
 TC-01 Task 7:            ACCEPTED
 TC-01 Task 8:            ACCEPTED
-TC-01 Task 9:            NOT_STARTED
+TC-01 Task 9:            ACCEPTED
+TC-01 Task 10:           NOT_STARTED
 TC-01 real Evidence:     NOT_STARTED
 M01 microdesign:         PROPOSED — version 0.3.0
 Design coverage:         7/7 M01 requirements proposed
 Blocking external input: Treehouse production-adapter conformance
-Current human gate:      continuation to TC-01 Task 9
+Current human gate:      continuation to TC-01 Task 10
 Design PR:               #17 DRAFT
 ```
 
@@ -131,28 +123,23 @@ Task 6 clarified the execution environment by adding `TREEHOUSE_NO_UPDATE_CHECK=
 
 Task 7 established canonical JSON, atomic command/scenario/environment writes, exact artifact hash verification and an immutable final manifest. It also reclassifies lower-level path and run-ID failures as `TC01_EVIDENCE_INVALID` while preserving their causes.
 
-Task 8 established one frozen S01-S15 registry and sequential dependency semantics. S02 performs one acquisition; S05 recovers through a new status-only client without a second acquisition. Material acquisition failures block dependent scenarios through S13 while S14 and S15 remain executable. S07-S12 remain explicit Task 9 blockers rather than synthetic PASS results.
+Task 8 established one frozen S01-S15 registry and sequential dependency semantics. S02 performs one acquisition; S05 recovers through a new status-only client without a second acquisition. Material failures block dependent mutation-heavy scenarios while S14 and S15 remain executable.
+
+Task 9 establishes deterministic S07-S12 lifecycle semantics without invoking the real Treehouse binary. Correct release requires exact preflight and fresh status; stale ID/holder attempts require non-zero exit plus unchanged Lease/worktree state; dirty return must preserve the byte-exact sentinel and exact Lease; repeated release is classified from fresh status without a second return; missing and unmanaged paths remain explicit divergence classifications. Every mutation-heavy scenario uses a fresh external Lease identity and trusted cleanup is allowed only after intact-state proof.
 
 ## Current authorization boundary
 
 ```text
-M01 research:         AUTHORIZED
-TC-01 protocol:       ACCEPTED
-TC-01 plan:           APPROVED
-TC-01 Task 1:         ACCEPTED
-TC-01 Task 2:         ACCEPTED
-TC-01 Task 3:         ACCEPTED
-TC-01 Task 4:         ACCEPTED
-TC-01 Task 5:         ACCEPTED
-TC-01 Task 6:         ACCEPTED
-TC-01 Task 7:         ACCEPTED
-TC-01 Task 8:         ACCEPTED
-TC-01 Task 9:         NOT_STARTED
-TC-01 WSL2 execution: AUTHORIZED only after a reviewed, CI-green complete harness exists
-M01 microdesign:      PROPOSED, NOT FINAL
-M01 implementation:  PROHIBITED until final microdesign approval
-Pi Worker dispatch:  PROHIBITED
-Automatic merge:     NOT AUTHORIZED
+M01 research:          AUTHORIZED
+TC-01 protocol:        ACCEPTED
+TC-01 plan:            APPROVED
+TC-01 Tasks 1-9:       ACCEPTED
+TC-01 Task 10:         NOT_STARTED
+TC-01 WSL2 execution:  AUTHORIZED only after a reviewed, CI-green complete harness exists
+M01 microdesign:       PROPOSED, NOT FINAL
+M01 implementation:   PROHIBITED until final microdesign approval
+Pi Worker dispatch:    PROHIBITED
+Automatic merge:      NOT AUTHORIZED
 ```
 
 A material change to the approved Mission contract, `SEC-E1`, Capability, prerequisite or applicable requirements triggers Replan/re-readiness before implementation.
@@ -171,29 +158,29 @@ documentation tooling:            PASS
 documentation validation:         PASS — 71 canonical IDs
 ```
 
-## Latest TC-01 Task 8 verification
+## Latest TC-01 Task 9 verification
 
-PR #17 merge commit `3005f80e66bb56a5ecc6ceac11d64f976cef1e8c` verified TC-01 Task 8 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
+PR #17 merge commit `55b6fe5ac32c23c4c6c677c8e950dfb8d28816ea` verified TC-01 Task 9 on Ubuntu 24.04.4 with Node.js 24.18.0, npm 11.16.0 and Git 2.54.0:
 
 ```text
-Workflow:                          30904478744
-Job:                               91976228067
+Workflow:                          30906802712
+Job:                               91983671880
 npm ci:                            PASS — 0 vulnerabilities
 typecheck:                         PASS
 product tests:                     PASS — 95/95
 AS-02 deterministic tests:        PASS — 119/119
-TC-01 deterministic tests:        PASS — 40/40
+TC-01 deterministic tests:        PASS — 44/44
 documentation tooling:            PASS
 MIS-002 Replan builder:            PASS
 approved allocation tests:        PASS
-documentation validation:         PASS — 83 canonical IDs
+documentation validation:         PASS — 84 canonical IDs
 ```
 
-This proof establishes deterministic acquisition/recovery orchestration, dependency blocking, private-state limitation rules, process-contract inspection and freshness invalidation. It does not invoke Treehouse acquisition, create a real Lease or validate release/fencing runtime behavior.
+This proof establishes deterministic release, stale-ID and stale-holder fencing, dirty-worktree preservation, repeated-release classification, divergence handling and safe cleanup semantics under injected dependencies. It does not invoke the installed Treehouse binary, create a real Lease or establish production-adapter conformance.
 
 ## Immediate next action
 
-1. Review `ACCEPTANCE-TC-01-TASK-08-ACQUISITION-RECOVERY-ORCHESTRATION`.
-2. Continue with Task 9 of the approved TC-01 plan only after the next governed continuation.
-3. Task 9 must replace S07-S12 blockers with deterministic release, fencing and work-preservation scenarios through fresh RED/GREEN TDD cycles.
-4. Keep the full real Treehouse scenario suite, M01 implementation and Pi Worker dispatch prohibited until their later gates pass.
+1. Review `ACCEPTANCE-TC-01-TASK-09-RELEASE-FENCING-PRESERVATION`.
+2. Continue with Task 10 of the approved TC-01 plan only after the next governed continuation.
+3. Task 10 must derive the deterministic Verdict and render the human/machine reports through a fresh RED/GREEN TDD cycle.
+4. Keep real Treehouse execution, M01 implementation, Pi Worker dispatch and automatic merge prohibited until their later gates pass.

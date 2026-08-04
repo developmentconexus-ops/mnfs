@@ -46,8 +46,7 @@ function signalProcessGroup(pid: number, signal: NodeJS.Signals): void {
 async function terminateProcessGroup(pid: number): Promise<void> {
   signalProcessGroup(pid, 'SIGTERM');
   await new Promise<void>((resolve) => {
-    const timer = setTimeout(resolve, TERMINATION_GRACE_MS);
-    timer.unref();
+    setTimeout(resolve, TERMINATION_GRACE_MS);
   });
   signalProcessGroup(pid, 'SIGKILL');
 }

@@ -15,6 +15,7 @@ import type {
   MissionEvent,
   SaveMissionPlanRevisionInput,
 } from '../domain/types.js';
+import { EventStore } from './event-store.js';
 import { inspectSupportedDatabaseSchema } from './sqlite-maintenance.js';
 import { applyMigrations } from './migrations.js';
 import { SqliteTransaction } from './sqlite-transaction.js';
@@ -31,7 +32,7 @@ export interface OpenNextMissionInput {
   readonly openedAt: string;
 }
 
-const CURRENT_WRITE_SCHEMA_VERSION = 3;
+const CURRENT_WRITE_SCHEMA_VERSION = 4;
 
 function missionFromRow(row: Readonly<Record<string, unknown>>): Mission {
   return {
@@ -71,17 +72,25 @@ function requireCurrentWriteSchema(database: DatabaseSync): void {
 export class SqliteStore {
   readonly #database: DatabaseSync;
   readonly #transactions: SqliteTransaction;
+  readonly #events: EventStore;
 
   private constructor(database: DatabaseSync) {
     this.#database = database;
     this.#transactions = new SqliteTransaction(database);
+    this.#events = new EventStore(database);
   }
 
   static open(path: string): SqliteStore {
     mkdirSync(dirname(path), { recursive: true });
     const database = new DatabaseSync(path);
-    applyMigrations(database);
-    return new SqliteStore(database);
+    try {
+      applyMigrations(database);
+      requireCurrentWriteSchema(database);
+      return new SqliteStore(database);
+    } catch (error) {
+      database.close();
+      throw error;
+    }
   }
 
   static openCurrent(path: string): SqliteStore {
@@ -115,12 +124,14 @@ export class SqliteStore {
     this.#database
       .prepare('INSERT INTO missions (id, goal, status, opened_at) VALUES (?, ?, ?, ?)')
       .run(mission.id, mission.goal, mission.status, mission.openedAt);
-    this.#database
-      .prepare(`
-        INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
-        VALUES (?, 'MISSION_OPENED', ?, ?, ?)
-      `)
-      .run(input.eventId, mission.id, mission.openedAt, JSON.stringify({ goal: mission.goal }));
+    this.#events.append({
+      eventId: input.eventId,
+      type: 'MISSION_OPENED',
+      payloadSchemaVersion: 1,
+      missionId: mission.id,
+      occurredAt: mission.openedAt,
+      payload: { goal: mission.goal },
+    });
 
     return mission;
   }
@@ -257,17 +268,14 @@ export class SqliteStore {
           canonicalJson(revision.content),
           revision.createdAt,
         );
-      this.#database
-        .prepare(`
-          INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
-          VALUES (?, 'PLAN_REVISION_SAVED', ?, ?, ?)
-        `)
-        .run(
-          `EVT-${input.missionId}-PLAN-R${String(revisionNumber).padStart(4, '0')}`,
-          input.missionId,
-          input.createdAt,
-          JSON.stringify({ revision: revisionNumber, contentHash }),
-        );
+      this.#events.append({
+        eventId: `EVT-${input.missionId}-PLAN-R${String(revisionNumber).padStart(4, '0')}`,
+        type: 'PLAN_REVISION_SAVED',
+        payloadSchemaVersion: 1,
+        missionId: input.missionId,
+        occurredAt: input.createdAt,
+        payload: { revision: revisionNumber, contentHash },
+      });
 
       return revision;
     });
@@ -321,17 +329,14 @@ export class SqliteStore {
           WHERE mission_id = ? AND revision = ? AND status = 'DRAFT'
         `)
         .run(input.approvedAt, input.missionId, current.revision);
-      this.#database
-        .prepare(`
-          INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
-          VALUES (?, 'PLAN_APPROVED', ?, ?, ?)
-        `)
-        .run(
-          `EVT-${input.missionId}-PLAN-APPROVED-R${String(current.revision).padStart(4, '0')}`,
-          input.missionId,
-          input.approvedAt,
-          JSON.stringify({ revision: current.revision, contentHash: current.contentHash }),
-        );
+      this.#events.append({
+        eventId: `EVT-${input.missionId}-PLAN-APPROVED-R${String(current.revision).padStart(4, '0')}`,
+        type: 'PLAN_APPROVED',
+        payloadSchemaVersion: 1,
+        missionId: input.missionId,
+        occurredAt: input.approvedAt,
+        payload: { revision: current.revision, contentHash: current.contentHash },
+      });
 
       return {
         ...current,
@@ -349,21 +354,7 @@ export class SqliteStore {
   }
 
   listEvents(): MissionEvent[] {
-    return this.#database
-      .prepare(`
-        SELECT seq, event_id, type, mission_id, occurred_at, payload_json
-        FROM events
-        ORDER BY seq
-      `)
-      .all()
-      .map((row) => ({
-        seq: Number(row.seq),
-        eventId: String(row.event_id),
-        type: String(row.type) as MissionEvent['type'],
-        missionId: String(row.mission_id),
-        occurredAt: String(row.occurred_at),
-        payload: JSON.parse(String(row.payload_json)) as MissionEvent['payload'],
-      })) as MissionEvent[];
+    return this.#events.list();
   }
 
   close(): void {

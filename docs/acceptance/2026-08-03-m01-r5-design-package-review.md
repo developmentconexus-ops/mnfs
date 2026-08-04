@@ -5,7 +5,7 @@ document_type: acceptance_report
 form: explanation
 authority: evidence
 status: accepted
-version: 1.0.4
+version: 1.0.5
 owners:
   - developmentconexus-ops
 related:
@@ -64,13 +64,13 @@ The plan:
 - stops before production adapter or M01 implementation work;
 - requires separate Operator approval before harness implementation begins.
 
-An earlier plan-package revision passed workflow `30865311721`, job `91855751914`, with 95/95 product tests, 119/119 AS-02 tests and 76 canonical documentation IDs. Version 1.0.3 requires its own exact-head CI before implementation authorization.
+An earlier plan-package revision passed workflow `30865311721`, job `91855751914`, with 95/95 product tests, 119/119 AS-02 tests and 76 canonical documentation IDs. Version 1.0.3 requires its own consolidated-head CI before implementation authorization.
 
 ## Current authority boundary
 
 ```text
 TC-01 protocol:            ACCEPTED — version 0.2.0
-TC-01 implementation plan: WRITTEN — version 1.0.3, awaiting exact-head CI and Operator approval
+TC-01 implementation plan: WRITTEN — version 1.0.3, awaiting consolidated-head CI and Operator approval
 TC-01 harness build:        PROHIBITED until plan approval
 TC-01 WSL2 execution:       AUTHORIZED after a reviewed, CI-green harness exists
 M01 microdesign:            PROPOSED, NOT FINAL

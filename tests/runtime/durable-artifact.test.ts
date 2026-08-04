@@ -6,9 +6,29 @@ import test from 'node:test';
 
 const DURABLE_ARTIFACT_SPECIFIER = '../../src/runtime/' + 'durable-artifact.js';
 
+interface DurableTemporaryFile {
+  readonly path: string;
+  write(bytes: Buffer): Promise<void>;
+  sync(): Promise<void>;
+  close(): Promise<void>;
+}
+
+interface DurableArtifactOperations {
+  readRegularIfExists(filePath: string): Promise<Buffer | undefined>;
+  createTemporary(finalPath: string, mode: number): Promise<DurableTemporaryFile>;
+  rename(temporaryPath: string, finalPath: string): Promise<void>;
+  syncDirectory(directoryPath: string): Promise<void>;
+  removeTemporary(temporaryPath: string): Promise<void>;
+}
+
+interface DurableArtifactWriter {
+  writeDurableFile(filePath: string, bytes: Buffer, mode: number): Promise<void>;
+}
+
 interface DurableArtifactModule {
   writeDurableFile(filePath: string, bytes: Buffer, mode: number): Promise<void>;
   readRegularFileNoSymlink(filePath: string): Promise<Buffer>;
+  createDurableArtifactWriter(operations: DurableArtifactOperations): DurableArtifactWriter;
 }
 
 function describeError(error: unknown): string {
@@ -49,6 +69,56 @@ test('publishes exact immutable bytes with the requested file mode', async () =>
     );
     assert.deepEqual(await artifacts.readRegularFileNoSymlink(artifactPath), expected);
   });
+});
+
+test('performs write, temp fsync, close, rename and directory fsync in durable order', async () => {
+  const artifacts = await loadDurableArtifact();
+  const steps: string[] = [];
+  const finalPath = '/state/evidence.bin';
+  const temporaryPath = '/state/.evidence.bin.task2-red';
+
+  const writer = artifacts.createDurableArtifactWriter({
+    async readRegularIfExists(filePath) {
+      steps.push(`read-final:${filePath}`);
+      return undefined;
+    },
+    async createTemporary(filePath, mode) {
+      steps.push(`open-temp:${filePath}:${mode.toString(8)}`);
+      return {
+        path: temporaryPath,
+        async write(bytes) {
+          steps.push(`write:${bytes.toString('hex')}`);
+        },
+        async sync() {
+          steps.push('fsync-temp');
+        },
+        async close() {
+          steps.push('close-temp');
+        },
+      };
+    },
+    async rename(from, to) {
+      steps.push(`rename:${from}->${to}`);
+    },
+    async syncDirectory(directoryPath) {
+      steps.push(`fsync-directory:${directoryPath}`);
+    },
+    async removeTemporary(filePath) {
+      steps.push(`remove-temp:${filePath}`);
+    },
+  });
+
+  await writer.writeDurableFile(finalPath, Buffer.from([1, 2, 3]), 0o600);
+
+  assert.deepEqual(steps, [
+    `read-final:${finalPath}`,
+    `open-temp:${finalPath}:600`,
+    'write:010203',
+    'fsync-temp',
+    'close-temp',
+    `rename:${temporaryPath}->${finalPath}`,
+    'fsync-directory:/state',
+  ]);
 });
 
 test('rejects symlink reads and writes without mutating the target', async () => {

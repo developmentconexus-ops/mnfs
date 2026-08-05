@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.24
+version: 1.8.25
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 7 atomic-authority corrective RED awaits explicit authority
+- **Current enabler:** Issue #16 — Task 7 atomic-authority GREEN awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -57,10 +57,12 @@ Implementation started:           YES — bounded by task gates
 Tasks 1–6:                         COMPLETE
 Task 7 primary RED:               OBSERVED / ACCEPTABLE
 Task 7 functional GREEN:          VERIFIED — 155/155 product PASS
-Task 7 post-GREEN review:         R7-01/R7-02/R7-03 IMPORTANT
-Task 7 corrective RED:            OBSERVED / ACCEPTABLE — 4 expected failures
-Task 7 corrective GREEN:          VERIFIED — 159/159 product PASS
+Task 7 first review:              R7-01/R7-02/R7-03 IMPORTANT
+Task 7 first corrective RED:      OBSERVED / ACCEPTABLE — 4 expected failures
+Task 7 first corrective GREEN:    VERIFIED — 159/159 product PASS
 Task 7 post-correction review:    R7-04 IMPORTANT
+Task 7 atomic-authority RED:      OBSERVED / ACCEPTABLE — 4 expected failures
+Task 7 atomic-authority GREEN:    NOT AUTHORIZED
 Task 7 accepted:                  NO
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
@@ -90,7 +92,7 @@ empty guarded Track
 
 This moves MNFS from “a database that can store execution rows” toward a deterministic control plane that decides when execution state may advance.
 
-The remaining `R7-04` gap means those decisions are correct for sequential calls but are not yet proven atomic against another MNFS writer changing contract or lifecycle authority between validation and mutation.
+The remaining `R7-04` gap is now mechanically reproduced: sequential decisions are correct, but another MNFS writer can change contract or lifecycle authority after validation and before `BEGIN IMMEDIATE`.
 
 ## Operator authority chain
 
@@ -115,6 +117,7 @@ MNFS_AUTHORIZE_M01_TASK_7_RED plan=1.0.1 microdesign=0.6.1 task6=b1d7f0d4b2c5a44
 MNFS_AUTHORIZE_M01_TASK_7_GREEN plan=1.0.1 microdesign=0.6.1 red=2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda
 MNFS_AUTHORIZE_M01_TASK_7_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=656d9a431957b74b9018020b829621f5a07a53eb blockers=R7-01,R7-02,R7-03
 MNFS_AUTHORIZE_M01_TASK_7_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=f976f254677c14a13371769269914e86cf96b539 blockers=R7-01,R7-02,R7-03
+MNFS_AUTHORIZE_M01_TASK_7_ATOMIC_AUTHORITY_RED plan=1.0.1 microdesign=0.6.1 green=5795fc5bf98677bec532484d3ec8c0917b83ca08 blocker=R7-04
 ```
 
 ## Completed implementation summary
@@ -220,15 +223,6 @@ Correction tests:          0/4 expected failure
 
 ### Corrective GREEN
 
-Implemented only:
-
-- ACTIVE Track fences for Worker Run creation and replacement;
-- exact Track/Attempt/Run contract-lineage checks;
-- preservation of `processIdentity` and `processStartedAt` during terminalization;
-- latest-approved-contract fences for replacement Run and Attempt supersession.
-
-Evidence:
-
 ```text
 Correction GREEN head:    5795fc5bf98677bec532484d3ec8c0917b83ca08
 Synthetic merge:          e25fc188844e2209eb8521b95ff725115027fe24
@@ -241,49 +235,53 @@ TC-01 tests:               78/78 PASS
 Documentation validation: PASS — 93 canonical IDs
 ```
 
-Scope review:
-
-```text
-src/services/execution-service.ts  +18 / -1
-other product files                unchanged
-Task 8 adapters                    absent
-schema/migrations                  unchanged
-Treehouse/Pi behavior              unchanged
-```
-
 `R7-01`, `R7-02` and `R7-03` are closed.
 
-## Task 7 post-correction review
+## Task 7 atomic-authority RED
 
-### R7-04 — authority and lifecycle guards are outside the write transaction
-
-Current service flow is:
+Created only:
 
 ```text
-read latest approved contract / Track / Attempt / Run
-→ validate outside a transaction
-→ later begin SqliteExecutionStore.runAtomic
-→ mutate rows and append Events
+tests/services/execution-service-atomic-authority.test.ts
 ```
 
-A second MNFS process can commit a Replan, Track abandonment or lifecycle change between the read and `BEGIN IMMEDIATE`. The original operation can then write from a stale semantic snapshot.
+The tests open two independent `SqliteStore` connections to the same test database. A deterministic wrapper commits the competing writer immediately after the primary service performs its external validation and immediately before the primary `runAtomic` begins.
 
-Required proof:
+The four tests prove:
 
-- controlled interleaving demonstrates the stale-authority window;
-- latest approved contract and every mutable Track/Attempt/Run dependency are reloaded and validated inside the same `BEGIN IMMEDIATE` transaction that applies the mutation;
-- expected versions fence every mutable semantic dependency;
-- Git, filesystem, Treehouse and process observations remain outside the domain transaction;
-- stale authority changes nothing and appends no Event.
+1. Track opening can continue after an interleaved approved Replan;
+2. Worker Run opening can continue after an interleaved Track abandonment;
+3. Worker Run replacement can continue after an interleaved approved Replan;
+4. Attempt supersession can continue after an interleaved Track abandonment.
 
-Classification:
+Evidence:
 
 ```text
-Critical:  0
-Important: 1 — R7-04
-Minor:     0
-Replan:    not required
+Atomic RED head:          062f1be67dd86c4ad70c311a302eea4f68e95c21
+Synthetic merge:          0115d73641aebf76e1c34e23df7f5f350cf2264c
+Workflow/job:              30973072545 / 92201364051
+TypeScript:                PASS
+Prior product tests:       159/159 PASS
+Atomic-authority tests:    0/4 expected failure
+Product total:             159 PASS / 4 FAIL
 ```
+
+All four failures are `Missing expected exception`. The competing writer commits successfully, then the primary service enters its transaction and mutates from the stale pre-transaction snapshot.
+
+No production file changed in the atomic-authority RED.
+
+## R7-04 required GREEN behavior
+
+The future correction must ensure:
+
+- Git, filesystem, process and Treehouse observations remain outside the database transaction;
+- `BEGIN IMMEDIATE` starts before loading mutable semantic authority;
+- latest approved contract and Track/Attempt/Run dependencies are reloaded inside that transaction;
+- expected versions fence mutable dependencies;
+- stale authority changes no execution row, consumes no durable identity and appends no execution Event;
+- no second SQLite transaction authority is introduced.
+
+No Replan is required; this is an implementation gap against the accepted atomic authority design.
 
 ## Frozen boundaries
 
@@ -308,7 +306,8 @@ Task 7 primary RED:                OBSERVED / ACCEPTABLE
 Task 7 functional GREEN:           VERIFIED
 Task 7 first corrective RED:       OBSERVED / ACCEPTABLE
 Task 7 first corrective GREEN:     VERIFIED
-Task 7 atomic-authority RED:       NOT AUTHORIZED
+Task 7 atomic-authority RED:       OBSERVED / ACCEPTABLE
+Task 7 atomic-authority GREEN:     NOT AUTHORIZED
 Task 7 accepted:                   NO
 Task 8 and later:                  NOT AUTHORIZED
 Real Treehouse execution:          NOT AUTHORIZED
@@ -321,4 +320,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 7 atomic-authority RED only**, bound to corrective GREEN head `5795fc5bf98677bec532484d3ec8c0917b83ca08` and finding `R7-04`.
+Request or provide an explicit continuation for **Task 7 atomic-authority GREEN only**, bound to atomic RED head `062f1be67dd86c4ad70c311a302eea4f68e95c21` and blocker `R7-04`.

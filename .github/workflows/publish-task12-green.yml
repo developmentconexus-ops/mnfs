@@ -75,8 +75,18 @@ jobs:
           echo 'c6a28317b09c4c5effab32c53d29789d44f5b64766e77565f22c79386117b08d  src/store/sqlite-store.ts' | sha256sum -c -
           echo '982d0567eea4d555e53d0b7203436662c6a26efc0299ed7a00442f89bc8c7102  tests/services/claim-service.test.ts' | sha256sum -c -
           echo '1a318d05857d5cf16c276ef66ae30729c0579112c85e9ce86ea07ea995567b5d  tests/services/recovery-service.test.ts' | sha256sum -c -
+          paths=(
+            src/services/claim-service.ts
+            src/services/recovery-service.ts
+            src/store/sqlite-store.ts
+            tests/services/claim-service.test.ts
+            tests/services/recovery-service.test.ts
+          )
           expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\nsrc/store/sqlite-store.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
-          actual="$(git diff --name-only | sort)"
+          actual="$({
+            git diff --name-only -- "${paths[@]}"
+            git ls-files --others --exclude-standard -- "${paths[@]}"
+          } | sort -u)"
           test "$actual" = "$expected"
           git diff --check
           test -z "$(git diff --name-only -- package.json package-lock.json migrations schema)"

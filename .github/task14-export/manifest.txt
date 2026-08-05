@@ -1,0 +1,7 @@
+archive.sha256 65
+archive.size 7
+chunk-000 500000
+chunk-001 500000
+chunk-002 292208
+chunk-count 2
+manifest.txt 0

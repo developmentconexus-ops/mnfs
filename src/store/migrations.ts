@@ -110,6 +110,14 @@ function applyMigration4(database: DatabaseSync): void {
     ALTER TABLE events_v4 RENAME TO events;
     CREATE INDEX events_mission_seq_idx ON events (mission_id, seq);
 
+    CREATE TABLE entity_sequences (
+      kind TEXT PRIMARY KEY CHECK (kind IN ('WRITE_TRACK', 'LEASE')),
+      next_value INTEGER NOT NULL CHECK (next_value > 0)
+    );
+
+    INSERT INTO entity_sequences (kind, next_value)
+    VALUES ('WRITE_TRACK', 1), ('LEASE', 1);
+
     CREATE TABLE write_tracks (
       id TEXT PRIMARY KEY,
       mission_id TEXT NOT NULL REFERENCES missions(id),

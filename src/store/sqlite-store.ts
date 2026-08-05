@@ -511,15 +511,15 @@ export class SqliteExecutionStore extends ExecutionStore {
         }
       };
       const session: ExecutionAtomicSession = Object.freeze({
-        allocateWriteTrack: (input) => {
+        allocateWriteTrack: (input: AllocateWriteTrackInput) => {
           requireActive();
           return this.#allocateWriteTrack(input);
         },
-        allocateAttempt: (input) => {
+        allocateAttempt: (input: AllocateAttemptInput) => {
           requireActive();
           return this.#allocateAttempt(input);
         },
-        appendEvent: (input) => {
+        appendEvent: (input: AppendEventInput) => {
           requireActive();
           this.#events.append(input);
         },

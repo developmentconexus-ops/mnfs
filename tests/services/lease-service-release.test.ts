@@ -385,6 +385,12 @@ async function withHarness(
   await mkdir(sourcePath, { recursive: true });
   const store = SqliteStore.open(databasePath);
   try {
+    store.openMission({
+      missionId: 'MIS-002',
+      eventId: 'EVT-MIS-002-OPEN',
+      goal: 'Task 11 release fixture',
+      openedAt: OCCURRED_AT,
+    });
     const track = store.execution.allocateWriteTrack({
       missionId: 'MIS-002',
       milestoneQualifiedId: 'MIS-002/M01',
@@ -652,6 +658,52 @@ test('blocks a competing caller while the exact release action owner remains ali
   });
 });
 
+
+test('blocks a same-owner release retry while its unstarted action claim remains live', async () => {
+  const module = await loadLeaseService();
+  await withHarness('release-same-owner-live', async (harness) => {
+    harness.actions.mode = 'FAIL_BEFORE_START';
+    const service = serviceFor(module, harness, { owner: OWNER_ONE });
+    await assert.rejects(async () => await service.release(releaseInput(harness.lease)));
+    const pending = latestLease(harness.store, harness.track);
+
+    await expectCode('LEASE_OPERATION_IN_PROGRESS', async () => await service.release(releaseInput(
+      pending,
+      { expectedLeaseVersion: harness.lease.version },
+    )));
+    assert.equal(harness.actions.launches.length, 1);
+  });
+});
+
+test('rejects a release action claim when Track authority changes after physical observation', async () => {
+  const module = await loadLeaseService();
+  await withHarness('release-atomic-track-fence', async (harness) => {
+    const service = serviceFor(module, harness);
+    const observe = harness.physical.observe.bind(harness.physical);
+    let observationCount = 0;
+    harness.physical.observe = async (input) => {
+      const result = await observe(input);
+      observationCount += 1;
+      if (observationCount === 2) {
+        const currentTrack = harness.store.execution.getWriteTrack(harness.track.id);
+        assert.notEqual(currentTrack, undefined);
+        harness.store.execution.setWriteTrackStatus({
+          id: harness.track.id,
+          expectedVersion: (currentTrack as WriteTrack).version,
+          status: 'ABANDONED',
+          updatedAt: OCCURRED_AT,
+        });
+      }
+      return result;
+    };
+
+    await expectCode('LEASE_CONFLICT', async () => await service.release(releaseInput(harness.lease)));
+    const pending = harness.store.execution.getLease(harness.lease.id);
+    assert.equal(pending?.actionToken, undefined);
+    assert.equal(harness.actions.launches.length, 0);
+  });
+});
+
 test('retries a STARTED release only under the exact same fence after helper absence', async () => {
   const module = await loadLeaseService();
   await withHarness('release-started-retry', async (harness) => {
@@ -708,6 +760,28 @@ test('classifies a missing or unmanaged former worktree as DIVERGED instead of R
     assert.equal(latestLease(harness.store, harness.track).status, 'DIVERGED');
     assert.equal(harness.actions.launches.length, 0);
     assert.equal(eventCount(harness.databasePath, 'LEASE_DIVERGED'), 1);
+  });
+});
+
+
+test('classifies split external identity evidence as DIVERGED instead of selecting one fence', async () => {
+  const module = await loadLeaseService();
+  await withHarness('split-identity', async (harness) => {
+    const exact = harness.physical.current.candidates[0] as PhysicalLeaseCandidate;
+    harness.physical.current = {
+      source: { ...harness.physical.current.source },
+      candidates: [
+        { ...exact, path: `${WORKTREE_PATH}-other` },
+        { ...exact, leaseId: 'different-external-id', holder: 'different-holder' },
+      ],
+    };
+    const service = serviceFor(module, harness);
+
+    await expectCode('RECOVERY_DIVERGENCE', async () => await service.release(
+      releaseInput(harness.lease),
+    ));
+    assert.equal(latestLease(harness.store, harness.track).status, 'DIVERGED');
+    assert.equal(harness.actions.launches.length, 0);
   });
 });
 

@@ -362,6 +362,12 @@ async function withHarness(
   mkdirSync(sourcePath, { recursive: true });
   const store = SqliteStore.open(databasePath);
   try {
+    store.openMission({
+      missionId: 'MIS-002',
+      eventId: 'EVT-MIS-002-OPEN',
+      goal: 'Task 11 grant fixture',
+      openedAt: OCCURRED_AT,
+    });
     const track = store.execution.allocateWriteTrack({
       missionId: 'MIS-002',
       milestoneQualifiedId: 'MIS-002/M01',
@@ -646,6 +652,72 @@ test('marks non-bijective external Lease matches DIVERGED and performs no acquis
     assert.equal(diverged?.status, 'DIVERGED');
     assert.equal(harness.actions.launches.length, 0);
     assert.equal(eventCount(harness.databasePath, 'LEASE_DIVERGED'), 1);
+  });
+});
+
+
+test('blocks a same-owner grant retry while its unstarted action claim remains live', async () => {
+  const module = await loadLeaseService();
+  await withHarness('same-owner-live', async (harness) => {
+    harness.actions.mode = 'FAIL_BEFORE_START';
+    const service = serviceFor(module, harness, { owner: OWNER_ONE });
+    await assert.rejects(async () => await service.grant(grantInput()));
+
+    await expectCode('LEASE_OPERATION_IN_PROGRESS', async () => await service.grant(grantInput()));
+    assert.equal(harness.actions.launches.length, 1);
+  });
+});
+
+test('rejects a grant action claim when Track authority changes after physical observation', async () => {
+  const module = await loadLeaseService();
+  await withHarness('atomic-track-fence', async (harness) => {
+    const service = serviceFor(module, harness);
+    await createIntentOnly(service, harness, 'task11_atomic_track_fence');
+    harness.physical.calls.length = 0;
+    const observe = harness.physical.observe.bind(harness.physical);
+    let observationCount = 0;
+    harness.physical.observe = async (input) => {
+      const result = await observe(input);
+      observationCount += 1;
+      if (observationCount === 2) {
+        const currentTrack = harness.store.execution.getWriteTrack(harness.track.id);
+        assert.notEqual(currentTrack, undefined);
+        harness.store.execution.setWriteTrackStatus({
+          id: harness.track.id,
+          expectedVersion: (currentTrack as WriteTrack).version,
+          status: 'ABANDONED',
+          updatedAt: OCCURRED_AT,
+        });
+      }
+      return result;
+    };
+
+    await expectCode('LEASE_CONFLICT', async () => await service.grant(grantInput()));
+    const requested = harness.store.execution.getCurrentLease(harness.track.id);
+    assert.equal(requested?.actionToken, undefined);
+    assert.equal(harness.actions.launches.length, 0);
+  });
+});
+
+test('preserves the first durable helper identity when later action evidence conflicts', async () => {
+  const module = await loadLeaseService();
+  await withHarness('helper-identity-conflict', async (harness) => {
+    harness.actions.mode = 'STARTED_THEN_THROW';
+    const service = serviceFor(module, harness);
+    await expectCode('LEASE_ACTION_INCONCLUSIVE', async () => await service.grant(grantInput()));
+    const token = harness.actions.launches[0]?.actionToken;
+    assert.notEqual(token, undefined);
+    harness.actions.observations.set(token as string, {
+      state: 'STARTED',
+      runner: OWNER_TWO,
+      startedRef: `/home/mnfs/actions/${token}/different-started.json`,
+    });
+
+    await expectCode('LEASE_ACTION_INCONCLUSIVE', async () => await service.grant(grantInput()));
+    const requested = harness.store.execution.getCurrentLease(harness.track.id);
+    assert.deepEqual(requested?.actionRunner, RUNNER);
+    assert.equal(requested?.actionStartedRef, `/home/mnfs/actions/${token}/started.json`);
+    assert.equal(harness.actions.launches.length, 1);
   });
 });
 

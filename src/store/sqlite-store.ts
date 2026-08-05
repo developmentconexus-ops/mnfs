@@ -29,6 +29,9 @@ import type {
   AttemptStatus,
   Claim,
   Lease,
+  LeaseActionKind,
+  LeaseActionPhase,
+  LeaseStatus,
   ProcessIdentity,
   SourceStatus,
   WorkerRun,
@@ -60,10 +63,41 @@ export interface OpenNextMissionInput {
   readonly openedAt: string;
 }
 
+export interface LeaseAllocationPreview {
+  readonly id: string;
+  readonly generation: number;
+}
+
+export interface SetLeaseLifecycleInput {
+  readonly id: string;
+  readonly expectedVersion: number;
+  readonly status: LeaseStatus;
+  readonly releaseIdempotencyKey?: string | null;
+  readonly releaseInputHash?: string | null;
+  readonly externalLeaseId?: string | null;
+  readonly worktreePath?: string | null;
+  readonly externalLeasedAt?: string | null;
+  readonly actionKind?: LeaseActionKind | null;
+  readonly actionToken?: string | null;
+  readonly actionPhase?: LeaseActionPhase | null;
+  readonly actionOwner?: ProcessIdentity | null;
+  readonly actionRunner?: ProcessIdentity | null;
+  readonly actionStartedRef?: string | null;
+  readonly actionResultRef?: string | null;
+  readonly releaseRequestedAt?: string | null;
+  readonly releaseObservedAt?: string | null;
+  readonly lastObservedAt?: string | null;
+  readonly lastErrorCode?: string | null;
+  readonly lastErrorRef?: string | null;
+  readonly updatedAt: string;
+}
+
 export interface ExecutionAtomicSession {
   allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack;
   allocateAttempt(input: AllocateAttemptInput): Attempt;
   allocateWorkerRun(input: AllocateWorkerRunInput): WorkerRun;
+  previewLeaseAllocation(writeTrackId: string): LeaseAllocationPreview;
+  allocateLease(input: AllocateLeaseInput): Lease;
   setWriteTrackStatus(input: {
     readonly id: string;
     readonly expectedVersion: number;
@@ -88,6 +122,7 @@ export interface ExecutionAtomicSession {
     readonly exitCode?: number;
     readonly updatedAt: string;
   }): WorkerRun;
+  setLeaseLifecycle(input: SetLeaseLifecycleInput): Lease;
   appendEvent(input: AppendEventInput): void;
 }
 
@@ -610,6 +645,26 @@ export class SqliteExecutionStore extends ExecutionStore {
     return row === undefined ? undefined : super.getLease(String(row.id));
   }
 
+  getLeaseByGrantIdempotencyKey(idempotencyKey: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE grant_idempotency_key = ?
+      LIMIT 1
+    `).get(idempotencyKey) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
+  getLeaseByReleaseIdempotencyKey(idempotencyKey: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE release_idempotency_key = ?
+      LIMIT 1
+    `).get(idempotencyKey) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
   getCurrentClaim(attemptId: string): Claim | undefined {
     const row = this.#database.prepare(`
       SELECT id
@@ -618,6 +673,29 @@ export class SqliteExecutionStore extends ExecutionStore {
       LIMIT 1
     `).get(attemptId) as { readonly id?: unknown } | undefined;
     return row === undefined ? undefined : super.getClaim(String(row.id));
+  }
+
+  #previewLeaseAllocation(writeTrackIdInput: string): LeaseAllocationPreview {
+    const writeTrackId = requireWriteTrackId(writeTrackIdInput);
+    const sequenceRow = this.#database.prepare(`
+      SELECT next_value
+      FROM entity_sequences
+      WHERE kind = 'LEASE'
+    `).get() as { readonly next_value?: unknown } | undefined;
+    const nextIdentity = Number(sequenceRow?.next_value);
+    if (!Number.isSafeInteger(nextIdentity) || nextIdentity <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', 'Lease identity sequence is missing or invalid.');
+    }
+    const generationRow = this.#database.prepare(`
+      SELECT COALESCE(MAX(generation), 0) + 1 AS next_value
+      FROM leases
+      WHERE write_track_id = ?
+    `).get(writeTrackId) as { readonly next_value?: unknown } | undefined;
+    const generation = Number(generationRow?.next_value ?? 1);
+    if (!Number.isSafeInteger(generation) || generation <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', 'Could not preview the next Lease generation.');
+    }
+    return { id: formatLeaseId(nextIdentity), generation };
   }
 
   #allocateLease(input: AllocateLeaseInput): Lease {
@@ -702,6 +780,64 @@ export class SqliteExecutionStore extends ExecutionStore {
     return this.#transactions.run(() => this.#allocateLease(input));
   }
 
+  #setLeaseLifecycle(input: SetLeaseLifecycleInput): Lease {
+    const owner = input.actionOwner;
+    const runner = input.actionRunner;
+    let result;
+    try {
+      result = this.#database.prepare(`
+        UPDATE leases
+        SET status = ?,
+            release_idempotency_key = ?, release_input_hash = ?,
+            external_lease_id = ?, worktree_path = ?, external_leased_at = ?,
+            action_kind = ?, action_token = ?, action_phase = ?,
+            action_owner_boot_id = ?, action_owner_pid = ?, action_owner_start_ticks = ?,
+            action_runner_boot_id = ?, action_runner_pid = ?, action_runner_start_ticks = ?,
+            action_started_ref = ?, action_result_ref = ?,
+            release_requested_at = ?, release_observed_at = ?, last_observed_at = ?,
+            last_error_code = ?, last_error_ref = ?,
+            version = version + 1, updated_at = ?
+        WHERE id = ? AND version = ?
+      `).run(
+        input.status,
+        input.releaseIdempotencyKey ?? null,
+        input.releaseInputHash ?? null,
+        input.externalLeaseId ?? null,
+        input.worktreePath ?? null,
+        input.externalLeasedAt ?? null,
+        input.actionKind ?? null,
+        input.actionToken ?? null,
+        input.actionPhase ?? null,
+        owner?.bootId ?? null,
+        owner?.pid ?? null,
+        owner?.startTicks ?? null,
+        runner?.bootId ?? null,
+        runner?.pid ?? null,
+        runner?.startTicks ?? null,
+        input.actionStartedRef ?? null,
+        input.actionResultRef ?? null,
+        input.releaseRequestedAt ?? null,
+        input.releaseObservedAt ?? null,
+        input.lastObservedAt ?? null,
+        input.lastErrorCode ?? null,
+        input.lastErrorRef ?? null,
+        input.updatedAt,
+        input.id,
+        input.expectedVersion,
+      );
+    } catch (error) {
+      translateExecutionConstraint(error, 'LEASE_CONFLICT', 'Could not update the Lease lifecycle.');
+    }
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Lease version for ${input.id}.`);
+    }
+    const value = super.getLease(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Lease ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
   runAtomic<T>(operation: (session: ExecutionAtomicSession) => T): T {
     return this.#transactions.run(() => {
       let active = true;
@@ -723,6 +859,14 @@ export class SqliteExecutionStore extends ExecutionStore {
           requireActive();
           return this.#allocateWorkerRun(input);
         },
+        previewLeaseAllocation: (writeTrackId: string) => {
+          requireActive();
+          return this.#previewLeaseAllocation(writeTrackId);
+        },
+        allocateLease: (input: AllocateLeaseInput) => {
+          requireActive();
+          return this.#allocateLease(input);
+        },
         setWriteTrackStatus: (
           input: Parameters<ExecutionAtomicSession['setWriteTrackStatus']>[0],
         ) => {
@@ -740,6 +884,10 @@ export class SqliteExecutionStore extends ExecutionStore {
         ) => {
           requireActive();
           return this.#setWorkerRunState(input);
+        },
+        setLeaseLifecycle: (input: SetLeaseLifecycleInput) => {
+          requireActive();
+          return this.#setLeaseLifecycle(input);
         },
         appendEvent: (input: AppendEventInput) => {
           requireActive();

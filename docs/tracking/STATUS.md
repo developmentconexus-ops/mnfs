@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.48
+version: 1.8.49
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 14 deterministic proof awaits explicit authority
+- **Current enabler:** Issue #16 — Task 14 canonical WSL2 preflight awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -60,8 +60,9 @@ Task 12 RED:                       OBSERVED / ACCEPTABLE
 Task 12 GREEN:                     VERIFIED / REVIEWED
 Task 13 RED:                       OBSERVED / ACCEPTABLE
 Task 13 GREEN:                     VERIFIED / REVIEWED
-Task 14:                           NOT AUTHORIZED
-Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
+Task 14 deterministic proof:      VERIFIED / REVIEWED
+Task 14 WSL2 preflight:           NOT AUTHORIZED
+Real Treehouse execution:         PROHIBITED until the explicit real-proof gate
 Pi Worker dispatch:               PROHIBITED
 M01 acceptance:                    NOT AUTHORIZED
 Automatic merge:                  NOT AUTHORIZED
@@ -84,6 +85,7 @@ Task 10  trusted Lease action helper          2b80692a10ad162bb1c5874ff40f0bc19c
 Task 11  fenced Lease lifecycle service       11fe71df23f697b021bd37133854152c033311ec
 Task 12  Claim OPEN and read-only Recovery     8c6fd9afa2cc7f707f96659b9efa73230579471a
 Task 13  execution CLI and composition          5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864
+Task 14  deterministic proof + R14-01           680b2e55d01f76da35922675c18ef997c56403d3
 ```
 
 ## Task 10 accepted boundary
@@ -635,6 +637,65 @@ Scope review:
 - no reset, clean, force, destroy, prune or automatic Recovery repair;
 - Task 14, real WSL2 proof, M01 acceptance and merge remain separately gated.
 
+## Task 14 deterministic proof and R14-01 correction
+
+Operator authorizations:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_14_DETERMINISTIC plan=1.0.1 microdesign=0.6.1 task13=5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864
+MNFS_AUTHORIZE_M01_TASK_14_DETERMINISTIC_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=a6822409e2b860de534c5fc68e9cc1ee1afb8c4d task13=5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864 blocker=R14-01
+```
+
+Accepted heads:
+
+```text
+Deterministic tests:  a6822409e2b860de534c5fc68e9cc1ee1afb8c4d
+R14-01 correction:   680b2e55d01f76da35922675c18ef997c56403d3
+```
+
+The deterministic proof exercises production CLI composition across fresh processes, source intent and physical-before-semantic recovery, grant/release crash windows, action fencing, idempotent replay, safe abandonment, exact Scenario B Run/Lease/Claim lineage, v3→v4 migration, pre-v4 writer rollback, migration-commit rollback and the frozen M01 source scan.
+
+R14-01 proved that the production observation authority emits an explicit `REQUESTED` source candidate after an intent-only crash. Recovery now classifies semantic `REQUESTED` plus related `MISSING`/`REQUESTED` observation as `SD-01`, preserves read-only behavior and requires only `ORIGINAL_OPERATION`. Existing READY/UNKNOWN/drift paths remain independently covered and continue to classify as HEALTHY, UNKNOWN or `SD-02` as designed.
+
+Canonical verification:
+
+```text
+Publisher Run / Job:     31049211257 / 92452161053
+Independent Run / Job:   31049547485 / 92453262355
+Node:                    24.18.0
+Directed proof/recovery: 49/49 PASS
+Product:                 320/320 PASS
+AS-02:                   119/119 PASS
+TC-01:                    78/78 PASS
+Documentation:           PASS — 93 canonical IDs
+npm vulnerabilities:     0
+```
+
+Adversarial review:
+
+```text
+Critical:    0 open
+Important:   0 open
+Minor:       0 open
+Result:      ACCEPTABLE
+Replan:      not required
+```
+
+Scope review:
+
+- the deterministic test head adds only the two planned integration proof files;
+- the correction changes only `RecoveryService` classification and one fail-first regression;
+- no schema, migration, dependency, Claim state, Lease mutation or CLI command surface changed;
+- Recovery remains byte-for-byte non-mutating and exposes no helper launch or repair authority;
+- no real Treehouse command, Lease helper action or Pi Worker was executed;
+- Task 14 is not complete until canonical WSL2 preflight, real Scenario A, Evidence finalization and trusted cleanup pass.
+
+Next exact gate:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_14_WSL2_PREFLIGHT plan=1.0.1 microdesign=0.6.1 deterministic=680b2e55d01f76da35922675c18ef997c56403d3
+```
+
 ## Frozen boundaries
 
 - canonical checkout is never Treehouse cwd;
@@ -657,7 +718,8 @@ Task 12 RED:                OBSERVED / ACCEPTABLE
 Task 12 GREEN:              VERIFIED / REVIEWED
 Task 13 RED:                OBSERVED / ACCEPTABLE
 Task 13 GREEN:              VERIFIED / REVIEWED
-Task 14:                    NOT AUTHORIZED
+Task 14 deterministic:      VERIFIED / REVIEWED
+Task 14 WSL2 preflight:     NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
 Pi Worker dispatch:         PROHIBITED
 M01 acceptance:             NOT AUTHORIZED
@@ -666,4 +728,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for the deterministic portion of Task 14, bound to accepted Task 13 implementation head `5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864`. The later canonical WSL2/real-Treehouse proof, M01 acceptance, Pi dispatch and merge remain separately unauthorized.
+A separate exact Operator continuation is required for the canonical WSL2 preflight, bound to deterministic head `680b2e55d01f76da35922675c18ef997c56403d3`. The preflight is read-only and must prove the exact Linux-local checkout, Node/Git/Treehouse provenance, clean full gate and no environment drift. Real Treehouse Scenario A, M01 acceptance, Pi dispatch and merge remain separately unauthorized.

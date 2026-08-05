@@ -192,6 +192,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
   const canonicalPath = join(root, 'canonical');
   const homePath = join(root, 'runtime', 'treehouse', 'home');
   const xdgPath = join(root, 'runtime', 'treehouse', 'xdg');
+  const treehouseConfigDirectory = join(xdgPath, 'treehouse');
   const poolRoot = join(root, 'runtime', 'treehouse', 'pool');
   const hooksPath = join(root, 'runtime', 'treehouse', 'hooks');
   const leasedPath = join(poolRoot, 'slot-1', 'source');
@@ -200,7 +201,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     sourcePath,
     canonicalPath,
     homePath,
-    xdgPath,
+    treehouseConfigDirectory,
     poolRoot,
     hooksPath,
     leasedPath,
@@ -219,7 +220,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     chmodSync(path, 0o755);
   }
   writeFileSync(osRelease, `ID=ubuntu\nVERSION_ID="${UBUNTU}"\n`);
-  const configPath = join(sourcePath, 'treehouse.toml');
+  const configPath = join(treehouseConfigDirectory, 'config.toml');
   writeFileSync(configPath, canonicalTreehouseConfig(realpathSync(poolRoot)));
 
   const fixture: Fixture = {
@@ -230,7 +231,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     xdgPath: realpathSync(xdgPath),
     poolRoot: realpathSync(poolRoot),
     hooksPath: realpathSync(hooksPath),
-    configPath,
+    configPath: realpathSync(configPath),
     treehouse: realpathSync(treehouse),
     git: realpathSync(git),
     uname: realpathSync(uname),
@@ -366,7 +367,7 @@ test('R9-01 accepts accepted multiline capabilities split across stdout and stde
   });
 });
 
-test('R9-02 rejects a Treehouse config whose pool differs from the accepted Attempt pool', async () => {
+test('R9-02 rejects a Treehouse user config whose pool differs from the accepted Attempt pool', async () => {
   const module = await loadModule();
   await withFixture(async (fixture) => {
     writeFileSync(fixture.configPath, canonicalTreehouseConfig(join(fixture.root, 'other-pool')));

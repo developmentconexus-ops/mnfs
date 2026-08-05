@@ -39,14 +39,14 @@ jobs:
             --exclude='./.git' \
             --exclude='./node_modules' \
             --exclude='./dist' \
-            -czf mnfs-task14-workspace.tar.gz .
-          sha256sum mnfs-task14-workspace.tar.gz > mnfs-task14-workspace.sha256
+            -czf /tmp/mnfs-task14-workspace.tar.gz .
+          sha256sum /tmp/mnfs-task14-workspace.tar.gz > /tmp/mnfs-task14-workspace.sha256
 
       - uses: actions/upload-artifact@v4
         with:
           name: mnfs-task14-workspace-8426d1c
           path: |
-            mnfs-task14-workspace.tar.gz
-            mnfs-task14-workspace.sha256
+            /tmp/mnfs-task14-workspace.tar.gz
+            /tmp/mnfs-task14-workspace.sha256
           if-no-files-found: error
           retention-days: 1

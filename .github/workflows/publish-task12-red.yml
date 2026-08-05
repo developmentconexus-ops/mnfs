@@ -58,18 +58,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import base64
-          from pathlib import Path
-
-          source = Path('.task12-publisher/.github/task12-red-tests-v3.tar.gz.b64')
-          encoded = source.read_bytes()
-          alphabet = b'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
-          normalized = bytes(value for value in encoded if value in alphabet)
-          normalized += b'=' * (-len(normalized) % 4)
-          Path('/tmp/task12-red-tests.tar.gz').write_bytes(base64.b64decode(normalized))
-          PY
-          sha256sum /tmp/task12-red-tests.tar.gz
+          cat \
+            .task12-publisher/.github/task12-red-payload/part-00.b64 \
+            .task12-publisher/.github/task12-red-payload/part-01.b64 \
+            > /tmp/task12-red-tests.tar.gz.b64
+          test "$(wc -c < /tmp/task12-red-tests.tar.gz.b64)" -eq 11988
+          base64 -d /tmp/task12-red-tests.tar.gz.b64 > /tmp/task12-red-tests.tar.gz
           echo '72ac99d23647786bdbe2d5e9b101e3629df2c89350e772d2f32633c7ab90cd20  /tmp/task12-red-tests.tar.gz' \
             | sha256sum -c -
           tar -xzf /tmp/task12-red-tests.tar.gz -C tests/services

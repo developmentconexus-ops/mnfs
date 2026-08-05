@@ -1,0 +1,80 @@
+name: Publish Task 14 Real Scenario A Executor
+
+on:
+  push:
+    branches:
+      - automation/task14-real-scenario-a
+    paths:
+      - .github/workflows/publish-task14-real-scenario-a.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task14-real-scenario-a
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+
+      - name: Verify exact authorized publisher lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = '3adb12c42394cf0d54fb386b1b85d83c38f8903a'
+          test "$(git diff --name-only HEAD^ HEAD)" = '.github/workflows/publish-task14-real-scenario-a.yml'
+          test "$(git status --porcelain)" = ''
+
+      - name: Materialize immutable executor and verifier
+        shell: bash
+        env:
+          EXECUTOR_GZ_B64: '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'}
+          VERIFIER_GZ_B64: 'H4sICOXEc2oCA3ZlcmlmeS10YXNrMTQtcmVhbC1zY2VuYXJpby1hLnltbACtWG1X2zgW/p5focl2jkMXB78ldnKGM5uCKTlDgZOE2e023RxJlhO1tuxaNiVT+t/3yk7AJKQDnH4gtqWr594r3ZdHCByzPvqTZTxcogmWn5HpoBHDERpTJnDGEzRA/g2jRZ5kjUYi+g2E0kIu1BMhkmFBF0xWXwjpCINgjHOeiIMc4ExHzwBNlys0HZeSKc4XtUXtOc8XBTkoRdMsScIdi9vxJ7m16muSfQ6j5Ks8uC790HesXcZRo5GyLOZSgn2lfpqInIlc9hFIB43Gp4SU4xVSZWFWCKmD56gghcgL3XLahlPOyJylNTcKCTuBMFXeywPYF/o5KfJ/XTsrCYS+gsX9uy+EQpbThR6wFIaR0diBJFlepLpIAvYjLDWvg93Ktz4CI02vbdTmKQaL+kik8b0eUT9+HsdFjknEEFsdOCLLnEmERYDkUuT45g5OLlgU9RHBcnE3BvvUR7c1jWA30lmRoJSnLMQ8qs2lGRd5iLRfJUK/yqnQ0LQ2i5DGrI5DHcy62CXM7did0HYtZhFGzA6Gb48ZdmDirkc91iEhMc3QteFBTdcLzcDaBHxWjG2svQV/sdXpyiJGul4eLDxlnnGab5zA3fzzYvrxEwmz5C8mVE4tkoz/VaZVdRoYImeJSFKIAGfLn3gsS1AlbDDkt9+0y/daPVaTJC4TN+IEYiVNshxdwmdNZDWasUYdEmTQYSna0p61K9peDSZnNznAKLS2ytWZGmgxQZOAi/mhVuSh7sGK2pKMfSl4xgJY9uHBeSLUhMSXORpcTU4vRsP/DibDi3MQ096dn4xn61F/9s4wZ5PB+I+Z6cxG/uBsNj7yzwej4cVsoDX3H8e8PBuUUGbbaJs7pd4Nj0YXx/54+LYUNtrdHwhfjman/uBYCdo4IKZFHcvuOTQ0go4TEtvrEpN4ncCzqe2FXs+w8U6sY3/ij94Nz4fjyfDoDrbrGcRinU5gQBp1A2x3epbVdTvU9FjY67m003Ug3+wfmOifnA3fnk5mf/qj4cn72fh0UDrmEdPrGGHoUuq6JoO07vWsELuuZRsEeyxwPNu0XZMaXTe0gi4NGDUcEzPDxIFHnqDw+OJocjFaK7RD5lgWDRzTMQMz6FndIMAWtnGXdmDYMJlteV2TEBc2jnUp6dmuxzAhjuU6Zm+3h5OR759eXI39mf8f/+hqMnhz5q+VUoM4HdwlLg1cBuXI7ZGgCwbYXc9xA88hDu1SO6ReQJgRBrDZrukaNnGxaVg03K10dHU+ezMY+6DkU8JFa5HELOBZa28fae0ooTjS4E3mOGfqJRahVM/Hc0rb21KjpQWJuFycMSzZoOw3F9Aiy0qjbQnXpEaFECzbITJm2TWnbHt2xGgCLWq5U2CSMbZIoP0NApzmjymgEcOiSAermsiCPgpxJB/BKnNZZe928sL3+Opscng5GI8fLPxYL3jQAK9xVDDExV0t6W9o4eFKRiS5klNVaVOmrEWYS4bGS6AMsX/D81aolTxEzO/L1Lqc99G3EvP7w3IG9hAeBNAQDtG3TWcz6NjQ+q8ZCljEyuMDTqNNSev3fhaPl4LeZjFETvlWiIiLz+p1b0pupySLp/KfehZOyfYuli1lxQjWqOXYVL7uw1+eFQwglACoOuERuy2Bf4e5aWsb75KjCBfAGlf2yRR/FbCytujD/6bi4+spSXlpXdVV1sMp38Z8y/PTgiBFX2qezxfgFSCn2S3sNFiJU36bsTS5XTPGvcccXjNYimKWzdkajOcVWjkIMNBj1QOa6W0ZkptY3zciKcKERfuqf0FYCxUqd+fZ5hAUsrX3SGxlrC0ZzuiitVq4X0bY3hND7Fup9Tuogsh6GE3/QGNVNYCtYDFXYXiXeghn82sU4yWcOocalIgIyKGQHNhNvmA1nlgRVJSsKwYiBY8ClrUbD5xQFrcpmJC3mh+0OctVidL1SJWK2qu+SNRiGOEiLfJ29VnOf5Jwqh+be+iXQ2Ru+r7ltzaHa0leuQHELQWTZZmfheBfCvaAVmyZlwHZzsSdESpUctgZRV9KU3i4spYHd0IAAEeDo7L4DYOHco969XRfMlbCPNmb+4jJNAjXMr1uy9+qCBSrZ1V0qhqwSq18HQFaFWX7Cmy49/c2Ql1hNK9FEDA7yqRcZfpj4QeWalVd0tZlE0GWaJAUFAiwqirarnq6bUDIb+DUGFo1hzVjBoq8Vn2/+vL9DrZ9f3Vd3WuRpBDaP49cQw2paoquigfcFLjUQQ+T6qr1VGKHFGWrgbKbFPaeBYevnkeup+IF9+f6fQCSv8DRYfNVS/kV8DAEj9SG6mXBeKo/7XbJQeGKBUV+r/mA8UPxab6q9DSh6TVfrZ1tbuzqSnt183qe5s1geKNKWHnJgrO9vwlLFoW6sujnhQPcxBHlGwNKaVlF1QUTmqnYumA+7yILKGvL4V11P9jGt8PJ6dWb2b8vRn+MLwdHfnPrvpszhg7yOH0IvUYC5jmvnwDAIv3kC9C3x9nW2D87mU388Ypw/R3yxomMmK52RbUemsQpsBt4wSIRHOgv0J1c/UtHQKeClj2HlvZzT0iprvJi17ZUszv3RLklkW0Z2rOXpli+cGWl1DR7L1T6opWVUtd7oc6XLDxOaBFDklRlG1gzD6pXhQiUutWza7EyPJZPVfHLSokPSlRUoA+m3vv4wYCf10/FUOGDi4CrzCufwAiuWXQItbbxf++FIKx5FQAA'
+        run: |
+          set -euo pipefail
+          mkdir -p .github/real-proof .github/workflows
+          printf '%s' "$EXECUTOR_GZ_B64" | base64 --decode | gzip --decompress > .github/real-proof/task14-real-scenario-a.mjs
+          printf '%s' "$VERIFIER_GZ_B64" | base64 --decode | gzip --decompress > .github/workflows/verify-task14-real-scenario-a.yml
+          chmod 0644 .github/real-proof/task14-real-scenario-a.mjs .github/workflows/verify-task14-real-scenario-a.yml
+          printf '%s  %s
+' \
+            'e254c4ae6a7be7535f372e2beb15a7538e03d1a68c8e5bfb11f73fb1c178f1d2' \
+            .github/real-proof/task14-real-scenario-a.mjs \
+            | sha256sum --check --strict
+          printf '%s  %s
+' \
+            '463557a9e731811de451f9b0980d51baac23e8fe2c16e10dfe4a07f694d2e782' \
+            .github/workflows/verify-task14-real-scenario-a.yml \
+            | sha256sum --check --strict
+          node --check .github/real-proof/task14-real-scenario-a.mjs
+          git diff --check
+
+      - name: Publish one bounded automation commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin automation/task14-real-scenario-a
+          test "$(git rev-parse origin/automation/task14-real-scenario-a)" = "$(git rev-parse HEAD)"
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git rm .github/workflows/publish-task14-real-scenario-a.yml
+          git add .github/real-proof/task14-real-scenario-a.mjs .github/workflows/verify-task14-real-scenario-a.yml
+          expected=$'.github/real-proof/task14-real-scenario-a.mjs
+.github/workflows/publish-task14-real-scenario-a.yml
+.github/workflows/verify-task14-real-scenario-a.yml'
+          test "$(git diff --cached --name-only | sort)" = "$expected"
+          git diff --cached --check
+          git commit -m 'automation: add Task 14 real Scenario A executor'
+          test "$(git diff --name-only 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD | sort)" = $'.github/real-proof/task14-real-scenario-a.mjs
+.github/workflows/verify-task14-real-scenario-a.yml'
+          git push origin HEAD:automation/task14-real-scenario-a
+          echo "Published executor: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

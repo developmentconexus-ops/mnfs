@@ -1,0 +1,44 @@
+name: Upload Task 14 Exact Dependencies
+
+on:
+  push:
+    branches:
+      - automation/task14-deterministic-export
+    paths:
+      - .github/workflows/upload-task14-node-modules.yml
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8426d1cea089bb3bc27aa6a1544ba289a1b5965e
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - name: Install exact dependency graph
+        run: npm ci
+      - name: Package exact dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = 'v24.18.0'
+          npm ls --all > /tmp/npm-ls.txt
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -czf /tmp/mnfs-task14-node-modules.tar.gz node_modules
+          sha256sum /tmp/mnfs-task14-node-modules.tar.gz > /tmp/mnfs-task14-node-modules.sha256
+          sha256sum package-lock.json > /tmp/package-lock.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mnfs-task14-node-modules
+          path: |
+            /tmp/mnfs-task14-node-modules.tar.gz
+            /tmp/mnfs-task14-node-modules.sha256
+            /tmp/package-lock.sha256
+            /tmp/npm-ls.txt
+          if-no-files-found: error
+          retention-days: 1

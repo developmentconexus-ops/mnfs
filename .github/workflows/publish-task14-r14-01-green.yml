@@ -40,7 +40,7 @@ jobs:
           test "$(git status --porcelain)" = ''
           printf '%s  %s\n' \
             'e6dcbaf204efab628825f5a3b4d4ab9f3ac9f0b302a5533b19d23421537b4339' src/services/recovery-service.ts \
-            '9633d2e29b5f80b3e250dc61b9287b356bc92bfa' tests/services/recovery-service.test.ts \
+            '431d73e372a6c8d38781400ce895ea4dfed9be311f2024e32689de378d78cacd' tests/services/recovery-service.test.ts \
             '159900b3490bb0012af7ddbc1e07269a9da459f3705b45259e6b6a85d428affe' tests/integration/m01-composition.test.ts \
             '729d44dbda2139d67a5f804100532affdad98ed1ac6ab28dfd3e966b7e14bfdf' tests/integration/m01-fresh-process.test.ts \
             | sha256sum --check --strict
@@ -50,29 +50,25 @@ jobs:
         run: |
           set -euo pipefail
           cat > /tmp/r14-01.patch <<'PATCH'
-          diff --git a/src/services/recovery-service.ts b/src/services/recovery-service.ts
-          index 1ee0bc0..033a04e 100644
           --- a/src/services/recovery-service.ts
           +++ b/src/services/recovery-service.ts
-          @@ -229,7 +229,12 @@ function classifySource(
+          @@ -229,7 +229,12 @@
                ));
              }
              if (attempt.sourceStatus === 'REQUESTED') {
           -    if (related.length === 0 || related.every((candidate) => candidate.status === 'MISSING')) {
           +    if (
           +      related.length === 0
-          +      || related.every((candidate) => (
+          +      || related.every((candidate) =>
           +        candidate.status === 'MISSING' || candidate.status === 'REQUESTED'
-          +      ))
+          +      )
           +    ) {
                  addFinding(findings, finding('SD-01', attempt.id, {
                    safeActions: ['preserve the Attempt intent and retry only the original source operation'],
                    requiredAuthority: 'ORIGINAL_OPERATION',
-          diff --git a/tests/services/recovery-service.test.ts b/tests/services/recovery-service.test.ts
-          index 9633d2e..ff80ffa 100644
           --- a/tests/services/recovery-service.test.ts
           +++ b/tests/services/recovery-service.test.ts
-          @@ -551,6 +551,25 @@ test('classifies REQUESTED source with no final source as SD-01', async () => {
+          @@ -551,6 +551,25 @@
              });
            });
            
@@ -109,7 +105,7 @@ jobs:
           git diff --check
           printf '%s  %s\n' \
             '42ca204225b94aa9359a67046bf3486eb0dd9eb0e778bb9cd1a53cf2d6f7f1f1' src/services/recovery-service.ts \
-            '431d73e372a6c8d38781400ce895ea4dfed9be311f2024e32689de378d78cacd' tests/services/recovery-service.test.ts \
+            '8ddc4ff5a4ab1f936c60d3f2012cef0e87e9b9e8bf33d12f736623fe808f71c7' tests/services/recovery-service.test.ts \
             | sha256sum --check --strict
 
       - name: Install exact dependencies

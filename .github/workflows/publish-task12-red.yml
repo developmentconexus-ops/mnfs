@@ -20,28 +20,23 @@ jobs:
           ref: automation/task12-red-publish
           fetch-depth: 1
 
-      - name: Measure exact payload fragments
+      - name: Locate the extra payload byte
         shell: bash
         run: |
           set -euo pipefail
-          wc -c \
-            .github/task12-red-payload/part-00.b64 \
-            .github/task12-red-payload/part-01.b64
-          sha256sum \
-            .github/task12-red-payload/part-00.b64 \
-            .github/task12-red-payload/part-01.b64
+          head -c 8000 .github/task12-red-payload/part-00.b64 > /tmp/part-00-first-8000.b64
+          sha256sum /tmp/part-00-first-8000.b64
+          echo '4e7f731017ad3c6d7c1b8b19624965a4ebf32586232b0a0fe9db036d3f800b69  /tmp/part-00-first-8000.b64' \
+            | sha256sum -c -
+          echo 'tail-bytes:'
+          tail -c 8 .github/task12-red-payload/part-00.b64 | od -An -t x1
           cat \
-            .github/task12-red-payload/part-00.b64 \
+            /tmp/part-00-first-8000.b64 \
             .github/task12-red-payload/part-01.b64 \
             > /tmp/task12-red-tests.tar.gz.b64
-          wc -c /tmp/task12-red-tests.tar.gz.b64
-          sha256sum /tmp/task12-red-tests.tar.gz.b64
-          set +e
+          echo 'fd06e44fb01b99e5a65c085d060a310d60acc91e1c47832ac00a4fa6ca8134d7  /tmp/task12-red-tests.tar.gz.b64' \
+            | sha256sum -c -
           base64 -d /tmp/task12-red-tests.tar.gz.b64 > /tmp/task12-red-tests.tar.gz
-          status=$?
-          set -e
-          echo "decode_status=$status"
-          if [ "$status" -eq 0 ]; then
-            sha256sum /tmp/task12-red-tests.tar.gz
-            tar -tzf /tmp/task12-red-tests.tar.gz
-          fi
+          echo '72ac99d23647786bdbe2d5e9b101e3629df2c89350e772d2f32633c7ab90cd20  /tmp/task12-red-tests.tar.gz' \
+            | sha256sum -c -
+          tar -tzf /tmp/task12-red-tests.tar.gz

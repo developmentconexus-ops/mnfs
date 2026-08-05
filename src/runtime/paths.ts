@@ -1,50 +1,13 @@
-import { homedir } from 'node:os';
-import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 import { MnfsError } from '../domain/errors.js';
 import { requireAttemptId, requireWriteTrackId } from '../execution/ids.js';
 
-const REPOSITORY_ID_PATTERN = /^repo-[0-9a-f]{32}$/;
-const MOUNT_ROOT_PATTERN = /^\/mnt(?:\/|$)/;
-
-function pathError(message: string): MnfsError {
-  return new MnfsError('INTERNAL_ERROR', message);
-}
-
-function requireAbsoluteLinuxPath(value: string, label: string): string {
-  if (!path.isAbsolute(value)) throw pathError(`${label} must be an absolute path.`);
-  const normalized = path.resolve(value);
-  if (normalized !== value || MOUNT_ROOT_PATTERN.test(normalized)) {
-    throw pathError(`${label} must remain on the canonical Linux filesystem.`);
-  }
-  return normalized;
-}
-
-function requireRepositoryId(repositoryId: string): string {
-  if (!REPOSITORY_ID_PATTERN.test(repositoryId)) {
-    throw pathError(`Repository id has an invalid shape: ${repositoryId}.`);
-  }
-  return repositoryId;
-}
-
-function contained(parent: string, child: string): boolean {
-  const suffix = path.relative(parent, child);
-  return suffix.length > 0
-    && suffix !== '..'
-    && !suffix.startsWith(`..${path.sep}`)
-    && !path.isAbsolute(suffix);
-}
-
-function requireContained(parent: string, child: string, label: string): string {
-  if (!contained(parent, child)) throw pathError(`${label} escapes its runtime root.`);
-  return child;
-}
-
 export interface RuntimeRootInput {
-  readonly repositoryId: string;
-  readonly homeDirectory?: string;
-  readonly xdgStateHome?: string;
-  readonly mnfsHome?: string;
+  readonly repoId: string;
+  readonly env: Readonly<Record<string, string | undefined>>;
+  readonly homeDir: string;
 }
 
 export interface ExecutionAttemptRuntimePaths {
@@ -55,101 +18,179 @@ export interface ExecutionAttemptRuntimePaths {
   readonly hooksPath: string;
 }
 
-export function resolveRuntimeRoot(input: RuntimeRootInput): string {
-  const repositoryId = requireRepositoryId(input.repositoryId);
-  if (input.mnfsHome !== undefined) {
-    const base = requireAbsoluteLinuxPath(input.mnfsHome, 'MNFS_HOME');
-    return path.join(base, 'repos', repositoryId);
+const SAFE_REPOSITORY_ID = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+const SAFE_MISSION_ID = /^MIS-\d{3,}$/;
+
+function requireMissionPlanMissionId(missionId: string): void {
+  if (!SAFE_MISSION_ID.test(missionId)) {
+    throw new MnfsError('PLAN_INVALID', `Invalid mission id for plan artifact: ${missionId}.`);
+  }
+}
+
+function requireLinuxOwnedAbsolutePath(path: string): string {
+  if (
+    !isAbsolute(path)
+    || path.includes('\0')
+    || path.includes('\n')
+    || path.includes('\r')
+  ) {
+    throw new MnfsError('EXECUTION_SOURCE_INVALID', `Invalid execution runtime root: ${path}.`);
+  }
+  const absolute = resolve(path);
+  if (absolute === '/mnt' || absolute.startsWith('/mnt/')) {
+    throw new MnfsError(
+      'LINUX_FILESYSTEM_REQUIRED',
+      `Execution sources require a Linux-owned runtime root, not ${absolute}.`,
+    );
+  }
+  return absolute;
+}
+
+function requireContainedRuntimePath(root: string, candidate: string, label: string): string {
+  const suffix = relative(root, candidate);
+  if (
+    suffix.length === 0
+    || suffix === '..'
+    || suffix.startsWith(`..${sep}`)
+    || isAbsolute(suffix)
+  ) {
+    throw new MnfsError('EXECUTION_SOURCE_INVALID', `${label} escaped its runtime root.`);
+  }
+  return candidate;
+}
+
+export function findGitRoot(startPath: string): string {
+  const result = spawnSync('git', ['rev-parse', '--show-toplevel'], {
+    cwd: startPath,
+    encoding: 'utf8',
+    shell: false,
+  });
+
+  const root = result.stdout.trim();
+  if (result.status !== 0 || root.length === 0) {
+    throw new MnfsError(
+      'NOT_GIT_REPOSITORY',
+      `MNFS requires a Git repository: ${result.stderr.trim() || startPath}`,
+      { remediation: 'Run the command inside a Git repository.' },
+    );
   }
 
-  const homeDirectory = requireAbsoluteLinuxPath(
-    input.homeDirectory ?? homedir(),
-    'Home directory',
-  );
-  const stateBase = input.xdgStateHome === undefined
-    ? path.join(homeDirectory, '.local', 'state')
-    : requireAbsoluteLinuxPath(input.xdgStateHome, 'XDG_STATE_HOME');
-  return path.join(stateBase, 'mnfs', 'repos', repositoryId);
+  return resolve(root);
 }
 
-export function resolvePlanCurrentPath(runtimeRoot: string, missionId: string): string {
-  return path.join(runtimeRoot, 'plans', 'current', `${missionId}.html`);
-}
+export function resolveRuntimeRoot(input: RuntimeRootInput): string {
+  if (!SAFE_REPOSITORY_ID.test(input.repoId)) {
+    throw new MnfsError(
+      'RUNTIME_HOME_INVALID',
+      `Invalid MNFS repository id: ${input.repoId}`,
+    );
+  }
 
-export function resolvePlanRevisionPath(
-  runtimeRoot: string,
-  missionId: string,
-  revision: number,
-): string {
-  return path.join(
-    runtimeRoot,
-    'plans',
-    'revisions',
-    missionId,
-    `revision-${revision.toString().padStart(4, '0')}.html`,
-  );
+  const configuredHome = input.env.MNFS_HOME?.trim();
+  const stateHome = configuredHome
+    ? resolve(configuredHome)
+    : join(resolve(input.homeDir), '.local', 'state', 'mnfs');
+
+  return join(stateHome, 'repos', input.repoId);
 }
 
 export function resolveExecutionSourcePath(
-  runtimeRootInput: string,
-  writeTrackIdInput: string,
-  attemptIdInput: string,
+  runtimeRoot: string,
+  trackId: string,
+  attemptId: string,
 ): string {
-  const runtimeRoot = requireAbsoluteLinuxPath(runtimeRootInput, 'Execution runtime root');
-  const writeTrackId = requireWriteTrackId(writeTrackIdInput);
-  const attemptId = requireAttemptId(attemptIdInput);
-  if (attemptId.writeTrackId !== writeTrackId) {
-    throw pathError(`Attempt ${attemptId.id} does not belong to Write Track ${writeTrackId}.`);
+  const root = requireLinuxOwnedAbsolutePath(runtimeRoot);
+  try {
+    const track = requireWriteTrackId(trackId);
+    const attempt = requireAttemptId(attemptId, track);
+    return requireContainedRuntimePath(
+      root,
+      join(root, 'execution-sources', track, attempt, 'source'),
+      'Execution source path',
+    );
+  } catch (error) {
+    if (error instanceof MnfsError && error.code === 'LINUX_FILESYSTEM_REQUIRED') throw error;
+    if (error instanceof MnfsError && error.code === 'EXECUTION_SOURCE_INVALID') throw error;
+    throw new MnfsError(
+      'EXECUTION_SOURCE_INVALID',
+      `Invalid execution source identity ${trackId}/${attemptId}.`,
+    );
   }
-
-  return requireContained(
-    runtimeRoot,
-    path.join(
-      runtimeRoot,
-      'execution-sources',
-      writeTrackId,
-      attemptId.id,
-      'source',
-    ),
-    'Execution source path',
-  );
 }
 
-export function resolveLeaseActionRoot(runtimeRootInput: string): string {
-  const runtimeRoot = requireAbsoluteLinuxPath(runtimeRootInput, 'Execution runtime root');
-  return requireContained(
-    runtimeRoot,
-    path.join(runtimeRoot, 'lease-actions'),
-    'Lease action root',
-  );
+export function resolveLeaseActionRoot(runtimeRoot: string): string {
+  const root = requireLinuxOwnedAbsolutePath(runtimeRoot);
+  return requireContainedRuntimePath(root, join(root, 'lease-actions'), 'Lease action root');
 }
 
 export function resolveExecutionAttemptRuntimePaths(
-  runtimeRootInput: string,
-  writeTrackIdInput: string,
-  attemptIdInput: string,
+  runtimeRoot: string,
+  trackId: string,
+  attemptId: string,
 ): ExecutionAttemptRuntimePaths {
-  const runtimeRoot = requireAbsoluteLinuxPath(runtimeRootInput, 'Execution runtime root');
-  const writeTrackId = requireWriteTrackId(writeTrackIdInput);
-  const attemptId = requireAttemptId(attemptIdInput);
-  if (attemptId.writeTrackId !== writeTrackId) {
-    throw pathError(`Attempt ${attemptId.id} does not belong to Write Track ${writeTrackId}.`);
+  const root = requireLinuxOwnedAbsolutePath(runtimeRoot);
+  try {
+    const track = requireWriteTrackId(trackId);
+    const attempt = requireAttemptId(attemptId, track);
+    const attemptRoot = requireContainedRuntimePath(
+      root,
+      join(root, 'treehouse', track, attempt),
+      'Treehouse Attempt root',
+    );
+    return {
+      attemptRoot,
+      homePath: requireContainedRuntimePath(
+        attemptRoot,
+        join(attemptRoot, 'home'),
+        'Treehouse HOME',
+      ),
+      xdgConfigHome: requireContainedRuntimePath(
+        attemptRoot,
+        join(attemptRoot, 'xdg-config'),
+        'Treehouse XDG config',
+      ),
+      poolRoot: requireContainedRuntimePath(
+        attemptRoot,
+        join(attemptRoot, 'pool'),
+        'Treehouse pool',
+      ),
+      hooksPath: requireContainedRuntimePath(
+        attemptRoot,
+        join(attemptRoot, 'hooks'),
+        'Treehouse hooks',
+      ),
+    };
+  } catch (error) {
+    if (error instanceof MnfsError && error.code === 'LINUX_FILESYSTEM_REQUIRED') throw error;
+    if (error instanceof MnfsError && error.code === 'EXECUTION_SOURCE_INVALID') throw error;
+    throw new MnfsError(
+      'EXECUTION_SOURCE_INVALID',
+      `Invalid Treehouse Attempt identity ${trackId}/${attemptId}.`,
+    );
+  }
+}
+
+export function resolveMissionPlanContractPath(projectRoot: string, missionId: string): string {
+  requireMissionPlanMissionId(missionId);
+  return join(projectRoot, '.mnfs', 'missions', missionId, 'plan.json');
+}
+
+export function resolveMissionPlanHtmlPath(runtimeRoot: string, missionId: string, revision: number): string {
+  requireMissionPlanMissionId(missionId);
+  if (!Number.isInteger(revision) || revision < 1) {
+    throw new MnfsError('PLAN_INVALID', `Invalid mission plan revision: ${revision}.`);
   }
 
-  const attemptRoot = requireContained(
+  return join(
     runtimeRoot,
-    path.join(runtimeRoot, 'treehouse', writeTrackId, attemptId.id),
-    'Treehouse Attempt root',
+    'artifacts',
+    'plans',
+    missionId,
+    `rev-${String(revision).padStart(4, '0')}.html`,
   );
-  return {
-    attemptRoot,
-    homePath: requireContained(attemptRoot, path.join(attemptRoot, 'home'), 'Treehouse HOME'),
-    xdgConfigHome: requireContained(
-      attemptRoot,
-      path.join(attemptRoot, 'xdg-config'),
-      'Treehouse XDG config',
-    ),
-    poolRoot: requireContained(attemptRoot, path.join(attemptRoot, 'pool'), 'Treehouse pool'),
-    hooksPath: requireContained(attemptRoot, path.join(attemptRoot, 'hooks'), 'Treehouse hooks'),
-  };
+}
+
+export function resolveMissionPlanReviewPath(runtimeRoot: string, missionId: string): string {
+  requireMissionPlanMissionId(missionId);
+  return join(runtimeRoot, 'artifacts', 'plans', missionId, 'review.html');
 }

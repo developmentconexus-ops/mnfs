@@ -18,13 +18,13 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout authorized target branch
+      - name: Checkout accepted Task 12 branch
         uses: actions/checkout@v4
         with:
           ref: design/mis-002-m01
           fetch-depth: 0
 
-      - name: Checkout reviewed GREEN correction payload
+      - name: Checkout reviewed tracking update
         uses: actions/checkout@v4
         with:
           ref: automation/task12-green-publish
@@ -37,88 +37,44 @@ jobs:
           node-version: 24.18.0
           cache: npm
 
-      - name: Verify authorized functional GREEN head
+      - name: Verify accepted implementation and tracking baseline
         shell: bash
         run: |
           set -euo pipefail
-          expected='77b5c56404663e8ce9d740dd9d7fe8a2d9f6292d'
-          actual="$(git rev-parse HEAD)"
-          test "$actual" = "$expected"
+          test "$(git rev-parse HEAD)" = '8c6fd9afa2cc7f707f96659b9efa73230579471a'
+          test "$(git hash-object docs/tracking/STATUS.md)" = 'e7084a7617a399dbf07fed2c8af9410c47d36800'
+          test "$(git -C .task12-publisher hash-object .github/update-task12-final-tracking.py)" = 'a26925acff2cc4ecaf7d51782dec063d20a4d1f4'
 
-      - name: Verify exact functional GREEN baseline
+      - name: Apply final Task 12 tracking update
         shell: bash
         run: |
           set -euo pipefail
-          echo '93371b46f0a6a6d845044015fa50de087326d66640d90dbe5150a5f5d4d0a43c  src/services/claim-service.ts' | sha256sum -c -
-          echo '210cd005ac0d87b8004d31a61c23ff4918363d8c9737942a3680d6ae078ce48a  src/services/recovery-service.ts' | sha256sum -c -
-          echo 'c6a28317b09c4c5effab32c53d29789d44f5b64766e77565f22c79386117b08d  src/store/sqlite-store.ts' | sha256sum -c -
-          echo '982d0567eea4d555e53d0b7203436662c6a26efc0299ed7a00442f89bc8c7102  tests/services/claim-service.test.ts' | sha256sum -c -
-          echo '1a318d05857d5cf16c276ef66ae30729c0579112c85e9ce86ea07ea995567b5d  tests/services/recovery-service.test.ts' | sha256sum -c -
-
-      - name: Reconstruct and verify reviewed correction patch
-        shell: bash
-        run: |
-          set -euo pipefail
-          payload='.task12-publisher/.github/task12-green-v4-correction.patch.xz.b64'
-          echo '78745cfcb029333100fdd90090c275aebd9fb1655f7a2a9e5bbd1fb9f00efb72  .task12-publisher/.github/task12-green-v4-correction.patch.xz.b64' | sha256sum -c -
-          base64 --decode "$payload" > /tmp/task12-green-v4-correction.patch.xz
-          echo '4c5d41f9bd3dc42d6faee488940cf97199fccf19202a063c0a4601745e6211ff  /tmp/task12-green-v4-correction.patch.xz' | sha256sum -c -
-          xz --decompress --stdout /tmp/task12-green-v4-correction.patch.xz > /tmp/task12-green-v4-correction.patch
-          echo 'bd7875faa2a0b9a84b161ec61498db5102b884d2f6e4e578ed0ffdc0df600979  /tmp/task12-green-v4-correction.patch' | sha256sum -c -
-          git apply --check /tmp/task12-green-v4-correction.patch
-          git apply /tmp/task12-green-v4-correction.patch
-
-      - name: Verify exact reviewed correction and scope
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo 'befcd24b0e4991f4db00cc63ff5f29d1d7f7841e5a25af0403c328d27fbb4384  src/services/claim-service.ts' | sha256sum -c -
-          echo 'e6dcbaf204efab628825f5a3b4d4ab9f3ac9f0b302a5533b19d23421537b4339  src/services/recovery-service.ts' | sha256sum -c -
-          echo 'c6a28317b09c4c5effab32c53d29789d44f5b64766e77565f22c79386117b08d  src/store/sqlite-store.ts' | sha256sum -c -
-          echo '7658ad0525d2eb4f53bc5ef21dff2880d42ca1f80edce2eca2b336e467c9967f  tests/services/claim-service.test.ts' | sha256sum -c -
-          echo '431d73e372a6c8d38781400ce895ea4dfed9be311f2024e32689de378d78cacd  tests/services/recovery-service.test.ts' | sha256sum -c -
-          expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
-          actual="$(git diff --name-only | sort)"
-          test "$actual" = "$expected"
+          python3 .task12-publisher/.github/update-task12-final-tracking.py
+          test "$(git diff --name-only)" = 'docs/tracking/STATUS.md'
           git diff --check
-          test -z "$(git diff --name-only -- package.json package-lock.json migrations schema src/store/sqlite-store.ts)"
+          grep -q '^version: 1.8.45$' docs/tracking/STATUS.md
+          grep -q 'Task 12  Claim OPEN and read-only Recovery     8c6fd9afa2cc7f707f96659b9efa73230579471a' docs/tracking/STATUS.md
+          grep -q 'Task 12:               50/50 PASS' docs/tracking/STATUS.md
+          grep -q 'Product:               290/290 PASS' docs/tracking/STATUS.md
+          grep -q 'Correction Run/Job:    31028279068 / 92382202637' docs/tracking/STATUS.md
 
       - name: Install dependencies
         shell: bash
         run: npm ci
 
-      - name: Verify Task 12 directed matrix
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm run build --silent
-          node --test \
-            dist/tests/services/claim-service.test.js \
-            dist/tests/services/recovery-service.test.js \
-            | tee /tmp/task12-green.log
-          grep -q 'tests 50' /tmp/task12-green.log
-          grep -q 'pass 50' /tmp/task12-green.log
-          grep -q 'fail 0' /tmp/task12-green.log
-
-      - name: Verify complete canonical suite
+      - name: Verify complete canonical suite with final tracking
         shell: bash
         run: npm run verify
 
-      - name: Commit and publish reviewed correction
+      - name: Commit and publish final tracking evidence
         shell: bash
         run: |
           set -euo pipefail
           rm -rf .task12-publisher
           git config user.name 'developmentconexus-ops'
           git config user.email 'development.conexus@gmail.com'
-          git add \
-            src/services/claim-service.ts \
-            src/services/recovery-service.ts \
-            tests/services/claim-service.test.ts \
-            tests/services/recovery-service.test.ts
-          expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
-          actual="$(git diff --cached --name-only | sort)"
-          test "$actual" = "$expected"
+          git add docs/tracking/STATUS.md
+          test "$(git diff --cached --name-only)" = 'docs/tracking/STATUS.md'
           git diff --cached --check
-          git commit -m 'fix: harden Claim and Recovery review boundaries'
+          git commit -m 'docs: record final Task 12 review evidence'
           git push origin HEAD:design/mis-002-m01

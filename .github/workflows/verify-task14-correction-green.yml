@@ -1,0 +1,44 @@
+name: Verify Published Task 14 R14-01 GREEN
+on:
+  push:
+    branches: [automation/task14-correction-verify]
+    paths: [.github/workflows/verify-task14-correction-green.yml]
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: 680b2e55d01f76da35922675c18ef997c56403d3, fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24.18.0, cache: npm}
+      - name: Verify published identity and scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 680b2e55d01f76da35922675c18ef997c56403d3
+          test "$(git rev-parse HEAD^)" = a6822409e2b860de534c5fc68e9cc1ee1afb8c4d
+          test "$(git diff --name-only HEAD^ HEAD | sort)" = $'src/services/recovery-service.ts\ntests/services/recovery-service.test.ts'
+          git diff --check HEAD^ HEAD
+          test "$(git diff --numstat HEAD^ HEAD | awk '{a+=$1;d+=$2}END{print a":"d}')" = 25:1
+          printf '%s  %s\n' \
+            42ca204225b94aa9359a67046bf3486eb0dd9eb0e778bb9cd1a53cf2d6f7f1f1 src/services/recovery-service.ts \
+            8ddc4ff5a4ab1f936c60d3f2012cef0e87e9b9e8bf33d12f736623fe808f71c7 tests/services/recovery-service.test.ts \
+            159900b3490bb0012af7ddbc1e07269a9da459f3705b45259e6b6a85d428affe tests/integration/m01-composition.test.ts \
+            729d44dbda2139d67a5f804100532affdad98ed1ac6ab28dfd3e966b7e14bfdf tests/integration/m01-fresh-process.test.ts \
+            | sha256sum --check --strict
+      - name: Reverify directed and canonical gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run build --silent
+          node --test dist/tests/services/recovery-service.test.js dist/tests/integration/m01-composition.test.js dist/tests/integration/m01-fresh-process.test.js | tee /tmp/directed
+          grep -Fq 'tests 49' /tmp/directed; grep -Fq 'pass 49' /tmp/directed; grep -Fq 'fail 0' /tmp/directed
+          npm run verify | tee /tmp/verify
+          grep -Fq 'tests 320' /tmp/verify; grep -Fq 'pass 320' /tmp/verify
+          grep -Fq 'tests 119' /tmp/verify; grep -Fq 'pass 119' /tmp/verify
+          grep -Fq 'tests 78' /tmp/verify; grep -Fq 'pass 78' /tmp/verify
+          grep -Fq 'Documentation validation passed (93 canonical IDs' /tmp/verify
+          npm audit --audit-level=low

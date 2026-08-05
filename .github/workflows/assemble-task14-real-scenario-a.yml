@@ -1,0 +1,118 @@
+name: Assemble Task 14 Real Scenario A Executor
+
+on:
+  push:
+    branches:
+      - automation/task14-real-scenario-a
+    paths:
+      - .github/workflows/assemble-task14-real-scenario-a.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: assemble-task14-real-scenario-a
+  cancel-in-progress: false
+
+jobs:
+  assemble:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+
+      - name: Verify exact authorized staging scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor '3adb12c42394cf0d54fb386b1b85d83c38f8903a' HEAD
+          expected=$'.github/workflows/assemble-task14-real-scenario-a.yml\n.github/workflows/publish-task14-real-scenario-a.yml\n.github/workflows/recover-task14-real-scenario-a-publisher.yml\n.github/workflows/task14-payload-executor-00.yml\n.github/workflows/task14-payload-executor-01.yml\n.github/workflows/task14-payload-executor-02.yml\n.github/workflows/task14-payload-executor-03.yml\n.github/workflows/task14-payload-executor-04.yml\n.github/workflows/task14-payload-executor-05.yml\n.github/workflows/task14-payload-executor-06.yml\n.github/workflows/task14-payload-executor-07.yml\n.github/workflows/task14-payload-verifier-00.yml'
+          actual="$(git diff --name-only 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD | sort)"
+          test "$actual" = "$expected"
+          test "$(git status --porcelain)" = ''
+
+      - name: Assemble and verify immutable payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import gzip
+          import re
+
+          def payload(path: Path) -> str:
+              text = path.read_text(encoding='utf-8')
+              match = re.search(r"^\s*PAYLOAD:\s*'([^']+)'\s*$", text, re.MULTILINE)
+              if match is None:
+                  raise SystemExit(f'missing PAYLOAD in {path}')
+              value = ''.join(match.group(1).split())
+              if not value:
+                  raise SystemExit(f'empty PAYLOAD in {path}')
+              return value
+
+          executor_parts = [
+              Path(f'.github/workflows/task14-payload-executor-{index:02d}.yml')
+              for index in range(8)
+          ]
+          executor_encoded = ''.join(payload(path) for path in executor_parts)
+          verifier_encoded = payload(Path('.github/workflows/task14-payload-verifier-00.yml'))
+
+          executor = gzip.decompress(base64.b64decode(executor_encoded, validate=True))
+          verifier = gzip.decompress(base64.b64decode(verifier_encoded, validate=True))
+
+          executor_path = Path('.github/real-proof/task14-real-scenario-a.mjs')
+          verifier_path = Path('.github/workflows/verify-task14-real-scenario-a.yml')
+          executor_path.parent.mkdir(parents=True, exist_ok=True)
+          executor_path.write_bytes(executor)
+          verifier_path.write_bytes(verifier)
+          PY
+          printf '%s  %s\n' \
+            'e254c4ae6a7be7535f372e2beb15a7538e03d1a68c8e5bfb11f73fb1c178f1d2' \
+            .github/real-proof/task14-real-scenario-a.mjs \
+            | sha256sum --check --strict
+          printf '%s  %s\n' \
+            '463557a9e731811de451f9b0980d51baac23e8fe2c16e10dfe4a07f694d2e782' \
+            .github/workflows/verify-task14-real-scenario-a.yml \
+            | sha256sum --check --strict
+          node --check .github/real-proof/task14-real-scenario-a.mjs
+          grep -Fq 'TASK14_REAL_SCENARIO_A_SELF_TEST=PASS' .github/real-proof/task14-real-scenario-a.mjs
+          grep -Fq 'Verify Task 14 Real Scenario A Executor' .github/workflows/verify-task14-real-scenario-a.yml
+          git diff --check
+
+      - name: Publish one bounded final executor commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin automation/task14-real-scenario-a
+          test "$(git rev-parse origin/automation/task14-real-scenario-a)" = "$(git rev-parse HEAD)"
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git rm \
+            .github/workflows/assemble-task14-real-scenario-a.yml \
+            .github/workflows/publish-task14-real-scenario-a.yml \
+            .github/workflows/recover-task14-real-scenario-a-publisher.yml \
+            .github/workflows/task14-payload-executor-00.yml \
+            .github/workflows/task14-payload-executor-01.yml \
+            .github/workflows/task14-payload-executor-02.yml \
+            .github/workflows/task14-payload-executor-03.yml \
+            .github/workflows/task14-payload-executor-04.yml \
+            .github/workflows/task14-payload-executor-05.yml \
+            .github/workflows/task14-payload-executor-06.yml \
+            .github/workflows/task14-payload-executor-07.yml \
+            .github/workflows/task14-payload-verifier-00.yml
+          git add \
+            .github/real-proof/task14-real-scenario-a.mjs \
+            .github/workflows/verify-task14-real-scenario-a.yml
+          git diff --cached --check
+          git commit -m 'automation: add Task 14 real Scenario A executor'
+          expected=$'.github/real-proof/task14-real-scenario-a.mjs\n.github/workflows/verify-task14-real-scenario-a.yml'
+          actual="$(git diff --name-only 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD | sort)"
+          test "$actual" = "$expected"
+          git push origin HEAD:automation/task14-real-scenario-a
+          echo "Published executor: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

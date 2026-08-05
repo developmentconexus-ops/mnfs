@@ -1,0 +1,63 @@
+name: Verify Task 14 R14-01 GREEN
+
+on:
+  push:
+    branches:
+      - automation/task14-r14-01-verify
+    paths:
+      - .github/workflows/verify-task14-r14-01-green.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact published correction
+        uses: actions/checkout@v4
+        with:
+          ref: 680b2e55d01f76da35922675c18ef997c56403d3
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify immutable lineage and scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '680b2e55d01f76da35922675c18ef997c56403d3'
+          test "$(git rev-parse HEAD^)" = 'a6822409e2b860de534c5fc68e9cc1ee1afb8c4d'
+          test "$(git rev-parse HEAD^^)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          expected=$'src/services/recovery-service.ts\ntests/services/recovery-service.test.ts'
+          actual="$(git diff-tree --no-commit-id --name-only -r HEAD | sort)"
+          test "$actual" = "$expected"
+          test "$(git show -s --format=%s HEAD)" = 'fix: classify requested source recovery'
+          git diff --check HEAD^
+          git status --porcelain | grep -q '^$' || test "$(git status --porcelain)" = ''
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Verify correction behavior and deterministic scenarios
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run build --silent
+          node --test \
+            dist/tests/services/recovery-service.test.js \
+            dist/tests/integration/m01-composition.test.js \
+            dist/tests/integration/m01-fresh-process.test.js \
+            | tee /tmp/task14-r14-01-verify.log
+          grep -Fq 'production CLI classifies an intent-only REQUESTED source crash as SD-01' /tmp/task14-r14-01-verify.log
+          grep -Fq 'classifies an explicit REQUESTED source observation as SD-01' /tmp/task14-r14-01-verify.log
+          grep -Fq 'Scenario B opens the next global Track and preserves its exact Run/Lease/Claim lineage for M02' /tmp/task14-r14-01-verify.log
+          grep -Fq 'fail 0' /tmp/task14-r14-01-verify.log
+
+      - name: Run independent complete canonical gate
+        run: npm run verify

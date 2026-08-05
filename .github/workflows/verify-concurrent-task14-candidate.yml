@@ -1,0 +1,37 @@
+name: Verify Concurrent Task 14 Candidate
+
+on:
+  push:
+    branches:
+      - automation/task14-deterministic-export
+    paths:
+      - .github/workflows/verify-concurrent-task14-candidate.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a6822409e2b860de534c5fc68e9cc1ee1afb8c4d
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - name: Verify exact candidate identity and scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'a6822409e2b860de534c5fc68e9cc1ee1afb8c4d'
+          test "$(git rev-parse HEAD^)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          expected=$'tests/integration/m01-composition.test.ts\ntests/integration/m01-fresh-process.test.ts'
+          actual="$(git diff-tree --no-commit-id --name-only -r HEAD | sort)"
+          test "$actual" = "$expected"
+          git diff --check HEAD^
+      - run: npm ci
+      - name: Run exact global gate
+        run: npm run verify

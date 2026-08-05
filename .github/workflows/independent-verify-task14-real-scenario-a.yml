@@ -1,0 +1,175 @@
+name: Independent Verify Task 14 Real Scenario A Executor
+
+on:
+  push:
+    branches:
+      - automation/task14-real-scenario-a-independent-verify
+    paths:
+      - .github/workflows/independent-verify-task14-real-scenario-a.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact immutable staged payload
+        uses: actions/checkout@v4
+        with:
+          ref: 42858b8a68cde3f56ee7d023eb10bdadebaecff0
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Independently reconstruct executor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '42858b8a68cde3f56ee7d023eb10bdadebaecff0'
+          git merge-base --is-ancestor '3adb12c42394cf0d54fb386b1b85d83c38f8903a' HEAD
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import gzip
+
+          prefix = "  PAYLOAD: '"
+          suffix = "'"
+          encoded = []
+          for index in range(8):
+              path = Path(f'.github/workflows/task14-payload-executor-{index:02d}.yml')
+              matches = [
+                  line[len(prefix):-len(suffix)]
+                  for line in path.read_text(encoding='utf-8').splitlines()
+                  if line.startswith(prefix) and line.endswith(suffix)
+              ]
+              if len(matches) != 1:
+                  raise SystemExit(f'{path}: expected one payload, found {len(matches)}')
+              encoded.append(matches[0])
+          raw = gzip.decompress(base64.b64decode(''.join(encoded), validate=True))
+          Path('/tmp/mnfs-task14-real-scenario-a.mjs').write_bytes(raw)
+          PY
+          printf '%s  %s\n' \
+            'e254c4ae6a7be7535f372e2beb15a7538e03d1a68c8e5bfb11f73fb1c178f1d2' \
+            /tmp/mnfs-task14-real-scenario-a.mjs \
+            | sha256sum --check --strict
+          node --check /tmp/mnfs-task14-real-scenario-a.mjs
+
+      - name: Independently review authority, containment and process boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          text = Path('/tmp/mnfs-task14-real-scenario-a.mjs').read_text(encoding='utf-8')
+
+          exact = {
+              "authorization": "const AUTHORIZATION = 'MNFS_AUTHORIZE_M01_TASK_14_REAL_SCENARIO_A';",
+              "plan": "const PLAN = '1.0.1';",
+              "microdesign": "const MICRODESIGN = '0.6.1';",
+              "head": "const PR_HEAD = '3adb12c42394cf0d54fb386b1b85d83c38f8903a';",
+              "deterministic": "const DETERMINISTIC_HEAD = '680b2e55d01f76da35922675c18ef997c56403d3';",
+              "preflight verify": "const PREFLIGHT_VERIFY_SHA = '08b1850ff7cc771ee25992fa77230ba8ed4831371c067f2d6cdec041ae01ad8b';",
+              "preflight doctor": "const PREFLIGHT_DOCTOR_SHA = '3fe422cd4141d1d926dda2a3a6c52cd01e32861bb7fb3e6cb9378eabb4274193';",
+              "Treehouse bytes": "const TREEHOUSE_EXECUTABLE_SHA = 'c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3';",
+              "fixed run root": "const RUN_BASE = join(homedir(), '.local', 'state', 'mnfs', 'task14-real-scenario-a');",
+              "branch": "const BRANCH = 'design/mis-002-m01';",
+              "no cleanup": "cleanupAuthorized: false,",
+          }
+          for label, value in exact.items():
+              if value not in text:
+                  raise SystemExit(f'missing exact {label} boundary')
+
+          required_calls = [
+              'ExecutionSourceAdapter',
+              'GitWorktreeInspector',
+              'LinuxProcessIdentityInspector',
+              'TreehouseAdapter',
+              'publishLeaseActionOperation',
+              'LeaseActionRunner',
+              'LeaseService',
+              'RecoveryService',
+              'SqliteStore.openCurrent',
+              "process.kill(asyncDriver.child.pid, 'SIGKILL')",
+              "process.kill(marker.helperPid, 'SIGSTOP')",
+              "process.kill(marker.helperPid, 'SIGCONT')",
+              'MNFS_TASK14_REAL_SCENARIO_A_RESULT=PASS',
+              'MNFS_TASK14_REAL_SCENARIO_A_RESULT=FAIL',
+          ]
+          for value in required_calls:
+              if value not in text:
+                  raise SystemExit(f'missing required real-proof behavior: {value}')
+
+          forbidden_tokens = [
+              'rmSync', 'rmdirSync', 'unlinkSync',
+              'force: true', 'shell: true',
+              'git reset', 'git clean', 'git rebase',
+              'ClaimService', 'ReceiptService', 'GateService',
+              'SEC-E1',
+          ]
+          for value in forbidden_tokens:
+              if value in text:
+                  raise SystemExit(f'forbidden authority found: {value}')
+
+          if text.count('spawnSync(') != 1:
+              raise SystemExit('unexpected spawnSync authority count')
+          if text.count('spawn(') != 2:
+              raise SystemExit('unexpected asynchronous spawn authority count')
+          if text.count("['get', '--lease', '--lease-holder', input.holder, '--json']") != 1:
+              raise SystemExit('unexpected Treehouse grant command shape')
+          if text.count("['return', input.worktreePath, '--if-lease-id', input.externalLeaseId, '--if-lease-holder', input.holder]") != 1:
+              raise SystemExit('unexpected Treehouse release command shape')
+          if re.search(r'(?:spawn|spawnSync)\s*\([^\n]*(?:treehouse|\bpi\b)', text, re.I):
+              raise SystemExit('direct Treehouse or Pi process launch found')
+          if re.search(r"from ['\"]node:fs['\"][\s\S]{0,300}\b(?:rm|rmdir|unlink)\b", text):
+              raise SystemExit('filesystem deletion import found')
+
+          containment_pairs = [
+              ('RUN_BASE', "join(RUN_BASE, runId)"),
+              ('run.runRoot', "join(run.runRoot, 'fixtures', label)"),
+              ('config.runtimeRoot', 'config.actionRoot'),
+          ]
+          for root, child in containment_pairs:
+              if root not in text or child not in text:
+                  raise SystemExit(f'missing containment binding {root} -> {child}')
+
+          if text.count("result: 'PASS'") != 1:
+              raise SystemExit('final PASS manifest is not unique')
+          if text.count("result: 'FAIL'") != 1:
+              raise SystemExit('failure Evidence is not unique')
+          if "retainedPaths: [run.runRoot]" not in text:
+              raise SystemExit('proof resources are not explicitly retained')
+          if "active_semantic_leases=0" not in text:
+              raise SystemExit('final semantic Lease assertion is absent')
+          PY
+
+      - name: Build exact production bytes and run self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build --silent
+          node /tmp/mnfs-task14-real-scenario-a.mjs --self-test --repo "$GITHUB_WORKSPACE" \
+            | tee /tmp/task14-independent-self-test.log
+          grep -Fq 'TASK14_REAL_SCENARIO_A_SELF_TEST=PASS' /tmp/task14-independent-self-test.log
+
+      - name: Reverify complete canonical baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run verify | tee /tmp/task14-independent-verify.log
+          for evidence in \
+            'tests 320' 'pass 320' \
+            'tests 119' 'pass 119' \
+            'tests 78' 'pass 78' \
+            'Documentation validation passed (93 canonical IDs'; do
+            grep -Fq "$evidence" /tmp/task14-independent-verify.log
+          done
+          ! grep -Eq 'fail [1-9][0-9]*' /tmp/task14-independent-verify.log
+          npm audit --audit-level=low

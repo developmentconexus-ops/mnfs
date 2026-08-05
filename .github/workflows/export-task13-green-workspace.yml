@@ -1,4 +1,4 @@
-name: Export Task 13 GREEN Workspace
+name: Export Accepted Task 13 Workspace
 
 on:
   push:
@@ -14,17 +14,18 @@ jobs:
   export:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout exact authorized target
+      - name: Checkout exact accepted target
         uses: actions/checkout@v4
         with:
           ref: design/mis-002-m01
           fetch-depth: 0
 
-      - name: Verify authorization lineage
+      - name: Verify accepted Task 13 lineage
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = 'd503a38f0134cd822de658e8dd88556df6c665ae'
+          test "$(git rev-parse HEAD)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          test "$(git rev-parse HEAD^)" = '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864'
           git merge-base --is-ancestor 'fe6da615d2d0a32437e2adb0627f09a693f1bd57' HEAD
           git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
 
@@ -41,25 +42,25 @@ jobs:
           npm ci
           npm run typecheck
 
-      - name: Package workspace and toolchain
+      - name: Package accepted workspace and toolchain
         shell: bash
         run: |
           set -euo pipefail
-          tar --exclude=.git -czf /tmp/mnfs-task13-green-workspace.tar.gz .
+          tar --exclude=.git -czf /tmp/mnfs-task13-accepted-workspace.tar.gz .
           node_root="$(dirname "$(dirname "$(readlink -f "$(command -v node)")")")"
           tar -C "$node_root" -czf /tmp/mnfs-node24.tar.gz .
           sha256sum \
-            /tmp/mnfs-task13-green-workspace.tar.gz \
+            /tmp/mnfs-task13-accepted-workspace.tar.gz \
             /tmp/mnfs-node24.tar.gz \
-            > /tmp/mnfs-task13-green-export.sha256
+            > /tmp/mnfs-task13-accepted-export.sha256
 
-      - name: Upload workspace
+      - name: Upload accepted workspace
         uses: actions/upload-artifact@v4
         with:
-          name: task13-green-workspace-with-toolchain
+          name: task13-accepted-workspace-with-toolchain
           path: |
-            /tmp/mnfs-task13-green-workspace.tar.gz
+            /tmp/mnfs-task13-accepted-workspace.tar.gz
             /tmp/mnfs-node24.tar.gz
-            /tmp/mnfs-task13-green-export.sha256
+            /tmp/mnfs-task13-accepted-export.sha256
           if-no-files-found: error
           retention-days: 1

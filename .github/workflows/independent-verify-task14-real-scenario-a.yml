@@ -97,7 +97,7 @@ jobs:
               'RecoveryService',
               'SqliteStore.openCurrent',
               "process.kill(asyncDriver.child.pid, 'SIGKILL')",
-              "process.kill(marker.helperPid, 'SIGSTOP')",
+              "process.kill(child.pid, 'SIGSTOP')",
               "process.kill(marker.helperPid, 'SIGCONT')",
               'MNFS_TASK14_REAL_SCENARIO_A_RESULT=PASS',
               'MNFS_TASK14_REAL_SCENARIO_A_RESULT=FAIL',

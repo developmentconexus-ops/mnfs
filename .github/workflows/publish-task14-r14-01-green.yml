@@ -122,8 +122,8 @@ jobs:
             dist/tests/integration/m01-composition.test.js \
             dist/tests/integration/m01-fresh-process.test.js \
             | tee /tmp/task14-r14-01-directed.log
-          grep -Fq 'tests 48' /tmp/task14-r14-01-directed.log
-          grep -Fq 'pass 48' /tmp/task14-r14-01-directed.log
+          grep -Fq 'tests 49' /tmp/task14-r14-01-directed.log
+          grep -Fq 'pass 49' /tmp/task14-r14-01-directed.log
           grep -Fq 'fail 0' /tmp/task14-r14-01-directed.log
 
       - name: Run complete canonical gate

@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.30
+version: 1.8.31
 owners:
   - developmentconexus-ops
 related:
@@ -73,7 +73,7 @@ PR:                               #17 DRAFT
 ## Accepted implementation baseline
 
 ```text
-Task 1  execution domain                    ec6505d720d7d252aeef77d72192c401f460b4816
+Task 1  execution domain                    ec6505d720d252aeef77d72192c401f460b4816
 Task 2  trusted runtime primitives          ff4d345720c2a14623ec1777fc5f318c9d96d685
 Task 3  SQLite transaction authority        2ed7e6d620f771dd1399421d06527911a2ffea0c
 Task 4  maintenance and backup              d0172cc2c141cec6004f10caa9859bced9ac8d1c

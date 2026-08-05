@@ -1,7 +1,8 @@
 import { spawnSync } from 'node:child_process';
-import { join, resolve } from 'node:path';
+import { isAbsolute, join, resolve } from 'node:path';
 
 import { MnfsError } from '../domain/errors.js';
+import { requireAttemptId, requireWriteTrackId } from '../execution/ids.js';
 
 export interface RuntimeRootInput {
   readonly repoId: string;
@@ -16,6 +17,25 @@ function requireMissionPlanMissionId(missionId: string): void {
   if (!SAFE_MISSION_ID.test(missionId)) {
     throw new MnfsError('PLAN_INVALID', `Invalid mission id for plan artifact: ${missionId}.`);
   }
+}
+
+function requireLinuxOwnedAbsolutePath(path: string): string {
+  if (
+    !isAbsolute(path)
+    || path.includes('\0')
+    || path.includes('\n')
+    || path.includes('\r')
+  ) {
+    throw new MnfsError('EXECUTION_SOURCE_INVALID', `Invalid execution runtime root: ${path}.`);
+  }
+  const absolute = resolve(path);
+  if (absolute === '/mnt' || absolute.startsWith('/mnt/')) {
+    throw new MnfsError(
+      'LINUX_FILESYSTEM_REQUIRED',
+      `Execution sources require a Linux-owned runtime root, not ${absolute}.`,
+    );
+  }
+  return absolute;
 }
 
 export function findGitRoot(startPath: string): string {
@@ -51,6 +71,30 @@ export function resolveRuntimeRoot(input: RuntimeRootInput): string {
     : join(resolve(input.homeDir), '.local', 'state', 'mnfs');
 
   return join(stateHome, 'repos', input.repoId);
+}
+
+export function resolveExecutionSourcePath(
+  runtimeRoot: string,
+  trackId: string,
+  attemptId: string,
+): string {
+  const root = requireLinuxOwnedAbsolutePath(runtimeRoot);
+  try {
+    const track = requireWriteTrackId(trackId);
+    const attempt = requireAttemptId(attemptId, track);
+    const path = join(root, 'execution-sources', track, attempt, 'source');
+    if (!path.startsWith(`${root}/`)) {
+      throw new MnfsError('EXECUTION_SOURCE_INVALID', 'Execution source path escaped its runtime root.');
+    }
+    return path;
+  } catch (error) {
+    if (error instanceof MnfsError && error.code === 'LINUX_FILESYSTEM_REQUIRED') throw error;
+    if (error instanceof MnfsError && error.code === 'EXECUTION_SOURCE_INVALID') throw error;
+    throw new MnfsError(
+      'EXECUTION_SOURCE_INVALID',
+      `Invalid execution source identity ${trackId}/${attemptId}.`,
+    );
+  }
 }
 
 export function resolveMissionPlanContractPath(projectRoot: string, missionId: string): string {

@@ -181,3 +181,5 @@ jobs:
           git diff --cached --check
           git commit -m 'test: prove M01 fresh-process composition'
           git push origin HEAD:design/mis-002-m01
+
+# transport retry: payload.03 restored

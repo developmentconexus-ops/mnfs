@@ -1,0 +1,106 @@
+name: Publish Task 14 R14-01 GREEN
+on:
+  push:
+    branches: [automation/task14-correction-publish]
+    paths: [.github/workflows/publish-task14-correction-green.yml]
+permissions: {contents: write}
+concurrency: {group: publish-task14-correction-green, cancel-in-progress: false}
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: design/mis-002-m01, fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24.18.0, cache: npm}
+      - name: Verify authorized RED
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = a6822409e2b860de534c5fc68e9cc1ee1afb8c4d
+          test "$(git rev-parse HEAD^)" = 8426d1cea089bb3bc27aa6a1544ba289a1b5965e
+          git merge-base --is-ancestor 5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864 HEAD
+          test -z "$(git status --porcelain)"
+      - name: Apply bounded correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/services/recovery-service.ts'); s=p.read_text()
+          old="""  if (attempt.sourceStatus === 'REQUESTED') {
+            if (related.length === 0 || related.every((candidate) => candidate.status === 'MISSING')) {
+          """
+          new="""  if (attempt.sourceStatus === 'REQUESTED') {
+            if (
+              related.length === 0
+              || related.every((candidate) => (
+                candidate.status === 'MISSING' || candidate.status === 'REQUESTED'
+              ))
+            ) {
+          """
+          assert s.count(old)==1; p.write_text(s.replace(old,new,1))
+          p=Path('tests/services/recovery-service.test.ts'); s=p.read_text()
+          marker="test('classifies source path, fingerprint, base or object-format drift as SD-02', async () => {\n"
+          add="""test('classifies an explicit REQUESTED source observation as SD-01', async () => {
+            const module = await loadRecoveryService();
+            await withHarness('sd01-requested-observation', async (harness) => {
+              updateAttemptSourceRequested(harness);
+              harness.observations.current = {
+                ...harness.observations.current,
+                sources: [{
+                  status: 'REQUESTED',
+                  attemptId: harness.attempt.id,
+                  baseCommitSha: harness.attempt.baseCommitSha,
+                  objectFormat: harness.attempt.gitObjectFormat,
+                }],
+              };
+              const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+              const finding = requireFinding(report, 'SD-01');
+              assert.equal(finding.requiredAuthority, 'ORIGINAL_OPERATION');
+            });
+          });
+
+          """
+          assert 'classifies an explicit REQUESTED source observation as SD-01' not in s
+          assert s.count(marker)==1; p.write_text(s.replace(marker,add+marker,1))
+          PY
+          expected=$'src/services/recovery-service.ts\ntests/services/recovery-service.test.ts'
+          test "$(git status --short | sed -E 's/^ M //' | sort)" = "$expected"
+          git diff --check
+          test "$(git diff --numstat | awk '{a+=$1;d+=$2}END{print a":"d}')" = 25:1
+      - name: Verify all deterministic gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run build --silent
+          node --test dist/tests/integration/m01-composition.test.js dist/tests/integration/m01-fresh-process.test.js | tee /tmp/directed
+          grep -Fq 'tests 13' /tmp/directed; grep -Fq 'pass 13' /tmp/directed; grep -Fq 'fail 0' /tmp/directed
+          node --test dist/tests/services/recovery-service.test.js | tee /tmp/recovery
+          grep -Fq 'tests 36' /tmp/recovery; grep -Fq 'pass 36' /tmp/recovery; grep -Fq 'fail 0' /tmp/recovery
+          node scripts/run-tests.mjs | tee /tmp/product
+          grep -Fq 'tests 320' /tmp/product; grep -Fq 'pass 320' /tmp/product; grep -Fq 'fail 0' /tmp/product
+          node scripts/run-as02-tests.mjs | tee /tmp/as02
+          grep -Fq 'tests 119' /tmp/as02; grep -Fq 'pass 119' /tmp/as02; grep -Fq 'fail 0' /tmp/as02
+          node scripts/run-tc01-tests.mjs | tee /tmp/tc01
+          grep -Fq 'tests 78' /tmp/tc01; grep -Fq 'pass 78' /tmp/tc01; grep -Fq 'fail 0' /tmp/tc01
+          npm run docs:check | tee /tmp/docs
+          grep -Fq 'Documentation validation passed (93 canonical IDs' /tmp/docs
+          npm audit --audit-level=low
+      - name: Publish one correction commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin design/mis-002-m01
+          test "$(git rev-parse origin/design/mis-002-m01)" = a6822409e2b860de534c5fc68e9cc1ee1afb8c4d
+          git config user.name developmentconexus-ops
+          git config user.email development.conexus@gmail.com
+          git add src/services/recovery-service.ts tests/services/recovery-service.test.ts
+          test "$(git diff --cached --name-only | sort)" = $'src/services/recovery-service.ts\ntests/services/recovery-service.test.ts'
+          git diff --cached --check
+          git commit -m 'fix: classify requested source observation as SD-01'
+          test "$(git rev-parse HEAD^)" = a6822409e2b860de534c5fc68e9cc1ee1afb8c4d
+          git push origin HEAD:design/mis-002-m01
+          echo "Published: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

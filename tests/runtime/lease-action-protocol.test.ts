@@ -22,6 +22,7 @@ const PROTOCOL_SPECIFIER = '../../src/runtime/' + 'lease-action-protocol.js';
 const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/;
 const ACTION_TOKEN = 'grant-wt001-a01-g1-0001';
 const HOLDER = 'mnfs-repo-lse001-g1';
+const OUTPUT_LIMIT_BYTES = 65_536;
 
 interface LeaseActionOperation {
   readonly schemaVersion: 1;
@@ -118,6 +119,8 @@ interface LeaseActionProtocolModule {
     actionRoot: string;
     resultPath: string;
     finished: LeaseActionFinished;
+    stdoutLimitBytes: number;
+    stderrLimitBytes: number;
   }>): Promise<PublishedFinished>;
   readLeaseActionFinished(input: Readonly<{
     actionRoot: string;
@@ -125,6 +128,8 @@ interface LeaseActionProtocolModule {
     expectedActionToken: string;
     expectedOperationSha256: string;
     expectedStartedSha256: string;
+    stdoutLimitBytes: number;
+    stderrLimitBytes: number;
   }>): Promise<PublishedFinished>;
 }
 
@@ -135,6 +140,7 @@ interface Fixture {
   readonly operationPath: string;
   readonly sourcePath: string;
   readonly executablePath: string;
+  readonly gitPath: string;
   readonly startedPath: string;
   readonly resultPath: string;
   readonly poolRoot: string;
@@ -161,9 +167,7 @@ function canonicalValue(value: unknown): unknown {
   if (typeof value !== 'object' || value === null) return value;
   const record = value as Readonly<Record<string, unknown>>;
   const output: Record<string, unknown> = {};
-  for (const key of Object.keys(record).sort()) {
-    output[key] = canonicalValue(record[key]);
-  }
+  for (const key of Object.keys(record).sort()) output[key] = canonicalValue(record[key]);
   return output;
 }
 
@@ -190,17 +194,29 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
   const actionRoot = path.join(root, 'actions');
   const tokenRoot = path.join(actionRoot, ACTION_TOKEN);
   const sourcePath = path.join(root, 'source');
-  const binRoot = path.join(root, 'bin');
-  const executablePath = path.join(binRoot, 'treehouse');
+  const treehouseBin = path.join(root, 'treehouse-bin');
+  const gitBin = path.join(root, 'git-bin');
+  const executablePath = path.join(treehouseBin, 'treehouse');
+  const gitPath = path.join(gitBin, 'git');
   const poolRoot = path.join(root, 'pool');
   const leasedPath = path.join(poolRoot, 'slot-1', 'source');
   const homePath = path.join(root, 'home');
   const xdgPath = path.join(root, 'xdg');
   const hooksPath = path.join(root, 'hooks');
-  for (const directory of [tokenRoot, sourcePath, binRoot, leasedPath, homePath, xdgPath, hooksPath]) {
+  for (const directory of [
+    tokenRoot,
+    sourcePath,
+    treehouseBin,
+    gitBin,
+    leasedPath,
+    homePath,
+    xdgPath,
+    hooksPath,
+  ]) {
     await mkdir(directory, { recursive: true });
   }
   await writeFile(executablePath, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  await writeFile(gitPath, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
 
   const fixture: Fixture = {
     root,
@@ -209,6 +225,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     operationPath: path.join(tokenRoot, 'operation.json'),
     sourcePath,
     executablePath,
+    gitPath,
     startedPath: path.join(tokenRoot, 'started.json'),
     resultPath: path.join(tokenRoot, 'finished.json'),
     poolRoot,
@@ -217,7 +234,6 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     xdgPath,
     hooksPath,
   };
-
   try {
     await operation(fixture);
   } finally {
@@ -227,7 +243,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
 
 function acceptedEnvironment(fixture: Fixture): Readonly<Record<string, string>> {
   return {
-    PATH: `${path.dirname(fixture.executablePath)}:/usr/bin:/bin`,
+    PATH: `${path.dirname(fixture.executablePath)}:${path.dirname(fixture.gitPath)}:/usr/bin:/bin`,
     HOME: fixture.homePath,
     XDG_CONFIG_HOME: fixture.xdgPath,
     LANG: 'C.UTF-8',
@@ -259,8 +275,8 @@ function grantOperation(fixture: Fixture): LeaseActionOperation {
     cwd: fixture.sourcePath,
     env: acceptedEnvironment(fixture),
     timeoutMs: 30_000,
-    stdoutLimitBytes: 65_536,
-    stderrLimitBytes: 65_536,
+    stdoutLimitBytes: OUTPUT_LIMIT_BYTES,
+    stderrLimitBytes: OUTPUT_LIMIT_BYTES,
     startedPath: fixture.startedPath,
     resultPath: fixture.resultPath,
   };
@@ -310,11 +326,7 @@ function finishedRecord(
     operationSha256,
     startedSha256,
     runner: RUNNER_IDENTITY,
-    process: {
-      exitCode: 7,
-      signal: null,
-      timedOut: false,
-    },
+    process: { exitCode: 7, signal: null, timedOut: false },
     stdout: {
       path: path.join(fixture.tokenRoot, 'stdout.bin'),
       sha256: sha256(stdoutBytes),
@@ -335,13 +347,11 @@ test('publishes one canonical immutable operation at mode 0400 and replays exact
     const operation = grantOperation(fixture);
     const expectedBytes = canonicalBytes(operation);
     const expectedHash = sha256(expectedBytes);
-
     const published = await protocol.publishLeaseActionOperation({
       actionRoot: fixture.actionRoot,
       operationPath: fixture.operationPath,
       operation,
     });
-
     assert.deepEqual(published.operation, operation);
     assert.deepEqual(published.bytes, expectedBytes);
     assert.equal(published.operationSha256, expectedHash);
@@ -356,7 +366,6 @@ test('publishes one canonical immutable operation at mode 0400 and replays exact
       operation,
     });
     assert.deepEqual(replay, published);
-
     await expectCode('INTERNAL_ERROR', async () => await protocol.publishLeaseActionOperation({
       actionRoot: fixture.actionRoot,
       operationPath: fixture.operationPath,
@@ -370,14 +379,13 @@ test('canonical operation hash ignores object key order but binds argv order and
   const protocol = await loadProtocol();
   await withFixture(async (fixture) => {
     const operation = grantOperation(fixture);
-    const reversedEnvironment = Object.fromEntries(Object.entries(operation.env).reverse());
     const reordered = {
       resultPath: operation.resultPath,
       startedPath: operation.startedPath,
       stderrLimitBytes: operation.stderrLimitBytes,
       stdoutLimitBytes: operation.stdoutLimitBytes,
       timeoutMs: operation.timeoutMs,
-      env: reversedEnvironment,
+      env: Object.fromEntries(Object.entries(operation.env).reverse()),
       cwd: operation.cwd,
       argv: [...operation.argv],
       executable: operation.executable,
@@ -385,7 +393,6 @@ test('canonical operation hash ignores object key order but binds argv order and
       actionToken: operation.actionToken,
       schemaVersion: operation.schemaVersion,
     } satisfies LeaseActionOperation;
-
     const first = protocol.canonicalizeLeaseActionOperation({
       actionRoot: fixture.actionRoot,
       operationPath: fixture.operationPath,
@@ -412,10 +419,7 @@ test('canonical operation hash ignores object key order but binds argv order and
     const changedEnvironment = protocol.canonicalizeLeaseActionOperation({
       actionRoot: fixture.actionRoot,
       operationPath: fixture.operationPath,
-      operation: {
-        ...operation,
-        env: { ...operation.env, HOME: differentHome },
-      },
+      operation: { ...operation, env: { ...operation.env, HOME: differentHome } },
     });
     assert.notEqual(first.operationSha256, changedArgv.operationSha256);
     assert.notEqual(first.operationSha256, changedEnvironment.operationSha256);
@@ -433,7 +437,6 @@ test('accepts only the two reviewed Treehouse argv shapes and one owned environm
       });
       assert.equal(SHA256_PATTERN.test(value.operationSha256), true);
     }
-
     const grant = grantOperation(fixture);
     const invalid: LeaseActionOperation[] = [
       { ...grant, argv: [...grant.argv, '--force'] },
@@ -444,7 +447,6 @@ test('accepts only the two reviewed Treehouse argv shapes and one owned environm
       { ...grant, env: Object.fromEntries(Object.entries(grant.env).filter(([key]) => key !== 'HOME')) },
       { ...grant, env: { ...grant.env, HOME: `${fixture.homePath}\nattacker` } },
     ];
-
     for (const operation of invalid) {
       assert.throws(() => protocol.canonicalizeLeaseActionOperation({
         actionRoot: fixture.actionRoot,
@@ -459,11 +461,10 @@ test('rejects path escapes, wrong mode, symlink operation files and non-canonica
   const protocol = await loadProtocol();
   await withFixture(async (fixture) => {
     const operation = grantOperation(fixture);
-    const escaped = { ...operation, resultPath: path.join(fixture.root, 'escaped-finished.json') };
     await expectCode('INTERNAL_ERROR', async () => await protocol.publishLeaseActionOperation({
       actionRoot: fixture.actionRoot,
       operationPath: fixture.operationPath,
-      operation: escaped,
+      operation: { ...operation, resultPath: path.join(fixture.root, 'escaped-finished.json') },
     }));
 
     const cases: readonly Buffer[] = [
@@ -533,10 +534,8 @@ test('publishes and verifies a hash-linked STARTED and FINISHED artifact chain',
 
     const stdoutBytes = Buffer.from('out', 'utf8');
     const stderrBytes = Buffer.from('warn', 'utf8');
-    const stdoutPath = path.join(fixture.tokenRoot, 'stdout.bin');
-    const stderrPath = path.join(fixture.tokenRoot, 'stderr.bin');
-    await writeFile(stdoutPath, stdoutBytes, { mode: 0o600 });
-    await writeFile(stderrPath, stderrBytes, { mode: 0o600 });
+    await writeFile(path.join(fixture.tokenRoot, 'stdout.bin'), stdoutBytes, { mode: 0o600 });
+    await writeFile(path.join(fixture.tokenRoot, 'stderr.bin'), stderrBytes, { mode: 0o600 });
     const finished = finishedRecord(
       fixture,
       operation.operationSha256,
@@ -548,6 +547,8 @@ test('publishes and verifies a hash-linked STARTED and FINISHED artifact chain',
       actionRoot: fixture.actionRoot,
       resultPath: fixture.resultPath,
       finished,
+      stdoutLimitBytes: OUTPUT_LIMIT_BYTES,
+      stderrLimitBytes: OUTPUT_LIMIT_BYTES,
     });
     assert.equal(publishedFinished.finishedSha256, sha256(canonicalBytes(finished)));
     assert.deepEqual((await protocol.readLeaseActionFinished({
@@ -556,13 +557,16 @@ test('publishes and verifies a hash-linked STARTED and FINISHED artifact chain',
       expectedActionToken: ACTION_TOKEN,
       expectedOperationSha256: operation.operationSha256,
       expectedStartedSha256: publishedStarted.startedSha256,
+      stdoutLimitBytes: OUTPUT_LIMIT_BYTES,
+      stderrLimitBytes: OUTPUT_LIMIT_BYTES,
     })).finished, finished);
 
-    const conflicting = { ...finished, startedSha256: `sha256:${'c'.repeat(64)}` };
     await expectCode('INTERNAL_ERROR', async () => await protocol.publishLeaseActionFinished({
       actionRoot: fixture.actionRoot,
       resultPath: fixture.resultPath,
-      finished: conflicting,
+      finished: { ...finished, startedSha256: `sha256:${'c'.repeat(64)}` },
+      stdoutLimitBytes: OUTPUT_LIMIT_BYTES,
+      stderrLimitBytes: OUTPUT_LIMIT_BYTES,
     }));
   });
 });

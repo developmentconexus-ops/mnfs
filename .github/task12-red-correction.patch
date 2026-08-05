@@ -1,0 +1,137 @@
+diff -ruN task12-patch-old/tests/services/claim-service.test.ts task12-patch-new/tests/services/claim-service.test.ts
+--- task12-patch-old/tests/services/claim-service.test.ts	2026-08-05 15:37:31.104625061 +0000
++++ task12-patch-new/tests/services/claim-service.test.ts	2026-08-05 15:37:31.107560278 +0000
+@@ -373,24 +373,77 @@
+ 
+ test('revalidates every expected version after Git observation and leaves no partial mutation', async () => {
+   const module = await loadClaimService();
+-  withHarness('version-fence', (harness) => {
+-    harness.git.beforeReturn = () => {
+-      const current = harness.store.execution.getWriteTrack(harness.track.id) as WriteTrack;
+-      harness.store.execution.setWriteTrackStatus({
+-        id: current.id,
+-        expectedVersion: current.version,
+-        status: 'ACTIVE',
+-        updatedAt: UPDATED_AT,
+-      });
+-      harness.git.beforeReturn = undefined;
+-    };
+-    expectCode(
+-      'CONCURRENCY_CONFLICT',
+-      () => serviceFor(module, harness).openClaim(claimInput(harness)),
+-    );
+-    assert.equal(rowCount(harness.databasePath, 'claims'), 0);
+-    assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 0);
+-  });
++  const mutations: ReadonlyArray<Readonly<{
++    label: string;
++    apply(harness: Harness): void;
++  }>> = [
++    {
++      label: 'track',
++      apply(harness) {
++        harness.store.execution.setWriteTrackStatus({
++          id: harness.track.id,
++          expectedVersion: harness.track.version,
++          status: 'ACTIVE',
++          updatedAt: UPDATED_AT,
++        });
++      },
++    },
++    {
++      label: 'attempt',
++      apply(harness) {
++        harness.store.execution.setAttemptState({
++          id: harness.attempt.id,
++          expectedVersion: harness.attempt.version,
++          status: 'OPEN',
++          sourceStatus: 'READY',
++          sourcePath: harness.sourcePath,
++          sourceFingerprint: SOURCE_FINGERPRINT,
++          updatedAt: UPDATED_AT,
++        });
++      },
++    },
++    {
++      label: 'run',
++      apply(harness) {
++        harness.store.execution.setWorkerRunState({
++          id: harness.run.id,
++          expectedVersion: harness.run.version,
++          status: 'STARTING',
++          updatedAt: UPDATED_AT,
++        });
++      },
++    },
++    {
++      label: 'lease',
++      apply(harness) {
++        harness.store.execution.setLeaseState({
++          id: harness.lease.id,
++          expectedVersion: harness.lease.version,
++          status: 'ACTIVE',
++          externalLeaseId: harness.lease.externalLeaseId!,
++          worktreePath: harness.lease.worktreePath!,
++          externalLeasedAt: harness.lease.externalLeasedAt!,
++          updatedAt: UPDATED_AT,
++        });
++      },
++    },
++  ];
++
++  for (const mutation of mutations) {
++    withHarness(`version-fence-${mutation.label}`, (harness) => {
++      harness.git.beforeReturn = () => {
++        mutation.apply(harness);
++        harness.git.beforeReturn = undefined;
++      };
++      expectCode(
++        'CONCURRENCY_CONFLICT',
++        () => serviceFor(module, harness).openClaim(claimInput(harness)),
++      );
++      assert.equal(rowCount(harness.databasePath, 'claims'), 0);
++      assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 0);
++      assert.equal(harness.store.execution.getWriteTrack(harness.track.id)?.status, 'ACTIVE');
++    });
++  }
+ });
+ 
+ test('rejects stale Track, Attempt, Run and Lease versions independently', async () => {
+@@ -428,9 +481,9 @@
+   });
+ });
+ 
+-test('rejects stale approved authority, wrong contract and wrong Attempt base', async () => {
++test('rejects stale approved authority and a wrong Attempt base without partial state', async () => {
+   const module = await loadClaimService();
+-  withHarness('authority', (harness) => {
++  withHarness('stale-authority', (harness) => {
+     const saved = harness.store.saveMissionPlanRevision({
+       missionId: 'MIS-002',
+       content: validPlanV2('MIS-002', 'Task 12 newer approved contract'),
+@@ -446,6 +499,9 @@
+       'EXECUTION_CONTRACT_CONFLICT',
+       () => serviceFor(module, harness).openClaim(claimInput(harness)),
+     );
++    assert.equal(rowCount(harness.databasePath, 'claims'), 0);
++  });
++  withHarness('wrong-base', (harness) => {
+     expectCode('CLAIM_CONFLICT', () => serviceFor(module, harness).openClaim(claimInput(harness, {
+       baseCommitSha: '9'.repeat(40),
+     })));
+diff -ruN task12-patch-old/tests/services/recovery-service.test.ts task12-patch-new/tests/services/recovery-service.test.ts
+--- task12-patch-old/tests/services/recovery-service.test.ts	2026-08-05 15:37:31.106161928 +0000
++++ task12-patch-new/tests/services/recovery-service.test.ts	2026-08-05 15:37:31.108764535 +0000
+@@ -200,6 +200,12 @@
+   mkdirSync(sourcePath, { recursive: true });
+   writeFileSync(resourcePath, `preserve:${label}\n`, 'utf8');
+   const store = SqliteStore.open(databasePath);
++  store.openMission({
++    missionId: 'MIS-002',
++    eventId: `EVT-MIS-002-TASK12-RECOVERY-${label.toUpperCase()}-OPEN`,
++    goal: 'Prove read-only deterministic Recovery classification',
++    openedAt: OPENED_AT,
++  });
+   const track = store.execution.allocateWriteTrack({
+     missionId: 'MIS-002',
+     milestoneQualifiedId: 'MIS-002/M01',

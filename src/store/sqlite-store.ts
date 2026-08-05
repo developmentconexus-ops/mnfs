@@ -2,7 +2,7 @@ import { existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-import { MnfsError } from '../domain/errors.js';
+import { MnfsError, type MnfsErrorCode } from '../domain/errors.js';
 import {
   canonicalJson,
   hashPlanContent,
@@ -16,8 +16,21 @@ import {
   type MissionEvent,
   type SaveMissionPlanRevisionInput,
 } from '../domain/types.js';
-import { EventStore } from './event-store.js';
-import { ExecutionStore } from './execution-store.js';
+import {
+  formatAttemptId,
+  formatLeaseId,
+  formatWriteTrackId,
+  requireAttemptId,
+  requireWriteTrackId,
+} from '../execution/ids.js';
+import type { Attempt, Lease, WriteTrack } from '../execution/model.js';
+import { EventStore, type AppendEventInput } from './event-store.js';
+import {
+  ExecutionStore,
+  type AllocateAttemptInput,
+  type AllocateLeaseInput,
+  type AllocateWriteTrackInput,
+} from './execution-store.js';
 import { inspectSupportedDatabaseSchema } from './sqlite-maintenance.js';
 import { applyMigrations } from './migrations.js';
 import { SqliteTransaction } from './sqlite-transaction.js';
@@ -32,6 +45,12 @@ export interface OpenMissionInput {
 export interface OpenNextMissionInput {
   readonly goal: string;
   readonly openedAt: string;
+}
+
+export interface ExecutionAtomicSession {
+  allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack;
+  allocateAttempt(input: AllocateAttemptInput): Attempt;
+  appendEvent(input: AppendEventInput): void;
 }
 
 const CURRENT_WRITE_SCHEMA_VERSION = 4;
@@ -58,6 +77,7 @@ const CURRENT_WRITE_TABLE_COLUMNS = {
     'approved_at',
   ],
   event_types: ['type', 'payload_schema_version'],
+  entity_sequences: ['kind', 'next_value'],
   write_tracks: [
     'id',
     'mission_id',
@@ -214,6 +234,26 @@ function requireCurrentWriteSchemaShape(database: DatabaseSync): void {
     }
   }
 
+  const sequences = database.prepare(`
+    SELECT kind, next_value
+    FROM entity_sequences
+    ORDER BY kind
+  `).all().map((row) => ({
+    kind: String(row.kind),
+    nextValue: Number(row.next_value),
+  }));
+  if (
+    sequences.length !== 2
+    || sequences[0]?.kind !== 'LEASE'
+    || sequences[1]?.kind !== 'WRITE_TRACK'
+    || sequences.some((sequence) => !Number.isSafeInteger(sequence.nextValue) || sequence.nextValue <= 0)
+  ) {
+    throw new MnfsError(
+      'SCHEMA_VERSION_UNSUPPORTED',
+      'SQLite schema v4 entity sequence authority is missing or invalid.',
+    );
+  }
+
   const indexNames = new Set(database.prepare(`
     SELECT name
     FROM sqlite_master
@@ -255,17 +295,255 @@ function requireCurrentWriteSchema(database: DatabaseSync): void {
   requireCurrentWriteSchemaShape(database);
 }
 
+function isSqliteConstraint(error: unknown): boolean {
+  const candidate = error as { readonly code?: unknown; readonly message?: unknown };
+  return (
+    typeof candidate.code === 'string'
+    && candidate.code.startsWith('SQLITE_CONSTRAINT')
+  ) || (
+    candidate.code === 'ERR_SQLITE_ERROR'
+    && typeof candidate.message === 'string'
+    && /constraint failed|not unique/i.test(candidate.message)
+  );
+}
+
+function translateExecutionConstraint(
+  error: unknown,
+  code: MnfsErrorCode,
+  message: string,
+): never {
+  if (error instanceof MnfsError) throw error;
+  if (isSqliteConstraint(error)) throw new MnfsError(code, message);
+  throw error;
+}
+
+export class SqliteExecutionStore extends ExecutionStore {
+  readonly #database: DatabaseSync;
+  readonly #transactions: SqliteTransaction;
+  readonly #events: EventStore;
+
+  constructor(database: DatabaseSync, transactions: SqliteTransaction, events: EventStore) {
+    super(database, transactions, events);
+    this.#database = database;
+    this.#transactions = transactions;
+    this.#events = events;
+  }
+
+  #nextEntitySequence(kind: 'WRITE_TRACK' | 'LEASE'): number {
+    const row = this.#database.prepare(`
+      SELECT next_value
+      FROM entity_sequences
+      WHERE kind = ?
+    `).get(kind) as { readonly next_value?: unknown } | undefined;
+    const value = Number(row?.next_value);
+    if (!Number.isSafeInteger(value) || value <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', `Execution sequence ${kind} is missing or invalid.`);
+    }
+    const result = this.#database.prepare(`
+      UPDATE entity_sequences
+      SET next_value = next_value + 1
+      WHERE kind = ? AND next_value = ?
+    `).run(kind, value);
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Execution sequence ${kind} changed concurrently.`);
+    }
+    return value;
+  }
+
+  #allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack {
+    try {
+      const id = formatWriteTrackId(this.#nextEntitySequence('WRITE_TRACK'));
+      this.#database.prepare(`
+        INSERT INTO write_tracks (
+          id, mission_id, milestone_qualified_id, feature_qualified_id,
+          contract_hash, status, version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, 'ACTIVE', 1, ?, ?)
+      `).run(
+        id,
+        input.missionId,
+        input.milestoneQualifiedId,
+        input.featureQualifiedId,
+        input.contractHash,
+        input.occurredAt,
+        input.occurredAt,
+      );
+      const value = super.getWriteTrack(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `WriteTrack ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      translateExecutionConstraint(error, 'WRITE_TRACK_CONFLICT', 'Could not allocate the Write Track.');
+    }
+  }
+
+  override allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack {
+    return this.#transactions.run(() => this.#allocateWriteTrack(input));
+  }
+
+  #allocateAttempt(input: AllocateAttemptInput): Attempt {
+    try {
+      const writeTrackId = requireWriteTrackId(input.writeTrackId);
+      const row = this.#database.prepare(`
+        SELECT COALESCE(MAX(ordinal), 0) + 1 AS next_value
+        FROM attempts
+        WHERE write_track_id = ?
+      `).get(writeTrackId) as { readonly next_value?: unknown } | undefined;
+      const ordinal = Number(row?.next_value ?? 1);
+      if (!Number.isSafeInteger(ordinal) || ordinal <= 0) {
+        throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Attempt ordinal.');
+      }
+      const id = formatAttemptId(writeTrackId, ordinal);
+      this.#database.prepare(`
+        INSERT INTO attempts (
+          id, write_track_id, ordinal, contract_hash, git_object_format,
+          base_commit_sha, source_status, source_path, source_fingerprint,
+          status, version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, 'REQUESTED', NULL, NULL, 'OPEN', 1, ?, ?)
+      `).run(
+        id,
+        writeTrackId,
+        ordinal,
+        input.contractHash,
+        input.gitObjectFormat,
+        input.baseCommitSha,
+        input.occurredAt,
+        input.occurredAt,
+      );
+      const value = super.getAttempt(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Attempt ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      translateExecutionConstraint(error, 'ATTEMPT_CONFLICT', 'Could not allocate the Attempt.');
+    }
+  }
+
+  #allocateLease(input: AllocateLeaseInput): Lease {
+    try {
+      const existingRow = this.#database.prepare(`
+        SELECT id
+        FROM leases
+        WHERE grant_idempotency_key = ?
+      `).get(input.grantIdempotencyKey) as { readonly id?: unknown } | undefined;
+      if (existingRow !== undefined) {
+        const existing = super.getLease(String(existingRow.id));
+        if (existing === undefined) {
+          throw new MnfsError('INTERNAL_ERROR', 'Lease idempotency row disappeared.');
+        }
+        if (
+          existing.grantInputHash === input.grantInputHash
+          && existing.writeTrackId === input.writeTrackId
+          && existing.attemptId === input.attemptId
+          && existing.contractHash === input.contractHash
+          && existing.holder === input.holder
+        ) return existing;
+        throw new MnfsError(
+          'LEASE_IDEMPOTENCY_CONFLICT',
+          `Lease idempotency key ${input.grantIdempotencyKey} is bound to different input.`,
+        );
+      }
+
+      const writeTrackId = requireWriteTrackId(input.writeTrackId);
+      const attemptId = requireAttemptId(input.attemptId, writeTrackId);
+      const id = formatLeaseId(this.#nextEntitySequence('LEASE'));
+      const generationRow = this.#database.prepare(`
+        SELECT COALESCE(MAX(generation), 0) + 1 AS next_value
+        FROM leases
+        WHERE write_track_id = ?
+      `).get(writeTrackId) as { readonly next_value?: unknown } | undefined;
+      const generation = Number(generationRow?.next_value ?? 1);
+      if (!Number.isSafeInteger(generation) || generation <= 0) {
+        throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Lease generation.');
+      }
+      this.#database.prepare(`
+        INSERT INTO leases (
+          id, write_track_id, attempt_id, contract_hash, generation, status,
+          grant_idempotency_key, grant_input_hash,
+          release_idempotency_key, release_input_hash, holder,
+          external_lease_id, worktree_path, external_leased_at,
+          action_kind, action_token, action_phase,
+          action_owner_boot_id, action_owner_pid, action_owner_start_ticks,
+          action_runner_boot_id, action_runner_pid, action_runner_start_ticks,
+          action_started_ref, action_result_ref,
+          release_requested_at, release_observed_at, last_observed_at,
+          last_error_code, last_error_ref, version, created_at, updated_at
+        ) VALUES (
+          ?, ?, ?, ?, ?, 'REQUESTED', ?, ?, NULL, NULL, ?,
+          NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, 1, ?, ?
+        )
+      `).run(
+        id,
+        writeTrackId,
+        attemptId,
+        input.contractHash,
+        generation,
+        input.grantIdempotencyKey,
+        input.grantInputHash,
+        input.holder,
+        input.occurredAt,
+        input.occurredAt,
+      );
+      const value = super.getLease(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Lease ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      if (error instanceof MnfsError && error.code === 'LEASE_IDEMPOTENCY_CONFLICT') throw error;
+      translateExecutionConstraint(error, 'LEASE_CONFLICT', 'Could not allocate the Lease.');
+    }
+  }
+
+  override allocateLease(input: AllocateLeaseInput): Lease {
+    return this.#transactions.run(() => this.#allocateLease(input));
+  }
+
+  runAtomic<T>(operation: (session: ExecutionAtomicSession) => T): T {
+    return this.#transactions.run(() => {
+      let active = true;
+      const requireActive = (): void => {
+        if (!active) {
+          throw new MnfsError('INTERNAL_ERROR', 'Atomic execution session is no longer active.');
+        }
+      };
+      const session: ExecutionAtomicSession = Object.freeze({
+        allocateWriteTrack: (input) => {
+          requireActive();
+          return this.#allocateWriteTrack(input);
+        },
+        allocateAttempt: (input) => {
+          requireActive();
+          return this.#allocateAttempt(input);
+        },
+        appendEvent: (input) => {
+          requireActive();
+          this.#events.append(input);
+        },
+      });
+      try {
+        return operation(session);
+      } finally {
+        active = false;
+      }
+    });
+  }
+}
+
 export class SqliteStore {
   readonly #database: DatabaseSync;
   readonly #transactions: SqliteTransaction;
   readonly #events: EventStore;
-  readonly execution: ExecutionStore;
+  readonly execution: SqliteExecutionStore;
 
   private constructor(database: DatabaseSync) {
     this.#database = database;
     this.#transactions = new SqliteTransaction(database);
     this.#events = new EventStore(database);
-    this.execution = new ExecutionStore(database, this.#transactions, this.#events);
+    this.execution = new SqliteExecutionStore(database, this.#transactions, this.#events);
   }
 
   static open(path: string): SqliteStore {

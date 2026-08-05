@@ -1,0 +1,183 @@
+name: Publish Task 14 Deterministic Correction RED
+
+on:
+  push:
+    branches:
+      - automation/task14-deterministic-red
+    paths:
+      - .github/workflows/publish-task14-deterministic-red.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task14-deterministic-red
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact accepted Task 13 target
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify authorization lineage and clean preimage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          test "$(git rev-parse HEAD^)" = '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864'
+          git merge-base --is-ancestor '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864' HEAD
+          test ! -e tests/integration/m01-composition.test.ts
+          test ! -e tests/integration/m01-fresh-process.test.ts
+          test "$(git status --porcelain)" = ''
+
+      - name: Checkout exact deterministic RED payload
+        uses: actions/checkout@v4
+        with:
+          ref: automation/task14-deterministic-red
+          path: .task14-deterministic-red
+          fetch-depth: 1
+
+      - name: Reconstruct and install bounded deterministic proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload_root='.task14-deterministic-red/.github/task14-deterministic-red'
+          test -d "$payload_root"
+
+          (
+            cd "$payload_root"
+            printf '%s  %s\n' \
+              '5df27f350686eabbc9db8887cff816a191b249ab1d08e9a301c4254376ac13f4' payload.00 \
+              '397702909ae44e21f3a1ea71d67bb76411bf58b27da04b9a44a630b8dc8d719e' payload.01 \
+              '19bc481b4b7d499be4121073ef8bac72befd0f1282263b88f7a4608f12ca4971' payload.02 \
+              '405439fe69fcad91d10231912bec8905887fcd37439ca99a311c0f52f9aaea06' payload.03 \
+              '7a29d013a76c2294a2d06e235559b6a3e6736ea71aa3b6bdf56a74165548e7dd' payload.04 \
+              'd0daf5d17606d5cd430aeb3b85279fa28d0e0606fb6daf5322441919971a3a5b' payload.05 \
+              | sha256sum --check --strict
+            cat payload.00 payload.01 payload.02 payload.03 payload.04 payload.05 \
+              > /tmp/task14-deterministic-red.b64
+          )
+
+          base64 --decode /tmp/task14-deterministic-red.b64 \
+            > /tmp/task14-deterministic-red.tar.gz
+          printf '%s  %s\n' \
+            'b994f0550a1cb54cb7e947d7cf0dbac68bc1f57836de6d91253324a0c1d1990f' \
+            /tmp/task14-deterministic-red.tar.gz \
+            | sha256sum --check --strict
+
+          rm -rf /tmp/task14-deterministic-red-extracted
+          mkdir -p /tmp/task14-deterministic-red-extracted
+          tar -xzf /tmp/task14-deterministic-red.tar.gz \
+            -C /tmp/task14-deterministic-red-extracted
+
+          mkdir -p tests/integration
+          cp /tmp/task14-deterministic-red-extracted/tests/integration/m01-composition.test.ts \
+            tests/integration/m01-composition.test.ts
+          cp /tmp/task14-deterministic-red-extracted/tests/integration/m01-fresh-process.test.ts \
+            tests/integration/m01-fresh-process.test.ts
+          rm -rf .task14-deterministic-red
+
+          printf '%s  %s\n' \
+            '159900b3490bb0012af7ddbc1e07269a9da459f3705b45259e6b6a85d428affe' \
+            tests/integration/m01-composition.test.ts \
+            '729d44dbda2139d67a5f804100532affdad98ed1ac6ab28dfd3e966b7e14bfdf' \
+            tests/integration/m01-fresh-process.test.ts \
+            | sha256sum --check --strict
+
+          expected=$'tests/integration/m01-composition.test.ts\ntests/integration/m01-fresh-process.test.ts'
+          actual="$(git status --short | sed -E 's/^\?\? //' | sort)"
+          test "$actual" = "$expected"
+          git diff --check
+
+      - name: Install dependencies and verify type surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run build --silent
+
+      - name: Observe directed Task 14 correction RED
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          node --test \
+            dist/tests/integration/m01-composition.test.js \
+            dist/tests/integration/m01-fresh-process.test.js \
+            > /tmp/task14-directed-red.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/task14-directed-red.log
+          test "$status" -ne 0
+          grep -Fq 'tests 13' /tmp/task14-directed-red.log
+          grep -Fq 'pass 12' /tmp/task14-directed-red.log
+          grep -Fq 'fail 1' /tmp/task14-directed-red.log
+          grep -Fq 'production CLI classifies an intent-only REQUESTED source crash as SD-01' \
+            /tmp/task14-directed-red.log
+          grep -Fq "'SD-02' !== 'SD-01'" /tmp/task14-directed-red.log
+
+      - name: Observe canonical product correction RED
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          node scripts/run-tests.mjs > /tmp/task14-product-red.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/task14-product-red.log
+          test "$status" -ne 0
+          grep -Fq 'tests 319' /tmp/task14-product-red.log
+          grep -Fq 'pass 318' /tmp/task14-product-red.log
+          grep -Fq 'fail 1' /tmp/task14-product-red.log
+          grep -Fq 'production CLI classifies an intent-only REQUESTED source crash as SD-01' \
+            /tmp/task14-product-red.log
+          grep -Fq "'SD-02' !== 'SD-01'" /tmp/task14-product-red.log
+
+      - name: Verify accepted adapters and documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-as02-tests.mjs > /tmp/task14-as02.log 2>&1
+          cat /tmp/task14-as02.log
+          grep -Fq 'tests 119' /tmp/task14-as02.log
+          grep -Fq 'pass 119' /tmp/task14-as02.log
+          grep -Fq 'fail 0' /tmp/task14-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task14-tc01.log 2>&1
+          cat /tmp/task14-tc01.log
+          grep -Fq 'tests 78' /tmp/task14-tc01.log
+          grep -Fq 'pass 78' /tmp/task14-tc01.log
+          grep -Fq 'fail 0' /tmp/task14-tc01.log
+
+          npm run docs:check > /tmp/task14-docs.log 2>&1
+          cat /tmp/task14-docs.log
+          grep -Fq 'Documentation validation passed (93 canonical IDs' /tmp/task14-docs.log
+
+      - name: Commit and publish deterministic correction RED
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add \
+            tests/integration/m01-composition.test.ts \
+            tests/integration/m01-fresh-process.test.ts
+          expected=$'tests/integration/m01-composition.test.ts\ntests/integration/m01-fresh-process.test.ts'
+          actual="$(git diff --cached --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --cached --check
+          git commit -m 'test: prove M01 fresh-process composition'
+          git push origin HEAD:design/mis-002-m01

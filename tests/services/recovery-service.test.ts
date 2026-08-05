@@ -200,6 +200,12 @@ function withHarness(label: string, operation: (harness: Harness) => Promise<voi
   mkdirSync(sourcePath, { recursive: true });
   writeFileSync(resourcePath, `preserve:${label}\n`, 'utf8');
   const store = SqliteStore.open(databasePath);
+  store.openMission({
+    missionId: 'MIS-002',
+    eventId: `EVT-MIS-002-TASK12-RECOVERY-${label.toUpperCase()}-OPEN`,
+    goal: 'Prove read-only deterministic Recovery classification',
+    openedAt: OPENED_AT,
+  });
   const track = store.execution.allocateWriteTrack({
     missionId: 'MIS-002',
     milestoneQualifiedId: 'MIS-002/M01',

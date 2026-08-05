@@ -373,24 +373,77 @@ test('rolls back Claim, Track transition and Event when CLAIM_OPENED insertion f
 
 test('revalidates every expected version after Git observation and leaves no partial mutation', async () => {
   const module = await loadClaimService();
-  withHarness('version-fence', (harness) => {
-    harness.git.beforeReturn = () => {
-      const current = harness.store.execution.getWriteTrack(harness.track.id) as WriteTrack;
-      harness.store.execution.setWriteTrackStatus({
-        id: current.id,
-        expectedVersion: current.version,
-        status: 'ACTIVE',
-        updatedAt: UPDATED_AT,
-      });
-      harness.git.beforeReturn = undefined;
-    };
-    expectCode(
-      'CONCURRENCY_CONFLICT',
-      () => serviceFor(module, harness).openClaim(claimInput(harness)),
-    );
-    assert.equal(rowCount(harness.databasePath, 'claims'), 0);
-    assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 0);
-  });
+  const mutations: ReadonlyArray<Readonly<{
+    label: string;
+    apply(harness: Harness): void;
+  }>> = [
+    {
+      label: 'track',
+      apply(harness) {
+        harness.store.execution.setWriteTrackStatus({
+          id: harness.track.id,
+          expectedVersion: harness.track.version,
+          status: 'ACTIVE',
+          updatedAt: UPDATED_AT,
+        });
+      },
+    },
+    {
+      label: 'attempt',
+      apply(harness) {
+        harness.store.execution.setAttemptState({
+          id: harness.attempt.id,
+          expectedVersion: harness.attempt.version,
+          status: 'OPEN',
+          sourceStatus: 'READY',
+          sourcePath: harness.sourcePath,
+          sourceFingerprint: SOURCE_FINGERPRINT,
+          updatedAt: UPDATED_AT,
+        });
+      },
+    },
+    {
+      label: 'run',
+      apply(harness) {
+        harness.store.execution.setWorkerRunState({
+          id: harness.run.id,
+          expectedVersion: harness.run.version,
+          status: 'STARTING',
+          updatedAt: UPDATED_AT,
+        });
+      },
+    },
+    {
+      label: 'lease',
+      apply(harness) {
+        harness.store.execution.setLeaseState({
+          id: harness.lease.id,
+          expectedVersion: harness.lease.version,
+          status: 'ACTIVE',
+          externalLeaseId: harness.lease.externalLeaseId!,
+          worktreePath: harness.lease.worktreePath!,
+          externalLeasedAt: harness.lease.externalLeasedAt!,
+          updatedAt: UPDATED_AT,
+        });
+      },
+    },
+  ];
+
+  for (const mutation of mutations) {
+    withHarness(`version-fence-${mutation.label}`, (harness) => {
+      harness.git.beforeReturn = () => {
+        mutation.apply(harness);
+        harness.git.beforeReturn = undefined;
+      };
+      expectCode(
+        'CONCURRENCY_CONFLICT',
+        () => serviceFor(module, harness).openClaim(claimInput(harness)),
+      );
+      assert.equal(rowCount(harness.databasePath, 'claims'), 0);
+      assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 0);
+      assert.equal(harness.store.execution.getWriteTrack(harness.track.id)?.status, 'ACTIVE');
+    });
+  }
 });
 
 test('rejects stale Track, Attempt, Run and Lease versions independently', async () => {
@@ -428,9 +481,9 @@ test('rejects cross-lineage Worker Run and Lease references without partial stat
   });
 });
 
-test('rejects stale approved authority, wrong contract and wrong Attempt base', async () => {
+test('rejects stale approved authority and a wrong Attempt base without partial state', async () => {
   const module = await loadClaimService();
-  withHarness('authority', (harness) => {
+  withHarness('stale-authority', (harness) => {
     const saved = harness.store.saveMissionPlanRevision({
       missionId: 'MIS-002',
       content: validPlanV2('MIS-002', 'Task 12 newer approved contract'),
@@ -446,6 +499,9 @@ test('rejects stale approved authority, wrong contract and wrong Attempt base', 
       'EXECUTION_CONTRACT_CONFLICT',
       () => serviceFor(module, harness).openClaim(claimInput(harness)),
     );
+    assert.equal(rowCount(harness.databasePath, 'claims'), 0);
+  });
+  withHarness('wrong-base', (harness) => {
     expectCode('CLAIM_CONFLICT', () => serviceFor(module, harness).openClaim(claimInput(harness, {
       baseCommitSha: '9'.repeat(40),
     })));

@@ -80,66 +80,68 @@ jobs:
               'Task 14  deterministic proof + R14-01           680b2e55d01f76da35922675c18ef997c56403d3',
           )
 
-          section = '''## Task 14 deterministic proof and R14-01 correction
-
-Operator authorizations:
-
-```text
-MNFS_AUTHORIZE_M01_TASK_14_DETERMINISTIC plan=1.0.1 microdesign=0.6.1 task13=5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864
-MNFS_AUTHORIZE_M01_TASK_14_DETERMINISTIC_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=a6822409e2b860de534c5fc68e9cc1ee1afb8c4d task13=5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864 blocker=R14-01
-```
-
-Accepted heads:
-
-```text
-Deterministic tests:  a6822409e2b860de534c5fc68e9cc1ee1afb8c4d
-R14-01 correction:   680b2e55d01f76da35922675c18ef997c56403d3
-```
-
-The deterministic proof exercises production CLI composition across fresh processes, source intent and physical-before-semantic recovery, grant/release crash windows, action fencing, idempotent replay, safe abandonment, exact Scenario B Run/Lease/Claim lineage, v3→v4 migration, pre-v4 writer rollback, migration-commit rollback and the frozen M01 source scan.
-
-R14-01 proved that the production observation authority emits an explicit `REQUESTED` source candidate after an intent-only crash. Recovery now classifies semantic `REQUESTED` plus related `MISSING`/`REQUESTED` observation as `SD-01`, preserves read-only behavior and requires only `ORIGINAL_OPERATION`. Existing READY/UNKNOWN/drift paths remain independently covered and continue to classify as HEALTHY, UNKNOWN or `SD-02` as designed.
-
-Canonical verification:
-
-```text
-Publisher Run / Job:     31049211257 / 92452161053
-Independent Run / Job:   31049547485 / 92453262355
-Node:                    24.18.0
-Directed proof/recovery: 49/49 PASS
-Product:                 320/320 PASS
-AS-02:                   119/119 PASS
-TC-01:                    78/78 PASS
-Documentation:           PASS — 93 canonical IDs
-npm vulnerabilities:     0
-```
-
-Adversarial review:
-
-```text
-Critical:    0 open
-Important:   0 open
-Minor:       0 open
-Result:      ACCEPTABLE
-Replan:      not required
-```
-
-Scope review:
-
-- the deterministic test head adds only the two planned integration proof files;
-- the correction changes only `RecoveryService` classification and one fail-first regression;
-- no schema, migration, dependency, Claim state, Lease mutation or CLI command surface changed;
-- Recovery remains byte-for-byte non-mutating and exposes no helper launch or repair authority;
-- no real Treehouse command, Lease helper action or Pi Worker was executed;
-- Task 14 is not complete until canonical WSL2 preflight, real Scenario A, Evidence finalization and trusted cleanup pass.
-
-Next exact gate:
-
-```text
-MNFS_AUTHORIZE_M01_TASK_14_WSL2_PREFLIGHT plan=1.0.1 microdesign=0.6.1 deterministic=680b2e55d01f76da35922675c18ef997c56403d3
-```
-
-'''
+          section_lines = [
+              '## Task 14 deterministic proof and R14-01 correction',
+              '',
+              'Operator authorizations:',
+              '',
+              '```text',
+              'MNFS_AUTHORIZE_M01_TASK_14_DETERMINISTIC plan=1.0.1 microdesign=0.6.1 task13=5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864',
+              'MNFS_AUTHORIZE_M01_TASK_14_DETERMINISTIC_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=a6822409e2b860de534c5fc68e9cc1ee1afb8c4d task13=5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864 blocker=R14-01',
+              '```',
+              '',
+              'Accepted heads:',
+              '',
+              '```text',
+              'Deterministic tests:  a6822409e2b860de534c5fc68e9cc1ee1afb8c4d',
+              'R14-01 correction:   680b2e55d01f76da35922675c18ef997c56403d3',
+              '```',
+              '',
+              'The deterministic proof exercises production CLI composition across fresh processes, source intent and physical-before-semantic recovery, grant/release crash windows, action fencing, idempotent replay, safe abandonment, exact Scenario B Run/Lease/Claim lineage, v3→v4 migration, pre-v4 writer rollback, migration-commit rollback and the frozen M01 source scan.',
+              '',
+              'R14-01 proved that the production observation authority emits an explicit `REQUESTED` source candidate after an intent-only crash. Recovery now classifies semantic `REQUESTED` plus related `MISSING`/`REQUESTED` observation as `SD-01`, preserves read-only behavior and requires only `ORIGINAL_OPERATION`. Existing READY/UNKNOWN/drift paths remain independently covered and continue to classify as HEALTHY, UNKNOWN or `SD-02` as designed.',
+              '',
+              'Canonical verification:',
+              '',
+              '```text',
+              'Publisher Run / Job:     31049211257 / 92452161053',
+              'Independent Run / Job:   31049547485 / 92453262355',
+              'Node:                    24.18.0',
+              'Directed proof/recovery: 49/49 PASS',
+              'Product:                 320/320 PASS',
+              'AS-02:                   119/119 PASS',
+              'TC-01:                    78/78 PASS',
+              'Documentation:           PASS — 93 canonical IDs',
+              'npm vulnerabilities:     0',
+              '```',
+              '',
+              'Adversarial review:',
+              '',
+              '```text',
+              'Critical:    0 open',
+              'Important:   0 open',
+              'Minor:       0 open',
+              'Result:      ACCEPTABLE',
+              'Replan:      not required',
+              '```',
+              '',
+              'Scope review:',
+              '',
+              '- the deterministic test head adds only the two planned integration proof files;',
+              '- the correction changes only `RecoveryService` classification and one fail-first regression;',
+              '- no schema, migration, dependency, Claim state, Lease mutation or CLI command surface changed;',
+              '- Recovery remains byte-for-byte non-mutating and exposes no helper launch or repair authority;',
+              '- no real Treehouse command, Lease helper action or Pi Worker was executed;',
+              '- Task 14 is not complete until canonical WSL2 preflight, real Scenario A, Evidence finalization and trusted cleanup pass.',
+              '',
+              'Next exact gate:',
+              '',
+              '```text',
+              'MNFS_AUTHORIZE_M01_TASK_14_WSL2_PREFLIGHT plan=1.0.1 microdesign=0.6.1 deterministic=680b2e55d01f76da35922675c18ef997c56403d3',
+              '```',
+              '',
+          ]
+          section = '\n'.join(section_lines) + '\n'
           marker = '## Frozen boundaries\n'
           if text.count(marker) != 1:
               raise SystemExit('Frozen boundaries marker is not unique')

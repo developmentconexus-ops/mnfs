@@ -1,0 +1,64 @@
+name: Fix Task 13 Source Observation
+
+on:
+  push:
+    branches:
+      - automation/task13-green-work
+    paths:
+      - .github/workflows/task13-green-fix-source-observation.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: automation/task13-green-work
+          fetch-depth: 0
+      - name: Patch exact optional source observation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('src/cli/entry.ts')
+          text = path.read_text(encoding='utf-8')
+          old = """  return {
+    status: existsSync(attempt.sourcePath as string) ? 'READY' : 'MISSING',
+    attemptId: attempt.id,
+    path: attempt.sourcePath,
+    fingerprint: attempt.sourceFingerprint,
+    baseCommitSha: attempt.baseCommitSha,
+    objectFormat: attempt.gitObjectFormat,
+  };
+"""
+          new = """  if (attempt.sourcePath === undefined || attempt.sourceFingerprint === undefined) {
+    return {
+      status: 'UNKNOWN',
+      attemptId: attempt.id,
+      baseCommitSha: attempt.baseCommitSha,
+      objectFormat: attempt.gitObjectFormat,
+    };
+  }
+  return {
+    status: existsSync(attempt.sourcePath) ? 'READY' : 'MISSING',
+    attemptId: attempt.id,
+    path: attempt.sourcePath,
+    fingerprint: attempt.sourceFingerprint,
+    baseCommitSha: attempt.baseCommitSha,
+    objectFormat: attempt.gitObjectFormat,
+  };
+"""
+          if text.count(old) != 1:
+              raise SystemExit('source observation preimage mismatch')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          git config user.name developmentconexus-ops
+          git config user.email development.conexus@gmail.com
+          git add src/cli/entry.ts
+          git rm .github/workflows/task13-green-fix-source-observation.yml
+          git diff --cached --check
+          git commit -m 'work: fix exact recovery source observation'
+          git push origin HEAD:automation/task13-green-work

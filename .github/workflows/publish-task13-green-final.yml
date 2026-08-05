@@ -1,0 +1,185 @@
+name: Publish Task 13 GREEN Final
+
+on:
+  push:
+    branches:
+      - automation/task13-green-publish-final
+    paths:
+      - .github/workflows/publish-task13-green-final.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task13-green-final
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact authorized target
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify authorization lineage and target preimage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'd503a38f0134cd822de658e8dd88556df6c665ae'
+          git merge-base --is-ancestor 'fe6da615d2d0a32437e2adb0627f09a693f1bd57' HEAD
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+          test ! -e tests/cli/execution-green-review.test.ts
+          test "$(git status --porcelain)" = ''
+
+      - name: Checkout exact reviewed GREEN candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ac072fdb20b681577f61b940aab9b5efb09a7f7f
+          path: .task13-green-candidate
+          fetch-depth: 1
+
+      - name: Install exact bounded Task 13 payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .task13-green-candidate rev-parse HEAD)" = 'ac072fdb20b681577f61b940aab9b5efb09a7f7f'
+          for path in \
+            src/cli/args.ts \
+            src/cli/main.ts \
+            src/cli/entry.ts \
+            src/runtime/paths.ts \
+            tests/cli/execution-green-review.test.ts
+          do
+            test -f ".task13-green-candidate/$path"
+            mkdir -p "$(dirname "$path")"
+            cp ".task13-green-candidate/$path" "$path"
+            cmp ".task13-green-candidate/$path" "$path"
+          done
+          rm -rf .task13-green-candidate
+
+          expected=$'src/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts\ntests/cli/execution-green-review.test.ts'
+          actual="$(git diff --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --check
+
+          test "$(git hash-object tests/cli/execution-args.test.ts)" = 'bf22293f55983c12450dc81bafe5df31be5457c8'
+          test "$(git hash-object tests/cli/execution-main.test.ts)" = '792fc7907aa12672532893558b98a99b9dd70a34'
+          test "$(git hash-object tests/cli/execution-red-review.test.ts)" = 'f5f8bd2825a13fd524f3223a37bcd602c8bf8c74'
+
+      - name: Verify directed Task 13 GREEN matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run build --silent
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            dist/tests/cli/execution-red-review.test.js \
+            dist/tests/cli/execution-green-review.test.js \
+            > /tmp/task13-green-directed.log 2>&1
+          cat /tmp/task13-green-directed.log
+          grep -q 'tests 16' /tmp/task13-green-directed.log
+          grep -q 'pass 16' /tmp/task13-green-directed.log
+          grep -q 'fail 0' /tmp/task13-green-directed.log
+
+      - name: Verify canonical product and accepted adapters
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-tests.mjs > /tmp/task13-green-product.log 2>&1
+          cat /tmp/task13-green-product.log
+          grep -q 'tests 306' /tmp/task13-green-product.log
+          grep -q 'pass 306' /tmp/task13-green-product.log
+          grep -q 'fail 0' /tmp/task13-green-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-green-as02.log 2>&1
+          cat /tmp/task13-green-as02.log
+          grep -q 'tests 119' /tmp/task13-green-as02.log
+          grep -q 'pass 119' /tmp/task13-green-as02.log
+          grep -q 'fail 0' /tmp/task13-green-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-green-tc01.log 2>&1
+          cat /tmp/task13-green-tc01.log
+          grep -q 'tests 78' /tmp/task13-green-tc01.log
+          grep -q 'pass 78' /tmp/task13-green-tc01.log
+          grep -q 'fail 0' /tmp/task13-green-tc01.log
+
+          npm run docs:check > /tmp/task13-green-docs.log 2>&1
+          cat /tmp/task13-green-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-green-docs.log
+
+      - name: Verify reviewed safety boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          entry = Path('src/cli/entry.ts').read_text(encoding='utf-8')
+          forbidden = [
+              'shell: true',
+              '--force',
+              "'destroy'",
+              '"destroy"',
+              "'prune'",
+              '"prune"',
+              "from '@mariozechner/pi-coding-agent'",
+              'ClaimService',
+              'new LeaseActionRunner(',
+              'recursive: true',
+          ]
+          found = [value for value in forbidden if value in entry]
+          if found:
+              raise SystemExit(f'forbidden Task 13 production surface: {found}')
+
+          required = [
+              'await ensureDatabaseReady(',
+              'SqliteStore.openCurrent(',
+              'store.close()',
+              'ExecutionService',
+              'LeaseService',
+              'RecoveryService',
+              'ExecutionSourceAdapter',
+              'GitWorktreeInspector',
+              'TreehouseAdapter',
+              'LeaseActionRunner',
+              'LinuxProcessIdentityInspector',
+              'mnfs-lease-action.mjs',
+              'canObservePhysicalWithoutMutation',
+              'ensureContainedDirectoryTree',
+          ]
+          missing = [value for value in required if value not in entry]
+          if missing:
+              raise SystemExit(f'missing Task 13 production boundary: {missing}')
+          PY
+
+      - name: Commit and publish Task 13 GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'd503a38f0134cd822de658e8dd88556df6c665ae'
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add \
+            src/cli/args.ts \
+            src/cli/main.ts \
+            src/cli/entry.ts \
+            src/runtime/paths.ts \
+            tests/cli/execution-green-review.test.ts
+          expected=$'src/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts\ntests/cli/execution-green-review.test.ts'
+          actual="$(git diff --cached --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --cached --check
+          git commit -m 'feat: expose M01 execution CLI'
+          git push origin HEAD:design/mis-002-m01

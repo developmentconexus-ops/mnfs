@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { lstat, readdir } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { TextDecoder } from 'node:util';
 
@@ -408,6 +408,13 @@ function canonicalTreehouseConfig(poolRoot: string): string {
   return `max_trees = 2\nroot = ${JSON.stringify(poolRoot)}\n`;
 }
 
+function exactEntries(actual: readonly string[], expected: readonly string[]): boolean {
+  const sorted = [...actual].sort();
+  const wanted = [...expected].sort();
+  return sorted.length === wanted.length
+    && sorted.every((value, index) => value === wanted[index]);
+}
+
 function buildEnvironment(
   treehouseExecutable: string,
   gitExecutable: string,
@@ -538,29 +545,88 @@ export class TreehouseAdapter {
   }
 
   async #validateControlledContent(boundary: ValidatedBoundary): Promise<void> {
-    const configPath = join(boundary.sourcePath, 'treehouse.toml');
+    const configDirectory = join(boundary.xdgConfigHome, 'treehouse');
+    const configPath = join(configDirectory, 'config.toml');
+    const repositoryConfigPath = join(boundary.sourcePath, 'treehouse.toml');
+    let canonicalConfigDirectory: string;
     let canonicalConfigPath: string;
     let configText: string;
     let xdgEntries: string[];
+    let configEntries: string[];
     let hookEntries: string[];
+
     try {
-      canonicalConfigPath = await this.#realpath(configPath);
-      configText = await this.#readTextFile(configPath);
-      [xdgEntries, hookEntries] = await Promise.all([
+      const [configDirectoryStat, configStat] = await Promise.all([
+        lstat(configDirectory),
+        lstat(configPath),
+      ]);
+      if (
+        !configDirectoryStat.isDirectory()
+        || configDirectoryStat.isSymbolicLink()
+        || !configStat.isFile()
+        || configStat.isSymbolicLink()
+        || configStat.nlink !== 1
+      ) {
+        fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse user configuration has an unsafe filesystem shape.');
+      }
+      [
+        canonicalConfigDirectory,
+        canonicalConfigPath,
+        configText,
+        xdgEntries,
+        configEntries,
+        hookEntries,
+      ] = await Promise.all([
+        this.#realpath(configDirectory),
+        this.#realpath(configPath),
+        this.#readTextFile(configPath),
         readdir(boundary.xdgConfigHome),
+        readdir(configDirectory),
         readdir(boundary.hooksPath),
       ]);
-    } catch {
+    } catch (error) {
+      if (error instanceof MnfsError) throw error;
       fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse controlled configuration cannot be observed.');
     }
-    if (canonicalConfigPath !== configPath) {
-      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse configuration must be one regular canonical path.');
+
+    if (
+      canonicalConfigDirectory !== configDirectory
+      || canonicalConfigPath !== configPath
+      || !exactEntries(xdgEntries, ['treehouse'])
+      || !exactEntries(configEntries, ['config.toml'])
+      || hookEntries.length !== 0
+    ) {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse XDG configuration or hooks differ from the accepted shape.');
     }
-    if (configText !== canonicalTreehouseConfig(boundary.poolRoot)) {
-      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse configuration differs from the accepted pool binding.');
+
+    const expectedConfig = canonicalTreehouseConfig(boundary.poolRoot);
+    if (configText !== expectedConfig) {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse user configuration differs from the accepted pool binding.');
     }
-    if (xdgEntries.length !== 0 || hookEntries.length !== 0) {
-      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse XDG configuration and hooks must be empty.');
+
+    try {
+      const repositoryConfigStat = await lstat(repositoryConfigPath);
+      if (
+        !repositoryConfigStat.isFile()
+        || repositoryConfigStat.isSymbolicLink()
+        || repositoryConfigStat.nlink !== 1
+      ) {
+        fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Repository Treehouse configuration has an unsafe filesystem shape.');
+      }
+      const [canonicalRepositoryConfig, repositoryConfigText] = await Promise.all([
+        this.#realpath(repositoryConfigPath),
+        this.#readTextFile(repositoryConfigPath),
+      ]);
+      if (
+        canonicalRepositoryConfig !== repositoryConfigPath
+        || repositoryConfigText !== expectedConfig
+      ) {
+        fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Repository Treehouse configuration overrides the accepted policy.');
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return;
+      if (error instanceof MnfsError) throw error;
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Repository Treehouse configuration cannot be observed safely.');
     }
   }
 

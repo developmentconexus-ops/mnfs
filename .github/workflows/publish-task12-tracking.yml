@@ -1,0 +1,227 @@
+name: Publish Task 12 Tracking
+
+on:
+  push:
+    branches:
+      - automation/task12-green-publish
+    paths:
+      - .github/workflows/publish-task12-tracking.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task12-tracking
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact Task 12 implementation head
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify implementation and tracking preimage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '74a6254ec6e0a237a26413956416798687c0b2f2'
+          test "$(git hash-object docs/tracking/STATUS.md)" = '2c432e732bd2ec1b5b37901c2a3c825779662e79'
+
+      - name: Record exact Task 12 GREEN evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/tracking/STATUS.md')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_once(old: str, new: str) -> None:
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'expected one replacement, found {count}: {old!r}')
+              text = text.replace(old, new)
+
+          replace_once('version: 1.8.43', 'version: 1.8.44')
+          replace_once(
+              '- **Current enabler:** Issue #16 — Task 12 GREEN awaits explicit authority',
+              '- **Current enabler:** Issue #16 — Task 13 RED awaits explicit authority',
+          )
+          replace_once(
+              'Tasks 1–11:                        COMPLETE / ACCEPTED',
+              'Tasks 1–12:                        COMPLETE / ACCEPTED',
+          )
+          replace_once(
+              'Task 12 GREEN:                     NOT AUTHORIZED',
+              'Task 12 GREEN:                     VERIFIED / REVIEWED',
+          )
+          replace_once(
+              'Task 11  fenced Lease lifecycle service       11fe71df23f697b021bd37133854152c033311ec',
+              'Task 11  fenced Lease lifecycle service       11fe71df23f697b021bd37133854152c033311ec\n'
+              'Task 12  Claim OPEN and read-only Recovery     74a6254ec6e0a237a26413956416798687c0b2f2',
+          )
+          replace_once(
+              'This is acceptable RED evidence; Task 12 GREEN remains separately gated.',
+              'This remains the accepted RED evidence consumed by the separately authorized GREEN below.',
+          )
+
+          task12_green = '''## Task 12 GREEN
+
+Authorization:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_12_GREEN plan=1.0.1 microdesign=0.6.1 red=86aae24ecfabb774710f10ace0d54fb4e53a16d5 task11=11fe71df23f697b021bd37133854152c033311ec
+```
+
+Implementation head:
+
+```text
+74a6254ec6e0a237a26413956416798687c0b2f2
+feat: add Claims and read-only Recovery
+```
+
+Implemented scope:
+
+```text
+src/services/claim-service.ts
+src/services/recovery-service.ts
+src/store/sqlite-store.ts
+tests/services/claim-service.test.ts
+tests/services/recovery-service.test.ts
+```
+
+`ClaimService` now owns the exact M01 Claim OPEN boundary: latest approved MIS-002/M01 contract and Feature criteria, exact current Track/Attempt/Worker Run/Lease lineage, expected-version fences, READY Attempt-owned source, exact result tree observation, canonical input binding, idempotent replay and one same-connection transaction for Claim OPEN, Track `CLAIMED` and `CLAIM_OPENED`.
+
+`RecoveryService` is deterministic and read-only. It reconciles authoritative Track/Attempt/latest Lease state with complete source, external Lease, helper-action and process observations; preserves every candidate and collection hash; classifies `HEALTHY`, `ADOPTABLE`, `LD-01`–`LD-07`, `SD-01`, `SD-02` and `UNKNOWN`; and emits blocker, safe action, required authority and concrete next action without mutation or helper execution.
+
+Post-GREEN adversarial review added fifteen fail-first cases beyond the accepted RED matrix, including:
+
+```text
+same-key concurrent Claim replay after Git observation
+semantic DIVERGED Lease never appearing HEALTHY
+canonical path aliases and non-bijective ownership
+orphan source and process candidates
+missing external Lease timestamp
+phase-aware CLAIMED, STARTED and FINISHED helper evidence
+live committed owner versus dead STARTED runner
+future expected Artifact paths not treated as observations
+separate canonical hashes for every observation collection
+latest RELEASED Lease recovery on an abandoned Track
+```
+
+Canonical verification:
+
+```text
+Head:              74a6254ec6e0a237a26413956416798687c0b2f2
+Publisher Run/Job: 31027102669 / 92378259729
+Node:              24.18.0
+TypeScript:        PASS
+Task 12:           45/45 PASS
+Product:           285/285 PASS
+AS-02:             119/119 PASS
+TC-01:             78/78 PASS
+Documentation:     PASS — 93 canonical IDs
+```
+
+Adversarial scope review:
+
+```text
+Critical:    0 open
+Important:   0 open
+Minor:       0 open
+Result:      ACCEPTABLE
+Replan:      not required
+```
+
+Scope review:
+
+- two production services plus the bounded same-connection Claim allocation seam and latest-Lease read required by Recovery;
+- no schema, migration, package or dependency change;
+- no second SQLite connection or transaction authority;
+- no real Treehouse, Lease helper or Pi process execution;
+- no CLI composition, SEC-E1 production dispatch, Claim completion/acceptance, Receipt or Gate;
+- Recovery contains no semantic mutation, Event append, action-token claim, acquire/release or destructive repair authority;
+- Task 13 and M01 acceptance remain outside this authorization.
+
+'''
+          marker = '## Frozen boundaries\n'
+          if text.count(marker) != 1:
+              raise SystemExit('expected one Frozen boundaries marker')
+          text = text.replace(marker, task12_green + marker)
+
+          old_boundary = '''```text
+Tasks 1–11:                 COMPLETE / ACCEPTED
+Task 11 RED:                OBSERVED / ACCEPTABLE
+Task 11 GREEN:              VERIFIED / REVIEWED
+Task 12 RED:                OBSERVED / ACCEPTABLE
+Task 12 GREEN:              NOT AUTHORIZED
+Task 13 and later:          NOT AUTHORIZED
+Real Treehouse execution:   NOT AUTHORIZED
+Pi Worker dispatch:         PROHIBITED
+M01 acceptance:             NOT AUTHORIZED
+PR #17 merge:               NOT AUTHORIZED
+```'''
+          new_boundary = '''```text
+Tasks 1–12:                 COMPLETE / ACCEPTED
+Task 11 RED:                OBSERVED / ACCEPTABLE
+Task 11 GREEN:              VERIFIED / REVIEWED
+Task 12 RED:                OBSERVED / ACCEPTABLE
+Task 12 GREEN:              VERIFIED / REVIEWED
+Task 13 and later:          NOT AUTHORIZED
+Real Treehouse execution:   NOT AUTHORIZED
+Pi Worker dispatch:         PROHIBITED
+M01 acceptance:             NOT AUTHORIZED
+PR #17 merge:               NOT AUTHORIZED
+```'''
+          replace_once(old_boundary, new_boundary)
+
+          replace_once(
+              'A separate exact Operator continuation is required for Task 12 GREEN, bound to reviewed Task 12 RED head `86aae24ecfabb774710f10ace0d54fb4e53a16d5` and accepted Task 11 implementation head `11fe71df23f697b021bd37133854152c033311ec`. Task 13, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.',
+              'A separate exact Operator continuation is required for Task 13 RED, bound to accepted Task 12 implementation head `74a6254ec6e0a237a26413956416798687c0b2f2`. Task 13 GREEN, Task 14, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.',
+          )
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+          expected='docs/tracking/STATUS.md'
+          actual="$(git diff --name-only)"
+          test "$actual" = "$expected"
+          git diff --check
+          grep -q '^version: 1.8.44$' docs/tracking/STATUS.md
+          grep -q 'Tasks 1–12:.*COMPLETE / ACCEPTED' docs/tracking/STATUS.md
+          grep -q 'Task 12 GREEN:.*VERIFIED / REVIEWED' docs/tracking/STATUS.md
+          grep -q 'Task 13 RED awaits explicit authority' docs/tracking/STATUS.md
+          grep -q '74a6254ec6e0a237a26413956416798687c0b2f2' docs/tracking/STATUS.md
+          grep -q '31027102669 / 92378259729' docs/tracking/STATUS.md
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci
+
+      - name: Verify complete canonical suite with tracking evidence
+        shell: bash
+        run: npm run verify
+
+      - name: Commit and publish Task 12 tracking evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add docs/tracking/STATUS.md
+          test "$(git diff --cached --name-only)" = 'docs/tracking/STATUS.md'
+          git diff --cached --check
+          git commit -m 'docs: record Task 12 implementation evidence'
+          git push origin HEAD:design/mis-002-m01

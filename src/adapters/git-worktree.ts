@@ -10,6 +10,13 @@ const READ_OUTPUT_LIMIT_BYTES = 1_048_576;
 const FATAL_UTF8 = new TextDecoder('utf-8', { fatal: true });
 const SHA1_PATTERN = /^[0-9a-f]{40}$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
+const ENVIRONMENT_ALLOWLIST = ['PATH', 'HOME', 'TMPDIR', 'LANG', 'LC_ALL', 'TZ'] as const;
+const OWNED_GIT_CONFIG = [
+  ['core.fsmonitor', 'false'],
+  ['core.hooksPath', '/dev/null'],
+  ['credential.helper', ''],
+  ['uploadpack.packObjectsHook', ''],
+] as const;
 
 export interface GitRepositoryObservation {
   readonly repositoryPath: string;
@@ -47,29 +54,23 @@ export interface GitWorktreeInspectorInput {
 function controlledGitEnvironment(
   environment: Readonly<Record<string, string>>,
 ): Readonly<Record<string, string>> {
-  const result: Record<string, string> = { ...environment };
-  for (const name of [
-    'HTTP_PROXY',
-    'HTTPS_PROXY',
-    'ALL_PROXY',
-    'NO_PROXY',
-    'http_proxy',
-    'https_proxy',
-    'all_proxy',
-    'no_proxy',
-    'GIT_ASKPASS',
-    'SSH_ASKPASS',
-    'SSH_AUTH_SOCK',
-    'GIT_PROXY_COMMAND',
-    'GIT_SSH',
-    'GIT_SSH_COMMAND',
-  ]) {
-    delete result[name];
+  const result: Record<string, string> = {};
+  for (const name of ENVIRONMENT_ALLOWLIST) {
+    const value = environment[name];
+    if (value !== undefined) result[name] = value;
   }
+
   result.GIT_CONFIG_GLOBAL = '/dev/null';
   result.GIT_CONFIG_NOSYSTEM = '1';
   result.GIT_TERMINAL_PROMPT = '0';
   result.GCM_INTERACTIVE = 'Never';
+  result.GIT_OPTIONAL_LOCKS = '0';
+  result.GIT_NO_LAZY_FETCH = '1';
+  result.GIT_CONFIG_COUNT = String(OWNED_GIT_CONFIG.length);
+  for (const [index, [key, value]] of OWNED_GIT_CONFIG.entries()) {
+    result[`GIT_CONFIG_KEY_${index}`] = key;
+    result[`GIT_CONFIG_VALUE_${index}`] = value;
+  }
   return Object.freeze(result);
 }
 

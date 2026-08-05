@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.25
+version: 1.8.26
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 7 atomic-authority GREEN awaits explicit authority
+- **Current enabler:** Issue #16 — Task 7 accepted; Task 8 RED awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -62,8 +62,10 @@ Task 7 first corrective RED:      OBSERVED / ACCEPTABLE — 4 expected failures
 Task 7 first corrective GREEN:    VERIFIED — 159/159 product PASS
 Task 7 post-correction review:    R7-04 IMPORTANT
 Task 7 atomic-authority RED:      OBSERVED / ACCEPTABLE — 4 expected failures
-Task 7 atomic-authority GREEN:    NOT AUTHORIZED
-Task 7 accepted:                  NO
+Task 7 atomic-authority GREEN:    VERIFIED — 163/163 product PASS
+Task 7 final review:              0 Critical / 0 Important / 0 Minor
+Task 7 accepted:                  YES
+Task 8 RED:                       NOT AUTHORIZED
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
 Automatic merge:                  NOT AUTHORIZED
@@ -78,21 +80,32 @@ Task 7 introduces `ExecutionService`, which governs:
 
 ```text
 approved contract + valid qualified target + exact Git base
-→ Write Track + A01 + matching Events
+→ atomic Write Track + A01 + matching Events
 
 current Worker Run
-→ terminalization + replacement Run + matching Events
+→ atomic terminalization + replacement Run + matching Events
 
 current Attempt + safe resource observations
-→ supersession + next Attempt + matching Events
+→ atomic supersession + next Attempt + matching Events
 
 empty guarded Track
 → explicit abandonment without implicit Lease release
 ```
 
-This moves MNFS from “a database that can store execution rows” toward a deterministic control plane that decides when execution state may advance.
+The final Task 7 boundary distinguishes external observation from durable authority:
 
-The remaining `R7-04` gap is now mechanically reproduced: sequential decisions are correct, but another MNFS writer can change contract or lifecycle authority after validation and before `BEGIN IMMEDIATE`.
+```text
+Git/resource observations
+→ outside the SQLite transaction
+
+latest approved contract + mutable Track/Attempt/Run/resource state
+→ reloaded after BEGIN IMMEDIATE
+
+validation + mutation + payload-versioned Events
+→ same transaction and same SQLite connection
+```
+
+This makes Task 7 a deterministic multi-writer control plane rather than only a collection of atomic writes. A competing writer either commits first and is observed by the operation, or waits until the operation commits; stale semantic snapshots cannot authorize new execution state.
 
 ## Operator authority chain
 
@@ -118,6 +131,7 @@ MNFS_AUTHORIZE_M01_TASK_7_GREEN plan=1.0.1 microdesign=0.6.1 red=2fe2d87e1bc6f69
 MNFS_AUTHORIZE_M01_TASK_7_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=656d9a431957b74b9018020b829621f5a07a53eb blockers=R7-01,R7-02,R7-03
 MNFS_AUTHORIZE_M01_TASK_7_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=f976f254677c14a13371769269914e86cf96b539 blockers=R7-01,R7-02,R7-03
 MNFS_AUTHORIZE_M01_TASK_7_ATOMIC_AUTHORITY_RED plan=1.0.1 microdesign=0.6.1 green=5795fc5bf98677bec532484d3ec8c0917b83ca08 blocker=R7-04
+MNFS_AUTHORIZE_M01_TASK_7_ATOMIC_AUTHORITY_GREEN plan=1.0.1 microdesign=0.6.1 red=062f1be67dd86c4ad70c311a302eea4f68e95c21 blocker=R7-04
 ```
 
 ## Completed implementation summary
@@ -160,17 +174,21 @@ Modified:
 src/store/sqlite-store.ts
 ```
 
-Task 7 functional implementation provides:
+Task 7 provides:
 
 - latest approved-contract and qualified-target validation;
 - non-empty Feature requirement allocation validation;
 - exact Git commit and object-format binding through an injected read-only inspector;
-- canonical same-input Track opening replay;
-- Track + A01 + two matching Events under the shared transaction authority;
-- Worker Run opening and replacement;
+- canonical same-input Track opening replay serialized under the write transaction;
+- atomic Track + A01 + two matching Events;
+- atomic Worker Run opening and replacement;
 - Attempt supersession with resource-disposition guards;
 - explicit Track abandonment without implicit resource release;
-- focused current-entity lookups and atomic mutation methods on the existing SQLite authority;
+- preservation of durable process identity during Run terminalization;
+- ACTIVE Track fences for Run creation and replacement;
+- latest-approved-contract fences for Run replacement and Attempt supersession;
+- in-transaction reload of mutable contract and lifecycle authority;
+- deterministic two-connection controlled-interleaving proof;
 - no Task 8 source adapter, real Git command, filesystem operation, Treehouse invocation or Pi behavior.
 
 ## Task 7 primary TDD
@@ -237,7 +255,9 @@ Documentation validation: PASS — 93 canonical IDs
 
 `R7-01`, `R7-02` and `R7-03` are closed.
 
-## Task 7 atomic-authority RED
+## Task 7 atomic-authority TDD
+
+### RED
 
 Created only:
 
@@ -245,16 +265,7 @@ Created only:
 tests/services/execution-service-atomic-authority.test.ts
 ```
 
-The tests open two independent `SqliteStore` connections to the same test database. A deterministic wrapper commits the competing writer immediately after the primary service performs its external validation and immediately before the primary `runAtomic` begins.
-
-The four tests prove:
-
-1. Track opening can continue after an interleaved approved Replan;
-2. Worker Run opening can continue after an interleaved Track abandonment;
-3. Worker Run replacement can continue after an interleaved approved Replan;
-4. Attempt supersession can continue after an interleaved Track abandonment.
-
-Evidence:
+The tests open two independent `SqliteStore` connections to the same test database and commit the competing writer immediately before the primary `runAtomic` begins.
 
 ```text
 Atomic RED head:          062f1be67dd86c4ad70c311a302eea4f68e95c21
@@ -266,22 +277,44 @@ Atomic-authority tests:    0/4 expected failure
 Product total:             159 PASS / 4 FAIL
 ```
 
-All four failures are `Missing expected exception`. The competing writer commits successfully, then the primary service enters its transaction and mutates from the stale pre-transaction snapshot.
+### GREEN
 
-No production file changed in the atomic-authority RED.
+The correction keeps external observations outside the transaction and moves all mutable semantic authority reads after `BEGIN IMMEDIATE`:
 
-## R7-04 required GREEN behavior
+```text
+Atomic GREEN head:        ff8fe7c972502ff6cc932687b7e65a16f37b6516
+Synthetic merge:          9fc77e5e854068850d479b8ac4b30509cc34e6e1
+Workflow/job:              30973626285 / 92203016125
+TypeScript:                PASS
+Product tests:             163/163 PASS
+Atomic-authority tests:    4/4 PASS
+R7-01/R7-02/R7-03:        PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation: PASS — 93 canonical IDs
+```
 
-The future correction must ensure:
+Scope review:
 
-- Git, filesystem, process and Treehouse observations remain outside the database transaction;
-- `BEGIN IMMEDIATE` starts before loading mutable semantic authority;
-- latest approved contract and Track/Attempt/Run dependencies are reloaded inside that transaction;
-- expected versions fence mutable dependencies;
-- stale authority changes no execution row, consumes no durable identity and appends no execution Event;
-- no second SQLite transaction authority is introduced.
+```text
+src/services/execution-service.ts  modified
+schema/migrations                  unchanged
+SQLite connections/authority       unchanged
+Task 8 adapters                    absent
+Treehouse/Pi behavior              unchanged
+```
 
-No Replan is required; this is an implementation gap against the accepted atomic authority design.
+Final adversarial review:
+
+```text
+Review:     4860838576
+Critical:   0
+Important:  0
+Minor:      0
+R7-04:      CLOSED
+Task 7:     ACCEPTABLE
+Replan:     not required
+```
 
 ## Frozen boundaries
 
@@ -307,9 +340,10 @@ Task 7 functional GREEN:           VERIFIED
 Task 7 first corrective RED:       OBSERVED / ACCEPTABLE
 Task 7 first corrective GREEN:     VERIFIED
 Task 7 atomic-authority RED:       OBSERVED / ACCEPTABLE
-Task 7 atomic-authority GREEN:     NOT AUTHORIZED
-Task 7 accepted:                   NO
-Task 8 and later:                  NOT AUTHORIZED
+Task 7 atomic-authority GREEN:     VERIFIED
+Task 7 accepted:                   YES
+Task 8 RED:                        NOT AUTHORIZED
+Task 8 GREEN and later:            NOT AUTHORIZED
 Real Treehouse execution:          NOT AUTHORIZED
 Pi Worker dispatch:                PROHIBITED
 M01 acceptance:                    NOT AUTHORIZED
@@ -320,4 +354,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 7 atomic-authority GREEN only**, bound to atomic RED head `062f1be67dd86c4ad70c311a302eea4f68e95c21` and blocker `R7-04`.
+Request or provide an explicit continuation for **Task 8 RED only**, bound to accepted Task 7 head `ff8fe7c972502ff6cc932687b7e65a16f37b6516`.

@@ -7,7 +7,8 @@
     "node": ">=24.18.0"
   },
   "bin": {
-    "mnfs": "./bin/mnfs.mjs"
+    "mnfs": "./bin/mnfs.mjs",
+    "mnfs-lease-action": "./bin/mnfs-lease-action.mjs"
   },
   "scripts": {
     "clean": "rm -rf dist",

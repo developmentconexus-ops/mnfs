@@ -28,19 +28,99 @@ jobs:
           node-version: 24.18.0
           cache: npm
 
+      - name: Verify authorized lineage and bounded work scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor d503a38f0134cd822de658e8dd88556df6c665ae HEAD
+          git merge-base --is-ancestor fe6da615d2d0a32437e2adb0627f09a693f1bd57 HEAD
+          git merge-base --is-ancestor 8c6fd9afa2cc7f707f96659b9efa73230579471a HEAD
+          expected=$'.github/workflows/task13-green-work.yml\nsrc/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts'
+          actual="$(git diff --name-only d503a38f0134cd822de658e8dd88556df6c665ae...HEAD | sort)"
+          test "$actual" = "$expected"
+          git diff --check d503a38f0134cd822de658e8dd88556df6c665ae...HEAD
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Directed Task 13 tests
+      - name: Verify directed Task 13 matrix
+        shell: bash
         run: |
+          set -euo pipefail
+          npm run typecheck
           npm run build --silent
           node --test \
             dist/tests/cli/execution-args.test.js \
             dist/tests/cli/execution-main.test.js \
-            dist/tests/cli/execution-red-review.test.js
+            dist/tests/cli/execution-red-review.test.js \
+            > /tmp/task13-directed.log 2>&1
+          cat /tmp/task13-directed.log
+          grep -q 'tests 12' /tmp/task13-directed.log
+          grep -q 'pass 12' /tmp/task13-directed.log
+          grep -q 'fail 0' /tmp/task13-directed.log
 
-      - name: Full product suite
-        run: node scripts/run-tests.mjs
+      - name: Verify canonical product and accepted adapters
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-tests.mjs > /tmp/task13-product.log 2>&1
+          cat /tmp/task13-product.log
+          grep -q 'tests 302' /tmp/task13-product.log
+          grep -q 'pass 302' /tmp/task13-product.log
+          grep -q 'fail 0' /tmp/task13-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-as02.log 2>&1
+          cat /tmp/task13-as02.log
+          grep -q 'tests 119' /tmp/task13-as02.log
+          grep -q 'pass 119' /tmp/task13-as02.log
+          grep -q 'fail 0' /tmp/task13-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-tc01.log 2>&1
+          cat /tmp/task13-tc01.log
+          grep -q 'tests 78' /tmp/task13-tc01.log
+          grep -q 'pass 78' /tmp/task13-tc01.log
+          grep -q 'fail 0' /tmp/task13-tc01.log
+
+          npm run docs:check > /tmp/task13-docs.log 2>&1
+          cat /tmp/task13-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-docs.log
+
+      - name: Adversarial source boundary scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          entry = Path('src/cli/entry.ts').read_text(encoding='utf-8')
+          forbidden = [
+              'shell: true',
+              '--force',
+              "'destroy'",
+              '"destroy"',
+              "'prune'",
+              '"prune"',
+              "from '@mariozechner/pi-coding-agent'",
+              'ClaimService',
+          ]
+          found = [value for value in forbidden if value in entry]
+          if found:
+              raise SystemExit(f'forbidden Task 13 production surface: {found}')
+          required = [
+              'await ensureDatabaseReady(',
+              'SqliteStore.openCurrent(',
+              'finally {',
+              'store.close()',
+              'ExecutionService',
+              'LeaseService',
+              'RecoveryService',
+              'ExecutionSourceAdapter',
+              'GitWorktreeInspector',
+              'TreehouseAdapter',
+              'LeaseActionRunner',
+              'LinuxProcessIdentityInspector',
+          ]
+          missing = [value for value in required if value not in entry]
+          if missing:
+              raise SystemExit(f'missing Task 13 production boundary: {missing}')
+          PY

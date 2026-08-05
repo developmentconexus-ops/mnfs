@@ -1,0 +1,179 @@
+name: Publish Task 13 GREEN Candidate
+
+on:
+  push:
+    branches:
+      - automation/task13-green-publish
+    paths:
+      - .github/workflows/publish-task13-green-candidate.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task13-green-candidate
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout isolated Task 13 GREEN candidate
+        uses: actions/checkout@v4
+        with:
+          ref: scratch/task13-green-candidate
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify authorized RED baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '7872071c6ed7238ec0cb8dc55e613d25d1f6d9fd'
+          git merge-base --is-ancestor '956a067336df48f54d19e634666f14bdf5a92143' HEAD
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+          test "$(git hash-object tests/cli/execution-args.test.ts)" = 'bf22293f55983c12450dc81bafe5df31be5457c8'
+          test "$(git hash-object tests/cli/execution-main.test.ts)" = '792fc7907aa12672532893558b98a99b9dd70a34'
+
+          npm ci
+          npm run typecheck
+          npm run build --silent
+
+          set +e
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            > /tmp/task13-green-red-directed.log 2>&1
+          directed_status=$?
+          node scripts/run-tests.mjs > /tmp/task13-green-red-product.log 2>&1
+          product_status=$?
+          set -e
+
+          cat /tmp/task13-green-red-directed.log
+          test "$directed_status" -ne 0
+          grep -q 'tests 8' /tmp/task13-green-red-directed.log
+          grep -q 'pass 0' /tmp/task13-green-red-directed.log
+          grep -q 'fail 8' /tmp/task13-green-red-directed.log
+          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-green-red-directed.log
+          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-green-red-directed.log
+
+          cat /tmp/task13-green-red-product.log
+          test "$product_status" -ne 0
+          grep -q 'tests 298' /tmp/task13-green-red-product.log
+          grep -q 'pass 290' /tmp/task13-green-red-product.log
+          grep -q 'fail 8' /tmp/task13-green-red-product.log
+
+      - name: Checkout reviewed GREEN payload
+        uses: actions/checkout@v4
+        with:
+          ref: automation/task13-green-publish
+          path: .task13-green-publisher
+          fetch-depth: 1
+
+      - name: Install exact four-file GREEN payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            .task13-green-publisher/.github/task13-green/payload.00 \
+            .task13-green-publisher/.github/task13-green/payload.01 \
+            .task13-green-publisher/.github/task13-green/payload.02 \
+            .task13-green-publisher/.github/task13-green/payload.03 \
+            .task13-green-publisher/.github/task13-green/payload.04 \
+            .task13-green-publisher/.github/task13-green/payload.05 \
+            > /tmp/task13-green-payload.b64
+          base64 --decode /tmp/task13-green-payload.b64 > /tmp/task13-green-payload.tar.gz
+          echo 'c567c67ec868d22301c3927b7322ce49a890a50e964f4501af41e766c4c9edd6  /tmp/task13-green-payload.tar.gz' | sha256sum -c -
+
+          mkdir -p /tmp/task13-green-payload
+          tar -xzf /tmp/task13-green-payload.tar.gz -C /tmp/task13-green-payload
+          expected=$'src/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts'
+          actual="$(find /tmp/task13-green-payload -type f -printf '%P\n' | sort)"
+          test "$actual" = "$expected"
+
+          cp /tmp/task13-green-payload/src/cli/args.ts src/cli/args.ts
+          cp /tmp/task13-green-payload/src/cli/main.ts src/cli/main.ts
+          cp /tmp/task13-green-payload/src/cli/entry.ts src/cli/entry.ts
+          cp /tmp/task13-green-payload/src/runtime/paths.ts src/runtime/paths.ts
+          rm -rf .task13-green-publisher
+
+          actual="$(git diff --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --check
+
+      - name: Verify Task 13 GREEN directed matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run build --silent
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            > /tmp/task13-green-directed.log 2>&1
+          cat /tmp/task13-green-directed.log
+          grep -q 'tests 8' /tmp/task13-green-directed.log
+          grep -q 'pass 8' /tmp/task13-green-directed.log
+          grep -q 'fail 0' /tmp/task13-green-directed.log
+
+      - name: Verify canonical product and conformance suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-tests.mjs > /tmp/task13-green-product.log 2>&1
+          cat /tmp/task13-green-product.log
+          grep -q 'tests 298' /tmp/task13-green-product.log
+          grep -q 'pass 298' /tmp/task13-green-product.log
+          grep -q 'fail 0' /tmp/task13-green-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-green-as02.log 2>&1
+          cat /tmp/task13-green-as02.log
+          grep -q 'tests 119' /tmp/task13-green-as02.log
+          grep -q 'pass 119' /tmp/task13-green-as02.log
+          grep -q 'fail 0' /tmp/task13-green-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-green-tc01.log 2>&1
+          cat /tmp/task13-green-tc01.log
+          grep -q 'tests 78' /tmp/task13-green-tc01.log
+          grep -q 'pass 78' /tmp/task13-green-tc01.log
+          grep -q 'fail 0' /tmp/task13-green-tc01.log
+
+          npm run docs:check > /tmp/task13-green-docs.log 2>&1
+          cat /tmp/task13-green-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-green-docs.log
+
+      - name: Verify bounded Task 13 scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected=$'src/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts'
+          actual="$(git diff --name-only | sort)"
+          test "$actual" = "$expected"
+          test "$(git hash-object tests/cli/execution-args.test.ts)" = 'bf22293f55983c12450dc81bafe5df31be5457c8'
+          test "$(git hash-object tests/cli/execution-main.test.ts)" = '792fc7907aa12672532893558b98a99b9dd70a34'
+          ! grep -R --line-number --fixed-strings 'force-release' src/cli src/runtime/paths.ts
+          ! grep -R --line-number --fixed-strings 'recover --repair' src/cli src/runtime/paths.ts
+          git diff --check
+
+      - name: Commit verified GREEN candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add \
+            src/cli/args.ts \
+            src/cli/main.ts \
+            src/cli/entry.ts \
+            src/runtime/paths.ts
+          expected=$'src/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts'
+          actual="$(git diff --cached --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --cached --check
+          git commit -m 'feat: expose M01 execution CLI'
+          git push origin HEAD:scratch/task13-green-candidate

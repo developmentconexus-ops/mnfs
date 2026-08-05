@@ -273,6 +273,22 @@ function installEventFailure(databasePath: string, eventType: string): void {
   }
 }
 
+function installTrackCasFailure(databasePath: string): void {
+  const database = new DatabaseSync(databasePath);
+  try {
+    database.exec(`
+      CREATE TRIGGER task12_claim_track_cas_failure
+      BEFORE UPDATE OF status ON write_tracks
+      WHEN NEW.status = 'CLAIMED'
+      BEGIN
+        SELECT RAISE(IGNORE);
+      END;
+    `);
+  } finally {
+    database.close();
+  }
+}
+
 function addSecondLineage(harness: Harness): Readonly<{
   track: WriteTrack;
   attempt: Attempt;
@@ -365,6 +381,20 @@ test('rolls back Claim, Track transition and Event when CLAIM_OPENED insertion f
   withHarness('event-rollback', (harness) => {
     installEventFailure(harness.databasePath, 'CLAIM_OPENED');
     assert.throws(() => serviceFor(module, harness).openClaim(claimInput(harness)));
+    assert.equal(rowCount(harness.databasePath, 'claims'), 0);
+    assert.equal(harness.store.execution.getWriteTrack(harness.track.id)?.status, 'ACTIVE');
+    assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 0);
+  });
+});
+
+test('rolls back Claim and Event when the Track CAS seam rejects after insertion', async () => {
+  const module = await loadClaimService();
+  withHarness('track-cas-rollback', (harness) => {
+    installTrackCasFailure(harness.databasePath);
+    expectCode(
+      'CONCURRENCY_CONFLICT',
+      () => serviceFor(module, harness).openClaim(claimInput(harness)),
+    );
     assert.equal(rowCount(harness.databasePath, 'claims'), 0);
     assert.equal(harness.store.execution.getWriteTrack(harness.track.id)?.status, 'ACTIVE');
     assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 0);
@@ -624,6 +654,32 @@ test('replays same-key same-input Claim and rejects a conflicting binding', asyn
       resultTreeSha: OTHER_TREE,
     })));
     assert.equal(rowCount(harness.databasePath, 'claims'), 1);
+  });
+});
+
+test('replays the exact committed Claim after a newer contract is approved', async () => {
+  const module = await loadClaimService();
+  withHarness('idempotency-after-replan', (harness) => {
+    const service = serviceFor(module, harness);
+    const input = claimInput(harness);
+    const first = service.openClaim(input);
+
+    const saved = harness.store.saveMissionPlanRevision({
+      missionId: 'MIS-002',
+      content: validPlanV2('MIS-002', 'Task 12 idempotent replay after Replan'),
+      expectedPreviousHash: harness.approvedHash,
+      createdAt: '2026-08-05T15:05:00.000Z',
+    });
+    harness.store.approveMissionPlan({
+      missionId: 'MIS-002',
+      contentHash: saved.contentHash,
+      approvedAt: '2026-08-05T15:06:00.000Z',
+    });
+
+    const replay = service.openClaim(input);
+    assert.deepEqual(replay, first);
+    assert.equal(rowCount(harness.databasePath, 'claims'), 1);
+    assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 1);
   });
 });
 

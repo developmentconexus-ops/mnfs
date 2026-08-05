@@ -349,11 +349,61 @@ function classifyLeaseCandidate(
     return { sourceExact: false, leaseExact: false };
   }
 
+  if (candidate.status === 'available') {
+    if (candidate.gitStatus === 'UNKNOWN') {
+      addFinding(findings, finding('UNKNOWN', target, {
+        safeActions: ['preserve the available candidate and collect decisive Git state'],
+        requiredAuthority: 'OPERATOR',
+        nextAction: 'Repeat external observation until the available worktree state is decisive.',
+      }));
+      return { sourceExact: false, leaseExact: false };
+    }
+    if (candidate.gitStatus !== 'CLEAN') {
+      addFinding(findings, finding('LD-05', target, {
+        safeActions: ['preserve worktree content and defer semantic changes'],
+        requiredAuthority: 'OPERATOR',
+        nextAction: 'Inspect the available worktree before any Lease operation.',
+      }));
+      return { sourceExact: false, leaseExact: false };
+    }
+    if (
+      candidate.leaseId !== undefined
+      || candidate.holder !== undefined
+      || candidate.leasedAt !== undefined
+    ) {
+      addFinding(findings, finding('UNKNOWN', target, {
+        safeActions: ['preserve the contradictory available and leased identity fields'],
+        requiredAuthority: 'OPERATOR',
+        nextAction: 'Resolve the contradictory external Lease observation before proceeding.',
+      }));
+      return { sourceExact: false, leaseExact: false };
+    }
+    if (
+      lease.status === 'RELEASE_PENDING'
+      && lease.worktreePath === candidate.path
+      && attempt?.sourcePath === candidate.sourcePath
+    ) {
+      addFinding(findings, finding('ADOPTABLE', target, {
+        severity: 'INFO',
+        safeActions: ['preserve the available worktree identity', 'retry the original release fence'],
+        requiredAuthority: 'ORIGINAL_OPERATION',
+        nextAction: 'Retry the original release operation to commit the observed result.',
+      }));
+      return { sourceExact: true, leaseExact: false };
+    }
+    addFinding(findings, finding('LD-01', target, {
+      safeActions: ['preserve semantic Lease state and the decisive available worktree evidence'],
+      requiredAuthority: 'OPERATOR',
+      nextAction: 'Resolve why the semantic Lease has no external leased match.',
+    }));
+    return { sourceExact: false, leaseExact: false };
+  }
+
   if (
     candidate.gitStatus === 'UNKNOWN'
     || candidate.leaseId === undefined
     || candidate.holder === undefined
-    || (candidate.status === 'leased' && candidate.leasedAt === undefined)
+    || candidate.leasedAt === undefined
   ) {
     addFinding(findings, finding('UNKNOWN', target, {
       safeActions: ['preserve the candidate and collect complete Lease identity fields'],
@@ -394,16 +444,6 @@ function classifyLeaseCandidate(
       nextAction: 'Resolve the missing external Lease before continuing.',
     }));
     return { sourceExact: false, leaseExact: false };
-  }
-
-  if (lease.status === 'RELEASE_PENDING' && candidate.status === 'available') {
-    addFinding(findings, finding('ADOPTABLE', target, {
-      severity: 'INFO',
-      safeActions: ['preserve the available worktree identity', 'retry the original release fence'],
-      requiredAuthority: 'ORIGINAL_OPERATION',
-      nextAction: 'Retry the original release operation to commit the observed result.',
-    }));
-    return { sourceExact: true, leaseExact: false };
   }
 
   if (candidate.status !== 'leased') {
@@ -481,6 +521,7 @@ function classifyLease(
 
   const lease = expected.lease;
   if (lease === undefined) {
+    if (candidates.length === 0) return true;
     for (const candidate of candidates) {
       addFinding(findings, finding('LD-02', candidate.path, {
         safeActions: ['preserve the external candidate for operator review'],
@@ -714,7 +755,6 @@ export class RecoveryService {
       findings.length === 0
       && writeTrack !== undefined
       && attempt !== undefined
-      && lease !== undefined
       && sourceExact
       && leaseExact
     ) {

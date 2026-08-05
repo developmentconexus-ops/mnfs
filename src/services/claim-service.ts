@@ -45,11 +45,14 @@ export interface OpenClaimInput {
   readonly occurredAt: string;
 }
 
-interface ClaimLineage {
+interface ClaimEntities {
   readonly track: WriteTrack;
   readonly attempt: Attempt;
   readonly run: WorkerRun;
   readonly lease: Lease;
+}
+
+interface ClaimLineage extends ClaimEntities {
   readonly approved: MissionPlanRevision;
   readonly feature: FeaturePlanV2;
 }
@@ -137,7 +140,7 @@ export class ClaimService {
     return { approved, feature };
   }
 
-  #loadLineage(input: OpenClaimInput, criteria: readonly string[]): ClaimLineage {
+  #loadEntities(input: OpenClaimInput): ClaimEntities {
     const track = this.#store.execution.getWriteTrack(input.writeTrackId);
     const attempt = this.#store.execution.getAttempt(input.attemptId);
     const run = this.#store.execution.getWorkerRun(input.workerRunId);
@@ -145,13 +148,17 @@ export class ClaimService {
     if (track === undefined || attempt === undefined || run === undefined || lease === undefined) {
       throw new MnfsError('CLAIM_CONFLICT', 'Claim lineage is incomplete.');
     }
+    return { track, attempt, run, lease };
+  }
 
-    const { approved, feature } = this.#requireApprovedFeature(track);
+  #loadLineage(input: OpenClaimInput, criteria: readonly string[]): ClaimLineage {
+    const entities = this.#loadEntities(input);
+    const { approved, feature } = this.#requireApprovedFeature(entities.track);
     const allowedCriteria = new Set(feature.acceptanceCriteria.map((criterion) => criterion.qualifiedId));
     if (criteria.some((criterion) => !allowedCriteria.has(criterion))) {
       throw new MnfsError('CLAIM_CONFLICT', 'Claim criteria are not owned by the approved Feature.');
     }
-    return { track, attempt, run, lease, approved, feature };
+    return { ...entities, approved, feature };
   }
 
   #requireLineage(input: OpenClaimInput, criteria: readonly string[]): ClaimLineage {
@@ -194,7 +201,7 @@ export class ClaimService {
   #inputHash(
     input: OpenClaimInput,
     criteria: readonly string[],
-    lineage: ClaimLineage,
+    lineage: ClaimEntities,
   ): string {
     return hashCanonicalInput({
       kind: 'CLAIM_OPEN',
@@ -217,30 +224,38 @@ export class ClaimService {
     });
   }
 
+  #existingClaim(input: OpenClaimInput, criteria: readonly string[]): Claim | undefined {
+    const existing = this.#store.execution.getClaimByIdempotencyKey(input.idempotencyKey);
+    if (
+      existing !== undefined
+      && (
+        existing.writeTrackId !== input.writeTrackId
+        || existing.attemptId !== input.attemptId
+        || existing.workerRunId !== input.workerRunId
+        || existing.leaseId !== input.leaseId
+        || existing.baseCommitSha !== input.baseCommitSha
+        || existing.resultTreeSha !== input.resultTreeSha
+        || !sameCriteria(existing.claimedCriterionIds, criteria)
+      )
+    ) {
+      throw new MnfsError(
+        'CLAIM_IDEMPOTENCY_CONFLICT',
+        `Claim idempotency key ${input.idempotencyKey} is bound to different input.`,
+      );
+    }
+    return existing;
+  }
+
   #replay(
-    input: OpenClaimInput,
-    criteria: readonly string[],
+    existing: Claim | undefined,
     inputHash: string,
     contractHash: string,
   ): Claim | undefined {
-    const existing = this.#store.execution.getClaimByIdempotencyKey(input.idempotencyKey);
     if (existing === undefined) return undefined;
-    if (
-      existing.inputHash === inputHash
-      && existing.writeTrackId === input.writeTrackId
-      && existing.attemptId === input.attemptId
-      && existing.workerRunId === input.workerRunId
-      && existing.leaseId === input.leaseId
-      && existing.contractHash === contractHash
-      && existing.baseCommitSha === input.baseCommitSha
-      && existing.resultTreeSha === input.resultTreeSha
-      && sameCriteria(existing.claimedCriterionIds, criteria)
-    ) {
-      return existing;
-    }
+    if (existing.inputHash === inputHash && existing.contractHash === contractHash) return existing;
     throw new MnfsError(
       'CLAIM_IDEMPOTENCY_CONFLICT',
-      `Claim idempotency key ${input.idempotencyKey} is bound to different input.`,
+      `Claim idempotency key ${existing.idempotencyKey} is bound to different input.`,
     );
   }
 
@@ -249,9 +264,10 @@ export class ClaimService {
       throw new MnfsError('CLAIM_CONFLICT', 'Claim idempotency key must be non-empty.');
     }
     const criteria = canonicalCriteria(input.claimedCriterionIds);
-    const loaded = this.#loadLineage(input, criteria);
+    const existing = this.#existingClaim(input, criteria);
+    const loaded = this.#loadEntities(input);
     const inputHash = this.#inputHash(input, criteria, loaded);
-    const replay = this.#replay(input, criteria, inputHash, loaded.track.contractHash);
+    const replay = this.#replay(existing, inputHash, loaded.track.contractHash);
     if (replay !== undefined) return replay;
     const initial = this.#requireLineage(input, criteria);
     if (this.#store.execution.getCurrentClaim(initial.attempt.id) !== undefined) {
@@ -272,14 +288,13 @@ export class ClaimService {
     }
 
     return this.#store.execution.runAtomic((session) => {
-      const observed = this.#loadLineage(input, criteria);
+      const observed = this.#loadEntities(input);
       const currentInputHash = this.#inputHash(input, criteria, observed);
       if (currentInputHash !== inputHash) {
         throw new MnfsError('CONCURRENCY_CONFLICT', 'Claim input binding changed after Git observation.');
       }
       const concurrentReplay = this.#replay(
-        input,
-        criteria,
+        this.#existingClaim(input, criteria),
         inputHash,
         observed.track.contractHash,
       );

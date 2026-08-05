@@ -401,6 +401,24 @@ test('classifies semantic Lease without an external match as LD-01', async () =>
   });
 });
 
+
+test('reports HEALTHY when semantic and physical Lease state are both absent', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('healthy-no-lease', async (harness) => {
+    rawDatabase(harness.databasePath, 'DELETE FROM leases;');
+    harness.observations.current = {
+      sources: [exactSource(harness.attempt, harness.sourcePath)],
+      leases: [],
+      actions: [],
+      processes: [],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.deepEqual(codes(report), ['HEALTHY']);
+    assert.equal(report.expected.lease, undefined);
+  });
+});
+
 test('classifies MNFS-like external Lease without semantic ownership as LD-02', async () => {
   const module = await loadRecoveryService();
   await withHarness('ld02', async (harness) => {
@@ -918,6 +936,80 @@ test('does not classify RELEASE_PENDING without decisive action evidence as HEAL
       report.findings.find((candidate) => candidate.code === 'LD-07')?.requiredAuthority,
       'ORIGINAL_OPERATION',
     );
+  });
+});
+
+
+test('classifies an ACTIVE semantic Lease whose managed worktree is available as LD-01', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('active-available', async (harness) => {
+    harness.observations.current = {
+      sources: [exactSource(harness.attempt, harness.sourcePath)],
+      leases: [{
+        path: WORKTREE_PATH,
+        managed: true,
+        sourcePath: harness.sourcePath,
+        status: 'available',
+        gitStatus: 'CLEAN',
+      }],
+      actions: [],
+      processes: [],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('LD-01'), true);
+    assert.equal(codes(report).includes('UNKNOWN'), false);
+    assert.equal(codes(report).includes('HEALTHY'), false);
+  });
+});
+
+test('reports a physically completed RELEASE_PENDING Lease as ADOPTABLE with exact action evidence', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('release-pending-available', async (harness) => {
+    const token = 'lease-task12-release-finished';
+    const startedRef = `/home/mnfs/actions/${token}/started.json`;
+    const resultRef = `/home/mnfs/actions/${token}/finished.json`;
+    rawDatabase(harness.databasePath, `
+      UPDATE leases
+      SET status = 'RELEASE_PENDING',
+          release_idempotency_key = 'release-task12-finished',
+          release_input_hash = 'sha256:${'e'.repeat(64)}',
+          release_requested_at = '${UPDATED_AT}',
+          action_kind = 'RELEASE', action_token = '${token}', action_phase = 'FINISHED',
+          action_owner_boot_id = '${RUNNER_ONE.bootId}', action_owner_pid = ${RUNNER_ONE.pid},
+          action_owner_start_ticks = '${RUNNER_ONE.startTicks}',
+          action_runner_boot_id = '${RUNNER_TWO.bootId}', action_runner_pid = ${RUNNER_TWO.pid},
+          action_runner_start_ticks = '${RUNNER_TWO.startTicks}',
+          action_started_ref = '${startedRef}', action_result_ref = '${resultRef}',
+          version = version + 1,
+          updated_at = '${UPDATED_AT}'
+      WHERE id = '${harness.lease.id}';
+    `);
+    harness.observations.current = {
+      sources: [exactSource(harness.attempt, harness.sourcePath)],
+      leases: [{
+        path: WORKTREE_PATH,
+        managed: true,
+        sourcePath: harness.sourcePath,
+        status: 'available',
+        gitStatus: 'CLEAN',
+      }],
+      actions: [{
+        actionToken: token,
+        state: 'FINISHED',
+        kind: 'RELEASE',
+        runner: RUNNER_TWO,
+        startedRef,
+        resultRef,
+      }],
+      processes: [{ identity: RUNNER_TWO, alive: false }],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('ADOPTABLE'), true);
+    assert.equal(codes(report).includes('UNKNOWN'), false);
+    assert.equal(codes(report).includes('LD-07'), false);
+    assert.equal(codes(report).includes('HEALTHY'), false);
   });
 });
 

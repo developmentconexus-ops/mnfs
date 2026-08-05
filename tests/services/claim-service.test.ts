@@ -626,3 +626,29 @@ test('replays same-key same-input Claim and rejects a conflicting binding', asyn
     assert.equal(rowCount(harness.databasePath, 'claims'), 1);
   });
 });
+
+test('replays a same-key Claim committed by another writer during Git observation', async () => {
+  const module = await loadClaimService();
+  withHarness('concurrent-idempotency', (harness) => {
+    const competingStore = SqliteStore.open(harness.databasePath);
+    try {
+      const competingService = new module.ClaimService({
+        store: competingStore,
+        git: new ScriptedClaimGitAuthority(),
+      });
+      let committed: Claim | undefined;
+      harness.git.beforeReturn = () => {
+        harness.git.beforeReturn = undefined;
+        committed = competingService.openClaim(claimInput(harness));
+      };
+
+      const replayed = serviceFor(module, harness).openClaim(claimInput(harness));
+      assert.notEqual(committed, undefined);
+      assert.deepEqual(replayed, committed);
+      assert.equal(rowCount(harness.databasePath, 'claims'), 1);
+      assert.equal(eventCount(harness.databasePath, 'CLAIM_OPENED'), 1);
+    } finally {
+      competingStore.close();
+    }
+  });
+});

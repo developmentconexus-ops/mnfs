@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import test from 'node:test';
 
+import { canonicalJson } from '../../src/domain/mission-plan.js';
 import type { Attempt, Lease, ProcessIdentity, WriteTrack } from '../../src/execution/model.js';
 import { SqliteStore } from '../../src/store/sqlite-store.js';
 
@@ -113,8 +114,19 @@ interface RecoveryFinding {
 interface RecoveryReport {
   readonly schemaVersion: 1;
   readonly writeTrackId?: string;
+  readonly expected: Readonly<{
+    writeTrack?: WriteTrack;
+    attempt?: Attempt;
+    lease?: Lease;
+  }>;
   readonly findings: readonly RecoveryFinding[];
   readonly observed: RecoveryWorldObservation;
+  readonly observationHashes: Readonly<{
+    sources: string;
+    leases: string;
+    actions: string;
+    processes: string;
+  }>;
   readonly contentHash: string;
 }
 
@@ -289,6 +301,10 @@ function requireFinding(report: RecoveryReport, code: RecoveryCode): RecoveryFin
 
 function sha256(bytes: Buffer): string {
   return createHash('sha256').update(bytes).digest('hex');
+}
+
+function canonicalHash(value: unknown): string {
+  return `sha256:${createHash('sha256').update(canonicalJson(value), 'utf8').digest('hex')}`;
 }
 
 function databaseSnapshot(databasePath: string): string {
@@ -650,6 +666,56 @@ test('same authoritative and observed inputs produce the same deterministic Reco
   });
 });
 
+test('orders Recovery findings without ambient locale comparison', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('locale-independent-order', async (harness) => {
+    harness.observations.current = {
+      sources: [],
+      leases: [
+        {
+          path: '/home/mnfs/runtime/treehouse/pool/tree-unowned-z',
+          managed: true,
+          sourcePath: '/home/mnfs/runtime/sources/unowned-z',
+          status: 'leased',
+          gitStatus: 'CLEAN',
+          leaseId: 'treehouse-unowned-z',
+          holder: 'holder-unowned-z',
+          leasedAt: LEASED_AT,
+        },
+        {
+          path: '/home/mnfs/runtime/treehouse/pool/tree-unowned-a',
+          managed: true,
+          sourcePath: '/home/mnfs/runtime/sources/unowned-a',
+          status: 'leased',
+          gitStatus: 'CLEAN',
+          leaseId: 'treehouse-unowned-a',
+          holder: 'holder-unowned-a',
+          leasedAt: LEASED_AT,
+        },
+      ],
+      actions: [],
+      processes: [],
+    };
+
+    const original = String.prototype.localeCompare;
+    String.prototype.localeCompare = () => {
+      throw new Error('ambient locale comparison is forbidden');
+    };
+    try {
+      const report = await serviceFor(module, harness).recover({});
+      assert.deepEqual(
+        report.findings.filter((candidate) => candidate.code === 'LD-02').map((candidate) => candidate.target),
+        [
+          '/home/mnfs/runtime/treehouse/pool/tree-unowned-a',
+          '/home/mnfs/runtime/treehouse/pool/tree-unowned-z',
+        ],
+      );
+    } finally {
+      String.prototype.localeCompare = original;
+    }
+  });
+});
+
 test('RecoveryService source contains no mutation, helper launch or destructive repair authority', async () => {
   const sourcePath = join(process.cwd(), 'src', 'services', 'recovery-service.ts');
   accessSync(sourcePath);
@@ -666,4 +732,307 @@ test('RecoveryService source contains no mutation, helper launch or destructive 
   ] as const) {
     assert.equal(pattern.test(source), false, `${label} is forbidden in ${sourcePath}`);
   }
+});
+
+test('does not classify a semantic DIVERGED Lease as HEALTHY', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('semantic-diverged', async (harness) => {
+    harness.store.execution.setLeaseState({
+      id: harness.lease.id,
+      expectedVersion: harness.lease.version,
+      status: 'DIVERGED',
+      externalLeaseId: harness.lease.externalLeaseId!,
+      worktreePath: harness.lease.worktreePath!,
+      externalLeasedAt: harness.lease.externalLeasedAt!,
+      updatedAt: UPDATED_AT,
+    });
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('HEALTHY'), false);
+    assert.equal(codes(report).includes('LD-07'), true);
+  });
+});
+
+test('treats canonical path aliases as non-bijective Lease identity', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('canonical-path-alias', async (harness) => {
+    const leaf = WORKTREE_PATH.split('/').at(-1)!;
+    harness.observations.current = {
+      ...harness.observations.current,
+      leases: [
+        exactLease(harness.sourcePath),
+        {
+          ...exactLease('/other/source'),
+          path: `${WORKTREE_PATH}/../${leaf}`,
+          leaseId: `${EXTERNAL_LEASE_ID}-alias`,
+          holder: `${HOLDER}-alias`,
+        },
+      ],
+    };
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('LD-06'), true);
+  });
+});
+
+test('does not ignore an unowned process candidate when deriving health', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('unowned-process', async (harness) => {
+    harness.observations.current = {
+      ...harness.observations.current,
+      processes: [{ identity: RUNNER_ONE, alive: true }],
+    };
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('HEALTHY'), false);
+    assert.equal(codes(report).includes('LD-07'), true);
+  });
+});
+
+test('does not ignore an unowned source candidate when deriving health', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('unowned-source', async (harness) => {
+    harness.observations.current = {
+      ...harness.observations.current,
+      sources: [
+        ...harness.observations.current.sources,
+        {
+          status: 'READY',
+          attemptId: 'WT-999/A01',
+          path: '/home/mnfs/runtime/sources/unowned-source',
+          fingerprint: `sha256:${'9'.repeat(64)}`,
+          baseCommitSha: '9'.repeat(40),
+          baseTreeSha: '8'.repeat(40),
+          objectFormat: 'sha1',
+        },
+      ],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('HEALTHY'), false);
+    assert.equal(codes(report).includes('UNKNOWN'), true);
+  });
+});
+
+test('classifies incomplete STARTED action evidence as LD-07', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('incomplete-started', async (harness) => {
+    rawDatabase(harness.databasePath, `
+      UPDATE leases
+      SET action_kind = 'GRANT', action_token = 'lease-task12-incomplete', action_phase = 'STARTED'
+      WHERE id = '${harness.lease.id}';
+    `);
+    harness.observations.current = {
+      ...harness.observations.current,
+      actions: [{
+        actionToken: 'lease-task12-incomplete',
+        state: 'STARTED',
+        kind: 'GRANT',
+      }],
+    };
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('LD-07'), true);
+    assert.equal(codes(report).includes('HEALTHY'), false);
+  });
+});
+
+test('classifies a missing external Lease timestamp as UNKNOWN', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('missing-leased-at', async (harness) => {
+    const { leasedAt: _leasedAt, ...candidate } = exactLease(harness.sourcePath);
+    harness.observations.current = {
+      ...harness.observations.current,
+      leases: [candidate],
+    };
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('UNKNOWN'), true);
+  });
+});
+
+test('binds every observation collection to an exact canonical hash', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('observation-hashes', async (harness) => {
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.deepEqual(report.observationHashes, {
+      sources: canonicalHash(report.observed.sources),
+      leases: canonicalHash(report.observed.leases),
+      actions: canonicalHash(report.observed.actions),
+      processes: canonicalHash(report.observed.processes),
+    });
+  });
+});
+
+test('reports an abandoned Track with its latest RELEASED Lease as HEALTHY', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('released-lineage', async (harness) => {
+    harness.store.execution.setLeaseState({
+      id: harness.lease.id,
+      expectedVersion: harness.lease.version,
+      status: 'RELEASED',
+      externalLeaseId: harness.lease.externalLeaseId!,
+      worktreePath: harness.lease.worktreePath!,
+      externalLeasedAt: harness.lease.externalLeasedAt!,
+      updatedAt: UPDATED_AT,
+    });
+    harness.store.execution.setWriteTrackStatus({
+      id: harness.track.id,
+      expectedVersion: harness.track.version,
+      status: 'ABANDONED',
+      updatedAt: UPDATED_AT,
+    });
+    harness.observations.current = {
+      sources: [exactSource(harness.attempt, harness.sourcePath)],
+      leases: [{
+        path: WORKTREE_PATH,
+        managed: true,
+        sourcePath: harness.sourcePath,
+        status: 'available',
+        gitStatus: 'CLEAN',
+      }],
+      actions: [],
+      processes: [],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.deepEqual(codes(report), ['HEALTHY']);
+    assert.equal(report.expected.writeTrack?.status, 'ABANDONED');
+    assert.equal(report.expected.lease?.status, 'RELEASED');
+  });
+});
+
+test('does not classify RELEASE_PENDING without decisive action evidence as HEALTHY', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('release-pending-no-action', async (harness) => {
+    rawDatabase(harness.databasePath, `
+      UPDATE leases
+      SET status = 'RELEASE_PENDING',
+          release_idempotency_key = 'release-task12-pending',
+          release_input_hash = 'sha256:${'d'.repeat(64)}',
+          release_requested_at = '${UPDATED_AT}',
+          version = version + 1,
+          updated_at = '${UPDATED_AT}'
+      WHERE id = '${harness.lease.id}';
+    `);
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('HEALTHY'), false);
+    assert.equal(codes(report).includes('LD-07'), true);
+    assert.equal(
+      report.findings.find((candidate) => candidate.code === 'LD-07')?.requiredAuthority,
+      'ORIGINAL_OPERATION',
+    );
+  });
+});
+
+test('accepts exact CLAIMED action evidence while the committed owner remains alive', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('claimed-action-owner', async (harness) => {
+    updateLeaseRequested(harness);
+    const token = 'lease-task12-claimed-owner';
+    const startedRef = `/home/mnfs/actions/${token}/started.json`;
+    const resultRef = `/home/mnfs/actions/${token}/finished.json`;
+    rawDatabase(harness.databasePath, `
+      UPDATE leases
+      SET action_kind = 'GRANT', action_token = '${token}', action_phase = 'CLAIMED',
+          action_owner_boot_id = '${RUNNER_ONE.bootId}', action_owner_pid = ${RUNNER_ONE.pid},
+          action_owner_start_ticks = '${RUNNER_ONE.startTicks}',
+          action_started_ref = '${startedRef}', action_result_ref = '${resultRef}'
+      WHERE id = '${harness.lease.id}';
+    `);
+    harness.observations.current = {
+      ...harness.observations.current,
+      actions: [{ actionToken: token, state: 'CLAIMED', kind: 'GRANT' }],
+      processes: [{ identity: RUNNER_ONE, alive: true }],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('ADOPTABLE'), true);
+    assert.equal(codes(report).includes('LD-07'), false);
+  });
+});
+
+test('accepts exact STARTED evidence that is physically ahead of a CLAIMED semantic action', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('started-ahead-of-claim', async (harness) => {
+    updateLeaseRequested(harness);
+    const token = 'lease-task12-started-ahead';
+    const startedRef = `/home/mnfs/actions/${token}/started.json`;
+    const resultRef = `/home/mnfs/actions/${token}/finished.json`;
+    rawDatabase(harness.databasePath, `
+      UPDATE leases
+      SET action_kind = 'GRANT', action_token = '${token}', action_phase = 'CLAIMED',
+          action_owner_boot_id = '${RUNNER_ONE.bootId}', action_owner_pid = ${RUNNER_ONE.pid},
+          action_owner_start_ticks = '${RUNNER_ONE.startTicks}',
+          action_started_ref = '${startedRef}', action_result_ref = '${resultRef}'
+      WHERE id = '${harness.lease.id}';
+    `);
+    harness.observations.current = {
+      ...harness.observations.current,
+      actions: [{
+        actionToken: token,
+        state: 'STARTED',
+        kind: 'GRANT',
+        runner: RUNNER_TWO,
+        startedRef,
+      }],
+      processes: [
+        { identity: RUNNER_ONE, alive: false },
+        { identity: RUNNER_TWO, alive: true },
+      ],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('ADOPTABLE'), true);
+    assert.equal(codes(report).includes('LD-07'), false);
+  });
+});
+
+test('classifies a dead STARTED runner without FINISHED evidence as LD-07', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('dead-started-runner', async (harness) => {
+    updateLeaseRequested(harness);
+    const token = 'lease-task12-dead-started';
+    const startedRef = `/home/mnfs/actions/${token}/started.json`;
+    rawDatabase(harness.databasePath, `
+      UPDATE leases
+      SET action_kind = 'GRANT', action_token = '${token}', action_phase = 'STARTED',
+          action_owner_boot_id = '${RUNNER_ONE.bootId}', action_owner_pid = ${RUNNER_ONE.pid},
+          action_owner_start_ticks = '${RUNNER_ONE.startTicks}',
+          action_runner_boot_id = '${RUNNER_TWO.bootId}', action_runner_pid = ${RUNNER_TWO.pid},
+          action_runner_start_ticks = '${RUNNER_TWO.startTicks}',
+          action_started_ref = '${startedRef}', action_result_ref = NULL
+      WHERE id = '${harness.lease.id}';
+    `);
+    harness.observations.current = {
+      ...harness.observations.current,
+      actions: [{
+        actionToken: token,
+        state: 'STARTED',
+        kind: 'GRANT',
+        runner: RUNNER_TWO,
+        startedRef,
+      }],
+      processes: [{ identity: RUNNER_TWO, alive: false }],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('LD-07'), true);
+    assert.equal(codes(report).includes('HEALTHY'), false);
+  });
+});
+
+test('classifies the exact Windows mount root as escaped Lease identity', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('exact-mount-root', async (harness) => {
+    rawDatabase(harness.databasePath, `
+      UPDATE leases
+      SET worktree_path = '/mnt'
+      WHERE id = '${harness.lease.id}';
+    `);
+    harness.observations.current = {
+      ...harness.observations.current,
+      leases: [{ ...exactLease(harness.sourcePath), path: '/mnt' }],
+    };
+
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    assert.equal(codes(report).includes('LD-05'), true);
+    assert.equal(codes(report).includes('HEALTHY'), false);
+  });
 });

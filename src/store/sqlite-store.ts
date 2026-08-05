@@ -18,10 +18,13 @@ import {
 } from '../domain/types.js';
 import {
   formatAttemptId,
+  formatClaimId,
   formatLeaseId,
   formatWorkerRunId,
   formatWriteTrackId,
   requireAttemptId,
+  requireLeaseId,
+  requireWorkerRunId,
   requireWriteTrackId,
 } from '../execution/ids.js';
 import type {
@@ -43,6 +46,7 @@ import { EventStore, type AppendEventInput } from './event-store.js';
 import {
   ExecutionStore,
   type AllocateAttemptInput,
+  type AllocateClaimInput,
   type AllocateLeaseInput,
   type AllocateWorkerRunInput,
   type AllocateWriteTrackInput,
@@ -98,6 +102,7 @@ export interface ExecutionAtomicSession {
   allocateWorkerRun(input: AllocateWorkerRunInput): WorkerRun;
   previewLeaseAllocation(writeTrackId: string): LeaseAllocationPreview;
   allocateLease(input: AllocateLeaseInput): Lease;
+  allocateClaim(input: AllocateClaimInput): Claim;
   setWriteTrackStatus(input: {
     readonly id: string;
     readonly expectedVersion: number;
@@ -645,6 +650,17 @@ export class SqliteExecutionStore extends ExecutionStore {
     return row === undefined ? undefined : super.getLease(String(row.id));
   }
 
+  getLatestLease(writeTrackId: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE write_track_id = ?
+      ORDER BY generation DESC
+      LIMIT 1
+    `).get(writeTrackId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
   getLeaseByGrantIdempotencyKey(idempotencyKey: string): Lease | undefined {
     const row = this.#database.prepare(`
       SELECT id
@@ -673,6 +689,99 @@ export class SqliteExecutionStore extends ExecutionStore {
       LIMIT 1
     `).get(attemptId) as { readonly id?: unknown } | undefined;
     return row === undefined ? undefined : super.getClaim(String(row.id));
+  }
+
+  getClaimByIdempotencyKey(idempotencyKey: string): Claim | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM claims
+      WHERE idempotency_key = ?
+      LIMIT 1
+    `).get(idempotencyKey) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getClaim(String(row.id));
+  }
+
+  #allocateClaim(input: AllocateClaimInput): Claim {
+    const criteria = [...input.claimedCriterionIds];
+    if (
+      criteria.length === 0
+      || criteria.some((criterion) => criterion.length === 0)
+      || new Set(criteria).size !== criteria.length
+    ) {
+      throw new MnfsError('CLAIM_CONFLICT', 'Claim criteria must be non-empty and unique.');
+    }
+
+    const writeTrackId = requireWriteTrackId(input.writeTrackId);
+    const attemptId = requireAttemptId(input.attemptId, writeTrackId);
+    const workerRunId = requireWorkerRunId(input.workerRunId, attemptId);
+    const leaseId = requireLeaseId(input.leaseId);
+
+    const existing = this.getClaimByIdempotencyKey(input.idempotencyKey);
+    if (existing !== undefined) {
+      const sameCriteria = JSON.stringify(existing.claimedCriterionIds) === JSON.stringify(criteria);
+      if (
+        existing.inputHash === input.inputHash
+        && existing.writeTrackId === writeTrackId
+        && existing.attemptId === attemptId
+        && existing.workerRunId === workerRunId
+        && existing.leaseId === leaseId
+        && existing.contractHash === input.contractHash
+        && existing.baseCommitSha === input.baseCommitSha
+        && existing.resultTreeSha === input.resultTreeSha
+        && sameCriteria
+      ) {
+        return existing;
+      }
+      throw new MnfsError(
+        'CLAIM_IDEMPOTENCY_CONFLICT',
+        `Claim idempotency key ${input.idempotencyKey} is bound to different input.`,
+      );
+    }
+
+    const ordinalRow = this.#database.prepare(`
+      SELECT COALESCE(MAX(ordinal), 0) + 1 AS next_value
+      FROM claims
+      WHERE attempt_id = ?
+    `).get(attemptId) as { readonly next_value?: unknown } | undefined;
+    const ordinal = Number(ordinalRow?.next_value ?? 1);
+    if (!Number.isSafeInteger(ordinal) || ordinal <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Claim ordinal.');
+    }
+    const id = formatClaimId(attemptId, ordinal);
+
+    try {
+      this.#database.prepare(`
+        INSERT INTO claims (
+          id, write_track_id, attempt_id, worker_run_id, lease_id,
+          contract_hash, ordinal, status, idempotency_key, input_hash,
+          base_commit_sha, result_tree_sha, claimed_criteria_json,
+          version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'OPEN', ?, ?, ?, ?, ?, 1, ?, ?)
+      `).run(
+        id,
+        writeTrackId,
+        attemptId,
+        workerRunId,
+        leaseId,
+        input.contractHash,
+        ordinal,
+        input.idempotencyKey,
+        input.inputHash,
+        input.baseCommitSha,
+        input.resultTreeSha,
+        JSON.stringify(criteria),
+        input.occurredAt,
+        input.occurredAt,
+      );
+    } catch (error) {
+      translateExecutionConstraint(error, 'CLAIM_CONFLICT', 'Could not allocate the Claim.');
+    }
+
+    const value = super.getClaim(id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Claim ${id} disappeared after persistence.`);
+    }
+    return value;
   }
 
   #previewLeaseAllocation(writeTrackIdInput: string): LeaseAllocationPreview {
@@ -866,6 +975,10 @@ export class SqliteExecutionStore extends ExecutionStore {
         allocateLease: (input: AllocateLeaseInput) => {
           requireActive();
           return this.#allocateLease(input);
+        },
+        allocateClaim: (input: AllocateClaimInput) => {
+          requireActive();
+          return this.#allocateClaim(input);
         },
         setWriteTrackStatus: (
           input: Parameters<ExecutionAtomicSession['setWriteTrackStatus']>[0],

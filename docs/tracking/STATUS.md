@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.42
+version: 1.8.43
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 12 RED awaits explicit authority
+- **Current enabler:** Issue #16 — Task 12 GREEN awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -56,7 +56,9 @@ Implementation plan:              CURRENT / APPROVED — version 1.0.1
 Tasks 1–11:                        COMPLETE / ACCEPTED
 Task 11 RED:                       OBSERVED / ACCEPTABLE
 Task 11 GREEN:                     VERIFIED / REVIEWED
-Task 12 and later:                 NOT AUTHORIZED
+Task 12 RED:                       OBSERVED / ACCEPTABLE
+Task 12 GREEN:                     NOT AUTHORIZED
+Task 13 and later:                 NOT AUTHORIZED
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
 M01 acceptance:                    NOT AUTHORIZED
@@ -304,6 +306,92 @@ Scope review:
 - no reset, clean, force, destructive Treehouse path or filesystem deletion fallback;
 - Task 12 and M01 acceptance remain outside this authorization.
 
+## Task 12 RED
+
+Authorization:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_12_RED plan=1.0.1 microdesign=0.6.1 task11=11fe71df23f697b021bd37133854152c033311ec
+```
+
+Commits:
+
+```text
+Initial RED:    dd9876ab9f839077e8da0a2f1701750b7e78b029
+Reviewed RED:   86aae24ecfabb774710f10ace0d54fb4e53a16d5
+```
+
+The reviewed RED changes only:
+
+```text
+tests/services/claim-service.test.ts
+tests/services/recovery-service.test.ts
+```
+
+No `src/services/claim-service.ts`, `src/services/recovery-service.ts`, schema, migration, package, Treehouse execution or Pi behavior was introduced.
+
+### ClaimService RED — 12 tests
+
+```text
+1. exports only the M01 Claim OPEN boundary
+2. opens Claim, moves Track to CLAIMED and appends CLAIM_OPENED atomically
+3. rolls back Claim, Track and Event when CLAIM_OPENED insertion fails
+4. revalidates Track, Attempt, Run and Lease versions after Git observation
+5. rejects every independently stale expected version
+6. rejects cross-lineage Worker Run and Lease references
+7. rejects stale approved authority and wrong Attempt base
+8. requires READY source, current Worker Run and ACTIVE matching Lease
+9. rejects missing and non-tree result objects in the exact Attempt source
+10. rejects empty, duplicate and out-of-Feature criteria
+11. blocks a second current Claim
+12. replays same-key/same-input and rejects conflicting binding
+```
+
+### RecoveryService RED — 18 tests
+
+```text
+1. exports a read-only M01 Recovery boundary
+2. HEALTHY exact one-to-one match
+3. ADOPTABLE exact external match for REQUESTED intent
+4. LD-01 semantic Lease without external match
+5. LD-02 external MNFS-like Lease without semantic owner
+6. LD-03 external Lease ID drift
+7. LD-04 holder drift
+8. LD-05 missing, unmanaged or escaped path
+9. LD-06 duplicate/non-bijective IDs, paths or holders
+10. LD-07 inconclusive, conflicting or multiple helper evidence
+11. SD-01 REQUESTED source with no final source
+12. SD-02 source path/fingerprint/base/object-format drift
+13. UNKNOWN insufficient observation
+14. simultaneous independent source and Lease divergences
+15. complete candidates, blocker, safe action, authority and next action
+16. byte-for-byte non-mutation of SQLite, Events and managed resources
+17. deterministic report for identical inputs
+18. static absence of mutation, helper launch and destructive repair authority
+```
+
+Review corrections before acceptance strengthened only the RED matrix:
+
+- Recovery fixtures now create the referenced `MIS-002` Mission before allocating a Track;
+- the post-Git race test fences Track, Attempt, Worker Run and Lease versions independently;
+- stale-contract authority and wrong-base behavior no longer shadow each other.
+
+Canonical expected-failure evidence:
+
+```text
+Node:               24.18.0
+Publisher Run/Job:  31021347465 / 92358541383
+Baseline Product:   240/240 PASS
+AS-02:              119/119 PASS
+TC-01:               78/78 PASS
+Documentation:      PASS — 93 canonical IDs
+Task 12 RED:          0/30 PASS — expected failure
+ClaimService:         0/12 expected failure
+RecoveryService:      0/18 expected failure
+```
+
+Every behavioral failure reports the exact absent production module. The static Recovery boundary test reports the exact absent source file. This is acceptable RED evidence; Task 12 GREEN remains separately gated.
+
 ## Frozen boundaries
 
 - canonical checkout is never Treehouse cwd;
@@ -322,7 +410,9 @@ Scope review:
 Tasks 1–11:                 COMPLETE / ACCEPTED
 Task 11 RED:                OBSERVED / ACCEPTABLE
 Task 11 GREEN:              VERIFIED / REVIEWED
-Task 12 and later:          NOT AUTHORIZED
+Task 12 RED:                OBSERVED / ACCEPTABLE
+Task 12 GREEN:              NOT AUTHORIZED
+Task 13 and later:          NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
 Pi Worker dispatch:         PROHIBITED
 M01 acceptance:             NOT AUTHORIZED
@@ -331,4 +421,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for Task 12 RED, bound to Task 11 implementation head `11fe71df23f697b021bd37133854152c033311ec`. Task 12 production, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.
+A separate exact Operator continuation is required for Task 12 GREEN, bound to reviewed Task 12 RED head `86aae24ecfabb774710f10ace0d54fb4e53a16d5` and accepted Task 11 implementation head `11fe71df23f697b021bd37133854152c033311ec`. Task 13, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.

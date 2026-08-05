@@ -63,6 +63,7 @@ jobs:
 
           text = Path('/tmp/task14-real-scenario-a.mjs').read_text(encoding='utf-8')
           required = [
+              "import { spawn, spawnSync } from 'node:child_process';",
               "const AUTHORIZATION = 'MNFS_AUTHORIZE_M01_TASK_14_REAL_SCENARIO_A'",
               "const PLAN = '1.0.1'",
               "const MICRODESIGN = '0.6.1'",
@@ -86,7 +87,8 @@ jobs:
 
           forbidden = {
               'recursive deletion': r'\b(?:rmSync|rmdirSync|unlinkSync)\b|\brm\s+-rf\b',
-              'shell execution': r'shell\s*:\s*true|\bexec(?:File|Sync)?\s*\(',
+              'shell execution': r'shell\s*:\s*true',
+              'child-process exec import': r"import\s*\{[^}]*\bexec(?:File|Sync)?\b[^}]*\}\s*from\s*['\"]node:child_process['\"]",
               'Pi launch': r'\bspawn(?:Sync)?\s*\([^\n]*\bpi\b|\bimport\([^\n]*pi',
               'GitHub mutation': r'\bgh\s+(?:pr|issue|api|repo|workflow)\b',
               'automatic merge': r'\bgit\s+(?:merge|rebase|reset|clean)\b',

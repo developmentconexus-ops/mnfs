@@ -271,7 +271,10 @@ export class ExecutionService {
     if (track === undefined) {
       throw new MnfsError('INTERNAL_ERROR', `Write Track ${attempt.writeTrackId} is missing.`);
     }
-    this.#requireCurrentContract(track.missionId, input.contractHash);
+    if (track.status !== 'ACTIVE' || track.contractHash !== attempt.contractHash) {
+      throw new MnfsError('WORKER_RUN_CONFLICT', `Write Track ${track.id} is not active for a Worker Run.`);
+    }
+    this.#requireCurrentContract(track.missionId, track.contractHash);
     if (this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined) {
       throw new MnfsError('WORKER_RUN_CONFLICT', `Attempt ${attempt.id} already has a current Worker Run.`);
     }
@@ -307,8 +310,10 @@ export class ExecutionService {
     const current = this.#store.execution.getWorkerRun(input.currentRunId);
     if (
       attempt === undefined
+      || attempt.status !== 'OPEN'
       || current === undefined
       || current.attemptId !== attempt.id
+      || current.contractHash !== attempt.contractHash
       || (current.status !== 'STARTING' && current.status !== 'RUNNING' && current.status !== 'IDLE')
     ) {
       throw new MnfsError('WORKER_RUN_CONFLICT', 'The current Worker Run lineage is invalid.');
@@ -323,12 +328,22 @@ export class ExecutionService {
     if (track === undefined) {
       throw new MnfsError('INTERNAL_ERROR', `Write Track ${attempt.writeTrackId} is missing.`);
     }
+    if (track.status !== 'ACTIVE' || track.contractHash !== attempt.contractHash) {
+      throw new MnfsError('WORKER_RUN_CONFLICT', `Write Track ${track.id} is not active for Run replacement.`);
+    }
+    this.#requireCurrentContract(track.missionId, track.contractHash);
 
     return this.#store.execution.runAtomic((session) => {
       const previousRun = session.setWorkerRunState({
         id: current.id,
         expectedVersion: input.expectedCurrentRunVersion,
         status: input.terminalStatus,
+        ...(current.processIdentity === undefined
+          ? {}
+          : { processIdentity: current.processIdentity }),
+        ...(current.processStartedAt === undefined
+          ? {}
+          : { processStartedAt: current.processStartedAt }),
         ...(input.exitCode === undefined ? {} : { exitCode: input.exitCode }),
         updatedAt: input.occurredAt,
       });
@@ -382,11 +397,13 @@ export class ExecutionService {
       || track.status !== 'ACTIVE'
       || attempt === undefined
       || attempt.writeTrackId !== track.id
+      || attempt.contractHash !== track.contractHash
       || attempt.status !== 'OPEN'
       || currentAttempt?.id !== attempt.id
     ) {
       throw new MnfsError('ATTEMPT_CONFLICT', 'Attempt supersession lineage is invalid.');
     }
+    this.#requireCurrentContract(track.missionId, track.contractHash);
     if (
       this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined
       || this.#store.execution.getCurrentLease(track.id) !== undefined

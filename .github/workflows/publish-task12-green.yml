@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          expected='74a6254ec6e0a237a26413956416798687c0b2f2'
+          expected='77b5c56404663e8ce9d740dd9d7fe8a2d9f6292d'
           actual="$(git rev-parse HEAD)"
           test "$actual" = "$expected"
 

@@ -24,7 +24,7 @@ jobs:
           ref: design/mis-002-m01
           fetch-depth: 0
 
-      - name: Checkout reviewed GREEN payload
+      - name: Checkout reviewed GREEN correction payload
         uses: actions/checkout@v4
         with:
           ref: automation/task12-green-publish
@@ -37,28 +37,38 @@ jobs:
           node-version: 24.18.0
           cache: npm
 
-      - name: Verify authorized target head
+      - name: Verify authorized functional GREEN head
         shell: bash
         run: |
           set -euo pipefail
-          expected='eb49a1eaa251f4bc5b1cb0dedc49f6de2cbc0dc0'
+          expected='74a6254ec6e0a237a26413956416798687c0b2f2'
           actual="$(git rev-parse HEAD)"
           test "$actual" = "$expected"
 
-      - name: Reconstruct and verify reviewed GREEN patch
+      - name: Verify exact functional GREEN baseline
         shell: bash
         run: |
           set -euo pipefail
-          payload='.task12-publisher/.github/task12-green-v3.patch.xz.b64'
-          echo 'c97a181701487a592b96833f611c95c2363d40e0fca8fca60e9ab2719c117f4a  .task12-publisher/.github/task12-green-v3.patch.xz.b64' | sha256sum -c -
-          base64 --decode "$payload" > /tmp/task12-green.patch.xz
-          echo 'bc5457c3ea5102b708d88db33146c81d9b197a1cd084ec7e223497a15e2ab111  /tmp/task12-green.patch.xz' | sha256sum -c -
-          xz --decompress --stdout /tmp/task12-green.patch.xz > /tmp/task12-green.patch
-          echo 'c403d73126fca4f40a6ac4e10d873aff133450b4b658c769d32b2ebafe5868e0  /tmp/task12-green.patch' | sha256sum -c -
-          git apply --check /tmp/task12-green.patch
-          git apply /tmp/task12-green.patch
+          echo '93371b46f0a6a6d845044015fa50de087326d66640d90dbe5150a5f5d4d0a43c  src/services/claim-service.ts' | sha256sum -c -
+          echo '210cd005ac0d87b8004d31a61c23ff4918363d8c9737942a3680d6ae078ce48a  src/services/recovery-service.ts' | sha256sum -c -
+          echo 'c6a28317b09c4c5effab32c53d29789d44f5b64766e77565f22c79386117b08d  src/store/sqlite-store.ts' | sha256sum -c -
+          echo '982d0567eea4d555e53d0b7203436662c6a26efc0299ed7a00442f89bc8c7102  tests/services/claim-service.test.ts' | sha256sum -c -
+          echo '1a318d05857d5cf16c276ef66ae30729c0579112c85e9ce86ea07ea995567b5d  tests/services/recovery-service.test.ts' | sha256sum -c -
 
-      - name: Verify exact reviewed files and scope
+      - name: Reconstruct and verify reviewed correction patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload='.task12-publisher/.github/task12-green-v4-correction.patch.xz.b64'
+          echo '78745cfcb029333100fdd90090c275aebd9fb1655f7a2a9e5bbd1fb9f00efb72  .task12-publisher/.github/task12-green-v4-correction.patch.xz.b64' | sha256sum -c -
+          base64 --decode "$payload" > /tmp/task12-green-v4-correction.patch.xz
+          echo '4c5d41f9bd3dc42d6faee488940cf97199fccf19202a063c0a4601745e6211ff  /tmp/task12-green-v4-correction.patch.xz' | sha256sum -c -
+          xz --decompress --stdout /tmp/task12-green-v4-correction.patch.xz > /tmp/task12-green-v4-correction.patch
+          echo 'bd7875faa2a0b9a84b161ec61498db5102b884d2f6e4e578ed0ffdc0df600979  /tmp/task12-green-v4-correction.patch' | sha256sum -c -
+          git apply --check /tmp/task12-green-v4-correction.patch
+          git apply /tmp/task12-green-v4-correction.patch
+
+      - name: Verify exact reviewed correction and scope
         shell: bash
         run: |
           set -euo pipefail
@@ -67,21 +77,11 @@ jobs:
           echo 'c6a28317b09c4c5effab32c53d29789d44f5b64766e77565f22c79386117b08d  src/store/sqlite-store.ts' | sha256sum -c -
           echo '7658ad0525d2eb4f53bc5ef21dff2880d42ca1f80edce2eca2b336e467c9967f  tests/services/claim-service.test.ts' | sha256sum -c -
           echo '431d73e372a6c8d38781400ce895ea4dfed9be311f2024e32689de378d78cacd  tests/services/recovery-service.test.ts' | sha256sum -c -
-          paths=(
-            src/services/claim-service.ts
-            src/services/recovery-service.ts
-            src/store/sqlite-store.ts
-            tests/services/claim-service.test.ts
-            tests/services/recovery-service.test.ts
-          )
-          expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\nsrc/store/sqlite-store.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
-          actual="$({
-            git diff --name-only -- "${paths[@]}"
-            git ls-files --others --exclude-standard -- "${paths[@]}"
-          } | sort -u)"
+          expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
+          actual="$(git diff --name-only | sort)"
           test "$actual" = "$expected"
           git diff --check
-          test -z "$(git diff --name-only -- package.json package-lock.json migrations schema)"
+          test -z "$(git diff --name-only -- package.json package-lock.json migrations schema src/store/sqlite-store.ts)"
 
       - name: Install dependencies
         shell: bash
@@ -96,15 +96,15 @@ jobs:
             dist/tests/services/claim-service.test.js \
             dist/tests/services/recovery-service.test.js \
             | tee /tmp/task12-green.log
-          grep -q 'tests 48' /tmp/task12-green.log
-          grep -q 'pass 48' /tmp/task12-green.log
+          grep -q 'tests 50' /tmp/task12-green.log
+          grep -q 'pass 50' /tmp/task12-green.log
           grep -q 'fail 0' /tmp/task12-green.log
 
       - name: Verify complete canonical suite
         shell: bash
         run: npm run verify
 
-      - name: Commit and publish reviewed GREEN
+      - name: Commit and publish reviewed correction
         shell: bash
         run: |
           set -euo pipefail
@@ -114,12 +114,11 @@ jobs:
           git add \
             src/services/claim-service.ts \
             src/services/recovery-service.ts \
-            src/store/sqlite-store.ts \
             tests/services/claim-service.test.ts \
             tests/services/recovery-service.test.ts
-          expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\nsrc/store/sqlite-store.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
+          expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
           actual="$(git diff --cached --name-only | sort)"
           test "$actual" = "$expected"
           git diff --cached --check
-          git commit -m 'feat: add Claims and read-only Recovery'
+          git commit -m 'fix: harden Claim and Recovery review boundaries'
           git push origin HEAD:design/mis-002-m01

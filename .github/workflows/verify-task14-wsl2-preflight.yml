@@ -1,0 +1,82 @@
+name: Verify Task 14 WSL2 Preflight Script
+
+on:
+  push:
+    branches:
+      - automation/task14-wsl2-preflight
+    paths:
+      - .github/preflight/task14-wsl2-preflight.sh
+      - .github/workflows/verify-task14-wsl2-preflight.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify immutable script bytes and syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s  %s\n' \
+            '5ff77c31659d3d33e9d774516f5dc9f8619101c8460bdbe286c950a701643d91' \
+            .github/preflight/task14-wsl2-preflight.sh \
+            | sha256sum --check --strict
+          bash -n .github/preflight/task14-wsl2-preflight.sh
+
+      - name: Verify authorized read-only boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('.github/preflight/task14-wsl2-preflight.sh')
+          text = path.read_text(encoding='utf-8')
+          executable = '\n'.join(
+              line for line in text.splitlines()
+              if not line.lstrip().startswith(('#', 'printf'))
+          )
+
+          forbidden = {
+              'mutating Git command': r'\bgit\s+(?:fetch|pull|reset|checkout|switch|merge|rebase|clean|push)\b',
+              'network downloader': r'\b(?:curl|wget)\b',
+              'GitHub mutation': r'\bgh\s+',
+              'direct production Treehouse command': r'\btreehouse\s+(?:get|status|return)\b',
+          }
+          for label, pattern in forbidden.items():
+              if re.search(pattern, executable):
+                  raise SystemExit(f'{label} found')
+
+          if text.count("trap 'rm -rf -- \"$TMP\"' EXIT") != 1:
+              raise SystemExit('temporary cleanup is not exact')
+          if text.count('rm -rf') != 1:
+              raise SystemExit('unexpected recursive deletion authority')
+
+          required = [
+              "PR_HEAD='3adb12c42394cf0d54fb386b1b85d83c38f8903a'",
+              "DETERMINISTIC='680b2e55d01f76da35922675c18ef997c56403d3'",
+              "TREEHOUSE_SHA='c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3'",
+              "COMMAND_SHAPE='sha256:f2077cfd037cbaefdcfc94385a0cfeb7e1647ef294ca8ceee3cd61a1b109dc84'",
+              'git ls-remote --exit-code',
+              'npm ci >',
+              'npm run verify >',
+              'node bin/mnfs.mjs doctor --json',
+              'MNFS_WSL2_PREFLIGHT_RESULT=PASS',
+          ]
+          for value in required:
+              if value not in text:
+                  raise SystemExit(f'missing required boundary: {value}')
+          PY
+
+      - name: Verify automation branch scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 3adb12c42394cf0d54fb386b1b85d83c38f8903a HEAD
+          test "$(git diff --name-only 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD | sort)" = $'.github/preflight/task14-wsl2-preflight.sh\n.github/workflows/verify-task14-wsl2-preflight.yml'
+          git diff --check 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD

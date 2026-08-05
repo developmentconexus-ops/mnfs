@@ -1,0 +1,93 @@
+name: Publish Task 14 Deterministic Tracking
+
+on:
+  push:
+    branches:
+      - automation/task14-correction-tracking
+    paths:
+      - .github/workflows/publish-task14-correction-tracking.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task14-correction-tracking
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact verified correction
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify exact tracking preimage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '680b2e55d01f76da35922675c18ef997c56403d3'
+          test "$(git rev-parse HEAD^)" = 'a6822409e2b860de534c5fc68e9cc1ee1afb8c4d'
+          grep -Fq 'version: 1.8.48' docs/tracking/STATUS.md
+          test "$(git status --porcelain)" = ''
+
+      - name: Checkout exact tracking payload
+        uses: actions/checkout@v4
+        with:
+          ref: automation/task14-correction-tracking
+          path: .tracking-payload
+          fetch-depth: 1
+
+      - name: Generate bounded tracking update
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .tracking-payload/.github/task14-correction-tracking/update-status.py
+          rm -rf .tracking-payload
+          expected='docs/tracking/STATUS.md'
+          actual="$(git status --short --untracked-files=all | sed -E 's/^ M //' | sort)"
+          test "$actual" = "$expected"
+          printf '%s  %s\n' \
+            '9f6b30839caafe0087ecef3c7a1bf4342b03e213294b8c265454d79e81997624' \
+            docs/tracking/STATUS.md \
+            | sha256sum --check --strict
+          git diff --check
+
+      - name: Reverify complete accepted head with tracking
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run verify | tee /tmp/task14-tracking-verify.log
+          grep -Fq 'tests 320' /tmp/task14-tracking-verify.log
+          grep -Fq 'pass 320' /tmp/task14-tracking-verify.log
+          grep -Fq 'tests 119' /tmp/task14-tracking-verify.log
+          grep -Fq 'pass 119' /tmp/task14-tracking-verify.log
+          grep -Fq 'tests 78' /tmp/task14-tracking-verify.log
+          grep -Fq 'pass 78' /tmp/task14-tracking-verify.log
+          grep -Fq 'Documentation validation passed (93 canonical IDs' /tmp/task14-tracking-verify.log
+          npm audit --audit-level=low
+
+      - name: Commit and publish tracking
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin design/mis-002-m01
+          test "$(git rev-parse origin/design/mis-002-m01)" = '680b2e55d01f76da35922675c18ef997c56403d3'
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add docs/tracking/STATUS.md
+          test "$(git diff --cached --name-only)" = 'docs/tracking/STATUS.md'
+          git diff --cached --check
+          git commit -m 'docs: record Task 14 deterministic evidence'
+          test "$(git rev-parse HEAD^)" = '680b2e55d01f76da35922675c18ef997c56403d3'
+          git push origin HEAD:design/mis-002-m01
+          echo "Published tracking: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

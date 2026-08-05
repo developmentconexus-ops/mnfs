@@ -35,7 +35,7 @@ jobs:
           git merge-base --is-ancestor d503a38f0134cd822de658e8dd88556df6c665ae HEAD
           git merge-base --is-ancestor fe6da615d2d0a32437e2adb0627f09a693f1bd57 HEAD
           git merge-base --is-ancestor 8c6fd9afa2cc7f707f96659b9efa73230579471a HEAD
-          expected=$'.github/workflows/task13-green-work.yml\nsrc/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts'
+          expected=$'.github/workflows/task13-green-work.yml\nsrc/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts\ntests/cli/execution-green-review.test.ts'
           actual="$(git diff --name-only d503a38f0134cd822de658e8dd88556df6c665ae...HEAD | sort)"
           test "$actual" = "$expected"
           git diff --check d503a38f0134cd822de658e8dd88556df6c665ae...HEAD
@@ -53,10 +53,11 @@ jobs:
             dist/tests/cli/execution-args.test.js \
             dist/tests/cli/execution-main.test.js \
             dist/tests/cli/execution-red-review.test.js \
+            dist/tests/cli/execution-green-review.test.js \
             > /tmp/task13-directed.log 2>&1
           cat /tmp/task13-directed.log
-          grep -q 'tests 12' /tmp/task13-directed.log
-          grep -q 'pass 12' /tmp/task13-directed.log
+          grep -q 'tests 16' /tmp/task13-directed.log
+          grep -q 'pass 16' /tmp/task13-directed.log
           grep -q 'fail 0' /tmp/task13-directed.log
 
       - name: Verify canonical product and accepted adapters
@@ -65,8 +66,8 @@ jobs:
           set -euo pipefail
           node scripts/run-tests.mjs > /tmp/task13-product.log 2>&1
           cat /tmp/task13-product.log
-          grep -q 'tests 302' /tmp/task13-product.log
-          grep -q 'pass 302' /tmp/task13-product.log
+          grep -q 'tests 306' /tmp/task13-product.log
+          grep -q 'pass 306' /tmp/task13-product.log
           grep -q 'fail 0' /tmp/task13-product.log
 
           node scripts/run-as02-tests.mjs > /tmp/task13-as02.log 2>&1

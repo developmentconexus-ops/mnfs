@@ -1,0 +1,135 @@
+name: Verify Published Task 13 GREEN
+
+on:
+  push:
+    branches:
+      - automation/task13-green-publish-final
+    paths:
+      - .github/workflows/verify-task13-green-published.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact published implementation
+        uses: actions/checkout@v4
+        with:
+          ref: 5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify exact implementation identity and scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864'
+          test "$(git rev-parse HEAD^)" = 'd503a38f0134cd822de658e8dd88556df6c665ae'
+          git merge-base --is-ancestor 'fe6da615d2d0a32437e2adb0627f09a693f1bd57' HEAD
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+          expected=$'src/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts\ntests/cli/execution-green-review.test.ts'
+          actual="$(git diff-tree --no-commit-id --name-only -r HEAD | sort)"
+          test "$actual" = "$expected"
+          test "$(git log -1 --pretty=%s)" = 'feat: expose M01 execution CLI'
+
+          test "$(git hash-object tests/cli/execution-args.test.ts)" = 'bf22293f55983c12450dc81bafe5df31be5457c8'
+          test "$(git hash-object tests/cli/execution-main.test.ts)" = '792fc7907aa12672532893558b98a99b9dd70a34'
+          test "$(git hash-object tests/cli/execution-red-review.test.ts)" = 'f5f8bd2825a13fd524f3223a37bcd602c8bf8c74'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify directed Task 13 matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run build --silent
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            dist/tests/cli/execution-red-review.test.js \
+            dist/tests/cli/execution-green-review.test.js \
+            > /tmp/task13-published-directed.log 2>&1
+          cat /tmp/task13-published-directed.log
+          grep -q 'tests 16' /tmp/task13-published-directed.log
+          grep -q 'pass 16' /tmp/task13-published-directed.log
+          grep -q 'fail 0' /tmp/task13-published-directed.log
+
+      - name: Verify canonical product and accepted adapters
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-tests.mjs > /tmp/task13-published-product.log 2>&1
+          cat /tmp/task13-published-product.log
+          grep -q 'tests 306' /tmp/task13-published-product.log
+          grep -q 'pass 306' /tmp/task13-published-product.log
+          grep -q 'fail 0' /tmp/task13-published-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-published-as02.log 2>&1
+          cat /tmp/task13-published-as02.log
+          grep -q 'tests 119' /tmp/task13-published-as02.log
+          grep -q 'pass 119' /tmp/task13-published-as02.log
+          grep -q 'fail 0' /tmp/task13-published-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-published-tc01.log 2>&1
+          cat /tmp/task13-published-tc01.log
+          grep -q 'tests 78' /tmp/task13-published-tc01.log
+          grep -q 'pass 78' /tmp/task13-published-tc01.log
+          grep -q 'fail 0' /tmp/task13-published-tc01.log
+
+          npm run docs:check > /tmp/task13-published-docs.log 2>&1
+          cat /tmp/task13-published-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-published-docs.log
+
+      - name: Verify adversarial production boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          entry = Path('src/cli/entry.ts').read_text(encoding='utf-8')
+          forbidden = [
+              'shell: true',
+              '--force',
+              "'destroy'",
+              '"destroy"',
+              "'prune'",
+              '"prune"',
+              "from '@mariozechner/pi-coding-agent'",
+              'ClaimService',
+              'new LeaseActionRunner(',
+              'recursive: true',
+          ]
+          found = [value for value in forbidden if value in entry]
+          if found:
+              raise SystemExit(f'forbidden Task 13 production surface: {found}')
+
+          required = [
+              'await ensureDatabaseReady(',
+              'SqliteStore.openCurrent(',
+              'store.close()',
+              'ExecutionService',
+              'LeaseService',
+              'RecoveryService',
+              'ExecutionSourceAdapter',
+              'GitWorktreeInspector',
+              'TreehouseAdapter',
+              'LeaseActionRunner',
+              'LinuxProcessIdentityInspector',
+              'mnfs-lease-action.mjs',
+              'canObservePhysicalWithoutMutation',
+              'ensureContainedDirectoryTree',
+          ]
+          missing = [value for value in required if value not in entry]
+          if missing:
+              raise SystemExit(f'missing Task 13 production boundary: {missing}')
+          PY

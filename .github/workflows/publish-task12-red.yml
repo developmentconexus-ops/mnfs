@@ -56,9 +56,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base64 -d .task12-publisher/.github/task12-red-tests.tar.gz.b64 \
+          base64 -d .task12-publisher/.github/task12-red-tests-v2.tar.gz.b64 \
             > /tmp/task12-red-tests.tar.gz
-          echo '2f7111b8fe23ab35fd52085f31e780f3b07d1f38adb52bb43f8f3e21251566a9  /tmp/task12-red-tests.tar.gz' \
+          echo 'e9d310033f94f629ded66f2e94a57b65bc98ba272c527bc08782a09a47dc05cd  /tmp/task12-red-tests.tar.gz' \
             | sha256sum -c -
           tar -xzf /tmp/task12-red-tests.tar.gz -C tests/services
 

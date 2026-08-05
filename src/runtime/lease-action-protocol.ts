@@ -12,7 +12,6 @@ import { TextDecoder } from 'node:util';
 
 import { MnfsError } from '../domain/errors.js';
 import type { ProcessIdentity } from '../execution/model.js';
-import { writeDurableFile } from './durable-artifact.js';
 
 const FATAL_UTF8 = new TextDecoder('utf-8', { fatal: true });
 const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/u;
@@ -404,7 +403,11 @@ function requireOperation(
 
 function requireStarted(value: unknown): LeaseActionStarted {
   if (!isRecord(value)) fail('Lease action STARTED must be one object.');
-  exactKeys(value, ['actionToken', 'operationSha256', 'runner', 'schemaVersion', 'startedAt'], 'Lease action STARTED');
+  exactKeys(
+    value,
+    ['actionToken', 'operationSha256', 'runner', 'schemaVersion', 'startedAt'],
+    'Lease action STARTED',
+  );
   if (value.schemaVersion !== 1) fail('Lease action STARTED schema version is unsupported.');
   return {
     schemaVersion: 1,
@@ -449,7 +452,9 @@ function requireFinished(value: unknown): LeaseActionFinished {
   if (signal !== null && (typeof signal !== 'string' || !SIGNAL_PATTERN.test(signal))) {
     fail('Lease action process signal is invalid.');
   }
-  if (typeof value.process.timedOut !== 'boolean') fail('Lease action process timeout marker is invalid.');
+  if (typeof value.process.timedOut !== 'boolean') {
+    fail('Lease action process timeout marker is invalid.');
+  }
   return {
     schemaVersion: 1,
     actionToken: requireActionToken(value.actionToken),
@@ -609,7 +614,50 @@ async function publishExclusive(finalPath: string, bytes: Buffer, mode: number):
   }
 }
 
-export async function leaseActionFileExists(actionRoot: string, filePath: string): Promise<boolean> {
+async function publishIdempotent(input: Readonly<{
+  readonly actionRoot: string;
+  readonly filePath: string;
+  readonly bytes: Buffer;
+  readonly mode: number;
+  readonly label: string;
+  readonly byteLimit: number;
+}>): Promise<void> {
+  await requireActionFileBoundary(input.actionRoot, input.filePath);
+  const limit = requirePositiveInteger(input.byteLimit, `${input.label} byte limit`);
+  if (input.bytes.length > limit) fail(`${input.label} exceeds its byte limit.`);
+
+  const verifyReplay = async (): Promise<void> => {
+    const replay = await readOwnedRegularFile(
+      input.filePath,
+      input.mode,
+      input.label,
+      limit,
+      input.bytes.length,
+    );
+    if (!replay.equals(input.bytes)) {
+      fail(`${input.label} already exists with different bytes.`);
+    }
+  };
+
+  if (await leaseActionFileExists(input.actionRoot, input.filePath)) {
+    await verifyReplay();
+    return;
+  }
+
+  try {
+    await publishExclusive(input.filePath, input.bytes, input.mode);
+  } catch (error) {
+    const appeared = await leaseActionFileExists(input.actionRoot, input.filePath)
+      .catch(() => false);
+    if (!appeared) throw error;
+  }
+  await verifyReplay();
+}
+
+export async function leaseActionFileExists(
+  actionRoot: string,
+  filePath: string,
+): Promise<boolean> {
   const boundary = await requireActionFileBoundary(actionRoot, filePath);
   try {
     await lstat(boundary.filePath);
@@ -635,12 +683,15 @@ export async function publishLeaseActionOperation(input: Readonly<{
   readonly operationPath: string;
   readonly operation: LeaseActionOperation;
 }>): Promise<PublishedLeaseActionOperation> {
-  await requireActionFileBoundary(input.actionRoot, input.operationPath);
   const published = canonicalizeLeaseActionOperation(input);
-  if (published.bytes.length > CONTROL_FILE_LIMIT_BYTES) {
-    fail('Lease action operation exceeds its byte limit.');
-  }
-  await writeDurableFile(input.operationPath, published.bytes, OPERATION_MODE);
+  await publishIdempotent({
+    actionRoot: input.actionRoot,
+    filePath: input.operationPath,
+    bytes: published.bytes,
+    mode: OPERATION_MODE,
+    label: 'Lease action operation',
+    byteLimit: CONTROL_FILE_LIMIT_BYTES,
+  });
   return await readLeaseActionOperation({
     actionRoot: input.actionRoot,
     operationPath: input.operationPath,
@@ -662,7 +713,11 @@ export async function readLeaseActionOperation(input: Readonly<{
     'Lease action operation',
     CONTROL_FILE_LIMIT_BYTES,
   );
-  const operation = requireOperation(decodeCanonicalJson(bytes, 'Lease action operation'), input.actionRoot, input.operationPath);
+  const operation = requireOperation(
+    decodeCanonicalJson(bytes, 'Lease action operation'),
+    input.actionRoot,
+    input.operationPath,
+  );
   const operationSha256 = sha256(bytes);
   if (
     operation.actionToken !== requireActionToken(input.expectedActionToken)
@@ -681,7 +736,9 @@ export async function publishLeaseActionStarted(input: Readonly<{
   await requireActionFileBoundary(input.actionRoot, input.startedPath);
   const started = requireStarted(input.started);
   const bytes = canonicalBytes(started);
-  if (bytes.length > CONTROL_FILE_LIMIT_BYTES) fail('Lease action STARTED exceeds its byte limit.');
+  if (bytes.length > CONTROL_FILE_LIMIT_BYTES) {
+    fail('Lease action STARTED exceeds its byte limit.');
+  }
   await publishExclusive(input.startedPath, bytes, OPERATION_MODE);
   return await readLeaseActionStarted({
     actionRoot: input.actionRoot,
@@ -707,7 +764,10 @@ export async function readLeaseActionStarted(input: Readonly<{
   const started = requireStarted(decodeCanonicalJson(bytes, 'Lease action STARTED'));
   if (
     started.actionToken !== requireActionToken(input.expectedActionToken)
-    || started.operationSha256 !== requireSha256(input.expectedOperationSha256, 'Expected operation hash')
+    || started.operationSha256 !== requireSha256(
+      input.expectedOperationSha256,
+      'Expected operation hash',
+    )
   ) {
     fail('Lease action STARTED identity differs from the expected operation.');
   }
@@ -746,12 +806,28 @@ export async function publishLeaseActionFinished(input: Readonly<{
   const boundary = await requireActionFileBoundary(input.actionRoot, input.resultPath);
   const finished = requireFinished(input.finished);
   await Promise.all([
-    verifyOutputReference(boundary.tokenRoot, finished.stdout, 'Lease action stdout', input.stdoutLimitBytes),
-    verifyOutputReference(boundary.tokenRoot, finished.stderr, 'Lease action stderr', input.stderrLimitBytes),
+    verifyOutputReference(
+      boundary.tokenRoot,
+      finished.stdout,
+      'Lease action stdout',
+      input.stdoutLimitBytes,
+    ),
+    verifyOutputReference(
+      boundary.tokenRoot,
+      finished.stderr,
+      'Lease action stderr',
+      input.stderrLimitBytes,
+    ),
   ]);
   const bytes = canonicalBytes(finished);
-  if (bytes.length > CONTROL_FILE_LIMIT_BYTES) fail('Lease action FINISHED exceeds its byte limit.');
-  await writeDurableFile(input.resultPath, bytes, OPERATION_MODE);
+  await publishIdempotent({
+    actionRoot: input.actionRoot,
+    filePath: input.resultPath,
+    bytes,
+    mode: OPERATION_MODE,
+    label: 'Lease action FINISHED',
+    byteLimit: CONTROL_FILE_LIMIT_BYTES,
+  });
   return await readLeaseActionFinished({
     actionRoot: input.actionRoot,
     resultPath: input.resultPath,
@@ -782,14 +858,30 @@ export async function readLeaseActionFinished(input: Readonly<{
   const finished = requireFinished(decodeCanonicalJson(bytes, 'Lease action FINISHED'));
   if (
     finished.actionToken !== requireActionToken(input.expectedActionToken)
-    || finished.operationSha256 !== requireSha256(input.expectedOperationSha256, 'Expected operation hash')
-    || finished.startedSha256 !== requireSha256(input.expectedStartedSha256, 'Expected STARTED hash')
+    || finished.operationSha256 !== requireSha256(
+      input.expectedOperationSha256,
+      'Expected operation hash',
+    )
+    || finished.startedSha256 !== requireSha256(
+      input.expectedStartedSha256,
+      'Expected STARTED hash',
+    )
   ) {
     fail('Lease action FINISHED identity differs from the expected Artifact chain.');
   }
   await Promise.all([
-    verifyOutputReference(boundary.tokenRoot, finished.stdout, 'Lease action stdout', input.stdoutLimitBytes),
-    verifyOutputReference(boundary.tokenRoot, finished.stderr, 'Lease action stderr', input.stderrLimitBytes),
+    verifyOutputReference(
+      boundary.tokenRoot,
+      finished.stdout,
+      'Lease action stdout',
+      input.stdoutLimitBytes,
+    ),
+    verifyOutputReference(
+      boundary.tokenRoot,
+      finished.stderr,
+      'Lease action stderr',
+      input.stderrLimitBytes,
+    ),
   ]);
   return { finished, bytes, finishedSha256: sha256(bytes) };
 }
@@ -805,8 +897,14 @@ export async function publishLeaseActionOutput(
     fail('Lease action output must be directly token-scoped.');
   }
   const limit = requirePositiveInteger(byteLimit, 'Lease action output byte limit');
-  if (bytes.length > limit) fail('Lease action output exceeds its byte limit.');
-  await writeDurableFile(outputPath, bytes, OUTPUT_MODE);
+  await publishIdempotent({
+    actionRoot,
+    filePath: outputPath,
+    bytes,
+    mode: OUTPUT_MODE,
+    label: 'Lease action output',
+    byteLimit: limit,
+  });
   const verified = await readOwnedRegularFile(
     outputPath,
     OUTPUT_MODE,

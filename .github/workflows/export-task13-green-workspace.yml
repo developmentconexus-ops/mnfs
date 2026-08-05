@@ -1,0 +1,46 @@
+name: Export Task 13 GREEN Workspace
+
+on:
+  push:
+    branches:
+      - automation/task13-green-export
+    paths:
+      - .github/workflows/export-task13-green-workspace.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact authorized target
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Verify authorization lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'd503a38f0134cd822de658e8dd88556df6c665ae'
+          git merge-base --is-ancestor 'fe6da615d2d0a32437e2adb0627f09a693f1bd57' HEAD
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+
+      - name: Package workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar --exclude=.git -czf /tmp/mnfs-task13-green-workspace.tar.gz .
+          sha256sum /tmp/mnfs-task13-green-workspace.tar.gz > /tmp/mnfs-task13-green-workspace.tar.gz.sha256
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: task13-green-workspace
+          path: |
+            /tmp/mnfs-task13-green-workspace.tar.gz
+            /tmp/mnfs-task13-green-workspace.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1

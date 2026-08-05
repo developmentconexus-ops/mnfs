@@ -1,4 +1,4 @@
-name: Diagnose authorized Task 12 RED payload
+name: Publish reviewed Task 12 RED
 
 on:
   push:
@@ -8,35 +8,98 @@ on:
       - .github/workflows/publish-task12-red.yml
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: publish-task12-red
+  cancel-in-progress: false
 
 jobs:
-  diagnose:
+  publish:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout publisher payload
+      - name: Checkout authorized target branch
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Checkout reviewed correction patch
         uses: actions/checkout@v4
         with:
           ref: automation/task12-red-publish
+          path: .task12-publisher
           fetch-depth: 1
 
-      - name: Locate the extra payload byte
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify authorized RED head
         shell: bash
         run: |
           set -euo pipefail
-          head -c 8000 .github/task12-red-payload/part-00.b64 > /tmp/part-00-first-8000.b64
-          sha256sum /tmp/part-00-first-8000.b64
-          echo '4e7f731017ad3c6d7c1b8b19624965a4ebf32586232b0a0fe9db036d3f800b69  /tmp/part-00-first-8000.b64' \
+          expected='dd9876ab9f839077e8da0a2f1701750b7e78b029'
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$expected"
+
+      - name: Verify accepted Tasks 1-11 baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git checkout --detach f46497d9b10c6abd453f1902ec4178d9e51aa454
+          npm ci
+          npm run verify
+          git checkout -B design/mis-002-m01 dd9876ab9f839077e8da0a2f1701750b7e78b029
+
+      - name: Apply reviewed test-only correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          patch_file='.task12-publisher/.github/task12-red-correction.patch'
+          echo 'a49757316521c187a5393cf7066452ea0843a0660013b26aa29ec1f3cfa5fe26  .task12-publisher/.github/task12-red-correction.patch' \
             | sha256sum -c -
-          echo 'tail-bytes:'
-          tail -c 8 .github/task12-red-payload/part-00.b64 | od -An -t x1
-          cat \
-            /tmp/part-00-first-8000.b64 \
-            .github/task12-red-payload/part-01.b64 \
-            > /tmp/task12-red-tests.tar.gz.b64
-          echo 'fd06e44fb01b99e5a65c085d060a310d60acc91e1c47832ac00a4fa6ca8134d7  /tmp/task12-red-tests.tar.gz.b64' \
+          patch --dry-run -p1 < "$patch_file"
+          patch -p1 < "$patch_file"
+          echo 'a84ae5651584f39ce83f59e6f2671868a5e6e576f5328bb68c0aa40539ff3d98  tests/services/claim-service.test.ts' \
             | sha256sum -c -
-          base64 -d /tmp/task12-red-tests.tar.gz.b64 > /tmp/task12-red-tests.tar.gz
-          echo '72ac99d23647786bdbe2d5e9b101e3629df2c89350e772d2f32633c7ab90cd20  /tmp/task12-red-tests.tar.gz' \
+          echo '729eaba7af1ab04f2de9ee70a04352e3f7a98c6e818b3343e6528df7a7032790  tests/services/recovery-service.test.ts' \
             | sha256sum -c -
-          tar -tzf /tmp/task12-red-tests.tar.gz
+
+      - name: Verify reviewed Task 12 RED signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          set +e
+          npm run build --silent && node --test \
+            dist/tests/services/claim-service.test.js \
+            dist/tests/services/recovery-service.test.js \
+            > /tmp/task12-red.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/task12-red.log
+          test "$status" -ne 0
+          grep -q 'M01 ClaimService is not implemented' /tmp/task12-red.log
+          grep -q 'M01 RecoveryService is not implemented' /tmp/task12-red.log
+          grep -q 'tests 30' /tmp/task12-red.log
+          grep -q 'pass 0' /tmp/task12-red.log
+          grep -q 'fail 30' /tmp/task12-red.log
+          test ! -e src/services/claim-service.ts
+          test ! -e src/services/recovery-service.ts
+
+      - name: Commit and publish reviewed RED tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .task12-publisher
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add \
+            tests/services/claim-service.test.ts \
+            tests/services/recovery-service.test.ts
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git commit -m 'test: correct Task 12 Claim and Recovery RED'
+          git push origin HEAD:design/mis-002-m01

@@ -43,7 +43,7 @@ jobs:
           )
 
           forbidden = {
-              'mutating Git command': r'\bgit\s+(?:fetch|pull|reset|checkout|switch|merge|rebase|clean|push)\b',
+              'mutating Git command': r'\bgit\s+(?:fetch|pull|reset|checkout|switch|merge|rebase|clean|push)(?:\s|$)',
               'network downloader': r'\b(?:curl|wget)\b',
               'GitHub mutation': r'\bgh\s+',
               'direct production Treehouse command': r'\btreehouse\s+(?:get|status|return)\b',

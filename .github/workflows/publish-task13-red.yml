@@ -30,18 +30,44 @@ jobs:
           node-version: 24.18.0
           cache: npm
 
-      - name: Verify authorized target head
+      - name: Verify authorized target and accepted Task 12 ancestry
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '77b5c56404663e8ce9d740dd9d7fe8a2d9f6292d'
+          test "$(git rev-parse HEAD)" = '39a7bdcaa351ec5212b53018595cbf34aae2e476'
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+          test ! -e tests/cli/execution-args.test.ts
+          test ! -e tests/cli/execution-main.test.ts
 
       - name: Verify accepted Tasks 1-12 baseline
         shell: bash
         run: |
           set -euo pipefail
           npm ci
-          npm run verify
+          npm run typecheck
+
+          npm run build --silent
+          node scripts/run-tests.mjs > /tmp/task13-baseline-product.log 2>&1
+          cat /tmp/task13-baseline-product.log
+          grep -q 'tests 290' /tmp/task13-baseline-product.log
+          grep -q 'pass 290' /tmp/task13-baseline-product.log
+          grep -q 'fail 0' /tmp/task13-baseline-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-baseline-as02.log 2>&1
+          cat /tmp/task13-baseline-as02.log
+          grep -q 'tests 119' /tmp/task13-baseline-as02.log
+          grep -q 'pass 119' /tmp/task13-baseline-as02.log
+          grep -q 'fail 0' /tmp/task13-baseline-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-baseline-tc01.log 2>&1
+          cat /tmp/task13-baseline-tc01.log
+          grep -q 'tests 78' /tmp/task13-baseline-tc01.log
+          grep -q 'pass 78' /tmp/task13-baseline-tc01.log
+          grep -q 'fail 0' /tmp/task13-baseline-tc01.log
+
+          npm run docs:check > /tmp/task13-baseline-docs.log 2>&1
+          cat /tmp/task13-baseline-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-baseline-docs.log
 
       - name: Checkout Task 13 RED payload
         uses: actions/checkout@v4
@@ -69,7 +95,7 @@ jobs:
           git diff --check --no-index /dev/null tests/cli/execution-args.test.ts
           git diff --check --no-index /dev/null tests/cli/execution-main.test.ts
 
-      - name: Verify Task 13 RED signatures
+      - name: Verify Task 13 directed RED signatures
         shell: bash
         run: |
           set -euo pipefail
@@ -79,17 +105,33 @@ jobs:
           node --test \
             dist/tests/cli/execution-args.test.js \
             dist/tests/cli/execution-main.test.js \
-            > /tmp/task13-red.log 2>&1
+            > /tmp/task13-red-directed.log 2>&1
           status=$?
           set -e
-          cat /tmp/task13-red.log
+          cat /tmp/task13-red-directed.log
           test "$status" -ne 0
-          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-red.log
-          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-red.log
-          grep -q 'tests 8' /tmp/task13-red.log
-          grep -q 'pass 0' /tmp/task13-red.log
-          grep -q 'fail 8' /tmp/task13-red.log
-          test "$(git rev-parse HEAD)" = '77b5c56404663e8ce9d740dd9d7fe8a2d9f6292d'
+          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-red-directed.log
+          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-red-directed.log
+          grep -q 'tests 8' /tmp/task13-red-directed.log
+          grep -q 'pass 0' /tmp/task13-red-directed.log
+          grep -q 'fail 8' /tmp/task13-red-directed.log
+
+      - name: Verify prior product baseline remains green inside full RED suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          node scripts/run-tests.mjs > /tmp/task13-red-product.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/task13-red-product.log
+          test "$status" -ne 0
+          grep -q 'tests 298' /tmp/task13-red-product.log
+          grep -q 'pass 290' /tmp/task13-red-product.log
+          grep -q 'fail 8' /tmp/task13-red-product.log
+          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-red-product.log
+          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-red-product.log
+          test "$(git rev-parse HEAD)" = '39a7bdcaa351ec5212b53018595cbf34aae2e476'
 
       - name: Commit and publish Task 13 RED tests
         shell: bash

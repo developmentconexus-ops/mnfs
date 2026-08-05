@@ -21,6 +21,7 @@ const SAFE_VALUE_PATTERN = /^[^\0\r\n]+$/u;
 const SIGNAL_PATTERN = /^SIG[A-Z0-9]+$/u;
 const OPERATION_MODE = 0o400;
 const OUTPUT_MODE = 0o600;
+const CONTROL_FILE_LIMIT_BYTES = 65_536;
 
 const ENVIRONMENT_KEYS = [
   'GCM_INTERACTIVE',
@@ -148,6 +149,13 @@ function requirePositiveInteger(value: unknown, label: string): number {
   return value as number;
 }
 
+function requireNonNegativeInteger(value: unknown, label: string): number {
+  if (!Number.isSafeInteger(value) || (value as number) < 0) {
+    fail(`${label} must be a non-negative safe integer.`);
+  }
+  return value as number;
+}
+
 function requireSha256(value: unknown, label: string): string {
   const digest = requireSafeString(value, label);
   if (!SHA256_PATTERN.test(digest)) {
@@ -197,16 +205,10 @@ function requireContainedPath(parent: string, value: unknown, label: string): st
 }
 
 function canonicalValue(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map(canonicalValue);
-  }
-  if (!isRecord(value)) {
-    return value;
-  }
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (!isRecord(value)) return value;
   const output: Record<string, unknown> = {};
-  for (const key of Object.keys(value).sort()) {
-    output[key] = canonicalValue(value[key]);
-  }
+  for (const key of Object.keys(value).sort()) output[key] = canonicalValue(value[key]);
   return output;
 }
 
@@ -225,18 +227,14 @@ function decodeCanonicalJson(bytes: Buffer, label: string): unknown {
   } catch (error) {
     throw protocolError(`${label} is not valid UTF-8.`, error);
   }
-  if (text.length === 0) {
-    fail(`${label} is empty.`);
-  }
+  if (text.length === 0) fail(`${label} is empty.`);
   let value: unknown;
   try {
     value = JSON.parse(text) as unknown;
   } catch (error) {
     throw protocolError(`${label} must contain exactly one JSON value.`, error);
   }
-  if (!canonicalBytes(value).equals(bytes)) {
-    fail(`${label} is not canonical JSON.`);
-  }
+  if (!canonicalBytes(value).equals(bytes)) fail(`${label} is not canonical JSON.`);
   return value;
 }
 
@@ -249,9 +247,7 @@ function requireIsoTimestamp(value: unknown, label: string): string {
 }
 
 function requireProcessIdentity(value: unknown, label: string): ProcessIdentity {
-  if (!isRecord(value)) {
-    fail(`${label} must be one process identity.`);
-  }
+  if (!isRecord(value)) fail(`${label} must be one process identity.`);
   exactKeys(value, ['bootId', 'pid', 'startTicks'], label);
   return {
     bootId: requireSafeString(value.bootId, `${label} boot ID`),
@@ -264,9 +260,7 @@ function requireEnvironment(
   value: unknown,
   executable: string,
 ): Readonly<Record<string, string>> {
-  if (!isRecord(value)) {
-    fail('Lease action environment must be one object.');
-  }
+  if (!isRecord(value)) fail('Lease action environment must be one object.');
   exactKeys(value, ENVIRONMENT_KEYS, 'Lease action environment');
   const env: Record<string, string> = {};
   for (const key of ENVIRONMENT_KEYS) {
@@ -299,20 +293,23 @@ function requireEnvironment(
     GIT_CONFIG_VALUE_2: 'false',
   };
   for (const [key, expected] of Object.entries(expectedFixed)) {
-    if (env[key] !== expected) {
-      fail(`Lease action environment ${key} differs from the accepted value.`);
-    }
+    if (env[key] !== expected) fail(`Lease action environment ${key} differs from the accepted value.`);
   }
 
-  const expectedPath = `${path.dirname(executable)}:/usr/bin:/bin`;
-  if (env.PATH !== expectedPath) {
+  const pathParts = (env.PATH as string).split(':');
+  if (pathParts.length !== 4) fail('Lease action PATH differs from the accepted Linux-only shape.');
+  const treehouseBin = requireAbsoluteLinuxPath(pathParts[0], 'Lease action Treehouse bin');
+  const gitBin = requireAbsoluteLinuxPath(pathParts[1], 'Lease action Git bin');
+  if (
+    treehouseBin !== path.dirname(executable)
+    || pathParts[2] !== '/usr/bin'
+    || pathParts[3] !== '/bin'
+  ) {
     fail('Lease action PATH differs from the accepted Linux-only shape.');
   }
+  env.PATH = `${treehouseBin}:${gitBin}:/usr/bin:/bin`;
   env.HOME = requireAbsoluteLinuxPath(env.HOME, 'Lease action HOME');
-  env.XDG_CONFIG_HOME = requireAbsoluteLinuxPath(
-    env.XDG_CONFIG_HOME,
-    'Lease action XDG_CONFIG_HOME',
-  );
+  env.XDG_CONFIG_HOME = requireAbsoluteLinuxPath(env.XDG_CONFIG_HOME, 'Lease action XDG_CONFIG_HOME');
   env.GIT_CONFIG_VALUE_0 = requireAbsoluteLinuxPath(
     env.GIT_CONFIG_VALUE_0,
     'Lease action hooks path',
@@ -325,9 +322,7 @@ function requireOperation(
   actionRootInput: string,
   operationPathInput: string,
 ): LeaseActionOperation {
-  if (!isRecord(value)) {
-    fail('Lease action operation must be one object.');
-  }
+  if (!isRecord(value)) fail('Lease action operation must be one object.');
   exactKeys(value, [
     'actionToken',
     'argv',
@@ -342,9 +337,7 @@ function requireOperation(
     'stdoutLimitBytes',
     'timeoutMs',
   ], 'Lease action operation');
-  if (value.schemaVersion !== 1) {
-    fail('Lease action operation schema version is unsupported.');
-  }
+  if (value.schemaVersion !== 1) fail('Lease action operation schema version is unsupported.');
 
   const actionRoot = requireAbsoluteLinuxPath(actionRootInput, 'Lease action root');
   const operationPath = requireContainedPath(actionRoot, operationPathInput, 'Lease action operation path');
@@ -363,14 +356,11 @@ function requireOperation(
   }
 
   const kind = value.kind;
-  if (kind !== 'GRANT' && kind !== 'RELEASE') {
-    fail('Lease action kind is unsupported.');
-  }
+  if (kind !== 'GRANT' && kind !== 'RELEASE') fail('Lease action kind is unsupported.');
   if (!Array.isArray(value.argv) || value.argv.some((item) => typeof item !== 'string')) {
     fail('Lease action argv must be one string array.');
   }
   const argv = value.argv.map((item, index) => requireSafeString(item, `Lease action argv ${index}`));
-
   if (kind === 'GRANT') {
     if (
       argv.length !== 5
@@ -413,19 +403,9 @@ function requireOperation(
 }
 
 function requireStarted(value: unknown): LeaseActionStarted {
-  if (!isRecord(value)) {
-    fail('Lease action STARTED must be one object.');
-  }
-  exactKeys(value, [
-    'actionToken',
-    'operationSha256',
-    'runner',
-    'schemaVersion',
-    'startedAt',
-  ], 'Lease action STARTED');
-  if (value.schemaVersion !== 1) {
-    fail('Lease action STARTED schema version is unsupported.');
-  }
+  if (!isRecord(value)) fail('Lease action STARTED must be one object.');
+  exactKeys(value, ['actionToken', 'operationSha256', 'runner', 'schemaVersion', 'startedAt'], 'Lease action STARTED');
+  if (value.schemaVersion !== 1) fail('Lease action STARTED schema version is unsupported.');
   return {
     schemaVersion: 1,
     actionToken: requireActionToken(value.actionToken),
@@ -436,21 +416,17 @@ function requireStarted(value: unknown): LeaseActionStarted {
 }
 
 function requireOutputRef(value: unknown, label: string): LeaseActionOutputRef {
-  if (!isRecord(value)) {
-    fail(`${label} must be one output reference.`);
-  }
+  if (!isRecord(value)) fail(`${label} must be one output reference.`);
   exactKeys(value, ['byteLength', 'path', 'sha256'], label);
   return {
     path: requireAbsoluteLinuxPath(value.path, `${label} path`),
     sha256: requireSha256(value.sha256, `${label} SHA-256`),
-    byteLength: requirePositiveInteger(value.byteLength, `${label} byte length`),
+    byteLength: requireNonNegativeInteger(value.byteLength, `${label} byte length`),
   };
 }
 
 function requireFinished(value: unknown): LeaseActionFinished {
-  if (!isRecord(value)) {
-    fail('Lease action FINISHED must be one object.');
-  }
+  if (!isRecord(value)) fail('Lease action FINISHED must be one object.');
   exactKeys(value, [
     'actionToken',
     'finishedAt',
@@ -462,12 +438,8 @@ function requireFinished(value: unknown): LeaseActionFinished {
     'stderr',
     'stdout',
   ], 'Lease action FINISHED');
-  if (value.schemaVersion !== 1) {
-    fail('Lease action FINISHED schema version is unsupported.');
-  }
-  if (!isRecord(value.process)) {
-    fail('Lease action FINISHED process result must be one object.');
-  }
+  if (value.schemaVersion !== 1) fail('Lease action FINISHED schema version is unsupported.');
+  if (!isRecord(value.process)) fail('Lease action FINISHED process result must be one object.');
   exactKeys(value.process, ['exitCode', 'signal', 'timedOut'], 'Lease action process result');
   const exitCode = value.process.exitCode;
   if (exitCode !== null && (!Number.isSafeInteger(exitCode) || (exitCode as number) < 0)) {
@@ -477,10 +449,7 @@ function requireFinished(value: unknown): LeaseActionFinished {
   if (signal !== null && (typeof signal !== 'string' || !SIGNAL_PATTERN.test(signal))) {
     fail('Lease action process signal is invalid.');
   }
-  if (typeof value.process.timedOut !== 'boolean') {
-    fail('Lease action process timeout marker is invalid.');
-  }
-
+  if (typeof value.process.timedOut !== 'boolean') fail('Lease action process timeout marker is invalid.');
   return {
     schemaVersion: 1,
     actionToken: requireActionToken(value.actionToken),
@@ -503,10 +472,7 @@ async function requireSafeDirectory(directoryPathInput: string, label: string): 
   let metadata;
   let canonical: string;
   try {
-    [metadata, canonical] = await Promise.all([
-      lstat(directoryPath),
-      realpath(directoryPath),
-    ]);
+    [metadata, canonical] = await Promise.all([lstat(directoryPath), realpath(directoryPath)]);
   } catch (error) {
     throw protocolError(`${label} cannot be observed.`, error);
   }
@@ -537,7 +503,13 @@ async function readOwnedRegularFile(
   filePath: string,
   expectedMode: number,
   label: string,
+  byteLimit: number,
+  expectedByteLength?: number,
 ): Promise<Buffer> {
+  const limit = requirePositiveInteger(byteLimit, `${label} byte limit`);
+  const expectedLength = expectedByteLength === undefined
+    ? undefined
+    : requireNonNegativeInteger(expectedByteLength, `${label} expected length`);
   let before;
   try {
     before = await lstat(filePath);
@@ -553,6 +525,10 @@ async function readOwnedRegularFile(
   ) {
     fail(`${label} has an unsafe file shape, owner or mode.`);
   }
+  if (before.size > limit) fail(`${label} exceeds its byte limit.`);
+  if (expectedLength !== undefined && before.size !== expectedLength) {
+    fail(`${label} size differs from its declared byte length.`);
+  }
 
   const handle = await open(filePath, constants.O_RDONLY | constants.O_NOFOLLOW);
   try {
@@ -566,6 +542,10 @@ async function readOwnedRegularFile(
       || (process.getuid !== undefined && opened.uid !== process.getuid())
     ) {
       fail(`${label} changed while it was being opened.`);
+    }
+    if (opened.size > limit) fail(`${label} exceeds its byte limit.`);
+    if (expectedLength !== undefined && opened.size !== expectedLength) {
+      fail(`${label} size differs from its declared byte length.`);
     }
     const bytes = await handle.readFile();
     const after = await handle.stat();
@@ -597,11 +577,7 @@ async function syncDirectory(directoryPath: string): Promise<void> {
   }
 }
 
-async function publishExclusive(
-  finalPath: string,
-  bytes: Buffer,
-  mode: number,
-): Promise<void> {
+async function publishExclusive(finalPath: string, bytes: Buffer, mode: number): Promise<void> {
   const temporaryPath = path.join(
     path.dirname(finalPath),
     `.${path.basename(finalPath)}.${process.pid}.${Date.now().toString(36)}.tmp`,
@@ -633,10 +609,7 @@ async function publishExclusive(
   }
 }
 
-export async function leaseActionFileExists(
-  actionRoot: string,
-  filePath: string,
-): Promise<boolean> {
+export async function leaseActionFileExists(actionRoot: string, filePath: string): Promise<boolean> {
   const boundary = await requireActionFileBoundary(actionRoot, filePath);
   try {
     await lstat(boundary.filePath);
@@ -654,11 +627,7 @@ export function canonicalizeLeaseActionOperation(input: Readonly<{
 }>): PublishedLeaseActionOperation {
   const operation = requireOperation(input.operation, input.actionRoot, input.operationPath);
   const bytes = canonicalBytes(operation);
-  return {
-    operation,
-    bytes,
-    operationSha256: sha256(bytes),
-  };
+  return { operation, bytes, operationSha256: sha256(bytes) };
 }
 
 export async function publishLeaseActionOperation(input: Readonly<{
@@ -668,6 +637,9 @@ export async function publishLeaseActionOperation(input: Readonly<{
 }>): Promise<PublishedLeaseActionOperation> {
   await requireActionFileBoundary(input.actionRoot, input.operationPath);
   const published = canonicalizeLeaseActionOperation(input);
+  if (published.bytes.length > CONTROL_FILE_LIMIT_BYTES) {
+    fail('Lease action operation exceeds its byte limit.');
+  }
   await writeDurableFile(input.operationPath, published.bytes, OPERATION_MODE);
   return await readLeaseActionOperation({
     actionRoot: input.actionRoot,
@@ -684,12 +656,13 @@ export async function readLeaseActionOperation(input: Readonly<{
   readonly expectedOperationSha256: string;
 }>): Promise<PublishedLeaseActionOperation> {
   await requireActionFileBoundary(input.actionRoot, input.operationPath);
-  const bytes = await readOwnedRegularFile(input.operationPath, OPERATION_MODE, 'Lease action operation');
-  const operation = requireOperation(
-    decodeCanonicalJson(bytes, 'Lease action operation'),
-    input.actionRoot,
+  const bytes = await readOwnedRegularFile(
     input.operationPath,
+    OPERATION_MODE,
+    'Lease action operation',
+    CONTROL_FILE_LIMIT_BYTES,
   );
+  const operation = requireOperation(decodeCanonicalJson(bytes, 'Lease action operation'), input.actionRoot, input.operationPath);
   const operationSha256 = sha256(bytes);
   if (
     operation.actionToken !== requireActionToken(input.expectedActionToken)
@@ -708,6 +681,7 @@ export async function publishLeaseActionStarted(input: Readonly<{
   await requireActionFileBoundary(input.actionRoot, input.startedPath);
   const started = requireStarted(input.started);
   const bytes = canonicalBytes(started);
+  if (bytes.length > CONTROL_FILE_LIMIT_BYTES) fail('Lease action STARTED exceeds its byte limit.');
   await publishExclusive(input.startedPath, bytes, OPERATION_MODE);
   return await readLeaseActionStarted({
     actionRoot: input.actionRoot,
@@ -724,14 +698,16 @@ export async function readLeaseActionStarted(input: Readonly<{
   readonly expectedOperationSha256: string;
 }>): Promise<PublishedLeaseActionStarted> {
   await requireActionFileBoundary(input.actionRoot, input.startedPath);
-  const bytes = await readOwnedRegularFile(input.startedPath, OPERATION_MODE, 'Lease action STARTED');
+  const bytes = await readOwnedRegularFile(
+    input.startedPath,
+    OPERATION_MODE,
+    'Lease action STARTED',
+    CONTROL_FILE_LIMIT_BYTES,
+  );
   const started = requireStarted(decodeCanonicalJson(bytes, 'Lease action STARTED'));
   if (
     started.actionToken !== requireActionToken(input.expectedActionToken)
-    || started.operationSha256 !== requireSha256(
-      input.expectedOperationSha256,
-      'Expected operation hash',
-    )
+    || started.operationSha256 !== requireSha256(input.expectedOperationSha256, 'Expected operation hash')
   ) {
     fail('Lease action STARTED identity differs from the expected operation.');
   }
@@ -742,10 +718,20 @@ async function verifyOutputReference(
   tokenRoot: string,
   reference: LeaseActionOutputRef,
   label: string,
+  byteLimit: number,
 ): Promise<void> {
+  const limit = requirePositiveInteger(byteLimit, `${label} byte limit`);
+  if (reference.byteLength > limit) fail(`${label} exceeds its byte limit.`);
   const outputPath = requireContainedPath(tokenRoot, reference.path, `${label} path`);
-  const bytes = await readOwnedRegularFile(outputPath, OUTPUT_MODE, label);
-  if (bytes.length !== reference.byteLength || sha256(bytes) !== reference.sha256) {
+  if (path.dirname(outputPath) !== tokenRoot) fail(`${label} must be directly token-scoped.`);
+  const bytes = await readOwnedRegularFile(
+    outputPath,
+    OUTPUT_MODE,
+    label,
+    limit,
+    reference.byteLength,
+  );
+  if (sha256(bytes) !== reference.sha256) {
     fail(`${label} bytes differ from their FINISHED reference.`);
   }
 }
@@ -754,14 +740,17 @@ export async function publishLeaseActionFinished(input: Readonly<{
   readonly actionRoot: string;
   readonly resultPath: string;
   readonly finished: LeaseActionFinished;
+  readonly stdoutLimitBytes: number;
+  readonly stderrLimitBytes: number;
 }>): Promise<PublishedLeaseActionFinished> {
   const boundary = await requireActionFileBoundary(input.actionRoot, input.resultPath);
   const finished = requireFinished(input.finished);
   await Promise.all([
-    verifyOutputReference(boundary.tokenRoot, finished.stdout, 'Lease action stdout'),
-    verifyOutputReference(boundary.tokenRoot, finished.stderr, 'Lease action stderr'),
+    verifyOutputReference(boundary.tokenRoot, finished.stdout, 'Lease action stdout', input.stdoutLimitBytes),
+    verifyOutputReference(boundary.tokenRoot, finished.stderr, 'Lease action stderr', input.stderrLimitBytes),
   ]);
   const bytes = canonicalBytes(finished);
+  if (bytes.length > CONTROL_FILE_LIMIT_BYTES) fail('Lease action FINISHED exceeds its byte limit.');
   await writeDurableFile(input.resultPath, bytes, OPERATION_MODE);
   return await readLeaseActionFinished({
     actionRoot: input.actionRoot,
@@ -769,6 +758,8 @@ export async function publishLeaseActionFinished(input: Readonly<{
     expectedActionToken: finished.actionToken,
     expectedOperationSha256: finished.operationSha256,
     expectedStartedSha256: finished.startedSha256,
+    stdoutLimitBytes: input.stdoutLimitBytes,
+    stderrLimitBytes: input.stderrLimitBytes,
   });
 }
 
@@ -778,26 +769,27 @@ export async function readLeaseActionFinished(input: Readonly<{
   readonly expectedActionToken: string;
   readonly expectedOperationSha256: string;
   readonly expectedStartedSha256: string;
+  readonly stdoutLimitBytes: number;
+  readonly stderrLimitBytes: number;
 }>): Promise<PublishedLeaseActionFinished> {
   const boundary = await requireActionFileBoundary(input.actionRoot, input.resultPath);
-  const bytes = await readOwnedRegularFile(input.resultPath, OPERATION_MODE, 'Lease action FINISHED');
+  const bytes = await readOwnedRegularFile(
+    input.resultPath,
+    OPERATION_MODE,
+    'Lease action FINISHED',
+    CONTROL_FILE_LIMIT_BYTES,
+  );
   const finished = requireFinished(decodeCanonicalJson(bytes, 'Lease action FINISHED'));
   if (
     finished.actionToken !== requireActionToken(input.expectedActionToken)
-    || finished.operationSha256 !== requireSha256(
-      input.expectedOperationSha256,
-      'Expected operation hash',
-    )
-    || finished.startedSha256 !== requireSha256(
-      input.expectedStartedSha256,
-      'Expected STARTED hash',
-    )
+    || finished.operationSha256 !== requireSha256(input.expectedOperationSha256, 'Expected operation hash')
+    || finished.startedSha256 !== requireSha256(input.expectedStartedSha256, 'Expected STARTED hash')
   ) {
     fail('Lease action FINISHED identity differs from the expected Artifact chain.');
   }
   await Promise.all([
-    verifyOutputReference(boundary.tokenRoot, finished.stdout, 'Lease action stdout'),
-    verifyOutputReference(boundary.tokenRoot, finished.stderr, 'Lease action stderr'),
+    verifyOutputReference(boundary.tokenRoot, finished.stdout, 'Lease action stdout', input.stdoutLimitBytes),
+    verifyOutputReference(boundary.tokenRoot, finished.stderr, 'Lease action stderr', input.stderrLimitBytes),
   ]);
   return { finished, bytes, finishedSha256: sha256(bytes) };
 }
@@ -806,13 +798,22 @@ export async function publishLeaseActionOutput(
   actionRoot: string,
   outputPath: string,
   bytes: Buffer,
+  byteLimit: number,
 ): Promise<LeaseActionOutputRef> {
   const boundary = await requireActionFileBoundary(actionRoot, outputPath);
   if (path.dirname(outputPath) !== boundary.tokenRoot) {
     fail('Lease action output must be directly token-scoped.');
   }
+  const limit = requirePositiveInteger(byteLimit, 'Lease action output byte limit');
+  if (bytes.length > limit) fail('Lease action output exceeds its byte limit.');
   await writeDurableFile(outputPath, bytes, OUTPUT_MODE);
-  const verified = await readOwnedRegularFile(outputPath, OUTPUT_MODE, 'Lease action output');
+  const verified = await readOwnedRegularFile(
+    outputPath,
+    OUTPUT_MODE,
+    'Lease action output',
+    limit,
+    bytes.length,
+  );
   return {
     path: outputPath,
     sha256: sha256(verified),

@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.22
+version: 1.8.23
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 7 GREEN
+- **Current enabler:** Issue #16 — Task 7 corrective RED observed; corrective GREEN awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -48,33 +48,50 @@ R5 Milestone Microdesign PASS
 ## Current M01 result
 
 ```text
-CAP-EXECUTION:                 ACCEPTED — version 0.1.0
-MIS-002 contract:              APPROVED — revision 5 / exact hash
-TC-01 canonical Evidence:      ACCEPT — 15/15 PASS, cleanup COMPLETED
-M01 microdesign:               ACCEPTED — version 0.6.1
-Implementation plan:           CURRENT / APPROVED — version 1.0.1
-Implementation started:        YES — bounded by task gates
-Task 1:                        COMPLETE
-Task 2:                        COMPLETE
-Task 3:                        COMPLETE
-Task 4:                        COMPLETE
-Task 5:                        COMPLETE
-Task 6:                        COMPLETE
-Task 7 RED:                    OBSERVED / ACCEPTABLE
-Prior product suite:           148/148 PASS
-Task 7 tests:                  0/7 expected failure
-TypeScript:                    PASS
-AS-02 baseline:                119/119 PASS
-TC-01 baseline:                78/78 PASS
-Documentation baseline:        PASS — 93 canonical IDs
-Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
-Pi Worker dispatch:            PROHIBITED
-Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 7 GREEN only
-PR:                            #17 DRAFT
+CAP-EXECUTION:                    ACCEPTED — version 0.1.0
+MIS-002 contract:                 APPROVED — revision 5 / exact hash
+TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
+M01 microdesign:                  ACCEPTED — version 0.6.1
+Implementation plan:              CURRENT / APPROVED — version 1.0.1
+Implementation started:           YES — bounded by task gates
+Task 1:                           COMPLETE
+Task 2:                           COMPLETE
+Task 3:                           COMPLETE
+Task 4:                           COMPLETE
+Task 5:                           COMPLETE
+Task 6:                           COMPLETE
+Task 7 primary RED:               OBSERVED / ACCEPTABLE
+Task 7 functional GREEN:          VERIFIED — 155/155 product PASS
+Task 7 post-GREEN review:         3 IMPORTANT findings
+Task 7 corrective RED:            OBSERVED / ACCEPTABLE — 4 expected failures
+Task 7 corrective GREEN:          NOT AUTHORIZED
+Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
+Pi Worker dispatch:               PROHIBITED
+Automatic merge:                  NOT AUTHORIZED
+PR:                               #17 DRAFT
 ```
 
-The Task 7 RED verification intentionally stops `npm run verify` during the product suite. AS-02, TC-01 and documentation checks therefore retain their last accepted Task 6 correction baseline and were not re-executed by the RED workflow.
+## What Task 7 adds to the harness
+
+Before Task 7, MNFS possessed durable execution entities and persistence primitives but no semantic lifecycle coordinator.
+
+Task 7 introduces `ExecutionService`, which governs:
+
+```text
+approved contract + valid qualified target + exact Git base
+→ atomic Write Track + A01 + matching Events
+
+current Worker Run
+→ atomic terminalization + replacement Run + matching Events
+
+current Attempt + safe resource observations
+→ atomic supersession + next Attempt + matching Events
+
+empty guarded Track
+→ explicit abandonment without implicit Lease release
+```
+
+This moves MNFS from “a database that can store execution rows” toward a deterministic control plane that decides when execution state may advance.
 
 ## Operator authority chain
 
@@ -96,222 +113,150 @@ MNFS_AUTHORIZE_M01_TASK_6_GREEN plan=1.0.1 microdesign=0.6.1 red=b7a98a1972038bb
 MNFS_AUTHORIZE_M01_TASK_6_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=839851d8d0d267b6ff235eae6c241c6ee38c5291 blockers=R6-01,R6-02
 MNFS_AUTHORIZE_M01_TASK_6_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=3d443aa2223abd185e5cea39ecb905a0e86e0a8f blockers=R6-01,R6-02
 MNFS_AUTHORIZE_M01_TASK_7_RED plan=1.0.1 microdesign=0.6.1 task6=b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992
+MNFS_AUTHORIZE_M01_TASK_7_GREEN plan=1.0.1 microdesign=0.6.1 red=2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda
+MNFS_AUTHORIZE_M01_TASK_7_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=656d9a431957b74b9018020b829621f5a07a53eb blockers=R7-01,R7-02,R7-03
 ```
 
-Task 7 RED authority allowed only `tests/services/execution-service.test.ts`, expected-failure verification and tracking Evidence. It did not authorize `src/services/execution-service.ts`, Task 7 GREEN, Task 8, Treehouse execution, Pi dispatch, M01 acceptance or merge.
-
-## Completed implementation
+## Completed implementation summary
 
 ### Task 1 — execution domain
 
-```text
-src/execution/ids.ts
-src/execution/model.ts
-src/execution/transitions.ts
-src/domain/errors.ts
-```
-
-Task 1 established canonical parent-relative IDs, immutable execution models, fail-closed lifecycle transitions and the accepted M01 typed-error vocabulary.
+Established canonical parent-relative identities, immutable entity models, fail-closed transition tables and the accepted M01 error vocabulary.
 
 ### Task 2 — trusted runtime primitives
 
-```text
-src/runtime/process-runner.ts
-src/runtime/durable-artifact.ts
-src/adapters/process-identity.ts
-```
-
-Task 2 established bounded shell-free process execution, immutable crash-durable Artifact publication and Linux process identity bound to boot ID, PID and start ticks.
+Established shell-free bounded process execution, immutable crash-durable Artifact publication and Linux process identity using boot ID, PID and start ticks.
 
 ### Task 3 — shared SQLite transaction authority
 
-```text
-src/store/sqlite-transaction.ts
-src/store/sqlite-store.ts
-```
+Established one shared `BEGIN IMMEDIATE` transaction authority with bounded busy retry before user code only and exact rollback semantics.
 
-Task 3 established one shared `BEGIN IMMEDIATE` authority with bounded `SQLITE_BUSY` retry before user code only, callback execution exactly once, one commit on success and rollback while the connection remains in a transaction.
+### Task 4 — maintenance and backup
 
-### Task 4 — maintenance gate and consistent backup
+Established durable maintenance locking, consistent backup verification and supported-schema readiness gates.
 
-```text
-src/store/sqlite-maintenance.ts
-src/store/sqlite-store.ts
-tests/store/sqlite-maintenance-boundary.test.ts
-```
+### Task 5 — schema v4 and versioned Events
 
-Task 4 established an exclusive durable maintenance lock, no age-based takeover, fail-closed malformed/symlink handling, consistent `node:sqlite backup()` Evidence and schema/version readiness checks separated from store opening.
+Established migration v4, versioned Event registry, execution tables, current-row indexes, composite ancestry and downgrade fencing.
 
-### Task 5 — migration v4, versioned Events and execution schema
+### Task 6 — execution persistence
 
-```text
-src/store/event-store.ts
-src/store/migrations.ts
-src/store/sqlite-store.ts
-src/domain/types.ts
-```
+Established focused execution persistence, monotonic global sequences, parent-relative ordinals, strict codecs, idempotency, optimistic concurrency and the bounded atomic composition seam.
 
-Task 5 established atomic migration v4, byte-preserving versioned Events, the 19-type Event registry, execution entity tables, partial current-row indexes, composite relational ancestry, downgrade fencing, strict v4 schema-shape checks and fail-closed ordinary opening for pre-v4 stores.
-
-## Task 5 verification
-
-```text
-Primary RED:               e38592a97485bac91c713dbd648c391bdb029357
-Primary RED workflow/job:  30948252320 / 92123531426
-Primary GREEN:             eb6e3a3251a6d6bdce8eff809619ceaa2d6f905e
-Primary GREEN workflow:    30953397122 / 92140684893
-Shape-fence RED/GREEN:     4af7b25f... → 8c3dcbf3...
-Implicit-migration fence:  1b54ab75... → ea459368...
-Final Task 5 product:      136/136 PASS
-```
-
-Current opening behavior:
-
-```text
-new database path       → create and verify schema v4
-existing exact v4       → open without migration
-existing v1/v2/v3       → SCHEMA_VERSION_UNSUPPORTED; no mutation
-incomplete/future v4    → SCHEMA_VERSION_UNSUPPORTED; no mutation
-```
-
-## Task 6 implementation
+### Task 7 — execution lifecycle service
 
 Created:
 
 ```text
-src/store/execution-store.ts
-tests/store/execution-store.test.ts
-tests/store/execution-store-correction.test.ts
+src/services/execution-service.ts
 ```
 
 Modified:
 
 ```text
-src/store/migrations.ts
 src/store/sqlite-store.ts
 ```
 
-Task 6 provides:
+Task 7 functional implementation provides:
 
-- one focused `SqliteStore.execution` instance sharing the existing database, transaction and Event authorities;
-- persisted `entity_sequences` authority for monotonic global Write Track and Lease IDs;
-- parent-relative Attempt, Worker Run and Claim ordinals;
-- current-row conflict translation for Track, Attempt, Worker Run, Lease and Claim;
-- exact Claim ancestry and Attempt base binding;
-- Lease and Claim same-key/same-input replay with conflicting-input rejection;
-- expected-version compare-and-swap for all mutable execution entities;
-- strict fail-closed codecs for persisted identities, enums, hashes, process state, Lease nullability and Claim criteria;
-- one bounded `runAtomic` session for composing Track, Attempt and versioned Events under the existing `SqliteTransaction`;
-- rollback of rows, Events and sequence increments when any operation in that session fails;
-- no second SQLite connection or transaction authority;
-- no lifecycle service, filesystem, Git, Treehouse or Pi behavior.
+- exact latest approved-contract and qualified-target validation;
+- non-empty Feature requirement allocation validation;
+- exact Git commit and object-format binding through an injected read-only inspector;
+- canonical same-input Track opening replay;
+- atomic Track + A01 + two matching Events;
+- atomic Worker Run opening and replacement;
+- Attempt supersession with resource-disposition guards;
+- explicit Track abandonment without implicit resource release;
+- focused current-entity lookups and atomic mutation methods on the existing SQLite authority;
+- no Task 8 source adapter, real Git command, filesystem operation, Treehouse invocation or Pi behavior.
 
-## Task 6 verification
+## Task 7 primary TDD
 
-### Primary RED
+### RED
 
 ```text
-RED head:                 b7a98a1972038bbd1d631f8e669959247256223b
-RED synthetic merge:      7d6510740ff6c794f81e69f035ba00d80f620a50
-RED workflow/job:          30955596905 / 92147742698
+RED head:                 2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda
+Synthetic merge:          c1d6f79c73cb4aeb70a4de56d82ac64e8547f2c1
+Workflow/job:              30969751509 / 92191310194
 TypeScript:                PASS
-Prior product tests:       136/136 PASS
-Task 6 tests:              0/7 expected failure
+Prior product tests:       148/148 PASS
+Task 7 tests:              0/7 expected failure
 ```
 
 ### Functional GREEN
 
 ```text
-Functional GREEN head:    839851d8d0d267b6ff235eae6c241c6ee38c5291
-Synthetic merge:          48758649c298e815b64d9390b940f4c8c36def54
-Workflow/job:              30956920940 / 92152041470
-Product tests:             143/143 PASS
-AS-02 tests:               119/119 PASS
-TC-01 tests:               78/78 PASS
-Documentation validation: PASS — 93 canonical IDs
-```
-
-Review found two accepted-contract gaps:
-
-```text
-R6-01  migration v4 lacked entity_sequences and global IDs used MAX(id)+1
-R6-02  no bounded seam could compose Track + A01 + matching Events atomically
-```
-
-### Correction RED
-
-```text
-Correction RED head:      3d443aa2223abd185e5cea39ecb905a0e86e0a8f
-Synthetic merge:          8ba8a2e760ffa25b9ea24921eadae4b5e568f480
-Workflow/job:              30963369380 / 92171947664
+Functional GREEN head:    656d9a431957b74b9018020b829621f5a07a53eb
+Synthetic merge:          64f583b55b1a1968a14d4762825f410b745933ba
+Workflow/job:              30970946398 / 92194909273
 TypeScript:                PASS
-Prior product tests:       143/143 PASS
-Correction tests:          0/5 expected failure
-```
-
-The five REDs independently proved the missing relation, WT/LSE ID reuse after controlled deletion, absent atomic composition and absent rollback proof.
-
-### Correction GREEN
-
-```text
-Correction GREEN head:    b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992
-Synthetic merge:          0bbd8db107f0699d05b963f3c34d58fb9547e78b
-Workflow/job:              30965918647 / 92179708566
-Product tests:             148/148 PASS
-Correction tests:         5/5 PASS
+Product tests:             155/155 PASS
+Task 7 tests:              7/7 PASS
 AS-02 tests:               119/119 PASS
 TC-01 tests:               78/78 PASS
 Documentation validation: PASS — 93 canonical IDs
 ```
 
-R6-01 and R6-02 are closed. The accepted microdesign remains version 0.6.1; no Replan was required.
+The first functional commit `f08c11e0dad16e775dd356811f2593fd12517037` failed typecheck on three untyped atomic-session callbacks. Commit `656d9a431957b74b9018020b829621f5a07a53eb` corrected only those typings and produced the complete GREEN result above.
 
-## Task 7 RED verification
+## Task 7 post-GREEN review
+
+Scope review passed: no Task 8 adapter, real Git/filesystem behavior, Treehouse, Pi, schema migration, second SQLite connection or merge behavior was introduced.
+
+The adversarial lifecycle review found:
+
+```text
+R7-01  an ABANDONED Track could receive a new Worker Run
+R7-02  terminal Run replacement erased process identity and start timing
+R7-03  replacement Run and Attempt supersession could continue after Replan
+```
+
+Classification:
+
+```text
+Critical:  0
+Important: 3
+Minor:     0
+Replan:    not required
+```
+
+## Task 7 corrective RED
 
 Created only:
 
 ```text
-tests/services/execution-service.test.ts
+tests/services/execution-service-correction.test.ts
 ```
 
-The seven RED tests define the accepted boundary for:
+The four tests independently prove:
 
-- exact latest approved contract and qualified M01 Feature authority;
-- non-empty Feature requirement allocation;
-- exact Git commit/object-format resolution;
-- atomic Track + A01 + `WRITE_TRACK_OPENED` + `ATTEMPT_OPENED`;
-- same-input replay and conflicting-input rejection;
-- rollback of Track, Attempt, Events and sequence allocation;
-- atomic Worker Run opening and replacement;
-- Attempt supersession resource guards;
-- empty Track abandonment without implicit Lease release.
+1. `R7-01`: opening a Run after Track abandonment must fail;
+2. `R7-02`: terminalization must preserve observed Linux process identity and start time;
+3. `R7-03a`: Run replacement after a newer approved contract must fail;
+4. `R7-03b`: Attempt supersession after a newer approved contract must fail.
 
 Evidence:
 
 ```text
-RED head:                 2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda
-RED synthetic merge:      c1d6f79c73cb4aeb70a4de56d82ac64e8547f2c1
-Workflow/job:              30969751509 / 92191310194
+Correction RED head:      f976f254677c14a13371769269914e86cf96b539
+Synthetic merge:          f562ba0355ba2efa609d6dc105455b371a40b21f
+Workflow/job:              30971768663 / 92197460024
 TypeScript:                PASS
-Prior product tests:       148/148 PASS
-Task 7 tests:              0/7 expected failure
-Product total:             148 PASS / 7 FAIL
-Expected cause:            src/services/execution-service.ts absent
+Prior product tests:       155/155 PASS
+Correction tests:          0/4 expected failure
+Product total:             155 PASS / 4 FAIL
 ```
 
-The preceding test-only commit `9815641c69e2e8889f8533304a0f9f3019c86b8a` failed typecheck on three payload-union accesses. Commit `2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda` corrected only those test typings; no production file was added.
-
-## Scope review
-
-Compared Task 6 tracking head `df52067ca6697f13687bf099cac8b69d74f7b036` to Task 7 RED head `2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda`.
+Observed failure signatures:
 
 ```text
-tests/services/execution-service.test.ts  added
-src/services/execution-service.ts         absent
-other production files                    unchanged
-Task 8 adapters                           absent
-Treehouse/Pi behavior                     unchanged
+R7-01  missing expected WORKER_RUN_CONFLICT
+R7-02  actual processIdentity undefined
+R7-03a missing expected EXECUTION_CONTRACT_CONFLICT
+R7-03b missing expected EXECUTION_CONTRACT_CONFLICT
 ```
+
+No production file changed in the corrective RED.
 
 ## Frozen boundaries
 
@@ -320,7 +265,7 @@ The accepted design invariants remain unchanged:
 - canonical checkout is never Treehouse cwd;
 - every Attempt owns an independent exact-base Linux-local source;
 - Treehouse uses controlled HOME/XDG/config/hooks and the accepted candidate;
-- state mutation and payload-versioned Event commit atomically;
+- state mutation and matching payload-versioned Event commit atomically;
 - relational keys prove exact Track → Attempt → Run/Lease → Claim ancestry;
 - action STARTED is durable before one external invocation;
 - inconclusive grant never automatically repeats `treehouse get`;
@@ -331,23 +276,20 @@ The accepted design invariants remain unchanged:
 ## Current authorization boundary
 
 ```text
-Task 1:                    COMPLETE
-Task 2:                    COMPLETE
-Task 3:                    COMPLETE
-Task 4:                    COMPLETE
-Task 5:                    COMPLETE
-Task 6:                    COMPLETE
-Task 7 RED:                OBSERVED / ACCEPTABLE
-Task 7 GREEN:              NOT AUTHORIZED
-Task 8 and later:          NOT AUTHORIZED
-Real Treehouse execution:  NOT AUTHORIZED
-Pi Worker dispatch:        PROHIBITED
-M01 acceptance:            NOT AUTHORIZED
-PR #17 merge:              NOT AUTHORIZED
+Tasks 1–6:                  COMPLETE
+Task 7 primary RED:         OBSERVED / ACCEPTABLE
+Task 7 functional GREEN:    VERIFIED
+Task 7 corrective RED:      OBSERVED / ACCEPTABLE
+Task 7 corrective GREEN:    NOT AUTHORIZED
+Task 8 and later:           NOT AUTHORIZED
+Real Treehouse execution:   NOT AUTHORIZED
+Pi Worker dispatch:         PROHIBITED
+M01 acceptance:             NOT AUTHORIZED
+PR #17 merge:               NOT AUTHORIZED
 ```
 
 A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boundary, microdesign invariants or applicable requirements triggers Replan or renewed readiness review.
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 7 GREEN only**, bound to RED head `2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda`. Stop before creating `src/services/execution-service.ts` unless that continuation is granted.
+Request or provide an explicit continuation for **Task 7 corrective GREEN only**, bound to corrective RED head `f976f254677c14a13371769269914e86cf96b539` and findings `R7-01`, `R7-02`, `R7-03`.

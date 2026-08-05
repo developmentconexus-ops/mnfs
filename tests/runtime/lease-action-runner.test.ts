@@ -22,6 +22,7 @@ const PROTOCOL_SPECIFIER = '../../src/runtime/' + 'lease-action-protocol.js';
 const RUNNER_SPECIFIER = '../../src/runtime/' + 'lease-action-runner.js';
 const ACTION_TOKEN = 'grant-wt001-a01-g1-0001';
 const HOLDER = 'mnfs-repo-lse001-g1';
+const OUTPUT_LIMIT_BYTES = 65_536;
 
 interface LeaseActionOperation {
   readonly schemaVersion: 1;
@@ -109,6 +110,8 @@ interface LeaseActionProtocolModule {
     expectedActionToken: string;
     expectedOperationSha256: string;
     expectedStartedSha256: string;
+    stdoutLimitBytes: number;
+    stderrLimitBytes: number;
   }>): Promise<PublishedFinished>;
 }
 
@@ -138,6 +141,7 @@ interface Fixture {
   readonly operationPath: string;
   readonly sourcePath: string;
   readonly executablePath: string;
+  readonly gitPath: string;
   readonly startedPath: string;
   readonly resultPath: string;
   readonly homePath: string;
@@ -193,15 +197,26 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
   const actionRoot = path.join(root, 'actions');
   const tokenRoot = path.join(actionRoot, ACTION_TOKEN);
   const sourcePath = path.join(root, 'source');
-  const binRoot = path.join(root, 'bin');
-  const executablePath = path.join(binRoot, 'treehouse');
+  const treehouseBin = path.join(root, 'treehouse-bin');
+  const gitBin = path.join(root, 'git-bin');
+  const executablePath = path.join(treehouseBin, 'treehouse');
+  const gitPath = path.join(gitBin, 'git');
   const homePath = path.join(root, 'home');
   const xdgPath = path.join(root, 'xdg');
   const hooksPath = path.join(root, 'hooks');
-  for (const directory of [tokenRoot, sourcePath, binRoot, homePath, xdgPath, hooksPath]) {
+  for (const directory of [
+    tokenRoot,
+    sourcePath,
+    treehouseBin,
+    gitBin,
+    homePath,
+    xdgPath,
+    hooksPath,
+  ]) {
     await mkdir(directory, { recursive: true });
   }
   await writeFile(executablePath, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  await writeFile(gitPath, '#!/bin/sh\nexit 0\n', { mode: 0o755 });
 
   const fixture: Fixture = {
     root,
@@ -210,13 +225,13 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     operationPath: path.join(tokenRoot, 'operation.json'),
     sourcePath,
     executablePath,
+    gitPath,
     startedPath: path.join(tokenRoot, 'started.json'),
     resultPath: path.join(tokenRoot, 'finished.json'),
     homePath,
     xdgPath,
     hooksPath,
   };
-
   try {
     await operation(fixture);
   } finally {
@@ -226,7 +241,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
 
 function environment(fixture: Fixture): Readonly<Record<string, string>> {
   return {
-    PATH: `${path.dirname(fixture.executablePath)}:/usr/bin:/bin`,
+    PATH: `${path.dirname(fixture.executablePath)}:${path.dirname(fixture.gitPath)}:/usr/bin:/bin`,
     HOME: fixture.homePath,
     XDG_CONFIG_HOME: fixture.xdgPath,
     LANG: 'C.UTF-8',
@@ -258,8 +273,8 @@ function operation(fixture: Fixture): LeaseActionOperation {
     cwd: fixture.sourcePath,
     env: environment(fixture),
     timeoutMs: 30_000,
-    stdoutLimitBytes: 65_536,
-    stderrLimitBytes: 65_536,
+    stdoutLimitBytes: OUTPUT_LIMIT_BYTES,
+    stderrLimitBytes: OUTPUT_LIMIT_BYTES,
     startedPath: fixture.startedPath,
     resultPath: fixture.resultPath,
   };
@@ -332,8 +347,8 @@ test('persists and reopens STARTED before invoking the exact external process', 
         cwd: fixture.sourcePath,
         env: environment(fixture),
         timeoutMs: 30_000,
-        stdoutLimitBytes: 65_536,
-        stderrLimitBytes: 65_536,
+        stdoutLimitBytes: OUTPUT_LIMIT_BYTES,
+        stderrLimitBytes: OUTPUT_LIMIT_BYTES,
       });
       return expectedResult;
     });
@@ -389,6 +404,8 @@ test('stores raw stdout and stderr as immutable bounded Artifacts referenced by 
       expectedActionToken: ACTION_TOKEN,
       expectedOperationSha256: published.operationSha256,
       expectedStartedSha256: finished.finished.startedSha256,
+      stdoutLimitBytes: OUTPUT_LIMIT_BYTES,
+      stderrLimitBytes: OUTPUT_LIMIT_BYTES,
     });
     assert.deepEqual(verified, finished);
   });

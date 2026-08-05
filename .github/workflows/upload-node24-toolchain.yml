@@ -1,0 +1,37 @@
+name: Upload Accepted Node 24 Toolchain
+
+on:
+  push:
+    branches:
+      - automation/task14-deterministic-export
+    paths:
+      - .github/workflows/upload-node24-toolchain.yml
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+
+      - name: Package exact Node runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = 'v24.18.0'
+          root="$(dirname "$(dirname "$(realpath "$(command -v node)")")")"
+          tar -C "$root" -czf /tmp/node-v24.18.0-linux-x64.tar.gz .
+          sha256sum /tmp/node-v24.18.0-linux-x64.tar.gz > /tmp/node-v24.18.0-linux-x64.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: node-v24.18.0-linux-x64
+          path: |
+            /tmp/node-v24.18.0-linux-x64.tar.gz
+            /tmp/node-v24.18.0-linux-x64.sha256
+          if-no-files-found: error
+          retention-days: 1

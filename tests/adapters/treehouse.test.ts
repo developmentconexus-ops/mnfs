@@ -268,11 +268,21 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
   const canonicalPath = join(root, 'canonical');
   const homePath = join(root, 'runtime', 'treehouse', 'home');
   const xdgPath = join(root, 'runtime', 'treehouse', 'xdg');
+  const treehouseConfigDirectory = join(xdgPath, 'treehouse');
   const poolRoot = join(root, 'runtime', 'treehouse', 'pool');
   const hooksPath = join(root, 'runtime', 'treehouse', 'hooks');
   const leasedPath = join(poolRoot, 'slot-1', 'source');
   const bin = join(root, 'bin');
-  for (const path of [sourcePath, canonicalPath, homePath, xdgPath, poolRoot, hooksPath, leasedPath, bin]) {
+  for (const path of [
+    sourcePath,
+    canonicalPath,
+    homePath,
+    treehouseConfigDirectory,
+    poolRoot,
+    hooksPath,
+    leasedPath,
+    bin,
+  ]) {
     mkdirSync(path, { recursive: true });
   }
   const bytes = Buffer.from('#!/bin/sh\nexit 0\n');
@@ -285,7 +295,10 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     chmodSync(path, 0o755);
   }
   writeFileSync(osRelease, `ID=ubuntu\nVERSION_ID="${UBUNTU}"\n`);
-  writeFileSync(join(sourcePath, 'treehouse.toml'), canonicalTreehouseConfig(realpathSync(poolRoot)));
+  writeFileSync(
+    join(treehouseConfigDirectory, 'config.toml'),
+    canonicalTreehouseConfig(realpathSync(poolRoot)),
+  );
 
   const fixture: Fixture = {
     root,
@@ -621,7 +634,7 @@ test('blocks Git, Node, WSL, Ubuntu and command-shape drift before protected wor
         runner.overrides.set(commandKey(fixture.uname, ['-r']), success('6.8.0-generic\n'));
         return {};
       },
-      () => ({ readTextFile: async (path) => path.endsWith('treehouse.toml')
+      () => ({ readTextFile: async (path) => path.endsWith('config.toml')
         ? canonicalTreehouseConfig(fixture.poolRoot)
         : 'ID=ubuntu\nVERSION_ID="26.04"\n' }),
       () => ({ candidate: { ...candidate(fixture), commandShapeSha256: `sha256:${'f'.repeat(64)}` } }),

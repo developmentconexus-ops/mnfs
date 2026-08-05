@@ -1,0 +1,151 @@
+name: Publish Task 14 R14-01 GREEN
+
+on:
+  push:
+    branches:
+      - automation/task14-r14-01-green
+    paths:
+      - .github/workflows/publish-task14-r14-01-green.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task14-r14-01-green
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact correction RED
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify exact authorization lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'a6822409e2b860de534c5fc68e9cc1ee1afb8c4d'
+          test "$(git rev-parse HEAD^)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          git merge-base --is-ancestor '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864' HEAD
+          test "$(git status --porcelain)" = ''
+          printf '%s  %s\n' \
+            'e6dcbaf204efab628825f5a3b4d4ab9f3ac9f0b302a5533b19d23421537b4339' src/services/recovery-service.ts \
+            '9633d2e29b5f80b3e250dc61b9287b356bc92bfa' tests/services/recovery-service.test.ts \
+            '159900b3490bb0012af7ddbc1e07269a9da459f3705b45259e6b6a85d428affe' tests/integration/m01-composition.test.ts \
+            '729d44dbda2139d67a5f804100532affdad98ed1ac6ab28dfd3e966b7e14bfdf' tests/integration/m01-fresh-process.test.ts \
+            | sha256sum --check --strict
+
+      - name: Apply minimal R14-01 correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/r14-01.patch <<'PATCH'
+          diff --git a/src/services/recovery-service.ts b/src/services/recovery-service.ts
+          index 1ee0bc0..033a04e 100644
+          --- a/src/services/recovery-service.ts
+          +++ b/src/services/recovery-service.ts
+          @@ -229,7 +229,12 @@ function classifySource(
+               ));
+             }
+             if (attempt.sourceStatus === 'REQUESTED') {
+          -    if (related.length === 0 || related.every((candidate) => candidate.status === 'MISSING')) {
+          +    if (
+          +      related.length === 0
+          +      || related.every((candidate) => (
+          +        candidate.status === 'MISSING' || candidate.status === 'REQUESTED'
+          +      ))
+          +    ) {
+                 addFinding(findings, finding('SD-01', attempt.id, {
+                   safeActions: ['preserve the Attempt intent and retry only the original source operation'],
+                   requiredAuthority: 'ORIGINAL_OPERATION',
+          diff --git a/tests/services/recovery-service.test.ts b/tests/services/recovery-service.test.ts
+          index 9633d2e..ff80ffa 100644
+          --- a/tests/services/recovery-service.test.ts
+          +++ b/tests/services/recovery-service.test.ts
+          @@ -551,6 +551,25 @@ test('classifies REQUESTED source with no final source as SD-01', async () => {
+             });
+           });
+           
+          +test('classifies an explicit REQUESTED source observation as SD-01', async () => {
+          +  const module = await loadRecoveryService();
+          +  await withHarness('sd01-requested-observation', async (harness) => {
+          +    updateAttemptSourceRequested(harness);
+          +    harness.observations.current = {
+          +      ...harness.observations.current,
+          +      sources: [{
+          +        status: 'REQUESTED',
+          +        attemptId: harness.attempt.id,
+          +        baseCommitSha: harness.attempt.baseCommitSha,
+          +        objectFormat: harness.attempt.gitObjectFormat,
+          +      }],
+          +    };
+          +    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+          +    const finding = requireFinding(report, 'SD-01');
+          +    assert.equal(finding.requiredAuthority, 'ORIGINAL_OPERATION');
+          +  });
+          +});
+          +
+           test('classifies source path, fingerprint, base or object-format drift as SD-02', async () => {
+             const module = await loadRecoveryService();
+             for (const [label, override] of [
+          PATCH
+          sed -i 's/^          //' /tmp/r14-01.patch
+          git apply --check /tmp/r14-01.patch
+          git apply /tmp/r14-01.patch
+
+          expected=$'src/services/recovery-service.ts\ntests/services/recovery-service.test.ts'
+          actual="$(git diff --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --check
+          printf '%s  %s\n' \
+            '42ca204225b94aa9359a67046bf3486eb0dd9eb0e778bb9cd1a53cf2d6f7f1f1' src/services/recovery-service.ts \
+            '431d73e372a6c8d38781400ce895ea4dfed9be311f2024e32689de378d78cacd' tests/services/recovery-service.test.ts \
+            | sha256sum --check --strict
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Verify directed correction and deterministic proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run build --silent
+          node --test \
+            dist/tests/services/recovery-service.test.js \
+            dist/tests/integration/m01-composition.test.js \
+            dist/tests/integration/m01-fresh-process.test.js \
+            | tee /tmp/task14-r14-01-directed.log
+          grep -Fq 'tests 48' /tmp/task14-r14-01-directed.log
+          grep -Fq 'pass 48' /tmp/task14-r14-01-directed.log
+          grep -Fq 'fail 0' /tmp/task14-r14-01-directed.log
+
+      - name: Run complete canonical gate
+        run: npm run verify
+
+      - name: Commit and publish correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'a6822409e2b860de534c5fc68e9cc1ee1afb8c4d'
+          git fetch origin design/mis-002-m01
+          test "$(git rev-parse origin/design/mis-002-m01)" = 'a6822409e2b860de534c5fc68e9cc1ee1afb8c4d'
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add src/services/recovery-service.ts tests/services/recovery-service.test.ts
+          expected=$'src/services/recovery-service.ts\ntests/services/recovery-service.test.ts'
+          actual="$(git diff --cached --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --cached --check
+          git commit -m 'fix: classify requested source recovery'
+          git push origin HEAD:design/mis-002-m01

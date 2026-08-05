@@ -17,6 +17,7 @@ import test from 'node:test';
 
 import type { GitRepositoryObservation } from '../../src/adapters/git-worktree.js';
 import { MnfsError, type MnfsErrorCode } from '../../src/domain/errors.js';
+import type { GitObjectFormat } from '../../src/execution/model.js';
 import type { ProcessResult, ProcessSpec } from '../../src/runtime/process-runner.js';
 
 const TREEHOUSE_SPECIFIER = '../../src/adapters/' + 'treehouse.js';
@@ -26,6 +27,16 @@ const NODE_VERSION = 'v24.18.0';
 const GIT_VERSION = '2.54.0';
 const KERNEL = '6.18.33.2-microsoft-standard-WSL2';
 const UBUNTU = '24.04';
+const BASE_COMMIT_SHA = '1'.repeat(40);
+const BASE_TREE_SHA = '2'.repeat(40);
+const SOURCE_FINGERPRINT = `sha256:${'3'.repeat(64)}`;
+
+interface ReadySourceIdentity {
+  readonly fingerprint: string;
+  readonly baseCommitSha: string;
+  readonly baseTreeSha: string;
+  readonly objectFormat: GitObjectFormat;
+}
 
 interface Boundary {
   readonly sourcePath: string;
@@ -34,6 +45,7 @@ interface Boundary {
   readonly xdgConfigHome: string;
   readonly poolRoot: string;
   readonly hooksPath: string;
+  readonly readySource: ReadySourceIdentity;
 }
 
 interface Candidate {
@@ -63,6 +75,21 @@ interface StatusItem {
   readonly processes: readonly Readonly<{ pid: number; name: string }>[];
 }
 
+interface SourceIntegrityInput {
+  readonly sourcePath: string;
+  readonly canonicalCheckoutPath: string;
+  readonly baseCommitSha: string;
+  readonly baseTreeSha: string;
+  readonly gitObjectFormat: GitObjectFormat;
+}
+
+interface SourceIntegrityObservation {
+  readonly status: 'READY';
+  readonly sourcePath: string;
+  readonly fingerprint: string;
+  readonly observation: GitRepositoryObservation;
+}
+
 interface AdapterContract {
   acquire(input: Readonly<{ boundary: Boundary; holder: string }>): Promise<LeaseObservation>;
   status(input: Readonly<{ boundary: Boundary }>): Promise<readonly StatusItem[]>;
@@ -88,6 +115,9 @@ interface TreehouseModule {
     environment: Readonly<Record<string, string>>;
     gitInspector: {
       observeRepository(path: string): Promise<GitRepositoryObservation>;
+    };
+    sourceIntegrity: {
+      observeReadySource(input: SourceIntegrityInput): Promise<SourceIntegrityObservation>;
     };
   }>) => AdapterContract;
 }
@@ -228,6 +258,10 @@ async function expectCode(code: MnfsErrorCode, operation: () => Promise<unknown>
   );
 }
 
+function canonicalTreehouseConfig(poolRoot: string): string {
+  return `max_trees = 2\nroot = ${JSON.stringify(poolRoot)}\n`;
+}
+
 async function withFixture(operation: (fixture: Fixture) => Promise<void>): Promise<void> {
   const root = mkdtempSync(join(tmpdir(), 'mnfs-task9-'));
   const sourcePath = join(root, 'runtime', 'execution-sources', 'WT-001', 'WT-001', 'A01', 'source');
@@ -251,6 +285,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     chmodSync(path, 0o755);
   }
   writeFileSync(osRelease, `ID=ubuntu\nVERSION_ID="${UBUNTU}"\n`);
+  writeFileSync(join(sourcePath, 'treehouse.toml'), canonicalTreehouseConfig(realpathSync(poolRoot)));
 
   const fixture: Fixture = {
     root,
@@ -285,6 +320,12 @@ function boundary(fixture: Fixture): Boundary {
     xdgConfigHome: fixture.xdgPath,
     poolRoot: fixture.poolRoot,
     hooksPath: fixture.hooksPath,
+    readySource: {
+      fingerprint: SOURCE_FINGERPRINT,
+      baseCommitSha: BASE_COMMIT_SHA,
+      baseTreeSha: BASE_TREE_SHA,
+      objectFormat: 'sha1',
+    },
   };
 }
 
@@ -295,10 +336,22 @@ function observation(fixture: Fixture): GitRepositoryObservation {
     commonDirPath: join(fixture.sourcePath, '.git'),
     objectDirPath: join(fixture.sourcePath, '.git', 'objects'),
     objectFormat: 'sha1',
-    headCommitSha: '1'.repeat(40),
-    headTreeSha: '2'.repeat(40),
+    headCommitSha: BASE_COMMIT_SHA,
+    headTreeSha: BASE_TREE_SHA,
     statusPorcelainV1Z: Buffer.alloc(0),
     remotes: [],
+  };
+}
+
+function sourceIntegrityObservation(
+  fixture: Fixture,
+  repository: GitRepositoryObservation,
+): SourceIntegrityObservation {
+  return {
+    status: 'READY',
+    sourcePath: fixture.sourcePath,
+    fingerprint: SOURCE_FINGERPRINT,
+    observation: repository,
   };
 }
 
@@ -320,6 +373,7 @@ function createAdapter(
   runner: Runner,
   overrides: AdapterOverrides = {},
 ): AdapterContract {
+  const repository = overrides.gitObservation ?? observation(fixture);
   return new module.TreehouseAdapter({
     acceptedCandidate: overrides.candidate ?? candidate(fixture),
     runProcess: runner.run,
@@ -343,7 +397,19 @@ function createAdapter(
     gitInspector: {
       observeRepository: async (path) => {
         assert.equal(path, fixture.sourcePath);
-        return overrides.gitObservation ?? observation(fixture);
+        return repository;
+      },
+    },
+    sourceIntegrity: {
+      observeReadySource: async (input) => {
+        assert.deepEqual(input, {
+          sourcePath: fixture.sourcePath,
+          canonicalCheckoutPath: fixture.canonicalPath,
+          baseCommitSha: BASE_COMMIT_SHA,
+          baseTreeSha: BASE_TREE_SHA,
+          gitObjectFormat: 'sha1',
+        });
+        return sourceIntegrityObservation(fixture, repository);
       },
     },
   });
@@ -498,6 +564,9 @@ test('revalidates candidate and source before every protected operation', async 
           return observation(fixture);
         },
       },
+      sourceIntegrity: {
+        observeReadySource: async () => sourceIntegrityObservation(fixture, observation(fixture)),
+      },
     });
     await adapter.acquire({ boundary: boundary(fixture), holder: fixture.holder });
     await adapter.status({ boundary: boundary(fixture) });
@@ -552,7 +621,9 @@ test('blocks Git, Node, WSL, Ubuntu and command-shape drift before protected wor
         runner.overrides.set(commandKey(fixture.uname, ['-r']), success('6.8.0-generic\n'));
         return {};
       },
-      () => ({ readTextFile: async () => 'ID=ubuntu\nVERSION_ID="26.04"\n' }),
+      () => ({ readTextFile: async (path) => path.endsWith('treehouse.toml')
+        ? canonicalTreehouseConfig(fixture.poolRoot)
+        : 'ID=ubuntu\nVERSION_ID="26.04"\n' }),
       () => ({ candidate: { ...candidate(fixture), commandShapeSha256: `sha256:${'f'.repeat(64)}` } }),
       () => ({ gitObservation: { ...observation(fixture), remotes: ['origin'] } }),
       () => ({ gitObservation: { ...observation(fixture), statusPorcelainV1Z: Buffer.from('?? drift\0') } }),

@@ -1,0 +1,49 @@
+name: Export Task 14 Correction Baseline
+
+on:
+  push:
+    branches:
+      - automation/task14-correction-export
+    paths:
+      - .github/workflows/export-task14-correction-baseline.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact correction RED
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Verify exact authorized RED
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'a6822409e2b860de534c5fc68e9cc1ee1afb8c4d'
+          test "$(git rev-parse HEAD^)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          git merge-base --is-ancestor '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864' HEAD
+          test -f tests/integration/m01-composition.test.ts
+          test -f tests/integration/m01-fresh-process.test.ts
+          test "$(git status --porcelain)" = ''
+
+      - name: Package exact correction RED workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar --exclude=.git --exclude=node_modules -czf /tmp/mnfs-task14-correction-red.tar.gz .
+          sha256sum /tmp/mnfs-task14-correction-red.tar.gz > /tmp/mnfs-task14-correction-red.tar.gz.sha256
+
+      - name: Upload exact correction RED workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: task14-correction-red-workspace
+          path: |
+            /tmp/mnfs-task14-correction-red.tar.gz
+            /tmp/mnfs-task14-correction-red.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1

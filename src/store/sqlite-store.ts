@@ -19,16 +19,29 @@ import {
 import {
   formatAttemptId,
   formatLeaseId,
+  formatWorkerRunId,
   formatWriteTrackId,
   requireAttemptId,
   requireWriteTrackId,
 } from '../execution/ids.js';
-import type { Attempt, Lease, WriteTrack } from '../execution/model.js';
+import type {
+  Attempt,
+  AttemptStatus,
+  Claim,
+  Lease,
+  ProcessIdentity,
+  SourceStatus,
+  WorkerRun,
+  WorkerRunStatus,
+  WriteTrack,
+  WriteTrackStatus,
+} from '../execution/model.js';
 import { EventStore, type AppendEventInput } from './event-store.js';
 import {
   ExecutionStore,
   type AllocateAttemptInput,
   type AllocateLeaseInput,
+  type AllocateWorkerRunInput,
   type AllocateWriteTrackInput,
 } from './execution-store.js';
 import { inspectSupportedDatabaseSchema } from './sqlite-maintenance.js';
@@ -50,6 +63,31 @@ export interface OpenNextMissionInput {
 export interface ExecutionAtomicSession {
   allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack;
   allocateAttempt(input: AllocateAttemptInput): Attempt;
+  allocateWorkerRun(input: AllocateWorkerRunInput): WorkerRun;
+  setWriteTrackStatus(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WriteTrackStatus;
+    readonly updatedAt: string;
+  }): WriteTrack;
+  setAttemptState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: AttemptStatus;
+    readonly sourceStatus: SourceStatus;
+    readonly sourcePath?: string;
+    readonly sourceFingerprint?: string;
+    readonly updatedAt: string;
+  }): Attempt;
+  setWorkerRunState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WorkerRunStatus;
+    readonly processIdentity?: ProcessIdentity;
+    readonly processStartedAt?: string;
+    readonly exitCode?: number;
+    readonly updatedAt: string;
+  }): WorkerRun;
   appendEvent(input: AppendEventInput): void;
 }
 
@@ -420,6 +458,168 @@ export class SqliteExecutionStore extends ExecutionStore {
     }
   }
 
+  #allocateWorkerRun(input: AllocateWorkerRunInput): WorkerRun {
+    try {
+      const attemptId = requireAttemptId(input.attemptId);
+      const row = this.#database.prepare(`
+        SELECT COALESCE(MAX(ordinal), 0) + 1 AS next_value
+        FROM worker_runs
+        WHERE attempt_id = ?
+      `).get(attemptId) as { readonly next_value?: unknown } | undefined;
+      const ordinal = Number(row?.next_value ?? 1);
+      if (!Number.isSafeInteger(ordinal) || ordinal <= 0) {
+        throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Worker Run ordinal.');
+      }
+      const id = formatWorkerRunId(attemptId, ordinal);
+      this.#database.prepare(`
+        INSERT INTO worker_runs (
+          id, attempt_id, ordinal, contract_hash, status,
+          process_boot_id, process_id, process_start_ticks, process_started_at,
+          exit_code, version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, 'STARTING', NULL, NULL, NULL, NULL, NULL, 1, ?, ?)
+      `).run(id, attemptId, ordinal, input.contractHash, input.occurredAt, input.occurredAt);
+      const value = super.getWorkerRun(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Worker Run ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      translateExecutionConstraint(error, 'WORKER_RUN_CONFLICT', 'Could not allocate the Worker Run.');
+    }
+  }
+
+  #setWriteTrackStatus(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WriteTrackStatus;
+    readonly updatedAt: string;
+  }): WriteTrack {
+    const result = this.#database.prepare(`
+      UPDATE write_tracks
+      SET status = ?, version = version + 1, updated_at = ?
+      WHERE id = ? AND version = ?
+    `).run(input.status, input.updatedAt, input.id, input.expectedVersion);
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Write Track version for ${input.id}.`);
+    }
+    const value = super.getWriteTrack(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Write Track ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
+  #setAttemptState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: AttemptStatus;
+    readonly sourceStatus: SourceStatus;
+    readonly sourcePath?: string;
+    readonly sourceFingerprint?: string;
+    readonly updatedAt: string;
+  }): Attempt {
+    const result = this.#database.prepare(`
+      UPDATE attempts
+      SET status = ?, source_status = ?, source_path = ?, source_fingerprint = ?,
+          version = version + 1, updated_at = ?
+      WHERE id = ? AND version = ?
+    `).run(
+      input.status,
+      input.sourceStatus,
+      input.sourcePath ?? null,
+      input.sourceFingerprint ?? null,
+      input.updatedAt,
+      input.id,
+      input.expectedVersion,
+    );
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Attempt version for ${input.id}.`);
+    }
+    const value = super.getAttempt(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Attempt ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
+  #setWorkerRunState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WorkerRunStatus;
+    readonly processIdentity?: ProcessIdentity;
+    readonly processStartedAt?: string;
+    readonly exitCode?: number;
+    readonly updatedAt: string;
+  }): WorkerRun {
+    const identity = input.processIdentity;
+    const result = this.#database.prepare(`
+      UPDATE worker_runs
+      SET status = ?, process_boot_id = ?, process_id = ?, process_start_ticks = ?,
+          process_started_at = ?, exit_code = ?, version = version + 1, updated_at = ?
+      WHERE id = ? AND version = ?
+    `).run(
+      input.status,
+      identity?.bootId ?? null,
+      identity?.pid ?? null,
+      identity?.startTicks ?? null,
+      input.processStartedAt ?? null,
+      input.exitCode ?? null,
+      input.updatedAt,
+      input.id,
+      input.expectedVersion,
+    );
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Worker Run version for ${input.id}.`);
+    }
+    const value = super.getWorkerRun(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Worker Run ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
+  getCurrentAttempt(writeTrackId: string): Attempt | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM attempts
+      WHERE write_track_id = ? AND status = 'OPEN'
+      LIMIT 1
+    `).get(writeTrackId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getAttempt(String(row.id));
+  }
+
+  getCurrentWorkerRun(attemptId: string): WorkerRun | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM worker_runs
+      WHERE attempt_id = ? AND status IN ('STARTING', 'RUNNING', 'IDLE')
+      LIMIT 1
+    `).get(attemptId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getWorkerRun(String(row.id));
+  }
+
+  getCurrentLease(writeTrackId: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE write_track_id = ?
+        AND status IN ('REQUESTED', 'ACTIVE', 'RELEASE_PENDING', 'DIVERGED')
+      ORDER BY generation DESC
+      LIMIT 1
+    `).get(writeTrackId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
+  getCurrentClaim(attemptId: string): Claim | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM claims
+      WHERE attempt_id = ? AND status = 'OPEN'
+      LIMIT 1
+    `).get(attemptId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getClaim(String(row.id));
+  }
+
   #allocateLease(input: AllocateLeaseInput): Lease {
     try {
       const existingRow = this.#database.prepare(`
@@ -518,6 +718,22 @@ export class SqliteExecutionStore extends ExecutionStore {
         allocateAttempt: (input: AllocateAttemptInput) => {
           requireActive();
           return this.#allocateAttempt(input);
+        },
+        allocateWorkerRun: (input: AllocateWorkerRunInput) => {
+          requireActive();
+          return this.#allocateWorkerRun(input);
+        },
+        setWriteTrackStatus: (input) => {
+          requireActive();
+          return this.#setWriteTrackStatus(input);
+        },
+        setAttemptState: (input) => {
+          requireActive();
+          return this.#setAttemptState(input);
+        },
+        setWorkerRunState: (input) => {
+          requireActive();
+          return this.#setWorkerRunState(input);
         },
         appendEvent: (input: AppendEventInput) => {
           requireActive();

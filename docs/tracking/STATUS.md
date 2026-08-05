@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.47
+version: 1.8.48
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 13 GREEN awaits explicit authority
+- **Current enabler:** Issue #16 — Task 14 deterministic proof awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -53,13 +53,13 @@ MIS-002 contract:                 APPROVED — revision 5 / exact hash
 TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:                  ACCEPTED — version 0.6.1
 Implementation plan:              CURRENT / APPROVED — version 1.0.1
-Tasks 1–12:                        COMPLETE / ACCEPTED
+Tasks 1–13:                        COMPLETE / ACCEPTED
 Task 11 RED:                       OBSERVED / ACCEPTABLE
 Task 11 GREEN:                     VERIFIED / REVIEWED
 Task 12 RED:                       OBSERVED / ACCEPTABLE
 Task 12 GREEN:                     VERIFIED / REVIEWED
 Task 13 RED:                       OBSERVED / ACCEPTABLE
-Task 13 GREEN:                     NOT AUTHORIZED
+Task 13 GREEN:                     VERIFIED / REVIEWED
 Task 14:                           NOT AUTHORIZED
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
@@ -83,6 +83,7 @@ Task 9   production Treehouse boundary        f984dd0f94e752060bc88cff128061da23
 Task 10  trusted Lease action helper          2b80692a10ad162bb1c5874ff40f0bc19c22e3c6
 Task 11  fenced Lease lifecycle service       11fe71df23f697b021bd37133854152c033311ec
 Task 12  Claim OPEN and read-only Recovery     8c6fd9afa2cc7f707f96659b9efa73230579471a
+Task 13  execution CLI and composition          5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864
 ```
 
 ## Task 10 accepted boundary
@@ -560,6 +561,80 @@ Replan:          not required
 
 No production source, schema, migration, package, Treehouse execution, Lease helper, Pi behavior, Task 14 proof or M01 acceptance was introduced. Task 13 GREEN remains separately gated.
 
+## Task 13 GREEN
+
+Authorization:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_13_GREEN plan=1.0.1 microdesign=0.6.1 red=fe6da615d2d0a32437e2adb0627f09a693f1bd57 task12=8c6fd9afa2cc7f707f96659b9efa73230579471a
+```
+
+Implementation head:
+
+```text
+5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864
+feat: expose M01 execution CLI
+```
+
+Published scope:
+
+```text
+src/cli/args.ts
+src/cli/main.ts
+src/cli/entry.ts
+src/runtime/paths.ts
+tests/cli/execution-green-review.test.ts
+```
+
+The CLI now exposes the bounded M01 `track open/show/abandon`, `lease grant/show/release` and read-only `recover` surface with strict canonical arguments, SHA-1/SHA-256 Git object support, stable JSON, typed MNFS errors, human identity/version/hash visibility and one concrete next action.
+
+The production composition validates current schema readiness before opening one `SqliteStore`, closes the store in `finally`, composes `ExecutionService`, `LeaseService`, `RecoveryService`, the independent source/Git/Treehouse boundaries and Linux process identity, and initializes physical dependencies only for commands that require them.
+
+Adversarial review added four fail-first boundaries and their corrections:
+
+```text
+fixed separate LeaseActionRunner child entry instead of in-process execution
+release cannot recreate missing Treehouse control state
+component-by-component directory creation rejects symlink traversal
+Recovery proves physical observation is non-mutating before adapters run
+```
+
+Canonical verification:
+
+```text
+Implementation:        5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864
+Publisher Run / Job:   31037428769 / 92412985292
+Verifier Run / Job:    31037580728 / 92413529799
+Node:                  24.18.0
+TypeScript:            PASS
+Task 13 directed:      16/16 PASS
+Product:               306/306 PASS
+AS-02:                 119/119 PASS
+TC-01:                  78/78 PASS
+Documentation:         PASS — 93 canonical IDs
+npm vulnerabilities:  0
+```
+
+Review result:
+
+```text
+Critical:    0 open
+Important:   0 open
+Minor:       0 open
+Result:      ACCEPTABLE
+Replan:      not required
+```
+
+Scope review:
+
+- four production files plus one adversarial boundary test;
+- no schema, migration, package or dependency change;
+- no second SQLite connection or transaction authority;
+- no real Treehouse, helper action or Pi process was executed by Task 13 verification;
+- no Claim completion/acceptance, Receipt, Gate, Integration or SEC-E1 production dispatch;
+- no reset, clean, force, destroy, prune or automatic Recovery repair;
+- Task 14, real WSL2 proof, M01 acceptance and merge remain separately gated.
+
 ## Frozen boundaries
 
 - canonical checkout is never Treehouse cwd;
@@ -575,13 +650,13 @@ No production source, schema, migration, package, Treehouse execution, Lease hel
 ## Current authorization boundary
 
 ```text
-Tasks 1–12:                 COMPLETE / ACCEPTED
+Tasks 1–13:                 COMPLETE / ACCEPTED
 Task 11 RED:                OBSERVED / ACCEPTABLE
 Task 11 GREEN:              VERIFIED / REVIEWED
 Task 12 RED:                OBSERVED / ACCEPTABLE
 Task 12 GREEN:              VERIFIED / REVIEWED
 Task 13 RED:                OBSERVED / ACCEPTABLE
-Task 13 GREEN:              NOT AUTHORIZED
+Task 13 GREEN:              VERIFIED / REVIEWED
 Task 14:                    NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
 Pi Worker dispatch:         PROHIBITED
@@ -591,4 +666,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for Task 13 GREEN, bound to reviewed Task 13 RED head `fe6da615d2d0a32437e2adb0627f09a693f1bd57` and accepted Task 12 implementation head `8c6fd9afa2cc7f707f96659b9efa73230579471a`. Task 14, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.
+A separate exact Operator continuation is required for the deterministic portion of Task 14, bound to accepted Task 13 implementation head `5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864`. The later canonical WSL2/real-Treehouse proof, M01 acceptance, Pi dispatch and merge remain separately unauthorized.

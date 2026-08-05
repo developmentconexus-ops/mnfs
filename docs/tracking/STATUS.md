@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.41
+version: 1.8.42
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 11 GREEN awaits explicit authority
+- **Current enabler:** Issue #16 — Task 12 RED awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -53,9 +53,9 @@ MIS-002 contract:                 APPROVED — revision 5 / exact hash
 TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:                  ACCEPTED — version 0.6.1
 Implementation plan:              CURRENT / APPROVED — version 1.0.1
-Tasks 1–10:                        COMPLETE / ACCEPTED
+Tasks 1–11:                        COMPLETE / ACCEPTED
 Task 11 RED:                       OBSERVED / ACCEPTABLE
-Task 11 GREEN:                     NOT AUTHORIZED
+Task 11 GREEN:                     VERIFIED / REVIEWED
 Task 12 and later:                 NOT AUTHORIZED
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
@@ -77,6 +77,7 @@ Task 7   atomic lifecycle service             ff8fe7c972502ff6cc932687b7e65a16f3
 Task 8   independent Attempt source           aa4b9e1006d324acd8889b98b3507b020403d1d9
 Task 9   production Treehouse boundary        f984dd0f94e752060bc88cff128061da23607f00
 Task 10  trusted Lease action helper          2b80692a10ad162bb1c5874ff40f0bc19c22e3c6
+Task 11  fenced Lease lifecycle service       11fe71df23f697b021bd37133854152c033311ec
 ```
 
 ## Task 10 accepted boundary
@@ -239,6 +240,70 @@ Task 11 signatures remain correct:
 
 The Task 11 matrices use real `SqliteStore` fixtures, independent stores for concurrency, SQLite Event-failure triggers and scripted observation/helper/process authorities. They execute no Treehouse or helper process.
 
+## Task 11 GREEN
+
+Authorization:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_11_GREEN plan=1.0.1 microdesign=0.6.1 red=ed6736cfb198119efbb3dde8cfac891632cd4b4c task10=2b80692a10ad162bb1c5874ff40f0bc19c22e3c6
+```
+
+Implementation head:
+
+```text
+11fe71df23f697b021bd37133854152c033311ec
+feat: implement fenced Lease lifecycle
+```
+
+Implemented scope:
+
+```text
+src/services/lease-service.ts
+src/store/sqlite-store.ts
+tests/services/lease-service-grant.test.ts
+tests/services/lease-service-release.test.ts
+```
+
+`LeaseService` now owns the bounded M01 grant/release Intent–Action–Observation workflow: exact source and candidate binding, idempotent semantic intent, CAS action ownership, durable helper observation, exact-match adoption, conditional release, non-bijective divergence and no destructive fallback.
+
+The existing `SqliteStore` atomic session was extended only with the focused Lease operations required to commit Lease state plus its matching Event on the already-owned `DatabaseSync` connection. No second connection, schema, migration, package or external adapter authority was introduced.
+
+Post-GREEN adversarial review added six fail-first cases for:
+
+```text
+same-owner grant re-entry
+same-owner release re-entry
+Track authority changing before grant action claim
+Track authority changing before release action claim
+conflicting helper identity after durable STARTED evidence
+split/non-bijective external identity evidence
+```
+
+Canonical verification:
+
+```text
+Head:              11fe71df23f697b021bd37133854152c033311ec
+Synthetic merge:   39d037fd7f2e608382509383b0d0d7a2027d187b
+Workflow / Job:    31017373454 / 92344867725
+Node:              24.18.0
+TypeScript:        PASS
+Task 11:           27/27 PASS
+Product:           240/240 PASS
+AS-02:             119/119 PASS
+TC-01:             78/78 PASS
+Documentation:     PASS — 93 canonical IDs
+```
+
+Scope review:
+
+- one production service plus the bounded same-connection Lease transaction seam;
+- no schema or migration change;
+- no second SQLite connection;
+- no real Treehouse or helper process execution;
+- no Pi, SEC-E1 production dispatch, Claim completion, Receipt or Gate;
+- no reset, clean, force, destructive Treehouse path or filesystem deletion fallback;
+- Task 12 and M01 acceptance remain outside this authorization.
+
 ## Frozen boundaries
 
 - canonical checkout is never Treehouse cwd;
@@ -254,9 +319,9 @@ The Task 11 matrices use real `SqliteStore` fixtures, independent stores for con
 ## Current authorization boundary
 
 ```text
-Tasks 1–10:                 COMPLETE / ACCEPTED
+Tasks 1–11:                 COMPLETE / ACCEPTED
 Task 11 RED:                OBSERVED / ACCEPTABLE
-Task 11 GREEN:              NOT AUTHORIZED
+Task 11 GREEN:              VERIFIED / REVIEWED
 Task 12 and later:          NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
 Pi Worker dispatch:         PROHIBITED
@@ -266,4 +331,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for Task 11 GREEN, bound to Task 11 RED head `ed6736cfb198119efbb3dde8cfac891632cd4b4c` and accepted Task 10 head `2b80692a10ad162bb1c5874ff40f0bc19c22e3c6`.
+A separate exact Operator continuation is required for Task 12 RED, bound to Task 11 implementation head `11fe71df23f697b021bd37133854152c033311ec`. Task 12 production, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.

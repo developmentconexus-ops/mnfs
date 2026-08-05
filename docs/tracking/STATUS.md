@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.36
+version: 1.8.37
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 10 GREEN awaits explicit authority
+- **Current enabler:** Issue #16 — Task 10 corrective RED awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -54,8 +54,10 @@ TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:                  ACCEPTED — version 0.6.1
 Implementation plan:              CURRENT / APPROVED — version 1.0.1
 Tasks 1–9:                         COMPLETE / ACCEPTED
-Task 10 RED:                       OBSERVED / ACCEPTABLE
-Task 10 GREEN:                     NOT AUTHORIZED
+Task 10 primary RED:               OBSERVED / ACCEPTABLE
+Task 10 functional GREEN:          VERIFIED — 207/207 product PASS
+Task 10 post-GREEN review:         R10-01/R10-02/R10-03 IMPORTANT
+Task 10 corrective RED:            NOT AUTHORIZED
 Task 10 accepted:                  NO
 Task 11 and later:                 NOT AUTHORIZED
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
@@ -79,64 +81,47 @@ Task 8  independent Attempt source           aa4b9e1006d324acd8889b98b3507b02040
 Task 9  production Treehouse boundary        f984dd0f94e752060bc88cff128061da23607f00
 ```
 
-Task 9 final accepted evidence:
+Task 9 remains the latest accepted implementation baseline. Task 10 is functionally green but not accepted.
 
-```text
-Functional head:      f984dd0f94e752060bc88cff128061da23607f00
-Tracking head:        c535f6997e75ac4a56b9432800dde5ef9c4fcac9
-Tracking merge:       1c54cf0e71258a06b776b531b512a636897178bd
-Workflow / Job:       30982541454 / 92229888186
-Product:              196/196 PASS
-AS-02:                119/119 PASS
-TC-01:                78/78 PASS
-Documentation:        PASS — 93 canonical IDs
-Review:               4861709427
-Findings:             0 Critical / 0 Important / 0 Minor
-```
+## Task 10 boundary
 
-## What Task 10 adds to the harness
-
-Task 10 is the narrow durable external-action boundary between semantic Lease intent and one physical Treehouse invocation:
+Task 10 is the narrow durable external-action boundary between a semantic action token and one physical Treehouse process:
 
 ```text
 committed action token
-→ immutable token-scoped operation
-→ durable STARTED before spawn
-→ exactly one bounded external command
-→ immutable raw stdout/stderr Artifacts
+→ immutable operation.json at mode 0400
+→ durable STARTED before process invocation
+→ exactly one bounded ProcessSpec
+→ immutable stdout/stderr Artifacts
 → hash-linked FINISHED observation
 → semantic observation by Task 11
 ```
 
-Task 10 does not own semantic Lease state and must never open MNFS SQLite. Its result remains advisory until Task 11 observes helper, Treehouse, Git and filesystem state.
-
-Frozen production targets remain:
+Created production files:
 
 ```text
 src/runtime/lease-action-protocol.ts
 src/runtime/lease-action-runner.ts
 src/runtime/lease-action-entry.ts
 bin/mnfs-lease-action.mjs
+```
+
+Modified:
+
+```text
 package.json
 ```
 
-None of those production files exists in the Task 10 RED.
+The helper never opens MNFS SQLite. FINISHED remains advisory and cannot commit Lease state.
 
-## Task 10 RED
+## Task 10 primary TDD
+
+### RED
 
 Authorization:
 
 ```text
 MNFS_AUTHORIZE_M01_TASK_10_RED plan=1.0.1 microdesign=0.6.1 task9=f984dd0f94e752060bc88cff128061da23607f00
-```
-
-Preflight proved:
-
-```text
-PR #17:        open / draft / unmerged
-Tracking head: c535f6997e75ac4a56b9432800dde5ef9c4fcac9
-Task 9 head:   f984dd0f94e752060bc88cff128061da23607f00
-Post-Task 9:   one tracking-only commit changing docs/tracking/STATUS.md
 ```
 
 Created only:
@@ -146,28 +131,7 @@ tests/runtime/lease-action-protocol.test.ts
 tests/runtime/lease-action-runner.test.ts
 ```
 
-Protocol RED covers five independent contracts:
-
-```text
-1. canonical immutable operation publication at mode 0400 and exact replay
-2. canonical SHA-256 insensitive to object-key order but binding argv order and env values
-3. only reviewed GRANT/RELEASE argv and the owned environment-key shape
-4. containment, fatal UTF-8, one canonical JSON value, exact keys, mode and no symlink
-5. hash-linked STARTED → FINISHED chain with process and output references
-```
-
-Runner RED covers six independent contracts:
-
-```text
-1. STARTED is durably readable before the external process callback
-2. raw stdout/stderr bytes are immutable bounded Artifacts referenced by FINISHED
-3. completed replay performs zero additional external calls
-4. existing STARTED without FINISHED is LEASE_ACTION_INCONCLUSIVE and never re-invokes
-5. token/hash/mode drift blocks before STARTED and before external invocation
-6. runner/entry/bin contain no SQLite, store, shell, exec or inherited-env fallback
-```
-
-Observed RED evidence:
+Evidence:
 
 ```text
 RED head:              86b78c26f8d1dbf1a07e2b7c89e0a83e90d76ecc
@@ -180,41 +144,133 @@ Task 10 tests:         0/11 expected failure
 Product total:         196 PASS / 11 FAIL / 207 total
 ```
 
-Expected failure signatures:
+The ten behavioral tests failed because `lease-action-protocol.js` was absent. The static boundary test failed because the production helper files were absent.
+
+### Functional GREEN
+
+Authorization:
 
 ```text
-10 behavioral tests:
-  Task 10 Lease action protocol is not implemented
-  dist/src/runtime/lease-action-protocol.js absent
-
-1 static boundary test:
-  src/runtime/lease-action-runner.ts absent
+MNFS_AUTHORIZE_M01_TASK_10_GREEN plan=1.0.1 microdesign=0.6.1 red=86b78c26f8d1dbf1a07e2b7c89e0a83e90d76ecc
 ```
 
-The root `verify` command stopped at the deliberate product RED. AS-02, TC-01 and documentation were not re-executed at this head; their latest accepted evidence remains the Task 9 tracking gate above.
+Production commits:
 
-Mechanical scope comparison from `c535f6997e75ac4a56b9432800dde5ef9c4fcac9` to the RED head contains only the two authorized test files. No production, package, schema, service, Treehouse-real or Pi behavior changed.
+```text
+Lease action protocol   ee40fe11a1c8edf50ee4095a7c5b68cb9465b70c
+Lease action runner     18cb5942063ec92c942ccf2615e5fb8eb9d3731c
+Helper entry            023cbe0c3e241090e3fa568dd78a6e57ecce7278
+Executable shim         374694b623e6f7e7b53655a8501ce406d5c0f22b
+Package exposure        e336116192d1261a9f94c2b6d5293f3ad5154c33
+```
+
+Delivered behavior:
+
+- canonical JSON and SHA-256 bind operation argv, cwd, env, limits and Artifact destinations;
+- operation is published/replayed at mode `0400` with owner, regular-file, hardlink and symlink checks;
+- only exact GRANT and RELEASE argv shapes are accepted;
+- environment keys are allowlisted and inherited environment is not used;
+- STARTED is published exclusively and fsynced before the process callback;
+- process identity binds boot ID, PID and start ticks;
+- raw stdout/stderr bytes are published below the token root;
+- FINISHED binds operation hash, STARTED hash, runner identity, process metadata and output refs;
+- completed replay performs zero additional process calls;
+- STARTED without FINISHED returns `LEASE_ACTION_INCONCLUSIVE` and never invokes again;
+- entry/bin contain no SQLite, store, shell, exec or host fallback authority.
+
+Evidence:
+
+```text
+Functional GREEN head: e336116192d1261a9f94c2b6d5293f3ad5154c33
+Synthetic merge:       72e81c70daf073ab0ee3c69d09a500c62b817578
+Workflow / Job:        31000870325 / 92289136416
+npm ci:                PASS — 0 vulnerabilities
+TypeScript:            PASS
+Product tests:         207/207 PASS
+Task 10 tests:         11/11 PASS
+AS-02 tests:           119/119 PASS
+TC-01 tests:           78/78 PASS
+Documentation:         PASS — 93 canonical IDs
+```
+
+No real Treehouse process was executed. Task 10 tests use an injected process function.
+
+## Task 10 post-GREEN review
+
+Formal review:
+
+```text
+Review:     4863820596
+Critical:   0
+Important:  3
+Minor:      0
+Task 10:    NOT ACCEPTED
+Replan:     not required
+```
+
+### R10-01 — empty stdout/stderr cannot produce FINISHED
+
+`LeaseActionOutputRef.byteLength` is validated as a positive integer. A valid external process may produce an empty stream. After the process executes and a zero-byte Artifact is written, FINISHED publication fails and the durable state remains STARTED. Every replay is then inconclusive.
+
+Required proof: empty stdout, empty stderr and both-empty results must publish FINISHED and replay without another process call.
+
+### R10-02 — helper PATH differs from the accepted Task 9 environment
+
+Task 9 builds:
+
+```text
+<treehouse-bin>:<git-bin>:/usr/bin:/bin
+```
+
+Task 10 currently accepts only:
+
+```text
+<treehouse-bin>:/usr/bin:/bin
+```
+
+The helper cannot consume the exact environment already accepted by the Treehouse boundary when the two executables resolve to different directories.
+
+Required proof: Task 10 accepts and hash-binds the exact Task 9 PATH shape while rejecting extra, mounted, relative or reordered directories.
+
+### R10-03 — Artifact reads allocate before enforcing bounds
+
+The protocol calls `readFile()` before checking any maximum size. Operation, STARTED, FINISHED and raw output files can therefore allocate unbounded memory before structural or referenced-length validation.
+
+Required proof: metadata size is checked before every read; output size is compared to the FINISHED reference and operation limits before allocation; inode/time stability checks remain after the read.
+
+## Operator authority chain — current task
+
+```text
+MNFS_AUTHORIZE_M01_TASK_10_RED plan=1.0.1 microdesign=0.6.1 task9=f984dd0f94e752060bc88cff128061da23607f00
+MNFS_AUTHORIZE_M01_TASK_10_GREEN plan=1.0.1 microdesign=0.6.1 red=86b78c26f8d1dbf1a07e2b7c89e0a83e90d76ecc
+```
+
+Earlier Task 1–9 authorities remain recorded in PR #17 and Git history.
 
 ## Frozen boundaries
 
 - canonical checkout is never Treehouse cwd;
 - every Attempt owns an independent exact-base Linux-local source;
-- Task 10 RED executes no Treehouse process, real or simulated;
-- the future helper may execute exactly one operation from one immutable token-scoped file;
+- Task 10 tests execute no real Treehouse process;
 - STARTED must be durable before external invocation;
-- FINISHED and process output are advisory observations, not semantic completion;
-- an existing STARTED without decisive FINISHED/physical evidence cannot cause another grant invocation;
-- the helper never opens MNFS SQLite or imports domain stores;
+- an existing STARTED without decisive FINISHED/physical evidence cannot cause another GRANT invocation;
+- FINISHED and process output remain advisory observations;
+- helper never opens SQLite or imports domain stores;
 - no semantic Lease grant/release exists before Task 11;
 - no Pi process, SEC-E1 production creation, Receipt or Gate exists in M01;
+- Task 11 and later require separate gates;
 - PR #17 remains draft and unmerged.
 
 ## Current authorization boundary
 
 ```text
 Tasks 1–9:                  COMPLETE / ACCEPTED
-Task 10 RED:                OBSERVED / ACCEPTABLE
-Task 10 GREEN:              NOT AUTHORIZED
+Task 10 primary RED:        OBSERVED / ACCEPTABLE
+Task 10 functional GREEN:   VERIFIED
+R10-01:                     OPEN — IMPORTANT
+R10-02:                     OPEN — IMPORTANT
+R10-03:                     OPEN — IMPORTANT
+Task 10 corrective RED:     NOT AUTHORIZED
 Task 10 accepted:           NO
 Task 11 and later:          NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
@@ -225,4 +281,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for **Task 10 GREEN only**, bound to RED head `86b78c26f8d1dbf1a07e2b7c89e0a83e90d76ecc`.
+A separate exact Operator continuation is required for **Task 10 corrective RED only**, bound to functional GREEN head `e336116192d1261a9f94c2b6d5293f3ad5154c33` and blockers `R10-01,R10-02,R10-03`.

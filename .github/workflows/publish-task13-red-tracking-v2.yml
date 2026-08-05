@@ -1,0 +1,119 @@
+name: Publish Task 13 RED Tracking v2
+
+on:
+  push:
+    branches:
+      - automation/task13-red-publish
+    paths:
+      - .github/workflows/publish-task13-red-tracking-v2.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task13-red-tracking-v2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact Task 13 RED head
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify RED head and tracking preimage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '956a067336df48f54d19e634666f14bdf5a92143'
+          test "$(git hash-object docs/tracking/STATUS.md)" = '5dfe97be4819245b77f3158c0609044a2e587ebe'
+          test "$(git show --format= --name-only HEAD | sort)" = $'tests/cli/execution-args.test.ts\ntests/cli/execution-main.test.ts'
+
+      - name: Checkout reviewed tracking updater
+        uses: actions/checkout@v4
+        with:
+          ref: automation/task13-red-publish
+          path: .task13-tracking-publisher
+          fetch-depth: 1
+
+      - name: Record exact Task 13 RED evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '6f28be5906cab6d79d46cc2a9f574253da0d9ed0b626f0628914b2746fbbf016  .task13-tracking-publisher/.github/task13-red/update-status.py' | sha256sum -c -
+          python3 .task13-tracking-publisher/.github/task13-red/update-status.py
+          rm -rf .task13-tracking-publisher
+          test "$(git diff --name-only)" = 'docs/tracking/STATUS.md'
+          git diff --check
+          grep -q '^version: 1.8.46$' docs/tracking/STATUS.md
+          grep -q 'Task 13 RED:.*OBSERVED / ACCEPTABLE' docs/tracking/STATUS.md
+          grep -q 'Task 13 GREEN awaits explicit authority' docs/tracking/STATUS.md
+          grep -q '956a067336df48f54d19e634666f14bdf5a92143' docs/tracking/STATUS.md
+          grep -q '31030653641 / 92390206386' docs/tracking/STATUS.md
+
+      - name: Verify baseline and expected RED with tracking
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run build --silent
+
+          set +e
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            > /tmp/task13-tracking-directed.log 2>&1
+          directed_status=$?
+          node scripts/run-tests.mjs > /tmp/task13-tracking-product.log 2>&1
+          product_status=$?
+          set -e
+
+          cat /tmp/task13-tracking-directed.log
+          test "$directed_status" -ne 0
+          grep -q 'tests 8' /tmp/task13-tracking-directed.log
+          grep -q 'pass 0' /tmp/task13-tracking-directed.log
+          grep -q 'fail 8' /tmp/task13-tracking-directed.log
+          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-tracking-directed.log
+          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-tracking-directed.log
+
+          cat /tmp/task13-tracking-product.log
+          test "$product_status" -ne 0
+          grep -q 'tests 298' /tmp/task13-tracking-product.log
+          grep -q 'pass 290' /tmp/task13-tracking-product.log
+          grep -q 'fail 8' /tmp/task13-tracking-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-tracking-as02.log 2>&1
+          grep -q 'tests 119' /tmp/task13-tracking-as02.log
+          grep -q 'pass 119' /tmp/task13-tracking-as02.log
+          grep -q 'fail 0' /tmp/task13-tracking-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-tracking-tc01.log 2>&1
+          grep -q 'tests 78' /tmp/task13-tracking-tc01.log
+          grep -q 'pass 78' /tmp/task13-tracking-tc01.log
+          grep -q 'fail 0' /tmp/task13-tracking-tc01.log
+
+          npm run docs:check > /tmp/task13-tracking-docs.log 2>&1
+          cat /tmp/task13-tracking-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-tracking-docs.log
+
+      - name: Commit and publish Task 13 RED tracking
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add docs/tracking/STATUS.md
+          test "$(git diff --cached --name-only)" = 'docs/tracking/STATUS.md'
+          git diff --cached --check
+          git commit -m 'docs: record Task 13 RED evidence'
+          git push origin HEAD:design/mis-002-m01

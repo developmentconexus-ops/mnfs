@@ -18,7 +18,7 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout reviewed Task 13 RED head
+      - name: Checkout reviewed Task 13 RED tracking head
         uses: actions/checkout@v4
         with:
           ref: design/mis-002-m01
@@ -30,13 +30,14 @@ jobs:
           node-version: 24.18.0
           cache: npm
 
-      - name: Verify exact initial RED and accepted Task 12 ancestry
+      - name: Verify exact initial RED, tracking and accepted Task 12 ancestry
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '956a067336df48f54d19e634666f14bdf5a92143'
+          test "$(git rev-parse HEAD)" = '7872071c6ed7238ec0cb8dc55e613d25d1f6d9fd'
+          test "$(git rev-parse HEAD^)" = '956a067336df48f54d19e634666f14bdf5a92143'
           git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
-          test "$(git rev-parse HEAD^)" = '39a7bdcaa351ec5212b53018595cbf34aae2e476'
+          git merge-base --is-ancestor '956a067336df48f54d19e634666f14bdf5a92143' HEAD
           test "$(git hash-object tests/cli/execution-args.test.ts)" = 'bf22293f55983c12450dc81bafe5df31be5457c8'
           test "$(git hash-object tests/cli/execution-main.test.ts)" = '792fc7907aa12672532893558b98a99b9dd70a34'
           echo '41780ce86b69a97979c56e21562ea7acf0380003ceca8a2223583af0b4820b15  tests/cli/execution-args.test.ts' | sha256sum -c -
@@ -151,7 +152,7 @@ jobs:
           grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-reviewed-red-product.log
           grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-reviewed-red-product.log
           grep -q 'M01 production composition root is not implemented' /tmp/task13-reviewed-red-product.log
-          test "$(git rev-parse HEAD)" = '956a067336df48f54d19e634666f14bdf5a92143'
+          test "$(git rev-parse HEAD)" = '7872071c6ed7238ec0cb8dc55e613d25d1f6d9fd'
 
       - name: Commit and publish reviewed Task 13 RED matrix
         shell: bash

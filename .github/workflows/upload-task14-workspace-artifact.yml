@@ -1,0 +1,54 @@
+name: Upload Task 14 Workspace Artifact
+
+on:
+  push:
+    branches:
+      - automation/task14-deterministic-export
+    paths:
+      - .github/workflows/upload-task14-workspace-artifact.yml
+
+permissions:
+  contents: read
+
+actions:
+
+jobs:
+  upload:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 8426d1cea089bb3bc27aa6a1544ba289a1b5965e
+          fetch-depth: 0
+
+      - name: Verify exact authorized baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+          test "$(git rev-parse HEAD^)" = '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864'
+
+      - name: Build deterministic archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar \
+            --sort=name \
+            --mtime='UTC 1970-01-01' \
+            --owner=0 \
+            --group=0 \
+            --numeric-owner \
+            --exclude='./.git' \
+            --exclude='./node_modules' \
+            --exclude='./dist' \
+            -czf mnfs-task14-workspace.tar.gz .
+          sha256sum mnfs-task14-workspace.tar.gz > mnfs-task14-workspace.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mnfs-task14-workspace-8426d1c
+          path: |
+            mnfs-task14-workspace.tar.gz
+            mnfs-task14-workspace.sha256
+          if-no-files-found: error
+          retention-days: 1

@@ -1,0 +1,63 @@
+name: Export Task 14 Deterministic Workspace
+
+on:
+  push:
+    branches:
+      - automation/task14-deterministic-export
+    paths:
+      - .github/workflows/export-task14-deterministic-workspace.yml
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: automation/task14-deterministic-export
+          fetch-depth: 0
+
+      - name: Verify exact authorized baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864 HEAD
+          git merge-base --is-ancestor 8426d1cea089bb3bc27aa6a1544ba289a1b5965e HEAD
+          test "$(git rev-parse HEAD^)" = '8426d1cea089bb3bc27aa6a1544ba289a1b5965e'
+
+      - name: Build deterministic source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .github/task14-export
+          mkdir -p .github/task14-export
+          tar \
+            --sort=name \
+            --mtime='UTC 1970-01-01' \
+            --owner=0 \
+            --group=0 \
+            --numeric-owner \
+            --exclude='./.git' \
+            --exclude='./node_modules' \
+            --exclude='./dist' \
+            --exclude='./.github/task14-export' \
+            -czf /tmp/mnfs-task14-workspace.tar.gz .
+          sha256sum /tmp/mnfs-task14-workspace.tar.gz | awk '{print $1}' > .github/task14-export/archive.sha256
+          stat -c '%s' /tmp/mnfs-task14-workspace.tar.gz > .github/task14-export/archive.size
+          base64 -w0 /tmp/mnfs-task14-workspace.tar.gz > /tmp/archive.b64
+          split -b 500000 -d -a 3 /tmp/archive.b64 .github/task14-export/chunk-
+          printf '%s\n' "$(find .github/task14-export -maxdepth 1 -name 'chunk-*' -type f | sort | wc -l)" > .github/task14-export/chunk-count
+          find .github/task14-export -maxdepth 1 -type f -printf '%f %s\n' | sort > .github/task14-export/manifest.txt
+
+      - name: Commit export chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name developmentconexus-ops
+          git config user.email development.conexus@gmail.com
+          git add .github/task14-export
+          git diff --cached --check
+          git commit -m 'automation: publish Task 14 deterministic workspace archive'
+          git push origin HEAD:automation/task14-deterministic-export

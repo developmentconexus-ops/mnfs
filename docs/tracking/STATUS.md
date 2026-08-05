@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.34
+version: 1.8.35
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 9 corrective GREEN awaits explicit authority
+- **Current enabler:** Issue #16 — Task 10 RED awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -53,14 +53,10 @@ MIS-002 contract:                 APPROVED — revision 5 / exact hash
 TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:                  ACCEPTED — version 0.6.1
 Implementation plan:              CURRENT / APPROVED — version 1.0.1
-Tasks 1–8:                         COMPLETE / ACCEPTED
-Task 9 primary RED:                OBSERVED / ACCEPTABLE — 8 expected failures
-Task 9 functional GREEN:           VERIFIED — 188/188 product PASS
-Task 9 post-GREEN review:          R9-01/R9-02/R9-03 IMPORTANT
-Task 9 corrective RED:             OBSERVED / ACCEPTABLE — 8 expected failures
-Task 9 corrective GREEN:           NOT AUTHORIZED
-Task 9 accepted:                   NO
-Task 10 and later:                 NOT AUTHORIZED
+Tasks 1–9:                         COMPLETE / ACCEPTED
+Task 10 RED:                       NOT AUTHORIZED
+Task 10 GREEN:                     NOT AUTHORIZED
+Task 11 and later:                 NOT AUTHORIZED
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
 M01 acceptance:                    NOT AUTHORIZED
@@ -79,28 +75,20 @@ Task 5  schema v4 and versioned Events       ea459368fe1346c2cb2d6e9d37b3bb25a0c
 Task 6  execution persistence               b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992
 Task 7  atomic lifecycle service             ff8fe7c972502ff6cc932687b7e65a16f37b6516
 Task 8  independent Attempt source           aa4b9e1006d324acd8889b98b3507b020403d1d9
+Task 9  production Treehouse boundary        f984dd0f94e752060bc88cff128061da23607f00
 ```
 
-Task 8 final verification:
+## Task 9 delivered boundary
+
+Task 9 provides physical Treehouse observation and invocation shapes above an accepted Attempt-owned source:
 
 ```text
-Product:          180/180 PASS
-AS-02:            119/119 PASS
-TC-01:            78/78 PASS
-Documentation:    PASS — 93 canonical IDs
-Review:           4861226705
-Findings:         0 Critical / 0 Important / 0 Minor
-```
-
-## What Task 9 adds to the harness
-
-Task 9 defines the physical Treehouse observation boundary above an Attempt-owned source:
-
-```text
-independent source
-→ candidate/source freshness
-→ exact Treehouse command
-→ strict physical observation
+persisted READY-source identity
+→ fresh Task 8 source-integrity observation
+→ fresh direct Git observation
+→ controlled Treehouse config and host provenance
+→ exact acquire/status/release command
+→ strict untrusted physical observation
 ```
 
 Created:
@@ -109,7 +97,7 @@ Created:
 src/adapters/treehouse.ts
 ```
 
-Implemented public operations:
+Public operations:
 
 ```text
 TreehouseAdapter.acquire
@@ -125,27 +113,17 @@ treehouse status --json
 treehouse return <path> --if-lease-id <id> --if-lease-holder <holder>
 ```
 
-The adapter returns physical observations only. It does not persist a semantic Lease, interpret release output as completion or launch the trusted Task 10 helper.
-
 Accepted command-shape identity:
 
 ```text
 sha256:f2077cfd037cbaefdcfc94385a0cfeb7e1647ef294ca8ceee3cd61a1b109dc84
 ```
 
+The adapter returns physical observations only. It does not persist a semantic Lease, interpret release output as completion, open MNFS SQLite, launch the Task 10 helper or invoke Pi.
+
 ## Task 9 primary TDD
 
 ### RED
-
-Created only:
-
-```text
-tests/adapters/treehouse.test.ts
-```
-
-The first draft at `700ec33c8546ac326e782ee3af86347db280e0d6` failed TypeScript for a test-only literal-property inference issue and was not accepted as RED.
-
-Corrected RED evidence:
 
 ```text
 Task 9 RED head:       a48bf4dba68984ce24a32575f982bae98e1cafc6
@@ -156,6 +134,8 @@ Prior product tests:   180/180 PASS
 Task 9 tests:          0/8 expected failure
 Product total:         180 PASS / 8 FAIL
 ```
+
+The earlier test draft `700ec33c8546ac326e782ee3af86347db280e0d6` failed TypeScript for a fixture-only inference error and was superseded before RED acceptance.
 
 ### Functional GREEN
 
@@ -171,100 +151,96 @@ TC-01 tests:           78/78 PASS
 Documentation:         PASS — 93 canonical IDs
 ```
 
-Scope review:
-
-```text
-src/adapters/treehouse.ts added
-schema/SQLite/services       unchanged
-Task 10 helper protocol      absent
-real Treehouse execution     absent
-Pi behavior                  unchanged
-```
-
 ## Task 9 post-GREEN review
-
-Formal review:
 
 ```text
 Review:     4861408689
 Critical:   0
 Important:  3
 Minor:      0
-Task 9:     NOT ACCEPTED
 Replan:     not required
 ```
 
-### R9-01 — capability discovery diverges from accepted TC-01 behavior
-
-The functional GREEN requires every help result to be exactly one stdout line. Accepted TC-01 conformance combines stdout and stderr, accepts multiline help and extracts exact flags from the complete evidence.
-
-### R9-02 — Attempt-owned Treehouse config and hooks are not verified
-
-The adapter resolves HOME, XDG, pool and hooks paths but does not bind the exact `treehouse.toml` pool/config bytes, require XDG to remain empty or reject every hook entry before protected work.
-
-### R9-03 — source freshness is not exact READY-source identity
-
-The adapter checks only source path, clean status and zero remotes. It does not consume a fresh Task 8 integrity observation bound to the persisted fingerprint, expected base commit/tree and object format.
-
-## Task 9 corrective RED
-
-Created only:
+Accepted blockers:
 
 ```text
-tests/adapters/treehouse-correction.test.ts
+R9-01  capability discovery rejected multiline stdout/stderr help
+R9-02  Attempt-owned Treehouse config/XDG/hooks contents were not bound
+R9-03  source freshness did not consume exact READY fingerprint/commit/tree/object format
 ```
 
-No production file changed.
+## Task 9 corrective TDD
 
-The corrective public contract adds an exact source authority boundary:
+### Corrective RED
 
 ```text
-TreehouseBoundary.readySource
-├── fingerprint
-├── baseCommitSha
-├── baseTreeSha
-└── objectFormat
-
-TreehouseAdapter sourceIntegrity
-└── observeReadySource(exact expected source identity)
+Correction RED head:   c87afa9c1a846f7788a378f2a9ed26c84620b755
+Synthetic merge:       5c6e03593564906f5385046fbc152b0577dd4ccb
+Workflow / Job:        30980233455 / 92222897267
+TypeScript:            PASS
+Prior product tests:   188/188 PASS
+Correction tests:      0/8 expected failure
+Product total:         188 PASS / 8 FAIL
 ```
 
-The adapter must consume this fresh observation rather than duplicating the Task 8 fingerprint algorithm.
+The eight failures covered multiline capability evidence, config/pool drift, unexpected XDG content, non-empty hooks and READY fingerprint/commit/tree/object-format drift.
 
-Eight independent failures prove:
+### Corrective implementation
+
+Production commits:
 
 ```text
-R9-01  multiline help split across stdout/stderr is rejected
-R9-02  treehouse.toml with a different pool is ignored
-R9-02  unexpected XDG config is ignored
-R9-02  non-empty executable hooks are ignored
-R9-03  source fingerprint drift is ignored
-R9-03  source base-commit drift is ignored
-R9-03  source base-tree drift is ignored
-R9-03  source object-format drift is ignored
+READY identity and capability/source authority  f433615d826494b5af0377bab1cab8e6c138eef1
+XDG user-config authority                        6bafed773c24adb0222a0b17493df2c417154618
 ```
 
-Evidence:
+The first corrective fixture placed policy in `source/treehouse.toml`. Review against accepted exact-base source invariants and Treehouse configuration precedence proved that location incorrect. The corrected contract uses:
 
 ```text
-Correction RED head:       c87afa9c1a846f7788a378f2a9ed26c84620b755
-Synthetic merge:           5c6e03593564906f5385046fbc152b0577dd4ccb
-Workflow / Job:            30980233455 / 92222897267
-TypeScript:                PASS
-Prior product tests:       188/188 PASS
-Correction tests:          0/8 expected failure
-Product total:             188 PASS / 8 FAIL
+$XDG_CONFIG_HOME/treehouse/config.toml
 ```
 
-Observed signatures:
+and treats a repository `treehouse.toml` as optional precedence that is accepted only when its canonical regular-file bytes exactly equal the controlled user policy.
+
+Final behavior:
+
+- capability flags are extracted from fatal-UTF-8 multiline stdout plus stderr;
+- persisted `readySource` binds fingerprint, base commit, base tree and object format;
+- a fresh Task 8 integrity seam and a fresh direct Git observation must both match;
+- source must remain clean, no-remote and exactly bound to the READY identity;
+- XDG contains exactly `treehouse/config.toml`;
+- user config is one canonical regular non-hardlinked file with exact `max_trees = 2` and exact pool root;
+- Git hooks path is empty;
+- repository config is absent or byte-equivalent to the controlled policy;
+- no protected command runs after any source, config, host, binary or command-shape drift;
+- release process output remains advisory.
+
+### Final corrective GREEN
 
 ```text
-R9-01  TREEHOUSE_VERSION_UNSUPPORTED: help must contain exactly one line
-R9-02  missing expected rejection before status --json
-R9-03  missing expected rejection before status --json
+Final functional head: f984dd0f94e752060bc88cff128061da23607f00
+Synthetic merge:       b440bfcf8115f1feb5a9582770f757b1e283df48
+Workflow / Job:        30982264746 / 92229040491
+TypeScript:            PASS
+Product tests:         196/196 PASS
+Task 9 primary:        8/8 PASS
+Task 9 corrective:     8/8 PASS
+AS-02 tests:           119/119 PASS
+TC-01 tests:           78/78 PASS
+Documentation:         PASS — 93 canonical IDs
+Vulnerabilities:       0
 ```
 
-The root `verify` command stopped at the deliberate product RED. AS-02, TC-01 and documentation were not re-executed at this head; their latest accepted evidence remains the functional GREEN result above.
+Final review:
+
+```text
+Review:     4861709427
+Critical:   0
+Important:  0
+Minor:      0
+Task 9:     ACCEPTED
+Replan:     not required
+```
 
 ## Operator authority chain — current task
 
@@ -272,6 +248,7 @@ The root `verify` command stopped at the deliberate product RED. AS-02, TC-01 an
 MNFS_AUTHORIZE_M01_TASK_9_RED plan=1.0.1 microdesign=0.6.1 task8=aa4b9e1006d324acd8889b98b3507b020403d1d9
 MNFS_AUTHORIZE_M01_TASK_9_GREEN plan=1.0.1 microdesign=0.6.1 red=a48bf4dba68984ce24a32575f982bae98e1cafc6
 MNFS_AUTHORIZE_M01_TASK_9_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=18c326e82b6b9179939c7d37169df1f5a7717a1d blockers=R9-01,R9-02,R9-03
+MNFS_AUTHORIZE_M01_TASK_9_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=c87afa9c1a846f7788a378f2a9ed26c84620b755 blockers=R9-01,R9-02,R9-03
 ```
 
 Earlier Task 1–8 authorities remain recorded in PR #17 and Git history.
@@ -280,10 +257,11 @@ Earlier Task 1–8 authorities remain recorded in PR #17 and Git history.
 
 - canonical checkout is never Treehouse cwd;
 - every Attempt owns an independent exact-base Linux-local source;
-- Task 9 tests and corrections use simulated processes only;
+- Task 9 tests use simulated protected processes only;
 - no real Treehouse command runs before the final explicit WSL2 acceptance task;
 - release process output is advisory and cannot mutate semantic state;
-- no semantic Lease grant/release or trusted helper exists before Tasks 10–11;
+- no semantic Lease grant/release exists before Task 11;
+- no trusted STARTED/FINISHED action helper exists before Task 10;
 - no Pi process, SEC-E1 production creation, Receipt or Gate exists in M01;
 - Task 10 and later require separate gates;
 - PR #17 remains draft and unmerged.
@@ -291,13 +269,10 @@ Earlier Task 1–8 authorities remain recorded in PR #17 and Git history.
 ## Current authorization boundary
 
 ```text
-Tasks 1–8:                  COMPLETE / ACCEPTED
-Task 9 primary RED:         OBSERVED / ACCEPTABLE
-Task 9 functional GREEN:    VERIFIED
-Task 9 corrective RED:      OBSERVED / ACCEPTABLE
-Task 9 corrective GREEN:    NOT AUTHORIZED
-Task 9 accepted:            NO
-Task 10 and later:          NOT AUTHORIZED
+Tasks 1–9:                  COMPLETE / ACCEPTED
+Task 10 RED:                NOT AUTHORIZED
+Task 10 GREEN:              NOT AUTHORIZED
+Task 11 and later:          NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
 Pi Worker dispatch:         PROHIBITED
 M01 acceptance:             NOT AUTHORIZED
@@ -306,4 +281,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 9 corrective GREEN only**, bound to corrective RED head `c87afa9c1a846f7788a378f2a9ed26c84620b755` and blockers `R9-01,R9-02,R9-03`.
+Request or provide an explicit continuation for **Task 10 RED only**, bound to accepted Task 9 head `f984dd0f94e752060bc88cff128061da23607f00`.

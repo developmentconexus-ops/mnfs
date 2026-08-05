@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.43
+version: 1.8.44
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 12 GREEN awaits explicit authority
+- **Current enabler:** Issue #16 — Task 13 RED awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -53,11 +53,11 @@ MIS-002 contract:                 APPROVED — revision 5 / exact hash
 TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:                  ACCEPTED — version 0.6.1
 Implementation plan:              CURRENT / APPROVED — version 1.0.1
-Tasks 1–11:                        COMPLETE / ACCEPTED
+Tasks 1–12:                        COMPLETE / ACCEPTED
 Task 11 RED:                       OBSERVED / ACCEPTABLE
 Task 11 GREEN:                     VERIFIED / REVIEWED
 Task 12 RED:                       OBSERVED / ACCEPTABLE
-Task 12 GREEN:                     NOT AUTHORIZED
+Task 12 GREEN:                     VERIFIED / REVIEWED
 Task 13 and later:                 NOT AUTHORIZED
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
@@ -80,6 +80,7 @@ Task 8   independent Attempt source           aa4b9e1006d324acd8889b98b3507b0204
 Task 9   production Treehouse boundary        f984dd0f94e752060bc88cff128061da23607f00
 Task 10  trusted Lease action helper          2b80692a10ad162bb1c5874ff40f0bc19c22e3c6
 Task 11  fenced Lease lifecycle service       11fe71df23f697b021bd37133854152c033311ec
+Task 12  Claim OPEN and read-only Recovery     74a6254ec6e0a237a26413956416798687c0b2f2
 ```
 
 ## Task 10 accepted boundary
@@ -390,7 +391,85 @@ ClaimService:         0/12 expected failure
 RecoveryService:      0/18 expected failure
 ```
 
-Every behavioral failure reports the exact absent production module. The static Recovery boundary test reports the exact absent source file. This is acceptable RED evidence; Task 12 GREEN remains separately gated.
+Every behavioral failure reports the exact absent production module. The static Recovery boundary test reports the exact absent source file. This remains the accepted RED evidence consumed by the separately authorized GREEN below.
+
+## Task 12 GREEN
+
+Authorization:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_12_GREEN plan=1.0.1 microdesign=0.6.1 red=86aae24ecfabb774710f10ace0d54fb4e53a16d5 task11=11fe71df23f697b021bd37133854152c033311ec
+```
+
+Implementation head:
+
+```text
+74a6254ec6e0a237a26413956416798687c0b2f2
+feat: add Claims and read-only Recovery
+```
+
+Implemented scope:
+
+```text
+src/services/claim-service.ts
+src/services/recovery-service.ts
+src/store/sqlite-store.ts
+tests/services/claim-service.test.ts
+tests/services/recovery-service.test.ts
+```
+
+`ClaimService` now owns the exact M01 Claim OPEN boundary: latest approved MIS-002/M01 contract and Feature criteria, exact current Track/Attempt/Worker Run/Lease lineage, expected-version fences, READY Attempt-owned source, exact result tree observation, canonical input binding, idempotent replay and one same-connection transaction for Claim OPEN, Track `CLAIMED` and `CLAIM_OPENED`.
+
+`RecoveryService` is deterministic and read-only. It reconciles authoritative Track/Attempt/latest Lease state with complete source, external Lease, helper-action and process observations; preserves every candidate and collection hash; classifies `HEALTHY`, `ADOPTABLE`, `LD-01`–`LD-07`, `SD-01`, `SD-02` and `UNKNOWN`; and emits blocker, safe action, required authority and concrete next action without mutation or helper execution.
+
+Post-GREEN adversarial review added fifteen fail-first cases beyond the accepted RED matrix, including:
+
+```text
+same-key concurrent Claim replay after Git observation
+semantic DIVERGED Lease never appearing HEALTHY
+canonical path aliases and non-bijective ownership
+orphan source and process candidates
+missing external Lease timestamp
+phase-aware CLAIMED, STARTED and FINISHED helper evidence
+live committed owner versus dead STARTED runner
+future expected Artifact paths not treated as observations
+separate canonical hashes for every observation collection
+latest RELEASED Lease recovery on an abandoned Track
+```
+
+Canonical verification:
+
+```text
+Head:              74a6254ec6e0a237a26413956416798687c0b2f2
+Publisher Run/Job: 31027102669 / 92378259729
+Node:              24.18.0
+TypeScript:        PASS
+Task 12:           45/45 PASS
+Product:           285/285 PASS
+AS-02:             119/119 PASS
+TC-01:             78/78 PASS
+Documentation:     PASS — 93 canonical IDs
+```
+
+Adversarial scope review:
+
+```text
+Critical:    0 open
+Important:   0 open
+Minor:       0 open
+Result:      ACCEPTABLE
+Replan:      not required
+```
+
+Scope review:
+
+- two production services plus the bounded same-connection Claim allocation seam and latest-Lease read required by Recovery;
+- no schema, migration, package or dependency change;
+- no second SQLite connection or transaction authority;
+- no real Treehouse, Lease helper or Pi process execution;
+- no CLI composition, SEC-E1 production dispatch, Claim completion/acceptance, Receipt or Gate;
+- Recovery contains no semantic mutation, Event append, action-token claim, acquire/release or destructive repair authority;
+- Task 13 and M01 acceptance remain outside this authorization.
 
 ## Frozen boundaries
 
@@ -407,11 +486,11 @@ Every behavioral failure reports the exact absent production module. The static 
 ## Current authorization boundary
 
 ```text
-Tasks 1–11:                 COMPLETE / ACCEPTED
+Tasks 1–12:                 COMPLETE / ACCEPTED
 Task 11 RED:                OBSERVED / ACCEPTABLE
 Task 11 GREEN:              VERIFIED / REVIEWED
 Task 12 RED:                OBSERVED / ACCEPTABLE
-Task 12 GREEN:              NOT AUTHORIZED
+Task 12 GREEN:              VERIFIED / REVIEWED
 Task 13 and later:          NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
 Pi Worker dispatch:         PROHIBITED
@@ -421,4 +500,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for Task 12 GREEN, bound to reviewed Task 12 RED head `86aae24ecfabb774710f10ace0d54fb4e53a16d5` and accepted Task 11 implementation head `11fe71df23f697b021bd37133854152c033311ec`. Task 13, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.
+A separate exact Operator continuation is required for Task 13 RED, bound to accepted Task 12 implementation head `74a6254ec6e0a237a26413956416798687c0b2f2`. Task 13 GREEN, Task 14, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.

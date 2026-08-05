@@ -28,17 +28,13 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           p=Path('src/services/recovery-service.ts'); s=p.read_text()
-          old="""  if (attempt.sourceStatus === 'REQUESTED') {
-            if (related.length === 0 || related.every((candidate) => candidate.status === 'MISSING')) {
-          """
-          new="""  if (attempt.sourceStatus === 'REQUESTED') {
-            if (
+          old="if (related.length === 0 || related.every((candidate) => candidate.status === 'MISSING')) {"
+          new="""if (
               related.length === 0
               || related.every((candidate) => (
                 candidate.status === 'MISSING' || candidate.status === 'REQUESTED'
               ))
-            ) {
-          """
+            ) {"""
           assert s.count(old)==1; p.write_text(s.replace(old,new,1))
           p=Path('tests/services/recovery-service.test.ts'); s=p.read_text()
           marker="test('classifies source path, fingerprint, base or object-format drift as SD-02', async () => {\n"

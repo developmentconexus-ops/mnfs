@@ -723,15 +723,21 @@ export class SqliteExecutionStore extends ExecutionStore {
           requireActive();
           return this.#allocateWorkerRun(input);
         },
-        setWriteTrackStatus: (input) => {
+        setWriteTrackStatus: (
+          input: Parameters<ExecutionAtomicSession['setWriteTrackStatus']>[0],
+        ) => {
           requireActive();
           return this.#setWriteTrackStatus(input);
         },
-        setAttemptState: (input) => {
+        setAttemptState: (
+          input: Parameters<ExecutionAtomicSession['setAttemptState']>[0],
+        ) => {
           requireActive();
           return this.#setAttemptState(input);
         },
-        setWorkerRunState: (input) => {
+        setWorkerRunState: (
+          input: Parameters<ExecutionAtomicSession['setWorkerRunState']>[0],
+        ) => {
           requireActive();
           return this.#setWorkerRunState(input);
         },

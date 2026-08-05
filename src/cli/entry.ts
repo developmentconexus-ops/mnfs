@@ -8,7 +8,7 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import { homedir, release } from 'node:os';
-import { delimiter, dirname, join } from 'node:path';
+import { delimiter, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 import { ExecutionSourceAdapter } from '../adapters/execution-source.js';
 import { GitWorktreeInspector } from '../adapters/git-worktree.js';
@@ -39,7 +39,7 @@ import {
   readLeaseActionStarted,
   type LeaseActionOperation,
 } from '../runtime/lease-action-protocol.js';
-import { LeaseActionRunner } from '../runtime/lease-action-runner.js';
+import type { LeaseActionRunner } from '../runtime/lease-action-runner.js';
 import {
   resolveExecutionAttemptRuntimePaths,
   resolveLeaseActionRoot,
@@ -443,35 +443,166 @@ async function abandonWriteTrack(input: Readonly<{
   });
 }
 
-async function ensureCanonicalDirectory(directoryPath: string): Promise<void> {
-  await mkdir(directoryPath, { recursive: true, mode: 0o700 });
-  const [metadata, canonical] = await Promise.all([lstat(directoryPath), realpath(directoryPath)]);
-  if (!metadata.isDirectory() || metadata.isSymbolicLink() || canonical !== directoryPath) {
-    throw new MnfsError('TREEHOUSE_OBSERVATION_CONFLICT', `Unsafe Treehouse directory: ${directoryPath}.`);
+function pathContained(parent: string, child: string): boolean {
+  const suffix = relative(parent, child);
+  return suffix.length > 0
+    && suffix !== '..'
+    && !suffix.startsWith(`..${sep}`)
+    && !isAbsolute(suffix);
+}
+
+async function isCanonicalDirectory(directoryPath: string): Promise<boolean> {
+  try {
+    const [metadata, canonical] = await Promise.all([
+      lstat(directoryPath),
+      realpath(directoryPath),
+    ]);
+    return metadata.isDirectory()
+      && !metadata.isSymbolicLink()
+      && canonical === directoryPath;
+  } catch {
+    return false;
   }
 }
 
-async function ensureTreehouseControl(boundary: TreehouseBoundary): Promise<void> {
-  await ensureCanonicalDirectory(boundary.homePath);
-  await ensureCanonicalDirectory(boundary.xdgConfigHome);
-  await ensureCanonicalDirectory(boundary.poolRoot);
-  await ensureCanonicalDirectory(boundary.hooksPath);
+async function isCanonicalFile(filePath: string): Promise<boolean> {
+  try {
+    const [metadata, canonical] = await Promise.all([
+      lstat(filePath),
+      realpath(filePath),
+    ]);
+    return metadata.isFile()
+      && !metadata.isSymbolicLink()
+      && canonical === filePath;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureContainedDirectoryTree(
+  rootPath: string,
+  targetPath: string,
+): Promise<void> {
+  const root = resolve(rootPath);
+  const target = resolve(targetPath);
+  if (
+    !isAbsolute(rootPath)
+    || !isAbsolute(targetPath)
+    || root !== rootPath
+    || target !== targetPath
+    || !pathContained(root, target)
+    || !await isCanonicalDirectory(root)
+  ) {
+    throw new MnfsError(
+      'TREEHOUSE_OBSERVATION_CONFLICT',
+      `Unsafe Treehouse directory boundary: ${targetPath}.`,
+    );
+  }
+
+  let current = root;
+  for (const component of relative(root, target).split(sep)) {
+    current = join(current, component);
+    let metadata;
+    try {
+      metadata = await lstat(current);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      try {
+        await mkdir(current, { mode: 0o700 });
+      } catch (creationError) {
+        if ((creationError as NodeJS.ErrnoException).code !== 'EEXIST') {
+throw creationError;
+        }
+      }
+      metadata = await lstat(current);
+    }
+    const canonical = await realpath(current);
+    if (!metadata.isDirectory() || metadata.isSymbolicLink() || canonical !== current) {
+      throw new MnfsError(
+        'TREEHOUSE_OBSERVATION_CONFLICT',
+        `Treehouse directory contains a symlink or non-directory component: ${current}.`,
+      );
+    }
+  }
+}
+
+function expectedTreehouseConfig(boundary: TreehouseBoundary): string {
+  return `max_trees = 2\nroot = ${JSON.stringify(boundary.poolRoot)}\n`;
+}
+
+async function ensureTreehouseControl(
+  runtimeRoot: string,
+  attemptRoot: string,
+  boundary: TreehouseBoundary,
+): Promise<void> {
+  await ensureContainedDirectoryTree(runtimeRoot, attemptRoot);
+  await ensureContainedDirectoryTree(attemptRoot, boundary.homePath);
+  await ensureContainedDirectoryTree(attemptRoot, boundary.xdgConfigHome);
+  await ensureContainedDirectoryTree(attemptRoot, boundary.poolRoot);
+  await ensureContainedDirectoryTree(attemptRoot, boundary.hooksPath);
   const configDirectory = join(boundary.xdgConfigHome, 'treehouse');
-  await ensureCanonicalDirectory(configDirectory);
+  await ensureContainedDirectoryTree(boundary.xdgConfigHome, configDirectory);
   const configPath = join(configDirectory, 'config.toml');
-  const expected = `max_trees = 2\nroot = ${JSON.stringify(boundary.poolRoot)}\n`;
+  const expected = expectedTreehouseConfig(boundary);
   try {
     await writeFile(configPath, expected, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
-    const existing = await readFile(configPath, 'utf8');
-    if (existing !== expected) {
-      throw new MnfsError(
-        'TREEHOUSE_OBSERVATION_CONFLICT',
-        'Existing Treehouse control configuration differs from the accepted pool binding.',
-      );
-    }
   }
+  if (!await isCanonicalFile(configPath) || await readFile(configPath, 'utf8') !== expected) {
+    throw new MnfsError(
+      'TREEHOUSE_OBSERVATION_CONFLICT',
+      'Existing Treehouse control configuration differs from the accepted pool binding.',
+    );
+  }
+}
+
+async function canObservePhysicalWithoutMutation(
+  context: ExecutionContext,
+  track: WriteTrack,
+  attempt: Attempt,
+): Promise<boolean> {
+  if (
+    attempt.writeTrackId !== track.id
+    || attempt.sourceStatus !== 'READY'
+    || attempt.sourcePath === undefined
+    || attempt.sourceFingerprint === undefined
+    || !await isCanonicalDirectory(attempt.sourcePath)
+    || !await isCanonicalDirectory(join(dirname(attempt.sourcePath), '.empty-hooks'))
+  ) return false;
+
+  const paths = resolveExecutionAttemptRuntimePaths(
+    context.runtimeRoot,
+    track.id,
+    attempt.id,
+  );
+  for (const directoryPath of [
+    paths.attemptRoot,
+    paths.homePath,
+    paths.xdgConfigHome,
+    paths.poolRoot,
+    paths.hooksPath,
+    join(paths.xdgConfigHome, 'treehouse'),
+  ]) {
+    if (!await isCanonicalDirectory(directoryPath)) return false;
+  }
+  const boundary: TreehouseBoundary = {
+    sourcePath: attempt.sourcePath,
+    canonicalCheckoutPath: context.identity.projectRoot,
+    homePath: paths.homePath,
+    xdgConfigHome: paths.xdgConfigHome,
+    poolRoot: paths.poolRoot,
+    hooksPath: paths.hooksPath,
+    readySource: {
+      fingerprint: attempt.sourceFingerprint,
+      baseCommitSha: attempt.baseCommitSha,
+      baseTreeSha: attempt.baseCommitSha,
+      objectFormat: attempt.gitObjectFormat,
+    },
+  };
+  const configPath = join(paths.xdgConfigHome, 'treehouse', 'config.toml');
+  return await isCanonicalFile(configPath)
+    && await readFile(configPath, 'utf8') === expectedTreehouseConfig(boundary);
 }
 
 interface AttemptPhysicalRuntime {
@@ -493,6 +624,12 @@ async function attemptPhysicalRuntime(
     || attempt.sourceFingerprint === undefined
   ) {
     throw new MnfsError('EXECUTION_SOURCE_CHANGED', `Attempt ${attempt.id} has no READY source.`);
+  }
+  if (!createControl && !await canObservePhysicalWithoutMutation(context, track, attempt)) {
+    throw new MnfsError(
+      'TREEHOUSE_OBSERVATION_CONFLICT',
+      `Attempt ${attempt.id} physical control state is not safely observable.`,
+    );
   }
   const inspector = gitInspector();
   const prepared = await sourceAdapter(context, inspector).prepare({
@@ -529,7 +666,9 @@ async function attemptPhysicalRuntime(
       objectFormat: attempt.gitObjectFormat,
     },
   };
-  if (createControl) await ensureTreehouseControl(boundary);
+  if (createControl) {
+    await ensureTreehouseControl(context.runtimeRoot, paths.attemptRoot, boundary);
+  }
 
   const adapter = new TreehouseAdapter({
     acceptedCandidate: ACCEPTED_TREEHOUSE,
@@ -670,12 +809,6 @@ function createActionAuthority(
   context: ExecutionContext,
   actionRoot: string,
 ): LeaseActionAuthority {
-  const runner = new LeaseActionRunner({
-    runProcess,
-    observeProcessIdentity: async (pid) => await context.processInspector.observe(pid),
-    now,
-  });
-
   return {
     observe: async (actionToken) => {
       const paths = actionPaths(actionRoot, actionToken);
@@ -683,41 +816,41 @@ function createActionAuthority(
       try {
         const operationSha256 = await fileSha256(paths.operationPath);
         const operation = await readLeaseActionOperation({
-          actionRoot,
-          operationPath: paths.operationPath,
-          expectedActionToken: actionToken,
-          expectedOperationSha256: operationSha256,
+actionRoot,
+operationPath: paths.operationPath,
+expectedActionToken: actionToken,
+expectedOperationSha256: operationSha256,
         });
         if (!await leaseActionFileExists(actionRoot, operation.operation.startedPath)) {
-          return { state: 'ABSENT' };
+return { state: 'ABSENT' };
         }
         const started = await readLeaseActionStarted({
-          actionRoot,
-          startedPath: operation.operation.startedPath,
-          expectedActionToken: actionToken,
-          expectedOperationSha256: operationSha256,
+actionRoot,
+startedPath: operation.operation.startedPath,
+expectedActionToken: actionToken,
+expectedOperationSha256: operationSha256,
         });
         if (!await leaseActionFileExists(actionRoot, operation.operation.resultPath)) {
-          return {
-            state: 'STARTED',
-            runner: started.started.runner,
-            startedRef: operation.operation.startedPath,
-          };
+return {
+  state: 'STARTED',
+  runner: started.started.runner,
+  startedRef: operation.operation.startedPath,
+};
         }
         const finished = await readLeaseActionFinished({
-          actionRoot,
-          resultPath: operation.operation.resultPath,
-          expectedActionToken: actionToken,
-          expectedOperationSha256: operationSha256,
-          expectedStartedSha256: started.startedSha256,
-          stdoutLimitBytes: operation.operation.stdoutLimitBytes,
-          stderrLimitBytes: operation.operation.stderrLimitBytes,
+actionRoot,
+resultPath: operation.operation.resultPath,
+expectedActionToken: actionToken,
+expectedOperationSha256: operationSha256,
+expectedStartedSha256: started.startedSha256,
+stdoutLimitBytes: operation.operation.stdoutLimitBytes,
+stderrLimitBytes: operation.operation.stderrLimitBytes,
         });
         return {
-          state: 'FINISHED',
-          runner: finished.finished.runner,
-          startedRef: operation.operation.startedPath,
-          resultRef: operation.operation.resultPath,
+state: 'FINISHED',
+runner: finished.finished.runner,
+startedRef: operation.operation.startedPath,
+resultRef: operation.operation.resultPath,
         };
       } catch {
         return { state: 'CONFLICT' };
@@ -725,33 +858,43 @@ function createActionAuthority(
     },
     launch: async (input) => {
       const lease = context.store.execution.getLease(input.leaseId);
-      if (lease === undefined) throw new MnfsError('LEASE_CONFLICT', `Lease ${input.leaseId} disappeared.`);
+      if (lease === undefined) {
+        throw new MnfsError('LEASE_CONFLICT', `Lease ${input.leaseId} disappeared.`);
+      }
       const track = context.store.execution.getWriteTrack(lease.writeTrackId);
       const attempt = context.store.execution.getAttempt(lease.attemptId);
       if (track === undefined || attempt === undefined) {
         throw new MnfsError('LEASE_CONFLICT', 'Lease launch lineage is missing.');
       }
-      const physical = await attemptPhysicalRuntime(context, track, attempt, true);
+      const physical = await attemptPhysicalRuntime(
+        context,
+        track,
+        attempt,
+        input.kind === 'GRANT',
+      );
       await physical.adapter.status({ boundary: physical.boundary });
       const treehouseExecutable = await realpath(requireExecutable('treehouse'));
       const gitExecutable = await realpath(requireExecutable('git'));
       if (await fileSha256(treehouseExecutable) !== ACCEPTED_TREEHOUSE.executableSha256) {
-        throw new MnfsError('TREEHOUSE_VERSION_UNSUPPORTED', 'Treehouse bytes changed before action launch.');
+        throw new MnfsError(
+'TREEHOUSE_VERSION_UNSUPPORTED',
+'Treehouse bytes changed before action launch.',
+        );
       }
 
-      await ensureCanonicalDirectory(actionRoot);
+      await ensureContainedDirectoryTree(context.runtimeRoot, actionRoot);
       const paths = actionPaths(actionRoot, input.actionToken);
-      await ensureCanonicalDirectory(paths.tokenRoot);
+      await ensureContainedDirectoryTree(actionRoot, paths.tokenRoot);
       const argv = input.kind === 'GRANT'
         ? ['get', '--lease', '--lease-holder', input.holder, '--json']
         : [
-            'return',
-            input.worktreePath as string,
-            '--if-lease-id',
-            input.externalLeaseId as string,
-            '--if-lease-holder',
-            input.holder,
-          ];
+  'return',
+  input.worktreePath as string,
+  '--if-lease-id',
+  input.externalLeaseId as string,
+  '--if-lease-holder',
+  input.holder,
+];
       const operation: LeaseActionOperation = {
         schemaVersion: 1,
         actionToken: input.actionToken,
@@ -771,12 +914,51 @@ function createActionAuthority(
         operationPath: paths.operationPath,
         operation,
       });
-      await runner.run({
-        actionRoot,
-        operationPath: paths.operationPath,
-        expectedActionToken: input.actionToken,
-        expectedOperationSha256: published.operationSha256,
+
+      const helperPath = join(
+        context.identity.projectRoot,
+        'bin',
+        'mnfs-lease-action.mjs',
+      );
+      if (!await isCanonicalFile(helperPath)) {
+        throw new MnfsError(
+'LEASE_ACTION_INCONCLUSIVE',
+`Trusted LeaseActionRunner entry is unavailable: ${helperPath}.`,
+        );
+      }
+      const helperResult = await runProcess({
+        executable: process.execPath,
+        args: [
+helperPath,
+'--action-root',
+actionRoot,
+'--operation',
+paths.operationPath,
+'--action-token',
+input.actionToken,
+'--operation-sha256',
+published.operationSha256,
+        ],
+        cwd: context.identity.projectRoot,
+        env: {
+PATH: `${dirname(process.execPath)}:/usr/bin:/bin`,
+HOME: homedir(),
+LANG: 'C.UTF-8',
+LC_ALL: 'C.UTF-8',
+        },
+        timeoutMs: TREEHOUSE_TIMEOUT_MS + 5_000,
+        stdoutLimitBytes: TREEHOUSE_OUTPUT_LIMIT_BYTES,
+        stderrLimitBytes: TREEHOUSE_OUTPUT_LIMIT_BYTES,
       });
+      if (helperResult.timedOut || helperResult.exitCode !== 0) {
+        const detail = helperResult.stderr.subarray(0, 1024).toString('utf8').trim();
+        throw new MnfsError(
+'LEASE_ACTION_INCONCLUSIVE',
+`Trusted LeaseActionRunner did not finish cleanly${
+  detail.length === 0 ? '' : `: ${detail}`
+}.`,
+        );
+      }
     },
   };
 }
@@ -786,8 +968,13 @@ function createLeaseService(
 ): LeaseService {
   const actionRoot = resolveLeaseActionRoot(context.runtimeRoot);
   const physical: LeasePhysicalAuthority = {
-    observe: async ({ writeTrack, attempt, lease }) => {
-      const runtime = await attemptPhysicalRuntime(context, writeTrack, attempt, true);
+    observe: async ({ kind, writeTrack, attempt, lease }) => {
+      const runtime = await attemptPhysicalRuntime(
+        context,
+        writeTrack,
+        attempt,
+        kind === 'GRANT',
+      );
       return {
         source: runtime.source,
         candidates: await treehouseCandidates(runtime, lease),
@@ -908,13 +1095,14 @@ async function recoveryObservation(
     ? []
     : [sourceObservationFromAttempt(attempt)];
   const leases: RecoveryLeaseCandidate[] = [];
-  if (
-    track !== undefined
-    && attempt !== undefined
-    && attempt.sourceStatus === 'READY'
-    && attempt.sourcePath !== undefined
-    && existsSync(attempt.sourcePath)
-  ) {
+if (
+  track !== undefined
+  && attempt !== undefined
+  && attempt.sourceStatus === 'READY'
+  && attempt.sourcePath !== undefined
+  && existsSync(attempt.sourcePath)
+) {
+  if (await canObservePhysicalWithoutMutation(context, track, attempt)) {
     try {
       const runtime = await attemptPhysicalRuntime(context, track, attempt, false);
       for (const candidate of await treehouseCandidates(runtime, lease)) leases.push(candidate);
@@ -933,7 +1121,13 @@ async function recoveryObservation(
         status: 'UNKNOWN',
       };
     }
+  } else {
+    sources[0] = {
+      ...sourceObservationFromAttempt(attempt),
+      status: 'UNKNOWN',
+    };
   }
+}
 
   const actions: RecoveryActionCandidate[] = [];
   const processes: RecoveryProcessCandidate[] = [];

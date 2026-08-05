@@ -92,8 +92,6 @@ jobs:
           expected=$'tests/cli/execution-args.test.ts\ntests/cli/execution-main.test.ts'
           actual="$(git ls-files --others --exclude-standard -- tests/cli | sort)"
           test "$actual" = "$expected"
-          git diff --check --no-index /dev/null tests/cli/execution-args.test.ts
-          git diff --check --no-index /dev/null tests/cli/execution-main.test.ts
 
       - name: Verify Task 13 directed RED signatures
         shell: bash

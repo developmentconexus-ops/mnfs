@@ -10,8 +10,6 @@ on:
 permissions:
   contents: read
 
-actions:
-
 jobs:
   upload:
     runs-on: ubuntu-24.04

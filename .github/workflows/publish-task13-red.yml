@@ -1,0 +1,108 @@
+name: Publish Task 13 RED
+
+on:
+  push:
+    branches:
+      - automation/task13-red-publish
+    paths:
+      - .github/workflows/publish-task13-red.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task13-red
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout authorized target branch
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify authorized target head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '77b5c56404663e8ce9d740dd9d7fe8a2d9f6292d'
+
+      - name: Verify accepted Tasks 1-12 baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run verify
+
+      - name: Checkout Task 13 RED payload
+        uses: actions/checkout@v4
+        with:
+          ref: automation/task13-red-publish
+          path: .task13-publisher
+          fetch-depth: 1
+
+      - name: Install the exact test-only RED payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e tests/cli/execution-args.test.ts
+          test ! -e tests/cli/execution-main.test.ts
+          echo '41780ce86b69a97979c56e21562ea7acf0380003ceca8a2223583af0b4820b15  .task13-publisher/.github/task13-red/execution-args.test.ts' | sha256sum -c -
+          echo 'ec50c6683b9115ea84e9d148efa9cd2029ba02b468bc4a1e1d24d65054663f29  .task13-publisher/.github/task13-red/execution-main.test.ts' | sha256sum -c -
+          cp .task13-publisher/.github/task13-red/execution-args.test.ts tests/cli/execution-args.test.ts
+          cp .task13-publisher/.github/task13-red/execution-main.test.ts tests/cli/execution-main.test.ts
+          rm -rf .task13-publisher
+          echo '41780ce86b69a97979c56e21562ea7acf0380003ceca8a2223583af0b4820b15  tests/cli/execution-args.test.ts' | sha256sum -c -
+          echo 'ec50c6683b9115ea84e9d148efa9cd2029ba02b468bc4a1e1d24d65054663f29  tests/cli/execution-main.test.ts' | sha256sum -c -
+          expected=$'tests/cli/execution-args.test.ts\ntests/cli/execution-main.test.ts'
+          actual="$(git ls-files --others --exclude-standard -- tests/cli | sort)"
+          test "$actual" = "$expected"
+          git diff --check --no-index /dev/null tests/cli/execution-args.test.ts
+          git diff --check --no-index /dev/null tests/cli/execution-main.test.ts
+
+      - name: Verify Task 13 RED signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run build --silent
+          set +e
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            > /tmp/task13-red.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/task13-red.log
+          test "$status" -ne 0
+          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-red.log
+          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-red.log
+          grep -q 'tests 8' /tmp/task13-red.log
+          grep -q 'pass 0' /tmp/task13-red.log
+          grep -q 'fail 8' /tmp/task13-red.log
+          test "$(git rev-parse HEAD)" = '77b5c56404663e8ce9d740dd9d7fe8a2d9f6292d'
+
+      - name: Commit and publish Task 13 RED tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add \
+            tests/cli/execution-args.test.ts \
+            tests/cli/execution-main.test.ts
+          expected=$'tests/cli/execution-args.test.ts\ntests/cli/execution-main.test.ts'
+          actual="$(git diff --cached --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --cached --check
+          git commit -m 'test: define Task 13 execution CLI RED'
+          git push origin HEAD:design/mis-002-m01

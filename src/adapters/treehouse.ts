@@ -1,8 +1,10 @@
-import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
+import { readdir } from 'node:fs/promises';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { TextDecoder } from 'node:util';
 
 import type { GitRepositoryObservation } from './git-worktree.js';
 import { MnfsError, type MnfsErrorCode } from '../domain/errors.js';
+import type { GitObjectFormat } from '../execution/model.js';
 import type { ProcessResult, ProcessSpec } from '../runtime/process-runner.js';
 
 export const TREEHOUSE_COMMAND_SHAPE_SHA256 =
@@ -13,7 +15,17 @@ const OUTPUT_LIMIT_BYTES = 65_536;
 const ACCEPTED_TREEHOUSE_VERSION = '2.1.1';
 const FATAL_UTF8 = new TextDecoder('utf-8', { fatal: true });
 const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/;
+const SHA1_OBJECT_PATTERN = /^[0-9a-f]{40}$/;
+const SHA256_OBJECT_PATTERN = /^[0-9a-f]{64}$/;
 const SAFE_VALUE_PATTERN = /^[^\0\n\r]+$/;
+const CAPABILITY_FLAG_PATTERN = /--[a-z0-9-]+/gu;
+
+export interface ReadyTreehouseSourceIdentity {
+  readonly fingerprint: string;
+  readonly baseCommitSha: string;
+  readonly baseTreeSha: string;
+  readonly objectFormat: GitObjectFormat;
+}
 
 export interface TreehouseBoundary {
   readonly sourcePath: string;
@@ -22,6 +34,7 @@ export interface TreehouseBoundary {
   readonly xdgConfigHome: string;
   readonly poolRoot: string;
   readonly hooksPath: string;
+  readonly readySource: ReadyTreehouseSourceIdentity;
 }
 
 export interface AcceptedTreehouseCandidate {
@@ -56,6 +69,21 @@ export interface TreehouseStatusItem {
   readonly processes: readonly TreehouseStatusProcess[];
 }
 
+export interface TreehouseSourceIntegrityInput {
+  readonly sourcePath: string;
+  readonly canonicalCheckoutPath: string;
+  readonly baseCommitSha: string;
+  readonly baseTreeSha: string;
+  readonly gitObjectFormat: GitObjectFormat;
+}
+
+export interface TreehouseSourceIntegrityObservation {
+  readonly status: 'READY';
+  readonly sourcePath: string;
+  readonly fingerprint: string;
+  readonly observation: GitRepositoryObservation;
+}
+
 export interface TreehouseAdapterInput {
   readonly acceptedCandidate: AcceptedTreehouseCandidate;
   readonly runProcess: (spec: ProcessSpec) => Promise<ProcessResult>;
@@ -69,6 +97,11 @@ export interface TreehouseAdapterInput {
   readonly gitInspector: {
     observeRepository(path: string): Promise<GitRepositoryObservation>;
   };
+  readonly sourceIntegrity: {
+    observeReadySource(
+      input: TreehouseSourceIntegrityInput,
+    ): Promise<TreehouseSourceIntegrityObservation>;
+  };
 }
 
 interface ValidatedBoundary {
@@ -78,6 +111,7 @@ interface ValidatedBoundary {
   readonly xdgConfigHome: string;
   readonly poolRoot: string;
   readonly hooksPath: string;
+  readonly readySource: ReadyTreehouseSourceIdentity;
 }
 
 interface FreshContext {
@@ -135,17 +169,24 @@ function decodeUtf8(bytes: Buffer, label: string): string {
   }
 }
 
+function decodeUtf8ForCode(
+  bytes: Buffer,
+  label: string,
+  code: MnfsErrorCode,
+): string {
+  try {
+    return FATAL_UTF8.decode(bytes);
+  } catch {
+    fail(code, `${label} is not valid UTF-8.`);
+  }
+}
+
 function decodeOneLine(
   bytes: Buffer,
   label: string,
   code: MnfsErrorCode,
 ): string {
-  let text: string;
-  try {
-    text = FATAL_UTF8.decode(bytes);
-  } catch {
-    fail(code, `${label} is not valid UTF-8.`);
-  }
+  const text = decodeUtf8ForCode(bytes, label, code);
   if (text.includes('\0') || text.includes('\r')) {
     fail(code, `${label} contains invalid control bytes.`);
   }
@@ -154,6 +195,28 @@ function decodeOneLine(
     fail(code, `${label} must contain exactly one line.`);
   }
   return value;
+}
+
+function combineCapabilityStreams(result: ProcessResult): Buffer {
+  const errorBytes = result.stderr;
+  return Buffer.concat([Buffer.from(result.stdout), Buffer.from('\n'), Buffer.from(errorBytes)]);
+}
+
+function decodeCapabilityEvidence(bytes: Buffer, label: string): string {
+  const text = decodeUtf8ForCode(bytes, label, 'TREEHOUSE_VERSION_UNSUPPORTED');
+  if (text.indexOf('\0') !== -1) {
+    fail('TREEHOUSE_VERSION_UNSUPPORTED', `${label} contains invalid control bytes.`);
+  }
+  return text;
+}
+
+function extractCapabilityFlags(text: string): ReadonlySet<string> {
+  const flags = new Set<string>();
+  for (const found of text.matchAll(CAPABILITY_FLAG_PATTERN)) {
+    const value = found[0];
+    if (value !== undefined) flags.add(value);
+  }
+  return flags;
 }
 
 function parseOneJsonValue(bytes: Buffer, label: string): unknown {
@@ -209,19 +272,28 @@ function processSpec(
   };
 }
 
-function requireSuccessfulProcess(
+function requireSuccessfulResult(
   result: ProcessResult,
   timeoutCode: MnfsErrorCode,
   failureCode: MnfsErrorCode,
   label: string,
-): Buffer {
+): ProcessResult {
   if (result.timedOut) {
     fail(timeoutCode, `${label} timed out.`);
   }
   if (result.exitCode !== 0 || result.signal !== null) {
     fail(failureCode, `${label} failed with exit code ${String(result.exitCode)}.`);
   }
-  return Buffer.from(result.stdout);
+  return result;
+}
+
+function requireSuccessfulProcess(
+  result: ProcessResult,
+  timeoutCode: MnfsErrorCode,
+  failureCode: MnfsErrorCode,
+  label: string,
+): Buffer {
+  return Buffer.from(requireSuccessfulResult(result, timeoutCode, failureCode, label).stdout);
 }
 
 function parseTreehouseVersion(bytes: Buffer): string {
@@ -268,15 +340,72 @@ function requireCapabilities(
   statusHelp: string,
   returnHelp: string,
 ): void {
-  const accepted = getHelp.includes('--lease')
-    && getHelp.includes('--lease-holder')
-    && getHelp.includes('--json')
-    && statusHelp.includes('--json')
-    && returnHelp.includes('--if-lease-id')
-    && returnHelp.includes('--if-lease-holder');
+  const getFlags = extractCapabilityFlags(getHelp);
+  const statusFlags = extractCapabilityFlags(statusHelp);
+  const returnFlags = extractCapabilityFlags(returnHelp);
+  const accepted = getFlags.has('--lease')
+    && getFlags.has('--lease-holder')
+    && getFlags.has('--json')
+    && statusFlags.has('--json')
+    && returnFlags.has('--if-lease-id')
+    && returnFlags.has('--if-lease-holder');
   if (!accepted) {
     fail('TREEHOUSE_VERSION_UNSUPPORTED', 'Treehouse is missing an accepted capability.');
   }
+}
+
+function requireReadySourceIdentity(value: unknown): ReadyTreehouseSourceIdentity {
+  if (!isRecord(value)) {
+    fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse boundary is missing READY-source identity.');
+  }
+  requireExactRuntimeKeys(
+    value,
+    ['fingerprint', 'baseCommitSha', 'baseTreeSha', 'objectFormat'],
+    'READY-source identity',
+  );
+  const fingerprint = requireStringValue(
+    value.fingerprint,
+    'READY-source fingerprint',
+    'TREEHOUSE_OBSERVATION_CONFLICT',
+  );
+  if (!SHA256_PATTERN.test(fingerprint)) {
+    fail('TREEHOUSE_OBSERVATION_CONFLICT', 'READY-source fingerprint is malformed.');
+  }
+  const objectFormat = value.objectFormat;
+  if (objectFormat !== 'sha1' && objectFormat !== 'sha256') {
+    fail('TREEHOUSE_OBSERVATION_CONFLICT', 'READY-source object format is unsupported.');
+  }
+  const objectPattern = objectFormat === 'sha1' ? SHA1_OBJECT_PATTERN : SHA256_OBJECT_PATTERN;
+  const baseCommitSha = requireStringValue(
+    value.baseCommitSha,
+    'READY-source base commit',
+    'TREEHOUSE_OBSERVATION_CONFLICT',
+  );
+  const baseTreeSha = requireStringValue(
+    value.baseTreeSha,
+    'READY-source base tree',
+    'TREEHOUSE_OBSERVATION_CONFLICT',
+  );
+  if (!objectPattern.test(baseCommitSha) || !objectPattern.test(baseTreeSha)) {
+    fail('TREEHOUSE_OBSERVATION_CONFLICT', 'READY-source Git identity is malformed.');
+  }
+  return { fingerprint, baseCommitSha, baseTreeSha, objectFormat };
+}
+
+function requireExactRuntimeKeys(
+  record: JsonRecord,
+  expected: readonly string[],
+  label: string,
+): void {
+  const actual = Object.keys(record).sort();
+  const wanted = [...expected].sort();
+  if (actual.length !== wanted.length || actual.some((key, index) => key !== wanted[index])) {
+    fail('TREEHOUSE_OBSERVATION_CONFLICT', `${label} has an unexpected shape.`);
+  }
+}
+
+function canonicalTreehouseConfig(poolRoot: string): string {
+  return `max_trees = 2\nroot = ${JSON.stringify(poolRoot)}\n`;
 }
 
 function buildEnvironment(
@@ -307,6 +436,18 @@ function buildEnvironment(
   });
 }
 
+function repositoryMatchesReadyIdentity(
+  repository: GitRepositoryObservation,
+  boundary: ValidatedBoundary,
+): boolean {
+  return repository.repositoryPath === boundary.sourcePath
+    && repository.objectFormat === boundary.readySource.objectFormat
+    && repository.headCommitSha === boundary.readySource.baseCommitSha
+    && repository.headTreeSha === boundary.readySource.baseTreeSha
+    && repository.statusPorcelainV1Z.length === 0
+    && repository.remotes.length === 0;
+}
+
 export class TreehouseAdapter {
   readonly #acceptedCandidate: AcceptedTreehouseCandidate;
   readonly #runProcess: (spec: ProcessSpec) => Promise<ProcessResult>;
@@ -317,6 +458,7 @@ export class TreehouseAdapter {
   readonly #nodeVersion: TreehouseAdapterInput['nodeVersion'];
   readonly #osReleasePath: string;
   readonly #gitInspector: TreehouseAdapterInput['gitInspector'];
+  readonly #sourceIntegrity: TreehouseAdapterInput['sourceIntegrity'] | undefined;
 
   constructor(input: TreehouseAdapterInput) {
     this.#acceptedCandidate = input.acceptedCandidate;
@@ -328,6 +470,7 @@ export class TreehouseAdapter {
     this.#nodeVersion = input.nodeVersion;
     this.#osReleasePath = input.osReleasePath;
     this.#gitInspector = input.gitInspector;
+    this.#sourceIntegrity = input.sourceIntegrity;
     void input.environment;
   }
 
@@ -359,13 +502,27 @@ export class TreehouseAdapter {
     const xdgConfigHome = await this.#realDirectory(xdgValue, 'Treehouse XDG config');
     const poolRoot = await this.#realDirectory(poolValue, 'Treehouse pool');
     const hooksPath = await this.#realDirectory(hooksValue, 'Treehouse hooks');
+    const readySource = requireReadySourceIdentity(boundary.readySource as unknown);
 
     if (pathsOverlap(sourcePath, canonicalPath)) {
       fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse source overlaps the canonical checkout.');
     }
-    for (const controlled of [homePath, xdgConfigHome, poolRoot, hooksPath]) {
-      if (pathsOverlap(sourcePath, controlled)) {
-        fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse source overlaps a controlled runtime path.');
+    const controlled = [homePath, xdgConfigHome, poolRoot, hooksPath];
+    for (const path of controlled) {
+      if (pathsOverlap(sourcePath, path) || pathsOverlap(canonicalPath, path)) {
+        fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse runtime path overlaps a repository boundary.');
+      }
+    }
+    for (let first = 0; first < controlled.length; first += 1) {
+      for (let second = first + 1; second < controlled.length; second += 1) {
+        const firstPath = controlled[first];
+        const secondPath = controlled[second];
+        if (firstPath === undefined || secondPath === undefined) {
+          fail('INTERNAL_ERROR', 'Treehouse runtime path validation is incomplete.');
+        }
+        if (pathsOverlap(firstPath, secondPath)) {
+          fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse controlled runtime paths overlap.');
+        }
       }
     }
 
@@ -376,7 +533,68 @@ export class TreehouseAdapter {
       xdgConfigHome,
       poolRoot,
       hooksPath,
+      readySource,
     };
+  }
+
+  async #validateControlledContent(boundary: ValidatedBoundary): Promise<void> {
+    const configPath = join(boundary.sourcePath, 'treehouse.toml');
+    let canonicalConfigPath: string;
+    let configText: string;
+    let xdgEntries: string[];
+    let hookEntries: string[];
+    try {
+      canonicalConfigPath = await this.#realpath(configPath);
+      configText = await this.#readTextFile(configPath);
+      [xdgEntries, hookEntries] = await Promise.all([
+        readdir(boundary.xdgConfigHome),
+        readdir(boundary.hooksPath),
+      ]);
+    } catch {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse controlled configuration cannot be observed.');
+    }
+    if (canonicalConfigPath !== configPath) {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse configuration must be one regular canonical path.');
+    }
+    if (configText !== canonicalTreehouseConfig(boundary.poolRoot)) {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse configuration differs from the accepted pool binding.');
+    }
+    if (xdgEntries.length !== 0 || hookEntries.length !== 0) {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse XDG configuration and hooks must be empty.');
+    }
+  }
+
+  async #validateReadySource(boundary: ValidatedBoundary): Promise<void> {
+    if (this.#sourceIntegrity === undefined) {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'READY-source integrity authority is unavailable.');
+    }
+
+    let observedIntegrity: TreehouseSourceIntegrityObservation;
+    let repository: GitRepositoryObservation;
+    try {
+      [observedIntegrity, repository] = await Promise.all([
+        this.#sourceIntegrity.observeReadySource({
+          sourcePath: boundary.sourcePath,
+          canonicalCheckoutPath: boundary.canonicalPath,
+          baseCommitSha: boundary.readySource.baseCommitSha,
+          baseTreeSha: boundary.readySource.baseTreeSha,
+          gitObjectFormat: boundary.readySource.objectFormat,
+        }),
+        this.#gitInspector.observeRepository(boundary.sourcePath),
+      ]);
+    } catch {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'READY-source integrity could not be observed.');
+    }
+
+    if (
+      observedIntegrity.status !== 'READY'
+      || observedIntegrity.sourcePath !== boundary.sourcePath
+      || observedIntegrity.fingerprint !== boundary.readySource.fingerprint
+      || !repositoryMatchesReadyIdentity(observedIntegrity.observation, boundary)
+      || !repositoryMatchesReadyIdentity(repository, boundary)
+    ) {
+      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Attempt source differs from its accepted READY identity.');
+    }
   }
 
   async #resolveTool(name: 'treehouse' | 'git' | 'uname'): Promise<string> {
@@ -396,6 +614,18 @@ export class TreehouseAdapter {
     return requireAbsolutePath(canonical, `${name} executable`, 'TREEHOUSE_NOT_FOUND');
   }
 
+  async #provenanceResult(
+    executable: string,
+    args: readonly string[],
+    sourcePath: string,
+    environment: Readonly<Record<string, string>>,
+    label: string,
+    code: MnfsErrorCode,
+  ): Promise<ProcessResult> {
+    const result = await this.#runProcess(processSpec(executable, args, sourcePath, environment));
+    return requireSuccessfulResult(result, code, code, label);
+  }
+
   async #provenanceCommand(
     executable: string,
     args: readonly string[],
@@ -404,12 +634,39 @@ export class TreehouseAdapter {
     label: string,
     code: MnfsErrorCode,
   ): Promise<Buffer> {
-    const result = await this.#runProcess(processSpec(executable, args, sourcePath, environment));
-    return requireSuccessfulProcess(result, code, code, label);
+    return Buffer.from((await this.#provenanceResult(
+      executable,
+      args,
+      sourcePath,
+      environment,
+      label,
+      code,
+    )).stdout);
+  }
+
+  async #capabilityEvidence(
+    executable: string,
+    args: readonly string[],
+    sourcePath: string,
+    environment: Readonly<Record<string, string>>,
+    label: string,
+  ): Promise<string> {
+    const result = await this.#provenanceResult(
+      executable,
+      args,
+      sourcePath,
+      environment,
+      label,
+      'TREEHOUSE_VERSION_UNSUPPORTED',
+    );
+    return decodeCapabilityEvidence(combineCapabilityStreams(result), label);
   }
 
   async #freshContext(boundaryInput: TreehouseBoundary): Promise<FreshContext> {
     const boundary = await this.#validateBoundary(boundaryInput);
+    await this.#validateControlledContent(boundary);
+    await this.#validateReadySource(boundary);
+
     const treehouseExecutable = await this.#resolveTool('treehouse');
     const gitExecutable = await this.#resolveTool('git');
     const unameExecutable = await this.#resolveTool('uname');
@@ -440,30 +697,27 @@ export class TreehouseAdapter {
       'Treehouse version command',
       'TREEHOUSE_VERSION_UNSUPPORTED',
     ));
-    const getHelp = decodeOneLine(await this.#provenanceCommand(
+    const getHelp = await this.#capabilityEvidence(
       treehouseExecutable,
       ['get', '--help'],
       boundary.sourcePath,
       environment,
-      'Treehouse get capability command',
-      'TREEHOUSE_VERSION_UNSUPPORTED',
-    ), 'Treehouse get help', 'TREEHOUSE_VERSION_UNSUPPORTED');
-    const statusHelp = decodeOneLine(await this.#provenanceCommand(
+      'Treehouse get help',
+    );
+    const statusHelp = await this.#capabilityEvidence(
       treehouseExecutable,
       ['status', '--help'],
       boundary.sourcePath,
       environment,
-      'Treehouse status capability command',
-      'TREEHOUSE_VERSION_UNSUPPORTED',
-    ), 'Treehouse status help', 'TREEHOUSE_VERSION_UNSUPPORTED');
-    const returnHelp = decodeOneLine(await this.#provenanceCommand(
+      'Treehouse status help',
+    );
+    const returnHelp = await this.#capabilityEvidence(
       treehouseExecutable,
       ['return', '--help'],
       boundary.sourcePath,
       environment,
-      'Treehouse return capability command',
-      'TREEHOUSE_VERSION_UNSUPPORTED',
-    ), 'Treehouse return help', 'TREEHOUSE_VERSION_UNSUPPORTED');
+      'Treehouse return help',
+    );
     requireCapabilities(getHelp, statusHelp, returnHelp);
 
     if (version !== this.#acceptedCandidate.semanticVersion) {
@@ -504,15 +758,6 @@ export class TreehouseAdapter {
       || ubuntu.version !== this.#acceptedCandidate.ubuntuRelease
     ) {
       fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse host provenance differs from the accepted candidate.');
-    }
-
-    const repository = await this.#gitInspector.observeRepository(boundary.sourcePath);
-    if (
-      repository.repositoryPath !== boundary.sourcePath
-      || repository.statusPorcelainV1Z.length !== 0
-      || repository.remotes.length !== 0
-    ) {
-      fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Attempt source is not a clean no-remote repository.');
     }
 
     return { treehouseExecutable, environment, boundary };

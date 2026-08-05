@@ -42,6 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import base64
           from pathlib import Path
 
           path = Path('docs/tracking/STATUS.md')
@@ -53,6 +54,10 @@ jobs:
               if count != 1:
                   raise SystemExit(f'expected one replacement, found {count}: {old!r}')
               text = text.replace(old, new)
+
+          section = base64.b64decode('IyMgVGFzayAxMiBHUkVFTgoKQXV0aG9yaXphdGlvbjoKCmBgYHRleHQKTU5GU19BVVRIT1JJWkVfTTAxX1RBU0tfMTJfR1JFRU4gcGxhbj0xLjAuMSBtaWNyb2Rlc2lnbj0wLjYuMSByZWQ9ODZhYWUyNGVjZmFiYjc3NDcxMGYxMGFjZTBkNTRmYjRlNTNhMTZkNSB0YXNrMTE9MTFmZTcxZGYyM2Y2OTdiMDIxYmQzNzEzMzg1NDE1MmMwMzMzMTFlYwpgYGAKCkltcGxlbWVudGF0aW9uIGhlYWQ6CgpgYGB0ZXh0Cjc0YTYyNTRlYzZlMGEyMzdhMjY0MTM5NTY0MTY3OTg2ODdjMGIyZjIKZmVhdDogYWRkIENsYWltcyBhbmQgcmVhZC1vbmx5IFJlY292ZXJ5CmBgYAoKSW1wbGVtZW50ZWQgc2NvcGU6CgpgYGB0ZXh0CnNyYy9zZXJ2aWNlcy9jbGFpbS1zZXJ2aWNlLnRzCnNyYy9zZXJ2aWNlcy9yZWNvdmVyeS1zZXJ2aWNlLnRzCnNyYy9zdG9yZS9zcWxpdGUtc3RvcmUudHMKdGVzdHMvc2VydmljZXMvY2xhaW0tc2VydmljZS50ZXN0LnRzCnRlc3RzL3NlcnZpY2VzL3JlY292ZXJ5LXNlcnZpY2UudGVzdC50cwpgYGAKCmBDbGFpbVNlcnZpY2VgIG5vdyBvd25zIHRoZSBleGFjdCBNMDEgQ2xhaW0gT1BFTiBib3VuZGFyeTogbGF0ZXN0IGFwcHJvdmVkIE1JUy0wMDIvTTAxIGNvbnRyYWN0IGFuZCBGZWF0dXJlIGNyaXRlcmlhLCBleGFjdCBjdXJyZW50IFRyYWNrL0F0dGVtcHQvV29ya2VyIFJ1bi9MZWFzZSBsaW5lYWdlLCBleHBlY3RlZC12ZXJzaW9uIGZlbmNlcywgUkVBRFkgQXR0ZW1wdC1vd25lZCBzb3VyY2UsIGV4YWN0IHJlc3VsdCB0cmVlIG9ic2VydmF0aW9uLCBjYW5vbmljYWwgaW5wdXQgYmluZGluZywgaWRlbXBvdGVudCByZXBsYXkgYW5kIG9uZSBzYW1lLWNvbm5lY3Rpb24gdHJhbnNhY3Rpb24gZm9yIENsYWltIE9QRU4sIFRyYWNrIGBDTEFJTUVEYCBhbmQgYENMQUlNX09QRU5FRGAuCgpgUmVjb3ZlcnlTZXJ2aWNlYCBpcyBkZXRlcm1pbmlzdGljIGFuZCByZWFkLW9ubHkuIEl0IHJlY29uY2lsZXMgYXV0aG9yaXRhdGl2ZSBUcmFjay9BdHRlbXB0L2xhdGVzdCBMZWFzZSBzdGF0ZSB3aXRoIGNvbXBsZXRlIHNvdXJjZSwgZXh0ZXJuYWwgTGVhc2UsIGhlbHBlci1hY3Rpb24gYW5kIHByb2Nlc3Mgb2JzZXJ2YXRpb25zOyBwcmVzZXJ2ZXMgZXZlcnkgY2FuZGlkYXRlIGFuZCBjb2xsZWN0aW9uIGhhc2g7IGNsYXNzaWZpZXMgYEhFQUxUSFlgLCBgQURPUFRBQkxFYCwgYExELTAxYOKAk2BMRC0wN2AsIGBTRC0wMWAsIGBTRC0wMmAgYW5kIGBVTktOT1dOYDsgYW5kIGVtaXRzIGJsb2NrZXIsIHNhZmUgYWN0aW9uLCByZXF1aXJlZCBhdXRob3JpdHkgYW5kIGNvbmNyZXRlIG5leHQgYWN0aW9uIHdpdGhvdXQgbXV0YXRpb24gb3IgaGVscGVyIGV4ZWN1dGlvbi4KClBvc3QtR1JFRU4gYWR2ZXJzYXJpYWwgcmV2aWV3IGFkZGVkIGZpZnRlZW4gZmFpbC1maXJzdCBjYXNlcyBiZXlvbmQgdGhlIGFjY2VwdGVkIFJFRCBtYXRyaXgsIGluY2x1ZGluZzoKCmBgYHRleHQKc2FtZS1rZXkgY29uY3VycmVudCBDbGFpbSByZXBsYXkgYWZ0ZXIgR2l0IG9ic2VydmF0aW9uCnNlbWFudGljIERJVkVSR0VEIExlYXNlIG5ldmVyIGFwcGVhcmluZyBIRUFMVEhZCmNhbm9uaWNhbCBwYXRoIGFsaWFzZXMgYW5kIG5vbi1iaWplY3RpdmUgb3duZXJzaGlwCm9ycGhhbiBzb3VyY2UgYW5kIHByb2Nlc3MgY2FuZGlkYXRlcwptaXNzaW5nIGV4dGVybmFsIExlYXNlIHRpbWVzdGFtcApwaGFzZS1hd2FyZSBDTEFJTUVELCBTVEFSVEVEIGFuZCBGSU5JU0hFRCBoZWxwZXIgZXZpZGVuY2UKbGl2ZSBjb21taXR0ZWQgb3duZXIgdmVyc3VzIGRlYWQgU1RBUlRFRCBydW5uZXIKZnV0dXJlIGV4cGVjdGVkIEFydGlmYWN0IHBhdGhzIG5vdCB0cmVhdGVkIGFzIG9ic2VydmF0aW9ucwpzZXBhcmF0ZSBjYW5vbmljYWwgaGFzaGVzIGZvciBldmVyeSBvYnNlcnZhdGlvbiBjb2xsZWN0aW9uCmxhdGVzdCBSRUxFQVNFRCBMZWFzZSByZWNvdmVyeSBvbiBhbiBhYmFuZG9uZWQgVHJhY2sKYGBgCgpDYW5vbmljYWwgdmVyaWZpY2F0aW9uOgoKYGBgdGV4dApIZWFkOiAgICAgICAgICAgICAgNzRhNjI1NGVjNmUwYTIzN2EyNjQxMzk1NjQxNjc5ODY4N2MwYjJmMgpQdWJsaXNoZXIgUnVuL0pvYjogMzEwMjcxMDI2NjkgLyA5MjM3ODI1OTcyOQpOb2RlOiAgICAgICAgICAgICAgMjQuMTguMApUeXBlU2NyaXB0OiAgICAgICAgUEFTUwpUYXNrIDEyOiAgICAgICAgICAgNDUvNDUgUEFTUwpQcm9kdWN0OiAgICAgICAgICAgMjg1LzI4NSBQQVNTCkFTLTAyOiAgICAgICAgICAgICAxMTkvMTE5IFBBU1MKVEMtMDE6ICAgICAgICAgICAgIDc4Lzc4IFBBU1MKRG9jdW1lbnRhdGlvbjogICAgIFBBU1Mg4oCUIDkzIGNhbm9uaWNhbCBJRHMKYGBgCgpBZHZlcnNhcmlhbCBzY29wZSByZXZpZXc6CgpgYGB0ZXh0CkNyaXRpY2FsOiAgICAwIG9wZW4KSW1wb3J0YW50OiAgIDAgb3BlbgpNaW5vcjogICAgICAgMCBvcGVuClJlc3VsdDogICAgICBBQ0NFUFRBQkxFClJlcGxhbjogICAgICBub3QgcmVxdWlyZWQKYGBgCgpTY29wZSByZXZpZXc6CgotIHR3byBwcm9kdWN0aW9uIHNlcnZpY2VzIHBsdXMgdGhlIGJvdW5kZWQgc2FtZS1jb25uZWN0aW9uIENsYWltIGFsbG9jYXRpb24gc2VhbSBhbmQgbGF0ZXN0LUxlYXNlIHJlYWQgcmVxdWlyZWQgYnkgUmVjb3Zlcnk7Ci0gbm8gc2NoZW1hLCBtaWdyYXRpb24sIHBhY2thZ2Ugb3IgZGVwZW5kZW5jeSBjaGFuZ2U7Ci0gbm8gc2Vjb25kIFNRTGl0ZSBjb25uZWN0aW9uIG9yIHRyYW5zYWN0aW9uIGF1dGhvcml0eTsKLSBubyByZWFsIFRyZWVob3VzZSwgTGVhc2UgaGVscGVyIG9yIFBpIHByb2Nlc3MgZXhlY3V0aW9uOwotIG5vIENMSSBjb21wb3NpdGlvbiwgU0VDLUUxIHByb2R1Y3Rpb24gZGlzcGF0Y2gsIENsYWltIGNvbXBsZXRpb24vYWNjZXB0YW5jZSwgUmVjZWlwdCBvciBHYXRlOwotIFJlY292ZXJ5IGNvbnRhaW5zIG5vIHNlbWFudGljIG11dGF0aW9uLCBFdmVudCBhcHBlbmQsIGFjdGlvbi10b2tlbiBjbGFpbSwgYWNxdWlyZS9yZWxlYXNlIG9yIGRlc3RydWN0aXZlIHJlcGFpciBhdXRob3JpdHk7Ci0gVGFzayAxMyBhbmQgTTAxIGFjY2VwdGFuY2UgcmVtYWluIG91dHNpZGUgdGhpcyBhdXRob3JpemF0aW9uLgoK').decode('utf-8')
+          old_boundary = base64.b64decode('YGBgdGV4dApUYXNrcyAx4oCTMTE6ICAgICAgICAgICAgICAgICBDT01QTEVURSAvIEFDQ0VQVEVEClRhc2sgMTEgUkVEOiAgICAgICAgICAgICAgICBPQlNFUlZFRCAvIEFDQ0VQVEFCTEUKVGFzayAxMSBHUkVFTjogICAgICAgICAgICAgIFZFUklGSUVEIC8gUkVWSUVXRUQKVGFzayAxMiBSRUQ6ICAgICAgICAgICAgICAgIE9CU0VSVkVEIC8gQUNDRVBUQUJMRQpUYXNrIDEyIEdSRUVOOiAgICAgICAgICAgICAgTk9UIEFVVEhPUklaRUQKVGFzayAxMyBhbmQgbGF0ZXI6ICAgICAgICAgIE5PVCBBVVRIT1JJWkVEClJlYWwgVHJlZWhvdXNlIGV4ZWN1dGlvbjogICBOT1QgQVVUSE9SSVpFRApQaSBXb3JrZXIgZGlzcGF0Y2g6ICAgICAgICAgUFJPSElCSVRFRApNMDEgYWNjZXB0YW5jZTogICAgICAgICAgICAgTk9UIEFVVEhPUklaRUQKUFIgIzE3IG1lcmdlOiAgICAgICAgICAgICAgIE5PVCBBVVRIT1JJWkVECmBgYA==').decode('utf-8')
+          new_boundary = base64.b64decode('YGBgdGV4dApUYXNrcyAx4oCTMTI6ICAgICAgICAgICAgICAgICBDT01QTEVURSAvIEFDQ0VQVEVEClRhc2sgMTEgUkVEOiAgICAgICAgICAgICAgICBPQlNFUlZFRCAvIEFDQ0VQVEFCTEUKVGFzayAxMSBHUkVFTjogICAgICAgICAgICAgIFZFUklGSUVEIC8gUkVWSUVXRUQKVGFzayAxMiBSRUQ6ICAgICAgICAgICAgICAgIE9CU0VSVkVEIC8gQUNDRVBUQUJMRQpUYXNrIDEyIEdSRUVOOiAgICAgICAgICAgICAgVkVSSUZJRUQgLyBSRVZJRVdFRApUYXNrIDEzIGFuZCBsYXRlcjogICAgICAgICAgTk9UIEFVVEhPUklaRUQKUmVhbCBUcmVlaG91c2UgZXhlY3V0aW9uOiAgIE5PVCBBVVRIT1JJWkVEClBpIFdvcmtlciBkaXNwYXRjaDogICAgICAgICBQUk9ISUJJVEVECk0wMSBhY2NlcHRhbmNlOiAgICAgICAgICAgICBOT1QgQVVUSE9SSVpFRApQUiAjMTcgbWVyZ2U6ICAgICAgICAgICAgICAgTk9UIEFVVEhPUklaRUQKYGBg').decode('utf-8')
 
           replace_once('version: 1.8.43', 'version: 1.8.44')
           replace_once(
@@ -77,114 +82,11 @@ jobs:
               'This remains the accepted RED evidence consumed by the separately authorized GREEN below.',
           )
 
-          task12_green = '''## Task 12 GREEN
-
-Authorization:
-
-```text
-MNFS_AUTHORIZE_M01_TASK_12_GREEN plan=1.0.1 microdesign=0.6.1 red=86aae24ecfabb774710f10ace0d54fb4e53a16d5 task11=11fe71df23f697b021bd37133854152c033311ec
-```
-
-Implementation head:
-
-```text
-74a6254ec6e0a237a26413956416798687c0b2f2
-feat: add Claims and read-only Recovery
-```
-
-Implemented scope:
-
-```text
-src/services/claim-service.ts
-src/services/recovery-service.ts
-src/store/sqlite-store.ts
-tests/services/claim-service.test.ts
-tests/services/recovery-service.test.ts
-```
-
-`ClaimService` now owns the exact M01 Claim OPEN boundary: latest approved MIS-002/M01 contract and Feature criteria, exact current Track/Attempt/Worker Run/Lease lineage, expected-version fences, READY Attempt-owned source, exact result tree observation, canonical input binding, idempotent replay and one same-connection transaction for Claim OPEN, Track `CLAIMED` and `CLAIM_OPENED`.
-
-`RecoveryService` is deterministic and read-only. It reconciles authoritative Track/Attempt/latest Lease state with complete source, external Lease, helper-action and process observations; preserves every candidate and collection hash; classifies `HEALTHY`, `ADOPTABLE`, `LD-01`–`LD-07`, `SD-01`, `SD-02` and `UNKNOWN`; and emits blocker, safe action, required authority and concrete next action without mutation or helper execution.
-
-Post-GREEN adversarial review added fifteen fail-first cases beyond the accepted RED matrix, including:
-
-```text
-same-key concurrent Claim replay after Git observation
-semantic DIVERGED Lease never appearing HEALTHY
-canonical path aliases and non-bijective ownership
-orphan source and process candidates
-missing external Lease timestamp
-phase-aware CLAIMED, STARTED and FINISHED helper evidence
-live committed owner versus dead STARTED runner
-future expected Artifact paths not treated as observations
-separate canonical hashes for every observation collection
-latest RELEASED Lease recovery on an abandoned Track
-```
-
-Canonical verification:
-
-```text
-Head:              74a6254ec6e0a237a26413956416798687c0b2f2
-Publisher Run/Job: 31027102669 / 92378259729
-Node:              24.18.0
-TypeScript:        PASS
-Task 12:           45/45 PASS
-Product:           285/285 PASS
-AS-02:             119/119 PASS
-TC-01:             78/78 PASS
-Documentation:     PASS — 93 canonical IDs
-```
-
-Adversarial scope review:
-
-```text
-Critical:    0 open
-Important:   0 open
-Minor:       0 open
-Result:      ACCEPTABLE
-Replan:      not required
-```
-
-Scope review:
-
-- two production services plus the bounded same-connection Claim allocation seam and latest-Lease read required by Recovery;
-- no schema, migration, package or dependency change;
-- no second SQLite connection or transaction authority;
-- no real Treehouse, Lease helper or Pi process execution;
-- no CLI composition, SEC-E1 production dispatch, Claim completion/acceptance, Receipt or Gate;
-- Recovery contains no semantic mutation, Event append, action-token claim, acquire/release or destructive repair authority;
-- Task 13 and M01 acceptance remain outside this authorization.
-
-'''
           marker = '## Frozen boundaries\n'
           if text.count(marker) != 1:
               raise SystemExit('expected one Frozen boundaries marker')
-          text = text.replace(marker, task12_green + marker)
+          text = text.replace(marker, section + marker)
 
-          old_boundary = '''```text
-Tasks 1–11:                 COMPLETE / ACCEPTED
-Task 11 RED:                OBSERVED / ACCEPTABLE
-Task 11 GREEN:              VERIFIED / REVIEWED
-Task 12 RED:                OBSERVED / ACCEPTABLE
-Task 12 GREEN:              NOT AUTHORIZED
-Task 13 and later:          NOT AUTHORIZED
-Real Treehouse execution:   NOT AUTHORIZED
-Pi Worker dispatch:         PROHIBITED
-M01 acceptance:             NOT AUTHORIZED
-PR #17 merge:               NOT AUTHORIZED
-```'''
-          new_boundary = '''```text
-Tasks 1–12:                 COMPLETE / ACCEPTED
-Task 11 RED:                OBSERVED / ACCEPTABLE
-Task 11 GREEN:              VERIFIED / REVIEWED
-Task 12 RED:                OBSERVED / ACCEPTABLE
-Task 12 GREEN:              VERIFIED / REVIEWED
-Task 13 and later:          NOT AUTHORIZED
-Real Treehouse execution:   NOT AUTHORIZED
-Pi Worker dispatch:         PROHIBITED
-M01 acceptance:             NOT AUTHORIZED
-PR #17 merge:               NOT AUTHORIZED
-```'''
           replace_once(old_boundary, new_boundary)
 
           replace_once(

@@ -30,8 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = '082ff29894c5abd0e9713978079c1bef571d23c3'
-          test "$(git rev-parse HEAD^^)" = '3adb12c42394cf0d54fb386b1b85d83c38f8903a'
+          git merge-base --is-ancestor '3adb12c42394cf0d54fb386b1b85d83c38f8903a' HEAD
           test "$(git diff --name-only 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD | sort)" = $'.github/workflows/publish-task14-real-scenario-a.yml\n.github/workflows/recover-task14-real-scenario-a-publisher.yml'
           python3 - <<'PY'
           from pathlib import Path
@@ -45,11 +44,12 @@ jobs:
               'VERIFIER_GZ_B64': Path('.github/workflows/verify-task14-real-scenario-a.yml'),
           }
           for name, output in outputs.items():
-              match = re.search(rf"^\s*{name}: '([^']+)'$", publisher, re.MULTILINE)
+              match = re.search(rf"{name}:\s*'([^']+)'", publisher, re.DOTALL)
               if match is None:
                   raise SystemExit(f'missing {name}')
               output.parent.mkdir(parents=True, exist_ok=True)
-              output.write_bytes(gzip.decompress(base64.b64decode(match.group(1), validate=True)))
+              encoded = ''.join(match.group(1).split())
+              output.write_bytes(gzip.decompress(base64.b64decode(encoded, validate=True)))
           PY
           printf '%s  %s\n' \
             'e254c4ae6a7be7535f372e2beb15a7538e03d1a68c8e5bfb11f73fb1c178f1d2' \

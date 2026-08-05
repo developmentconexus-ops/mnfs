@@ -229,7 +229,12 @@ function classifySource(
     ));
   }
   if (attempt.sourceStatus === 'REQUESTED') {
-    if (related.length === 0 || related.every((candidate) => candidate.status === 'MISSING')) {
+    if (
+      related.length === 0
+      || related.every((candidate) =>
+        candidate.status === 'MISSING' || candidate.status === 'REQUESTED'
+      )
+    ) {
       addFinding(findings, finding('SD-01', attempt.id, {
         safeActions: ['preserve the Attempt intent and retry only the original source operation'],
         requiredAuthority: 'ORIGINAL_OPERATION',

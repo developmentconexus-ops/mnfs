@@ -551,6 +551,25 @@ test('classifies REQUESTED source with no final source as SD-01', async () => {
   });
 });
 
+test('classifies an explicit REQUESTED source observation as SD-01', async () => {
+  const module = await loadRecoveryService();
+  await withHarness('sd01-requested-observation', async (harness) => {
+    updateAttemptSourceRequested(harness);
+    harness.observations.current = {
+      ...harness.observations.current,
+      sources: [{
+        status: 'REQUESTED',
+        attemptId: harness.attempt.id,
+        baseCommitSha: harness.attempt.baseCommitSha,
+        objectFormat: harness.attempt.gitObjectFormat,
+      }],
+    };
+    const report = await serviceFor(module, harness).recover({ writeTrackId: harness.track.id });
+    const finding = requireFinding(report, 'SD-01');
+    assert.equal(finding.requiredAuthority, 'ORIGINAL_OPERATION');
+  });
+});
+
 test('classifies source path, fingerprint, base or object-format drift as SD-02', async () => {
   const module = await loadRecoveryService();
   for (const [label, override] of [

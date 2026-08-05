@@ -211,10 +211,12 @@ export class ExecutionService {
       baseCommitSha: input.baseCommitSha,
       gitObjectFormat: commit.objectFormat,
     });
-    const replay = this.#findOpenReplay(input.idempotencyKey, inputHash);
-    if (replay !== undefined) return replay;
 
     return this.#store.execution.runAtomic((session) => {
+      this.#requireApprovedTarget(input);
+      const replay = this.#findOpenReplay(input.idempotencyKey, inputHash);
+      if (replay !== undefined) return replay;
+
       const track = session.allocateWriteTrack({
         missionId: input.missionId,
         milestoneQualifiedId: input.milestoneQualifiedId,
@@ -263,23 +265,36 @@ export class ExecutionService {
   }
 
   openWorkerRun(input: OpenWorkerRunInput): WorkerRun {
-    const attempt = this.#store.execution.getAttempt(input.attemptId);
-    if (attempt === undefined || attempt.status !== 'OPEN' || attempt.contractHash !== input.contractHash) {
-      throw new MnfsError('WORKER_RUN_CONFLICT', `Attempt ${input.attemptId} is not open for a Worker Run.`);
-    }
-    const track = this.#store.execution.getWriteTrack(attempt.writeTrackId);
-    if (track === undefined) {
-      throw new MnfsError('INTERNAL_ERROR', `Write Track ${attempt.writeTrackId} is missing.`);
-    }
-    if (track.status !== 'ACTIVE' || track.contractHash !== attempt.contractHash) {
-      throw new MnfsError('WORKER_RUN_CONFLICT', `Write Track ${track.id} is not active for a Worker Run.`);
-    }
-    this.#requireCurrentContract(track.missionId, track.contractHash);
-    if (this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined) {
-      throw new MnfsError('WORKER_RUN_CONFLICT', `Attempt ${attempt.id} already has a current Worker Run.`);
-    }
-
     return this.#store.execution.runAtomic((session) => {
+      const attempt = this.#store.execution.getAttempt(input.attemptId);
+      if (
+        attempt === undefined
+        || attempt.status !== 'OPEN'
+        || attempt.contractHash !== input.contractHash
+      ) {
+        throw new MnfsError(
+          'WORKER_RUN_CONFLICT',
+          `Attempt ${input.attemptId} is not open for a Worker Run.`,
+        );
+      }
+      const track = this.#store.execution.getWriteTrack(attempt.writeTrackId);
+      if (track === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Write Track ${attempt.writeTrackId} is missing.`);
+      }
+      if (track.status !== 'ACTIVE' || track.contractHash !== attempt.contractHash) {
+        throw new MnfsError(
+          'WORKER_RUN_CONFLICT',
+          `Write Track ${track.id} is not active for a Worker Run.`,
+        );
+      }
+      this.#requireCurrentContract(track.missionId, track.contractHash);
+      if (this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined) {
+        throw new MnfsError(
+          'WORKER_RUN_CONFLICT',
+          `Attempt ${attempt.id} already has a current Worker Run.`,
+        );
+      }
+
       const run = session.allocateWorkerRun({
         attemptId: attempt.id,
         contractHash: attempt.contractHash,
@@ -306,34 +321,38 @@ export class ExecutionService {
     readonly previousRun: WorkerRun;
     readonly currentRun: WorkerRun;
   } {
-    const attempt = this.#store.execution.getAttempt(input.attemptId);
-    const current = this.#store.execution.getWorkerRun(input.currentRunId);
-    if (
-      attempt === undefined
-      || attempt.status !== 'OPEN'
-      || current === undefined
-      || current.attemptId !== attempt.id
-      || current.contractHash !== attempt.contractHash
-      || (current.status !== 'STARTING' && current.status !== 'RUNNING' && current.status !== 'IDLE')
-    ) {
-      throw new MnfsError('WORKER_RUN_CONFLICT', 'The current Worker Run lineage is invalid.');
-    }
     if (
       (input.terminalStatus === 'EXITED' && !Number.isSafeInteger(input.exitCode))
       || (input.terminalStatus !== 'EXITED' && input.exitCode !== undefined)
     ) {
       throw new MnfsError('WORKER_RUN_CONFLICT', 'Worker Run terminal metadata is invalid.');
     }
-    const track = this.#store.execution.getWriteTrack(attempt.writeTrackId);
-    if (track === undefined) {
-      throw new MnfsError('INTERNAL_ERROR', `Write Track ${attempt.writeTrackId} is missing.`);
-    }
-    if (track.status !== 'ACTIVE' || track.contractHash !== attempt.contractHash) {
-      throw new MnfsError('WORKER_RUN_CONFLICT', `Write Track ${track.id} is not active for Run replacement.`);
-    }
-    this.#requireCurrentContract(track.missionId, track.contractHash);
 
     return this.#store.execution.runAtomic((session) => {
+      const attempt = this.#store.execution.getAttempt(input.attemptId);
+      const current = this.#store.execution.getWorkerRun(input.currentRunId);
+      if (
+        attempt === undefined
+        || attempt.status !== 'OPEN'
+        || current === undefined
+        || current.attemptId !== attempt.id
+        || current.contractHash !== attempt.contractHash
+        || (current.status !== 'STARTING' && current.status !== 'RUNNING' && current.status !== 'IDLE')
+      ) {
+        throw new MnfsError('WORKER_RUN_CONFLICT', 'The current Worker Run lineage is invalid.');
+      }
+      const track = this.#store.execution.getWriteTrack(attempt.writeTrackId);
+      if (track === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Write Track ${attempt.writeTrackId} is missing.`);
+      }
+      if (track.status !== 'ACTIVE' || track.contractHash !== attempt.contractHash) {
+        throw new MnfsError(
+          'WORKER_RUN_CONFLICT',
+          `Write Track ${track.id} is not active for Run replacement.`,
+        );
+      }
+      this.#requireCurrentContract(track.missionId, track.contractHash);
+
       const previousRun = session.setWorkerRunState({
         id: current.id,
         expectedVersion: input.expectedCurrentRunVersion,
@@ -389,34 +408,38 @@ export class ExecutionService {
     readonly currentAttempt: Attempt;
   } {
     requireSafeDisposition(input.observation, 'ATTEMPT_CONFLICT', 'Attempt supersession');
-    const track = this.#store.execution.getWriteTrack(input.writeTrackId);
-    const attempt = this.#store.execution.getAttempt(input.attemptId);
-    const currentAttempt = this.#store.execution.getCurrentAttempt(input.writeTrackId);
-    if (
-      track === undefined
-      || track.status !== 'ACTIVE'
-      || attempt === undefined
-      || attempt.writeTrackId !== track.id
-      || attempt.contractHash !== track.contractHash
-      || attempt.status !== 'OPEN'
-      || currentAttempt?.id !== attempt.id
-    ) {
-      throw new MnfsError('ATTEMPT_CONFLICT', 'Attempt supersession lineage is invalid.');
-    }
-    this.#requireCurrentContract(track.missionId, track.contractHash);
-    if (
-      this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined
-      || this.#store.execution.getCurrentLease(track.id) !== undefined
-      || this.#store.execution.getCurrentClaim(attempt.id) !== undefined
-    ) {
-      throw new MnfsError('ATTEMPT_CONFLICT', 'Attempt supersession is blocked by a current resource.');
-    }
     const commit = this.#git.requireCommit(input.baseCommitSha);
-    if (commit.sha !== input.baseCommitSha || commit.objectFormat !== attempt.gitObjectFormat) {
-      throw new MnfsError('GIT_OBJECT_INVALID', 'Replacement Attempt base is not a compatible commit.');
+    if (commit.sha !== input.baseCommitSha) {
+      throw new MnfsError('GIT_OBJECT_INVALID', 'Replacement Attempt base is not a commit.');
     }
 
     return this.#store.execution.runAtomic((session) => {
+      const track = this.#store.execution.getWriteTrack(input.writeTrackId);
+      const attempt = this.#store.execution.getAttempt(input.attemptId);
+      const currentAttempt = this.#store.execution.getCurrentAttempt(input.writeTrackId);
+      if (
+        track === undefined
+        || track.status !== 'ACTIVE'
+        || attempt === undefined
+        || attempt.writeTrackId !== track.id
+        || attempt.contractHash !== track.contractHash
+        || attempt.status !== 'OPEN'
+        || currentAttempt?.id !== attempt.id
+      ) {
+        throw new MnfsError('ATTEMPT_CONFLICT', 'Attempt supersession lineage is invalid.');
+      }
+      this.#requireCurrentContract(track.missionId, track.contractHash);
+      if (
+        this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined
+        || this.#store.execution.getCurrentLease(track.id) !== undefined
+        || this.#store.execution.getCurrentClaim(attempt.id) !== undefined
+      ) {
+        throw new MnfsError('ATTEMPT_CONFLICT', 'Attempt supersession is blocked by a current resource.');
+      }
+      if (commit.objectFormat !== attempt.gitObjectFormat) {
+        throw new MnfsError('GIT_OBJECT_INVALID', 'Replacement Attempt base is not a compatible commit.');
+      }
+
       const previousAttempt = session.setAttemptState({
         id: attempt.id,
         expectedVersion: input.expectedAttemptVersion,
@@ -467,20 +490,21 @@ export class ExecutionService {
 
   abandonWriteTrack(input: AbandonWriteTrackInput): WriteTrack {
     requireSafeDisposition(input.observation, 'WRITE_TRACK_NOT_ABANDONABLE', 'Write Track abandonment');
-    const track = this.#store.execution.getWriteTrack(input.writeTrackId);
-    if (track === undefined || track.status !== 'ACTIVE') {
-      throw new MnfsError('WRITE_TRACK_NOT_ABANDONABLE', 'Write Track is not active.');
-    }
-    const attempt = this.#store.execution.getCurrentAttempt(track.id);
-    if (
-      (attempt !== undefined && this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined)
-      || (attempt !== undefined && this.#store.execution.getCurrentClaim(attempt.id) !== undefined)
-      || this.#store.execution.getCurrentLease(track.id) !== undefined
-    ) {
-      throw new MnfsError('WRITE_TRACK_NOT_ABANDONABLE', 'Write Track still owns a current resource.');
-    }
 
     return this.#store.execution.runAtomic((session) => {
+      const track = this.#store.execution.getWriteTrack(input.writeTrackId);
+      if (track === undefined || track.status !== 'ACTIVE') {
+        throw new MnfsError('WRITE_TRACK_NOT_ABANDONABLE', 'Write Track is not active.');
+      }
+      const attempt = this.#store.execution.getCurrentAttempt(track.id);
+      if (
+        (attempt !== undefined && this.#store.execution.getCurrentWorkerRun(attempt.id) !== undefined)
+        || (attempt !== undefined && this.#store.execution.getCurrentClaim(attempt.id) !== undefined)
+        || this.#store.execution.getCurrentLease(track.id) !== undefined
+      ) {
+        throw new MnfsError('WRITE_TRACK_NOT_ABANDONABLE', 'Write Track still owns a current resource.');
+      }
+
       const abandoned = session.setWriteTrackStatus({
         id: track.id,
         expectedVersion: input.expectedTrackVersion,

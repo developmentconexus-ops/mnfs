@@ -49,23 +49,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          payload_dir='.task12-publisher/.github/task12-green'
-          test "$(find "$payload_dir" -maxdepth 1 -type f -name 'part-*' | wc -l)" -eq 9
-          echo 'f925e3206e02782575438ef5aa6d3a55f45625dbc011c988fa47dda673b61490  .task12-publisher/.github/task12-green/part-00' | sha256sum -c -
-          echo '31965450da14e90412d5e26c4bda9e0876c33fa2ce0ac699f8aab91c6605d0d8  .task12-publisher/.github/task12-green/part-01' | sha256sum -c -
-          echo '6bcf08557f2d20d768dd72c9947537fda718b992016af2e996725cfadea431c9  .task12-publisher/.github/task12-green/part-02' | sha256sum -c -
-          echo '87f45424754ba26a72922ac0db3b24e56b7e6fcf063fade6c1a7b97a406c4227  .task12-publisher/.github/task12-green/part-03' | sha256sum -c -
-          echo 'bb433459e35689eff2a07eff8e24ff724b472fdfbcb2a7fa10bda46542ea4722  .task12-publisher/.github/task12-green/part-04' | sha256sum -c -
-          echo '29f5721d9899532c27572331606c37114d6e5a8e2b7b59f56477096832d33862  .task12-publisher/.github/task12-green/part-05' | sha256sum -c -
-          echo '188069df5a0787acfa21e877f70517419c9d55a0ff997185ecca1c127097bfc8  .task12-publisher/.github/task12-green/part-06' | sha256sum -c -
-          echo 'a6ab1a1361428750817aba24e77452d6b1312101e468d0e943a00fd493a9be1c  .task12-publisher/.github/task12-green/part-07' | sha256sum -c -
-          echo '8ea0d504ff984a658fd4c05c53ca32f29df116f7f5c3437f32b7a5c6fa0c365d  .task12-publisher/.github/task12-green/part-08' | sha256sum -c -
+          payload_dir='.task12-publisher/.github/task12-green-v2'
+          test "$(find "$payload_dir" -maxdepth 1 -type f -name 'part-*' | wc -l)" -eq 6
+          echo '255a0dbe9f009569f6869a3ec84ecc9adb6fac10c6ae8cfb9c3f881e2ee61cf9  .task12-publisher/.github/task12-green-v2/part-00' | sha256sum -c -
+          echo 'd41781f6de70af1847dd7f09264dae44e59d85029b53b455554f8c867db571cf  .task12-publisher/.github/task12-green-v2/part-01' | sha256sum -c -
+          echo '6294e02cfa1dad7850729bd7559dcaac04720f80564ca5cc384db3772430a8db  .task12-publisher/.github/task12-green-v2/part-02' | sha256sum -c -
+          echo 'c5b392596cffc33798a0f5ffde8f80f1a974c45f4e4ec965721569a4b20876f0  .task12-publisher/.github/task12-green-v2/part-03' | sha256sum -c -
+          echo 'fdb8181bf9d81b034a4c89dfe29de17c9207a1aa2e9dff68b12d3f991f90265c  .task12-publisher/.github/task12-green-v2/part-04' | sha256sum -c -
+          echo 'b9cbc6adde9c600f719e6eefc7ef758cd2a630507cdbdd34624fc2a4c4f4f12d  .task12-publisher/.github/task12-green-v2/part-05' | sha256sum -c -
           cat "$payload_dir"/part-* > /tmp/task12-green.patch.gz.b64
-          echo '3ead64ef312f87eedee0f23364fe091d8b0aa637bb44b506c0d893154778fb09  /tmp/task12-green.patch.gz.b64' | sha256sum -c -
+          echo '0b814f27381bce9a75259d580d8dab2e03f7f8b6ab06830ef488bab063d76a1a  /tmp/task12-green.patch.gz.b64' | sha256sum -c -
           base64 --decode /tmp/task12-green.patch.gz.b64 > /tmp/task12-green.patch.gz
-          echo '52bbe5e0ed504df01723e6c806f272b12133356abe727b5f6e470e7d5734e218  /tmp/task12-green.patch.gz' | sha256sum -c -
+          echo '572b3351ebbd33ed569bf411fe3b1847558a326936c2e9b109f417cae53c5a69  /tmp/task12-green.patch.gz' | sha256sum -c -
           gzip --decompress --stdout /tmp/task12-green.patch.gz > /tmp/task12-green.patch
-          echo '2a868edcd0580e82d3e4922fa06e0fc08d99e1b1c0d5d79855a3984fcc4ab3dd  /tmp/task12-green.patch' | sha256sum -c -
+          echo '396f7d1f356fdf442f7de5eaffb95f4f343db895e71720ba5b1d5eba75966e27  /tmp/task12-green.patch' | sha256sum -c -
           patch --dry-run -p1 < /tmp/task12-green.patch
           patch -p1 < /tmp/task12-green.patch
 
@@ -74,10 +71,10 @@ jobs:
         run: |
           set -euo pipefail
           echo '93371b46f0a6a6d845044015fa50de087326d66640d90dbe5150a5f5d4d0a43c  src/services/claim-service.ts' | sha256sum -c -
-          echo '6cc86c67178682a2b8090102945ded75457f60cf2e56b78cc4e0a9abfe0fc106  src/services/recovery-service.ts' | sha256sum -c -
+          echo '210cd005ac0d87b8004d31a61c23ff4918363d8c9737942a3680d6ae078ce48a  src/services/recovery-service.ts' | sha256sum -c -
           echo 'c6a28317b09c4c5effab32c53d29789d44f5b64766e77565f22c79386117b08d  src/store/sqlite-store.ts' | sha256sum -c -
           echo '982d0567eea4d555e53d0b7203436662c6a26efc0299ed7a00442f89bc8c7102  tests/services/claim-service.test.ts' | sha256sum -c -
-          echo 'b8b3771351ecbc18555689518c2985e18b93e341855bda538943bdf4730d1e35  tests/services/recovery-service.test.ts' | sha256sum -c -
+          echo '1a318d05857d5cf16c276ef66ae30729c0579112c85e9ce86ea07ea995567b5d  tests/services/recovery-service.test.ts' | sha256sum -c -
           expected=$'src/services/claim-service.ts\nsrc/services/recovery-service.ts\nsrc/store/sqlite-store.ts\ntests/services/claim-service.test.ts\ntests/services/recovery-service.test.ts'
           actual="$(git diff --name-only | sort)"
           test "$actual" = "$expected"
@@ -97,8 +94,8 @@ jobs:
             dist/tests/services/claim-service.test.js \
             dist/tests/services/recovery-service.test.js \
             | tee /tmp/task12-green.log
-          grep -q 'tests 42' /tmp/task12-green.log
-          grep -q 'pass 42' /tmp/task12-green.log
+          grep -q 'tests 45' /tmp/task12-green.log
+          grep -q 'pass 45' /tmp/task12-green.log
           grep -q 'fail 0' /tmp/task12-green.log
 
       - name: Verify complete canonical suite

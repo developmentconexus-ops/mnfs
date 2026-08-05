@@ -96,7 +96,7 @@ jobs:
             | sha256sum --check --strict
 
           expected=$'tests/integration/m01-composition.test.ts\ntests/integration/m01-fresh-process.test.ts'
-          actual="$(git status --short | sed -E 's/^\?\? //' | sort)"
+          actual="$(git status --short --untracked-files=all | sed -E 's/^\?\? //' | sort)"
           test "$actual" = "$expected"
           git diff --check
 
@@ -182,4 +182,4 @@ jobs:
           git commit -m 'test: prove M01 fresh-process composition'
           git push origin HEAD:design/mis-002-m01
 
-# transport retry: payload.03 restored
+# transport retry: expand untracked file scope

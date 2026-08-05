@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.39
+version: 1.8.40
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 11 RED awaits explicit authority
+- **Current enabler:** Issue #16 — resolve the post-acceptance Task 10 publication RED before Task 11 GREEN
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -48,20 +48,22 @@ R5 Milestone Microdesign PASS
 ## Current M01 result
 
 ```text
-CAP-EXECUTION:                    ACCEPTED — version 0.1.0
-MIS-002 contract:                 APPROVED — revision 5 / exact hash
-TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
-M01 microdesign:                  ACCEPTED — version 0.6.1
-Implementation plan:              CURRENT / APPROVED — version 1.0.1
-Tasks 1–10:                        COMPLETE / ACCEPTED
-Task 11 RED:                       NOT AUTHORIZED
-Task 11 GREEN:                     NOT AUTHORIZED
-Task 12 and later:                 NOT AUTHORIZED
-Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
-Pi Worker dispatch:               PROHIBITED
-M01 acceptance:                    NOT AUTHORIZED
-Automatic merge:                  NOT AUTHORIZED
-PR:                               #17 DRAFT
+CAP-EXECUTION:                         ACCEPTED — version 0.1.0
+MIS-002 contract:                      APPROVED — revision 5 / exact hash
+TC-01 canonical Evidence:              ACCEPT — 15/15 PASS, cleanup COMPLETED
+M01 microdesign:                       ACCEPTED — version 0.6.1
+Implementation plan:                   CURRENT / APPROVED — version 1.0.1
+Tasks 1–10 accepted baseline:           COMPLETE / ACCEPTED
+Task 10 publication replay RED:         OBSERVED / OPEN — concurrent post-acceptance test
+Task 10 publication correction GREEN:   NOT AUTHORIZED
+Task 11 RED:                            OBSERVED / ACCEPTABLE IN ISOLATION
+Task 11 GREEN:                          NOT AUTHORIZED / BLOCKED
+Task 12 and later:                      NOT AUTHORIZED
+Real Treehouse execution:              PROHIBITED until the final WSL2 proof gate
+Pi Worker dispatch:                    PROHIBITED
+M01 acceptance:                        NOT AUTHORIZED
+Automatic merge:                       NOT AUTHORIZED
+PR:                                    #17 DRAFT
 ```
 
 ## Accepted implementation baseline
@@ -79,189 +81,201 @@ Task 9   production Treehouse boundary        f984dd0f94e752060bc88cff128061da23
 Task 10  trusted Lease action helper          e1e1231c3e4efcf45ba82e83c666547f27609c8a
 ```
 
-## Task 10 delivered boundary
-
-Task 10 provides a token-scoped durable external-action protocol:
+Latest fully green accepted baseline evidence:
 
 ```text
-committed semantic action token
-→ immutable canonical operation.json at mode 0400
-→ durable STARTED before process invocation
-→ exactly one bounded ProcessSpec
-→ immutable raw stdout/stderr Artifacts
-→ hash-linked FINISHED observation
-→ semantic interpretation by Task 11
+Tracking head:       443f7824a5cbc61d3bcd738fe944a888a7b9eca5
+Synthetic merge:     07ad5477992c30e376d4785f19a15a0a8ade4a2d
+Workflow / Job:      31005521175 / 92304353222
+Product:             212/212 PASS
+AS-02:               119/119 PASS
+TC-01:               78/78 PASS
+Documentation:       PASS — 93 canonical IDs
+Task 10 review:      4864279296 — 0 Critical / 0 Important / 0 Minor
 ```
 
-Production files:
+## Concurrent post-acceptance Task 10 publication RED
+
+After the Task 11 preflight and before the first Task 11 test commit, branch commit:
 
 ```text
-src/runtime/lease-action-protocol.ts
-src/runtime/lease-action-runner.ts
-src/runtime/lease-action-entry.ts
-bin/mnfs-lease-action.mjs
-package.json
+aebfddde7af27aeb9122a760f45475aceab6babe
+test: cover bounded Lease action publication replay
 ```
 
-The helper never opens MNFS SQLite, imports domain stores or decides semantic Lease state. FINISHED remains advisory.
-
-## Task 10 primary TDD
-
-### RED
+added:
 
 ```text
-Authorization:         MNFS_AUTHORIZE_M01_TASK_10_RED plan=1.0.1 microdesign=0.6.1 task9=f984dd0f94e752060bc88cff128061da23607f00
-RED head:              86b78c26f8d1dbf1a07e2b7c89e0a83e90d76ecc
-Synthetic merge:       9a77855d1a5a3380e64f377ed2b14bca6dbc4608
-Workflow / Job:        30983982965 / 92234461111
-TypeScript:            PASS
-Prior product:         196/196 PASS
-Task 10:               0/11 expected failure
+tests/runtime/lease-action-publication-correction.test.ts
 ```
 
-### Functional GREEN
+This commit was not authored by the Task 11 gate and was not silently absorbed into its scope. It defines one additional Task 10 behavior:
 
 ```text
-Authorization:         MNFS_AUTHORIZE_M01_TASK_10_GREEN plan=1.0.1 microdesign=0.6.1 red=86b78c26f8d1dbf1a07e2b7c89e0a83e90d76ecc
-Functional head:       e336116192d1261a9f94c2b6d5293f3ad5154c33
-Synthetic merge:       72e81c70daf073ab0ee3c69d09a500c62b817578
-Workflow / Job:        31000870325 / 92289136416
-TypeScript:            PASS
-Product:               207/207 PASS
-Task 10 primary:       11/11 PASS
-AS-02:                 119/119 PASS
-TC-01:                 78/78 PASS
-Documentation:         PASS — 93 canonical IDs
+publishLeaseActionOperation replay
+→ inspect an existing operation through the bounded protocol reader
+→ reject an oversized existing control file by byte-limit classification
+→ do not delegate immutable replay to the generic unbounded read path
 ```
 
-Post-GREEN review:
+Observed failure:
 
 ```text
-Review:     4863820596
-Critical:   0
-Important:  3
-Minor:      0
-Task 10:    NOT ACCEPTED
+Expected: bounded byte-limit rejection
+Actual:   Artifact already exists with different bytes
+Cause:    publishLeaseActionOperation still delegates replay through writeDurableFile
 ```
 
-Accepted findings:
+This is a separate post-acceptance RED. No Task 10 production correction is authorized in the Task 11 RED gate.
+
+## Task 11 boundary
+
+Task 11 owns semantic Lease grant and release Intent–Action–Observation:
 
 ```text
-R10-01  zero-byte stdout/stderr could not produce FINISHED
-R10-02  helper PATH omitted the accepted Task 9 Git executable directory
-R10-03  control/output Artifact reads allocated before byte-bound enforcement
+grant intent
+→ exact source/candidate observation
+→ action-token CAS claim
+→ trusted helper
+→ fresh helper/Treehouse/Git observation
+→ ACTIVE, DIVERGED or inconclusive
+
+release preflight and fences
+→ ACTIVE → RELEASE_PENDING
+→ exact conditional helper action
+→ fresh helper/Treehouse/Git/filesystem observation
+→ RELEASED, fenced retry or DIVERGED
 ```
 
-## Task 10 corrective TDD
+The service is the only component allowed to prepare Treehouse operations and interpret Task 10 helper observations semantically. Plain Recovery remains read-only.
 
-### Corrective RED
-
-```text
-Authorization:         MNFS_AUTHORIZE_M01_TASK_10_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=e336116192d1261a9f94c2b6d5293f3ad5154c33 blockers=R10-01,R10-02,R10-03
-Correction RED head:   2b9f10f4a112af68c6a982c2163b0f1a7ccedbf6
-Synthetic merge:       bf4edbb8739b88a61d2e7d09efaee0a3efb9d372
-Workflow / Job:        31002131377 / 92293264284
-TypeScript:            PASS
-Prior product:         207/207 PASS
-Correction tests:      0/5 expected failure
-Product total:         207 PASS / 5 FAIL / 212 total
-```
-
-The RED proved zero-byte rejection, Task 9 PATH incompatibility, oversized control-file decoding before rejection, output-limit bypass and absence of a pre-read opened-size guard.
-
-### Corrective GREEN
+## Task 11 RED
 
 Authorization:
 
 ```text
-MNFS_AUTHORIZE_M01_TASK_10_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=2b9f10f4a112af68c6a982c2163b0f1a7ccedbf6 blockers=R10-01,R10-02,R10-03
+MNFS_AUTHORIZE_M01_TASK_11_RED plan=1.0.1 microdesign=0.6.1 task10=e1e1231c3e4efcf45ba82e83c666547f27609c8a
 ```
 
-Production commits:
+Preflight proved:
 
 ```text
-Bounded protocol and Task 9 PATH  1884d1b881bf3780d1622639d1d39e8d63999bd8
-Runner limit propagation           d8fe02810f2c635c90708b0a25b3312a99c65f4d
-Primary protocol fixture migration d1394b19d42fb10678cf8c20b8f144b00ded83e1
-Primary runner fixture migration   e1e1231c3e4efcf45ba82e83c666547f27609c8a
+PR #17:          open / draft / unmerged / mergeable
+Tracking head:   443f7824a5cbc61d3bcd738fe944a888a7b9eca5
+Task 10 head:    e1e1231c3e4efcf45ba82e83c666547f27609c8a
+Post-Task 10:    one tracking-only commit changing docs/tracking/STATUS.md
+Authorization:   PR comment 5191741728
 ```
 
-Accepted behavior:
-
-- stdout/stderr `byteLength` is a non-negative safe integer, so zero-byte Artifacts remain hash-bound and replayable;
-- PATH has exactly `<treehouse-bin>:<git-bin>:/usr/bin:/bin` with ordered absolute Linux-local segments;
-- operation, STARTED and FINISHED are capped at 65,536 bytes;
-- outputs are capped by the immutable operation's original stdout/stderr limits;
-- `lstat` and opened-handle metadata size checks occur before `handle.readFile()`;
-- declared output length is checked before read and SHA-256 after bounded read;
-- owner, mode, no-symlink, no-hardlink, inode and post-read stability checks remain in force;
-- replay reads the immutable operation first and reuses its exact limits;
-- no SQLite/store/shell/exec/inherited-environment authority was introduced.
-
-Evidence:
+Authorized Task 11 files created:
 
 ```text
-Final functional head: e1e1231c3e4efcf45ba82e83c666547f27609c8a
-Synthetic merge:       85c004d3c8dea57a47e8aaa8f14679220ab101fe
-Workflow / Job:        31005192150 / 92303277926
-npm ci:                PASS — 0 vulnerabilities
-TypeScript:            PASS
-Product:               212/212 PASS
-Task 10 primary:       11/11 PASS
-Task 10 corrective:    5/5 PASS
-AS-02:                 119/119 PASS
-TC-01:                 78/78 PASS
-Documentation:         PASS — 93 canonical IDs
+tests/services/lease-service-grant.test.ts
+tests/services/lease-service-release.test.ts
 ```
 
-No real Treehouse process was executed. Product tests use injected process callbacks.
-
-Final adversarial review:
+Commits:
 
 ```text
-Review:     4864279296
-Critical:   0
-Important:  0
-Minor:      0
-Task 10:    ACCEPTED
-Replan:     not required
+Grant matrix:    4bd8c9bd3423c2a0957953e5b7b123594d458edd
+Release matrix:  ed6736cfb198119efbb3dde8cfac891632cd4b4c
 ```
 
-Closed findings:
+### Grant RED — 10 tests
 
 ```text
-R10-01 CLOSED
-R10-02 CLOSED
-R10-03 CLOSED
+1. READY source drift blocks before Lease intent and helper launch
+2. intent-only retry performs exactly one acquisition
+3. one exact external match is adopted without another acquisition
+4. exact live action owner blocks takeover
+5. dead pre-STARTED owner may receive a new token after fresh observation
+6. durable STARTED without decisive Lease state never repeats get
+7. external Lease before semantic commit is recovered without another get
+8. ACTIVE replay is idempotent; candidate drift conflicts
+9. non-bijective external matches commit DIVERGED and never first-match
+10. two independent callers produce at most one acquisition and one ACTIVE Lease
 ```
+
+### Release RED — 11 tests
+
+```text
+1. internal/external/holder/path/source fence drift blocks before helper
+2. DIRTY and UNKNOWN work block without release intent
+3. current Worker Run or Claim blocks release
+4. clean release performs one exact conditional return and Event chain
+5. exact live action owner blocks a competing caller
+6. STARTED release retries only under the same fence after helper absence
+7. physical release before semantic commit is recovered without another action
+8. missing or unmanaged path becomes DIVERGED, never RELEASED
+9. duplicate external identity becomes DIVERGED, never first-matched
+10. RELEASED replay is idempotent; candidate drift conflicts
+11. source contains no reset, clean, force, destroy, prune, deletion, shell or exec fallback
+```
+
+The matrices use real `SqliteStore` fixtures, independent stores for concurrency, SQLite Event-failure triggers for crash windows and scripted observation/helper/process authorities. No Treehouse or helper process is executed.
+
+## RED evidence
+
+Current Task 11 head:
+
+```text
+Head:              ed6736cfb198119efbb3dde8cfac891632cd4b4c
+Synthetic merge:   aafeb10a94e2f0c64d38cfac07fa964c43dd8b1f
+Workflow / Job:    31006909566 / 92308973432
+npm ci:            PASS — 0 vulnerabilities
+TypeScript:        PASS
+```
+
+Separated test result:
+
+```text
+Accepted baseline tests:             212/212 PASS
+Task 11 grant RED:                    0/10 expected failure
+Task 11 release RED:                  0/11 expected failure
+Concurrent Task 10 publication RED:   0/1 independent failure
+Product total:                        212 PASS / 22 FAIL / 234 total
+```
+
+Task 11 failure signatures are correct:
+
+```text
+20 behavioral tests:
+  dist/src/services/lease-service.js absent
+
+1 static boundary test:
+  src/services/lease-service.ts absent
+```
+
+The independent Task 10 failure is not attributed to Task 11. The root `verify` command stops at product RED, so AS-02, TC-01 and documentation were not re-executed at this head.
 
 ## Frozen boundaries
 
+- Task 11 RED changes no production source, store, adapter, schema, package or helper;
 - canonical checkout is never Treehouse cwd;
 - every Attempt owns an independent exact-base Linux-local source;
-- no real Treehouse process runs before the final explicit WSL2 proof gate;
-- STARTED is durable before external invocation;
-- STARTED without decisive FINISHED/physical evidence never causes another GRANT invocation;
-- FINISHED and process output remain advisory observations;
-- helper never opens SQLite or imports domain stores;
-- no semantic Lease grant/release exists before Task 11;
+- no real Treehouse or Lease helper process runs in this gate;
+- grant STARTED without decisive exact Lease state never repeats acquisition;
+- release retry remains conditional and bound to the same internal/external/source/helper fence;
+- dirty, missing, unmanaged, ambiguous or non-bijective work is preserved;
+- no reset, clean, force, destroy, prune or product deletion is authorized;
 - no Pi process, SEC-E1 production creation, Receipt or Gate exists in M01;
-- Task 11 and later require separate gates;
 - PR #17 remains draft and unmerged.
 
 ## Current authorization boundary
 
 ```text
-Tasks 1–10:                 COMPLETE / ACCEPTED
-Task 11 RED:                NOT AUTHORIZED
-Task 11 GREEN:              NOT AUTHORIZED
-Task 12 and later:          NOT AUTHORIZED
-Real Treehouse execution:   NOT AUTHORIZED
-Pi Worker dispatch:         PROHIBITED
-M01 acceptance:             NOT AUTHORIZED
-PR #17 merge:               NOT AUTHORIZED
+Tasks 1–10 accepted baseline:         COMPLETE / ACCEPTED
+Task 10 publication replay RED:       OBSERVED / OPEN
+Task 10 publication correction GREEN: NOT AUTHORIZED
+Task 11 RED:                          OBSERVED / ACCEPTABLE IN ISOLATION
+Task 11 GREEN:                        NOT AUTHORIZED / BLOCKED
+Task 12 and later:                    NOT AUTHORIZED
+Real Treehouse execution:             NOT AUTHORIZED
+Pi Worker dispatch:                   PROHIBITED
+M01 acceptance:                       NOT AUTHORIZED
+PR #17 merge:                         NOT AUTHORIZED
 ```
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for **Task 11 RED only**, bound to accepted Task 10 head `e1e1231c3e4efcf45ba82e83c666547f27609c8a`.
+The safe next continuation is a narrowly scoped Task 10 publication correction GREEN bound to commit `aebfddde7af27aeb9122a760f45475aceab6babe`. Task 11 GREEN remains blocked until that product regression is resolved and the complete baseline is green again.

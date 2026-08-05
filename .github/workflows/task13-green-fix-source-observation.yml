@@ -25,32 +25,8 @@ jobs:
           from pathlib import Path
           path = Path('src/cli/entry.ts')
           text = path.read_text(encoding='utf-8')
-          old = """  return {
-    status: existsSync(attempt.sourcePath as string) ? 'READY' : 'MISSING',
-    attemptId: attempt.id,
-    path: attempt.sourcePath,
-    fingerprint: attempt.sourceFingerprint,
-    baseCommitSha: attempt.baseCommitSha,
-    objectFormat: attempt.gitObjectFormat,
-  };
-"""
-          new = """  if (attempt.sourcePath === undefined || attempt.sourceFingerprint === undefined) {
-    return {
-      status: 'UNKNOWN',
-      attemptId: attempt.id,
-      baseCommitSha: attempt.baseCommitSha,
-      objectFormat: attempt.gitObjectFormat,
-    };
-  }
-  return {
-    status: existsSync(attempt.sourcePath) ? 'READY' : 'MISSING',
-    attemptId: attempt.id,
-    path: attempt.sourcePath,
-    fingerprint: attempt.sourceFingerprint,
-    baseCommitSha: attempt.baseCommitSha,
-    objectFormat: attempt.gitObjectFormat,
-  };
-"""
+          old = "  return {\n    status: existsSync(attempt.sourcePath as string) ? 'READY' : 'MISSING',\n    attemptId: attempt.id,\n    path: attempt.sourcePath,\n    fingerprint: attempt.sourceFingerprint,\n    baseCommitSha: attempt.baseCommitSha,\n    objectFormat: attempt.gitObjectFormat,\n  };\n"
+          new = "  if (attempt.sourcePath === undefined || attempt.sourceFingerprint === undefined) {\n    return {\n      status: 'UNKNOWN',\n      attemptId: attempt.id,\n      baseCommitSha: attempt.baseCommitSha,\n      objectFormat: attempt.gitObjectFormat,\n    };\n  }\n  return {\n    status: existsSync(attempt.sourcePath) ? 'READY' : 'MISSING',\n    attemptId: attempt.id,\n    path: attempt.sourcePath,\n    fingerprint: attempt.sourceFingerprint,\n    baseCommitSha: attempt.baseCommitSha,\n    objectFormat: attempt.gitObjectFormat,\n  };\n"
           if text.count(old) != 1:
               raise SystemExit('source observation preimage mismatch')
           path.write_text(text.replace(old, new, 1), encoding='utf-8')

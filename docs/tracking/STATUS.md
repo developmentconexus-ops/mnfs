@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.20
+version: 1.8.21
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Operator decision on Task 6 schema/composition review blockers
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 7 RED
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -59,18 +59,16 @@ Task 2:                        COMPLETE
 Task 3:                        COMPLETE
 Task 4:                        COMPLETE
 Task 5:                        COMPLETE
-Task 6 RED:                    OBSERVED / COMPLETE
-Task 6 functional GREEN:       143/143 PASS
-Task 6 contract review:        BLOCKED — R6-01 / R6-02
-Task 6 COMPLETE:               NO
-Task 7 and later:              NOT AUTHORIZED
+Task 6:                        COMPLETE
+Complete product suite:        148/148 PASS
 AS-02:                         119/119 PASS
 TC-01:                         78/78 PASS
 Documentation validation:      PASS — 93 canonical IDs
+Task 7 RED:                    NOT AUTHORIZED
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit Operator decision on bounded correction or Replan
+Current human gate:            explicit authorization for Task 7 RED only
 PR:                            #17 DRAFT
 ```
 
@@ -91,9 +89,11 @@ MNFS_AUTHORIZE_M01_TASK_5_RED plan=1.0.1 microdesign=0.6.1 task4=d0172cc2c141cec
 MNFS_AUTHORIZE_M01_TASK_5_GREEN plan=1.0.1 microdesign=0.6.1 red=e38592a97485bac91c713dbd648c391bdb029357
 MNFS_AUTHORIZE_M01_TASK_6_RED plan=1.0.1 microdesign=0.6.1 task5=ea459368fe1346c2cb2d6e9d37b3bb25a0c54903
 MNFS_AUTHORIZE_M01_TASK_6_GREEN plan=1.0.1 microdesign=0.6.1 red=b7a98a1972038bbd1d631f8e669959247256223b
+MNFS_AUTHORIZE_M01_TASK_6_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=839851d8d0d267b6ff235eae6c241c6ee38c5291 blockers=R6-01,R6-02
+MNFS_AUTHORIZE_M01_TASK_6_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=3d443aa2223abd185e5cea39ecb905a0e86e0a8f blockers=R6-01,R6-02
 ```
 
-Task 6 authority allowed only `src/store/execution-store.ts` and the bounded `src/store/sqlite-store.ts` composition change. It did not authorize migration/schema correction, microdesign change, Task 7, real Treehouse execution, Pi dispatch, M01 acceptance or merge.
+Task 6 correction authority closed only R6-01 and R6-02. It did not authorize Task 7, real Treehouse execution, Pi dispatch, M01 acceptance or merge.
 
 ## Completed implementation
 
@@ -176,28 +176,34 @@ Created:
 ```text
 src/store/execution-store.ts
 tests/store/execution-store.test.ts
+tests/store/execution-store-correction.test.ts
 ```
 
 Modified:
 
 ```text
+src/store/migrations.ts
 src/store/sqlite-store.ts
 ```
 
-The functional implementation provides:
+Task 6 provides:
 
 - one focused `SqliteStore.execution` instance sharing the existing database, transaction and Event authorities;
-- deterministic global and parent-relative ID allocation under `BEGIN IMMEDIATE`;
+- persisted `entity_sequences` authority for monotonic global Write Track and Lease IDs;
+- parent-relative Attempt, Worker Run and Claim ordinals;
 - current-row conflict translation for Track, Attempt, Worker Run, Lease and Claim;
 - exact Claim ancestry and Attempt base binding;
 - Lease and Claim same-key/same-input replay with conflicting-input rejection;
 - expected-version compare-and-swap for all mutable execution entities;
 - strict fail-closed codecs for persisted identities, enums, hashes, process state, Lease nullability and Claim criteria;
-- no second SQLite connection, transaction authority, Domain Event workflow, filesystem, Git, Treehouse or Pi behavior.
+- one bounded `runAtomic` session for composing Track, Attempt and versioned Events under the existing `SqliteTransaction`;
+- rollback of rows, Events and sequence increments when any operation in that session fails;
+- no second SQLite connection or transaction authority;
+- no lifecycle service, filesystem, Git, Treehouse or Pi behavior.
 
 ## Task 6 verification
 
-### RED
+### Primary RED
 
 ```text
 RED head:                 b7a98a1972038bbd1d631f8e669959247256223b
@@ -220,37 +226,51 @@ TC-01 tests:               78/78 PASS
 Documentation validation: PASS — 93 canonical IDs
 ```
 
-## Task 6 contract-review blockers
+Review found two accepted-contract gaps:
 
-### R6-01 — accepted sequence relation is missing
-
-Accepted microdesign 0.6.1 requires:
-
-```sql
-CREATE TABLE entity_sequences (
-  kind TEXT PRIMARY KEY CHECK (kind IN ('WRITE_TRACK', 'LEASE')),
-  next_value INTEGER NOT NULL CHECK (next_value > 0)
-);
+```text
+R6-01  migration v4 lacked entity_sequences and global IDs used MAX(id)+1
+R6-02  no bounded seam could compose Track + A01 + matching Events atomically
 ```
 
-The current migration v4 does not create this table. The functional store uses transactionally serialized `MAX(id) + 1` allocation instead. That behavior passes deterministic tests but is not the accepted relational model. Correcting it requires a migration/schema change outside Task 6 authority, or an explicit Replan that changes the accepted microdesign.
+### Correction RED
 
-### R6-02 — Task 7 atomic-composition seam is absent
+```text
+Correction RED head:      3d443aa2223abd185e5cea39ecb905a0e86e0a8f
+Synthetic merge:          8ba8a2e760ffa25b9ea24921eadae4b5e568f480
+Workflow/job:              30963369380 / 92171947664
+TypeScript:                PASS
+Prior product tests:       143/143 PASS
+Correction tests:          0/5 expected failure
+```
 
-Task 7 requires one transaction to commit Track, A01, `WRITE_TRACK_OPENED` and `ATTEMPT_OPENED`. Current Task 6 allocation methods each acquire their own transaction, and `EventStore`/transaction composition is not exposed to the future service. The implementation therefore needs a bounded transaction-composition seam before Task 7 can be implemented without changing the Task 7 file scope or creating nested transactions.
+The five REDs independently proved the missing relation, WT/LSE ID reuse after controlled deletion, absent atomic composition and absent rollback proof.
 
-R6-01 and R6-02 are review blockers, not failing deterministic tests. Task 6 remains incomplete until the Operator authorizes a bounded correction or Replan and the correction receives its own RED/GREEN Evidence.
+### Correction GREEN
+
+```text
+Correction GREEN head:    b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992
+Synthetic merge:          0bbd8db107f0699d05b963f3c34d58fb9547e78b
+Workflow/job:              30965918647 / 92179708566
+Product tests:             148/148 PASS
+Correction tests:         5/5 PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation: PASS — 93 canonical IDs
+```
+
+R6-01 and R6-02 are closed. The accepted microdesign remains version 0.6.1; no Replan was required.
 
 ## Scope review
 
-Compared Task 6 RED `b7a98a1972038bbd1d631f8e669959247256223b` to functional GREEN `839851d8d0d267b6ff235eae6c241c6ee38c5291`.
+Compared correction RED `3d443aa2223abd185e5cea39ecb905a0e86e0a8f` to correction GREEN `b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992`.
 
 ```text
-src/store/execution-store.ts   added
-src/store/sqlite-store.ts      +3 lines
-other product files            unchanged
-migration/schema files         unchanged
-Task 7/service files           absent
+src/store/migrations.ts       entity_sequences added inside migration v4
+src/store/sqlite-store.ts     exact shape fence, persisted sequence use and bounded runAtomic seam
+other product files           unchanged
+Task 7/service files          absent
+Treehouse/Pi/process code     unchanged
 ```
 
 ## Frozen boundaries
@@ -276,11 +296,9 @@ Task 2:                    COMPLETE
 Task 3:                    COMPLETE
 Task 4:                    COMPLETE
 Task 5:                    COMPLETE
-Task 6 functional GREEN:   VERIFIED
-Task 6 COMPLETE:           BLOCKED — R6-01 / R6-02
-Task 7 and later:          NOT AUTHORIZED
-Migration/schema change:   NOT AUTHORIZED
-Microdesign change:        NOT AUTHORIZED
+Task 6:                    COMPLETE
+Task 7 RED:                NOT AUTHORIZED
+Task 7 GREEN and later:    NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 M01 acceptance:            NOT AUTHORIZED
@@ -291,9 +309,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Obtain one explicit Operator decision:
-
-1. authorize a bounded corrective RED/GREEN that amends migration v4 with `entity_sequences` and adds the Task 7 transaction-composition seam; or
-2. initiate Replan to replace those accepted microdesign requirements.
-
-Stop before either path until explicit authority is recorded.
+Request or provide an explicit continuation for **Task 7 RED only**. Stop before creating execution lifecycle services or changing lifecycle semantics unless that continuation is granted.

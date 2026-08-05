@@ -1,4 +1,4 @@
-name: Task 13 Typecheck Diagnostic
+name: Task 13 Directed Diagnostic
 
 on:
   push:
@@ -20,12 +20,20 @@ jobs:
           node-version: 24.18.0
           cache: npm
       - run: npm ci
-      - name: Capture exact TypeScript diagnostics
+      - name: Capture exact directed diagnostics
         shell: bash
         run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run build --silent
           set +e
-          npm run typecheck > /tmp/typecheck.log 2>&1
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            dist/tests/cli/execution-red-review.test.js \
+            dist/tests/cli/execution-green-review.test.js \
+            > /tmp/directed.log 2>&1
           status=$?
           set -e
-          cat /tmp/typecheck.log
+          cat /tmp/directed.log
           exit "$status"

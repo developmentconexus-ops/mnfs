@@ -1,0 +1,84 @@
+name: Recover Task 14 Real Scenario A Publisher
+
+on:
+  push:
+    branches:
+      - automation/task14-real-scenario-a
+    paths:
+      - .github/workflows/recover-task14-real-scenario-a-publisher.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recover-task14-real-scenario-a-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+
+      - name: Recover immutable payload from the inert publisher file
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = '082ff29894c5abd0e9713978079c1bef571d23c3'
+          test "$(git rev-parse HEAD^^)" = '3adb12c42394cf0d54fb386b1b85d83c38f8903a'
+          test "$(git diff --name-only 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD | sort)" = $'.github/workflows/publish-task14-real-scenario-a.yml\n.github/workflows/recover-task14-real-scenario-a-publisher.yml'
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import gzip
+          import re
+
+          publisher = Path('.github/workflows/publish-task14-real-scenario-a.yml').read_text(encoding='utf-8')
+          outputs = {
+              'EXECUTOR_GZ_B64': Path('.github/real-proof/task14-real-scenario-a.mjs'),
+              'VERIFIER_GZ_B64': Path('.github/workflows/verify-task14-real-scenario-a.yml'),
+          }
+          for name, output in outputs.items():
+              match = re.search(rf"^\s*{name}: '([^']+)'$", publisher, re.MULTILINE)
+              if match is None:
+                  raise SystemExit(f'missing {name}')
+              output.parent.mkdir(parents=True, exist_ok=True)
+              output.write_bytes(gzip.decompress(base64.b64decode(match.group(1), validate=True)))
+          PY
+          printf '%s  %s\n' \
+            'e254c4ae6a7be7535f372e2beb15a7538e03d1a68c8e5bfb11f73fb1c178f1d2' \
+            .github/real-proof/task14-real-scenario-a.mjs \
+            | sha256sum --check --strict
+          printf '%s  %s\n' \
+            '463557a9e731811de451f9b0980d51baac23e8fe2c16e10dfe4a07f694d2e782' \
+            .github/workflows/verify-task14-real-scenario-a.yml \
+            | sha256sum --check --strict
+          node --check .github/real-proof/task14-real-scenario-a.mjs
+          git diff --check
+
+      - name: Publish the bounded executor commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin automation/task14-real-scenario-a
+          test "$(git rev-parse origin/automation/task14-real-scenario-a)" = "$(git rev-parse HEAD)"
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git rm \
+            .github/workflows/publish-task14-real-scenario-a.yml \
+            .github/workflows/recover-task14-real-scenario-a-publisher.yml
+          git add \
+            .github/real-proof/task14-real-scenario-a.mjs \
+            .github/workflows/verify-task14-real-scenario-a.yml
+          git diff --cached --check
+          git commit -m 'automation: add Task 14 real Scenario A executor'
+          expected=$'.github/real-proof/task14-real-scenario-a.mjs\n.github/workflows/verify-task14-real-scenario-a.yml'
+          test "$(git diff --name-only 3adb12c42394cf0d54fb386b1b85d83c38f8903a..HEAD | sort)" = "$expected"
+          git push origin HEAD:automation/task14-real-scenario-a
+          echo "Published executor: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"

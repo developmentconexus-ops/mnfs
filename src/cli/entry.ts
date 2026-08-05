@@ -871,8 +871,16 @@ function sourceObservationFromAttempt(attempt: Attempt): RecoverySourceObservati
       objectFormat: attempt.gitObjectFormat,
     };
   }
+  if (attempt.sourcePath === undefined || attempt.sourceFingerprint === undefined) {
+    return {
+      status: 'UNKNOWN',
+      attemptId: attempt.id,
+      baseCommitSha: attempt.baseCommitSha,
+      objectFormat: attempt.gitObjectFormat,
+    };
+  }
   return {
-    status: existsSync(attempt.sourcePath as string) ? 'READY' : 'MISSING',
+    status: existsSync(attempt.sourcePath) ? 'READY' : 'MISSING',
     attemptId: attempt.id,
     path: attempt.sourcePath,
     fingerprint: attempt.sourceFingerprint,

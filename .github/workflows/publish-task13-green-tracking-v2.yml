@@ -1,0 +1,125 @@
+name: Publish Task 13 GREEN Tracking v2
+
+on:
+  push:
+    branches:
+      - automation/task13-green-publish-final
+    paths:
+      - .github/workflows/publish-task13-green-tracking-v2.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task13-green-tracking-v2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact verified implementation
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify exact preimage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864'
+          test "$(git hash-object docs/tracking/STATUS.md)" = 'fa6fa212e0469d06090e976a88a1981001a5152f'
+          git merge-base --is-ancestor 'fe6da615d2d0a32437e2adb0627f09a693f1bd57' HEAD
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+
+      - name: Checkout exact updater
+        uses: actions/checkout@v4
+        with:
+          ref: automation/task13-green-publish-final
+          path: .task13-green-tracking
+          fetch-depth: 1
+
+      - name: Generate reviewed tracking
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .task13-green-tracking hash-object .github/task13-green/update-status.py)" = '8ecc47cfc9ebaa4940d02203d9e00ad849e08d44'
+          python3 .task13-green-tracking/.github/task13-green/update-status.py
+          rm -rf .task13-green-tracking
+          test "$(git diff --name-only)" = 'docs/tracking/STATUS.md'
+          git diff --check
+          grep -q '^version: 1.8.48$' docs/tracking/STATUS.md
+          grep -q 'Tasks 1–13:.*COMPLETE / ACCEPTED' docs/tracking/STATUS.md
+          grep -q 'Task 13 GREEN:.*VERIFIED / REVIEWED' docs/tracking/STATUS.md
+
+      - name: Install dependencies and typecheck
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run typecheck
+          npm run build --silent
+
+      - name: Reverify directed matrix with explicit diagnostics
+        shell: bash
+        run: |
+          set +e
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            dist/tests/cli/execution-red-review.test.js \
+            dist/tests/cli/execution-green-review.test.js \
+            > /tmp/task13-tracking-directed.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/task13-tracking-directed.log
+          test "$status" -eq 0
+          grep -q 'tests 16' /tmp/task13-tracking-directed.log
+          grep -q 'pass 16' /tmp/task13-tracking-directed.log
+          grep -q 'fail 0' /tmp/task13-tracking-directed.log
+
+      - name: Reverify product and accepted adapters
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-tests.mjs > /tmp/task13-tracking-product.log 2>&1
+          cat /tmp/task13-tracking-product.log
+          grep -q 'tests 306' /tmp/task13-tracking-product.log
+          grep -q 'pass 306' /tmp/task13-tracking-product.log
+          grep -q 'fail 0' /tmp/task13-tracking-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-tracking-as02.log 2>&1
+          cat /tmp/task13-tracking-as02.log
+          grep -q 'tests 119' /tmp/task13-tracking-as02.log
+          grep -q 'pass 119' /tmp/task13-tracking-as02.log
+          grep -q 'fail 0' /tmp/task13-tracking-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-tracking-tc01.log 2>&1
+          cat /tmp/task13-tracking-tc01.log
+          grep -q 'tests 78' /tmp/task13-tracking-tc01.log
+          grep -q 'pass 78' /tmp/task13-tracking-tc01.log
+          grep -q 'fail 0' /tmp/task13-tracking-tc01.log
+
+          npm run docs:check > /tmp/task13-tracking-docs.log 2>&1
+          cat /tmp/task13-tracking-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-tracking-docs.log
+
+      - name: Commit and publish tracking
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '5daeb8d36a8cd5dd9615ce342a3d5223f3a6f864'
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git add docs/tracking/STATUS.md
+          test "$(git diff --cached --name-only)" = 'docs/tracking/STATUS.md'
+          git diff --cached --check
+          git commit -m 'docs: record Task 13 GREEN evidence'
+          git push origin HEAD:design/mis-002-m01

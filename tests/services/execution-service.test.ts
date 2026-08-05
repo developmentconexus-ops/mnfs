@@ -391,8 +391,14 @@ test('opens Track and A01 with matching Events and replays only identical input'
       'WRITE_TRACK_OPENED',
       'ATTEMPT_OPENED',
     ]);
-    assert.equal(executionEvents[0]?.payload.writeTrackId, opened.track.id);
-    assert.equal(executionEvents[1]?.payload.attemptId, opened.attempt.id);
+    assert.equal(
+      (executionEvents[0]?.payload as Readonly<Record<string, unknown>> | undefined)?.writeTrackId,
+      opened.track.id,
+    );
+    assert.equal(
+      (executionEvents[1]?.payload as Readonly<Record<string, unknown>> | undefined)?.attemptId,
+      opened.attempt.id,
+    );
 
     const beforeReplay = store.listEvents().length;
     assert.deepEqual(service.openWriteTrack(input), opened);
@@ -608,6 +614,9 @@ test('abandons only an empty guarded Track and never releases a Lease implicitly
     const abandonedEvents = store.listEvents().filter((event) =>
       event.type === 'WRITE_TRACK_ABANDONED');
     assert.equal(abandonedEvents.length, 1);
-    assert.equal(abandonedEvents[0]?.payload.writeTrackId, opened.track.id);
+    assert.equal(
+      (abandonedEvents[0]?.payload as Readonly<Record<string, unknown>> | undefined)?.writeTrackId,
+      opened.track.id,
+    );
   });
 });

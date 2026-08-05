@@ -1,4 +1,4 @@
-name: Publish Task 13 RED Tracking v2
+name: Publish Reviewed Task 13 RED Tracking
 
 on:
   push:
@@ -11,14 +11,14 @@ permissions:
   contents: write
 
 concurrency:
-  group: publish-task13-red-tracking-v2
+  group: publish-reviewed-task13-red-tracking
   cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout exact Task 13 RED head
+      - name: Checkout exact reviewed Task 13 RED head
         uses: actions/checkout@v4
         with:
           ref: design/mis-002-m01
@@ -30,37 +30,141 @@ jobs:
           node-version: 24.18.0
           cache: npm
 
-      - name: Verify RED head and tracking preimage
+      - name: Verify reviewed RED lineage and tracking preimage
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = '956a067336df48f54d19e634666f14bdf5a92143'
-          test "$(git hash-object docs/tracking/STATUS.md)" = '5dfe97be4819245b77f3158c0609044a2e587ebe'
-          test "$(git show --format= --name-only HEAD | sort)" = $'tests/cli/execution-args.test.ts\ntests/cli/execution-main.test.ts'
+          test "$(git rev-parse HEAD)" = 'fe6da615d2d0a32437e2adb0627f09a693f1bd57'
+          test "$(git rev-parse HEAD^)" = '7872071c6ed7238ec0cb8dc55e613d25d1f6d9fd'
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+          git merge-base --is-ancestor '956a067336df48f54d19e634666f14bdf5a92143' HEAD
+          test "$(git hash-object docs/tracking/STATUS.md)" = 'fd47e6681d0f9d44b810696cf518c4220c3f2636'
+          test "$(git show --format= --name-only HEAD | sort)" = 'tests/cli/execution-red-review.test.ts'
+          echo '4ed469cd00cf105a24b3e093cd537c5bc45ed07ecfc952ad99f5ea25ac8d4825  tests/cli/execution-red-review.test.ts' | sha256sum -c -
 
-      - name: Checkout reviewed tracking updater
-        uses: actions/checkout@v4
-        with:
-          ref: automation/task13-red-publish
-          path: .task13-tracking-publisher
-          fetch-depth: 1
-
-      - name: Record exact Task 13 RED evidence
+      - name: Record reviewed Task 13 RED evidence
         shell: bash
         run: |
           set -euo pipefail
-          echo '6f28be5906cab6d79d46cc2a9f574253da0d9ed0b626f0628914b2746fbbf016  .task13-tracking-publisher/.github/task13-red/update-status.py' | sha256sum -c -
-          python3 .task13-tracking-publisher/.github/task13-red/update-status.py
-          rm -rf .task13-tracking-publisher
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/tracking/STATUS.md')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_once(old: str, new: str) -> None:
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'expected one replacement, found {count}: {old!r}')
+              text = text.replace(old, new, 1)
+
+          replace_once('version: 1.8.46', 'version: 1.8.47')
+
+          start_marker = '## Task 13 RED\n'
+          end_marker = '## Frozen boundaries\n'
+          if text.count(start_marker) != 1 or text.count(end_marker) != 1:
+              raise SystemExit('Task 13 or Frozen boundaries marker is not unique')
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+
+          reviewed_section = '''## Task 13 RED
+
+Authorization:
+
+```text
+MNFS_AUTHORIZE_M01_TASK_13_RED plan=1.0.1 microdesign=0.6.1 task12=8c6fd9afa2cc7f707f96659b9efa73230579471a
+```
+
+RED lineage:
+
+```text
+Initial RED:   956a067336df48f54d19e634666f14bdf5a92143
+Initial track: 7872071c6ed7238ec0cb8dc55e613d25d1f6d9fd
+Reviewed RED:  fe6da615d2d0a32437e2adb0627f09a693f1bd57
+```
+
+Test-only scope:
+
+```text
+tests/cli/execution-args.test.ts
+tests/cli/execution-main.test.ts
+tests/cli/execution-red-review.test.ts
+```
+
+The parser matrix defines the complete bounded M01 command surface for `track open/show/abandon`, `lease grant/show/release` and read-only `recover`. It rejects missing or duplicate flags, positional extras, malformed or non-canonical identities and hashes, non-positive versions, Claim/Run production commands, force release and Recovery repair.
+
+The dispatch matrix requires one dependency call per command, stable JSON, human identity/version/hash visibility, a concrete next action, complete help text and preservation of typed MNFS errors.
+
+Adversarial review strengthened the initial eight-test matrix with four additional fail-first cases:
+
+```text
+positive SHA-256 Git object-id support with canonical identity validation
+unscoped recover dispatch without inventing a Write Track
+read-only show commands that do not touch physical-operation dependencies
+production composition using current-schema readiness and the complete bounded M01 runtime
+```
+
+Canonical reviewed expected-failure evidence:
+
+```text
+Reviewed head:      fe6da615d2d0a32437e2adb0627f09a693f1bd57
+Publisher Run/Job:  31031446681 / 92392885796
+Node:               24.18.0
+TypeScript:         PASS
+Task 13 RED:         0/12 PASS — expected failure
+Parser:              0/5 expected failure
+Dispatch/output:     0/6 expected failure
+Composition root:    0/1 expected failure
+Product total:       290 PASS / 12 expected FAIL / 302 total
+AS-02:               119/119 PASS
+TC-01:                78/78 PASS
+Documentation:       PASS — 93 canonical IDs
+```
+
+Every reviewed Task 13 failure reports one of the exact missing production surfaces:
+
+```text
+M01 execution CLI parser is not implemented
+M01 execution CLI dispatch is not implemented
+M01 production composition root is not implemented
+```
+
+RED review result:
+
+```text
+Initial matrix:  8 tests
+Review additions: 4 tests
+Reviewed matrix: 12 tests
+Result:          ACCEPTABLE
+Replan:          not required
+```
+
+No production source, schema, migration, package, Treehouse execution, Lease helper, Pi behavior, Task 14 proof or M01 acceptance was introduced. Task 13 GREEN remains separately gated.
+
+'''
+          text = text[:start] + reviewed_section + text[end:]
+
+          replace_once(
+              'A separate exact Operator continuation is required for Task 13 GREEN, bound to reviewed Task 13 RED head `956a067336df48f54d19e634666f14bdf5a92143` and accepted Task 12 implementation head `8c6fd9afa2cc7f707f96659b9efa73230579471a`. Task 14, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.',
+              'A separate exact Operator continuation is required for Task 13 GREEN, bound to reviewed Task 13 RED head `fe6da615d2d0a32437e2adb0627f09a693f1bd57` and accepted Task 12 implementation head `8c6fd9afa2cc7f707f96659b9efa73230579471a`. Task 14, real Treehouse execution, Pi dispatch, M01 acceptance and merge remain unauthorized.',
+          )
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
           test "$(git diff --name-only)" = 'docs/tracking/STATUS.md'
           git diff --check
-          grep -q '^version: 1.8.46$' docs/tracking/STATUS.md
+          grep -q '^version: 1.8.47$' docs/tracking/STATUS.md
           grep -q 'Task 13 RED:.*OBSERVED / ACCEPTABLE' docs/tracking/STATUS.md
           grep -q 'Task 13 GREEN awaits explicit authority' docs/tracking/STATUS.md
-          grep -q '956a067336df48f54d19e634666f14bdf5a92143' docs/tracking/STATUS.md
-          grep -q '31030653641 / 92390206386' docs/tracking/STATUS.md
+          grep -q 'Reviewed RED:  fe6da615d2d0a32437e2adb0627f09a693f1bd57' docs/tracking/STATUS.md
+          grep -q '31031446681 / 92392885796' docs/tracking/STATUS.md
+          grep -q 'Task 13 RED:         0/12 PASS' docs/tracking/STATUS.md
+          grep -q '290 PASS / 12 expected FAIL / 302 total' docs/tracking/STATUS.md
+          grep -q 'reviewed Task 13 RED head `fe6da615d2d0a32437e2adb0627f09a693f1bd57`' docs/tracking/STATUS.md
 
-      - name: Verify baseline and expected RED with tracking
+      - name: Verify baseline and reviewed expected RED with tracking
         shell: bash
         run: |
           set -euo pipefail
@@ -72,41 +176,43 @@ jobs:
           node --test \
             dist/tests/cli/execution-args.test.js \
             dist/tests/cli/execution-main.test.js \
-            > /tmp/task13-tracking-directed.log 2>&1
+            dist/tests/cli/execution-red-review.test.js \
+            > /tmp/task13-reviewed-tracking-directed.log 2>&1
           directed_status=$?
-          node scripts/run-tests.mjs > /tmp/task13-tracking-product.log 2>&1
+          node scripts/run-tests.mjs > /tmp/task13-reviewed-tracking-product.log 2>&1
           product_status=$?
           set -e
 
-          cat /tmp/task13-tracking-directed.log
+          cat /tmp/task13-reviewed-tracking-directed.log
           test "$directed_status" -ne 0
-          grep -q 'tests 8' /tmp/task13-tracking-directed.log
-          grep -q 'pass 0' /tmp/task13-tracking-directed.log
-          grep -q 'fail 8' /tmp/task13-tracking-directed.log
-          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-tracking-directed.log
-          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-tracking-directed.log
+          grep -q 'tests 12' /tmp/task13-reviewed-tracking-directed.log
+          grep -q 'pass 0' /tmp/task13-reviewed-tracking-directed.log
+          grep -q 'fail 12' /tmp/task13-reviewed-tracking-directed.log
+          grep -q 'M01 execution CLI parser is not implemented' /tmp/task13-reviewed-tracking-directed.log
+          grep -q 'M01 execution CLI dispatch is not implemented' /tmp/task13-reviewed-tracking-directed.log
+          grep -q 'M01 production composition root is not implemented' /tmp/task13-reviewed-tracking-directed.log
 
-          cat /tmp/task13-tracking-product.log
+          cat /tmp/task13-reviewed-tracking-product.log
           test "$product_status" -ne 0
-          grep -q 'tests 298' /tmp/task13-tracking-product.log
-          grep -q 'pass 290' /tmp/task13-tracking-product.log
-          grep -q 'fail 8' /tmp/task13-tracking-product.log
+          grep -q 'tests 302' /tmp/task13-reviewed-tracking-product.log
+          grep -q 'pass 290' /tmp/task13-reviewed-tracking-product.log
+          grep -q 'fail 12' /tmp/task13-reviewed-tracking-product.log
 
-          node scripts/run-as02-tests.mjs > /tmp/task13-tracking-as02.log 2>&1
-          grep -q 'tests 119' /tmp/task13-tracking-as02.log
-          grep -q 'pass 119' /tmp/task13-tracking-as02.log
-          grep -q 'fail 0' /tmp/task13-tracking-as02.log
+          node scripts/run-as02-tests.mjs > /tmp/task13-reviewed-tracking-as02.log 2>&1
+          grep -q 'tests 119' /tmp/task13-reviewed-tracking-as02.log
+          grep -q 'pass 119' /tmp/task13-reviewed-tracking-as02.log
+          grep -q 'fail 0' /tmp/task13-reviewed-tracking-as02.log
 
-          node scripts/run-tc01-tests.mjs > /tmp/task13-tracking-tc01.log 2>&1
-          grep -q 'tests 78' /tmp/task13-tracking-tc01.log
-          grep -q 'pass 78' /tmp/task13-tracking-tc01.log
-          grep -q 'fail 0' /tmp/task13-tracking-tc01.log
+          node scripts/run-tc01-tests.mjs > /tmp/task13-reviewed-tracking-tc01.log 2>&1
+          grep -q 'tests 78' /tmp/task13-reviewed-tracking-tc01.log
+          grep -q 'pass 78' /tmp/task13-reviewed-tracking-tc01.log
+          grep -q 'fail 0' /tmp/task13-reviewed-tracking-tc01.log
 
-          npm run docs:check > /tmp/task13-tracking-docs.log 2>&1
-          cat /tmp/task13-tracking-docs.log
-          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-tracking-docs.log
+          npm run docs:check > /tmp/task13-reviewed-tracking-docs.log 2>&1
+          cat /tmp/task13-reviewed-tracking-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-reviewed-tracking-docs.log
 
-      - name: Commit and publish Task 13 RED tracking
+      - name: Commit and publish reviewed Task 13 RED tracking
         shell: bash
         run: |
           set -euo pipefail
@@ -115,5 +221,5 @@ jobs:
           git add docs/tracking/STATUS.md
           test "$(git diff --cached --name-only)" = 'docs/tracking/STATUS.md'
           git diff --cached --check
-          git commit -m 'docs: record Task 13 RED evidence'
+          git commit -m 'docs: record reviewed Task 13 RED evidence'
           git push origin HEAD:design/mis-002-m01

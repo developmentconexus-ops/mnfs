@@ -1,0 +1,147 @@
+name: Publish Task 13 GREEN v2
+
+on:
+  push:
+    branches:
+      - automation/task13-green-publisher-v2
+    paths:
+      - .github/workflows/publish-task13-green-v2.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-task13-green-v2
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact authorized target
+        uses: actions/checkout@v4
+        with:
+          ref: design/mis-002-m01
+          fetch-depth: 0
+
+      - name: Verify exact authorization lineage
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 'd503a38f0134cd822de658e8dd88556df6c665ae'
+          test "$(git rev-parse HEAD^)" = 'fe6da615d2d0a32437e2adb0627f09a693f1bd57'
+          git merge-base --is-ancestor '8c6fd9afa2cc7f707f96659b9efa73230579471a' HEAD
+          git merge-base --is-ancestor 'fe6da615d2d0a32437e2adb0627f09a693f1bd57' HEAD
+          test ! -e tests/cli/execution-green-review.test.ts
+
+      - name: Checkout exact GREEN payload
+        uses: actions/checkout@v4
+        with:
+          ref: automation/task13-green-publisher-v2
+          path: .task13-green-publisher
+          fetch-depth: 1
+
+      - name: Reconstruct and install exact GREEN payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            .task13-green-publisher/.github/task13-green-v2/payload.00 \
+            .task13-green-publisher/.github/task13-green-v2/payload.02 \
+            .task13-green-publisher/.github/task13-green-v2/payload.03 \
+            .task13-green-publisher/.github/task13-green-v2/payload.04 \
+            .task13-green-publisher/.github/task13-green-v2/payload.05 \
+            .task13-green-publisher/.github/task13-green-v2/payload.06 \
+            .task13-green-publisher/.github/task13-green-v2/payload.07 \
+            > /tmp/task13-green-payload.b64
+          base64 --decode /tmp/task13-green-payload.b64 > /tmp/task13-green-payload.tar.gz
+          echo 'a34e1612f9b38c0510c7fbe437c8838a091f39374dba26f3bab599ca5883d8d6  /tmp/task13-green-payload.tar.gz' | sha256sum -c -
+          expected=$'src/cli/args.ts\nsrc/cli/entry.ts\nsrc/cli/main.ts\nsrc/runtime/paths.ts\ntests/cli/execution-green-review.test.ts'
+          actual="$(tar -tzf /tmp/task13-green-payload.tar.gz | sort)"
+          test "$actual" = "$expected"
+          tar -xzf /tmp/task13-green-payload.tar.gz
+          rm -rf .task13-green-publisher
+          echo 'e32aa8a8944fcc1b1c6c947cb562281974560af10089e07b1c44f07e6f909182  src/cli/args.ts' | sha256sum -c -
+          echo '762e36e516e233b658d506fff9ba670ab5c7debf4093a70e9baf88371c7b6399  src/cli/entry.ts' | sha256sum -c -
+          echo '9a00c259d6e9384d879b2955347f5baf08f0193a009ac9e7ecdbdeca825a7e22  src/cli/main.ts' | sha256sum -c -
+          echo '64fd39fb84bb90adbbbe2a06eb02b296dcfdc0f6ee3c67c683ff3fe2681b35e4  src/runtime/paths.ts' | sha256sum -c -
+          echo '58e6d7c83abf8455fdb03087579af99a5b80d76fd33117069f203f6285487c24  tests/cli/execution-green-review.test.ts' | sha256sum -c -
+          git add \
+            src/cli/args.ts \
+            src/cli/entry.ts \
+            src/cli/main.ts \
+            src/runtime/paths.ts \
+            tests/cli/execution-green-review.test.ts
+          actual="$(git diff --cached --name-only | sort)"
+          test "$actual" = "$expected"
+          git diff --cached --check
+          ! grep -nE -- '(--force|\bdestroy\b|\bprune\b|git reset|git clean|shell:[[:space:]]*true|exec\()' \
+            src/cli/args.ts src/cli/entry.ts src/cli/main.ts src/runtime/paths.ts tests/cli/execution-green-review.test.ts
+
+      - name: Set up accepted Node runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Install exact dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm audit
+
+      - name: Verify Task 13 directed GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run typecheck
+          npm run build --silent
+          node --test \
+            dist/tests/cli/execution-args.test.js \
+            dist/tests/cli/execution-main.test.js \
+            dist/tests/cli/execution-red-review.test.js \
+            dist/tests/cli/execution-green-review.test.js \
+            > /tmp/task13-green-directed.log 2>&1
+          cat /tmp/task13-green-directed.log
+          grep -q 'tests 27' /tmp/task13-green-directed.log
+          grep -q 'pass 27' /tmp/task13-green-directed.log
+          grep -q 'fail 0' /tmp/task13-green-directed.log
+
+      - name: Verify complete product and accepted conformance suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-tests.mjs > /tmp/task13-green-product.log 2>&1
+          cat /tmp/task13-green-product.log
+          grep -q 'tests 317' /tmp/task13-green-product.log
+          grep -q 'pass 317' /tmp/task13-green-product.log
+          grep -q 'fail 0' /tmp/task13-green-product.log
+
+          node scripts/run-as02-tests.mjs > /tmp/task13-green-as02.log 2>&1
+          cat /tmp/task13-green-as02.log
+          grep -q 'tests 119' /tmp/task13-green-as02.log
+          grep -q 'pass 119' /tmp/task13-green-as02.log
+          grep -q 'fail 0' /tmp/task13-green-as02.log
+
+          node scripts/run-tc01-tests.mjs > /tmp/task13-green-tc01.log 2>&1
+          cat /tmp/task13-green-tc01.log
+          grep -q 'tests 78' /tmp/task13-green-tc01.log
+          grep -q 'pass 78' /tmp/task13-green-tc01.log
+          grep -q 'fail 0' /tmp/task13-green-tc01.log
+
+          npm run docs:check > /tmp/task13-green-docs.log 2>&1
+          cat /tmp/task13-green-docs.log
+          grep -q 'Documentation validation passed (93 canonical IDs' /tmp/task13-green-docs.log
+          git diff --cached --check
+
+      - name: Commit and publish Task 13 GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin design/mis-002-m01
+          test "$(git rev-parse origin/design/mis-002-m01)" = 'd503a38f0134cd822de658e8dd88556df6c665ae'
+          git config user.name 'developmentconexus-ops'
+          git config user.email 'development.conexus@gmail.com'
+          git commit -m 'feat: expose M01 execution CLI'
+          git push origin HEAD:design/mis-002-m01

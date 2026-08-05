@@ -33,7 +33,7 @@ test('release observation and launch never create missing Treehouse control stat
   );
   assert.match(
     source,
-    /attemptPhysicalRuntime\(context,\s*track,\s*attempt,\s*input\.kind\s*===\s*'GRANT'\)/u,
+    /attemptPhysicalRuntime\(\s*context,\s*track,\s*attempt,\s*input\.kind\s*===\s*'GRANT'/u,
   );
 });
 

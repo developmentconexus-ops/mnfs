@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.23
+version: 1.8.24
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 7 corrective RED observed; corrective GREEN awaits explicit authority
+- **Current enabler:** Issue #16 — Task 7 atomic-authority corrective RED awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -54,17 +54,14 @@ TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:                  ACCEPTED — version 0.6.1
 Implementation plan:              CURRENT / APPROVED — version 1.0.1
 Implementation started:           YES — bounded by task gates
-Task 1:                           COMPLETE
-Task 2:                           COMPLETE
-Task 3:                           COMPLETE
-Task 4:                           COMPLETE
-Task 5:                           COMPLETE
-Task 6:                           COMPLETE
+Tasks 1–6:                         COMPLETE
 Task 7 primary RED:               OBSERVED / ACCEPTABLE
 Task 7 functional GREEN:          VERIFIED — 155/155 product PASS
-Task 7 post-GREEN review:         3 IMPORTANT findings
+Task 7 post-GREEN review:         R7-01/R7-02/R7-03 IMPORTANT
 Task 7 corrective RED:            OBSERVED / ACCEPTABLE — 4 expected failures
-Task 7 corrective GREEN:          NOT AUTHORIZED
+Task 7 corrective GREEN:          VERIFIED — 159/159 product PASS
+Task 7 post-correction review:    R7-04 IMPORTANT
+Task 7 accepted:                  NO
 Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
 Automatic merge:                  NOT AUTHORIZED
@@ -79,19 +76,21 @@ Task 7 introduces `ExecutionService`, which governs:
 
 ```text
 approved contract + valid qualified target + exact Git base
-→ atomic Write Track + A01 + matching Events
+→ Write Track + A01 + matching Events
 
 current Worker Run
-→ atomic terminalization + replacement Run + matching Events
+→ terminalization + replacement Run + matching Events
 
 current Attempt + safe resource observations
-→ atomic supersession + next Attempt + matching Events
+→ supersession + next Attempt + matching Events
 
 empty guarded Track
 → explicit abandonment without implicit Lease release
 ```
 
 This moves MNFS from “a database that can store execution rows” toward a deterministic control plane that decides when execution state may advance.
+
+The remaining `R7-04` gap means those decisions are correct for sequential calls but are not yet proven atomic against another MNFS writer changing contract or lifecycle authority between validation and mutation.
 
 ## Operator authority chain
 
@@ -115,6 +114,7 @@ MNFS_AUTHORIZE_M01_TASK_6_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=3d44
 MNFS_AUTHORIZE_M01_TASK_7_RED plan=1.0.1 microdesign=0.6.1 task6=b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992
 MNFS_AUTHORIZE_M01_TASK_7_GREEN plan=1.0.1 microdesign=0.6.1 red=2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda
 MNFS_AUTHORIZE_M01_TASK_7_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=656d9a431957b74b9018020b829621f5a07a53eb blockers=R7-01,R7-02,R7-03
+MNFS_AUTHORIZE_M01_TASK_7_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=f976f254677c14a13371769269914e86cf96b539 blockers=R7-01,R7-02,R7-03
 ```
 
 ## Completed implementation summary
@@ -159,12 +159,12 @@ src/store/sqlite-store.ts
 
 Task 7 functional implementation provides:
 
-- exact latest approved-contract and qualified-target validation;
+- latest approved-contract and qualified-target validation;
 - non-empty Feature requirement allocation validation;
 - exact Git commit and object-format binding through an injected read-only inspector;
 - canonical same-input Track opening replay;
-- atomic Track + A01 + two matching Events;
-- atomic Worker Run opening and replacement;
+- Track + A01 + two matching Events under the shared transaction authority;
+- Worker Run opening and replacement;
 - Attempt supersession with resource-disposition guards;
 - explicit Track abandonment without implicit resource release;
 - focused current-entity lookups and atomic mutation methods on the existing SQLite authority;
@@ -197,13 +197,9 @@ TC-01 tests:               78/78 PASS
 Documentation validation: PASS — 93 canonical IDs
 ```
 
-The first functional commit `f08c11e0dad16e775dd356811f2593fd12517037` failed typecheck on three untyped atomic-session callbacks. Commit `656d9a431957b74b9018020b829621f5a07a53eb` corrected only those typings and produced the complete GREEN result above.
+## Task 7 first review and correction
 
-## Task 7 post-GREEN review
-
-Scope review passed: no Task 8 adapter, real Git/filesystem behavior, Treehouse, Pi, schema migration, second SQLite connection or merge behavior was introduced.
-
-The adversarial lifecycle review found:
+The first adversarial review found:
 
 ```text
 R7-01  an ABANDONED Track could receive a new Worker Run
@@ -211,31 +207,7 @@ R7-02  terminal Run replacement erased process identity and start timing
 R7-03  replacement Run and Attempt supersession could continue after Replan
 ```
 
-Classification:
-
-```text
-Critical:  0
-Important: 3
-Minor:     0
-Replan:    not required
-```
-
-## Task 7 corrective RED
-
-Created only:
-
-```text
-tests/services/execution-service-correction.test.ts
-```
-
-The four tests independently prove:
-
-1. `R7-01`: opening a Run after Track abandonment must fail;
-2. `R7-02`: terminalization must preserve observed Linux process identity and start time;
-3. `R7-03a`: Run replacement after a newer approved contract must fail;
-4. `R7-03b`: Attempt supersession after a newer approved contract must fail.
-
-Evidence:
+### Corrective RED
 
 ```text
 Correction RED head:      f976f254677c14a13371769269914e86cf96b539
@@ -244,19 +216,74 @@ Workflow/job:              30971768663 / 92197460024
 TypeScript:                PASS
 Prior product tests:       155/155 PASS
 Correction tests:          0/4 expected failure
-Product total:             155 PASS / 4 FAIL
 ```
 
-Observed failure signatures:
+### Corrective GREEN
+
+Implemented only:
+
+- ACTIVE Track fences for Worker Run creation and replacement;
+- exact Track/Attempt/Run contract-lineage checks;
+- preservation of `processIdentity` and `processStartedAt` during terminalization;
+- latest-approved-contract fences for replacement Run and Attempt supersession.
+
+Evidence:
 
 ```text
-R7-01  missing expected WORKER_RUN_CONFLICT
-R7-02  actual processIdentity undefined
-R7-03a missing expected EXECUTION_CONTRACT_CONFLICT
-R7-03b missing expected EXECUTION_CONTRACT_CONFLICT
+Correction GREEN head:    5795fc5bf98677bec532484d3ec8c0917b83ca08
+Synthetic merge:          e25fc188844e2209eb8521b95ff725115027fe24
+Workflow/job:              30972478663 / 92199611186
+TypeScript:                PASS
+Product tests:             159/159 PASS
+Correction tests:          4/4 PASS
+AS-02 tests:               119/119 PASS
+TC-01 tests:               78/78 PASS
+Documentation validation: PASS — 93 canonical IDs
 ```
 
-No production file changed in the corrective RED.
+Scope review:
+
+```text
+src/services/execution-service.ts  +18 / -1
+other product files                unchanged
+Task 8 adapters                    absent
+schema/migrations                  unchanged
+Treehouse/Pi behavior              unchanged
+```
+
+`R7-01`, `R7-02` and `R7-03` are closed.
+
+## Task 7 post-correction review
+
+### R7-04 — authority and lifecycle guards are outside the write transaction
+
+Current service flow is:
+
+```text
+read latest approved contract / Track / Attempt / Run
+→ validate outside a transaction
+→ later begin SqliteExecutionStore.runAtomic
+→ mutate rows and append Events
+```
+
+A second MNFS process can commit a Replan, Track abandonment or lifecycle change between the read and `BEGIN IMMEDIATE`. The original operation can then write from a stale semantic snapshot.
+
+Required proof:
+
+- controlled interleaving demonstrates the stale-authority window;
+- latest approved contract and every mutable Track/Attempt/Run dependency are reloaded and validated inside the same `BEGIN IMMEDIATE` transaction that applies the mutation;
+- expected versions fence every mutable semantic dependency;
+- Git, filesystem, Treehouse and process observations remain outside the domain transaction;
+- stale authority changes nothing and appends no Event.
+
+Classification:
+
+```text
+Critical:  0
+Important: 1 — R7-04
+Minor:     0
+Replan:    not required
+```
 
 ## Frozen boundaries
 
@@ -276,20 +303,22 @@ The accepted design invariants remain unchanged:
 ## Current authorization boundary
 
 ```text
-Tasks 1–6:                  COMPLETE
-Task 7 primary RED:         OBSERVED / ACCEPTABLE
-Task 7 functional GREEN:    VERIFIED
-Task 7 corrective RED:      OBSERVED / ACCEPTABLE
-Task 7 corrective GREEN:    NOT AUTHORIZED
-Task 8 and later:           NOT AUTHORIZED
-Real Treehouse execution:   NOT AUTHORIZED
-Pi Worker dispatch:         PROHIBITED
-M01 acceptance:             NOT AUTHORIZED
-PR #17 merge:               NOT AUTHORIZED
+Tasks 1–6:                         COMPLETE
+Task 7 primary RED:                OBSERVED / ACCEPTABLE
+Task 7 functional GREEN:           VERIFIED
+Task 7 first corrective RED:       OBSERVED / ACCEPTABLE
+Task 7 first corrective GREEN:     VERIFIED
+Task 7 atomic-authority RED:       NOT AUTHORIZED
+Task 7 accepted:                   NO
+Task 8 and later:                  NOT AUTHORIZED
+Real Treehouse execution:          NOT AUTHORIZED
+Pi Worker dispatch:                PROHIBITED
+M01 acceptance:                    NOT AUTHORIZED
+PR #17 merge:                      NOT AUTHORIZED
 ```
 
 A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boundary, microdesign invariants or applicable requirements triggers Replan or renewed readiness review.
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 7 corrective GREEN only**, bound to corrective RED head `f976f254677c14a13371769269914e86cf96b539` and findings `R7-01`, `R7-02`, `R7-03`.
+Request or provide an explicit continuation for **Task 7 atomic-authority RED only**, bound to corrective GREEN head `5795fc5bf98677bec532484d3ec8c0917b83ca08` and finding `R7-04`.

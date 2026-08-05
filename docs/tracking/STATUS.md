@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.21
+version: 1.8.22
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 7 RED
+- **Current enabler:** Issue #16 — explicit authorization for M01 implementation Task 7 GREEN
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -60,17 +60,21 @@ Task 3:                        COMPLETE
 Task 4:                        COMPLETE
 Task 5:                        COMPLETE
 Task 6:                        COMPLETE
-Complete product suite:        148/148 PASS
-AS-02:                         119/119 PASS
-TC-01:                         78/78 PASS
-Documentation validation:      PASS — 93 canonical IDs
-Task 7 RED:                    NOT AUTHORIZED
+Task 7 RED:                    OBSERVED / ACCEPTABLE
+Prior product suite:           148/148 PASS
+Task 7 tests:                  0/7 expected failure
+TypeScript:                    PASS
+AS-02 baseline:                119/119 PASS
+TC-01 baseline:                78/78 PASS
+Documentation baseline:        PASS — 93 canonical IDs
 Real Treehouse execution:      PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:            PROHIBITED
 Automatic merge:               NOT AUTHORIZED
-Current human gate:            explicit authorization for Task 7 RED only
+Current human gate:            explicit authorization for Task 7 GREEN only
 PR:                            #17 DRAFT
 ```
+
+The Task 7 RED verification intentionally stops `npm run verify` during the product suite. AS-02, TC-01 and documentation checks therefore retain their last accepted Task 6 correction baseline and were not re-executed by the RED workflow.
 
 ## Operator authority chain
 
@@ -91,9 +95,10 @@ MNFS_AUTHORIZE_M01_TASK_6_RED plan=1.0.1 microdesign=0.6.1 task5=ea459368fe1346c
 MNFS_AUTHORIZE_M01_TASK_6_GREEN plan=1.0.1 microdesign=0.6.1 red=b7a98a1972038bbd1d631f8e669959247256223b
 MNFS_AUTHORIZE_M01_TASK_6_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=839851d8d0d267b6ff235eae6c241c6ee38c5291 blockers=R6-01,R6-02
 MNFS_AUTHORIZE_M01_TASK_6_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=3d443aa2223abd185e5cea39ecb905a0e86e0a8f blockers=R6-01,R6-02
+MNFS_AUTHORIZE_M01_TASK_7_RED plan=1.0.1 microdesign=0.6.1 task6=b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992
 ```
 
-Task 6 correction authority closed only R6-01 and R6-02. It did not authorize Task 7, real Treehouse execution, Pi dispatch, M01 acceptance or merge.
+Task 7 RED authority allowed only `tests/services/execution-service.test.ts`, expected-failure verification and tracking Evidence. It did not authorize `src/services/execution-service.ts`, Task 7 GREEN, Task 8, Treehouse execution, Pi dispatch, M01 acceptance or merge.
 
 ## Completed implementation
 
@@ -261,16 +266,51 @@ Documentation validation: PASS — 93 canonical IDs
 
 R6-01 and R6-02 are closed. The accepted microdesign remains version 0.6.1; no Replan was required.
 
-## Scope review
+## Task 7 RED verification
 
-Compared correction RED `3d443aa2223abd185e5cea39ecb905a0e86e0a8f` to correction GREEN `b1d7f0d4b2c5a44dc8686342d8d882c8dcf3d992`.
+Created only:
 
 ```text
-src/store/migrations.ts       entity_sequences added inside migration v4
-src/store/sqlite-store.ts     exact shape fence, persisted sequence use and bounded runAtomic seam
-other product files           unchanged
-Task 7/service files          absent
-Treehouse/Pi/process code     unchanged
+tests/services/execution-service.test.ts
+```
+
+The seven RED tests define the accepted boundary for:
+
+- exact latest approved contract and qualified M01 Feature authority;
+- non-empty Feature requirement allocation;
+- exact Git commit/object-format resolution;
+- atomic Track + A01 + `WRITE_TRACK_OPENED` + `ATTEMPT_OPENED`;
+- same-input replay and conflicting-input rejection;
+- rollback of Track, Attempt, Events and sequence allocation;
+- atomic Worker Run opening and replacement;
+- Attempt supersession resource guards;
+- empty Track abandonment without implicit Lease release.
+
+Evidence:
+
+```text
+RED head:                 2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda
+RED synthetic merge:      c1d6f79c73cb4aeb70a4de56d82ac64e8547f2c1
+Workflow/job:              30969751509 / 92191310194
+TypeScript:                PASS
+Prior product tests:       148/148 PASS
+Task 7 tests:              0/7 expected failure
+Product total:             148 PASS / 7 FAIL
+Expected cause:            src/services/execution-service.ts absent
+```
+
+The preceding test-only commit `9815641c69e2e8889f8533304a0f9f3019c86b8a` failed typecheck on three payload-union accesses. Commit `2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda` corrected only those test typings; no production file was added.
+
+## Scope review
+
+Compared Task 6 tracking head `df52067ca6697f13687bf099cac8b69d74f7b036` to Task 7 RED head `2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda`.
+
+```text
+tests/services/execution-service.test.ts  added
+src/services/execution-service.ts         absent
+other production files                    unchanged
+Task 8 adapters                           absent
+Treehouse/Pi behavior                     unchanged
 ```
 
 ## Frozen boundaries
@@ -297,8 +337,9 @@ Task 3:                    COMPLETE
 Task 4:                    COMPLETE
 Task 5:                    COMPLETE
 Task 6:                    COMPLETE
-Task 7 RED:                NOT AUTHORIZED
-Task 7 GREEN and later:    NOT AUTHORIZED
+Task 7 RED:                OBSERVED / ACCEPTABLE
+Task 7 GREEN:              NOT AUTHORIZED
+Task 8 and later:          NOT AUTHORIZED
 Real Treehouse execution:  NOT AUTHORIZED
 Pi Worker dispatch:        PROHIBITED
 M01 acceptance:            NOT AUTHORIZED
@@ -309,4 +350,4 @@ A material change to MIS-002, SEC-E1, CAP-EXECUTION, the accepted Treehouse boun
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 7 RED only**. Stop before creating execution lifecycle services or changing lifecycle semantics unless that continuation is granted.
+Request or provide an explicit continuation for **Task 7 GREEN only**, bound to RED head `2fe2d87e1bc6f690c2cd556f1b0278420b8e3dda`. Stop before creating `src/services/execution-service.ts` unless that continuation is granted.

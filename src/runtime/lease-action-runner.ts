@@ -74,6 +74,8 @@ export class LeaseActionRunner {
         expectedActionToken: operation.actionToken,
         expectedOperationSha256: publishedOperation.operationSha256,
         expectedStartedSha256: started.startedSha256,
+        stdoutLimitBytes: operation.stdoutLimitBytes,
+        stderrLimitBytes: operation.stderrLimitBytes,
       });
     }
 
@@ -133,11 +135,13 @@ export class LeaseActionRunner {
       input.actionRoot,
       path.join(tokenRoot, 'stdout.bin'),
       Buffer.from(result.stdout),
+      operation.stdoutLimitBytes,
     );
     const stderr = await publishLeaseActionOutput(
       input.actionRoot,
       path.join(tokenRoot, 'stderr.bin'),
       Buffer.from(result.stderr),
+      operation.stderrLimitBytes,
     );
 
     return await publishLeaseActionFinished({
@@ -158,6 +162,8 @@ export class LeaseActionRunner {
         stderr,
         finishedAt: requireNow(this.#now),
       },
+      stdoutLimitBytes: operation.stdoutLimitBytes,
+      stderrLimitBytes: operation.stderrLimitBytes,
     });
   }
 }

@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.31
+version: 1.8.32
 owners:
   - developmentconexus-ops
 related:
@@ -31,7 +31,7 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 8 accepted; Task 9 RED awaits explicit authority
+- **Current enabler:** Issue #16 — Task 9 GREEN awaits explicit authority
 - **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
 
 ## Readiness result
@@ -53,17 +53,11 @@ MIS-002 contract:                 APPROVED — revision 5 / exact hash
 TC-01 canonical Evidence:         ACCEPT — 15/15 PASS, cleanup COMPLETED
 M01 microdesign:                  ACCEPTED — version 0.6.1
 Implementation plan:              CURRENT / APPROVED — version 1.0.1
-Tasks 1–7:                         COMPLETE / ACCEPTED
-Task 8 primary RED:                OBSERVED / ACCEPTABLE — 12 expected failures
-Task 8 functional GREEN:           VERIFIED — 175/175 product PASS
-Task 8 first review:               R8-01/R8-02/R8-03/R8-04 IMPORTANT
-Task 8 corrective RED:             OBSERVED / ACCEPTABLE — 5 expected failures
-Task 8 corrective GREEN:           VERIFIED — 180/180 product PASS
-Task 8 final review:               0 Critical / 0 Important / 0 Minor
-Task 8 accepted:                   YES
-Task 9 RED:                        NOT AUTHORIZED
-Task 9 and later:                  NOT AUTHORIZED
-Real Treehouse execution:          PROHIBITED until the final WSL2 proof gate
+Tasks 1–8:                         COMPLETE / ACCEPTED
+Task 9 RED:                        OBSERVED / ACCEPTABLE — 8 expected failures
+Task 9 GREEN:                      NOT AUTHORIZED
+Task 10 and later:                 NOT AUTHORIZED
+Real Treehouse execution:         PROHIBITED until the final WSL2 proof gate
 Pi Worker dispatch:               PROHIBITED
 M01 acceptance:                    NOT AUTHORIZED
 Automatic merge:                  NOT AUTHORIZED
@@ -83,212 +77,123 @@ Task 7  atomic lifecycle service             ff8fe7c972502ff6cc932687b7e65a16f37
 Task 8  independent Attempt source           aa4b9e1006d324acd8889b98b3507b020403d1d9
 ```
 
-## What Task 8 adds to the harness
-
-Task 8 establishes the physical boundary between durable Attempt identity and Git source state:
+Task 8 final verification:
 
 ```text
-canonical checkout
-→ strict typed read-only Git observation
-→ exact-base local transfer only
-
-Attempt
-→ deterministic Linux-local source path
-→ sibling temporary independent repository
-→ verification and divergence classification
-→ atomic final publication
+Product:          180/180 PASS
+AS-02:            119/119 PASS
+TC-01:            78/78 PASS
+Documentation:    PASS — 93 canonical IDs
+Review:           4861226705
+Findings:         0 Critical / 0 Important / 0 Minor
 ```
 
-Created:
+## What Task 9 adds to the harness
+
+Task 9 defines the production boundary between an accepted Attempt-owned `READY` source and Treehouse:
 
 ```text
-src/adapters/git-worktree.ts
-src/adapters/execution-source.ts
+validated independent source
+→ fresh candidate/provenance observation
+→ exact acquire/status/release command
+→ strict untrusted output observation
 ```
 
-Modified:
+Accepted protected commands:
 
 ```text
-src/runtime/paths.ts
+treehouse get --lease --lease-holder <holder> --json
+treehouse status --json
+treehouse return <path> --if-lease-id <id> --if-lease-holder <holder>
 ```
 
-The accepted boundary provides:
+Task 9 does not grant or release a semantic Lease. It returns physical observations to the later Lease action/service protocol. Release stdout/stderr remains advisory until fresh Treehouse, Git and filesystem observation.
 
-- typed `observeRepository`, `observeWorktrees`, `requireCommit` and `requireTree` operations;
-- a Git environment constructed from an explicit allowlist rather than inherited caller state;
-- disabled global/system config, prompting, credentials, optional locks and lazy fetch;
-- owned config overrides neutralizing fsmonitor, hooks, credential helpers and upload-pack hooks;
-- fatal UTF-8 and strict repository/worktree/object parsing;
-- deterministic `<runtime>/execution-sources/<track>/<attempt>/source` paths;
-- component-by-component path creation with symlink/non-directory rejection before descent;
-- reviewed local `init → fetch → update-ref → checkout` transfer with zero persisted remotes;
-- exact commit, tree, object format, clean `main` and no-origin verification;
-- distinct common/object directories, no alternates and no canonical-object hardlinks;
-- canonical-checkout immutability bound by Git semantics plus a deterministic no-follow physical path-tree fingerprint;
-- source-local config normalization, recognized sample-hook removal and rejection of unexpected hooks before checkout;
-- exact config bytes and empty hooks required on every verification and replay;
-- fingerprint schema version 2 binding repository, control and object evidence;
-- matching final replay without another transfer;
-- conflicting or drifted final/temp preservation as `DIVERGED`;
-- no Task 9 Treehouse adapter or invocation.
-
-## Task 8 primary TDD
-
-### RED
+## Task 9 RED contract
 
 Created only:
 
 ```text
-tests/adapters/git-worktree.test.ts
-tests/adapters/execution-source.test.ts
+tests/adapters/treehouse.test.ts
 ```
+
+No production file changed and `src/adapters/treehouse.ts` remains absent.
+
+The eight tests define:
+
+1. exact acquire/status/release argv, bounded process shape, Attempt-owned source cwd and controlled HOME/XDG/pool/hooks environment;
+2. strict acquisition JSON with fatal UTF-8, exactly one JSON value, expected holder/identity and Linux-contained path;
+3. strict status arrays with consistent leased/available fields and no duplicate path or external Lease ID;
+4. candidate and source freshness before every protected operation;
+5. exact executable bytes, semantic version `2.1.1` with optional lowercase raw `v`, and accepted capabilities;
+6. Git `2.54.0`, Node `v24.18.0`, Ubuntu `24.04`, canonical WSL2 kernel and command-shape drift fencing;
+7. rejection of canonical-checkout cwd, `/mnt`, symlinked, newline-bearing or overlapping runtime paths;
+8. static prohibition of `--force`, destroy, prune, shell execution, `exec`, inherited environment spread, stderr-state inference and canonical-checkout cwd.
+
+Accepted command-shape identity:
 
 ```text
-Git observer test commit:  77b1e7ccf0f7a6124056f61959ea59ca8bf78652
-Primary RED head:          6c468cffb9c18ad9b0cdea1ad3d0469a6eeb3610
-Synthetic merge:           cae2ee0bcb4e302bbc36b1cced796829b88a3a44
-Workflow / Job:            30974886466 / 92206751909
-TypeScript:                PASS
-Prior product tests:       163/163 PASS
-Primary Task 8 tests:      0/12 expected failure
+sha256:f2077cfd037cbaefdcfc94385a0cfeb7e1647ef294ca8ceee3cd61a1b109dc84
 ```
 
-### Functional GREEN
+## Task 9 RED evidence
+
+The first test draft at `700ec33c8546ac326e782ee3af86347db280e0d6` was not an acceptable RED because two local literal-property reads failed TypeScript compilation. It changed only the Task 9 test and was superseded by a test-only typing correction.
+
+Corrected evidence:
 
 ```text
-Git observer commit:       46cd7ea34478edc3ce82c842093ead44a7229576
-Source-path commit:        e3415a7d920ba80aa1f1a761dee42872fc1c0f28
-Functional GREEN head:     7b35b54806e39fdefb4f26beaf8dff22dd1153f3
-Synthetic merge:           fff21101935ba9a8b387f0c29735d2853f1a2d2e
-Workflow / Job:            30976055447 / 92210152648
-TypeScript:                PASS
-Product tests:             175/175 PASS
-Task 8 tests:              12/12 PASS
-AS-02 tests:               119/119 PASS
-TC-01 tests:               78/78 PASS
-Documentation validation: PASS — 93 canonical IDs
+Task 9 RED head:             a48bf4dba68984ce24a32575f982bae98e1cafc6
+Synthetic merge:             d2936833b1a6b7ed040c207322305ad3848f5b7e
+Workflow / Job:              30978752678 / 92218451668
+TypeScript:                  PASS
+Prior product tests:         180/180 PASS
+Task 9 tests:                0/8 expected failure
+Product total:               180 PASS / 8 FAIL
 ```
 
-## Task 8 first review
+Observed failure signature:
 
 ```text
-Review:     4861087515
-Critical:   0
-Important:  4
-Minor:      0
-Replan:     not required
+7 dynamic contracts:
+Task 9 TreehouseAdapter is not implemented:
+Cannot find dist/src/adapters/treehouse.js
+
+1 static contract:
+Task 9 production adapter is absent
 ```
 
-Findings:
+The failure occurs before any fixture can invoke a Treehouse protected operation. The runner is fully simulated; no real Treehouse command, Lease, worktree or managed resource was created.
 
-```text
-R8-01  incomplete Git side-effect/network/config isolation
-R8-02  recursive path creation traversed an intermediate symlink before rejection
-R8-03  canonical comparison omitted ignored/control physical byte drift
-R8-04  source config/hooks were not validated or fingerprint-bound
-```
-
-## Task 8 corrective TDD
-
-### RED
-
-Created only:
-
-```text
-tests/adapters/git-worktree-correction.test.ts
-tests/adapters/execution-source-correction.test.ts
-```
-
-```text
-Git authority RED commit:  47098b309f514e2e189a2019afb6942a94f1c03b
-Correction RED head:       d2cfc16832f1db9245e49f238458fe505b3a86e6
-Synthetic merge:           76be59eb04e35f41eb5f971290813c201c89d412
-Workflow / Job:            30976903976 / 92212691918
-TypeScript:                PASS
-Prior product tests:       175/175 PASS
-Correction tests:          0/5 expected failure
-```
-
-Observed signatures:
-
-```text
-R8-01  GIT_OPTIONAL_LOCKS missing and inherited config authority survived
-R8-02  external symlink target received WT-001 directory creation
-R8-03  ignored canonical-file drift returned READY
-R8-04  config/hook drift returned READY
-R8-04  executable hook reached a published READY source
-```
-
-### GREEN
-
-Production corrections:
-
-```text
-Git observer correction:   3a3e19cf9a4a266e7a3c79bdb836906f988f02fd
-Corrective GREEN head:      aa4b9e1006d324acd8889b98b3507b020403d1d9
-Synthetic merge:            550464e5bc0ca5635c824c6b55c1b4e92365be4d
-Workflow / Job:             30977503049 / 92214532870
-TypeScript:                 PASS
-Product tests:              180/180 PASS
-Correction tests:           5/5 PASS
-Primary Task 8 tests:       12/12 PASS
-AS-02 tests:                119/119 PASS
-TC-01 tests:                78/78 PASS
-Documentation validation:  PASS — 93 canonical IDs
-```
-
-Scope:
-
-```text
-src/adapters/git-worktree.ts     modified
-src/adapters/execution-source.ts modified
-src/runtime/paths.ts             unchanged during correction
-schema/SQLite/services           unchanged
-Treehouse/Pi behavior            unchanged
-```
-
-Final adversarial review:
-
-```text
-Review:     4861226705
-Critical:   0
-Important:  0
-Minor:      0
-R8-01:      CLOSED
-R8-02:      CLOSED
-R8-03:      CLOSED
-R8-04:      CLOSED
-Task 8:     ACCEPTABLE
-Replan:     not required
-```
+The root `verify` command stopped at the deliberate product RED. AS-02, TC-01 and documentation were therefore not re-executed at the RED head; their latest accepted evidence remains the Task 8 final result above.
 
 ## Operator authority chain — current task
 
 ```text
-MNFS_AUTHORIZE_M01_TASK_8_RED plan=1.0.1 microdesign=0.6.1 task7=ff8fe7c972502ff6cc932687b7e65a16f37b6516
-MNFS_AUTHORIZE_M01_TASK_8_GREEN plan=1.0.1 microdesign=0.6.1 red=6c468cffb9c18ad9b0cdea1ad3d0469a6eeb3610
-MNFS_AUTHORIZE_M01_TASK_8_CORRECTION_RED plan=1.0.1 microdesign=0.6.1 green=7b35b54806e39fdefb4f26beaf8dff22dd1153f3 blockers=R8-01,R8-02,R8-03,R8-04
 MNFS_AUTHORIZE_M01_TASK_8_CORRECTION_GREEN plan=1.0.1 microdesign=0.6.1 red=d2cfc16832f1db9245e49f238458fe505b3a86e6 blockers=R8-01,R8-02,R8-03,R8-04
+MNFS_AUTHORIZE_M01_TASK_9_RED plan=1.0.1 microdesign=0.6.1 task8=aa4b9e1006d324acd8889b98b3507b020403d1d9
 ```
 
-Earlier Task 1–7 authorities remain recorded in PR #17 and Git history.
+Earlier Task 1–8 authorities remain recorded in PR #17 and Git history.
 
 ## Frozen boundaries
 
 - canonical checkout is never Treehouse cwd;
 - every Attempt owns an independent exact-base Linux-local source;
-- dirty, ambiguous, unexpected and unclassified work is preserved;
+- Task 9 tests use simulated processes only;
 - no real Treehouse command runs before the final explicit WSL2 acceptance task;
+- no semantic Lease grant/release or trusted helper exists before Tasks 10–11;
 - no Pi process, SEC-E1 production creation, Receipt or Gate exists in M01;
-- Task 9 and later require separate gates;
+- Task 10 and later require separate gates;
 - PR #17 remains draft and unmerged.
 
 ## Current authorization boundary
 
 ```text
 Tasks 1–8:                  COMPLETE / ACCEPTED
-Task 9 RED:                 NOT AUTHORIZED
-Task 9 and later:           NOT AUTHORIZED
+Task 9 RED:                 OBSERVED / ACCEPTABLE
+Task 9 GREEN:               NOT AUTHORIZED
+Task 10 and later:          NOT AUTHORIZED
 Real Treehouse execution:   NOT AUTHORIZED
 Pi Worker dispatch:         PROHIBITED
 M01 acceptance:             NOT AUTHORIZED
@@ -297,4 +202,4 @@ PR #17 merge:               NOT AUTHORIZED
 
 ## Immediate next action
 
-Request or provide an explicit continuation for **Task 9 RED only**, bound to accepted Task 8 head `aa4b9e1006d324acd8889b98b3507b020403d1d9`.
+Request or provide an explicit continuation for **Task 9 GREEN only**, bound to RED head `a48bf4dba68984ce24a32575f982bae98e1cafc6`.

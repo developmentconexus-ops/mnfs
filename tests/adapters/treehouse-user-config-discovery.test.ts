@@ -215,7 +215,9 @@ test('Treehouse 2.1.1 discovers the Attempt-owned pool through HOME/.config', as
     assert.equal(acquired.path.startsWith(`${boundary.poolRoot}/`), true);
     assert.equal(protectedCalls.length, 1);
     const protectedCall = protectedCalls[0];
-    assert.notEqual(protectedCall, undefined);
+    if (protectedCall === undefined) {
+      assert.fail('Treehouse protected acquisition was not observed.');
+    }
     assert.equal(protectedCall.env.HOME, boundary.homePath);
     assert.equal(protectedCall.env.XDG_CONFIG_HOME, join(boundary.homePath, '.config'));
   } finally {

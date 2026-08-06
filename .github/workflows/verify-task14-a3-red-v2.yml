@@ -1,0 +1,51 @@
+name: Verify Task 14 A3 RED v2
+
+on:
+  push:
+    branches:
+      - automation/task14-a3-red-proof-v2
+
+permissions:
+  contents: read
+
+jobs:
+  expected-red:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact RED branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24.18.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build all production and test sources
+        run: npm run build --silent
+
+      - name: Observe exactly one expected RED
+        shell: bash
+        run: |
+          set +e
+          node scripts/run-tests.mjs > /tmp/task14-a3-red.log 2>&1
+          status=$?
+          set -e
+
+          cat /tmp/task14-a3-red.log
+
+          if [[ "$status" -eq 0 ]]; then
+            echo "Expected the new Task 14 A3 regression test to fail."
+            exit 1
+          fi
+
+          grep -F "Treehouse worktree path escapes the controlled pool." /tmp/task14-a3-red.log
+          grep -E "# tests +321" /tmp/task14-a3-red.log
+          grep -E "# pass +320" /tmp/task14-a3-red.log
+          grep -E "# fail +1" /tmp/task14-a3-red.log
+
+          echo "MNFS_TASK14_A3_RED=OBSERVED"

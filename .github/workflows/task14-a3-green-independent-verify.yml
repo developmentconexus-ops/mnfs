@@ -1,0 +1,48 @@
+name: Task 14 A3 GREEN independent verify
+
+on:
+  push:
+    branches:
+      - automation/task14-a3-green-independent-verify
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact GREEN
+        uses: actions/checkout@v4
+        with:
+          ref: d64992babc0d35d473eefdc7c7ba985dc08a07a9
+          fetch-depth: 1
+
+      - name: Set up Node.js 24.18.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify exact immutable correction boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "d64992babc0d35d473eefdc7c7ba985dc08a07a9"
+          test "$(git status --porcelain)" = ""
+          test "$(grep -RIl --exclude-dir=dist --exclude-dir=node_modules 'xdg-config' src tests | wc -l)" -eq 0
+          grep -F "join(homePath, '.config')" src/runtime/paths.ts
+          grep -F "xdgConfigHome !== join(homePath, '.config')" src/adapters/treehouse.ts
+          grep -F "!isContained(poolRoot, canonical)" src/adapters/treehouse.ts
+          grep -F "Treehouse worktree path escapes the controlled pool." src/adapters/treehouse.ts
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run complete independent verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run verify
+          test "$(git status --porcelain)" = ""
+          echo "MNFS_TASK14_A3_GREEN_INDEPENDENT=PASS"

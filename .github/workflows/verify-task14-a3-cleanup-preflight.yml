@@ -98,7 +98,7 @@ jobs:
           PY
           bash -n /tmp/task14-a3-cleanup-preflight.sh
           node --check /tmp/task14-a3-cleanup-preflight.mjs
-          "$wrapper" --print-identity > /tmp/task14-a3-identity.txt
+          bash "$wrapper" --print-identity > /tmp/task14-a3-identity.txt
           grep -Fx 'plan=1.0.1' /tmp/task14-a3-identity.txt
           grep -Fx 'microdesign=0.6.1' /tmp/task14-a3-identity.txt
           grep -Fx 'green=d64992babc0d35d473eefdc7c7ba985dc08a07a9' /tmp/task14-a3-identity.txt

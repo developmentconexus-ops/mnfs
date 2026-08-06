@@ -1,0 +1,156 @@
+name: Verify Task 14 A3 Cleanup Preflight
+
+on:
+  push:
+    branches:
+      - automation/task14-a3-cleanup-preflight
+    paths:
+      - .github/preflight/task14-a3-cleanup-preflight.sh
+      - .github/workflows/verify-task14-a3-cleanup-preflight.yml
+
+permissions:
+  contents: read
+
+jobs:
+  primary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+
+      - name: Verify immutable lineage and exact scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          green='d64992babc0d35d473eefdc7c7ba985dc08a07a9'
+          git merge-base --is-ancestor "$green" HEAD
+          changed="$(git diff --name-only "$green" HEAD | sort)"
+          expected="$(printf '%s\n' \
+            .github/preflight/task14-a3-cleanup-preflight.sh \
+            .github/workflows/publish-task14-a3-cleanup-preflight.yml \
+            .github/workflows/verify-task14-a3-cleanup-preflight.yml | sort)"
+          test "$changed" = "$expected"
+          sha256sum .github/preflight/task14-a3-cleanup-preflight.sh
+          test "$(sha256sum .github/preflight/task14-a3-cleanup-preflight.sh | cut -d' ' -f1)" = 'eabda536312c5b87a380cd6a33f57475ce175be6a52c229fa5f197a33dea66e5'
+          test "$(git status --porcelain)" = ''
+
+      - name: Decode and verify immutable read-only payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrapper='.github/preflight/task14-a3-cleanup-preflight.sh'
+          bash -n "$wrapper"
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          import gzip
+          import hashlib
+          import re
+
+          wrapper = Path('.github/preflight/task14-a3-cleanup-preflight.sh').read_text(encoding='utf-8')
+          match = re.search(r"^PAYLOAD_GZ_B64='([^']*)'$", wrapper, flags=re.MULTILINE)
+          if match is None:
+              raise SystemExit('missing embedded cleanup-preflight payload')
+          clean = re.sub(r'[^A-Za-z0-9+/=]', '', match.group(1))
+          decoded = gzip.decompress(base64.b64decode(clean, validate=False))
+          observed = hashlib.sha256(decoded).hexdigest()
+          expected = '73feb3b7c43b425456dab48dd3fd1a7872e071b71ca25659f26b4ae673fe7a6d'
+          if observed != expected:
+              raise SystemExit(f'payload hash mismatch: {observed}')
+          Path('/tmp/task14-a3-cleanup-preflight.sh').write_bytes(decoded)
+          script = decoded.decode('utf-8')
+          start = script.index("node --input-type=module - <<'NODE'\n") + len("node --input-type=module - <<'NODE'\n")
+          end = script.rindex('\nNODE\n')
+          Path('/tmp/task14-a3-cleanup-preflight.mjs').write_text(script[start:end], encoding='utf-8')
+          forbidden = [
+              "['get'", "['return'", "['destroy'", "['prune'",
+              "['fetch'", "['pull'", "['reset'", "['checkout'",
+              "['switch'", "['merge'", "['rebase'", "['clean'",
+              "['push'", "['commit'", 'writeFileSync(', 'appendFileSync(',
+              'rmSync(', 'unlinkSync(', 'rmdirSync(', 'renameSync(',
+              'copyFileSync(', 'mkdirSync(', 'truncateSync(', 'LeaseActionRunner',
+              'sqlite3', 'better-sqlite3', 'child_process.exec', 'shell: true',
+          ]
+          found = [token for token in forbidden if token in script]
+          if found:
+              raise SystemExit(f'forbidden mutation or execution surface: {found}')
+          if script.count("['status', '--json']") != 1:
+              raise SystemExit('expected exactly one Treehouse status invocation')
+          required = [
+              'd64992babc0d35d473eefdc7c7ba985dc08a07a9',
+              '3adb12c42394cf0d54fb386b1b85d83c38f8903a',
+              'm01-real-a-20260806t000414z-528fee9163cf',
+              'dab979cd28aeeedae84657eb7915f7b1b91de3d0e7eb1d72b211061a23cdd8f9',
+              'ce1292a113ae08fa8ff13f72410fe02e',
+              'mnfs-a437a00afffe5994-lse001-g1',
+              'c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3',
+              'READY_FOR_SEPARATE_CONDITIONAL_RELEASE_AUTHORIZATION',
+          ]
+          missing = [value for value in required if value not in script]
+          if missing:
+              raise SystemExit(f'missing immutable binding: {missing}')
+          PY
+          bash -n /tmp/task14-a3-cleanup-preflight.sh
+          node --check /tmp/task14-a3-cleanup-preflight.mjs
+          "$wrapper" --print-identity > /tmp/task14-a3-identity.txt
+          grep -Fx 'plan=1.0.1' /tmp/task14-a3-identity.txt
+          grep -Fx 'microdesign=0.6.1' /tmp/task14-a3-identity.txt
+          grep -Fx 'green=d64992babc0d35d473eefdc7c7ba985dc08a07a9' /tmp/task14-a3-identity.txt
+          grep -Fx 'run=m01-real-a-20260806t000414z-528fee9163cf' /tmp/task14-a3-identity.txt
+          grep -Fx 'diagnostic=sha256:dab979cd28aeeedae84657eb7915f7b1b91de3d0e7eb1d72b211061a23cdd8f9' /tmp/task14-a3-identity.txt
+          grep -Fx 'lease=ce1292a113ae08fa8ff13f72410fe02e' /tmp/task14-a3-identity.txt
+          grep -Fx 'holder=mnfs-a437a00afffe5994-lse001-g1' /tmp/task14-a3-identity.txt
+          echo 'MNFS_TASK14_A3_CLEANUP_PREFLIGHT_INSTRUMENT=VERIFIED'
+
+  independent:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Independently verify bytes and non-mutation surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          wrapper='.github/preflight/task14-a3-cleanup-preflight.sh'
+          sha256sum "$wrapper"
+          test "$(sha256sum "$wrapper" | cut -d' ' -f1)" = 'eabda536312c5b87a380cd6a33f57475ce175be6a52c229fa5f197a33dea66e5'
+          python - <<'PY'
+          from pathlib import Path
+          import base64
+          import gzip
+          import hashlib
+          import re
+
+          wrapper = Path('.github/preflight/task14-a3-cleanup-preflight.sh').read_text(encoding='utf-8')
+          payload = re.search(r"^PAYLOAD_GZ_B64='([^']*)'$", wrapper, flags=re.MULTILINE)
+          if payload is None:
+              raise SystemExit('payload missing')
+          decoded = gzip.decompress(base64.b64decode(re.sub(r'[^A-Za-z0-9+/=]', '', payload.group(1)), validate=False))
+          if hashlib.sha256(decoded).hexdigest() != '73feb3b7c43b425456dab48dd3fd1a7872e071b71ca25659f26b4ae673fe7a6d':
+              raise SystemExit('payload hash mismatch')
+          text = decoded.decode('utf-8')
+          assertions = {
+              'single_status': text.count("['status', '--json']") == 1,
+              'no_get': "['get'" not in text,
+              'no_return': "['return'" not in text,
+              'no_fs_write': all(token not in text for token in ('writeFile', 'appendFile', 'rmSync', 'unlinkSync', 'renameSync', 'mkdirSync')),
+              'private_before_after': all(token in text for token in ('privateBefore', 'privateAfter', 'privateStateUnchanged')),
+              'duplicate_detection': 'DUPLICATE_EXTERNAL_IDENTITY' in text,
+              'process_detection': all(token in text for token in ('TREEHOUSE_PROCESSES_PRESENT', 'OS_PROCESSES_PRESENT')),
+              'clean_git': all(token in text for token in ('WORKTREE_DIRTY', 'WORKTREE_BASE_DRIFT', 'WORKTREE_REMOTES_PRESENT')),
+          }
+          failed = [name for name, passed in assertions.items() if not passed]
+          if failed:
+              raise SystemExit(f'independent boundary failures: {failed}')
+          PY
+          test "$(git status --porcelain)" = ''
+          echo 'MNFS_TASK14_A3_CLEANUP_PREFLIGHT_INDEPENDENT=PASS'

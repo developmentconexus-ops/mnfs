@@ -267,7 +267,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
   const sourcePath = join(root, 'runtime', 'execution-sources', 'WT-001', 'WT-001', 'A01', 'source');
   const canonicalPath = join(root, 'canonical');
   const homePath = join(root, 'runtime', 'treehouse', 'home');
-  const xdgPath = join(root, 'runtime', 'treehouse', 'xdg');
+  const xdgPath = join(homePath, '.config');
   const treehouseConfigDirectory = join(xdgPath, 'treehouse');
   const poolRoot = join(root, 'runtime', 'treehouse', 'pool');
   const hooksPath = join(root, 'runtime', 'treehouse', 'hooks');
@@ -658,12 +658,15 @@ test('rejects canonical, mounted, symlinked and overlapping boundaries before Tr
   const module = await loadModule();
   await withFixture(async (fixture) => {
     const linked = join(fixture.root, 'linked-source');
+    const detachedXdg = join(fixture.root, 'detached-xdg');
     symlinkSync(fixture.sourcePath, linked, 'dir');
+    mkdirSync(detachedXdg, { recursive: true });
     const invalid: Boundary[] = [
       { ...boundary(fixture), sourcePath: fixture.canonicalPath },
       { ...boundary(fixture), sourcePath: '/mnt/c/source' },
       { ...boundary(fixture), sourcePath: linked },
       { ...boundary(fixture), homePath: `${fixture.homePath}\n` },
+      { ...boundary(fixture), xdgConfigHome: realpathSync(detachedXdg) },
       { ...boundary(fixture), poolRoot: fixture.sourcePath },
     ];
     for (const value of invalid) {

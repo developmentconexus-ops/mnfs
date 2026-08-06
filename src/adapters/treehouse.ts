@@ -514,7 +514,13 @@ export class TreehouseAdapter {
     if (pathsOverlap(sourcePath, canonicalPath)) {
       fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse source overlaps the canonical checkout.');
     }
-    const controlled = [homePath, xdgConfigHome, poolRoot, hooksPath];
+    if (xdgConfigHome !== join(homePath, '.config')) {
+      fail(
+        'TREEHOUSE_OBSERVATION_CONFLICT',
+        'Treehouse XDG config must be the controlled HOME/.config directory.',
+      );
+    }
+    const controlled = [homePath, poolRoot, hooksPath];
     for (const path of controlled) {
       if (pathsOverlap(sourcePath, path) || pathsOverlap(canonicalPath, path)) {
         fail('TREEHOUSE_OBSERVATION_CONFLICT', 'Treehouse runtime path overlaps a repository boundary.');

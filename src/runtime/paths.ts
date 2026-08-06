@@ -137,16 +137,17 @@ export function resolveExecutionAttemptRuntimePaths(
       join(root, 'treehouse', track, attempt),
       'Treehouse Attempt root',
     );
+    const homePath = requireContainedRuntimePath(
+      attemptRoot,
+      join(attemptRoot, 'home'),
+      'Treehouse HOME',
+    );
     return {
       attemptRoot,
-      homePath: requireContainedRuntimePath(
-        attemptRoot,
-        join(attemptRoot, 'home'),
-        'Treehouse HOME',
-      ),
+      homePath,
       xdgConfigHome: requireContainedRuntimePath(
         attemptRoot,
-        join(attemptRoot, 'xdg-config'),
+        join(homePath, '.config'),
         'Treehouse XDG config',
       ),
       poolRoot: requireContainedRuntimePath(

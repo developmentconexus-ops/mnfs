@@ -1,0 +1,33 @@
+name: Task 14 A3 GREEN scan
+
+on:
+  push:
+    branches:
+      - automation/task14-a3-green-scan
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact RED
+        uses: actions/checkout@v4
+        with:
+          ref: 68b646570318c557233caef5551161115b5649f2
+          fetch-depth: 1
+
+      - name: Verify exact RED and inventory config-path assumptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "68b646570318c557233caef5551161115b5649f2"
+          echo '=== xdgConfigHome ==='
+          grep -RIn --exclude-dir=dist --exclude-dir=node_modules 'xdgConfigHome' src tests || true
+          echo '=== xdg-config ==='
+          grep -RIn --exclude-dir=dist --exclude-dir=node_modules 'xdg-config' src tests || true
+          echo '=== xdgPath assignments ==='
+          grep -RIn --exclude-dir=dist --exclude-dir=node_modules 'xdgPath.*join' tests || true
+          echo '=== HOME/.config ==='
+          grep -RIn --exclude-dir=dist --exclude-dir=node_modules "homePath, '.config'\|HOME/.config" src tests || true

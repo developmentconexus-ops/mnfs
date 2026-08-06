@@ -1,0 +1,194 @@
+name: Task 14 A3 GREEN apply
+
+on:
+  push:
+    branches:
+      - automation/task14-a3-green-apply
+
+permissions:
+  contents: write
+
+jobs:
+  green:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout exact authorized RED
+        uses: actions/checkout@v4
+        with:
+          ref: 68b646570318c557233caef5551161115b5649f2
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Node.js 24.18.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+
+      - name: Verify authorization bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "68b646570318c557233caef5551161115b5649f2"
+          remote_head="$(git ls-remote origin refs/heads/design/mis-002-m01 | cut -f1)"
+          test "$remote_head" = "68b646570318c557233caef5551161115b5649f2"
+          test "$(sha256sum /dev/stdin <<< 'plan=1.0.1 microdesign=0.6.1 blocker=R14-A3-01' | cut -d' ' -f1)" != ""
+
+      - name: Apply minimal production correction
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected one replacement, found {count}')
+              file.write_text(text.replace(old, new), encoding='utf-8')
+
+          replace_once(
+              'src/runtime/paths.ts',
+              """    return {
+                attemptRoot,
+                homePath: requireContainedRuntimePath(
+                  attemptRoot,
+                  join(attemptRoot, 'home'),
+                  'Treehouse HOME',
+                ),
+                xdgConfigHome: requireContainedRuntimePath(
+                  attemptRoot,
+                  join(attemptRoot, 'xdg-config'),
+                  'Treehouse XDG config',
+                ),
+          """,
+              """    const homePath = requireContainedRuntimePath(
+                attemptRoot,
+                join(attemptRoot, 'home'),
+                'Treehouse HOME',
+              );
+              return {
+                attemptRoot,
+                homePath,
+                xdgConfigHome: requireContainedRuntimePath(
+                  attemptRoot,
+                  join(homePath, '.config'),
+                  'Treehouse XDG config',
+                ),
+          """,
+          )
+
+          replace_once(
+              'src/adapters/treehouse.ts',
+              """    const controlled = [homePath, xdgConfigHome, poolRoot, hooksPath];
+              for (const path of controlled) {
+          """,
+              """    if (xdgConfigHome !== join(homePath, '.config')) {
+                fail(
+                  'TREEHOUSE_OBSERVATION_CONFLICT',
+                  'Treehouse XDG config must be the controlled HOME/.config directory.',
+                );
+              }
+              const controlled = [homePath, poolRoot, hooksPath];
+              for (const path of controlled) {
+          """,
+          )
+
+          for path in [
+              'tests/adapters/treehouse.test.ts',
+              'tests/adapters/treehouse-correction.test.ts',
+          ]:
+              replace_once(
+                  path,
+                  "  const xdgPath = join(root, 'runtime', 'treehouse', 'xdg');\n",
+                  "  const xdgPath = join(homePath, '.config');\n",
+              )
+
+          replace_once(
+              'tests/adapters/treehouse.test.ts',
+              """    const linked = join(fixture.root, 'linked-source');
+              symlinkSync(fixture.sourcePath, linked, 'dir');
+              const invalid: Boundary[] = [
+          """,
+              """    const linked = join(fixture.root, 'linked-source');
+              const detachedXdg = join(fixture.root, 'detached-xdg');
+              symlinkSync(fixture.sourcePath, linked, 'dir');
+              mkdirSync(detachedXdg, { recursive: true });
+              const invalid: Boundary[] = [
+          """,
+          )
+
+          replace_once(
+              'tests/adapters/treehouse.test.ts',
+              """      { ...boundary(fixture), homePath: `${fixture.homePath}\\n` },
+                { ...boundary(fixture), poolRoot: fixture.sourcePath },
+          """,
+              """      { ...boundary(fixture), homePath: `${fixture.homePath}\\n` },
+                { ...boundary(fixture), xdgConfigHome: realpathSync(detachedXdg) },
+                { ...boundary(fixture), poolRoot: fixture.sourcePath },
+          """,
+          )
+          PY
+
+          git diff --check
+          test "$(grep -RIl --exclude-dir=dist --exclude-dir=node_modules 'xdg-config' src tests | wc -l)" -eq 0
+          grep -F "join(homePath, '.config')" src/runtime/paths.ts
+          grep -F "Treehouse XDG config must be the controlled HOME/.config directory." src/adapters/treehouse.ts
+
+          changed="$(git diff --name-only | sort)"
+          expected="$(printf '%s\n' \
+            src/adapters/treehouse.ts \
+            src/runtime/paths.ts \
+            tests/adapters/treehouse-correction.test.ts \
+            tests/adapters/treehouse.test.ts | sort)"
+          test "$changed" = "$expected"
+          git diff --stat
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Prove directed GREEN before commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build --silent
+          node --test \
+            dist/tests/adapters/treehouse-user-config-discovery.test.js \
+            dist/tests/adapters/treehouse.test.js \
+            dist/tests/adapters/treehouse-correction.test.js
+
+      - name: Commit the exact GREEN delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'MNFS Automation'
+          git config user.email 'development.conexus@gmail.com'
+          git add \
+            src/adapters/treehouse.ts \
+            src/runtime/paths.ts \
+            tests/adapters/treehouse-correction.test.ts \
+            tests/adapters/treehouse.test.ts
+          git commit -m 'fix: align Treehouse config discovery with HOME'
+          test -z "$(git status --porcelain)"
+          echo "GREEN_COMMIT=$(git rev-parse HEAD)" | tee -a "$GITHUB_ENV"
+
+      - name: Verify complete committed GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run verify
+          test -z "$(git status --porcelain)"
+          echo "MNFS_TASK14_A3_GREEN=VERIFIED"
+
+      - name: Publish by fast-forward only
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_head="$(git ls-remote origin refs/heads/design/mis-002-m01 | cut -f1)"
+          test "$remote_head" = "68b646570318c557233caef5551161115b5649f2"
+          git push origin HEAD:refs/heads/design/mis-002-m01
+          published="$(git ls-remote origin refs/heads/design/mis-002-m01 | cut -f1)"
+          test "$published" = "$GREEN_COMMIT"
+          echo "MNFS_TASK14_A3_GREEN_PUBLISHED=$published"

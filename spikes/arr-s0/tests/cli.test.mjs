@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parseCliArgs } from '../src/cli.mjs';
+import { executeCli, parseCliArgs } from '../src/cli.mjs';
 
 test('accepts only the three frozen CLI forms', () => {
   assert.deepEqual(parseCliArgs(['preflight', '--json']), { command: 'preflight', json: true });
@@ -37,4 +37,21 @@ test('json flag is mandatory for the frozen machine interface', () => {
   assert.throws(() => parseCliArgs(['preflight']), /invalid ARR-S0 CLI/u);
   assert.throws(() => parseCliArgs(['run']), /invalid ARR-S0 CLI/u);
   assert.throws(() => parseCliArgs(['report', '--run-id', 'arr-s0-20260807t120000000z-a1b2c3']), /invalid ARR-S0 CLI/u);
+});
+
+test('run preserves the dedicated execution-authority environment when no explicit token override exists', async () => {
+  let seenOptions;
+  await assert.rejects(
+    () => executeCli(['run', '--json'], {
+      repoRoot: '/home/example/src/mnfs',
+      env: { MNFS_ARR_S0_EXECUTE_AUTHORIZATION: 'exact-token' },
+      identitiesLoader: async (_repoRoot, options) => {
+        seenOptions = options;
+        throw new Error('stop-after-authority-options');
+      },
+    }),
+    /stop-after-authority-options/u,
+  );
+  assert.equal(Object.prototype.hasOwnProperty.call(seenOptions, 'executionAuthorizationToken'), false);
+  assert.equal(seenOptions.env.MNFS_ARR_S0_EXECUTE_AUTHORIZATION, 'exact-token');
 });

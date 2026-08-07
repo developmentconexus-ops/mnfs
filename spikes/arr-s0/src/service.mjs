@@ -16,6 +16,8 @@ import { observeRepositoryIdentity } from './probes/repository.mjs';
 import { deriveS0Verdict } from './verdict.mjs';
 
 const POSITIVE_NODE = Object.freeze([24, 18, 0]);
+const SHA_PATTERN = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u;
+const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 
 function nodeVersionAtLeast(value, minimum = POSITIVE_NODE) {
   const match = String(value ?? '').match(/^v?(\d+)\.(\d+)\.(\d+)/u);
@@ -32,6 +34,38 @@ function isLinuxOwnedAbsolute(value) {
   if (typeof value !== 'string' || !path.isAbsolute(value)) return false;
   const normalized = path.normalize(value);
   return normalized !== '/mnt' && !normalized.startsWith(`/mnt${path.sep}`);
+}
+
+function requireExecutionAuthorization(identities, source = null) {
+  const authority = identities?.executionAuthorization;
+  if (!identities?.plan || !identities?.contract) {
+    throw new TypeError('ARR-S0 run requires exact plan and contract identities');
+  }
+  if (!authority || typeof authority !== 'object' || Array.isArray(authority)) {
+    throw new TypeError('ARR-S0 run requires exact GATE-S0-EXECUTE execution authorization');
+  }
+  if (authority.gate !== 'GATE-S0-EXECUTE') {
+    throw new TypeError('ARR-S0 execution authorization gate must be GATE-S0-EXECUTE');
+  }
+  if (!SHA_PATTERN.test(authority.baseCommitSha ?? '')) {
+    throw new TypeError('ARR-S0 execution authorization base commit is invalid');
+  }
+  if (!DIGEST_PATTERN.test(authority.contractHash ?? '') || authority.contractHash !== identities.contract.hash) {
+    throw new TypeError('ARR-S0 execution authorization contract hash does not match');
+  }
+  if (!Number.isSafeInteger(authority.verificationRunId) || authority.verificationRunId <= 0) {
+    throw new TypeError('ARR-S0 execution authorization verification run is invalid');
+  }
+  if (!DIGEST_PATTERN.test(authority.tokenHash ?? '')) {
+    throw new TypeError('ARR-S0 execution authorization token hash is invalid');
+  }
+  if (Object.hasOwn(authority, 'operatorToken')) {
+    throw new TypeError('ARR-S0 execution authorization must not retain the raw Operator token');
+  }
+  if (source?.commitSha && authority.baseCommitSha !== source.commitSha) {
+    throw new TypeError('ARR-S0 execution authorization source commit does not match preflight source');
+  }
+  return structuredClone(authority);
 }
 
 async function defaultInspect({ repoRoot, stateRoot }) {
@@ -142,18 +176,25 @@ export async function runS0({
   preflight = preflightS0,
   collect = collectDefaultS0,
 } = {}) {
-  if (!identities?.plan || !identities?.contract) throw new TypeError('ARR-S0 run requires exact plan and contract identities');
+  const executionAuthorization = requireExecutionAuthorization(identities);
   const canonicalRunId = requireRunId(runId);
   const preflightResult = await preflight({ repoRoot, stateRoot });
   if (!preflightResult?.ok) throw new Error('ARR-S0 preflight blocked');
   const source = preflightResult.facts?.repository?.source;
   if (!source) throw new Error('ARR-S0 preflight did not establish repository identity');
+  requireExecutionAuthorization(identities, source);
 
   const resolvedStateRoot = preflightResult.stateRoot ?? await resolveS0StateRoot(stateRoot === undefined ? {} : { stateRoot });
   const runRoot = await resolveS0RunRoot(canonicalRunId, { stateRoot: resolvedStateRoot });
   const evidenceRecords = [];
 
-  let state = createInitialRunState({ runId: canonicalRunId, source, ...identities });
+  let state = createInitialRunState({
+    runId: canonicalRunId,
+    source,
+    plan: identities.plan,
+    contract: identities.contract,
+    executionAuthorization,
+  });
   const createdMeta = await writeCanonicalJsonArtifact(runRoot, 'state/created.json', state);
   evidenceRecords.push(artifactRecord('state-created', createdMeta));
 
@@ -209,6 +250,7 @@ export async function runS0({
     schemaVersion: 1,
     runId: canonicalRunId,
     source: structuredClone(collected.source ?? source),
+    executionAuthorization: structuredClone(executionAuthorization),
     hostIdentity: structuredClone(collected.hostIdentity ?? null),
     capabilities: structuredClone(collected.observations ?? []),
     capabilityClasses: structuredClone(classes),
@@ -272,6 +314,9 @@ export async function reportS0({ runId, stateRoot } = {}) {
   if (sha256Bytes(manifestBytes) !== state.manifestHash) errors.push('manifest hash does not match finalized state');
   if (sha256Bytes(resultBytes) !== state.resultHash) errors.push('result hash does not match finalized state');
   if (result.manifest?.sha256 !== state.manifestHash) errors.push('result manifest hash does not match finalized state');
+  if (JSON.stringify(result.executionAuthorization) !== JSON.stringify(state.executionAuthorization)) {
+    errors.push('result execution authorization does not match finalized state');
+  }
 
   const integrity = { ok: errors.length === 0, errors };
   const verdict = integrity.ok

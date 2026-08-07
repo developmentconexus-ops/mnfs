@@ -20,7 +20,7 @@ document_type: product_roadmap
 form: reference
 authority: generated_projection
 status: generated
-version: 2.0.0
+version: 2.1.0
 owners:
   - developmentconexus-ops
 generated_from:
@@ -28,21 +28,24 @@ generated_from:
 related:
   - DOC-PRODUCT-BLUEPRINT
   - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
+  - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
+  - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
 ---
 
 <!-- GENERATED — DO NOT EDIT
 Source: ${sourceRel}
 Generator: scripts/generate-roadmap.mjs
-Generator version: 1
+Generator version: 2
 -->
 
 # MNFS capability roadmap
 
-**Status:** Accepted architecture baseline  
-**Version:** 2.0.0  
-**Current gate:** AB1 — Architecture Baseline and Contract Reconciliation
+**Status:** M2 Opportunity Replan — Architecture Realization Review  
+**Version:** 2.1.0  
+**Current program:** ARR-S0 → ARR-S1/ARR-S2 → conditional ARR-S2W → ARR-S3 → evidence-backed M2 Replan  
+**Exact execution authority:** see \`docs/tracking/STATUS.md\`
 
-> Edit the canonical Product Blueprint Section 12 and regenerate this projection.
+> Edit the canonical Product Blueprint Section 12 and regenerate this projection. The roadmap describes product/program sequence; the exact bounded execution gate is tracking authority and must not be hard-coded here.
 
 ---
 

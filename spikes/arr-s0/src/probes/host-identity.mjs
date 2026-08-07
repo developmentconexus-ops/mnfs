@@ -1,4 +1,5 @@
-import { readFile as fsReadFile } from 'node:fs/promises';
+import { lstat as fsLstat, readFile as fsReadFile } from 'node:fs/promises';
+import path from 'node:path';
 import { runProbeCommand } from '../process.mjs';
 
 const FIXED_ENV = Object.freeze({ PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' });
@@ -36,14 +37,54 @@ function parseGitVersion(text) {
 
 export function classifyLinuxFilesystem(filesystemType) {
   const value = String(filesystemType ?? '').trim().toLowerCase();
-  if (!value) return { state: 'UNKNOWN', rationale: 'repository filesystem type was not observed' };
+  if (!value) return { state: 'UNKNOWN', rationale: 'filesystem type was not observed' };
   if (REVIEWED_WINDOWS_BACKED_FILESYSTEMS.has(value)) {
-    return { state: 'UNSUPPORTED', rationale: `repository filesystem ${value} is Windows-backed or otherwise outside the ARR-S0 Linux-owned boundary` };
+    return { state: 'UNSUPPORTED', rationale: `filesystem ${value} is Windows-backed or otherwise outside the ARR-S0 Linux-owned boundary` };
   }
   if (REVIEWED_LINUX_OWNED_FILESYSTEMS.has(value)) {
-    return { state: 'SUPPORTED', rationale: `repository filesystem ${value} is on the reviewed Linux-owned allowlist` };
+    return { state: 'SUPPORTED', rationale: `filesystem ${value} is on the reviewed Linux-owned allowlist` };
   }
-  return { state: 'UNKNOWN', rationale: `repository filesystem ${value} is not on the reviewed ARR-S0 filesystem allowlist` };
+  return { state: 'UNKNOWN', rationale: `filesystem ${value} is not on the reviewed ARR-S0 filesystem allowlist` };
+}
+
+async function nearestExistingAncestor(target, lstat) {
+  let current = path.resolve(target);
+  while (true) {
+    try {
+      const stats = await lstat(current);
+      if (stats.isSymbolicLink?.()) throw new TypeError(`filesystem observation path is a symlink: ${current}`);
+      return current;
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error;
+      const parent = path.dirname(current);
+      if (parent === current) throw new Error(`no existing filesystem ancestor for ${target}`);
+      current = parent;
+    }
+  }
+}
+
+export async function observeFilesystemOwnership(target, {
+  lstat = fsLstat,
+  runCommand = runProbeCommand,
+} = {}) {
+  if (typeof target !== 'string' || !path.isAbsolute(target)) {
+    throw new TypeError('filesystem observation target must be absolute');
+  }
+  const observedPath = await nearestExistingAncestor(target, lstat);
+  const result = await runCommand({
+    argv: ['/usr/bin/stat', '-f', '-c', '%T', observedPath],
+    cwd: '/',
+    env: { ...FIXED_ENV },
+    timeoutMs: 5000,
+    outputLimitBytes: READ_LIMIT,
+  });
+  const filesystemType = result.exitCode === 0 ? result.stdout.toString('utf8').trim().toLowerCase() : '';
+  const classification = classifyLinuxFilesystem(filesystemType);
+  return {
+    ...classification,
+    filesystemType,
+    observedPath,
+  };
 }
 
 export function normalizeHostIdentity({

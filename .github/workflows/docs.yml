@@ -20,6 +20,7 @@ on:
       - 'scripts/test-arr-spike-contract-binding.mjs'
       - 'scripts/test-arr-s0-contract-consistency.mjs'
       - 'scripts/run-arr-s0-tests.mjs'
+      - 'scripts/run-documentation-tests.mjs'
       - 'README.md'
       - 'AGENTS.md'
       - 'package.json'
@@ -48,6 +49,7 @@ on:
       - 'scripts/test-arr-spike-contract-binding.mjs'
       - 'scripts/test-arr-s0-contract-consistency.mjs'
       - 'scripts/run-arr-s0-tests.mjs'
+      - 'scripts/run-documentation-tests.mjs'
       - 'package.json'
       - 'package-lock.json'
       - '.github/workflows/docs.yml'
@@ -65,6 +67,4 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
-      - run: npm run build --silent
-      - name: Prepared docs wrapper only
-        run: npm run docs:test:prepared
+      - run: npm run verify

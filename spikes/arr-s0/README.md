@@ -24,7 +24,7 @@ Contract acceptance is not execution authority. The exact runtime Operator token
 MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=<accepted-plan-git-blob> contract_sha256=<exact-contract-sha256> base_sha=<exact-canonical-commit> verify_run=<exact-successful-workflow-run> scope=canonical-host-probe-only
 ```
 
-The execution-authority token is authenticated against the accepted plan blob and SHA-256 recomputed from the exact accepted contract bytes **before any Git or host observation occurs**. Only then may the loader observe the repository commit and revalidate `base_sha`. A missing, malformed, broader, stale or differently bound token fails closed.
+The execution-authority token is authenticated against the accepted plan blob and SHA-256 recomputed from the exact accepted contract bytes **before any Git observation or host observation occurs**. Only then may the loader observe the repository commit and revalidate `base_sha`. A missing, malformed, broader, stale or differently bound token fails closed.
 
 The raw token is consumed by the control plane only. It is never passed to probe subprocesses and is never persisted; durable Evidence retains only its hash-bound authority projection (`gate`, plan blob, base commit, contract hash, verification run and token SHA-256).
 

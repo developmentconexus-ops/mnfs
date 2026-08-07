@@ -34,6 +34,13 @@ assert.match(contract, /^version: 0\.1\.0$/mu, 'S0 contract draft version must r
 assert.match(contract, /GATE-S0-EXECUTE/u, 'S0 contract must name the separate real-host execution gate');
 assert.match(contract, /real host probe[^\n]*(?:PROHIBITED|prohibited)/iu, 'S0 contract must explicitly prohibit real host probing before GATE-S0-EXECUTE');
 assert.match(contract, /PHYSICALLY_PLAUSIBLE[^\n]*does not[^\n]*named candidate/iu, 'S0 contract must preserve class-hint semantics');
+assert.match(contract, /MNFS_ARR_S0_EXECUTE_AUTHORIZATION/u, 'S0 contract must name the dedicated runtime execution-authority channel');
+assert.match(contract, /MNFS_AUTHORIZE_ARR_S0_EXECUTE[^\n]*plan_blob[^\n]*contract_sha256[^\n]*base_sha[^\n]*verify_run[^\n]*canonical-host-probe-only/u, 'S0 contract must document the exact execution token binding');
+assert.match(contract, /state[- ]root filesystem[^\n]*(?:allowlist|reviewed|stat)/iu, 'S0 contract must require state-root filesystem proof');
+assert.match(contract, /no-replace|hard-link|hard link/iu, 'S0 contract must document no-replace artifact publication');
+assert.doesNotMatch(contract, /atomic rename/iu, 'S0 contract must not claim replace-capable rename publication');
+assert.match(readme, /MNFS_ARR_S0_EXECUTE_AUTHORIZATION/u, 'ARR-S0 README must document the dedicated runtime execution-authority channel');
+assert.match(readme, /no-replace|hard-link|hard link/iu, 'ARR-S0 README must document no-replace publication');
 
 const capabilitySection = section(contract, '## 4. Required host capability observations', '## 5. Generic capability classes');
 const classSection = section(contract, '## 5. Generic capability classes', '## 6. Mechanical overall Verdict');

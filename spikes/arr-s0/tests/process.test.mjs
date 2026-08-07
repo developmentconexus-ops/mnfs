@@ -29,7 +29,8 @@ if (mode === 'inspect') {
   process.stdout.write('x'.repeat(Number(rest[0])));
 } else if (mode === 'descendant') {
   const marker = rest[0];
-  spawn(process.execPath, ['-e', \`const fs=require('node:fs'); setTimeout(()=>fs.writeFileSync(${JSON.stringify('${marker}')},'alive'), 500); setInterval(()=>{},1000);\`], { stdio: 'ignore' });
+  const childCode = "const fs=require('node:fs'); const marker=" + JSON.stringify(marker) + "; setTimeout(()=>fs.writeFileSync(marker,'alive'),500); setInterval(()=>{},1000);";
+  spawn(process.execPath, ['-e', childCode], { stdio: 'ignore' });
   setInterval(() => {}, 1000);
 }
 `, 'utf8');

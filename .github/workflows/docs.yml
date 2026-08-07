@@ -75,5 +75,7 @@ jobs:
         run: npm run test:tc01
       - name: Verify component - ARR-S0
         run: npm run test:arr-s0
-      - name: Verify component - prepared docs
-        run: npm run docs:check:prepared
+      - name: Verify component - prepared docs tests
+        run: npm run docs:test:prepared
+      - name: Verify component - documentation validator
+        run: node scripts/validate-docs.mjs

@@ -17,6 +17,10 @@ const capabilitySpecText = await readFile(path.join(root, 'docs/capabilities/CAP
 const domainModelText = await readFile(path.join(root, 'docs/product/blueprint/02-domain-model.md'), 'utf8');
 const mcrmText = await readFile(path.join(root, 'docs/product/CAPABILITY-REALIZATION-METHOD.md'), 'utf8');
 const adrIndexText = await readFile(path.join(root, 'docs/adr/README.md'), 'utf8');
+const roadmapGeneratorText = await readFile(path.join(root, 'scripts/generate-roadmap.mjs'), 'utf8');
+const agentsText = await readFile(path.join(root, 'AGENTS.md'), 'utf8');
+const documentationMapText = await readFile(path.join(root, 'docs/DOCUMENTATION-MAP.md'), 'utf8');
+const toolingText = await readFile(path.join(root, 'docs/tooling-adoption.md'), 'utf8');
 const adrFiles = {
   'ADR-0001': 'docs/adr/0001-pi-first-wsl2.md',
   'ADR-0003': 'docs/adr/0003-worktree-write-tracks.md',
@@ -221,6 +225,46 @@ for (const [previous, successor] of [
   assert.ok((successorMeta.supersedes ?? []).includes(previous), `${successor} must reciprocally supersede ${previous}`);
   assert.equal(successorMeta.status, 'accepted', `${successor} must be accepted provider-neutral authority`);
 }
+
+assert.match(roadmapGeneratorText, /M2 Opportunity Replan/u);
+assert.match(roadmapGeneratorText, /ARR-S0/u);
+assert.match(roadmapGeneratorText, /docs\/tracking\/STATUS\.md/u);
+assert.doesNotMatch(roadmapGeneratorText, /AB1 — Architecture Baseline and Contract Reconciliation/u);
+
+const canonicalFreshReadPath = [
+  'docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md',
+  'docs/product/CAPABILITY-REALIZATION-METHOD.md',
+  'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md',
+  'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md',
+  'docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md',
+];
+let previousReadPathIndex = -1;
+for (const rel of canonicalFreshReadPath) {
+  const nextIndex = agentsText.indexOf(rel);
+  assert.ok(nextIndex >= 0, `AGENTS missing current ARR read-path item: ${rel}`);
+  assert.ok(nextIndex > previousReadPathIndex, `AGENTS read order is wrong around ${rel}`);
+  previousReadPathIndex = nextIndex;
+}
+assert.match(agentsText, /MIS-002\/M02[^\n]*SUPERSEDED/iu);
+assert.match(agentsText, /ARR-S0[^\n]*PROHIBITED/iu);
+
+for (const id of [
+  'ADR-0013',
+  'ADR-0014',
+  'ADR-0015',
+  'DESIGN-LAYERED-AGENT-EXECUTION-PLANNING',
+  'PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM',
+]) {
+  assert.ok(documentationMapText.includes(id), `Documentation Map missing ${id}`);
+}
+assert.match(documentationMapText, /M2 — Secure One-Worker Vertical Slice[^\n]*OPPORTUNITY_REPLAN/u);
+assert.match(documentationMapText, /MIS-002\/M02[\s\S]{0,160}SUPERSEDED_AS_EXECUTION_PATH/u);
+assert.match(documentationMapText, /ARR-S0[\s\S]*ARR-S3/u);
+
+assert.match(toolingText, /projection of current capability-realization decisions/u);
+assert.match(toolingText, /no production winner selected/u);
+assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
+assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];

@@ -1,0 +1,50 @@
+name: ARR P1 F01 RED Transformer
+
+on:
+  push:
+    branches:
+      - reconcile/arr-p1-f01-red-transform
+
+permissions:
+  contents: write
+
+jobs:
+  red:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: reconcile/arr-p1-f01-red-transform
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - run: npm ci
+      - name: Apply reviewed RED test transform
+        run: node scripts/arr-p1-f01-red-transform.mjs
+      - name: Prove F01 RED
+        shell: bash
+        run: |
+          set +e
+          npm run docs:test > /tmp/f01-red.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/f01-red.log
+          if [ "$status" -eq 0 ]; then
+            echo 'Expected F01 RED but docs:test passed.' >&2
+            exit 1
+          fi
+          grep -F 'STATUS current phase must be P1 review' /tmp/f01-red.log
+      - name: Remove transport-only machinery
+        run: |
+          rm scripts/arr-p1-f01-red-transform.mjs
+          rm .github/workflows/arr-p1-f01-red-transform.yml
+      - name: Commit RED test only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --stat
+          git commit -m 'test: catch stale P1 authorization status'
+          git push origin HEAD:reconcile/arr-p1-f01-red-transform

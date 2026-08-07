@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.15.0
+version: 1.16.0
 owners:
   - developmentconexus-ops
 related:
@@ -18,6 +18,7 @@ related:
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
+  - ACCEPTANCE-ARR-GATE-P0-PLAN-APPROVAL
   - ACCEPTANCE-CAP-EXECUTION-R3
   - ACCEPTANCE-MIS-002-REPLAN
   - ACCEPTANCE-M2-UNBLOCK
@@ -50,9 +51,10 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
 - **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
-- **Current phase:** `GATE-P0 — Architecture Reconciliation + ARR Plan Review` under Issue #23.
-- **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — PROPOSED / REVIEW_READY.
-- **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — PROPOSED / REVIEW_READY.
+- **Current phase:** `ARR P1 — Pre-Spike Reconciliation Review` under Issue #23 / PR #24.
+- **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — ACCEPTED — GATE-P0 — blob `52033adcdfb7163f63606034b9912942b018f38e`.
+- **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — ACCEPTED — GATE-P0 — blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`.
+- **Current P1 tranche:** A1–A4 + B1 implemented and verified in PR #24; finding P1-F01 is the authorized tracking correction required before P1 review can close.
 - **Superseded prior planning container:** Issue #21 — prior `MIS-002/M02` R5 path; do not resume under revision 5.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
@@ -131,18 +133,18 @@ Pre-Spike reconciliation
 
 No concrete Agent Runtime, process sandbox, microVM or workspace substrate has been selected.
 
-## Plan verification evidence
+## Plan and tranche verification evidence
 
 ```text
-Master plan 0.2.0 commit: e798b2a4a58e52318147b7bc17cc76b8f4616d83
-Documentation workflow:    31180374347 — SUCCESS
+GATE-P0 master-plan blob:   52033adcdfb7163f63606034b9912942b018f38e — ACCEPTED
+GATE-P0 ARR-S0-plan blob:   3e78445fcbcca360f612edefd025c6cb0f84f8e5 — ACCEPTED
 
-ARR-S0 plan 0.2.0 commit:  59a1ff8ca20bbbb1a0170bd3eb68da68d86169af
-Verification job:          92872990047 — SUCCESS
-Command:                   npm run verify — SUCCESS
+P1 authorized scope:        A1, A2, A3, A4, B1
+P1 review surface:          PR #24
+P1-F01 correction scope:    docs/tracking/STATUS.md + documentation regression test
 ```
 
-These runs validate the planning/documentation package only. They are not ARR-S0 host Evidence.
+The accepted GATE-P0 package approves plan authority only. The P1 execution authorization is separately bounded to A1–A4 + B1, plus the explicit P1-F01 correction. None of this is ARR-S0 host Evidence or authorization to execute ARR-S0.
 
 ## Current authorization boundary
 
@@ -150,26 +152,19 @@ These runs validate the planning/documentation package only. They are not ARR-S0
 M01 implementation / closeout:             ACCEPTED / CLOSED
 D1–D4 + Architecture Synthesis:             APPROVED
 Execution Planning Design 1.0.0:            ACCEPTED — D-016
-Master ARR program plan 0.2.0:              PROPOSED / REVIEW_READY
-ARR-S0 plan 0.2.0:                          PROPOSED / REVIEW_READY
-Pre-Spike reconciliation execution:         PROHIBITED pending plan approval/gate
-ARR-S0 harness implementation:              PROHIBITED pending later exact gate
-ARR-S0 real host probe:                      PROHIBITED pending later exact gate
+Master ARR program plan 0.2.0:              ACCEPTED — GATE-P0
+ARR-S0 plan 0.2.0:                          ACCEPTED — GATE-P0
+ARR P1 A1-A4 + B1 + P1-F01:                 IMPLEMENTED / VERIFIED / REVIEW_REQUIRED
+ARR-S0 harness implementation:              PROHIBITED pending GATE-S0-IMPLEMENT
+ARR-S0 real host probe:                      PROHIBITED pending later GATE-S0-EXECUTE
 ARR-S1/S2/S2W/S3 execution:                 PROHIBITED pending their later exact gates
 MIS-002 revision 5 M02 implementation:       PROHIBITED / SUPERSEDED PATH
 Production Worker dispatch:                 PROHIBITED
 Automatic delivery / merge:                 NOT AUTHORIZED
 ```
 
-## Immediate next action — GATE-P0
+## Immediate next action — P1 review
 
-Operator reviews and either accepts or requests changes to both:
+Operator reviews PR #24 and either accepts P1 or requests further changes. P1 acceptance does not implicitly authorize ARR-S0 implementation, real host probing, candidate execution, M02 production work, Worker dispatch or automatic merge.
 
-```text
-docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md
-docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md
-```
-
-Acceptance of `GATE-P0` approves the plan package only. It does **not** authorize pre-Spike reconciliation changes, S0 harness implementation, host probing or any candidate execution.
-
-After plan acceptance, issue a separate exact execution authorization for the first bounded tranche. The recommended first tranche is pre-Spike semantic/authority reconciliation (Program Tasks A1-A4 + B1). After that tranche is reviewed/accepted, issue the separate `GATE-S0-IMPLEMENT` and later `GATE-S0-EXECUTE` as required by the accepted S0 plan.
+After P1 is accepted and merged, or an exact later S0 base SHA explicitly includes the accepted P1 tree, the next possible gate is a separate `GATE-S0-IMPLEMENT` authorizing deterministic construction/testing of the ARR-S0 host-capability harness. Real probing of the canonical WSL2 host remains separately gated by the later `GATE-S0-EXECUTE`.

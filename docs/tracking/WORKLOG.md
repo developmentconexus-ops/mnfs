@@ -13,6 +13,14 @@ owners:
 
 ## 2026-08-07
 
+### M01 formal acceptance and methodology reconciliation
+
+- PR #19 merged into `main` at `a783cc5854163b0f1abc8a944286a540f9b653b8`, completing the post-PR M01 production-integration and closeout delta.
+- Operator decision `D-009` formally accepted and closed `MIS-002/M01` without claiming the unfinished real R2/R3 scenarios as PASS.
+- Reclassified real R2 crash/recovery and R3 lineage as non-blocking supplemental hardening under Issue #20, with required completion or re-disposition before Product Milestone M2 exit (MCRM R7/R8), or earlier if M02 exposes a concrete dependency.
+- Clarified the evidence method: intermediate Mission Milestone acceptance is criterion-driven rather than test-inventory-driven; supplemental hardening may be deferred only with explicit destination, rationale, residual risk and Operator authority and only when it is not the sole proof of a deciding criterion/MUST requirement.
+- Reconciled canonical entrypoints in commit `662aade371e4c60a6ec7f199c9944fdb454c67c9`; closed Issue #16 and opened Issue #21 for `MIS-002/M02` R5 microdesign preparation/review only. M02 production implementation and Pi Worker dispatch remain prohibited.
+
 ### MIS-002/M01 closeout publication
 
 - Committed the reviewed post-PR M01 implementation and closeout delta as `a531702` (`feat: close out M01 durable execution core`).

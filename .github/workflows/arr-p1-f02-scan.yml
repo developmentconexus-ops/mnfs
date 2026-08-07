@@ -1,0 +1,34 @@
+name: ARR P1 F02 Constitutional Scan
+
+on:
+  push:
+    branches:
+      - reconcile/arr-p1-f02-scan
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan realization-specific language
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            docs/product/blueprint/01-product-vision.md
+            docs/product/blueprint/02-domain-model.md
+            docs/product/blueprint/03-lifecycle-flows.md
+            docs/product/blueprint/04-engineering-system.md
+            docs/product/blueprint/05-system-architecture.md
+            docs/product/blueprint/06-roles-authority.md
+            docs/product/blueprint/07-quality-evidence.md
+            docs/product/blueprint/08-state-recovery.md
+            docs/product/blueprint/09-context-memory.md
+            docs/product/blueprint/10-security-isolation.md
+            docs/product/blueprint/12-capability-roadmap.md
+            docs/product/blueprint/13-documentation-governance.md
+          )
+          grep -nE 'Pi|Treehouse|E0|E1|E2|E3|E4|AB1|AS-01|AS-02|worktree|Worktree' "${files[@]}" || true

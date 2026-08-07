@@ -21,24 +21,36 @@ function exactTokens(text, pattern) {
   return [...new Set(text.match(pattern) ?? [])].sort();
 }
 
+function section(text, heading, nextHeading) {
+  const start = text.indexOf(heading);
+  assert.notEqual(start, -1, `missing contract section: ${heading}`);
+  const end = nextHeading ? text.indexOf(nextHeading, start + heading.length) : text.length;
+  assert.notEqual(end, -1, `missing next contract section: ${nextHeading}`);
+  return text.slice(start, end);
+}
+
 assert.match(contract, /^status: proposed$/mu, 'S0 contract must remain proposed before Operator approval');
 assert.match(contract, /^version: 0\.1\.0$/mu, 'S0 contract draft version must remain 0.1.0 before approval');
 assert.match(contract, /GATE-S0-EXECUTE/u, 'S0 contract must name the separate real-host execution gate');
 assert.match(contract, /real host probe[^\n]*(?:PROHIBITED|prohibited)/iu, 'S0 contract must explicitly prohibit real host probing before GATE-S0-EXECUTE');
 assert.match(contract, /PHYSICALLY_PLAUSIBLE[^\n]*does not[^\n]*named candidate/iu, 'S0 contract must preserve class-hint semantics');
 
+const capabilitySection = section(contract, '## 4. Required host capability observations', '## 5. Generic capability classes');
+const classSection = section(contract, '## 5. Generic capability classes', '## 6. Mechanical overall Verdict');
+const verdictSection = section(contract, '## 6. Mechanical overall Verdict', '## 7. Evidence integrity');
+
 assert.deepEqual(
-  exactTokens(contract, /\bHOST-[A-Z0-9-]+\b/gu),
+  exactTokens(capabilitySection, /\bHOST-[A-Z0-9-]+\b/gu),
   [...S0_CAPABILITY_IDS].sort(),
   'human S0 contract capability IDs must exactly match harness constants',
 );
 assert.deepEqual(
-  exactTokens(contract, /\bCLASS-[A-Z0-9-]+\b/gu),
+  exactTokens(classSection, /\bCLASS-[A-Z0-9-]+\b/gu),
   [...S0_CLASS_IDS].sort(),
   'human S0 contract class IDs must exactly match harness constants',
 );
 assert.deepEqual(
-  exactTokens(contract, /\b(?:ACCEPT_WITH_LIMITATIONS|ACCEPT|BLOCKED|REJECT)\b/gu),
+  exactTokens(verdictSection, /\b(?:ACCEPT_WITH_LIMITATIONS|ACCEPT|BLOCKED|REJECT)\b/gu),
   [...S0_VERDICT_VALUES].sort(),
   'human S0 contract verdict vocabulary must exactly match harness constants',
 );

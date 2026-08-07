@@ -17,8 +17,28 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current constitutional direction
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+The current product architecture is:
+
+```text
+Thin Sovereign Semantic Kernel
++ Validation-first Planning
++ Replaceable Open Agent Runtime
++ Property-based Execution Environment
++ Provider-neutral Git Result Boundary
++ Independent Evidence / Gates
++ Capability-first Sourcing
+```
+
+Pi, Treehouse and the historical fixed E1 realization remain useful implementation Evidence and candidates where applicable; they are not constitutional requirements after D-012 through D-015. Product M2 keeps its secure one-Worker outcome but its realization is an Opportunity Replan and revision-5 M02 must not be implemented.
+
 ---
 
 # 1. Visão do Produto

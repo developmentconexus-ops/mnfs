@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current development/documentation governance
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+The Development Governance Method and accepted **Layered Agent Execution Planning** design govern how architecture inquiry, Decisions and bounded execution relate. MCRM remains the single Capability Realization lifecycle; execution-planning completeness is a derived projection rather than a second manual checklist.
+
+The tooling registry is a projection of capability-realization Decisions, never architecture authority. Accepted Decisions/ADRs/specifications/contracts remain canonical sources; generated Blueprint/Roadmap/Coverage artifacts must be regenerated and checked from their editable sources.
+
+Plan approval may be bound to exact reviewed hashes/blobs. Superseded historical documents are preserved as history instead of silently rewritten into a different decision.
+
 ---
 
 # 13. Governança Documental, Fontes de Verdade e Protocolo de Evolução

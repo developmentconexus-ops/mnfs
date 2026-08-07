@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current domain semantics
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+**Runtime Session is observational**. Role, ActorRun, Attempt, Authority, Claim, Evidence and Verdict remain MNFS domain truth; losing or replacing a runtime Session cannot lose or redefine them.
+
+A WriteTrack semantically owns an isolated mutable workspace, not an inherent Git worktree. Its physical realization may be a worktree, COW state, private rootfs/disk or another selected substrate. Accepted result identity remains provider-neutral Git base/result identity.
+
+Child criteria and bounded work declare upward `CONTRIBUTES_TO` lineage to parent outcomes. Execution Environment identity/bindings describe independent properties and selected concrete realization; this reconciliation does not create speculative generic provider entities.
+
 ---
 
 # 2. Modelo de Domínio Canônico

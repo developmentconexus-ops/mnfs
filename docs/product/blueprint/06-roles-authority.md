@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current Role and Authority rules
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+Role authority belongs to MNFS identities, not runtime Sessions. Planner, Investigator, Writer, Reviewer/Validator, Integrator and QA receive role-specific compiled packs with current Authority, target, proof and effect boundaries.
+
+**Validator does not receive write authority by default**. The Writer implements and produces a Claim; independent verification/validation produces Receipts and Findings; only the governed MNFS Gate or explicitly authorized Operator transition may accept where policy assigns that authority.
+
+Fresh Actor orientation and structured handoff must be sufficient without the previous conversation. Session continuity is an optimization only.
+
 ---
 
 # 6. Papéis, Autoridades, Decisões Humanas e Modelo de Autonomia

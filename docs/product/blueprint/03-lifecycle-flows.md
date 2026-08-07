@@ -17,8 +17,35 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current planning and execution lifecycle
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+The current lifecycle is validation-first:
+
+```text
+Operator Intent
+→ Investigation / Localization
+→ Validation Baseline
+→ adversarial correctness review
+→ Milestone / Feature decomposition + CONTRIBUTES_TO coverage
+→ Execution Design & Readiness
+→ Fresh bounded Actor work
+→ Claim
+→ deterministic Receipts
+→ independent Review / Validation
+→ Finding routing
+→ composition validation
+→ Mission outcome validation
+→ Closeout / Learning
+```
+
+Correctness and approved realization are frozen for bounded execution; tactical Actor planning may adapt to observations inside those bounds. Findings route to Correction/new Attempt, a new bounded Feature when scope already permits it, or Decision/Replan when correctness, architecture, security or outcome is wrong.
+
 ---
 
 # 3. Lifecycle e Fluxos Ponta a Ponta

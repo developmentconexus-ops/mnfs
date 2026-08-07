@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current security and Execution Environment semantics
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+The separate planes remain: Domain Authority, Tool Capability, process/compute isolation, Execution Environment lifecycle, Credential brokerage, Network/Egress policy, External Effect Gate and Evidence/Audit/Reconcile.
+
+**E0 → E4 ordinal ladder is superseded** as the semantic model. Environment requirements are independent properties such as agent placement, compute location, isolation boundary, workspace model, persistence, network posture, credential delivery, resource limits, recovery capability and Git result boundary.
+
+`CONTROL_SIDE` placement is preferred when strict MNFS-brokered capabilities are provable so provider credentials stay outside untrusted execution. `IN_ENVIRONMENT` is used when whole-agent containment is required, with brokered credential/inference delivery preferred over raw secrets. Protected execution fails closed. No concrete sandbox/microVM/workspace substrate is selected until the approved ARR-S0/S2/S2W evidence gates.
+
 ---
 
 # 10. Segurança, Isolamento, Ambientes, Credenciais e Efeitos Externos

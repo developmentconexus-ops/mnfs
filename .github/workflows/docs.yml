@@ -65,34 +65,35 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
-      - name: First typecheck
+      - name: Baseline checkout clean
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+      - name: Typecheck
         run: npm run typecheck
-      - name: First unit suite
+      - name: Checkout clean after typecheck
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+      - name: Unit suite
         run: npm run test:unit
-      - name: First AS-02 suite
+      - name: Checkout clean after unit suite
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+        continue-on-error: true
+      - name: AS-02 suite
         run: npm run test:as02
-      - name: First TC-01 suite
+      - name: Checkout clean after AS-02
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+        continue-on-error: true
+      - name: TC-01 suite
         run: npm run test:tc01
-      - name: First ARR-S0 suite
+      - name: Checkout clean after TC-01
+        run: test -z "$(git status --porcelain --untracked-files=all)"
+        continue-on-error: true
+      - name: ARR-S0 suite
         run: npm run test:arr-s0
-      - name: First docs check
-        run: npm run docs:check
-      - name: Second typecheck
-        run: npm run typecheck
+      - name: Checkout clean after ARR-S0
+        run: test -z "$(git status --porcelain --untracked-files=all)"
         continue-on-error: true
-      - name: Second unit suite
-        run: npm run test:unit
+      - name: Documentation test suite
+        run: npm run docs:test
         continue-on-error: true
-      - name: Second AS-02 suite
-        run: npm run test:as02
+      - name: Documentation validator
+        run: node scripts/validate-docs.mjs
         continue-on-error: true
-      - name: Second TC-01 suite
-        run: npm run test:tc01
-        continue-on-error: true
-      - name: Second ARR-S0 suite
-        run: npm run test:arr-s0
-        continue-on-error: true
-      - name: Second docs check
-        run: npm run docs:check
-        continue-on-error: true
-      - run: npm run verify

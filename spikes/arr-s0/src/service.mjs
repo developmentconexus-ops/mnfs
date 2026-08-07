@@ -40,13 +40,13 @@ function isLinuxOwnedAbsolute(value) {
 
 function requireExecutionAuthorization(identities, source = null) {
   if (!identities?.plan || !identities?.contract) {
-    throw new TypeError('ARR-S0 host observation requires exact plan and contract identities');
+    throw new TypeError('ARR-S0 execution authorization requires exact plan and contract identities for GATE-S0-EXECUTE');
   }
   if (identities.plan.version !== S0_PLAN_VERSION) {
-    throw new TypeError('ARR-S0 host observation plan version does not match accepted implementation plan');
+    throw new TypeError('ARR-S0 execution authorization plan version does not match accepted implementation plan');
   }
   if (identities.contract.version !== '1.0.0') {
-    throw new TypeError('ARR-S0 host observation requires accepted contract version 1.0.0');
+    throw new TypeError('ARR-S0 execution authorization requires accepted contract version 1.0.0');
   }
   const authority = requireAuthenticatedExecutionAuthorization(identities.executionAuthorization, {
     planGitBlob: S0_PLAN_GIT_BLOB,

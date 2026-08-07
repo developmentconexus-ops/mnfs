@@ -1,0 +1,44 @@
+name: ARR P1 F02 Fresh Review Scan
+
+on:
+  push:
+    branches:
+      - review/arr-p1-f02-fresh-20260807
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Report residual realization language with nearest heading
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          files = [
+            'docs/product/blueprint/01-product-vision.md',
+            'docs/product/blueprint/02-domain-model.md',
+            'docs/product/blueprint/03-lifecycle-flows.md',
+            'docs/product/blueprint/04-engineering-system.md',
+            'docs/product/blueprint/05-system-architecture.md',
+            'docs/product/blueprint/06-roles-authority.md',
+            'docs/product/blueprint/07-quality-evidence.md',
+            'docs/product/blueprint/08-state-recovery.md',
+            'docs/product/blueprint/09-context-memory.md',
+            'docs/product/blueprint/10-security-isolation.md',
+            'docs/product/blueprint/12-capability-roadmap.md',
+            'docs/product/blueprint/13-documentation-governance.md',
+          ]
+          pat = re.compile(r'\b(?:Pi|Treehouse|E0|E1|E2|E3|E4|AB1|AS-01|AS-02|worktree|worktrees)\b', re.I)
+          for rel in files:
+              heading = '<frontmatter>'
+              for n, line in enumerate(Path(rel).read_text().splitlines(), 1):
+                  if line.startswith('#'):
+                      heading = line
+                  if pat.search(line):
+                      print(f'{rel}:{n}\n  under: {heading}\n  text: {line}')
+          PY

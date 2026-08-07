@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current Role and Authority rules
+
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
+
+Role authority belongs to MNFS identities, not runtime Sessions. Planner, Investigator, Writer, Reviewer/Validator, Integrator and QA receive role-specific compiled packs with current Authority, target, proof and effect boundaries.
+
+**Validator does not receive write authority by default**. The Writer implements and produces a Claim; independent verification/validation produces Receipts and Findings; only the governed MNFS Gate or explicitly authorized Operator transition may accept where policy assigns that authority.
+
+Fresh Actor orientation and structured handoff must be sufficient without the previous conversation. Session continuity is an optimization only.
+
 ---
 
 # 6. Papéis, Autoridades, Decisões Humanas e Modelo de Autonomia
@@ -101,8 +113,8 @@ Exemplo:
 
 ```text
 MNFS Lead role
-├── Pi session S-001
-└── Pi session S-002 após restart
+├── Runtime Session S-001
+└── Runtime Session S-002 após restart
 ```
 
 ## 6.2.4 Process
@@ -132,7 +144,7 @@ Authority e Permission não são equivalentes.
 Exemplo:
 
 ```text
-Worker possui permissão de escrever no worktree.
+Worker possui permissão de escrever apenas no isolated mutable workspace autorizado.
 Worker não possui autoridade para aceitar o próprio Claim.
 ```
 
@@ -236,7 +248,7 @@ A necessidade de autorização é definida pelo Repository Profile e pela polít
 
 - escolher worker;
 - escrever prompts;
-- abrir worktrees;
+- abrir isolated mutable workspaces;
 - executar testes;
 - reconciliar estado;
 - interpretar logs;
@@ -316,7 +328,7 @@ Dentro do contrato:
 - alocação de workers;
 - seleção entre Golden Paths equivalentes;
 - retry permitido;
-- reuso de worktree;
+- reuso de isolated mutable workspace;
 - escalada de risco;
 - pedido de review;
 - investigação adicional;
@@ -414,7 +426,7 @@ Planner transforma intenção e evidência em proposta estruturada.
 Planner pode ser:
 
 - o próprio Lead;
-- Pi especializado;
+- Actor especializado via Agent Runtime;
 - outro modelo;
 - combinação de investigadores;
 - co-planner independente.
@@ -701,7 +713,7 @@ Integrator compõe Write Tracks aceitas.
 - mascarar conflito;
 - realizar refactor amplo;
 - corrigir Feature sem Correction;
-- destruir worktree de origem;
+- destruir isolated mutable workspace de origem;
 - integrar Track não aceita.
 
 ## 6.11.5 Conflict classes
@@ -880,7 +892,7 @@ Actor pode executar ação reversível e isolada.
 
 Exemplos:
 
-- editar worktree;
+- editar isolated mutable workspace;
 - criar branch;
 - rodar testes;
 - gerar artefato;
@@ -1029,7 +1041,7 @@ Altera ordem ou estratégia operacional sem alterar outcome.
 
 Exemplos:
 
-- reusar worktree;
+- reusar isolated mutable workspace;
 - trocar Worker Run;
 - serializar Track;
 - executar investigation;
@@ -1192,7 +1204,7 @@ Status mostra:
 | Ação | Worker | Reviewer | Runner | Integrator | Lead | Operator |
 |---|---:|---:|---:|---:|---:|---:|
 | Ler contrato | Sim | Sim | Sim | Sim | Sim | Sim |
-| Alterar worktree | Sim | Não | Não | Só integração | Limitado | Não |
+| Alterar isolated mutable workspace | Sim | Não | Não | Só integração | Limitado | Não |
 | Criar Claim | Solicita | Não | Não | Não | Pode coordenar | Não |
 | Produzir Receipt | Não autoritativo | Não | Sim | Sim para integração | Não | Não |
 | Abrir Finding | Pode reportar | Sim | Sim mecânico | Sim | Sim | Sim |
@@ -1329,7 +1341,7 @@ No cloud, capabilities poderão se tornar enforcement técnico.
 - retry local;
 - escolha de worker;
 - execução de testes;
-- criação de worktree;
+- criação de isolated mutable workspace;
 - correção pequena;
 - review adicional;
 - integração local reversível.
@@ -1618,7 +1630,7 @@ Writer Worker Contract
 ├── Context Pack
 ├── Claim schema
 ├── authority policy
-├── Pi skill/template
+├── runtime skill/template
 └── process adapter
 ```
 

@@ -17,8 +17,22 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Capability-first sourcing
+
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
+
+Material realization uses the canonical vocabulary:
+
+`OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT`.
+
+MNFS owns differentiated semantics and authority. Commodity machinery is adopted/adapted when a replaceable substrate eliminates meaningful machinery without becoming a second source of truth. Prefer the lowest sufficient upstream layer, one primary production substrate per concern and a concrete implementation until a second real consumer earns a generic abstraction.
+
+Engineering Standards, applicability, Waivers, Golden Paths and proof ownership remain MNFS semantics; repository-native linters, scanners, typecheckers and other mature tools remain replaceable machinery behind those semantics.
+
 ---
 
 # 4. Engineering System e Evolução para Software Factory
@@ -258,7 +272,7 @@ Exemplos:
 - reconcile;
 - migration expand/contract;
 - release gradual;
-- worktree preservado após integração falha.
+- isolated mutable workspace preservado após integração falha.
 
 Safety Net não justifica ignorar qualidade.
 

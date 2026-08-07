@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current security and Execution Environment semantics
+
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
+
+The separate planes remain: Domain Authority, Tool Capability, process/compute isolation, Execution Environment lifecycle, Credential brokerage, Network/Egress policy, External Effect Gate and Evidence/Audit/Reconcile.
+
+**E0 → E4 ordinal ladder is superseded** as the semantic model. Environment requirements are independent properties such as agent placement, compute location, isolation boundary, workspace model, persistence, network posture, credential delivery, resource limits, recovery capability and Git result boundary.
+
+`CONTROL_SIDE` placement is preferred when strict MNFS-brokered capabilities are provable so provider credentials stay outside untrusted execution. `IN_ENVIRONMENT` is used when whole-agent containment is required, with brokered credential/inference delivery preferred over raw secrets. Protected execution fails closed. No concrete sandbox/microVM/workspace substrate is selected until the approved ARR-S0/S2/S2W evidence gates.
+
 ---
 
 # 10. Segurança, Isolamento, Ambientes, Credenciais e Efeitos Externos
@@ -52,7 +64,7 @@ O objetivo é impedir que:
 - um dependency script comprometa o host;
 - dois Tracks contaminem o mesmo banco ou provider;
 - um agent opere produção apenas porque possui credentials;
-- uma extensão Pi não revisada entre no trusted computing base;
+- uma third-party Agent Runtime extension não revisada entre no trusted computing base;
 - uma sandbox failure degrade silenciosamente para execução irrestrita.
 
 No MNFS:
@@ -147,7 +159,7 @@ Controla se uma tool call pode ser iniciada.
 
 Pode ser aplicada por:
 
-- Pi extension;
+- Agent Runtime extension;
 - allowlist;
 - denylist;
 - permission prompt;
@@ -338,7 +350,7 @@ Falíveis ou potencialmente não confiáveis:
 - web content;
 - logs;
 - generated files;
-- third-party Pi packages;
+- third-party Agent Runtime packages/extensions;
 - provider responses;
 - downloaded binaries.
 
@@ -354,7 +366,7 @@ Porém, prompt injection ou conteúdo comprometido pode fazê-los agir como cód
 
 ### T01 — Host write
 
-Worker altera arquivo fora do worktree.
+Worker altera arquivo fora do bound isolated mutable workspace.
 
 ### T02 — Secret read
 
@@ -402,14 +414,14 @@ Dependency executa código inesperado durante setup.
 
 ### T08 — Compromised extension
 
-Pi extension executa com os privilégios do usuário.
+Third-party Agent Runtime extension may execute with the privileges of its hosting process.
 
 ### T09 — Policy tampering
 
 Worker altera:
 
 - sandbox config;
-- Pi settings;
+- Agent Runtime settings;
 - MNFS policy;
 - CI workflow;
 - credentials binding.
@@ -463,7 +475,7 @@ Clone ou PR executa scripts maliciosos.
 
 ### T20 — False isolation assumption
 
-Sistema acredita estar protegido apenas por worktree, WSL ou container.
+Sistema acredita estar protegido apenas por mutable-workspace isolation, WSL ou container.
 
 ---
 
@@ -480,7 +492,7 @@ MNFS Core / Policy
    ▼
 Execution Boundary
    │
-   ├── Pi Actor
+   ├── Actor through selected Agent Runtime
    ├── repository code
    ├── dependencies
    └── tool processes
@@ -496,14 +508,13 @@ Inclui:
 - MNFS binary/code;
 - effective policy;
 - SQLite;
-- Pi runtime;
-- loaded Pi extensions;
-- sandbox runtime;
-- process adapter;
-- Treehouse;
-- operating-system enforcement.
+- selected Agent Runtime boundary and loaded runtime extensions;
+- selected Execution Environment / isolation realization;
+- selected Mutable Workspace realization;
+- process/runtime adapters;
+- operating-system enforcement used by the selected realization.
 
-Cada third-party package adicionado ao Pi pode ampliar a TCB.
+Cada third-party runtime/extension/package introduzido na execution path pode ampliar a TCB.
 
 ## 10.6.2 Untrusted content boundary
 
@@ -590,17 +601,17 @@ Contém:
 
 Autoriza temporariamente o uso de uma Environment Instance.
 
-É diferente do Treehouse Lease.
+É diferente do binding/lease do isolated mutable workspace. The concrete resource identity is realization-specific:
 
 ```text
-Treehouse Lease
-→ worktree físico
+Workspace Binding / Lease
+→ physical isolated mutable workspace
 
 Environment Lease
-→ runtime e recursos de execução
+→ runtime / compute / isolation resources
 ```
 
-No M2 local, ambos podem estar vinculados à mesma Track sem exigir um sistema genérico separado.
+The M01 Treehouse Lease is historical incumbent Evidence for the workspace side. M2 may bind workspace and Environment resources to the same Track without requiring a generic provider framework.
 
 ## 10.7.4 Credential Grant
 
@@ -622,93 +633,46 @@ Não presume malícia.
 
 ---
 
-# 10.8 Isolation levels
+# 10.8 Execution Environment property model
 
-## 10.8.1 E0 — Inspection
+The E0–E4 ordinal ladder is historical vocabulary and is not the current semantic model. An Execution Environment is described by independent properties so capability, locality and security are not conflated.
 
-Uso:
+## 10.8.1 Required properties
 
-- Planning;
-- read-only Investigation;
-- initial Review;
-- status;
-- documentation analysis.
+```text
+agentPlacement       CONTROL_SIDE | IN_ENVIRONMENT
+computeLocation      LOCAL_WSL2 | LOCAL_VM | REMOTE | ...
+isolationBoundary   PROCESS | CONTAINER | MICROVM | VM | REMOTE_SANDBOX | ...
+workspaceModel       WORKTREE | COW_FS | PRIVATE_ROOTFS | VOLUME | ...
+persistence          EPHEMERAL | ATTEMPT | TRACK | REUSABLE
+networkPosture       DENY_ALL | ALLOWLIST | BROKERED
+credentialDelivery   NONE | BROKERED | TEMPORARY_GRANT
+resourceLimits       explicit CPU/memory/process/time limits when required
+resultBoundary       baseCommitSha + resultTreeSha (+ optional resultCommitSha)
+recoveryCapability   observable/reconcilable external identity and disposition
+```
 
-Propriedades:
+These properties are domain-visible requirements. They do not imply a provider factory or one adapter per property.
 
-- sem escrita no Repository;
-- sem credentials;
-- network off por default;
-- read scope delimitado;
-- sem external mutation.
+## 10.8.2 Agent placement
 
-## 10.8.2 E1 — Local Worktree + OS Sandbox
+CONTROL_SIDE is preferred when MNFS can expose a strict brokered capability surface while provider auth remains outside untrusted execution. IN_ENVIRONMENT is used when the whole agent must be contained; brokered inference/credentials are preferred over raw secrets.
 
-Target inicial para Writers locais.
+## 10.8.3 Bounded local Writer baseline
 
-Propriedades:
+For the M2 outcome, the selected local realization must prove at minimum:
 
-- Treehouse worktree;
-- Pi tool interception;
-- sandbox do process tree;
-- write somente no worktree e temp/runtime explicitamente permitidos;
-- deny read de credential paths;
-- network off por default;
-- sem production credentials;
-- protected policy paths;
-- process/resource limits quando disponíveis.
+- exact isolated mutable workspace;
+- protected host reads/writes denied;
+- no raw production credentials;
+- contract-required network posture, default deny for the current M2 proof;
+- child-process containment appropriate to the selected boundary;
+- fail-closed initialization;
+- deterministic Git result extraction;
+- fresh Recovery/Reconcile;
+- safe resource disposition.
 
-## 10.8.3 E2 — Dev Container
-
-Uso:
-
-- toolchain complexa;
-- múltiplos services;
-- parity local/CI;
-- environment drift;
-- setup repetível.
-
-Propriedades:
-
-- environment-as-code;
-- container user não root quando possível;
-- mounts explícitos;
-- lifecycle commands;
-- side services;
-- security policy separada.
-
-## 10.8.4 E3 — Remote Sandbox
-
-Uso:
-
-- código não confiável;
-- paralelismo elevado;
-- host local não deve executar código;
-- múltiplos environments;
-- lifecycle remoto;
-- preview e services.
-
-Candidatos futuros:
-
-- Daytona;
-- E2B;
-- Ona-compatible environment.
-
-## 10.8.5 E4 — Dedicated VM ou microVM
-
-Uso:
-
-- multi-tenant;
-- high-risk untrusted execution;
-- customer-isolated workloads;
-- stronger kernel boundary.
-
-Referência:
-
-- Firecracker-based platform;
-- VM sandbox provider.
-
-MNFS não construirá esse runtime diretamente no local roadmap.
+The concrete runtime, process sandbox, microVM or workspace substrate is selected only after ARR Evidence.
 
 ---
 
@@ -743,7 +707,7 @@ WSL pode expor:
 
 ## 10.9.3 Política
 
-Para Worker E1:
+Para o protected local Writer profile:
 
 - Repository deve estar no filesystem Linux;
 - host mounts são negados por default;
@@ -754,7 +718,7 @@ Para Worker E1:
 
 ---
 
-# 10.10 Pi security integration
+# 10.10 Historical / Incumbent Runtime Security Reference — Pi
 
 ## 10.10.1 Pi extensions e packages
 
@@ -814,7 +778,7 @@ Não é suficiente adicionar uma skill dizendo:
 
 ---
 
-# 10.11 Candidate local sandbox
+# 10.11 Historical / Incumbent Evidence — local process sandbox candidate study
 
 ## 10.11.1 Composição
 
@@ -848,10 +812,10 @@ filesystem:
     - ~/.kube
     - Windows host mounts
   allowRead:
-    - worktree
+    - bound isolated mutable workspace
     - required system/tool paths
   allowWrite:
-    - worktree
+    - bound isolated mutable workspace
     - attempt temp
     - approved cache
   denyWrite:
@@ -897,7 +861,7 @@ Nunca executar sem sandbox como fallback silencioso.
 
 ```text
 CANDIDATE
-→ ADOPT ONLY AFTER AS-02
+→ HISTORICAL CANDIDATE; current selection requires ARR-S2 Evidence
 ```
 
 ---
@@ -973,7 +937,7 @@ NOT UNIVERSALLY REQUIRED
 
 ---
 
-# 10.13 Remote sandbox market scan
+# 10.13 Historical market/reference scan — remote execution
 
 ## 10.13.1 Daytona
 
@@ -1070,7 +1034,7 @@ Risco:
 Classificação:
 
 ```text
-E4 ARCHITECTURE REFERENCE
+HISTORICAL MICROVM ARCHITECTURE REFERENCE
 ```
 
 ---
@@ -1079,53 +1043,42 @@ E4 ARCHITECTURE REFERENCE
 
 ## 10.14.1 Inputs
 
-- Role;
-- Repository trust;
-- code trust;
-- risk;
-- required services;
-- credentials;
-- external effects;
-- concurrency;
-- duration;
-- cost;
-- host sensitivity.
+- Role and Actor placement;
+- repository/code trust;
+- required mutation and proof;
+- isolation and workspace requirements;
+- network/credential/effect posture;
+- services and resource limits;
+- concurrency/duration/cost;
+- host sensitivity and recovery needs.
 
 ## 10.14.2 Selection
 
-```text
-read-only trusted repo
-→ E0
+Selection compiles required properties first, then chooses the lowest sufficient proven realization. Examples:
 
-local bounded write, trusted repo
-→ E1
+```text
+read-only trusted investigation
+→ CONTROL_SIDE + no mutation + bounded read surface
+
+local bounded Writer
+→ isolated mutable workspace + proven local isolation + contract network/credential posture
 
 complex reproducible stack
-→ E2 + security controls
+→ environment-as-code may be added; it is not automatically a security boundary
 
-untrusted code or high parallelism
-→ E3
-
-multi-tenant/high-assurance
-→ E4
+untrusted/high-assurance workload
+→ stronger proven isolation boundary, potentially microVM/VM/remote
 ```
 
-## 10.14.3 Escalation
+## 10.14.3 Escalation and failure
 
-Risk pode elevar o Environment.
-
-Não reduzir silenciosamente quando adapter estiver indisponível.
+Risk may require stronger properties. If the required realization is unavailable or cannot prove the contract:
 
 ```text
-required E3 unavailable
-→ BLOCK
+BLOCK / REPLAN
 ```
 
-Não:
-
-```text
-fallback to E1 with same credentials
-```
+Never silently downgrade isolation, credentials, network posture or effect authority.
 
 ---
 
@@ -1136,7 +1089,7 @@ fallback to E1 with same credentials
 Read pode ser:
 
 ```text
-WORKTREE_ONLY
+BOUND_WORKSPACE_ONLY
 REPOSITORY
 DECLARED_DEPENDENCY_PATHS
 SYSTEM_TOOLCHAIN
@@ -1146,14 +1099,14 @@ HOST_BROAD
 Default Writer:
 
 ```text
-WORKTREE + required toolchain
+BOUND_MUTABLE_WORKSPACE + required toolchain
 ```
 
 ## 10.15.2 Write model
 
 Write é allow-only:
 
-- worktree;
+- bound isolated mutable workspace;
 - Attempt temp;
 - approved cache;
 - generated artifacts path.
@@ -1169,7 +1122,7 @@ Default:
 - Approved Contracts;
 - runtime SQLite;
 - active policy;
-- `.pi` security/extensions;
+- selected Agent Runtime security/extensions/config;
 - secret files;
 - shell profiles;
 - system executables;
@@ -1413,7 +1366,7 @@ Secret é entregue:
 - no momento necessário;
 - sem aparecer no prompt;
 - sem entrar no Context Pack;
-- sem ser escrito no worktree.
+- sem ser escrito no bound isolated mutable workspace.
 
 ## 10.18.6 Redaction
 
@@ -1522,7 +1475,7 @@ Quando ferramenta exige file:
 
 - create in protected temp;
 - strict permissions;
-- exclude from worktree;
+- exclude from bound mutable workspace;
 - delete after use;
 - record cleanup;
 - never commit.
@@ -1654,7 +1607,7 @@ Mutation no workspace isolado.
 
 Exemplos:
 
-- edit worktree;
+- edit bound mutable workspace;
 - temp files;
 - local build;
 - local database disposable.
@@ -1972,7 +1925,7 @@ MNFS usa NIST SSDF 1.1 como linguagem de referência para:
 
 Não como programa de compliance completo no MVP.
 
-## 10.29.2 Pi package supply chain
+## 10.29.2 Agent Runtime extension/package supply chain
 
 Regras:
 
@@ -2060,7 +2013,7 @@ SEC-EFFECT-002
 Production effects use a separate executor and receipt.
 
 SEC-EXT-001
-Pi extensions and packages are pinned and reviewed.
+Agent Runtime extensions and packages are pinned and reviewed.
 
 SEC-SUPPLY-001
 Dependency installation follows a declared setup policy.
@@ -2088,13 +2041,15 @@ O ordinary Writer Pack inclui referências, não secrets.
 
 ```text
 Environment:
-  E1 LOCAL_SANDBOX
-Policy hash:
+  agentPlacement: <approved CONTROL_SIDE or IN_ENVIRONMENT>
+  isolationBoundary: <approved realization/property>
+  workspaceBinding: <current binding ref>
+Execution policy hash:
   sha256:...
 Network:
-  OFF
+  <contract posture; DENY_ALL for current M2 proof>
 Credentials:
-  NONE
+  NONE for ordinary M2 Writer
 Allowed effects:
   X0, X1
 Protected paths:
@@ -2237,20 +2192,17 @@ SECURITY_BLOCKED
 
 ---
 
-# 10.34 AS-02 — Local Pi Sandbox on WSL2
+# 10.34 Historical / Incumbent Evidence — AS-02 Local Pi Sandbox on WSL2
 
 ## 10.34.1 Objetivo
 
 Validar:
 
 ```text
+Historical revision-5 realization:
 Pi sandbox extension pattern
-+
-@anthropic-ai/sandbox-runtime
-+
-Treehouse worktree
-+
-WSL2
++ Anthropic Sandbox Runtime
++ Treehouse worktree
 ```
 
 ## 10.34.2 Ambiente
@@ -2384,48 +2336,44 @@ Substituir ou remover quando:
 
 # 10.35 M2 security slice
 
-M2 não implementa o Security System completo.
-
-Precisa garantir:
+M2 does not implement the complete future Security System. It proves one bounded Writer under the selected, evidence-backed local realization.
 
 ```text
-one Pi Worker
+one bounded Writer Actor
 does not mean
-full user authority
+full host-user authority
 ```
 
 ## Inclui
 
-- explicit cwd;
-- `shell: false`;
-- arguments separated;
+- exact workspace/environment binding;
+- explicit cwd/capability boundary where applicable;
+- shell/process invocation controlled by the selected realization;
 - environment allowlist;
-- no production credentials;
-- network off by default;
-- protected paths;
-- external effects denied;
-- security policy hash;
-- AS-02 or equivalent accepted local boundary before general execution;
-- security failure reflected in state;
-- no fail-open.
+- no raw production credentials;
+- contract-bound network posture, deny-by-default for the current local proof;
+- protected host/policy paths;
+- external effects denied beyond the contract;
+- frozen effective execution/security policy hash;
+- fail-closed initialization;
+- security failure reflected in durable state/Evidence;
+- provider-neutral Git result identity;
+- Fresh Recovery without Session/transcript authority.
 
 ## Não inclui
 
-- generic Credential Broker;
+- generic Credential Broker without a named consumer;
 - full Effect Executor;
-- Dev Container engine;
-- remote sandbox;
+- remote/cloud control plane;
 - production access;
-- OIDC;
-- SBOM;
 - multi-tenant security;
 - security dashboard.
 
 ## Contract reconciliation
 
-O Approved Contract de MIS-002 precisará ser reconciliado depois do Blueprint.
+Production M02 only resumes after ARR-S0/S1/S2/(S2W)/S3, substrate-selection Decision and superseding CAP-EXECUTION/MIS-002 authority. Historical AS-02 Evidence may inform the incumbent comparison but is not a current prerequisite or selecting gate.
 
-A arquitetura não deve permitir que “spawn Pi worker” signifique “spawn unrestricted Pi under the user account.”
+The architecture never permits Writer dispatch to degrade silently to unrestricted host execution.
 
 ---
 
@@ -2433,15 +2381,15 @@ A arquitetura não deve permitir que “spawn Pi worker” signifique “spawn u
 
 | Tool ou conceito | Decisão | Papel |
 |---|---|---|
-| Pi tool interception | Adotar | capability enforcement |
-| Pi sandbox example | Adotar como pattern | local integration reference |
-| Anthropic Sandbox Runtime | Candidato | E1 OS sandbox |
+| Pi tool interception | Historical/incumbent Evidence | prior capability-enforcement realization |
+| Pi sandbox example | Historical/reference | local integration Evidence |
+| Anthropic Sandbox Runtime | Incumbent candidate for ARR-S2 | process-envelope Evidence |
 | Dev Container Spec | Suportar | environment-as-code |
 | Dev Container CLI | Candidato | local/CI environment adapter |
-| Daytona | Future primary candidate | E3 remote workspace |
-| E2B | Future alternative | narrow remote sandbox |
+| Daytona | Historical remote reference | reassess only with fresh provenance |
+| E2B | remote reference/candidate | fresh provenance required |
 | Ona | Reference platform | Software Factory/environment model |
-| Firecracker | Future reference | E4 isolation |
+| Firecracker | low-level isolation reference | not a selected MNFS realization |
 | 1Password CLI | Optional binding | local process secret injection |
 | SOPS | Optional binding | encrypted config in Git |
 | GitHub OIDC | Preferred CI pattern | short-lived cloud identity |
@@ -2455,7 +2403,7 @@ A arquitetura não deve permitir que “spawn Pi worker” signifique “spawn u
 
 ## Antes do M2 unrestricted worker
 
-Executar AS-02.
+Historical AS-02 has already produced incumbent Evidence; current selection proceeds through ARR-S0/S2.
 
 ## M2
 
@@ -2486,7 +2434,7 @@ Entregar:
 Avaliar:
 
 - Daytona;
-- E2B;
+- remote sandbox candidate/reference;
 - customer/VPC requirements;
 - environment costs;
 - persistence;
@@ -2496,7 +2444,7 @@ Avaliar:
 
 Definir:
 
-- E4 boundary;
+- required isolation boundary;
 - workload identity;
 - per-tenant isolation;
 - secrets broker;
@@ -2516,8 +2464,8 @@ Decide:
 
 - Authority, permission, sandbox e Environment são separados;
 - WSL2/worktree não são sandbox;
-- E1 é o target local do Writer;
-- Sandbox Runtime é candidato após AS-02;
+- o local Writer requer property-based isolation proven by ARR Evidence;
+- process sandbox realizations are selected by ARR-S2 Evidence;
 - fail-open é proibido.
 
 ## ADR-0007 — Credential grants and external effects
@@ -2535,7 +2483,7 @@ Decide:
 
 - Dev Containers são optional Environment Contract;
 - Daytona é future primary remote candidate;
-- E2B é alternativa;
+- remote sandbox candidates remain deferred until a named consumer;
 - Ona e Firecracker são referências;
 - Environment adapters não viram Domain Authority.
 
@@ -2582,7 +2530,7 @@ Não construir agora:
 9. Sensitive reads são denied.
 10. Active security policy é imutável ao Worker.
 11. Sandbox failure não executa sem proteção.
-12. Pi packages são trusted code.
+12. Agent Runtime extensions/packages admitted to the execution path are trusted code and therefore pinned/reviewed.
 13. Third-party extensions são pinned e revisadas.
 14. Worker não recebe user environment inteiro.
 15. Secrets não entram em Context Pack.
@@ -2598,20 +2546,20 @@ Não construir agora:
 25. Unknown external effect exige Reconcile.
 26. Domain allowlist não é proteção suficiente contra exfiltration.
 27. Docker socket é denied por default.
-28. `/mnt/c` é denied para E1 por default.
+28. `/mnt/c` is denied by default for the current protected local Writer profile.
 29. Untrusted content não concede Authority.
 30. Dependency setup ocorre sob policy.
 31. Supply-chain score é supporting evidence.
 32. Security Violation não presume malícia.
 33. Incident preserva evidence e revoga credentials.
 34. Remote Environment é adapter substituível.
-35. M2 não executa unrestricted Pi como definição de sucesso.
+35. M2 não executa qualquer Agent Runtime irrestrito como definição de sucesso.
 36. Security tooling entra por spike, Acceptance Criteria e Removal Conditions.
 
 ---
 
 # Decisão resumida da Seção 10
 
-> **O MNFS adota defesa em profundidade e separa Domain Authority, tool capability, process sandbox, execution environment, credential grant, network policy e external-effect gate. O target local do Writer será E1: Treehouse worktree executado por Pi dentro de uma boundary de sistema operacional, com writes allow-only, sensitive reads bloqueados, network off, policy imutável e ausência de production credentials. A integração Pi + Anthropic Sandbox Runtime é candidata e precisa passar pelo AS-02 no WSL2. Dev Containers serão suportados como environment-as-code; Daytona é o principal candidato remoto futuro; E2B é alternativa; Ona e Firecracker são referências. Credentials serão temporárias e process-scoped; external mutations serão governadas por Effect Request, Effect Executor e Effect Receipt. M2 permanecerá simples, mas não poderá equivaler a executar um Pi Worker irrestrito com todos os poderes do usuário.**
+> **O MNFS adota defesa em profundidade e separa Domain Authority, Tool Capability, isolation boundary, Execution Environment, Credential Grant, Network/Egress Policy e External Effect Gate. Environments are defined by independent properties rather than E0–E4 levels. The M2 local Writer must use an isolated mutable workspace, fail-closed proven isolation, no raw production credentials, contract-bounded network posture and provider-neutral Git result identity. Concrete process-sandbox/microVM/workspace/runtime realizations are selected only by ARR Evidence and Decision. Credentials are temporary/brokered where possible; external mutations use Effect Request/Executor/Receipt.**
 
 ---

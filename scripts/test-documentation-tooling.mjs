@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { evaluateReadiness } from './generate-capability-coverage.mjs';
 import { loadDocumentRegistry, parseFrontmatter, resolveDocumentReference, validateJsonSchema } from './document-utils.mjs';
@@ -15,6 +17,28 @@ const traceabilitySchema = JSON.parse(await readFile(path.join(root, 'schemas/ca
 const currentContract = JSON.parse(await readFile(path.join(root, '.mnfs/missions/MIS-002/plan.json'), 'utf8'));
 const capabilitySpecText = await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/SPEC.md'), 'utf8');
 const domainModelText = await readFile(path.join(root, 'docs/product/blueprint/02-domain-model.md'), 'utf8');
+const mcrmText = await readFile(path.join(root, 'docs/product/CAPABILITY-REALIZATION-METHOD.md'), 'utf8');
+const adrIndexText = await readFile(path.join(root, 'docs/adr/README.md'), 'utf8');
+const roadmapGeneratorText = await readFile(path.join(root, 'scripts/generate-roadmap.mjs'), 'utf8');
+const agentsText = await readFile(path.join(root, 'AGENTS.md'), 'utf8');
+const documentationMapText = await readFile(path.join(root, 'docs/DOCUMENTATION-MAP.md'), 'utf8');
+const toolingText = await readFile(path.join(root, 'docs/tooling-adoption.md'), 'utf8');
+const statusText = await readFile(path.join(root, 'docs/tracking/STATUS.md'), 'utf8');
+const decisionsText = await readFile(path.join(root, 'docs/tracking/DECISIONS.md'), 'utf8');
+const arrReviewText = await readFile(path.join(root, 'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md'), 'utf8');
+const p1AcceptanceText = await readFile(path.join(root, 'docs/acceptance/2026-08-07-arr-p1-reconciliation-acceptance.md'), 'utf8');
+const adrFiles = {
+  'ADR-0001': 'docs/adr/0001-pi-first-wsl2.md',
+  'ADR-0003': 'docs/adr/0003-worktree-write-tracks.md',
+  'ADR-0006': 'docs/adr/0006-security-planes-and-local-execution-isolation.md',
+  'ADR-0008': 'docs/adr/0008-reproducible-and-remote-execution-environments.md',
+  'ADR-0013': 'docs/adr/0013-wsl2-host-and-replaceable-agent-runtime.md',
+  'ADR-0014': 'docs/adr/0014-isolated-mutable-workspace-per-write-track.md',
+  'ADR-0015': 'docs/adr/0015-property-based-execution-environments.md',
+};
+const adrTexts = Object.fromEntries(await Promise.all(
+  Object.entries(adrFiles).map(async ([id, rel]) => [id, await readFile(path.join(root, rel), 'utf8')]),
+));
 
 function registryWithCapabilityStatus(status) {
   const documents = new Map(registry.documents);
@@ -179,6 +203,93 @@ assert.match(
   /M2 implementa apenas um Minimal Deterministic Receipt delimitado[^\n]*Golden Proof/iu,
 );
 
+for (const marker of [
+  'R4A — Validation Baseline',
+  'R4B — Decomposition and Allocation',
+  'Fresh Actor',
+  'HANDOFF_REQUIRED',
+  'OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT',
+]) {
+  assert.ok(mcrmText.includes(marker), `MCRM missing accepted execution-planning marker: ${marker}`);
+}
+assert.equal((mcrmText.match(/^# 10\. O ciclo MCRM$/gmu) ?? []).length, 1, 'MCRM must keep one canonical R0-R8 lifecycle');
+assert.match(mcrmText, /R0 Baseline[\s\S]*R8 Closeout and Learning/u);
+
+for (const id of ['ADR-0013', 'ADR-0014', 'ADR-0015']) {
+  assert.ok(adrIndexText.includes(id), `ADR index must include ${id}`);
+}
+for (const [previous, successor] of [
+  ['ADR-0001', 'ADR-0013'],
+  ['ADR-0003', 'ADR-0014'],
+  ['ADR-0006', 'ADR-0015'],
+  ['ADR-0008', 'ADR-0015'],
+]) {
+  const previousMeta = parseFrontmatter(adrTexts[previous], adrFiles[previous]).metadata;
+  const successorMeta = parseFrontmatter(adrTexts[successor], adrFiles[successor]).metadata;
+  assert.equal(previousMeta.status, 'superseded', `${previous} must preserve history as superseded`);
+  assert.equal(previousMeta.superseded_by, successor, `${previous} must point to ${successor}`);
+  assert.ok((successorMeta.supersedes ?? []).includes(previous), `${successor} must reciprocally supersede ${previous}`);
+  assert.equal(successorMeta.status, 'accepted', `${successor} must be accepted provider-neutral authority`);
+}
+
+assert.match(roadmapGeneratorText, /M2 Opportunity Replan/u);
+assert.match(roadmapGeneratorText, /ARR-S0/u);
+assert.match(roadmapGeneratorText, /docs\/tracking\/STATUS\.md/u);
+assert.doesNotMatch(roadmapGeneratorText, /AB1 — Architecture Baseline and Contract Reconciliation/u);
+
+const canonicalFreshReadPath = [
+  'docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md',
+  'docs/product/CAPABILITY-REALIZATION-METHOD.md',
+  'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md',
+  'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md',
+  'docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md',
+];
+let previousReadPathIndex = -1;
+for (const rel of canonicalFreshReadPath) {
+  const nextIndex = agentsText.indexOf(rel);
+  assert.ok(nextIndex >= 0, `AGENTS missing current ARR read-path item: ${rel}`);
+  assert.ok(nextIndex > previousReadPathIndex, `AGENTS read order is wrong around ${rel}`);
+  previousReadPathIndex = nextIndex;
+}
+assert.match(agentsText, /MIS-002\/M02[^\n]*SUPERSEDED/iu);
+assert.match(agentsText, /ARR-S0[^\n]*PROHIBITED/iu);
+
+for (const id of [
+  'ADR-0013',
+  'ADR-0014',
+  'ADR-0015',
+  'DESIGN-LAYERED-AGENT-EXECUTION-PLANNING',
+  'PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM',
+]) {
+  assert.ok(documentationMapText.includes(id), `Documentation Map missing ${id}`);
+}
+assert.match(documentationMapText, /M2 — Secure One-Worker Vertical Slice[^\n]*OPPORTUNITY_REPLAN/u);
+assert.match(documentationMapText, /MIS-002\/M02[\s\S]{0,160}SUPERSEDED_AS_EXECUTION_PATH/u);
+assert.match(documentationMapText, /ARR-S0[\s\S]*ARR-S3/u);
+
+assert.match(toolingText, /projection of current capability-realization decisions/u);
+assert.match(toolingText, /no production winner selected/u);
+assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
+assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
+
+assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — ACCEPTED \/ INTEGRATION_PENDING`/u, 'STATUS current phase must be P1 accepted/integration pending');
+assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
+assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
+assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'STATUS must record P1 GATE-R acceptance');
+assert.match(statusText, /P1-F02 fresh review:[^\n]*Critical 0 \/ Important 0[^\n]*31194963494/u, 'STATUS must record F02 fresh-review evidence');
+assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
+assert.match(statusText, /## Immediate next action — P1 integration decision/u, 'STATUS next action must be P1 integration decision');
+assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
+assert.doesNotMatch(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS must not point to completed F02 fresh review');
+assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
+assert.match(statusText, /PR #24 merge \/ integration:[^\n]*NOT AUTHORIZED/u, 'STATUS must keep P1 integration separately gated');
+assert.match(p1AcceptanceText, /MNFS_ACCEPT_ARR_P1 program_blob=52033adcdfb7163f63606034b9912942b018f38e pr=24 head=02e99b25842562d111488d5c8c7008cb2635f3da findings=critical:0,important:0/u, 'P1 acceptance record must bind the exact Operator token');
+assert.match(decisionsText, /\| D-017 \| 2026-08-07 \| Accept ARR P1 \/ GATE-R[\s\S]*02e99b25842562d111488d5c8c7008cb2635f3da/u, 'D-017 must record exact P1 acceptance authority');
+assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED — D-017/u, 'ARR review must close GATE-R');
+assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-S0-IMPLEMENT — NOT AUTHORIZED/u, 'ARR review must keep S0 implementation unapproved');
+assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must orient fresh actors to accepted P1');
+assert.match(documentationMapText, /ARR P1 A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'Documentation Map must record accepted P1');
+
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];
 assert.equal(validateJsonSchema(schemaCandidate, traceabilitySchema).length, 0);
@@ -244,5 +355,135 @@ assert.equal((await evaluateReadiness(unresolvedSource, registry)).R2.result, 'B
 const missingProof = structuredClone(traceability);
 missingProof.requirements.find((item) => item.level === 'MUST').verifiedBy = [];
 assert.equal((await evaluateReadiness(missingProof, registry)).R2.result, 'BLOCKED');
+
+
+const spikeEvidenceTemp = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-spike-evidence-'));
+try {
+  const artifactRoot = path.join(spikeEvidenceTemp, 'artifacts');
+  await mkdir(artifactRoot, { recursive: true });
+  const rawBytes = Buffer.from('raw-spike-evidence\n', 'utf8');
+  await writeFile(path.join(artifactRoot, 'raw.bin'), rawBytes);
+  const rawSha256 = 'sha256:' + createHash('sha256').update(rawBytes).digest('hex');
+
+  const validSpikeEvidence = {
+    schemaVersion: 1,
+    spikeId: 'ARR-TEST',
+    contractVersion: '1.0.0',
+    runId: 'arr-test-run-001',
+    startedAt: '2026-08-07T12:00:00.000Z',
+    finishedAt: '2026-08-07T12:00:01.000Z',
+    canonicalHost: {
+      kind: 'ubuntu-wsl2',
+      identity: 'fixture-host',
+    },
+    source: {
+      commitSha: 'a'.repeat(40),
+      treeSha: 'b'.repeat(40),
+    },
+    candidate: null,
+    criteria: [
+      {
+        id: 'CRIT-001',
+        required: true,
+        result: 'PASS',
+        artifactRefs: ['raw-001'],
+      },
+    ],
+    rawArtifacts: [
+      {
+        id: 'raw-001',
+        path: 'raw.bin',
+        sha256: rawSha256,
+        sizeBytes: rawBytes.length,
+      },
+    ],
+    limitations: [],
+    measurements: [],
+    verdictInput: {
+      status: 'PASS',
+      reasons: ['all required fixture criteria passed'],
+    },
+  };
+
+  async function invokeSpikeEvidenceValidator(name, evidence) {
+    const evidencePath = path.join(spikeEvidenceTemp, name + '.json');
+    await writeFile(evidencePath, JSON.stringify(evidence, null, 2) + '\n', 'utf8');
+    const result = spawnSync(
+      process.execPath,
+      [
+        path.join(root, 'scripts/validate-docs.mjs'),
+        '--architecture-spike-evidence',
+        evidencePath,
+        '--artifact-root',
+        artifactRoot,
+      ],
+      {
+        cwd: root,
+        encoding: 'utf8',
+        shell: false,
+      },
+    );
+    return {
+      status: result.status,
+      output: String(result.stdout ?? '') + '\n' + String(result.stderr ?? ''),
+    };
+  }
+
+  {
+    const result = await invokeSpikeEvidenceValidator('valid', validSpikeEvidence);
+    assert.equal(result.status, 0, result.output);
+    assert.match(result.output, /Architecture Spike Evidence validation passed/u);
+  }
+
+  {
+    const evidence = structuredClone(validSpikeEvidence);
+    delete evidence.contractVersion;
+    const result = await invokeSpikeEvidenceValidator('missing-contract-version', evidence);
+    assert.notEqual(result.status, 0, 'missing contractVersion must fail');
+    assert.match(result.output, /missing required property contractVersion/u);
+  }
+
+  {
+    const evidence = structuredClone(validSpikeEvidence);
+    evidence.candidate = { id: 'candidate-without-provenance' };
+    const result = await invokeSpikeEvidenceValidator('candidate-without-provenance', evidence);
+    assert.notEqual(result.status, 0, 'candidate without provenance must fail');
+    assert.match(result.output, /missing required property provenance/u);
+  }
+
+  {
+    const evidence = structuredClone(validSpikeEvidence);
+    evidence.rawArtifacts[0].sha256 = 'sha256:not-a-digest';
+    const result = await invokeSpikeEvidenceValidator('invalid-artifact-sha', evidence);
+    assert.notEqual(result.status, 0, 'invalid SHA-256 reference must fail');
+    assert.match(result.output, /does not match/u);
+  }
+
+  {
+    const evidence = structuredClone(validSpikeEvidence);
+    evidence.criteria.push(structuredClone(evidence.criteria[0]));
+    const result = await invokeSpikeEvidenceValidator('duplicate-criterion', evidence);
+    assert.notEqual(result.status, 0, 'duplicate criterion IDs must fail');
+    assert.match(result.output, /duplicate criterion id CRIT-001/u);
+  }
+
+  for (const failingResult of ['FAIL', 'BLOCKED', 'UNKNOWN']) {
+    const evidence = structuredClone(validSpikeEvidence);
+    evidence.criteria[0].result = failingResult;
+    const result = await invokeSpikeEvidenceValidator('pass-with-' + failingResult.toLowerCase(), evidence);
+    assert.notEqual(result.status, 0, 'PASS cannot contain required ' + failingResult);
+    assert.match(result.output, /PASS verdict input cannot include required criterion CRIT-001/u);
+  }
+
+  {
+    const evidence = structuredClone(validSpikeEvidence);
+    evidence.rawArtifacts[0].sha256 = 'sha256:' + '0'.repeat(64);
+    const result = await invokeSpikeEvidenceValidator('artifact-hash-mismatch', evidence);
+    assert.notEqual(result.status, 0, 'artifact hash mismatch must fail');
+    assert.match(result.output, /artifact hash mismatch for raw-001/u);
+  }
+} finally {
+  await rm(spikeEvidenceTemp, { recursive: true, force: true });
+}
 
 console.log('Documentation tooling tests passed.');

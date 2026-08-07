@@ -17,8 +17,18 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current Recovery semantics
+
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
+
+**Fresh Recovery does not depend on runtime transcript**. Recovery loads authoritative MNFS state, observes Git plus selected Environment/workspace/runtime resources, classifies divergence and chooses the safe governed next action.
+
+Runtime Sessions, worktree paths, COW deltas, snapshots, VM disks and remote volumes are observations/execution artifacts, not domain authority. Late or superseded Attempts cannot mutate the current target. A HANDOFF_REQUIRED or interrupted Actor is never reclassified as successful merely because partial work exists.
+
 ---
 
 # 8. Estado, Recovery, Reconcile, Concorrência e Tolerância a Falhas
@@ -34,7 +44,7 @@ Esta seção define como o MNFS permanece correto quando:
 - o processo termina sem Claim;
 - SQLite confirma uma operação, mas a ferramenta externa falha;
 - a ferramenta externa conclui, mas SQLite não registra;
-- um worktree desaparece;
+- um bound isolated mutable workspace desaparece;
 - uma branch diverge;
 - um Receipt fica stale;
 - duas ações concorrentes disputam o mesmo recurso;
@@ -94,9 +104,9 @@ O MNFS também observa:
 
 - filesystem;
 - Git;
-- Treehouse;
+- selected workspace/environment realization;
 - processos;
-- Pi sessions;
+- Runtime Sessions;
 - Lavish;
 - Herdr;
 - browser;
@@ -111,8 +121,8 @@ Exemplo:
 SQLite:
 Lease ACTIVE
 
-Treehouse:
-worktree não encontrado
+Workspace realization:
+mutable workspace not found
 ```
 
 Isso não significa automaticamente que SQLite está errado ou que o Lease deve ser apagado.
@@ -161,30 +171,30 @@ Não participa diretamente de gates.
 
 | Conceito | Autoridade | Observadores secundários |
 |---|---|---|
-| Mission lifecycle | MNFS/SQLite | CLI, Pi, futura UI |
-| Approved Contract | SQLite + artefato versionado | Pi, Git, Lavish |
-| Code tree | Git | MNFS, Worker |
-| Worktree físico | Treehouse + Git | filesystem, MNFS |
-| Lease semântico | MNFS/SQLite | Treehouse |
-| Process existence | sistema operacional | Pi, Herdr |
-| Worker Run state | MNFS/SQLite | process adapter, Pi events, Herdr |
+| Mission lifecycle | MNFS/SQLite | CLI, Agent Runtime, futura UI |
+| Approved Contract | SQLite + artefato versionado | Git, presentation/runtime adapters |
+| Code/result tree | Git | MNFS, Worker |
+| Mutable Workspace binding | MNFS + selected workspace/environment observation | filesystem/Git |
+| Workspace/Environment Lease semântico | MNFS/SQLite | selected realization adapter |
+| Process/runtime existence | execution substrate | Agent Runtime adapter |
+| Worker Run state | MNFS/SQLite | Agent Runtime events/process observations |
 | Claim state | MNFS/SQLite | Worker, CLI |
 | Receipt | MNFS/SQLite + artifact | runner |
 | Terminal presentation | Herdr | Operator |
-| Visual feedback | Lavish até ser consumido | Pi, MNFS |
+| Visual feedback | presentation surface until consumed | Agent Runtime/presentation adapters, MNFS |
 | Decision | MNFS/SQLite + artefato quando necessário | Operator, Lead |
 | Integration candidate | Git + MNFS Integration Run | CI, QA |
 | Evidence artifact | artifact store + hash | Git quando promovido |
 | Quality Posture | MNFS aggregation | docs/dashboard |
 
-## 8.3.1 Pi Session Ledger e memória observacional
+## 8.3.1 Runtime Session history e memória observacional
 
-O arquivo JSONL da Pi Session é o histórico exato daquele processo conversacional.
+Quando o Agent Runtime oferece um ledger/session history exato, ele é Evidence histórica daquela execução e nunca current Mission authority. O Pi JSONL provado anteriormente é um exemplo incumbent dessa categoria.
 
 Uma memória observacional é uma projeção comprimida e probabilística sobre esse histórico.
 
 ```text
-Pi JSONL source entries
+Exact Runtime Session source entries
 → histórico exato da Session
 
 Observations / Reflections
@@ -198,7 +208,7 @@ Uma Session completamente nova recupera a Mission por SQLite, Approved Contract,
 
 ## 8.3.2 Transporte não é durabilidade
 
-Process stdin, Pi queue, WebSocket ou terminal messaging podem entregar ou despertar Actors.
+Process stdin, runtime queue/protocol, WebSocket ou terminal messaging podem entregar ou despertar Actors.
 
 Commands, Decisions, Claims e resultados continuam persistidos no MNFS.
 
@@ -262,9 +272,9 @@ WT-001/A01
 └── WR-002 RUNNING
 ```
 
-## 8.4.4 Worktree é preservável
+## 8.4.4 Isolated mutable workspace é preservável
 
-Worktree representa trabalho físico.
+O isolated mutable workspace representa trabalho físico em progresso.
 
 Ele não é removido enquanto:
 
@@ -314,9 +324,9 @@ insert CLAIM_OPENED Event
 
 SQLite não pode formar transaction ACID com:
 
-- Treehouse;
+- selected workspace/environment realization;
 - Git;
-- processo Pi;
+- Agent Runtime/process execution;
 - Lavish;
 - browser;
 - provider;
@@ -366,11 +376,11 @@ Para efeito externo relevante:
 ```text
 LEASE_REQUESTED persistido
         ↓
-Treehouse get
+selected workspace-realization acquire/materialize
         ↓
 path e lease_id observados
         ↓
-validar worktree
+validar workspace binding
         ↓
 LEASE_ACTIVE persistido
         ↓
@@ -604,7 +614,7 @@ Cada seam mutável possui:
 
 ## 8.10.4 Paralelismo não é apenas Git
 
-Worktrees isolam arquivos.
+Isolated mutable workspaces separam mutation surfaces.
 
 Não isolam:
 
@@ -674,7 +684,7 @@ Não manter transaction aberta enquanto:
 
 - renderiza HTML;
 - chama Git;
-- espera Pi;
+- espera/observa o Agent Runtime;
 - executa teste;
 - chama browser.
 
@@ -698,7 +708,7 @@ CANCELLED
 Podem vir de:
 
 - process PID;
-- Pi lifecycle event;
+- Agent Runtime lifecycle event;
 - session metadata;
 - Herdr;
 - stdout activity;
@@ -873,7 +883,7 @@ Recovery Service:
 - Repository ID;
 - SQLite state;
 - Git state;
-- Treehouse state;
+- workspace/environment realization state;
 - process observations;
 - artifacts;
 - adapter capabilities;
@@ -992,11 +1002,11 @@ Não inferir sucesso.
 
 ### LD-01
 
-SQLite Lease ativo, worktree ausente.
+SQLite binding/lease ativo, mutable workspace ausente.
 
 ### LD-02
 
-Worktree MNFS existe, Lease ausente.
+Mutable workspace MNFS-like existe, binding/lease ausente.
 
 ### LD-03
 
@@ -1008,7 +1018,7 @@ Holder incorreto.
 
 ### LD-05
 
-Path não é worktree real.
+Path/resource não corresponde ao workspace binding esperado.
 
 ## 8.17.2 Git divergence
 
@@ -1022,7 +1032,7 @@ Branch ausente.
 
 ### GD-03
 
-Worktree dirty inesperadamente.
+Mutable workspace dirty inesperadamente.
 
 ### GD-04
 
@@ -1125,7 +1135,7 @@ Candidate SHA não é reproduzível.
 Adotar recurso externo órfão quando:
 
 - identity corresponde;
-- worktree é válido;
+- mutable workspace identity/binding é válido;
 - base é válida;
 - nenhuma outra entidade possui o recurso;
 - policy permite.
@@ -1190,11 +1200,11 @@ Usado quando reparo pode:
 
 | Estado autoritativo | Observação | Classificação | Ação segura inicial |
 |---|---|---|---|
-| Lease REQUESTED | sem worktree | request incompleto | retry ou cancel |
-| Lease REQUESTED | worktree correspondente | órfão adotável | validate + adopt |
-| Lease ACTIVE | worktree existe | healthy | nenhuma |
-| Lease ACTIVE | worktree ausente | divergence | block dispatch |
-| sem Lease | worktree MNFS existe | orphan | inspect/preserve |
+| workspace binding REQUESTED | sem physical mutable workspace | request incompleto | retry ou cancel |
+| workspace binding REQUESTED | matching physical mutable workspace | órfão adotável | validate + adopt |
+| Lease ACTIVE | mutable workspace existe | healthy | nenhuma |
+| Lease ACTIVE | mutable workspace ausente | divergence | block dispatch |
+| sem Lease | mutable workspace MNFS-like existe | orphan | inspect/preserve |
 | Worker STARTING | processo existe | observe boot | aguardar/inspect |
 | Worker STARTING | processo ausente | start failed | retry/new Run |
 | Worker RUNNING | processo existe | healthy | nenhuma |
@@ -1203,8 +1213,8 @@ Usado quando reparo pode:
 | Claim COMPLETED | Receipts ausentes | awaiting verification | run gates |
 | Claim ACCEPTED | tree mudou | stale acceptance | revoke/block |
 | Track ACCEPTED | não integrada | awaiting integration | queue |
-| Track INTEGRATED | worktree existe | cleanup pending | preserve/release |
-| Track RELEASED | worktree existe | cleanup divergence | fenced cleanup |
+| Track INTEGRATED | mutable workspace existe | cleanup pending | preserve/release |
+| Track RELEASED | mutable workspace existe | cleanup divergence | fenced cleanup |
 | Integration RUNNING | process absent | interrupted | inspect candidate |
 | Mission CLOSED | active Track existe | invalid close | block/report |
 
@@ -1239,11 +1249,11 @@ Recovery:
 
 ## 8.20.3 Worker writes code before Claim
 
-Código permanece no worktree.
+Código permanece no isolated mutable workspace.
 
 Recovery:
 
-- Worktree diff;
+- Mutable workspace diff/result tree;
 - Attempt;
 - Worker Run;
 - no Claim.
@@ -1308,7 +1318,7 @@ Validar:
 - head esperado;
 - base;
 - Lease;
-- worktree trust.
+- workspace trust.
 
 ## 8.21.4 CAS semantics
 
@@ -1345,7 +1355,7 @@ Policy calcula re-verificação mínima segura.
 
 ## 8.22.1 Problema
 
-Dois worktrees podem usar o mesmo:
+Dois isolated mutable workspaces podem usar o mesmo:
 
 - database;
 - schema;
@@ -1451,7 +1461,7 @@ Fencing e state version decidem qual transição é válida.
 ## Pause Track
 
 - impede novo Attempt;
-- pode manter worktree;
+- pode manter o isolated mutable workspace;
 - Worker pode ser cancelado ou idle.
 
 ## Resume
@@ -1535,7 +1545,7 @@ Bloquear mutações.
 
 - backup;
 - Git artifacts;
-- worktrees;
+- isolated mutable workspaces;
 - Events;
 - logs;
 - external state.
@@ -1637,7 +1647,7 @@ Remover recursos que não são mais necessários sem perder trabalho ou auditori
 
 ## 8.29.2 Candidatos
 
-- released worktrees;
+- released isolated mutable workspaces;
 - obsolete branches;
 - old generated HTML;
 - temp logs;
@@ -1711,15 +1721,15 @@ mnfs verify claim CLM-007
 RECOVERY REQUIRED
 
 LD-01 Lease LEASE-004 is ACTIVE,
-but its Treehouse worktree is missing.
+but its bound isolated mutable workspace is missing.
 
 Affected:
 MIS-002/M02/F01
 WT-004
 
 Safe actions:
-1. mark Lease DIVERGED and recreate worktree
-2. inspect Treehouse manually
+1. mark current workspace binding DIVERGED and re-materialize/rebind the mutable workspace
+2. inspect the selected workspace realization
 
 Recommended:
 1
@@ -1756,19 +1766,19 @@ Precisa de drills automatizados e reais.
 
 ### DR-02 — Worker crash sem Claim
 
-- worktree preservado;
+- isolated mutable workspace preservado;
 - Attempt permanece recuperável.
 
 ### DR-03 — Duplicate lease grant
 
 - apenas um Lease ativo.
 
-### DR-04 — Orphan worktree
+### DR-04 — Orphan mutable workspace
 
 - detectado;
 - não destruído silenciosamente.
 
-### DR-05 — Lease without worktree
+### DR-05 — Binding/Lease without mutable workspace
 
 - dispatch bloqueado.
 
@@ -1818,8 +1828,8 @@ Precisa de drills automatizados e reais.
 
 Ao menos os drills críticos de M2 precisam rodar no WSL2 real com:
 
-- Pi;
-- Treehouse;
+- Agent Runtime;
+- selected workspace/environment realization;
 - processos;
 - filesystem;
 - fresh Lead process.
@@ -1833,7 +1843,7 @@ M2 deve provar:
 ```text
 one Lead
 → Lease
-→ Pi Worker
+→ Writer Actor through Agent Runtime
 → Claim
 → Lead killed
 → new Lead
@@ -1846,7 +1856,7 @@ one Lead
 ## M2 inclui
 
 - Lease intent;
-- Treehouse adapter;
+- selected workspace adapter;
 - Claim transaction;
 - Worker Run;
 - process observation;
@@ -1887,7 +1897,7 @@ Não construir agora:
 - full event-sourced reconstruction;
 - cryptographic ledger;
 - global transaction coordinator;
-- custom worktree pool;
+- custom workspace pool;
 - automatic destructive repair;
 - invisible background cleanup;
 - retry infinito;
@@ -1899,7 +1909,7 @@ Não construir agora:
 
 1. SQLite é autoridade operacional local.
 2. Git é autoridade sobre code tree.
-3. Treehouse é autoridade física do pool.
+3. A selected workspace realization é autoridade somente sobre seu estado físico observado; MNFS conserva a autoridade semântica.
 4. Divergence é estado explícito.
 5. Unknown não vira healthy.
 6. Mensagem não é memória.
@@ -1913,7 +1923,7 @@ Não construir agora:
 14. Lease antigo não libera Lease novo.
 15. Base SHA é validada antes de integration.
 16. Track alterada após aceite fica stale.
-17. Worktree não é removido com trabalho não classificado.
+17. Isolated mutable workspace não é liberado com trabalho não classificado.
 18. Recovery é read-only por default.
 19. Reparo destrutivo exige autoridade.
 20. Reconcile ocorre antes de ações protegidas.
@@ -1932,8 +1942,13 @@ Não construir agora:
 
 # Decisão resumida da Seção 8
 
-> **O MNFS mantém estado operacional autoritativo em SQLite e reconcilia esse estado com Git, Treehouse, processos, Pi sessions, artifacts e ambientes externos. Operações locais usam transactions; efeitos externos usam Intent–Action–Observation, idempotência, optimistic concurrency, fencing e reconcile. Sessions e processos são substituíveis; worktrees e evidências são preservados; resultados atrasados não sobrescrevem Attempts atuais; divergências permanecem explícitas. Recovery é um produto verificável por drills, não a reconstrução de transcripts nem uma promessa genérica de self-healing.**
+> **O MNFS mantém estado operacional autoritativo em SQLite e reconcilia esse estado com Git, Mutable Workspace bindings, Execution Environments, Agent Runtime/process observations, artifacts e sistemas externos. Operações locais usam transactions; efeitos externos usam Intent–Action–Observation, idempotência, optimistic concurrency, fencing e reconcile. Runtime Sessions e processos são substituíveis; workspaces/evidências são preservados conforme policy; resultados atrasados não sobrescrevem Attempts atuais; divergências permanecem explícitas. Recovery é um produto verificável por drills, não reconstrução de transcript.**
 
 ---
 
 ---
+
+
+## Historical / Incumbent Evidence — M01 Pi/Treehouse Recovery
+
+M01 provou crash windows, fencing, adoption/release e fresh-process recovery usando a realização concreta Pi + Treehouse. Esses resultados continuam Evidence para as invariantes provider-neutral; detalhes de commands, lease IDs e worktree behavior permanecem nos artifacts/closeout de M01 e não selecionam a futura workspace/runtime realization.

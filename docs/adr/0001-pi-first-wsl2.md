@@ -4,14 +4,15 @@ title: Pi-first WSL2 Architecture
 document_type: architecture_decision_record
 form: explanation
 authority: decision
-status: accepted
+status: superseded
 owners:
   - developmentconexus-ops
+superseded_by: ADR-0013
 ---
 
 # ADR-0001: Pi-first runtime on WSL2
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR-0013
 - **Date:** 2026-07-31
 
 ## Context
@@ -32,3 +33,7 @@ Pi is the first execution runtime. The domain core must not import Pi APIs direc
 - Browser-based tools such as Lavish may run in WSL and open through Windows localhost.
 - The core remains portable and receives a Windows smoke-test lane later.
 - WSL2 is not treated as a security sandbox. Stronger isolation remains a future execution concern.
+
+## Supersession
+
+ADR-0013 preserves Ubuntu WSL2 as the canonical local host but supersedes Pi-first product architecture with a replaceable Agent Runtime boundary selected through conformance Evidence.

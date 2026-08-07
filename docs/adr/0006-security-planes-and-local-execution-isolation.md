@@ -4,14 +4,14 @@ title: Security planes and local execution isolation
 document_type: architecture_decision_record
 form: explanation
 authority: decision
-status: accepted
+status: superseded
 date: 2026-08-02
 owners:
   - developmentconexus-ops
 approvers:
   - operator
 supersedes: []
-superseded_by: null
+superseded_by: ADR-0015
 related:
   - DOC-PRODUCT-BLUEPRINT-10
   - DOC-PRODUCT-BLUEPRINT-12
@@ -69,7 +69,7 @@ Block real Writers or select another ProcessSandboxAdapter; domain work may cont
 
 ## Supersession
 
-This ADR is accepted. A semantic change requires a new ADR that explicitly supersedes this record.
+ADR-0015 preserves the separate security/authority planes and fail-closed requirements but supersedes the fixed `E1 = Treehouse + OS sandbox` realization with property-based Execution Environment semantics.
 
 ## Related documents
 

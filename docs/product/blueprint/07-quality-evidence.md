@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current Evidence and acceptance rules
+
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
+
+**Implementer completion never grants acceptance**. Claim, deterministic Receipt, independent Finding/Review and Verdict remain distinct evidence stages.
+
+Proof-first is universal; TDD is required where executable TEST is the correct deciding proof and a meaningful RED state can be established before implementation. Parent Milestone/Mission outcomes still require composition and outcome validation even when every child unit is green.
+
+Evidence bound to the wrong/stale contract, Attempt, policy, environment or Git result identity cannot decide the current target.
+
 ---
 
 # 7. Qualidade, Evidência, Gates e Prevenção de False Completion
@@ -149,7 +161,7 @@ Sem Claim estruturado e sem evidência.
 
 ### FC-02 — Local Green
 
-Testes locais passam no worktree, mas:
+Testes locais passam no isolated mutable workspace, mas:
 
 - integração não ocorreu;
 - wiring não existe;
@@ -1558,7 +1570,7 @@ Testes precisam declarar recursos:
 - clock;
 - network.
 
-Worktree isolation não resolve esses recursos automaticamente.
+Isolated mutable workspace não resolve esses recursos automaticamente.
 
 ## 7.21.5 Flake
 
@@ -2083,7 +2095,7 @@ M2 não precisa implementar o Quality System completo.
 Precisa provar a lei central:
 
 ```text
-Pi worker completes
+Writer Worker completes
 ≠ Claim accepted
 ```
 
@@ -2150,7 +2162,7 @@ Não construir agora:
 14. Finding bloqueante precisa de confirmação.
 15. Review não cria escopo.
 16. Critério live não é provado apenas por mock.
-17. Worktree green não prova integration.
+17. Isolated mutable workspace green não prova integration.
 18. Integration green não prova user outcome quando QA é exigido.
 19. Accepted Risk não falsifica critério.
 20. Waiver não apaga Acceptance Criterion.

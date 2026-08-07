@@ -94,6 +94,7 @@ test('preflight is read-only and requires canonical identity, clean repo, Linux-
     const ok = await preflightS0({
       repoRoot: '/home/example/src/mnfs',
       stateRoot,
+      identities: IDENTITIES,
       inspect: async () => preflightFacts(),
     });
     assert.equal(ok.ok, true);
@@ -102,6 +103,7 @@ test('preflight is read-only and requires canonical identity, clean repo, Linux-
     const dirty = await preflightS0({
       repoRoot: '/home/example/src/mnfs',
       stateRoot,
+      identities: IDENTITIES,
       inspect: async () => preflightFacts({ repository: { source: SOURCE, clean: false } }),
     });
     assert.equal(dirty.ok, false);
@@ -118,6 +120,7 @@ test('preflight fails closed when the state-root filesystem is not explicitly re
       const result = await preflightS0({
         repoRoot: '/home/example/src/mnfs',
         stateRoot,
+        identities: IDENTITIES,
         inspect: async () => preflightFacts({ stateRootFilesystemSupported }),
       });
       assert.equal(result.ok, false);

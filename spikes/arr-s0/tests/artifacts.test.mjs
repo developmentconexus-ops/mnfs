@@ -98,7 +98,31 @@ test('artifact verification rejects a symlinked parent even when final bytes/has
   }
 });
 
-test('publication orders temp write, file fsync, rename and directory fsync', async () => {
+test('concurrent destination creation is never replaced by artifact publication', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-artifact-race-'));
+  try {
+    const finalPath = path.join(root, 'raw/race.bin');
+    await assert.rejects(
+      () => writeRawArtifact(root, 'raw/race.bin', Buffer.from('ours\n'), {
+        ops: {
+          async link(_tempPath, targetPath) {
+            assert.equal(targetPath, finalPath);
+            await writeFile(targetPath, 'concurrent\n', { mode: 0o600 });
+            const error = new Error('destination already exists');
+            error.code = 'EEXIST';
+            throw error;
+          },
+        },
+      }),
+      /existing artifact differs/u,
+    );
+    assert.equal(await readFile(finalPath, 'utf8'), 'concurrent\n');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('publication orders temp write, file fsync, no-replace link, temp unlink and directory fsync', async () => {
   const calls = [];
   const handles = new Map();
   const fakeHandle = (label) => ({
@@ -117,7 +141,7 @@ test('publication orders temp write, file fsync, rename and directory fsync', as
       calls.push(`${label}:open`);
       return handle;
     },
-    async rename() { calls.push('rename'); },
+    async link() { calls.push('link'); },
     async unlink() { calls.push('unlink'); },
   };
   await writeRawArtifact('/home/test/.local/state/mnfs/run', 'raw/a.bin', Buffer.from('abc'), { ops });
@@ -127,7 +151,8 @@ test('publication orders temp write, file fsync, rename and directory fsync', as
     'temp:write:3',
     'temp:fsync',
     'temp:close',
-    'rename',
+    'link',
+    'unlink',
     'dir:open',
     'dir:fsync',
     'dir:close',

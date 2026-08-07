@@ -161,7 +161,7 @@ Sem Claim estruturado e sem evidência.
 
 ### FC-02 — Local Green
 
-Testes locais passam no worktree, mas:
+Testes locais passam no isolated mutable workspace, mas:
 
 - integração não ocorreu;
 - wiring não existe;

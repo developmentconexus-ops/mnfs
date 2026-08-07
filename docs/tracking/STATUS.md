@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.16.0
+version: 1.17.0
 owners:
   - developmentconexus-ops
 related:
@@ -51,10 +51,10 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
 - **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
-- **Current phase:** `ARR P1 — Pre-Spike Reconciliation Review` under Issue #23 / PR #24.
+- **Current phase:** `ARR P1 — P1-F02 Constitutional Body Reconciliation / Fresh Review` under Issue #23 / PR #24.
 - **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — ACCEPTED — GATE-P0 — blob `52033adcdfb7163f63606034b9912942b018f38e`.
 - **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — ACCEPTED — GATE-P0 — blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`.
-- **Current P1 tranche:** A1–A4 + B1 implemented and verified in PR #24; finding P1-F01 is the authorized tracking correction required before P1 review can close.
+- **Current P1 tranche:** A1–A4 + B1 + P1-F01 implemented/verified; P1-F02 is the active authorized correction removing superseded Pi/Treehouse/fixed-E1 authority from current constitutional bodies before P1 acceptance.
 - **Superseded prior planning container:** Issue #21 — prior `MIS-002/M02` R5 path; do not resume under revision 5.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
@@ -154,7 +154,7 @@ D1–D4 + Architecture Synthesis:             APPROVED
 Execution Planning Design 1.0.0:            ACCEPTED — D-016
 Master ARR program plan 0.2.0:              ACCEPTED — GATE-P0
 ARR-S0 plan 0.2.0:                          ACCEPTED — GATE-P0
-ARR P1 A1-A4 + B1 + P1-F01:                 IMPLEMENTED / VERIFIED / REVIEW_REQUIRED
+ARR P1 A1-A4 + B1 + P1-F01 + P1-F02:       IMPLEMENTED / VERIFIED / FRESH_REVIEW_REQUIRED
 ARR-S0 harness implementation:              PROHIBITED pending GATE-S0-IMPLEMENT
 ARR-S0 real host probe:                      PROHIBITED pending later GATE-S0-EXECUTE
 ARR-S1/S2/S2W/S3 execution:                 PROHIBITED pending their later exact gates
@@ -163,8 +163,8 @@ Production Worker dispatch:                 PROHIBITED
 Automatic delivery / merge:                 NOT AUTHORIZED
 ```
 
-## Immediate next action — P1 review
+## Immediate next action — P1-F02 fresh review
 
-Operator reviews PR #24 and either accepts P1 or requests further changes. P1 acceptance does not implicitly authorize ARR-S0 implementation, real host probing, candidate execution, M02 production work, Worker dispatch or automatic merge.
+A Fresh Reviewer inspects PR #24 after P1-F02 and classifies any remaining current-authority/vendor ambiguity. The Operator accepts P1 only after that review has no Critical/Important findings. P1 acceptance does not implicitly authorize ARR-S0 implementation, real host probing, candidate execution, M02 production work, Worker dispatch or automatic merge.
 
 After P1 is accepted and merged, or an exact later S0 base SHA explicitly includes the accepted P1 tree, the next possible gate is a separate `GATE-S0-IMPLEMENT` authorizing deterministic construction/testing of the ARR-S0 host-capability harness. Real probing of the canonical WSL2 host remains separately gated by the later `GATE-S0-EXECUTE`.

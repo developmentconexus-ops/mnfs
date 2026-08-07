@@ -1598,7 +1598,7 @@ sem rationale não é declaração válida para change material.
 | Domain Entity/FSM | Blueprint, Spec, ADR, Reference |
 | CLI | Reference, how-to, AGENTS bootstrap |
 | SQLite schema | Spec, migration reference, Recovery |
-| Pi adapter | Spec, adoption record, compatibility |
+| Agent Runtime adapter / selected realization | Spec, sourcing Decision, provenance, compatibility |
 | Security policy | ADR, Section 10, Profile, runbook |
 | Standard | Standard, Paths, Profile bindings |
 | Golden Path | Path, templates, examples |

@@ -278,7 +278,7 @@ Entretanto, ficou **arquiteturalmente stale** porque não inclui integralmente:
 Também exclui explicitamente isolamento além de worktree, o que conflita com o princípio atual:
 
 ```text
-one Pi Worker
+one bounded Writer
 ≠ unrestricted user process
 ```
 

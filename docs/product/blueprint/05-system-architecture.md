@@ -267,8 +267,8 @@ Componentes:
 - CLI;
 - human-readable output;
 - `--json` output;
-- Pi project skills;
-- futura Pi extension;
+- project/runtime skills;
+- future Agent Runtime extension or protocol adapter when selected;
 - Lavish HTML;
 - futura web UI;
 - optional Herdr projection.
@@ -365,7 +365,7 @@ Implementa portas externas.
 - Git adapter;
 - filesystem artifact store;
 - process runner;
-- Pi adapter;
+- Agent Runtime adapter;
 - process sandbox adapter;
 - execution environment adapter;
 - credential provider adapter;
@@ -375,7 +375,7 @@ Implementa portas externas.
 - observability backend adapter;
 - evaluation backend adapter;
 - notification adapter;
-- Treehouse adapter;
+- Mutable Workspace adapter;
 - Lavish adapter;
 - Herdr adapter;
 - browser/QA adapter;
@@ -731,7 +731,7 @@ permitted next actions
 
 ## 5.6.10 Session Memory Adapter
 
-Porta opcional para memória auxiliar de uma Pi Session.
+Porta opcional para memória auxiliar de uma Runtime Session.
 
 Pode fornecer Observations, Reflections, source-backed recall, custo e falhas.
 
@@ -1203,7 +1203,7 @@ A CLI é a API local principal do MNFS.
 Usada por:
 
 - operador;
-- Pi skills;
+- project/runtime skills;
 - workers;
 - scripts;
 - testes;
@@ -1270,7 +1270,7 @@ parse args
 A CLI não:
 
 - monta SQL;
-- chama Treehouse diretamente;
+- chama a workspace realization diretamente;
 - altera FSM;
 - infere risk;
 - lê transcript.
@@ -1523,7 +1523,7 @@ structured artifact
 → deterministic HTML
 → Lavish open
 → feedback
-→ Pi reasoning
+→ Planner/Actor reasoning
 → new structured artifact
 ```
 
@@ -1725,7 +1725,7 @@ Critérios de escolha:
 - diff;
 - referências;
 - estabilidade;
-- facilidade de edição pelo Pi.
+- facilidade de edição por humanos e Actors.
 
 ## 5.20.2 Separação recomendada
 
@@ -1834,9 +1834,9 @@ Conteúdo é autoridade de freshness.
 - packages confiáveis;
 - workers considerados falíveis, não maliciosos.
 
-## 5.22.2 Pi e extensions
+## 5.22.2 Agent Runtime extensions and packages
 
-Pi extensions executam com permissões do processo e podem registrar tools que executam código; somente fontes confiáveis devem ser instaladas. citeturn428383search1turn428383search8
+Agent Runtime extensions/packages execute inside the authority of their hosting process and may expose executable tools; only reviewed, pinned sources may enter the trusted computing base. The prior Pi extension analysis remains incumbent Evidence in Sections 5.13–5.14.
 
 ## 5.22.3 WSL2
 
@@ -1846,7 +1846,7 @@ Workers podem ter acesso às permissões do usuário.
 
 ## 5.22.4 Proteções iniciais
 
-- worktree isolation;
+- isolated mutable workspace boundaries;
 - allowed cwd;
 - protected paths;
 - tool allowlists quando aplicável;
@@ -1947,16 +1947,16 @@ Status mostra:
 
 Cada adapter possui failure behavior nomeado.
 
-## Pi failure
+## Agent Runtime failure
 
 - Worker Run LOST/EXITED;
 - Claim permanece;
-- Lease permanece;
+- workspace/environment bindings remain until explicit disposition;
 - recovery decide.
 
-## Treehouse failure
+## Workspace realization failure
 
-- Lease REQUESTED/DIVERGED;
+- workspace/environment binding BLOCKED/DIVERGED;
 - nenhum novo worker;
 - state preservado.
 
@@ -1994,25 +1994,15 @@ Cada adapter possui failure behavior nomeado.
 
 ## 5.25.1 Lead
 
-```text
-Pi interactive session
-+
-MNFS skill/extension
-+
-MNFS CLI
-```
+The MNFS Lead is a Role/ActorRun owned by MNFS semantics. Its concrete reasoning/runtime surface is selected separately and may be an interactive Agent Runtime session, a programmatic runtime boundary or a later UI-hosted Actor. Runtime Session identity is observational.
 
 ## 5.25.2 MNFS commands
 
-Podem rodar como subprocessos curtos.
-
-SQLite coordena estado.
+Podem rodar como subprocessos curtos. SQLite coordena estado.
 
 ## 5.25.3 Workers
 
-Processos Pi independentes.
-
-Um processo por active Worker Run.
+Bounded Writer/Reviewer/QA Actors execute through the selected Agent Runtime boundary. A concrete runtime process/session may exist per ActorRun, but MNFS does not require one provider or one process topology constitutionally.
 
 ## 5.25.4 Integration
 
@@ -2020,19 +2010,11 @@ Comando/processo MNFS separado ou executado pelo Lead por application service.
 
 ## 5.25.5 QA
 
-Processo separado quando browser ou ambiente live exigir.
+Processo/runtime separado quando browser ou ambiente live exigir.
 
 ## 5.25.6 Sem daemon obrigatório
 
-Reconcile ocorre em:
-
-- startup;
-- status;
-- antes de dispatch;
-- antes de integration;
-- ação explícita.
-
-Watcher contínuo entra se a experiência exigir notificação automática.
+Reconcile ocorre em startup, status, before dispatch/integration and explicit actions. Continuous watchers enter only when a named notification/coordination consumer proves the need.
 
 ---
 
@@ -2072,8 +2054,8 @@ Pi deliberadamente fornece modos interactive, print/JSON, RPC e SDK, permitindo 
 |---|---|
 | SQLite | PostgreSQL |
 | local filesystem | object storage |
-| child Pi process | remote worker runtime |
-| Treehouse local | workspace provisioner |
+| local Agent Runtime execution | remote Agent Runtime execution |
+| local workspace realization | remote workspace provisioner |
 | local credentials | scoped secret service |
 | CLI | API + web client |
 | local event table | outbox + queue/stream |
@@ -2125,7 +2107,7 @@ src/
 │   ├── filesystem/
 │   ├── git/
 │   ├── process/
-│   ├── pi/
+│   ├── agent-runtime/
 │   ├── sandbox/
 │   ├── environments/
 │   ├── credentials/
@@ -2133,14 +2115,14 @@ src/
 │   ├── telemetry/
 │   ├── evaluation/
 │   ├── notifications/
-│   ├── treehouse/
+│   ├── workspace/
 │   ├── lavish/
 │   ├── herdr/
 │   └── browser/
 │
 ├── interfaces/
 │   ├── cli/
-│   └── pi-extension/
+│   └── runtime-extension/
 │
 └── index.ts
 ```
@@ -2248,11 +2230,11 @@ Não construir agora:
 1. Domain Core não importa adapters externos.
 2. CLI não contém regra de negócio.
 3. Skills não alteram state diretamente.
-4. Pi não é source of truth.
+4. Agent Runtime and Runtime Session state are not source of truth.
 5. SQLite não armazena código.
 6. Git não armazena state operacional transitório.
 7. Herdr não decide lifecycle MNFS.
-8. Treehouse não decide ownership.
+8. Workspace realizations do not decide domain ownership.
 9. Lavish não aprova por conta própria.
 10. Process exit não fecha trabalho.
 11. Adapter failure não corrompe Domain State.

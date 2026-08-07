@@ -44,7 +44,7 @@ Esta seção define como o MNFS permanece correto quando:
 - o processo termina sem Claim;
 - SQLite confirma uma operação, mas a ferramenta externa falha;
 - a ferramenta externa conclui, mas SQLite não registra;
-- um worktree desaparece;
+- um bound isolated mutable workspace desaparece;
 - uma branch diverge;
 - um Receipt fica stale;
 - duas ações concorrentes disputam o mesmo recurso;
@@ -121,8 +121,8 @@ Exemplo:
 SQLite:
 Lease ACTIVE
 
-Treehouse:
-worktree não encontrado
+Workspace realization:
+mutable workspace not found
 ```
 
 Isso não significa automaticamente que SQLite está errado ou que o Lease deve ser apagado.
@@ -181,7 +181,7 @@ Não participa diretamente de gates.
 | Claim state | MNFS/SQLite | Worker, CLI |
 | Receipt | MNFS/SQLite + artifact | runner |
 | Terminal presentation | Herdr | Operator |
-| Visual feedback | Lavish até ser consumido | Pi, MNFS |
+| Visual feedback | presentation surface until consumed | Agent Runtime/presentation adapters, MNFS |
 | Decision | MNFS/SQLite + artefato quando necessário | Operator, Lead |
 | Integration candidate | Git + MNFS Integration Run | CI, QA |
 | Evidence artifact | artifact store + hash | Git quando promovido |
@@ -1135,7 +1135,7 @@ Candidate SHA não é reproduzível.
 Adotar recurso externo órfão quando:
 
 - identity corresponde;
-- worktree é válido;
+- mutable workspace identity/binding é válido;
 - base é válida;
 - nenhuma outra entidade possui o recurso;
 - policy permite.
@@ -1200,8 +1200,8 @@ Usado quando reparo pode:
 
 | Estado autoritativo | Observação | Classificação | Ação segura inicial |
 |---|---|---|---|
-| Lease REQUESTED | sem worktree | request incompleto | retry ou cancel |
-| Lease REQUESTED | worktree correspondente | órfão adotável | validate + adopt |
+| workspace binding REQUESTED | sem physical mutable workspace | request incompleto | retry ou cancel |
+| workspace binding REQUESTED | matching physical mutable workspace | órfão adotável | validate + adopt |
 | Lease ACTIVE | mutable workspace existe | healthy | nenhuma |
 | Lease ACTIVE | mutable workspace ausente | divergence | block dispatch |
 | sem Lease | mutable workspace MNFS-like existe | orphan | inspect/preserve |
@@ -1728,7 +1728,7 @@ MIS-002/M02/F01
 WT-004
 
 Safe actions:
-1. mark Lease DIVERGED and recreate worktree
+1. mark current workspace binding DIVERGED and re-materialize/rebind the mutable workspace
 2. inspect the selected workspace realization
 
 Recommended:
@@ -1897,7 +1897,7 @@ Não construir agora:
 - full event-sourced reconstruction;
 - cryptographic ledger;
 - global transaction coordinator;
-- custom worktree pool;
+- custom workspace pool;
 - automatic destructive repair;
 - invisible background cleanup;
 - retry infinito;

@@ -65,20 +65,17 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
-      - run: npm run test:arr-s0
       - run: npm run build --silent
-      - run: node scripts/test-documentation-tooling.mjs
+      - run: npm run typecheck
         continue-on-error: true
-      - run: node scripts/test-mis-002-replan-builder.mjs
+      - run: npm run test:unit
         continue-on-error: true
-      - run: node scripts/test-approved-mis-002-allocations.mjs
+      - run: npm run test:as02
         continue-on-error: true
-      - run: node scripts/test-arr-p1-blueprint-reconciliation.mjs
+      - run: npm run test:tc01
         continue-on-error: true
-      - run: node scripts/test-arr-spike-contract-binding.mjs
+      - run: npm run test:arr-s0
         continue-on-error: true
-      - run: node scripts/test-arr-s0-contract-consistency.mjs
-        continue-on-error: true
-      - run: node scripts/validate-docs.mjs
+      - run: npm run docs:check
         continue-on-error: true
       - run: npm run verify

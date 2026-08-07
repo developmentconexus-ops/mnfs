@@ -56,7 +56,7 @@ Current state:
 - MIS-002 revision 5 is the approved schema-v2 contract at `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`;
 - R0–R5 pass for accepted M01 microdesign version 0.6.1;
 - PR #14 is integrated in `main` at `dee12a9b53984d39045421c9586ee53665ebc5e5`;
-- Issue #16 tracks the M01 closeout; PR #17 is merged in `main` at `3722235a2c7a4d4d5fc11e55d8c4b8e6f025a8f7`, and the current closeout is the post-PR implementation delta awaiting publication in a new PR;
+- Issue #16 tracks the M01 closeout; PR #17 is merged in `main` at `3722235a2c7a4d4d5fc11e55d8c4b8e6f025a8f7`, and PR #19 carries the post-PR implementation delta for operator review;
 - canonical TC-01 WSL2 Evidence is `ACCEPT`, S01–S15 all `PASS`, cleanup `COMPLETED`;
 - final R5 review closed all 3 Critical and all 8 Important findings;
 - Operator decision `D-007` accepted microdesign 0.6.1 and closed R5;
@@ -362,7 +362,7 @@ No unresolved authority-map blocker remains from AB1, the MIS-002 Replan, TC-01,
 Current gate:
 
 ```text
-Operator review of the uncommitted M01 implementation closeout
+Operator review of PR #19 M01 implementation closeout
 ```
 
 The closeout review does not authorize M02/Pi dispatch, merge or delivery; any further real scenario or formal acceptance action remains separately governed.
@@ -372,5 +372,5 @@ M01 implementation:  VERIFIED / CLOSEOUT_PREPARED
 M01 acceptance:      PENDING_OPERATOR_REVIEW
 Pi Worker dispatch:   PROHIBITED
 PR #17:              MERGED / historical implementation baseline
-New closeout PR:     PENDING PUBLICATION
+PR #19:              OPEN / M01 closeout pending operator review
 ```

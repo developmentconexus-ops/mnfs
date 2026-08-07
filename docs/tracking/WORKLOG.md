@@ -11,6 +11,14 @@ owners:
 
 # Worklog
 
+## 2026-08-07
+
+### MIS-002/M01 closeout publication
+
+- Committed the reviewed post-PR M01 implementation and closeout delta as `a531702` (`feat: close out M01 durable execution core`).
+- Pushed `design/mis-002-m01` and opened PR #19 against `main`; PR #17 remains the merged historical baseline.
+- Kept formal M01 acceptance pending operator review; R2/R3 remain deferred and M02/Pi remain governed separately.
+
 ## 2026-08-06
 
 ### MIS-002/M01 implementation closeout preparation

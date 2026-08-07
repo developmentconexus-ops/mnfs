@@ -33,7 +33,7 @@ M01 scope:                   Durable Execution and Lease Core
 M02/Pi:                      PROHIBITED
 ```
 
-This document records the uncommitted closeout state for the implementation work in the clean `design/mis-002-m01` clone. It does not constitute formal M01 acceptance, does not amend the Approved Mission Contract, and does not authorize M02, Pi Worker dispatch, merge or delivery.
+This document records the prepared closeout for the post-PR implementation work in `design/mis-002-m01`, published as PR #19 from commit `a531702`. It does not constitute formal M01 acceptance, does not amend the Approved Mission Contract, and does not authorize M02, Pi Worker dispatch, merge or delivery.
 
 ## Verification record
 
@@ -101,7 +101,7 @@ M01 does not include Pi Worker execution, SEC-E1 production dispatch, Claim comp
 
 ## Required operator action
 
-Review this document and the listed uncommitted implementation/documentation diff. If accepted, record the separate operator decision and update the lifecycle status through the governed process. Until then, retain:
+Review this document and PR #19. If accepted, record the separate operator decision and update the lifecycle status through the governed process. Until then, retain:
 
 ```text
 CLOSEOUT_PREPARED
@@ -121,7 +121,7 @@ documentation_impact:
     - docs/tracking/WORKLOG.md
     - docs/capabilities/CAP-EXECUTION/COVERAGE.md
     - docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
-  rationale: "Prepared the canonical uncommitted M01 implementation closeout and reconciled its tracking and traceability projections for the post-PR implementation/test delta without changing product requirements."
+  rationale: "Prepared and published the canonical M01 implementation closeout and reconciled its tracking and traceability projections for the post-PR implementation/test delta without changing product requirements."
   follow_up: "Operator review and separate formal M01 acceptance decision remain pending."
 
 requirements_impact:

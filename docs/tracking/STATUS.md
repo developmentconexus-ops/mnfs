@@ -32,8 +32,8 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — M01 implementation closeout awaits Operator review
-- **Current design/implementation PR:** #17 is merged; the post-PR M01 closeout delta is awaiting publication as a new PR from `design/mis-002-m01`
+- **Current enabler:** Issue #16 — M01 closeout PR #19 awaits Operator review
+- **Current design/implementation PR:** #19 — `design/mis-002-m01` (open; post-PR M01 closeout)
 
 ## Readiness result
 
@@ -71,7 +71,7 @@ M01 acceptance:                    PENDING OPERATOR REVIEW
 Pi Worker dispatch:               PROHIBITED
 Automatic merge:                  NOT AUTHORIZED
 PR #17:                           MERGED — historical implementation baseline
-Closeout PR:                      PENDING PUBLICATION
+PR #19:                           OPEN — M01 closeout pending operator review
 ```
 
 ## Accepted implementation baseline
@@ -711,7 +711,7 @@ MNFS_AUTHORIZE_M01_TASK_14_WSL2_PREFLIGHT plan=1.0.1 microdesign=0.6.1 determini
 - dirty, missing, unmanaged, ambiguous or non-bijective work is preserved;
 - no reset, clean, force, destroy, prune or product deletion is authorized;
 - no Pi process, SEC-E1 production creation, Receipt or Gate exists in M01;
-- PR #17 is merged in `main`; the post-PR closeout delta is the current publication scope.
+- PR #17 is merged in `main`; PR #19 carries the post-PR closeout delta and awaits operator review.
 
 ## Current authorization boundary
 
@@ -732,7 +732,7 @@ M01 closeout:               PREPARED / UNCOMMITTED
 M01 acceptance:             PENDING OPERATOR REVIEW
 Pi Worker dispatch:         PROHIBITED
 PR #17:                     MERGED / historical implementation baseline
-New closeout PR:            PENDING PUBLICATION
+PR #19:                     OPEN / M01 closeout pending operator review
 ```
 
 ## Immediate next action

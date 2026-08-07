@@ -11,6 +11,8 @@ related:
   - DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD
   - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
+  - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
+  - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - DOC-PRODUCT-BLUEPRINT
   - DOC-CAPABILITY-ROADMAP
   - TRACKING-DECISIONS
@@ -25,19 +27,6 @@ Reassess the current MNFS product architecture and implementation-sourcing strat
 
 The review searches for the best-supported global solution rather than optimizing only inside prior Blueprint, ADR, Roadmap or Mission assumptions.
 
-## Current evidence base
-
-- accepted MNFS Product Blueprint and ADR set;
-- accepted M0/M1/M01 Evidence;
-- CAP-EXECUTION and MIS-002 revision 5;
-- Mastra Software Factory / AgentController / Signals / ACP research;
-- Pi SDK/RPC/extensions/session research;
-- Factory.ai Software Factory / Missions / Droid / open-source VFS research;
-- open agent-runtime interoperability research including ACP and open coding-agent runtimes;
-- local/remote sandbox landscape including Anthropic Sandbox Runtime, nono, Sandlock, BoxLite, `smol-machines/smolvm`, CelestoAI/SmolVM, microsandbox, OpenShell, OpenSandbox, E2B, Mitos, Sandbox0, Kubernetes Agent Sandbox, Cleanroom/SporeVM and VFS/AgentFS;
-- mature adjacent workflow, browser, MCP and observability primitives;
-- current MNFS implementation and canonical WSL2 constraints.
-
 ## Decision progress
 
 ```text
@@ -47,10 +36,12 @@ D3 — Execution Environment architecture         APPROVED — D-013
 D4 — Implementation sourcing strategy           APPROVED — D-014
 SYNTHESIS — cross-decision architecture          APPROVED — D-015
 EXECUTION PLANNING DESIGN                         APPROVED — D-016
-RECONCILIATION + SPIKE EXECUTION PLAN             CURRENT
+ARR PROGRAM PLAN                                 REVIEW_READY — v0.2.0
+ARR-S0 PLAN                                      REVIEW_READY — v0.2.0
+CURRENT GATE                                     GATE-P0
 ```
 
-## Approved architecture
+## Accepted architecture
 
 Canonical target:
 
@@ -121,6 +112,42 @@ R8  Closeout / Learning / Calibration proposals
 
 Every bounded execution unit uses role-specific compiled context, explicit write/resource/environment/tool authority, proof-first/TDD where applicable, finite retry/hypothesis policy and explicit `SUCCESS / BLOCKED / ESCALATE / HANDOFF_REQUIRED / REPLAN_REQUIRED` termination. Fresh-Actor recovery cannot depend on transcript/session continuity.
 
+## Review-ready execution plan package
+
+### Master plan
+
+`PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` version 0.2.0:
+
+```text
+pre-Spike semantic/authority reconciliation
+→ shared Spike governance/Evidence contract
+→ S0
+→ S1/S2
+→ conditional S2W
+→ S3
+→ substrate selection
+→ superseding CAP-EXECUTION/MIS-002 authority
+→ new M02 R5
+```
+
+It deliberately freezes sequence, gates, criteria and outputs while deferring candidate-specific implementation details until prerequisite Evidence exists.
+
+### ARR-S0 plan
+
+`PLAN-ARR-S0-HOST-CAPABILITY-PROBE` version 0.2.0 defines the first executable Spike design. S0 is observation-first and may not install packages, mutate WSL/kernel configuration, run candidate workloads or select a named substrate.
+
+S0 outputs generic host facts and coarse capability classes such as:
+
+```text
+CLASS-LOCAL-PROCESS-ISOLATION
+CLASS-LANDLOCK-ISOLATION
+CLASS-MICROVM-KVM
+CLASS-FUSE-COW
+CLASS-LOCAL-CONTAINER
+```
+
+Named candidate eligibility is intentionally deferred to fresh S1/S2/S2W planners that combine immutable accepted S0 Evidence with refreshed primary-source project requirements. This prevents upstream requirement drift from mutating the meaning of historical host Evidence.
+
 ## Deciding Architecture Spike sequence
 
 ```text
@@ -131,42 +158,49 @@ ARR-S2W Workspace comparison — conditional only
 ARR-S3  Vertical Composition Proof
 ```
 
-The sequence is governed by candidate-independent deciding contracts. Candidate tests/fixtures may not be weakened after observing a preferred candidate fail unless the contract is revised and every affected candidate is rerun under the same revision.
+Every comparative Spike must freeze a candidate-independent deciding contract first. Tests/fixtures may not be weakened after a preferred candidate fails unless the contract is formally revised and affected candidates are rerun under that same revision.
 
-## Current phase — Architecture Reconciliation + Spike Execution Planning
+## Plan verification
 
-The current task is to produce the reviewed execution plan that converts D-011 through D-016 into bounded, exact work.
+```text
+Master plan v0.2.0
+commit:   e798b2a4a58e52318147b7bc17cc76b8f4616d83
+workflow: 31180374347
+result:   SUCCESS
 
-The plan must:
+ARR-S0 plan v0.2.0
+commit:   59a1ff8ca20bbbb1a0170bd3eb68da68d86169af
+job:      92872990047
+command:  npm run verify
+result:   SUCCESS
+```
 
-1. identify which canonical documents are reconciled before any Spike and which must wait for Spike Evidence;
-2. keep accepted historical documents immutable where their authority/version must be preserved;
-3. define exact files/interfaces and proof steps for the first executable tranche;
-4. fully specify `ARR-S0` because it has no dependency on unresolved substrate selection;
-5. define candidate-independent contracts, outputs and gates for S1/S2/S2W/S3 without inventing implementation details that preceding Spikes must decide;
-6. mechanically prove coverage of D-011 through D-016 and the accepted planning completeness concerns;
-7. state explicit authorization tokens/gates so plan approval does not accidentally authorize execution;
-8. preserve M02 production prohibition until new CAP-EXECUTION/MIS-002 authority is created after S3.
+These checks validate the repository/planning package only. They are not host-probe or candidate-conformance Evidence.
 
-## Authorization boundary
+## Current gate — GATE-P0
 
-Authorized:
+Operator review is required for:
 
-- architecture reconciliation planning;
-- exact design/plan documents for ARR-S0 through ARR-S3;
-- documentation/Decision proposals;
-- deterministic tests of documentation/planning tooling only when separately authorized by a later execution gate.
+```text
+docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md
+docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md
+```
 
-Not authorized by plan drafting or review alone:
+`GATE-P0` acceptance freezes the planning direction only.
 
-- ARR-S0 host probing;
-- ARR-S1/S2/S2W/S3 candidate execution;
+It does **not** authorize:
+
+- pre-Spike reconciliation writes;
+- S0 harness implementation;
+- S0 host probing;
+- S1/S2/S2W/S3 execution;
+- candidate adoption;
 - M02 production implementation;
 - production Worker dispatch;
-- changing accepted Mission contracts in place;
-- automatic merge/delivery;
-- concrete foundational runtime/environment adoption without the required Spike Evidence and Decision.
+- automatic merge/delivery.
+
+After `GATE-P0`, the recommended next exact execution gate is a bounded authorization for the pre-Spike reconciliation tranche (`A1-A4 + B1`). Only after that tranche is accepted should the Operator issue `GATE-S0-IMPLEMENT`; the real host probe remains separately controlled by `GATE-S0-EXECUTE`.
 
 ## Current relationship to MIS-002/M02
 
-`MIS-002` revision 5 remains immutable historical/current authority until explicitly superseded, but D-015 decides that `MIS-002/M02` under revision 5 must not be implemented. Product M2 proceeds through Opportunity Replan after deciding Architecture Spikes and final authority reconciliation.
+`MIS-002` revision 5 remains immutable historical/current authority until explicitly superseded, but D-015 decides that `MIS-002/M02` under revision 5 must not be implemented. Product M2 proceeds through Opportunity Replan after the deciding Architecture Spikes and final authority reconciliation.

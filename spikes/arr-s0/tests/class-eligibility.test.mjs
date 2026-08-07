@@ -80,6 +80,26 @@ test('Docker CLI/daemon absence is setup, not proof that the host cannot run con
   assert.equal(classEligibility('CLASS-LOCAL-CONTAINER', input).eligibility, 'REQUIRES_SETUP_DECISION');
 });
 
+test('decisive setup absence outranks UNKNOWN for another setup-only capability', () => {
+  const input = observations([
+    ['HOST-WSL2', 'SUPPORTED'],
+    ['HOST-DOCKER-CLI', 'ABSENT'],
+    ['HOST-DOCKER-DAEMON', 'UNKNOWN'],
+  ]);
+  const result = classEligibility('CLASS-LOCAL-CONTAINER', input);
+  assert.equal(result.eligibility, 'REQUIRES_SETUP_DECISION');
+  assert.ok(result.reasons.some((reason) => reason.includes('HOST-DOCKER-CLI')));
+});
+
+test('unknown hard capability outranks a setup requirement', () => {
+  const input = observations([
+    ['HOST-WSL2', 'UNKNOWN'],
+    ['HOST-FUSE-DEVICE', 'SUPPORTED'],
+    ['HOST-FUSE-TOOLS', 'ABSENT'],
+  ]);
+  assert.equal(classEligibility('CLASS-FUSE-COW', input).eligibility, 'UNKNOWN');
+});
+
 test('a decisive hard blocker outranks unrelated unknowns in the same class', () => {
   const input = observations([
     ['HOST-WSL2', 'UNSUPPORTED'],

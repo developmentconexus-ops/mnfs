@@ -44,7 +44,8 @@ D1 — Planning and validation semantics          APPROVED — D-011
 D2 — Agent runtime and session/control strategy APPROVED — D-012
 D3 — Execution Environment architecture         APPROVED — D-013
 D4 — Implementation sourcing strategy           APPROVED — D-014
-SYNTHESIS — cross-decision architecture          IN REVIEW
+SYNTHESIS — cross-decision architecture          APPROVED — D-015
+EXECUTION PLANNING DESIGN                         CURRENT
 ```
 
 ## Approved D1 — Planning and validation
@@ -97,54 +98,93 @@ Capability-realization vocabulary:
 OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT
 ```
 
-Every material sourcing decision must test:
+Every material sourcing decision must test semantic ownership, authority inversion, mechanical leverage, replaceability/exit, proofability, sovereignty/license and a named consumer. Prefer the lowest sufficient upstream layer, one primary production substrate per concern and concrete implementations until a second real consumer earns a generic abstraction.
 
-- semantic ownership;
-- authority inversion / duplicate state;
-- mechanical leverage;
-- replaceability and exit path;
-- proofability;
-- sovereignty and license;
-- named consumer;
-- pinned public/supported boundary and provenance;
-- upgrade/removal conditions for foundational dependencies.
+## Approved Architecture Synthesis — D-015
 
-Additional rules:
+Canonical target:
 
-- choose the lowest sufficient upstream layer;
-- prefer one primary production substrate per concern;
-- do not add a dependency unless it eliminates meaningful machinery or is otherwise clearly simpler than the local implementation;
-- small local mechanics may beat dependencies when they are genuinely smaller and safer;
-- proprietary foundational runtimes are `REFERENCE` by default unless explicit Operator authority accepts the sovereignty trade-off;
-- the tooling registry is a projection of capability decisions, not architectural authority;
-- do not build custom agent loops, browser engines, hypervisors, VCS/database engines or generic distributed workflow infrastructure by default while credible substrates exist.
+```text
+Thin Sovereign Semantic Kernel
++
+Validation-first Planning
++
+Replaceable Open Agent Runtime
++
+Property-based Execution Environment
++
+Provider-neutral Git Result Boundary
++
+Independent Evidence / Gates
++
+Capability-first Sourcing
+```
 
-## Current phase — Architecture Synthesis & Reconciliation
+Disposition:
 
-D1–D4 are individually approved. The current task is to combine them into one coherent architecture and determine the exact impact on current authority.
+```text
+M0                          PRESERVE
+M1                          PRESERVE
+MIS-002/M01                 PRESERVE / ACCEPTED
+Product M2 outcome          PRESERVE
+Product M2 realization      OPPORTUNITY REPLAN
 
-Required synthesis outputs:
+MIS-002 revision 5          PRESERVE IMMUTABLE / HISTORICAL CURRENT AUTHORITY
+MIS-002/M02 rev5 execution  SUPERSEDE / DO NOT IMPLEMENT
+future MIS-002 revision     REQUIRED AFTER DECIDING SPIKES
 
-1. canonical target architecture and trust boundaries;
-2. end-to-end lifecycle from Operator Intent through accepted Git result;
-3. first-principles component/capability ownership map;
-4. exact `PRESERVE / SUPERSEDE / REPLAN` disposition for Product Blueprint sections, ADRs, Roadmap, CAP-EXECUTION and MIS-002;
-5. identify accepted implementation/Evidence that remains reusable without pretending its old realization is still mandatory;
-6. bounded Architecture Spikes, with ordering and deciding criteria;
-7. exact post-spike decision gate and the path back to M2 execution;
-8. explicit adversarial case against the synthesized architecture.
+CAP-EXECUTION 0.1.0         PRESERVE HISTORICAL
+future CAP-EXECUTION        SUPERSEDING REVISION REQUIRED
+
+ADR-0001                    PARTIAL SUPERSEDE
+ADR-0003                    SUPERSEDE
+ADR-0006                    PARTIAL SUPERSEDE
+ADR-0008                    SUPERSEDE
+```
+
+Accepted M01 semantics/Evidence remain reusable where provider-neutral: durable WriteTrack/Attempt/ActorRun identities, fencing, Claim atomicity, Intent–Action–Observation, fresh-process Recovery/Reconcile and Git base/result lineage. Treehouse-specific physical realization remains historical implementation Evidence, not future constitutional architecture.
+
+Approved deciding-spike sequence:
+
+```text
+ARR-S0  Host Capability Probe
+ARR-S1  Agent Runtime Conformance
+ARR-S2  Local Execution Envelope Conformance
+ARR-S2W Workspace comparison — conditional only
+ARR-S3  Vertical Composition Proof
+```
+
+Spike execution still requires a separate exact authorization gate.
+
+## Current phase — Execution Planning Design
+
+Before authorizing any Architecture Spike, define the execution-planning method that turns approved architecture and Validation into reliable agent work.
+
+The design must answer at least:
+
+1. which parts of a plan are frozen Authority versus adaptive tactical reasoning;
+2. how Validation Baseline, Milestones, Features and executable work units relate;
+3. how every work unit proves upward coverage and receives only the required context;
+4. how repository localization, architecture, sourcing, security, environment, resources, concurrency and tool boundaries are captured before dispatch;
+5. how TDD, deterministic verification, independent validation, integration and live QA are scheduled;
+6. how retries, failed hypotheses, blocked states, escalation and Replan are bounded;
+7. what a fresh Actor must read before starting and what it must leave behind at handoff;
+8. how budgets, termination conditions and progress are made explicit;
+9. how findings and production learnings feed Evaluation/Calibration rather than silently mutating current Authority;
+10. how plan completeness is mechanically checked so no applicable concern from D1–D4/MCRM is omitted.
 
 ## Authorization boundary
 
 Authorized:
 
-- cross-decision architecture synthesis;
-- source/document impact analysis;
-- documentation/Decision proposals;
-- bounded Architecture Spike design.
+- research on effective planning/execution for AI agents;
+- Execution Planning Design;
+- Architecture/authority reconciliation proposals;
+- bounded Architecture Spike specification and planning.
 
 Not authorized by this review alone:
 
+- Architecture Spike execution;
 - M02 production implementation;
 - production Worker dispatch;
 - changing accepted Mission contracts in place;
@@ -153,14 +193,4 @@ Not authorized by this review alone:
 
 ## Current relationship to MIS-002/M02
 
-`MIS-002` revision 5 remains authoritative historical/current contract until explicitly superseded. `MIS-002/M02` microdesign remains paused.
-
-The synthesis must decide whether to:
-
-```text
-PRESERVE M02 contract semantics
-SUPERSEDE selected architecture assumptions
-REPLAN M2/M02 because the approved architecture is materially better
-```
-
-That disposition must be based on D1–D4 and current Evidence, not sunk cost.
+`MIS-002` revision 5 remains immutable historical/current authority until explicitly superseded, but D-015 decides that `MIS-002/M02` under revision 5 must not be implemented. Product M2 proceeds through Opportunity Replan after the deciding Architecture Spikes and final reconciliation.

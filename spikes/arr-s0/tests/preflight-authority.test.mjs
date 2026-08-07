@@ -123,6 +123,7 @@ test('authenticated preflight authority may reach inspection and remains bound t
       repoRoot: '/home/example/src/mnfs',
       stateRoot,
       identities: authenticatedIdentities(),
+      sourceObserver: async () => ({ source: SOURCE, clean: true }),
       inspect: async () => {
         inspectCalls += 1;
         return safeFacts();

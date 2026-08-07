@@ -24,6 +24,9 @@ const agentsText = await readFile(path.join(root, 'AGENTS.md'), 'utf8');
 const documentationMapText = await readFile(path.join(root, 'docs/DOCUMENTATION-MAP.md'), 'utf8');
 const toolingText = await readFile(path.join(root, 'docs/tooling-adoption.md'), 'utf8');
 const statusText = await readFile(path.join(root, 'docs/tracking/STATUS.md'), 'utf8');
+const decisionsText = await readFile(path.join(root, 'docs/tracking/DECISIONS.md'), 'utf8');
+const arrReviewText = await readFile(path.join(root, 'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md'), 'utf8');
+const p1AcceptanceText = await readFile(path.join(root, 'docs/acceptance/2026-08-07-arr-p1-reconciliation-acceptance.md'), 'utf8');
 const adrFiles = {
   'ADR-0001': 'docs/adr/0001-pi-first-wsl2.md',
   'ADR-0003': 'docs/adr/0003-worktree-write-tracks.md',
@@ -269,16 +272,23 @@ assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
-assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — Operator Acceptance Review`/u, 'STATUS current phase must be Operator P1 review');
+assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — ACCEPTED \/ INTEGRATION_PENDING`/u, 'STATUS current phase must be P1 accepted/integration pending');
 assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
 assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
-assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*IMPLEMENTED \/ VERIFIED \/ FRESH_REVIEW_PASSED \/ OPERATOR_DECISION_REQUIRED/u, 'STATUS must record P1 review-ready state');
+assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'STATUS must record P1 GATE-R acceptance');
 assert.match(statusText, /P1-F02 fresh review:[^\n]*Critical 0 \/ Important 0[^\n]*31194963494/u, 'STATUS must record F02 fresh-review evidence');
 assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
-assert.match(statusText, /## Immediate next action — Operator P1 decision/u, 'STATUS next action must be Operator P1 decision');
+assert.match(statusText, /## Immediate next action — P1 integration decision/u, 'STATUS next action must be P1 integration decision');
 assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
 assert.doesNotMatch(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS must not point to completed F02 fresh review');
 assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
+assert.match(statusText, /PR #24 merge \/ integration:[^\n]*NOT AUTHORIZED/u, 'STATUS must keep P1 integration separately gated');
+assert.match(p1AcceptanceText, /MNFS_ACCEPT_ARR_P1 program_blob=52033adcdfb7163f63606034b9912942b018f38e pr=24 head=02e99b25842562d111488d5c8c7008cb2635f3da findings=critical:0,important:0/u, 'P1 acceptance record must bind the exact Operator token');
+assert.match(decisionsText, /\| D-017 \| 2026-08-07 \| Accept ARR P1 \/ GATE-R[\s\S]*02e99b25842562d111488d5c8c7008cb2635f3da/u, 'D-017 must record exact P1 acceptance authority');
+assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED — D-017/u, 'ARR review must close GATE-R');
+assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-S0-IMPLEMENT — NOT AUTHORIZED/u, 'ARR review must keep S0 implementation unapproved');
+assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must orient fresh actors to accepted P1');
+assert.match(documentationMapText, /ARR P1 A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'Documentation Map must record accepted P1');
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];

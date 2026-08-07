@@ -13,6 +13,7 @@ related:
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
+  - ACCEPTANCE-ARR-P1-RECONCILIATION
   - DOC-PRODUCT-BLUEPRINT
   - DOC-CAPABILITY-ROADMAP
   - TRACKING-DECISIONS
@@ -36,9 +37,10 @@ D3 — Execution Environment architecture         APPROVED — D-013
 D4 — Implementation sourcing strategy           APPROVED — D-014
 SYNTHESIS — cross-decision architecture          APPROVED — D-015
 EXECUTION PLANNING DESIGN                         APPROVED — D-016
-ARR PROGRAM PLAN                                 REVIEW_READY — v0.2.0
-ARR-S0 PLAN                                      REVIEW_READY — v0.2.0
-CURRENT GATE                                     GATE-P0
+ARR PROGRAM PLAN                                 ACCEPTED — GATE-P0 — v0.2.0
+ARR-S0 PLAN                                      ACCEPTED — GATE-P0 — v0.2.0
+P1 / GATE-R                                      ACCEPTED — D-017
+NEXT POSSIBLE GATE                               GATE-S0-IMPLEMENT — NOT AUTHORIZED
 ```
 
 ## Accepted architecture
@@ -112,7 +114,7 @@ R8  Closeout / Learning / Calibration proposals
 
 Every bounded execution unit uses role-specific compiled context, explicit write/resource/environment/tool authority, proof-first/TDD where applicable, finite retry/hypothesis policy and explicit `SUCCESS / BLOCKED / ESCALATE / HANDOFF_REQUIRED / REPLAN_REQUIRED` termination. Fresh-Actor recovery cannot depend on transcript/session continuity.
 
-## Review-ready execution plan package
+## Accepted execution plan package
 
 ### Master plan
 
@@ -177,29 +179,34 @@ result:   SUCCESS
 
 These checks validate the repository/planning package only. They are not host-probe or candidate-conformance Evidence.
 
-## Current gate — GATE-P0
+## P1 / GATE-R closeout — ACCEPTED
 
-Operator review is required for:
+On 2026-08-07 the Operator accepted ARR P1 / GATE-R, bound to:
 
 ```text
-docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md
-docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md
+program blob: 52033adcdfb7163f63606034b9912942b018f38e
+PR:           #24
+P1 head:      02e99b25842562d111488d5c8c7008cb2635f3da
+findings:     Critical 0 / Important 0
+Decision:     D-017
+Evidence:     ACCEPTANCE-ARR-P1-RECONCILIATION
 ```
 
-`GATE-P0` acceptance freezes the planning direction only.
+GATE-R accepts the pre-Spike semantic/authority reconciliation and shared Spike governance produced by A1-A4+B1 plus the explicitly authorized P1-F01/P1-F02 corrections.
 
 It does **not** authorize:
 
-- pre-Spike reconciliation writes;
-- S0 harness implementation;
-- S0 host probing;
+- PR #24 merge/integration;
+- ARR-S0 implementation or host probing;
 - S1/S2/S2W/S3 execution;
-- candidate adoption;
+- candidate adoption/selection;
 - M02 production implementation;
 - production Worker dispatch;
 - automatic merge/delivery.
 
-After `GATE-P0`, the recommended next exact execution gate is a bounded authorization for the pre-Spike reconciliation tranche (`A1-A4 + B1`). Only after that tranche is accepted should the Operator issue `GATE-S0-IMPLEMENT`; the real host probe remains separately controlled by `GATE-S0-EXECUTE`.
+## Next possible gate — GATE-S0-IMPLEMENT (NOT AUTHORIZED)
+
+Before `GATE-S0-IMPLEMENT` can be issued, the accepted P1 tree must either be integrated into the canonical branch or be explicitly included in the exact later S0 base SHA. The S0 implementation gate must then be separately authorized. Real host probing remains separately controlled by `GATE-S0-EXECUTE`.
 
 ## Current relationship to MIS-002/M02
 

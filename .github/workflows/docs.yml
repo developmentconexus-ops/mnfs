@@ -65,35 +65,4 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
-      - name: Baseline checkout clean
-        run: test -z "$(git status --porcelain --untracked-files=all)"
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Checkout clean after typecheck
-        run: test -z "$(git status --porcelain --untracked-files=all)"
-      - name: Unit suite
-        run: npm run test:unit
-      - name: Checkout clean after unit suite
-        run: test -z "$(git status --porcelain --untracked-files=all)"
-        continue-on-error: true
-      - name: AS-02 suite
-        run: npm run test:as02
-      - name: Checkout clean after AS-02
-        run: test -z "$(git status --porcelain --untracked-files=all)"
-        continue-on-error: true
-      - name: TC-01 suite
-        run: npm run test:tc01
-      - name: Checkout clean after TC-01
-        run: test -z "$(git status --porcelain --untracked-files=all)"
-        continue-on-error: true
-      - name: ARR-S0 suite
-        run: npm run test:arr-s0
-      - name: Checkout clean after ARR-S0
-        run: test -z "$(git status --porcelain --untracked-files=all)"
-        continue-on-error: true
-      - name: Documentation test suite
-        run: npm run docs:test
-        continue-on-error: true
-      - name: Documentation validator
-        run: node scripts/validate-docs.mjs
-        continue-on-error: true
+      - run: npm run verify

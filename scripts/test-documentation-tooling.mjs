@@ -23,6 +23,7 @@ const roadmapGeneratorText = await readFile(path.join(root, 'scripts/generate-ro
 const agentsText = await readFile(path.join(root, 'AGENTS.md'), 'utf8');
 const documentationMapText = await readFile(path.join(root, 'docs/DOCUMENTATION-MAP.md'), 'utf8');
 const toolingText = await readFile(path.join(root, 'docs/tooling-adoption.md'), 'utf8');
+const statusText = await readFile(path.join(root, 'docs/tracking/STATUS.md'), 'utf8');
 const adrFiles = {
   'ADR-0001': 'docs/adr/0001-pi-first-wsl2.md',
   'ADR-0003': 'docs/adr/0003-worktree-write-tracks.md',
@@ -267,6 +268,15 @@ assert.match(toolingText, /projection of current capability-realization decision
 assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
+
+assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — Pre-Spike Reconciliation Review`/u, 'STATUS current phase must be P1 review');
+assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
+assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
+assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01:[^\n]*IMPLEMENTED \/ VERIFIED \/ REVIEW_REQUIRED/u, 'STATUS must record P1 implementation review state');
+assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
+assert.match(statusText, /## Immediate next action — P1 review/u, 'STATUS next action must be P1 review');
+assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
+assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];

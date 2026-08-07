@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.21.0
+version: 1.22.0
 owners:
   - developmentconexus-ops
 related:
@@ -16,9 +16,11 @@ related:
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
+  - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
   - ACCEPTANCE-ARR-GATE-P0-PLAN-APPROVAL
+  - ACCEPTANCE-ARR-S0-IMPLEMENT-AUTHORIZATION
   - ACCEPTANCE-ARR-P1-INTEGRATION-CLOSEOUT
   - ACCEPTANCE-ARR-P1-RECONCILIATION
   - ACCEPTANCE-ARR-P1-F03-CONTRACT-BINDING
@@ -55,11 +57,15 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
 - **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
-- **Current phase:** `ARR P1-F03 — ACCEPTED / INTEGRATED` under Issue #23 / PR #26.
+- **Current phase:** `ARR-S0 — DETERMINISTIC HARNESS IMPLEMENTED / REVIEW_REQUIRED` under Issue #23 / PR #27.
 - **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — ACCEPTED — GATE-P0 — blob `52033adcdfb7163f63606034b9912942b018f38e`.
-- **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — ACCEPTED — GATE-P0 — blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`.
-- **P1 base reconciliation:** A1–A4 + B1 + P1-F01 + P1-F02 is ACCEPTED under GATE-R / D-017 and INTEGRATED into `main` by squash merge of PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`.
-- **P1-F03 post-integration correction:** exact Architecture Spike contract-byte binding is ACCEPTED under D-018 at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27` and INTEGRATED into canonical `main` by squash merge at `88c5e05964e8465ef4317a3b4174c6160d8cdefa`.
+- **ARR-S0 plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — ACCEPTED — GATE-P0 — blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`.
+- **P1 base reconciliation:** A1–A4 + B1 + P1-F01 + P1-F02 is ACCEPTED under GATE-R / D-017 and INTEGRATED into `main` by PR #24.
+- **P1-F03 correction:** exact Architecture Spike contract-byte binding is ACCEPTED under D-018 and INTEGRATED by PR #26.
+- **ARR-S0 deterministic implementation authorization:** exact Operator token recorded in `ACCEPTANCE-ARR-S0-IMPLEMENT-AUTHORIZATION`, bound to canonical base `ad913dd1e0ff3b286280081b5dd4ba90eb390972`; scope is Tasks 1–11 / deterministic harness only.
+- **ARR-S0 deterministic harness:** implemented on PR #27; root `npm run verify` now contains `test:arr-s0`; Task 11 independent review is the next implementation-gate action.
+- **ARR-S0 host contract:** `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` remains PROPOSED at version `0.1.0`; a real run stays fail-closed until explicit Operator acceptance produces the later accepted contract identity.
+- **ARR-S0 real host probe:** PROHIBITED pending `GATE-S0-EXECUTE`.
 - **Superseded prior planning container:** Issue #21 — prior `MIS-002/M02` R5 path; do not resume under revision 5.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
@@ -117,16 +123,17 @@ M01 closeout:                          ACCEPTED — D-009
 M01 lifecycle status:                  ACCEPTED / CLOSED
 ```
 
-Provider-neutral M01 Evidence remains reusable for durable WriteTrack/Attempt/ActorRun identity, fencing, Claim atomicity, Intent–Action–Observation, Recovery/Reconcile and Git base/result lineage. Treehouse-specific Evidence remains historical realization Evidence and does not mandate future workspace architecture.
+Provider-neutral M01 Evidence remains reusable for durable WriteTrack/Attempt/ActorRun identity, fencing, Claim atomicity, Intent–Action–Observation, Recovery/Reconcile and Git base/result lineage. Tool-specific historical Evidence does not mandate future workspace/runtime/environment architecture.
 
 ## Deciding Architecture Spike program
 
 ```text
-Pre-Spike reconciliation
-→ shared Spike governance/Evidence contract
-→ ARR-S0 Host Capability Probe
+Pre-Spike reconciliation                         ACCEPTED / INTEGRATED
+→ shared Spike governance/Evidence contract      ACCEPTED / INTEGRATED
+→ ARR-S0 deterministic harness                   IMPLEMENTED / REVIEW_REQUIRED
+→ ARR-S0 Host Capability Probe                   PROHIBITED pending GATE-S0-EXECUTE
 → ARR-S1 Agent Runtime Conformance   ┐
-→ ARR-S2 Execution Envelope         ├ independently after S0
+→ ARR-S2 Execution Envelope         ├ later exact gates
 → optional ARR-S2W Workspace        ┘
 → ARR-S3 Vertical Composition Proof
 → substrate selection Decision
@@ -134,7 +141,7 @@ Pre-Spike reconciliation
 → new M02 R5 Execution Design
 ```
 
-`ARR-S0` records generic host facts and coarse capability classes. It deliberately does not hard-code named-project eligibility; S1/S2 planners map refreshed candidate requirements onto immutable S0 Evidence.
+ARR-S0 records generic host facts and coarse capability classes. It deliberately does not hard-code named-project eligibility; S1/S2 planners map refreshed candidate requirements onto immutable accepted S0 Evidence.
 
 No concrete Agent Runtime, process sandbox, microVM or workspace substrate has been selected.
 
@@ -144,39 +151,37 @@ No concrete Agent Runtime, process sandbox, microVM or workspace substrate has b
 GATE-P0 master-plan blob:       52033adcdfb7163f63606034b9912942b018f38e — ACCEPTED
 GATE-P0 ARR-S0-plan blob:       3e78445fcbcca360f612edefd025c6cb0f84f8e5 — ACCEPTED
 
-P1 authorized scope:            A1, A2, A3, A4, B1
-P1 review surface:              PR #24
-P1-F01 correction:              RESOLVED
-P1-F02 constitutional tree:     d741b64b41bb04d4ceabaf0efa4b565a9d7e935e
-P1-F02 PR verification:         31194802381 — SUCCESS — npm run verify
-P1-F02 fresh review:            Critical 0 / Important 0 — 31194963494 — SUCCESS
-P1 accepted head verify:        31195841392 — SUCCESS — npm run verify
 P1 Operator acceptance:         GATE-R — D-017 — ACCEPTED
 P1 accepted head:               02e99b25842562d111488d5c8c7008cb2635f3da
-P1 acceptance record:           ACCEPTANCE-ARR-P1-RECONCILIATION
 P1 integrated commit:           def9e5fe819f76950d61fba2cf5abcda1533c07f
-P1 integration record:          ACCEPTANCE-ARR-P1-INTEGRATION-CLOSEOUT
-
-P1-F03 correction surface:      PR #26
-P1-F03 canonical base:          dffd3c929eac0f939615408f4729781bd029f11a
-P1-F03 refined RED head:        aa70e28da8e603990d523705e411daecef03dd54
-P1-F03 RED workflow:            31202444046 — FAILURE
-P1-F03 accepted substantive head: 0b9fe9747887ef5817fffbb586db04ccb3292b27
-P1-F03 accepted-head workflow:  31203105413 — SUCCESS — npm run verify
-P1-F03 review findings:         Critical 0 / Important 0
 P1-F03 Operator acceptance:     D-018 — ACCEPTED
-P1-F03 acceptance record:       ACCEPTANCE-ARR-P1-F03-CONTRACT-BINDING
+P1-F03 accepted head:           0b9fe9747887ef5817fffbb586db04ccb3292b27
 P1-F03 integrated commit:       88c5e05964e8465ef4317a3b4174c6160d8cdefa
-P1-F03 integration workflow:    31205404945 — SUCCESS — npm run verify
-P1-F03 integration record:      ACCEPTANCE-ARR-P1-F03-INTEGRATION-CLOSEOUT
-P1-F03 integration:             COMPLETE — PR #26 MERGED
+P1/F03 canonical closeout head: ad913dd1e0ff3b286280081b5dd4ba90eb390972 — 31205835660 SUCCESS
+
+ARR-S0 implementation token:    MNFS_AUTHORIZE_ARR_S0_IMPLEMENT
+ARR-S0 implementation base:     ad913dd1e0ff3b286280081b5dd4ba90eb390972
+ARR-S0 implementation scope:    deterministic-harness-only / Tasks 1–11
+ARR-S0 review surface:          PR #27 / branch arr-s0/implement
+Task 1 RED:                     31207248567 — FAILURE
+Task 1 GREEN:                   31207344332 — SUCCESS
+Task 2 RED/GREEN:               31207499603 FAILURE / 31207617424 SUCCESS
+Task 3 RED/GREEN:               31207730197 FAILURE / 31207811932 SUCCESS
+Task 4 RED/GREEN:               31207906970 FAILURE / 31207969720 SUCCESS
+Task 5 RED/GREEN:               31208150501 FAILURE / 31208258691 SUCCESS
+Task 6 RED/GREEN:               31208374189 FAILURE / 31208513948 SUCCESS
+Task 7 RED/GREEN + edge:        31208623722 / 31208677544 / 31208797147 / 31208861465
+Task 8 RED/GREEN:               31208972147 FAILURE / 31209090912 SUCCESS
+Task 9 RED:                     31209384739 — FAILURE
+Task 9 run-id RED:              31209842593 — FAILURE
+Task 9 pre-promotion GREEN:     31209927526 — SUCCESS
+Task 9 root-verify GREEN:       31210025032 — SUCCESS
+Task 10 contract consistency:   IN PROGRESS — human contract proposed 0.1.0
 ```
 
-The P1-F02 review used the provider-neutral constitutional tree and a fresh contextual scan of residual Pi/Treehouse/E0–E4/AB1/AS-01/AS-02/worktree language. Remaining vendor-specific occurrences are explicitly historical/incumbent/reference Evidence, research, negative examples or property options rather than current substrate selection.
+The harness uses exact argv, closed stdin, explicit allowlisted subprocess environments, bounded output, full process-group timeout termination, strict Linux-owned state roots, durable/immutable artifact publication, post-publication hash verification, generic class derivation and a mechanical overall Verdict. The real CLI `run` path fails closed while the S0 contract is not explicitly accepted at version `1.0.0`.
 
-D-018 strengthens the shared B1 Architecture Spike Evidence contract before any deciding ARR host/candidate Evidence is produced: every Evidence record carries `contractHash`, and the validator recomputes SHA-256 from the exact frozen contract bytes supplied through `--contract`.
-
-The accepted GATE-P0 package approves plan authority only. None of P1, P1-F03 or their acceptance/integration records are ARR-S0 host Evidence or authorization to execute ARR-S0.
+No host capability Evidence has been produced under this implementation gate. Deterministic tests use injected fixtures and temporary state roots only.
 
 ## Current authorization boundary
 
@@ -186,22 +191,21 @@ D1–D4 + Architecture Synthesis:                 APPROVED
 Execution Planning Design 1.0.0:                ACCEPTED — D-016
 Master ARR program plan 0.2.0:                  ACCEPTED — GATE-P0
 ARR-S0 plan 0.2.0:                              ACCEPTED — GATE-P0
-ARR P1 A1-A4 + B1 + P1-F01 + P1-F02:           ACCEPTED — GATE-R / D-017 / INTEGRATED
-PR #24 merge / integration:                     COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
-P1-F03 exact Spike-contract binding correction: ACCEPTED — D-018 / INTEGRATED
-PR #26 merge / integration:                     COMPLETE — 88c5e05964e8465ef4317a3b4174c6160d8cdefa
-ARR-S0 harness implementation:                  PROHIBITED pending GATE-S0-IMPLEMENT
-ARR-S0 real host probe:                         PROHIBITED pending later GATE-S0-EXECUTE
+ARR P1 + P1-F03:                                ACCEPTED / INTEGRATED — D-017 / D-018
+GATE-S0-IMPLEMENT:                              AUTHORIZED — exact token / deterministic-harness-only
+ARR-S0 deterministic harness:                   IMPLEMENTED / REVIEW_REQUIRED — PR #27
+ARR-S0 host contract:                           PROPOSED — 0.1.0 / NOT ACCEPTED
+ARR-S0 real host probe:                         PROHIBITED pending GATE-S0-EXECUTE
 ARR-S1/S2/S2W/S3 execution:                     PROHIBITED pending their later exact gates
 MIS-002 revision 5 M02 implementation:           PROHIBITED / SUPERSEDED PATH
 Production Worker dispatch:                     PROHIBITED
 Automatic delivery / merge:                     NOT AUTHORIZED
 ```
 
-## Immediate next action — GATE-S0-IMPLEMENT review
+## Immediate next action — ARR-S0 deterministic review
 
-P1 and the accepted P1-F03 correction are now integrated into canonical `main`. The integration prerequisites from the ARR program and D-018 are therefore satisfied.
+Complete Task 10 contract/harness consistency verification, then execute Task 11 fresh independent deterministic review of PR #27.
 
-`GATE-S0-IMPLEMENT` is now the **next possible gate**, but it remains **NOT AUTHORIZED**. The Operator must separately authorize deterministic construction/testing of the ARR-S0 harness against an exact canonical base SHA and the accepted ARR-S0 plan.
+Task 11 requires **zero unresolved Critical/Important Findings** before the deterministic harness/contract can be presented for Operator acceptance. Review or implementation completion does not authorize a real host run.
 
-ARR-S0 real host probing, candidate execution, M02 production work and production Worker dispatch remain prohibited. Real probing of the canonical WSL2 host remains behind the later separate `GATE-S0-EXECUTE`.
+`GATE-S0-EXECUTE` remains **NOT AUTHORIZED**. A later execution Decision must bind an accepted S0 contract version/hash, exact canonical commit and exact deterministic verification Evidence before Task 12 may run.

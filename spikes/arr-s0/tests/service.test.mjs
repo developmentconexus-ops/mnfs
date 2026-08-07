@@ -9,9 +9,17 @@ import { preflightS0, reportS0, runS0 } from '../src/service.mjs';
 
 const RUN_ID = 'arr-s0-20260807t120000000z-a1b2c3';
 const SOURCE = { commitSha: 'a'.repeat(40), treeSha: 'b'.repeat(40) };
+const CONTRACT_HASH = `sha256:${'d'.repeat(64)}`;
 const IDENTITIES = {
   plan: { version: '0.2.0', hash: `sha256:${'c'.repeat(64)}` },
-  contract: { version: '0.1.0', hash: `sha256:${'d'.repeat(64)}` },
+  contract: { version: '0.1.0', hash: CONTRACT_HASH },
+  executionAuthorization: {
+    gate: 'GATE-S0-EXECUTE',
+    baseCommitSha: SOURCE.commitSha,
+    contractHash: CONTRACT_HASH,
+    verificationRunId: 31216915662,
+    tokenHash: `sha256:${'e'.repeat(64)}`,
+  },
 };
 const CAPABILITY_IDS = [
   'HOST-WSL2',
@@ -100,7 +108,7 @@ test('preflight fails closed when the state-root filesystem is not explicitly re
   }
 });
 
-test('deterministic run persists lifecycle, Evidence manifest, classes and mechanical Verdict', async () => {
+test('deterministic run persists lifecycle, execution authority, Evidence manifest, classes and mechanical Verdict', async () => {
   const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-run-'));
   try {
     const result = await runS0({
@@ -126,6 +134,8 @@ test('deterministic run persists lifecycle, Evidence manifest, classes and mecha
     assert.equal(result.phase, 'FINALIZED');
     assert.equal(result.verdict.status, 'ACCEPT');
     assert.equal(result.source.commitSha, SOURCE.commitSha);
+    assert.deepEqual(result.executionAuthorization, IDENTITIES.executionAuthorization);
+    assert.equal(Object.hasOwn(result.executionAuthorization, 'operatorToken'), false);
     assert.equal(result.capabilities.length, CAPABILITY_IDS.length);
     assert.equal(result.capabilityClasses.length, 5);
     assert.match(result.manifest.sha256, /^sha256:[a-f0-9]{64}$/u);
@@ -134,6 +144,7 @@ test('deterministic run persists lifecycle, Evidence manifest, classes and mecha
     assert.equal(report.complete, true);
     assert.equal(report.phase, 'FINALIZED');
     assert.equal(report.verdict.status, 'ACCEPT');
+    assert.deepEqual(report.executionAuthorization, IDENTITIES.executionAuthorization);
     assert.equal(report.integrity.ok, true);
   } finally {
     await rm(stateRoot, { recursive: true, force: true });
@@ -181,6 +192,7 @@ test('report identifies an incomplete CREATED run and never invents a Verdict', 
     const report = await reportS0({ runId: RUN_ID, stateRoot });
     assert.equal(report.complete, false);
     assert.equal(report.phase, 'CREATED');
+    assert.deepEqual(report.state.executionAuthorization, IDENTITIES.executionAuthorization);
     assert.equal(report.verdict, null);
   } finally {
     await rm(stateRoot, { recursive: true, force: true });

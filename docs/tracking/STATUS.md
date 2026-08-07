@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.10.0
+version: 1.11.0
 owners:
   - developmentconexus-ops
 related:
@@ -46,6 +46,7 @@ M2 — Secure One-Worker Vertical Slice                   ARCHITECTURE_REASSESSM
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`.
 - **Approved Mission contract:** `MIS-002` revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`; remains authoritative until explicitly superseded.
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / Operator decision `D-010`.
+- **Architecture Review decisions:** D1 approved as `D-011`; D2 approved as `D-012`; D3 approved as `D-013`; D4 Implementation Sourcing Strategy is the current decision area.
 - **Current planning container:** Issue #23 — global Architecture Realization Review.
 - **Paused prior planning container:** Issue #21 — `MIS-002/M02` R5 Milestone Microdesign; resume only after the Architecture Realization Review decides preserve/supersede/replan impact.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
@@ -119,12 +120,24 @@ Opportunity Replan
 
 Sunk cost is migration cost, not architectural justification.
 
+## Architecture Realization Review progress
+
+```text
+D1 — Planning and validation semantics          APPROVED — D-011
+D2 — Agent runtime and session/control strategy APPROVED — D-012
+D3 — Execution Environment architecture         APPROVED — D-013
+D4 — Implementation sourcing strategy           IN REVIEW
+```
+
+D1–D3 approve semantic/boundary direction only. They do not select a production Agent Runtime or Execution Environment substrate and do not authorize Worker dispatch.
+
 ## Current authorization boundary
 
 ```text
 M01 implementation / closeout:        ACCEPTED / CLOSED
 M01 R2/R3 hardening:                   FOLLOW_UP_REQUIRED under Issue #20
 Architecture Discovery / Decision:     AUTHORIZED under Issue #23 / D-010
+D4 Implementation Sourcing Review:     CURRENT
 M02 R5 microdesign as next gate:       PAUSED pending Architecture Realization Review
 M02 production implementation:        PROHIBITED
 Production Worker dispatch:            PROHIBITED
@@ -133,15 +146,26 @@ Automatic delivery / merge:            NOT AUTHORIZED by this status
 
 ## Immediate next action
 
-Execute the global Architecture Realization Review from first principles before resuming `MIS-002/M02` design.
+Complete D4 — Implementation Sourcing Strategy for the global Architecture Realization Review.
 
-The review must compare the best credible open/replaceable approaches for:
+D4 must classify each material capability as:
 
-1. planning and validation semantics;
-2. agent runtime and session/control infrastructure;
-3. execution workspace and isolation;
-4. implementation sourcing (`OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT`).
+```text
+OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT
+```
 
-It must actively search for evidence that the preferred architecture is wrong and finish with explicit `PRESERVE / SUPERSEDE / REPLAN` impact on Blueprint, ADRs, Roadmap, CAP-EXECUTION and MIS-002.
+and explicitly test:
+
+- authority/state duplication;
+- unnecessary custom infrastructure;
+- sovereignty and license/lock-in;
+- maintenance tail;
+- named current consumer;
+- integration cost versus machinery eliminated;
+- proofability in the canonical environment;
+- removal/replacement path;
+- speculative abstractions.
+
+After D4 is approved, perform the cross-decision architecture synthesis and produce exact `PRESERVE / SUPERSEDE / REPLAN` impact on Blueprint, ADRs, Roadmap, CAP-EXECUTION and MIS-002 plus the bounded Architecture Spikes and next execution gate.
 
 Do not implement M02 until those decisions are reconciled and a new exact execution gate is issued.

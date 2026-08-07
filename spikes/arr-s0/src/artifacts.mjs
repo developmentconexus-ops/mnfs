@@ -102,7 +102,9 @@ async function existingArtifactMetadata(ops, root, finalPath, relativePath, byte
 }
 
 export async function writeRawArtifact(runRoot, relativePath, inputBytes, options = {}) {
-  const ops = options.ops ? { ...defaultOps, ...options.ops } : defaultOps;
+  const ops = options.ops
+    ? { ...defaultOps, ...options.ops, realpath: options.ops.realpath }
+    : defaultOps;
   const normalized = requireContainedRelativePath(relativePath);
   const root = path.resolve(runRoot);
   const finalPath = path.resolve(root, normalized);

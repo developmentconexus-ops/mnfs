@@ -65,4 +65,15 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
-      - run: npm run verify
+      - name: Verify component - typecheck
+        run: npm run typecheck
+      - name: Verify component - unit
+        run: npm run test:unit
+      - name: Verify component - AS-02
+        run: npm run test:as02
+      - name: Verify component - TC-01
+        run: npm run test:tc01
+      - name: Verify component - ARR-S0
+        run: npm run test:arr-s0
+      - name: Verify component - prepared docs
+        run: npm run docs:check:prepared

@@ -3,7 +3,12 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { sha256Bytes } from './artifacts.mjs';
 import { S0_PLAN_GIT_BLOB, S0_PLAN_VERSION } from './contract.mjs';
+import {
+  EXECUTION_AUTHORIZATION_RELATIVE_PATH,
+  validateExecutionAuthorization,
+} from './execution-authority.mjs';
 import { requireRunId } from './paths.mjs';
+import { observeRepositoryIdentity } from './probes/repository.mjs';
 import { buildReportView } from './report.mjs';
 import { generateRunId } from './run-id.mjs';
 import { preflightS0, reportS0, runS0 } from './service.mjs';
@@ -59,10 +64,17 @@ function gitBlobSha1(bytes) {
     .digest('hex');
 }
 
-export async function loadS0Identities(repoRoot = process.cwd()) {
+async function defaultSourceLoader(repoRoot) {
+  return await observeRepositoryIdentity({ repoRoot });
+}
+
+export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
+  const fileReader = options.readFile ?? readFile;
+  const sourceLoader = options.sourceLoader ?? defaultSourceLoader;
   const planPath = path.join(repoRoot, 'docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md');
   const contractPath = path.join(repoRoot, 'docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md');
-  const [planBytes, contractBytes] = await Promise.all([readFile(planPath), readFile(contractPath)]);
+  const authorizationPath = path.join(repoRoot, EXECUTION_AUTHORIZATION_RELATIVE_PATH);
+  const [planBytes, contractBytes] = await Promise.all([fileReader(planPath), fileReader(contractPath)]);
   if (gitBlobSha1(planBytes) !== S0_PLAN_GIT_BLOB) {
     throw new Error('ARR-S0 plan bytes do not match the GATE-P0 approved Git blob');
   }
@@ -76,9 +88,33 @@ export async function loadS0Identities(repoRoot = process.cwd()) {
   if (contractStatus !== 'accepted' || contractVersion !== '1.0.0') {
     throw new Error('ARR-S0 real run remains prohibited until contract 1.0.0 is explicitly accepted');
   }
+
+  let authorizationRecord;
+  try {
+    authorizationRecord = JSON.parse((await fileReader(authorizationPath)).toString('utf8'));
+  } catch (error) {
+    throw new Error(`ARR-S0 GATE-S0-EXECUTE execution authorization is unavailable or invalid (${error?.message ?? error})`);
+  }
+
+  const repository = await sourceLoader(repoRoot);
+  const source = repository?.source;
+  if (!source?.commitSha) {
+    throw new Error('ARR-S0 execution authorization cannot bind because current repository source commit is unavailable');
+  }
+
+  const contractHash = sha256Bytes(contractBytes);
+  const executionAuthorization = validateExecutionAuthorization(authorizationRecord, {
+    planGitBlob: S0_PLAN_GIT_BLOB,
+    contractVersion,
+    contractHash,
+    baseCommitSha: source.commitSha,
+    verificationRunId: authorizationRecord?.verification?.workflowRunId,
+  });
+
   return {
     plan: { version: S0_PLAN_VERSION, hash: sha256Bytes(planBytes) },
-    contract: { version: contractVersion, hash: sha256Bytes(contractBytes) },
+    contract: { version: contractVersion, hash: contractHash },
+    executionAuthorization,
   };
 }
 

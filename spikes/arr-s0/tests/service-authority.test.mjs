@@ -3,10 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import {
-  buildExecutionAuthorizationToken,
-  parseExecutionAuthorizationToken,
-} from '../src/execution-authority.mjs';
+import { parseExecutionAuthorizationToken } from '../src/execution-authority.mjs';
 import { runS0 } from '../src/service.mjs';
 
 const RUN_ID = 'arr-s0-20260807t120000000z-a1b2c3';
@@ -16,12 +13,7 @@ const PLAN = { version: '0.2.0', hash: `sha256:${'c'.repeat(64)}` };
 const CONTRACT = { version: '1.0.0', hash: `sha256:${'d'.repeat(64)}` };
 
 function authority({ baseCommitSha = SOURCE.commitSha, contractHash = CONTRACT.hash } = {}) {
-  const token = buildExecutionAuthorizationToken({
-    planGitBlob: PLAN_BLOB,
-    contractHash,
-    baseCommitSha,
-    verificationRunId: 31216915662,
-  });
+  const token = `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=${PLAN_BLOB} contract_sha256=${contractHash} base_sha=${baseCommitSha} verify_run=31216915662 scope=canonical-host-probe-only`;
   return parseExecutionAuthorizationToken(token, {
     planGitBlob: PLAN_BLOB,
     contractHash,

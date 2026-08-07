@@ -6,6 +6,7 @@ import { S0_PLAN_GIT_BLOB, S0_PLAN_VERSION } from './contract.mjs';
 import {
   EXECUTION_AUTHORIZATION_ENV,
   parseExecutionAuthorizationToken,
+  requireAuthenticatedExecutionAuthorization,
 } from './execution-authority.mjs';
 import { requireRunId } from './paths.mjs';
 import { observeRepositoryIdentity } from './probes/repository.mjs';
@@ -85,13 +86,7 @@ export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
   const contractStatus = parseFrontmatterScalar(contractText, 'status');
   const contractVersion = parseFrontmatterScalar(contractText, 'version');
   if (contractStatus !== 'accepted' || contractVersion !== '1.0.0') {
-    throw new Error('ARR-S0 real run remains prohibited until contract 1.0.0 is explicitly accepted');
-  }
-
-  const repository = await sourceLoader(repoRoot);
-  const source = repository?.source;
-  if (!source?.commitSha) {
-    throw new Error('ARR-S0 execution authorization cannot bind because current repository source commit is unavailable');
+    throw new Error('ARR-S0 real host observation remains prohibited until contract 1.0.0 is explicitly accepted');
   }
 
   const env = options.env ?? process.env;
@@ -99,11 +94,19 @@ export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
     ? options.executionAuthorizationToken
     : env?.[EXECUTION_AUTHORIZATION_ENV];
   const contractHash = sha256Bytes(contractBytes);
+
+  // Authenticate plan + exact contract bytes before any repository/host observation.
   const executionAuthorization = parseExecutionAuthorizationToken(executionAuthorizationToken, {
     planGitBlob: S0_PLAN_GIT_BLOB,
     contractHash,
-    baseCommitSha: source.commitSha,
   });
+
+  const repository = await sourceLoader(repoRoot);
+  const source = repository?.source;
+  if (!source?.commitSha) {
+    throw new Error('ARR-S0 execution authorization cannot bind because current repository source commit is unavailable');
+  }
+  requireAuthenticatedExecutionAuthorization(executionAuthorization, { baseCommitSha: source.commitSha });
 
   return {
     plan: { version: S0_PLAN_VERSION, hash: sha256Bytes(planBytes) },
@@ -114,6 +117,14 @@ export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
 
 function writeJson(stdout, value) {
   stdout.write(`${JSON.stringify(value)}\n`);
+}
+
+function authorityOptions(options) {
+  const result = { env: options.env };
+  if (Object.prototype.hasOwnProperty.call(options, 'executionAuthorizationToken')) {
+    result.executionAuthorizationToken = options.executionAuthorizationToken;
+  }
+  return result;
 }
 
 export async function executeCli(argv, options = {}) {
@@ -128,16 +139,13 @@ export async function executeCli(argv, options = {}) {
   const runIdGenerator = options.runIdGenerator ?? generateRunId;
 
   if (parsed.command === 'preflight') {
-    const result = await preflight({ repoRoot, stateRoot });
+    const identities = await identitiesLoader(repoRoot, authorityOptions(options));
+    const result = await preflight({ repoRoot, stateRoot, identities });
     writeJson(stdout, result);
     return result.ok ? 0 : 2;
   }
   if (parsed.command === 'run') {
-    const authorityOptions = { env: options.env };
-    if (Object.prototype.hasOwnProperty.call(options, 'executionAuthorizationToken')) {
-      authorityOptions.executionAuthorizationToken = options.executionAuthorizationToken;
-    }
-    const identities = await identitiesLoader(repoRoot, authorityOptions);
+    const identities = await identitiesLoader(repoRoot, authorityOptions(options));
     const runId = runIdGenerator();
     const result = await run({ repoRoot, stateRoot, identities, runId });
     writeJson(stdout, buildReportView(result));

@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 1.4.3
+version: 1.5.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -17,7 +17,9 @@ source_of_truth_for:
 related:
   - DOC-PRODUCT-BLUEPRINT
   - DOC-CAPABILITY-ROADMAP
+  - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
   - CAP-EXECUTION
+  - TRACKING-DECISIONS
   - ACCEPTANCE-M2-UNBLOCK
   - ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER
   - REVIEW-MIS-002-M01-R5-FINAL
@@ -30,40 +32,37 @@ review_triggers:
   - canonical document added, removed or superseded
   - documentation authority changes
   - Product Milestone changes
-last_reviewed: 2026-08-04
-tracking_issue: 16
+last_reviewed: 2026-08-07
+tracking_issue: 21
 ---
 
 # MNFS Documentation Map
 
-> Accepted documentation authority and discovery map. This document indexes canonical sources and current read paths; it does not redefine their content.
+> Accepted documentation authority and discovery map. This document indexes canonical sources and read paths; it does not redefine their content.
 
 ## 1. Current architecture phase
 
 ```text
-M2 — Secure One-Worker Vertical Slice
-MIS-002/M01 — Durable Execution and Lease Core
-MCRM R5 — PASS
-M01 implementation plan 1.0.1 — APPROVED
-M01 implementation — CLOSEOUT_PREPARED / ACCEPTANCE_PENDING_OPERATOR_REVIEW
+M0 — Foundation Walking Skeleton                         ACCEPTED
+M1 — Visual Mission Planning                            ACCEPTED
+M2 — Secure One-Worker Vertical Slice                   IN_PROGRESS
+  MIS-002/M01 — Durable Execution and Lease Core        ACCEPTED / CLOSED
+  MIS-002/M02 — Governed E1 Worker, Recovery and Acceptance
+                                                        R5 DESIGN PREPARATION
 ```
 
 Current state:
 
-- M0 and M1 are accepted Product Milestone history;
-- Product Blueprint Sections 1–13, ADR-0001–ADR-0012 and the Capability Realization Method are accepted;
-- CAP-EXECUTION version 0.1.0 is accepted;
-- MIS-002 revision 5 is the approved schema-v2 contract at `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`;
-- R0–R5 pass for accepted M01 microdesign version 0.6.1;
-- PR #14 is integrated in `main` at `dee12a9b53984d39045421c9586ee53665ebc5e5`;
-- Issue #16 tracks the M01 closeout; PR #17 is merged in `main` at `3722235a2c7a4d4d5fc11e55d8c4b8e6f025a8f7`, and PR #19 carries the post-PR implementation delta for operator review;
-- canonical TC-01 WSL2 Evidence is `ACCEPT`, S01–S15 all `PASS`, cleanup `COMPLETED`;
-- final R5 review closed all 3 Critical and all 8 Important findings;
-- Operator decision `D-007` accepted microdesign 0.6.1 and closed R5;
-- Operator decision `D-008` approved implementation plan 1.0.1;
-- M01 implementation verification is green for the deterministic suite and normal real Treehouse Scenario A (`HISTORICAL_PASS`); successful raw run artifacts were cleaned after evidence finalization and are not retained;
-- real R2 crash/recovery and R3 lineage evidence remain FOLLOW_UP_REQUIRED;
-- formal M01 acceptance, Pi dispatch and automatic merge require separate operator authority.
+- Product Blueprint Sections 1–13 and ADR-0001–ADR-0012 are accepted;
+- `CAP-EXECUTION` version 0.1.0 is accepted;
+- `MIS-002` revision 5 is the approved schema-v2 Mission contract at `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`;
+- MCRM R0–R4 pass for M2 readiness;
+- M01 microdesign 0.6.1 and implementation plan 1.0.1 are accepted;
+- PR #17 merged the historical M01 implementation baseline at `3722235a2c7a4d4d5fc11e55d8c4b8e6f025a8f7`;
+- PR #19 merged the final production-integration and closeout delta at `a783cc5854163b0f1abc8a944286a540f9b653b8`;
+- Operator decision `D-009` formally accepts the M01 closeout;
+- real R2/R3 remain `FOLLOW_UP_REQUIRED` under Issue #20 and are not represented as PASS;
+- Issue #21 owns M02 R5 microdesign preparation/review only; M02 implementation and Pi Worker dispatch remain prohibited.
 
 ## 2. Authority hierarchy
 
@@ -97,7 +96,7 @@ accepted specific ADR
 → Research / Historical
 ```
 
-An implementation plan cannot change the accepted microdesign, Mission contract, Capability or ADR. Conflicts are resolved explicitly.
+An implementation plan cannot change an accepted microdesign, Mission contract, Capability or ADR. Material conflict is resolved explicitly through Decision, ADR or Replan as applicable.
 
 ## 3. Storage boundaries
 
@@ -108,6 +107,7 @@ Canonical human-readable product knowledge:
 - Product Blueprint and ADRs;
 - Capability Specs and Roadmap;
 - accepted designs and approved plans;
+- Operator Decisions;
 - selected Evidence, Standards, guidance and research.
 
 ### `.mnfs/`
@@ -117,7 +117,7 @@ Canonical machine-readable repository artifacts:
 - Repository ID;
 - Approved Mission Contracts and immutable history;
 - accepted Evidence promoted to the repository;
-- Closeouts.
+- Closeouts when materialized there by product flows.
 
 ### SQLite
 
@@ -147,39 +147,28 @@ Generated or temporary:
 | Path | Purpose | Authority |
 |---|---|---|
 | `README.md` | product introduction and quick start | guidance |
-| `AGENTS.md` | agent bootstrap and hard rules | guidance/index |
+| `AGENTS.md` | agent bootstrap, hard rules and current gate | guidance/index |
 | `docs/DOCUMENTATION-MAP.md` | discovery, authority and read order | constitutional reference |
+| `docs/tracking/STATUS.md` | current lifecycle/gates | tracking |
+| `docs/tracking/DECISIONS.md` | Operator decisions | tracking of A1 authority |
+| `docs/tracking/WORKLOG.md` | chronological implementation history | tracking |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated complete Blueprint | generated constitutional projection |
 | `docs/product/CAPABILITY-REALIZATION-METHOD.md` | Blueprint-to-build readiness method | Standard / Policy |
 | `docs/roadmap.md` | capability and Product Milestone sequence | product plan |
-| `docs/tracking/STATUS.md` | current gates and authorization | tracking |
-| `docs/tracking/DECISIONS.md` | Operator decisions | tracking |
 
-## 5. Product Blueprint and ADRs
-
-Canonical editable Blueprint sources are `docs/product/blueprint/01-*.md` through `13-*.md`; `docs/product/PRODUCT-BLUEPRINT.md` is generated and must not be edited directly.
-
-Accepted ADRs are indexed at:
-
-```text
-docs/adr/README.md
-```
-
-Current M01 decisions depend especially on ADR-0002, ADR-0003, ADR-0005 and ADR-0006. A semantic change requires a superseding ADR.
-
-## 6. Capability and contract authorities
+## 5. Capability and contract authorities
 
 ```text
 docs/product/CAPABILITY-REALIZATION-METHOD.md
 docs/capabilities/CAP-EXECUTION/SPEC.md
 docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
 docs/capabilities/CAP-EXECUTION/COVERAGE.md
+.mnfs/missions/MIS-002/plan.json
 ```
 
 Current Approved Mission Contract:
 
 ```text
-.mnfs/missions/MIS-002/plan.json
 Mission:       MIS-002
 Revision:      5
 Schema:        2
@@ -188,9 +177,43 @@ Contract hash: sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56
 
 Historical revision 3 remains immutable under `.mnfs/missions/MIS-002/history/`.
 
-## 7. Current M01 authority package
+## 6. Accepted M01 closeout package
 
-Read in this order:
+M01 is closed through this authority/evidence chain:
+
+```text
+MIS-002 revision 5
+→ CAP-EXECUTION requirements allocated to MIS-002/M01
+→ DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE 0.6.1
+→ PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE 1.0.1
+→ Tasks 1–14 implementation and verification
+→ PR #17 historical implementation merge
+→ PR #19 final production-integration/closeout merge
+→ ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT 1.1.0
+→ Operator decision D-009
+```
+
+Deciding M01 Evidence includes the deterministic/fresh-process crash-and-retry composition suite and the historical real Treehouse normal-path proof. R2/R3 real crash/lineage scenarios remain supplemental operational hardening under Issue #20.
+
+## 7. Evidence proportionality and deferment
+
+MNFS uses **criterion-driven Evidence**, not completion of an arbitrary test inventory, to decide an intermediate Mission Milestone.
+
+A supplemental proof may be deferred only when:
+
+- it is not the sole proof of a deciding criterion or MUST requirement;
+- the existing Evidence covers the required invariant/integration assumption;
+- destination, rationale, residual risk and Operator authority are recorded;
+- it is never represented as PASS;
+- deferment does not contradict the approved contract, Capability Spec or ADRs.
+
+For M01, `MIS-002/M01/AC-08` remains satisfied by the deterministic/fresh-process crash-and-retry composition evidence plus the real normal-path Treehouse boundary proof. Issue #20 owns the additional R2/R3 real hardening before Product Milestone M2 exit (MCRM R7/R8), or earlier if M02 exposes a concrete dependency.
+
+This interpretation does not weaken Product Milestone R7/R8: M2 still requires complete Verification, Validation and Closeout before Product Milestone exit.
+
+## 8. M02 canonical read path
+
+Before designing or implementing `MIS-002/M02`, read:
 
 ```text
 AGENTS.md
@@ -200,150 +223,15 @@ AGENTS.md
 → .mnfs/missions/MIS-002/plan.json
 → docs/capabilities/CAP-EXECUTION/SPEC.md
 → docs/capabilities/CAP-EXECUTION/TRACEABILITY.json
-→ ADR-0002 / ADR-0003 / ADR-0005 / ADR-0006
-→ Product Blueprint Sections 2, 5, 7, 8, 9, 10 and 12
-→ docs/research/MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1.md
-→ docs/design/2026-08-03-tc-01-treehouse-production-adapter-conformance.md
-→ docs/acceptance/2026-08-03-tc-01-treehouse-production-adapter.md
-→ docs/acceptance/2026-08-04-mis-002-m01-final-r5-review.md
-→ docs/acceptance/2026-08-04-mis-002-m01-r5-approval.md
-→ docs/design/2026-08-03-mis-002-m01-durable-execution-lease-core.md
-→ docs/superpowers/plans/2026-08-04-mis-002-m01-durable-execution-lease-core-implementation.md
-→ docs/acceptance/2026-08-04-mis-002-m01-implementation-plan-approval.md
+→ accepted AS-02 Evidence and SEC-E1 sources
+→ accepted M01 design/implementation closeout
+→ applicable ADRs and Product Blueprint clauses
+→ current M02 microdesign once created under Issue #21
 ```
 
-Current authority:
+Do not treat `.mnfs` runtime artifacts, conversations, terminal state or Issue discussion as product doctrine.
 
-```text
-Research:                 published Evidence
-TC-01 protocol:           accepted specification
-TC-01 runtime Evidence:   accepted Evidence
-Final R5 review:          accepted Evidence
-M01 microdesign:          accepted specification version 0.6.1
-MCRM R5:                  PASS
-M01 implementation plan: current guidance version 1.0.1 / Operator approved
-M01 implementation:      verified in the post-PR local working tree / closeout prepared
-Real Scenario A:          HISTORICAL_PASS; evidence finalized before fixture cleanup, successful raw root not retained; R2/R3 follow-up required
-Pi Worker dispatch:       prohibited
-```
-
-The TC-01 harness plan is historical/current guidance for the completed spike. It is not the M01 production implementation plan.
-
-## 8. Accepted M01 invariants
-
-The implementation plan and any later code must preserve:
-
-1. canonical checkout is never Treehouse cwd;
-2. every Attempt owns an independent Linux-local exact-base source;
-3. sources have zero remotes, no alternates, no shared common directory and no hardlinked canonical objects;
-4. Treehouse uses controlled HOME/XDG/config/hooks and exact accepted candidate identity;
-5. semantic state and matching payload-versioned Event commit atomically;
-6. relational keys prove exact Track → Attempt → Run/Lease → Claim ancestry;
-7. Claim result is a Git tree in the exact Attempt source;
-8. grant, release and Claim idempotency bind unique keys to canonical input hashes;
-9. LeaseActionRunner records STARTED before one external invocation;
-10. an inconclusive STARTED grant never automatically repeats `treehouse get`;
-11. release is conditional, idempotent and fully fenced;
-12. dirty, ambiguous and unclassified work is preserved;
-13. plain Recovery performs no domain or resource mutation;
-14. M01 contains no Pi dispatch, Claim completion, Receipt or Gate.
-
-A material change to these invariants triggers renewed design/replan review.
-
-## 9. Design, plans, tracking and Evidence
-
-Designs:
-
-```text
-docs/design/
-```
-
-Implementation plans:
-
-```text
-docs/superpowers/plans/
-```
-
-Tracking:
-
-```text
-docs/tracking/STATUS.md
-docs/tracking/WORKLOG.md
-docs/tracking/DECISIONS.md
-```
-
-Relevant accepted Evidence:
-
-```text
-docs/acceptance/2026-08-03-m2-unblock.md
-docs/acceptance/2026-08-03-m01-r5-design-package-review.md
-docs/acceptance/2026-08-03-tc-01-treehouse-production-adapter.md
-docs/acceptance/2026-08-04-tc-01-task-12-deterministic-adversarial-review.md
-docs/acceptance/2026-08-04-mis-002-m01-final-r5-review.md
-docs/acceptance/2026-08-04-mis-002-m01-r5-approval.md
-docs/acceptance/2026-08-04-mis-002-m01-implementation-plan-approval.md
-docs/acceptance/2026-08-06-mis-002-m01-implementation-closeout.md
-```
-
-Tracking never owns architecture. Evidence records observations and authority decisions; each implementation task still requires its own continuation when the approved plan says so.
-
-## 10. Human and agent read paths
-
-### New user
-
-```text
-README → Documentation Map → Product Blueprint → Roadmap
-```
-
-### Contributor
-
-```text
-README → CONTRIBUTING → Documentation Map → relevant Spec/ADR → active contract/design/plan
-```
-
-### Lead or implementation coordinator
-
-```text
-AGENTS.md
-→ STATUS
-→ Decisions
-→ Approved Mission Contract
-→ Capability Spec and TRACEABILITY
-→ accepted microdesign
-→ approved implementation plan and approval Evidence
-```
-
-### Writer during authorized implementation
-
-```text
-accepted microdesign
-→ approved implementation plan
-→ exact authorized task/interfaces/tests
-→ current code and contract
-```
-
-Agents do not load the entire Blueprint by default, but architecture and implementation work must follow the current package read order.
-
-## 11. Ownership and checks
-
-Operator Domain Authority is separate from Git write access.
-
-Required checks include:
-
-```text
-frontmatter schema and unique IDs
-relation target and status validation
-owner and ADR-index validation
-supersession consistency
-Blueprint/roadmap/coverage freshness
-Mission Plan schema and hierarchical IDs
-generated-file headers
-documentation/requirements impact
-accepted-doc placeholder checks
-research source-manifest validation
-```
-
-## 12. Historical and generated sources
+## 9. Historical and generated sources
 
 Keep discoverable but out of normal execution packs:
 
@@ -353,24 +241,16 @@ Keep discoverable but out of normal execution packs:
 - raw Architecture Spike artifacts;
 - previous roadmap states.
 
-Generated projections include `PRODUCT-BLUEPRINT.md`, `roadmap.md`, CAP-EXECUTION coverage and plan `review.html`. Generated files carry a `DO NOT EDIT` header.
+Generated projections include `PRODUCT-BLUEPRINT.md`, `roadmap.md`, CAP-EXECUTION coverage and plan `review.html`. Generated files carry a `DO NOT EDIT` header and are regenerated from their canonical sources.
 
-## 13. Current divergence and immediate gate
-
-No unresolved authority-map blocker remains from AB1, the MIS-002 Replan, TC-01, MCRM R5 or implementation-plan review.
-
-Current gate:
+## 10. Current gate
 
 ```text
-Operator review of PR #19 M01 implementation closeout
+M01:                         ACCEPTED / CLOSED — D-009
+M01 R2/R3 hardening:         FOLLOW_UP_REQUIRED — Issue #20
+M02 research/microdesign:    AUTHORIZED — Issue #21
+M02 production implementation: PROHIBITED
+Pi Worker production dispatch: PROHIBITED
 ```
 
-The closeout review does not authorize M02/Pi dispatch, merge or delivery; any further real scenario or formal acceptance action remains separately governed.
-
-```text
-M01 implementation:  VERIFIED / CLOSEOUT_PREPARED
-M01 acceptance:      PENDING_OPERATOR_REVIEW
-Pi Worker dispatch:   PROHIBITED
-PR #17:              MERGED / historical implementation baseline
-PR #19:              OPEN / M01 closeout pending operator review
-```
+The next exact activity is deep preparation and adversarial review of the `MIS-002/M02` R5 Milestone Microdesign. A separate approved implementation plan and explicit Operator authorization are required before any M02 production code or Pi Worker dispatch.

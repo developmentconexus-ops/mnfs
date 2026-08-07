@@ -3,27 +3,141 @@ id: DOC-TOOLING-ADOPTION
 title: MNFS Tooling Adoption
 document_type: tooling_reference
 form: reference
-authority: policy
-status: accepted
-version: 2.0.0
+authority: projection
+status: current
+version: 3.0.0
 owners:
   - developmentconexus-ops
 source_of_truth_for:
-  - external tooling adoption state
+  - current external substrate projection
 related:
+  - DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD
+  - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
+  - TRACKING-DECISIONS
+  - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
   - DOC-PRODUCT-BLUEPRINT-05
   - DOC-PRODUCT-BLUEPRINT-09
   - DOC-PRODUCT-BLUEPRINT-10
   - DOC-PRODUCT-BLUEPRINT-11
   - DOC-PRODUCT-BLUEPRINT-12
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 ---
 
 # Tooling adoption
 
-MNFS is Pi-first and adapter-driven. An external tool enters only for a named consumer, behind a replaceable boundary, with an explicit proof and Removal Conditions.
+This document is a **projection of current capability-realization decisions**. It is not the architectural authority that decides what MNFS means.
 
-## Lifecycle
+Operator decisions D-012 through D-014 supersede the former tool-first assumption that Pi, Treehouse, a specific sandbox runtime or a future remote provider are inherently canonical product foundations.
+
+Canonical sourcing direction:
+
+```text
+Thin Sovereign Semantic Kernel
++
+Selective Open Substrates
+```
+
+MNFS owns differentiated semantics and authority. External tools realize mechanical capabilities only when they preserve that authority and eliminate enough machinery to justify their integration.
+
+## Capability-realization vocabulary
+
+```text
+OWN
+ADOPT
+ADAPT
+SPIKE
+REFERENCE
+DEFER
+REJECT
+```
+
+These dispositions apply first to **capabilities and integration shapes**, not brands.
+
+## Admission rules
+
+A material dependency or substrate must have:
+
+1. a named current or explicitly staged consumer;
+2. a simpler baseline comparison;
+3. a clear statement of what machinery it eliminates;
+4. preserved MNFS authority and no duplicate source of lifecycle truth;
+5. proofability in the canonical environment when applicable;
+6. license, sovereignty and lock-in review;
+7. a public/supported integration boundary and pinned provenance for foundational use;
+8. upgrade policy and Removal Conditions;
+9. a replacement/exit path whose cost is understood.
+
+Additional rules:
+
+- prefer the **lowest sufficient upstream layer**;
+- prefer **one primary production substrate per concern**;
+- do not add a dependency that merely replaces a small local helper with a larger integration surface;
+- small local implementations may win when genuinely simpler and safer;
+- proprietary foundational runtimes are `REFERENCE` by default unless an explicit Operator Decision accepts the sovereignty trade-off;
+- generic provider/plugin abstractions require a second real consumer.
+
+## Current capability projection
+
+| Capability / concern | MNFS ownership | Current substrate/candidates | Disposition / next proof |
+|---|---|---|---|
+| operational state | lifecycle/schema meaning | SQLite | `ADOPT` engine; MNFS owns semantics |
+| code/result tree | accepted Git identity and bindings | Git | `ADOPT` |
+| visual plan review | approval semantics | Lavish | current `ADAPT`; revisit only if a better review surface has a named consumer |
+| Agent Runtime | Role/ActorRun/Authority boundary | Pi incumbent; OpenCode/ACP challenger; second ACP implementation | `SPIKE` under D-012; no production winner selected |
+| agent interoperability | MNFS runtime boundary | ACP | `SPIKE`; adopt only if multi-implementation conformance reduces total complexity |
+| runtime Session / compaction | authority precedence only | selected agent runtime; Mastra reference | `ADAPT/DEFER`; never domain authority |
+| live wake/steer | durable command meaning | Mastra Signals or another transport | `DEFER` until named live-session consumer |
+| local process isolation | Environment policy identity | Anthropic Sandbox Runtime incumbent; nono challenger; Sandlock conditional | comparative `SPIKE` under D-013 |
+| local microVM envelope | Environment semantics | BoxLite; `smol-machines/smolvm` | comparative `SPIKE` under D-013 |
+| physical mutable workspace | WriteTrack ownership + Git result boundary | Treehouse/native Git incumbent mechanics; VFS/AgentFS if still needed | defer selection until execution-envelope spike resolves required workspace properties |
+| whole-agent policy/inference brokerage | MNFS authority remains external | OpenShell | `REFERENCE`; possible future `SPIKE` |
+| sandbox control plane | Environment lifecycle meaning | OpenSandbox | `REFERENCE`; future candidate when a named local/remote control-plane consumer exists |
+| remote Firecracker execution | Environment semantics | E2B | `DEFER → SPIKE` for remote scale/BYOC consumer |
+| remote/parallel sandboxing | Environment semantics | Mitos, Sandbox0, Kubernetes Agent Sandbox | `REFERENCE / DEFER` until named parallel/remote consumer |
+| Daytona | none | public historical implementation | `REFERENCE`; public core no longer primary active development path |
+| quality checks | Standard/applicability/Evidence binding | repo-native linters, typecheckers, scanners, contract tools | `ADAPT`; do not build a universal MNFS linter |
+| browser automation | QA Journey/Evidence meaning | Playwright | expected `ADOPT/ADAPT` when QA consumer arrives |
+| exploratory browser agent | QA authority/policy | agent-browser or equivalent | `SPIKE` only for a named exploratory Journey |
+| provider/tool integration | Credential/Effect semantics | MCP, official provider SDKs/CLIs | `ADOPT/ADAPT`; tool availability never grants Effect Authority |
+| credential delivery | Grant semantics | OIDC/workload identity, OS secret store, 1Password/SOPS, substrate brokers | `ADAPT`; MNFS never stores plaintext or becomes a password manager |
+| telemetry interchange | domain event/attribute meaning | OpenTelemetry / OTLP | expected `ADOPT` when instrumentation consumer arrives |
+| observability/eval backend | calibration meaning | Phoenix, Langfuse or another backend | `DEFER/SPIKE` |
+| evaluation execution | Golden Mission/Evaluation semantics | Harbor or equivalent | `DEFER/SPIKE` |
+| operator web stack | Mission-first interaction semantics | conventional open web stack | `DEFER`; adopt commodity framework when UI consumer exists |
+| repository portal | catalog semantics | Backstage | `REFERENCE/DEFER` |
+| durable distributed scheduling | domain work semantics | Temporal/Restate/DBOS/Inngest or future candidates | `DEFER`; compare upstream when a named distributed consumer appears |
+| custom agent loop | none | — | `REJECT` by default |
+| custom browser engine | none | — | `REJECT` |
+| custom hypervisor/container runtime | none | Firecracker/Kata/gVisor are upstream building blocks/references | `REJECT` direct MNFS implementation by default |
+| custom VCS/database engine | none | Git/SQLite | `REJECT` |
+| Factory.ai / Droid | architecture reference only | proprietary product/runtime | `REFERENCE`; foundational dependency rejected under current sovereignty posture |
+| FirstMate | pattern/laboratory reference | external project | `REFERENCE` |
+
+## Historical Evidence does not equal permanent selection
+
+An upstream tool can have accepted historical Evidence and still be reopened as a realization choice.
+
+Examples:
+
+```text
+Pi AS-02 proof
+→ strong incumbent Evidence
+→ not permanent Agent Runtime authority
+
+Treehouse M01 proof
+→ accepted Evidence for the implemented worktree realization
+→ not proof that WriteTrack must always be a worktree
+
+Anthropic Sandbox Runtime AS-02 proof
+→ accepted process-envelope Evidence
+→ incumbent, not unchallengeable architecture
+```
+
+Sunk cost and prior successful integration are migration-cost inputs, not reasons to stop inquiry.
+
+## Lifecycle projection
+
+For a selected external substrate, operational adoption may still move through:
 
 ```text
 RESEARCHED
@@ -35,72 +149,4 @@ RESEARCHED
 → REMOVED
 ```
 
-## Current matrix
-
-| Tool | MNFS role | State | Proof / next decision |
-|---|---|---|---|
-| Pi | primary reasoning and Worker runtime | ADOPTED | M1 planning accepted; M2 secure Worker proof pending |
-| Lavish | structured visual review | ADOPTED | M1 exact-hash planning loop accepted |
-| SQLite | local operational state | ADOPTED | M0/M1 restart proof accepted |
-| Git | code and accepted repository artifacts | ADOPTED | accepted contracts and docs versioned |
-| Treehouse | physical worktree and Lease adapter | CANDIDATE | M2 real WSL2 Lease/recovery proof |
-| Anthropic Sandbox Runtime | E1 local process sandbox | CANDIDATE | AS-02 |
-| Herdr | optional terminal projection | DEFERRED | absence must not affect correctness |
-| `pi-observational-memory` V3 | optional Lead Session memory | CANDIDATE | AS-01 after M3 |
-| `pi-link` | future notification/steering transport | DEFERRED | durable command semantics first |
-| Dev Container Spec/CLI | optional environment-as-code | TARGET | Repository Profile binding in M7 or earlier proven need |
-| Daytona | future remote workspace | RESEARCHED | AS-04 before M12 |
-| E2B | narrow remote sandbox alternative | RESEARCHED | AS-04 comparison |
-| Ona | Software Factory/environment reference | REFERENCE | no runtime dependency |
-| Firecracker | E4 isolation reference | REFERENCE | use established platform, do not build local runtime |
-| OpenTelemetry | telemetry interchange | TARGET | instrument after stable end-to-end flow |
-| Phoenix | local trace/evaluation backend | CANDIDATE | AS-03 |
-| Langfuse | trace/evaluation backend | CANDIDATE | AS-03 |
-| 1Password CLI | local secret injection binding | OPTIONAL | M7 provider-specific proof |
-| SOPS | encrypted configuration binding | OPTIONAL | M7 provider-specific proof |
-| no-mistakes | optional Delivery adapter | DEFERRED | M8 authority-overlap evaluation |
-| Backstage | future multi-repository portal | OPTION | AS-05 before M11 |
-| FirstMate | pattern and benchmark source | REFERENCE | never domain/runtime authority |
-
-## Authority boundaries
-
-```text
-MNFS
-→ domain, contracts, state, decisions, policy and gates
-
-Pi
-→ probabilistic reasoning and tool execution
-
-Treehouse
-→ physical worktree pool
-
-Sandbox Runtime
-→ technical process enforcement
-
-Lavish
-→ human review transport
-
-Herdr
-→ operational presentation
-
-Observability backend
-→ telemetry/evaluation projection
-
-Git
-→ code and versioned artifacts
-
-SQLite
-→ local operational state
-```
-
-## Admission rule
-
-A tool is not adopted because it is popular or used by FirstMate. It must have:
-
-1. a named failure mode or capability consumer;
-2. a simpler baseline comparison;
-3. a narrow adapter;
-4. preserved MNFS authority;
-5. real acceptance evidence;
-6. a pinned version and source/license review;
-7. Removal Conditions.
+This lifecycle is subordinate to capability sourcing decisions. A tool may also remain `REFERENCE` or `DEFER` indefinitely without entering the adoption lifecycle.

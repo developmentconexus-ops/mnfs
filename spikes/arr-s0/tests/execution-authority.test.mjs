@@ -14,7 +14,7 @@ const EXPECTED = {
 
 const TOKEN = buildExecutionAuthorizationToken(EXPECTED);
 
-test('accepts only an exact runtime GATE-S0-EXECUTE Operator token', () => {
+test('accepts only an exact runtime GATE-S0-EXECUTE Operator token and retains no raw token', () => {
   const result = parseExecutionAuthorizationToken(TOKEN, {
     planGitBlob: EXPECTED.planGitBlob,
     contractHash: EXPECTED.contractHash,
@@ -24,7 +24,7 @@ test('accepts only an exact runtime GATE-S0-EXECUTE Operator token', () => {
   assert.equal(result.baseCommitSha, EXPECTED.baseCommitSha);
   assert.equal(result.contractHash, EXPECTED.contractHash);
   assert.equal(result.verificationRunId, EXPECTED.verificationRunId);
-  assert.equal(result.operatorToken, TOKEN);
+  assert.equal(Object.hasOwn(result, 'operatorToken'), false);
   assert.match(result.tokenHash, /^sha256:[a-f0-9]{64}$/u);
 });
 

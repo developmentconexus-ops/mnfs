@@ -40,13 +40,13 @@ function isLinuxOwnedAbsolute(value) {
 
 function requireExecutionAuthorization(identities, source = null) {
   if (!identities?.plan || !identities?.contract) {
-    throw new TypeError('ARR-S0 run requires exact plan and contract identities');
+    throw new TypeError('ARR-S0 host observation requires exact plan and contract identities');
   }
   if (identities.plan.version !== S0_PLAN_VERSION) {
-    throw new TypeError('ARR-S0 run plan version does not match accepted implementation plan');
+    throw new TypeError('ARR-S0 host observation plan version does not match accepted implementation plan');
   }
   if (identities.contract.version !== '1.0.0') {
-    throw new TypeError('ARR-S0 run requires accepted contract version 1.0.0');
+    throw new TypeError('ARR-S0 host observation requires accepted contract version 1.0.0');
   }
   const authority = requireAuthenticatedExecutionAuthorization(identities.executionAuthorization, {
     planGitBlob: S0_PLAN_GIT_BLOB,
@@ -91,7 +91,9 @@ async function defaultInspect({ repoRoot, stateRoot }) {
   };
 }
 
-export async function preflightS0({ repoRoot = process.cwd(), stateRoot, inspect = defaultInspect } = {}) {
+export async function preflightS0({ repoRoot = process.cwd(), stateRoot, identities, inspect = defaultInspect } = {}) {
+  const executionAuthorization = requireExecutionAuthorization(identities);
+
   let resolvedStateRoot;
   try {
     resolvedStateRoot = await resolveS0StateRoot(stateRoot === undefined ? {} : { stateRoot });
@@ -101,6 +103,7 @@ export async function preflightS0({ repoRoot = process.cwd(), stateRoot, inspect
       checks: [{ id: 'stateRoot', ok: false, rationale: String(error.message ?? error) }],
       facts: null,
       stateRoot: null,
+      executionAuthorization,
     };
   }
 
@@ -113,7 +116,12 @@ export async function preflightS0({ repoRoot = process.cwd(), stateRoot, inspect
       checks: [{ id: 'inspect', ok: false, rationale: String(error.message ?? error) }],
       facts: null,
       stateRoot: resolvedStateRoot,
+      executionAuthorization,
     };
+  }
+
+  if (facts?.repository?.source?.commitSha) {
+    requireExecutionAuthorization(identities, facts.repository.source);
   }
 
   const checks = [
@@ -127,7 +135,13 @@ export async function preflightS0({ repoRoot = process.cwd(), stateRoot, inspect
     { id: 'nodeVersion', ok: nodeVersionAtLeast(facts?.hostIdentity?.nodeVersion), rationale: 'Node.js >=24.18.0 is required' },
     { id: 'requiredReads', ok: facts?.requiredReadsAvailable === true, rationale: 'required host identity files must be readable' },
   ];
-  return { ok: checks.every((check) => check.ok), checks, facts, stateRoot: resolvedStateRoot };
+  return {
+    ok: checks.every((check) => check.ok),
+    checks,
+    facts,
+    stateRoot: resolvedStateRoot,
+    executionAuthorization,
+  };
 }
 
 function observationInventory(observations) {
@@ -166,7 +180,7 @@ export async function runS0({
 } = {}) {
   const executionAuthorization = requireExecutionAuthorization(identities);
   const canonicalRunId = requireRunId(runId);
-  const preflightResult = await preflight({ repoRoot, stateRoot });
+  const preflightResult = await preflight({ repoRoot, stateRoot, identities });
   if (!preflightResult?.ok) throw new Error('ARR-S0 preflight blocked');
   const source = preflightResult.facts?.repository?.source;
   if (!source) throw new Error('ARR-S0 preflight did not establish repository identity');

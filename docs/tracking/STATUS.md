@@ -5,14 +5,16 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.9.0
+version: 1.10.0
 owners:
   - developmentconexus-ops
 related:
   - DOC-DOCUMENTATION-MAP
   - DOC-CAPABILITY-ROADMAP
+  - DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD
   - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
   - TRACKING-DECISIONS
+  - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
   - ACCEPTANCE-CAP-EXECUTION-R3
   - ACCEPTANCE-MIS-002-REPLAN
   - ACCEPTANCE-M2-UNBLOCK
@@ -23,7 +25,7 @@ related:
   - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
   - PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
-tracking_issue: 21
+tracking_issue: 23
 ---
 
 # Project status
@@ -33,31 +35,33 @@ tracking_issue: 21
 ```text
 M0 — Foundation Walking Skeleton                         ACCEPTED
 M1 — Visual Mission Planning                            ACCEPTED
-M2 — Secure One-Worker Vertical Slice                   IN_PROGRESS
+M2 — Secure One-Worker Vertical Slice                   ARCHITECTURE_REASSESSMENT
   MIS-002/M01 — Durable Execution and Lease Core        ACCEPTED
   MIS-002/M02 — Governed E1 Worker, Recovery and Acceptance
-                                                        DESIGN_PREPARATION
+                                                        PAUSED_PENDING_ARCH_REVIEW
 ```
 
 - **Canonical environment:** Ubuntu on WSL2; Windows remains the browser, terminal and desktop host.
-- **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`.
+- **Architecture baseline:** accepted historical/current baseline merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`; it is an input to the current review, not a boundary on inquiry.
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`.
-- **Approved Mission contract:** `MIS-002` revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`.
-- **Current planning container:** Issue #21 — `MIS-002/M02` R5 Milestone Microdesign.
+- **Approved Mission contract:** `MIS-002` revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`; remains authoritative until explicitly superseded.
+- **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / Operator decision `D-010`.
+- **Current planning container:** Issue #23 — global Architecture Realization Review.
+- **Paused prior planning container:** Issue #21 — `MIS-002/M02` R5 Milestone Microdesign; resume only after the Architecture Realization Review decides preserve/supersede/replan impact.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
 ## MCRM readiness inherited by M2
 
 ```text
-R0 Baseline              PASS
-R1 Applicability         PASS
-R2 Requirements          PASS
-R3 Capability Readiness  PASS
-R4 Contract Readiness    PASS
-M01 R5 Microdesign       PASS / ACCEPTED
+R0 Baseline              HISTORICAL PASS — subject to refreshed architecture inputs
+R1 Applicability         HISTORICAL PASS — subject to refreshed architecture inputs
+R2 Requirements          HISTORICAL PASS — subject to review impact
+R3 Capability Readiness  HISTORICAL PASS — subject to review impact
+R4 Contract Readiness    HISTORICAL PASS — revision 5 remains approved unless superseded
+M01 R5 Microdesign       PASS / ACCEPTED / CLOSED
 ```
 
-The next R5 action is the separate microdesign for `MIS-002/M02`; M01's accepted design does not authorize M02 implementation.
+These results are not revoked. The Architecture Realization Review may determine that some R0–R4 inputs need supersession or a new Replan before M02 resumes.
 
 ## M01 final result
 
@@ -81,38 +85,63 @@ M01 lifecycle status:             ACCEPTED / CLOSED
 Real R2 crash/recovery:  FOLLOW_UP_REQUIRED / NON_BLOCKING / Issue #20
 Real R3 lineage:         FOLLOW_UP_REQUIRED / NON_BLOCKING / Issue #20
 Destination:             before Product Milestone M2 exit (MCRM R7/R8),
-                         or earlier if M02 exposes a concrete dependency
+                         or earlier if the selected next architecture exposes a concrete dependency
 ```
 
-R2/R3 are **not claimed as PASS**. Operator decision `D-009` classifies them as supplemental real-environment hardening rather than the sole proof of any M01 deciding criterion. `MIS-002/M01/AC-08` remains satisfied by the deterministic/fresh-process crash-and-retry composition evidence together with the real normal-path Treehouse boundary proof.
+R2/R3 are **not claimed as PASS**. Operator decision `D-009` classifies them as supplemental real-environment hardening rather than the sole proof of any M01 deciding criterion.
 
-## Evidence methodology clarification
+## Development governance clarification
 
-MNFS closes an intermediate Mission Milestone from its **deciding criteria and requirement Evidence**, not from an ever-growing inventory of possible tests.
+Operator decision `D-010` separates MNFS development into:
 
-A supplemental proof may be deferred when all of the following are true:
+```text
+Discovery Loop
+→ challenge assumptions and search the global candidate space
 
-1. it is not the sole proof of a deciding criterion or MUST requirement;
-2. the existing Evidence covers the distinct invariant or integration assumption required for the Milestone;
-3. destination, rationale, residual risk and Operator authority are recorded;
-4. the deferred item is not represented as PASS;
-5. the deferment does not contradict the approved Mission contract, Capability Spec or ADRs.
+Decision Loop
+→ compare, falsify and explicitly preserve/supersede/replan
 
-Product Milestone M2 still must satisfy its full R7/R8 Verification, Validation and Closeout obligations before Product Milestone exit.
+Execution Loop
+→ implement only under frozen accepted authority
+```
+
+Current accepted documents remain authority for bounded execution until superseded, but they are not the boundary of architecture inquiry.
+
+Replan may be:
+
+```text
+Necessity Replan
+→ current plan cannot satisfy the outcome
+
+Opportunity Replan
+→ current plan could work, but stronger Evidence supports a materially better architecture
+```
+
+Sunk cost is migration cost, not architectural justification.
 
 ## Current authorization boundary
 
 ```text
-M01 implementation / closeout:   ACCEPTED / CLOSED
-M01 R2/R3 hardening:              FOLLOW_UP_REQUIRED under Issue #20
-M02 research / R5 microdesign:    AUTHORIZED under Issue #21
-M02 implementation:               PROHIBITED pending approved M02 microdesign and plan
-Pi Worker production dispatch:    PROHIBITED
-Automatic delivery / merge:       NOT AUTHORIZED by this status
+M01 implementation / closeout:        ACCEPTED / CLOSED
+M01 R2/R3 hardening:                   FOLLOW_UP_REQUIRED under Issue #20
+Architecture Discovery / Decision:     AUTHORIZED under Issue #23 / D-010
+M02 R5 microdesign as next gate:       PAUSED pending Architecture Realization Review
+M02 production implementation:        PROHIBITED
+Production Worker dispatch:            PROHIBITED
+Automatic delivery / merge:            NOT AUTHORIZED by this status
 ```
 
 ## Immediate next action
 
-Prepare and adversarially review the `MIS-002/M02 — Governed E1 Worker, Recovery and Acceptance` Milestone Microdesign against the approved revision 5 contract, accepted M01 predecessor and accepted AS-02/SEC-E1 evidence. Do not implement M02 until the design and a separate implementation plan receive explicit Operator approval.
+Execute the global Architecture Realization Review from first principles before resuming `MIS-002/M02` design.
 
-Historical task-by-task evidence remains in Git history, the M01 acceptance package and `docs/tracking/WORKLOG.md`; this file intentionally reports only the current authoritative state.
+The review must compare the best credible open/replaceable approaches for:
+
+1. planning and validation semantics;
+2. agent runtime and session/control infrastructure;
+3. execution workspace and isolation;
+4. implementation sourcing (`OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT`).
+
+It must actively search for evidence that the preferred architecture is wrong and finish with explicit `PRESERVE / SUPERSEDE / REPLAN` impact on Blueprint, ADRs, Roadmap, CAP-EXECUTION and MIS-002.
+
+Do not implement M02 until those decisions are reconciled and a new exact execution gate is issued.

@@ -17,8 +17,37 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current system architecture
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+The architecture is a Thin Sovereign Semantic Kernel with a **Replaceable Agent Runtime** and a property-based Execution Environment outside the semantic core.
+
+```text
+Operator / MNFS domain authority
+        ↓
+Planning + Context compilation
+        ↓
+Role / ActorRun boundary
+        ↓
+replaceable Agent Runtime
+        ↓ controlled capability boundary
+Execution Environment
+  + isolated mutable workspace
+  + compute/isolation properties
+  + network/credential/resource policy
+        ↓
+provider-neutral Git result identity
+        ↓
+Verification / independent Validation / MNFS Gate
+```
+
+SQLite remains operational-state authority and Git remains code/result identity. Initial adapters stay concrete; this architecture does not authorize a generic runtime/environment/workspace provider framework without a second production consumer.
+
 ---
 
 # 5. Arquitetura do Sistema e Fronteiras dos Componentes

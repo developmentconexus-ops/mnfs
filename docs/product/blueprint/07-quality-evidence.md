@@ -17,8 +17,20 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current Evidence and acceptance rules
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+**Implementer completion never grants acceptance**. Claim, deterministic Receipt, independent Finding/Review and Verdict remain distinct evidence stages.
+
+Proof-first is universal; TDD is required where executable TEST is the correct deciding proof and a meaningful RED state can be established before implementation. Parent Milestone/Mission outcomes still require composition and outcome validation even when every child unit is green.
+
+Evidence bound to the wrong/stale contract, Attempt, policy, environment or Git result identity cannot decide the current target.
+
 ---
 
 # 7. Qualidade, Evidência, Gates e Prevenção de False Completion

@@ -17,8 +17,29 @@ related:
   - DOC-DOCUMENTATION-MAP
 review_triggers:
   - material change to this section's concepts
-last_reviewed: 2026-08-02
+last_reviewed: 2026-08-07
 tracking_issue: 6
+---
+
+## ARR-RECONCILIATION-2026-08-07 — Current M2 Opportunity-Replan path
+
+This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+
+Product M2 preserves the secure one-Worker vertical-slice outcome while its realization follows the accepted Architecture Realization Review path:
+
+```text
+ARR-S0  Host Capability Probe
+→ ARR-S1 Agent Runtime Conformance
+  + ARR-S2 Local Execution Envelope Conformance
+→ ARR-S2W Workspace comparison only if S2 requires it
+→ ARR-S3 Vertical Composition Proof
+→ substrate selection Decision
+→ superseding CAP-EXECUTION / MIS-002 Replan
+→ new M02 R5 Execution Design + implementation plan
+```
+
+Revision-5 M02 is a superseded execution path and must not be implemented. Named runtimes/environments remain candidates or historical Evidence until their deciding spike/Decision.
+
 ---
 
 # 12. Roadmap de Capacidades e Ordem de Implementação

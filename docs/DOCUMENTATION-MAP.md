@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 1.7.0
+version: 1.8.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -22,6 +22,7 @@ related:
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
+  - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
   - CAP-EXECUTION
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
@@ -29,6 +30,9 @@ related:
   - ADR-0014
   - ADR-0015
   - ACCEPTANCE-ARR-GATE-P0-PLAN-APPROVAL
+  - ACCEPTANCE-ARR-S0-IMPLEMENT-AUTHORIZATION
+  - ACCEPTANCE-ARR-P1-F03-CONTRACT-BINDING
+  - ACCEPTANCE-ARR-P1-F03-INTEGRATION-CLOSEOUT
   - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT
 review_triggers:
   - canonical document added, removed or superseded
@@ -54,15 +58,17 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 
 Current state:
 
-- D-010 through D-016 are the current development, architecture-synthesis and agent-execution-planning Decisions;
+- D-010 through D-018 are the current development, architecture-synthesis, execution-planning and P1/P1-F03 acceptance Decisions;
 - `ADR-0013`, `ADR-0014` and `ADR-0015` are current provider-neutral runtime/workspace/environment architecture;
 - `ADR-0001`, `ADR-0003`, `ADR-0006` and `ADR-0008` remain readable historical decisions and are superseded by the ADRs above;
 - `CAP-EXECUTION` 0.1.0 and `MIS-002` revision 5 remain immutable historical/current authority for the versions they describe, but D-015 prohibits implementing revision-5 M02;
-- accepted M01 provider-neutral Evidence remains reusable; Pi/Treehouse/fixed-E1 evidence is historical realization Evidence rather than future constitutional selection;
+- accepted M01 provider-neutral Evidence remains reusable; tool-specific/fixed-realization Evidence is historical realization Evidence rather than future constitutional selection;
 - `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0 is accepted execution-planning authority under D-016;
 - `GATE-P0` accepted exact reviewed blobs of the ARR master plan and S0 plan through `ACCEPTANCE-ARR-GATE-P0-PLAN-APPROVAL`;
-- the current authorized non-host tranche is P1: A1–A4 + B1 under Issue #23 / PR #24;
-- ARR-S0 implementation and real host probing remain separately prohibited until later exact gates;
+- ARR P1 plus P1-F03 are accepted and integrated through D-017/D-018, PR #24 and PR #26;
+- `GATE-S0-IMPLEMENT` is explicitly authorized for deterministic ARR-S0 Tasks 1–11 on base `ad913dd1e0ff3b286280081b5dd4ba90eb390972` under `ACCEPTANCE-ARR-S0-IMPLEMENT-AUTHORIZATION`;
+- the deterministic ARR-S0 harness is implemented on PR #27 and is at `REVIEW_REQUIRED`; its human contract remains proposed at version `0.1.0`;
+- ARR-S0 real host execution remains prohibited pending the later exact `GATE-S0-EXECUTE` and an accepted S0 contract;
 - Issue #20 owns residual M01 R2/R3 hardening until it is completed or re-dispositioned by final reconciliation.
 
 ## 2. Authority hierarchy
@@ -110,6 +116,7 @@ Canonical human-readable product knowledge:
 - Capability Specs and Roadmap sources;
 - Development/MCRM/execution-planning methods;
 - accepted designs and reviewed plans;
+- proposed/accepted Spike contracts and governance;
 - Operator Decision records and selected Evidence;
 - guidance/research needed for reproducibility.
 
@@ -140,6 +147,8 @@ Generated or temporary observations:
 
 Raw runtime artifacts are Evidence only when bound to an accepted criterion/contract/provenance chain. They are never product doctrine by existence alone.
 
+For ARR-S0, real-run raw artifacts will live under the validated Linux-owned MNFS state root rather than the repository. No real S0 artifact exists under the current implementation-only gate.
+
 ### GitHub
 
 - Issue: tracking/discussion;
@@ -161,6 +170,9 @@ Raw runtime artifacts are Evidence only when bound to an accepted criterion/cont
 | `docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md` | L0–L3, Fresh Actor, packs, termination/handoff | accepted specification |
 | `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md` | reviewed ARR program / P1→S3 sequence | approved guidance by exact blob under GATE-P0 |
 | `docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md` | reviewed S0 implementation/execution plan | approved guidance by exact blob under GATE-P0 |
+| `docs/spikes/ARR-SPIKE-GOVERNANCE.md` | common Architecture Spike fairness/Evidence rules | accepted by D-017/D-018 authority chain |
+| `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | exact provider-neutral host facts/class/Verdict contract for ARR-S0 | proposed A3 contract; real execution forbidden until accepted |
+| `spikes/arr-s0/README.md` | deterministic harness interface and safety boundary | implementation reference |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated complete constitutional projection | generated projection |
 | `docs/roadmap.md` | generated capability/program sequence | generated projection |
 | `docs/tooling-adoption.md` | current external substrate/candidate projection | reference only |
@@ -180,10 +192,12 @@ AGENTS.md
 → docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md
 → docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md
 → exact task-specific plan / gate
-→ relevant Blueprint / current ADR / Capability / Mission / Evidence
+→ task-specific contract / relevant Blueprint / current ADR / Capability / Mission / Evidence
 → current primary external sources when a realization decision is being made
 → current implementation where compatibility/migration cost matters
 ```
+
+For the current ARR-S0 deterministic review, the task-specific pack includes the approved S0 plan, `ACCEPTANCE-ARR-S0-IMPLEMENT-AUTHORIZATION`, proposed `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`, PR #27 diff and exact deterministic `npm run verify` Evidence.
 
 This ordering prevents a fresh Actor from treating the superseded revision-5 M02 microdesign path or historical tool choices as current execution authority.
 
@@ -213,7 +227,7 @@ capability-first sourcing
 fresh Recovery without transcript
 ```
 
-Concrete Pi/OpenCode/ACP/process-sandbox/microVM/workspace winners are not selected by these documents. Their realization is decided by the bounded ARR Evidence sequence.
+Concrete runtime/process-envelope/microVM/workspace winners are not selected by these documents. Their realization is decided by the bounded ARR Evidence sequence.
 
 ## 7. Capability and Mission authority during Opportunity Replan
 
@@ -242,8 +256,9 @@ M01 remains accepted/closed. Its provider-neutral durability/fencing/Claim/Recov
 ## 8. Current ARR program path
 
 ```text
-P1  semantic/authority reconciliation + shared Spike governance
-→ ARR-S0 Host Capability Probe
+P1  semantic/authority reconciliation + shared Spike governance   ACCEPTED / INTEGRATED
+→ ARR-S0 deterministic harness                                   IMPLEMENTED / REVIEW_REQUIRED
+→ ARR-S0 real Host Capability Probe                               PROHIBITED pending GATE-S0-EXECUTE
 → ARR-S1 Agent Runtime Conformance
   + ARR-S2 Local Execution Envelope Conformance
 → ARR-S2W Workspace comparison only if S2 proves it is needed
@@ -296,7 +311,7 @@ Generated projections include:
 
 Generated files carry `DO NOT EDIT` framing and must be regenerated from canonical sources.
 
-`docs/tooling-adoption.md` is a **reference projection** of current capability-realization candidates/decisions. It is not allowed to make Pi, Treehouse, Sandbox Runtime, BoxLite, OpenCode or any other substrate architectural authority by itself.
+`docs/tooling-adoption.md` is a **reference projection** of current capability-realization candidates/decisions. It cannot make any listed substrate architectural authority by itself.
 
 ## 11. Current gate
 
@@ -307,15 +322,17 @@ Architecture synthesis:                   APPROVED — D-015
 Layered Agent Execution Planning:         ACCEPTED — D-016
 GATE-P0 plans:                            ACCEPTED — exact reviewed blobs
 ARR P1 A1-A4 + B1:                        ACCEPTED — GATE-R / D-017 / INTEGRATED
-P1 acceptance record:                      ACCEPTANCE-ARR-P1-RECONCILIATION
-P1 integration record:                     ACCEPTANCE-ARR-P1-INTEGRATION-CLOSEOUT
-PR #24 merge / integration:                 COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
-ARR-S0 implementation:                    PROHIBITED pending GATE-S0-IMPLEMENT
-ARR-S0 real host execution:               PROHIBITED pending later GATE-S0-EXECUTE
+P1-F03 correction:                        ACCEPTED — D-018 / INTEGRATED
+GATE-S0-IMPLEMENT:                        AUTHORIZED — exact token / base ad913dd1e0ff3b286280081b5dd4ba90eb390972
+ARR-S0 deterministic harness:             IMPLEMENTED / REVIEW_REQUIRED — PR #27
+ARR-S0 contract:                          PROPOSED — 0.1.0 / requires Operator acceptance before real run
+ARR-S0 real host execution:               PROHIBITED pending GATE-S0-EXECUTE
 Agent Runtime / Environment selection:    PROHIBITED pending deciding Evidence
 M02 revision-5 implementation:            PROHIBITED / SUPERSEDED_AS_EXECUTION_PATH
 Production Worker dispatch:               PROHIBITED
 Automatic merge/delivery:                 NOT AUTHORIZED
 ```
 
-P1 is accepted and integrated into `main` at `def9e5fe819f76950d61fba2cf5abcda1533c07f`. The next possible gate is `GATE-S0-IMPLEMENT`, but it remains separately **NOT AUTHORIZED** until the Operator issues an exact gate. Real S0 host execution remains behind `GATE-S0-EXECUTE`.
+The immediate action is **Task 11 independent deterministic review of PR #27** after Task 10 contract consistency is green. The reviewer must find zero unresolved Critical/Important Findings before the harness/contract can be presented for Operator acceptance.
+
+No real ARR-S0 host run is authorized by implementation completion, tests, review, or this Documentation Map. Real execution remains behind `GATE-S0-EXECUTE` and an accepted exact S0 contract.

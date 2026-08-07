@@ -41,23 +41,25 @@ export function classEligibility(classId, observations) {
   const mapping = CLASS_MAPPING[classId];
   if (!mapping) throw new TypeError(`unknown ARR-S0 capability class: ${classId}`);
 
+  const setupSet = new Set(mapping.setupCapabilities);
   const hardBlocked = [];
+  const hardUnknown = [];
   const setupRequired = [];
-  const unknown = [];
+  const setupUnknown = [];
 
   for (const capabilityId of mapping.relevantCapabilities) {
     const record = recordFor(observations, capabilityId);
+    const isSetup = setupSet.has(capabilityId);
     if (!record || typeof record.state !== 'string' || record.state === 'UNKNOWN') {
-      unknown.push(capabilityId);
+      (isSetup ? setupUnknown : hardUnknown).push(capabilityId);
       continue;
     }
     if (POSITIVE_STATES.has(record.state)) continue;
     if (NEGATIVE_STATES.has(record.state)) {
-      if (mapping.setupCapabilities.includes(capabilityId)) setupRequired.push(capabilityId);
-      else hardBlocked.push(capabilityId);
+      (isSetup ? setupRequired : hardBlocked).push(capabilityId);
       continue;
     }
-    unknown.push(capabilityId);
+    (isSetup ? setupUnknown : hardUnknown).push(capabilityId);
   }
 
   let eligibility;
@@ -65,13 +67,19 @@ export function classEligibility(classId, observations) {
   if (hardBlocked.length > 0) {
     eligibility = 'BLOCKED_BY_HOST';
     reasons = hardBlocked.map((id) => `${id} is decisively absent/unsupported for this generic class`);
-    if (unknown.length) reasons.push(`also unresolved: ${unknown.join(', ')}`);
-  } else if (unknown.length > 0) {
+    if (hardUnknown.length || setupUnknown.length) {
+      reasons.push(`also unresolved: ${[...hardUnknown, ...setupUnknown].join(', ')}`);
+    }
+  } else if (hardUnknown.length > 0) {
     eligibility = 'UNKNOWN';
-    reasons = unknown.map((id) => `${id} is missing or UNKNOWN`);
+    reasons = hardUnknown.map((id) => `${id} is missing or UNKNOWN`);
   } else if (setupRequired.length > 0) {
     eligibility = 'REQUIRES_SETUP_DECISION';
     reasons = setupRequired.map((id) => `${id} is absent/unsupported but is classified as setup-provisionable`);
+    if (setupUnknown.length) reasons.push(`other setup-only facts remain unresolved: ${setupUnknown.join(', ')}`);
+  } else if (setupUnknown.length > 0) {
+    eligibility = 'UNKNOWN';
+    reasons = setupUnknown.map((id) => `${id} setup state is missing or UNKNOWN`);
   } else {
     eligibility = 'PHYSICALLY_PLAUSIBLE';
     reasons = ['all mapped generic host capabilities are positive; this does not prove a named candidate current prerequisites'];

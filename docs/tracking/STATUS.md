@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.14.0
+version: 1.15.0
 owners:
   - developmentconexus-ops
 related:
@@ -14,6 +14,8 @@ related:
   - DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD
   - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
+  - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
+  - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
   - ACCEPTANCE-CAP-EXECUTION-R3
@@ -48,7 +50,9 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
 - **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
-- **Current phase:** Architecture Reconciliation + Spike Execution Planning under Issue #23.
+- **Current phase:** `GATE-P0 — Architecture Reconciliation + ARR Plan Review` under Issue #23.
+- **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — PROPOSED / REVIEW_READY.
+- **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — PROPOSED / REVIEW_READY.
 - **Superseded prior planning container:** Issue #21 — prior `MIS-002/M02` R5 path; do not resume under revision 5.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
@@ -108,17 +112,37 @@ M01 lifecycle status:                  ACCEPTED / CLOSED
 
 Provider-neutral M01 Evidence remains reusable for durable WriteTrack/Attempt/ActorRun identity, fencing, Claim atomicity, Intent–Action–Observation, Recovery/Reconcile and Git base/result lineage. Treehouse-specific Evidence remains historical realization Evidence and does not mandate future workspace architecture.
 
-## Deciding Architecture Spikes
+## Deciding Architecture Spike program
 
 ```text
-ARR-S0  Host Capability Probe
-ARR-S1  Agent Runtime Conformance
-ARR-S2  Local Execution Envelope Conformance
-ARR-S2W Workspace comparison — conditional only
-ARR-S3  Vertical Composition Proof
+Pre-Spike reconciliation
+→ shared Spike governance/Evidence contract
+→ ARR-S0 Host Capability Probe
+→ ARR-S1 Agent Runtime Conformance   ┐
+→ ARR-S2 Execution Envelope         ├ independently after S0
+→ optional ARR-S2W Workspace        ┘
+→ ARR-S3 Vertical Composition Proof
+→ substrate selection Decision
+→ CAP-EXECUTION / MIS-002 Opportunity Replan
+→ new M02 R5 Execution Design
 ```
 
+`ARR-S0` records generic host facts and coarse capability classes. It deliberately does not hard-code named-project eligibility; S1/S2 planners map refreshed candidate requirements onto immutable S0 Evidence.
+
 No concrete Agent Runtime, process sandbox, microVM or workspace substrate has been selected.
+
+## Plan verification evidence
+
+```text
+Master plan 0.2.0 commit: e798b2a4a58e52318147b7bc17cc76b8f4616d83
+Documentation workflow:    31180374347 — SUCCESS
+
+ARR-S0 plan 0.2.0 commit:  59a1ff8ca20bbbb1a0170bd3eb68da68d86169af
+Verification job:          92872990047 — SUCCESS
+Command:                   npm run verify — SUCCESS
+```
+
+These runs validate the planning/documentation package only. They are not ARR-S0 host Evidence.
 
 ## Current authorization boundary
 
@@ -126,25 +150,26 @@ No concrete Agent Runtime, process sandbox, microVM or workspace substrate has b
 M01 implementation / closeout:             ACCEPTED / CLOSED
 D1–D4 + Architecture Synthesis:             APPROVED
 Execution Planning Design 1.0.0:            ACCEPTED — D-016
-Architecture reconciliation/spike planning: CURRENT / AUTHORIZED
-ARR-S0 execution:                           PROHIBITED pending exact Operator gate
+Master ARR program plan 0.2.0:              PROPOSED / REVIEW_READY
+ARR-S0 plan 0.2.0:                          PROPOSED / REVIEW_READY
+Pre-Spike reconciliation execution:         PROHIBITED pending plan approval/gate
+ARR-S0 harness implementation:              PROHIBITED pending later exact gate
+ARR-S0 real host probe:                      PROHIBITED pending later exact gate
 ARR-S1/S2/S2W/S3 execution:                 PROHIBITED pending their later exact gates
 MIS-002 revision 5 M02 implementation:       PROHIBITED / SUPERSEDED PATH
 Production Worker dispatch:                 PROHIBITED
 Automatic delivery / merge:                 NOT AUTHORIZED
 ```
 
-## Immediate next action
+## Immediate next action — GATE-P0
 
-Write and review the **Architecture Reconciliation + Spike Execution Plan**.
+Operator reviews and either accepts or requests changes to both:
 
-The plan must:
+```text
+docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md
+docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md
+```
 
-- reconcile D-011 through D-016 into exact document/authority changes without rewriting accepted history;
-- fully specify the first executable tranche and `ARR-S0` with exact files, proof, outputs and failure conditions;
-- define candidate-independent contracts and gates for S1/S2/S2W/S3 while deferring implementation details that prior Spike Evidence must decide;
-- include mechanical coverage showing every accepted architecture/planning decision has a planned consumer;
-- preserve fresh-Actor, proof-first, independent-validation and structured-handoff requirements;
-- state explicit authorization boundaries so plan approval does not imply Spike execution.
+Acceptance of `GATE-P0` approves the plan package only. It does **not** authorize pre-Spike reconciliation changes, S0 harness implementation, host probing or any candidate execution.
 
-After the plan is approved, issue a separate exact Operator authorization for ARR-S0 only. Do not execute any Spike before that gate.
+After plan acceptance, issue a separate exact execution authorization for the first bounded tranche. The recommended first tranche is pre-Spike semantic/authority reconciliation (Program Tasks A1-A4 + B1). After that tranche is reviewed/accepted, issue the separate `GATE-S0-IMPLEMENT` and later `GATE-S0-EXECUTE` as required by the accepted S0 plan.

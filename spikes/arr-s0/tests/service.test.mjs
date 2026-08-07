@@ -53,6 +53,7 @@ function preflightFacts(overrides = {}) {
       gitVersion: '2.51.0',
     },
     linuxFilesystemSupported: true,
+    stateRootFilesystemSupported: true,
     repository: { source: SOURCE, clean: true },
     requiredReadsAvailable: true,
     ...overrides,
@@ -77,6 +78,23 @@ test('preflight is read-only and requires canonical identity, clean repo, Linux-
     });
     assert.equal(dirty.ok, false);
     assert.ok(dirty.checks.some((check) => check.id === 'checkoutClean' && !check.ok));
+  } finally {
+    await rm(stateRoot, { recursive: true, force: true });
+  }
+});
+
+test('preflight fails closed when the state-root filesystem is not explicitly reviewed', async () => {
+  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-state-root-fs-'));
+  try {
+    for (const stateRootFilesystemSupported of [false, undefined]) {
+      const result = await preflightS0({
+        repoRoot: '/home/example/src/mnfs',
+        stateRoot,
+        inspect: async () => preflightFacts({ stateRootFilesystemSupported }),
+      });
+      assert.equal(result.ok, false);
+      assert.ok(result.checks.some((check) => check.id === 'stateRootFilesystem' && check.ok === false));
+    }
   } finally {
     await rm(stateRoot, { recursive: true, force: true });
   }

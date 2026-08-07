@@ -38,9 +38,14 @@ test('non-WSL2 identity still completes with HOST-WSL2 unsupported', () => {
   assert.equal(result.observations.find((item) => item.id === 'HOST-WSL2').state, 'UNSUPPORTED');
 });
 
-test('Linux-owned filesystem classifier rejects drvfs and preserves unknowns', () => {
-  assert.equal(classifyLinuxFilesystem('ext2/ext3').state, 'SUPPORTED');
-  assert.equal(classifyLinuxFilesystem('overlayfs').state, 'SUPPORTED');
-  assert.equal(classifyLinuxFilesystem('drvfs').state, 'UNSUPPORTED');
-  assert.equal(classifyLinuxFilesystem('').state, 'UNKNOWN');
+test('Linux-owned filesystem classifier uses an explicit reviewed allowlist', () => {
+  for (const local of ['ext2/ext3', 'xfs', 'btrfs', 'overlayfs', 'tmpfs']) {
+    assert.equal(classifyLinuxFilesystem(local).state, 'SUPPORTED', local);
+  }
+  for (const windowsBacked of ['drvfs', '9p', 'fuseblk']) {
+    assert.equal(classifyLinuxFilesystem(windowsBacked).state, 'UNSUPPORTED', windowsBacked);
+  }
+  for (const unreviewed of ['', 'cifs', 'nfs', 'nfs4', 'fuse.sshfs', 'ceph']) {
+    assert.equal(classifyLinuxFilesystem(unreviewed).state, 'UNKNOWN', unreviewed || '<empty>');
+  }
 });

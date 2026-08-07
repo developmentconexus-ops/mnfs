@@ -6,6 +6,7 @@ export function buildReportView(result) {
   return {
     runId: result.runId,
     source: structuredClone(result.source),
+    executionAuthorization: structuredClone(result.executionAuthorization ?? null),
     hostIdentity: structuredClone(result.hostIdentity),
     capabilities: structuredClone(result.capabilities ?? []),
     capabilityClasses: structuredClone(result.capabilityClasses ?? []),
@@ -26,6 +27,9 @@ export function renderHumanReport(result) {
     row('Run ID', view.runId),
     row('Source commit', view.source?.commitSha ?? 'UNKNOWN'),
     row('Source tree', view.source?.treeSha ?? 'UNKNOWN'),
+    row('Execution gate', view.executionAuthorization?.gate ?? 'UNKNOWN'),
+    row('Execution verify run', view.executionAuthorization?.verificationRunId ?? 'UNKNOWN'),
+    row('Execution token SHA-256', view.executionAuthorization?.tokenHash ?? 'UNKNOWN'),
     row('Host', view.hostIdentity ? `${view.hostIdentity.distroId} ${view.hostIdentity.distroVersion} / ${view.hostIdentity.kernelRelease}` : 'UNKNOWN'),
     row('Manifest SHA-256', view.artifactManifestHash ?? 'UNKNOWN'),
     '',

@@ -2,6 +2,21 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { observeRepositoryIdentity } from '../src/probes/repository.mjs';
 
+const EXPECTED_GIT_ENV = {
+  PATH: '/usr/bin:/bin',
+  LANG: 'C',
+  LC_ALL: 'C',
+  GIT_OPTIONAL_LOCKS: '0',
+  GIT_TERMINAL_PROMPT: '0',
+  GIT_CONFIG_NOSYSTEM: '1',
+  GIT_CONFIG_GLOBAL: '/dev/null',
+  GIT_CONFIG_COUNT: '2',
+  GIT_CONFIG_KEY_0: 'core.fsmonitor',
+  GIT_CONFIG_VALUE_0: 'false',
+  GIT_CONFIG_KEY_1: 'core.hooksPath',
+  GIT_CONFIG_VALUE_1: '/dev/null',
+};
+
 function fixtureRunner(responses) {
   const calls = [];
   return {
@@ -24,7 +39,7 @@ function fixtureRunner(responses) {
   };
 }
 
-test('observes exact Git commit/tree and clean status with a fixed environment', async () => {
+test('observes exact Git commit/tree and clean status with a fixed non-mutating environment', async () => {
   const commit = 'a'.repeat(40);
   const tree = 'b'.repeat(40);
   const responses = new Map([
@@ -41,7 +56,7 @@ test('observes exact Git commit/tree and clean status with a fixed environment',
   assert.equal(runner.calls.length, 3);
   for (const call of runner.calls) {
     assert.equal(call.cwd, '/home/example/src/mnfs');
-    assert.deepEqual(call.env, { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' });
+    assert.deepEqual(call.env, EXPECTED_GIT_ENV);
     assert.equal(call.argv[0], '/usr/bin/git');
   }
 });

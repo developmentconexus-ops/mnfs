@@ -1,6 +1,8 @@
 import { canonicalJsonBytes } from './canonical-json.mjs';
 import { sha256Bytes } from './artifacts.mjs';
 
+export const EXECUTION_AUTHORIZATION_RELATIVE_PATH = 'docs/acceptance/arr-s0-execution-authorization.json';
+
 const SHA_PATTERN = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u;
 const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const GIT_BLOB_PATTERN = /^[a-f0-9]{40}$/u;

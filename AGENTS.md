@@ -108,22 +108,26 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
   MIS-002/M02 revision-5 execution path                  SUPERSEDED
 ```
 
-Accepted current architecture/planning authority includes D-010 through D-016, ADR-0013 through ADR-0015 and `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0.
+Accepted architecture/planning authority includes D-010 through D-018, ADR-0013 through ADR-0015 and `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0.
 
-`GATE-P0` accepted the Architecture Reconciliation / ARR master plan and ARR-S0 plan. ARR P1 / GATE-R was accepted by D-017 for Tasks `A1,A2,A3,A4,B1` plus P1-F01/P1-F02 and was integrated into `main` by PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`. This integration does not authorize S0.
+`GATE-P0` accepted the Architecture Reconciliation / ARR master plan and ARR-S0 plan. ARR P1 / GATE-R was accepted by D-017 for Tasks `A1,A2,A3,A4,B1` plus P1-F01/P1-F02 and was integrated into `main` by PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`.
+
+A post-integration Important finding, P1-F03, identified that B1 Evidence carried only semantic `contractVersion` rather than binding to the exact frozen Spike contract bytes. D-018 accepts the bounded correction at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27`: deciding Architecture Spike Evidence now carries `contractHash`, and validation recomputes SHA-256 from the exact bytes supplied through `--contract`. The accepted correction is not yet integrated into canonical `main`.
 
 ```text
-ARR P1 reconciliation A1-A4 + B1:       ACCEPTED — GATE-R / D-017 / INTEGRATED
-PR #24 merge / integration:               COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
-ARR-S0 implementation:                   PROHIBITED pending GATE-S0-IMPLEMENT
-ARR-S0 real host probe:                   PROHIBITED pending later GATE-S0-EXECUTE
-Candidate installation/execution:        PROHIBITED
-Agent Runtime / Environment selection:   PROHIBITED pending deciding Evidence
-M02 production implementation:           PROHIBITED
-Production Worker dispatch:              PROHIBITED
-Automatic merge/delivery:                NOT AUTHORIZED
+ARR P1 reconciliation A1-A4 + B1:          ACCEPTED — GATE-R / D-017 / INTEGRATED
+PR #24 merge / integration:                  COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
+P1-F03 exact contract-binding correction:    ACCEPTED — D-018 / PR #26 / INTEGRATION_REQUIRED
+PR #26 merge / integration:                  NOT AUTHORIZED / NOT COMPLETE
+ARR-S0 implementation:                       PROHIBITED pending GATE-S0-IMPLEMENT
+ARR-S0 real host probe:                       PROHIBITED pending later GATE-S0-EXECUTE
+Candidate installation/execution:             PROHIBITED
+Agent Runtime / Environment selection:        PROHIBITED pending deciding Evidence
+M02 production implementation:                PROHIBITED
+Production Worker dispatch:                   PROHIBITED
+Automatic merge/delivery:                     NOT AUTHORIZED
 ```
 
 Real M01 R2/R3 Treehouse crash/lineage scenarios remain `FOLLOW_UP_REQUIRED` under Issue #20. Whether the Treehouse-specific form remains necessary is decided by the final architecture reconciliation; provider-neutral recovery/fencing proof remains mandatory before Product Milestone M2 exit.
 
-P1 is integrated into canonical `main` at `def9e5fe819f76950d61fba2cf5abcda1533c07f`. The next possible gate is **GATE-S0-IMPLEMENT** for deterministic construction/testing of the host-capability harness, but that gate is **not currently authorized**. Real host probing remains separately gated and is not implied by S0 implementation approval.
+The current action is the **integration decision for accepted PR #26**. Acceptance does not authorize merge. Only after the accepted P1-F03 correction is integrated into canonical `main` — or an exact later S0 base SHA explicitly includes it — can **GATE-S0-IMPLEMENT** return as the next possible gate for deterministic construction/testing of the host-capability harness. That gate remains separately unauthorized. Real host probing remains behind the later `GATE-S0-EXECUTE`.

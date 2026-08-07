@@ -272,16 +272,17 @@ assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
-assert.match(statusText, /\*\*Current phase:\*\* `ARR P1-F03 — ACCEPTED \/ INTEGRATION_REQUIRED`/u, 'STATUS current phase must expose accepted P1-F03 integration gate');
+assert.match(statusText, /\*\*Current phase:\*\* `ARR P1-F03 — ACCEPTED \/ INTEGRATED`/u, 'STATUS current phase must expose integrated P1-F03');
 assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
 assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
 assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*ACCEPTED — GATE-R \/ D-017 \/ INTEGRATED/u, 'STATUS must record P1 integration');
 assert.match(statusText, /P1-F02 fresh review:[^\n]*Critical 0 \/ Important 0[^\n]*31194963494/u, 'STATUS must record F02 fresh-review evidence');
 assert.match(statusText, /P1-F03 Operator acceptance:[^\n]*D-018[^\n]*ACCEPTED/u, 'STATUS must record D-018 acceptance');
-assert.match(statusText, /P1-F03 integration:[^\n]*REQUIRED[^\n]*PR #26 NOT MERGED/u, 'STATUS must keep accepted F03 integration pending');
+assert.match(statusText, /P1-F03 integration:[^\n]*COMPLETE[^\n]*PR #26 MERGED/u, 'STATUS must record completed F03 integration');
+assert.match(statusText, /P1-F03 integrated commit:[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'STATUS must bind F03 integration to the real merge commit');
 assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
 assert.match(statusText, /PR #24 merge \/ integration:[^\n]*COMPLETE[^\n]*def9e5fe819f76950d61fba2cf5abcda1533c07f/u, 'STATUS must bind P1 integration to the real merge commit');
-assert.match(statusText, /## Immediate next action — P1-F03 integration decision/u, 'STATUS next action must be P1-F03 integration decision');
+assert.match(statusText, /## Immediate next action — GATE-S0-IMPLEMENT review/u, 'STATUS next action must be GATE-S0-IMPLEMENT review');
 assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
 assert.doesNotMatch(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS must not point to completed F02 fresh review');
 assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
@@ -291,7 +292,8 @@ assert.match(decisionsText, /\| D-018 \| 2026-08-07 \| Accept the bounded ARR P1
 assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must record integrated GATE-R');
 assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-S0-IMPLEMENT — NOT AUTHORIZED/u, 'ARR review must keep S0 implementation unapproved');
 assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must orient fresh actors to accepted P1');
-assert.match(agentsText, /P1-F03 exact contract-binding correction:[^\n]*ACCEPTED — D-018 \/ PR #26 \/ INTEGRATION_REQUIRED/u, 'AGENTS must orient fresh actors to accepted F03 pending integration');
+assert.match(agentsText, /P1-F03 exact contract-binding correction:[^\n]*ACCEPTED — D-018 \/ INTEGRATED/u, 'AGENTS must orient fresh actors to integrated F03');
+assert.match(agentsText, /PR #26 merge \/ integration:[^\n]*COMPLETE[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'AGENTS must bind F03 integration to the real merge commit');
 assert.match(documentationMapText, /ARR P1 A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'Documentation Map must record accepted P1');
 
 const schemaCandidate = structuredClone(traceability);

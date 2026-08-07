@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.20.0
+version: 1.21.0
 owners:
   - developmentconexus-ops
 related:
@@ -22,6 +22,7 @@ related:
   - ACCEPTANCE-ARR-P1-INTEGRATION-CLOSEOUT
   - ACCEPTANCE-ARR-P1-RECONCILIATION
   - ACCEPTANCE-ARR-P1-F03-CONTRACT-BINDING
+  - ACCEPTANCE-ARR-P1-F03-INTEGRATION-CLOSEOUT
   - ACCEPTANCE-CAP-EXECUTION-R3
   - ACCEPTANCE-MIS-002-REPLAN
   - ACCEPTANCE-M2-UNBLOCK
@@ -54,11 +55,11 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
 - **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
-- **Current phase:** `ARR P1-F03 — ACCEPTED / INTEGRATION_REQUIRED` under Issue #23 / PR #26.
+- **Current phase:** `ARR P1-F03 — ACCEPTED / INTEGRATED` under Issue #23 / PR #26.
 - **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — ACCEPTED — GATE-P0 — blob `52033adcdfb7163f63606034b9912942b018f38e`.
 - **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — ACCEPTED — GATE-P0 — blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`.
 - **P1 base reconciliation:** A1–A4 + B1 + P1-F01 + P1-F02 is ACCEPTED under GATE-R / D-017 and INTEGRATED into `main` by squash merge of PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`.
-- **P1-F03 post-integration correction:** exact Architecture Spike contract-byte binding is ACCEPTED under D-018 at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27`; integration into canonical `main` remains separately required before `GATE-S0-IMPLEMENT` may be considered.
+- **P1-F03 post-integration correction:** exact Architecture Spike contract-byte binding is ACCEPTED under D-018 at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27` and INTEGRATED into canonical `main` by squash merge at `88c5e05964e8465ef4317a3b4174c6160d8cdefa`.
 - **Superseded prior planning container:** Issue #21 — prior `MIS-002/M02` R5 path; do not resume under revision 5.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
@@ -165,10 +166,13 @@ P1-F03 accepted-head workflow:  31203105413 — SUCCESS — npm run verify
 P1-F03 review findings:         Critical 0 / Important 0
 P1-F03 Operator acceptance:     D-018 — ACCEPTED
 P1-F03 acceptance record:       ACCEPTANCE-ARR-P1-F03-CONTRACT-BINDING
-P1-F03 integration:             REQUIRED — PR #26 NOT MERGED
+P1-F03 integrated commit:       88c5e05964e8465ef4317a3b4174c6160d8cdefa
+P1-F03 integration workflow:    31205404945 — SUCCESS — npm run verify
+P1-F03 integration record:      ACCEPTANCE-ARR-P1-F03-INTEGRATION-CLOSEOUT
+P1-F03 integration:             COMPLETE — PR #26 MERGED
 ```
 
-The P1-F02 review used the provider-neutral constitutional tree and a fresh contextual scan of residual Pi/Treehouse/E0–E4/AB1/AS-01/AS-02/worktree language. Remaining vendor-specific occurrences are explicitly historical/incumbent/reference Evidence, research, negative examples, or property options rather than current substrate selection.
+The P1-F02 review used the provider-neutral constitutional tree and a fresh contextual scan of residual Pi/Treehouse/E0–E4/AB1/AS-01/AS-02/worktree language. Remaining vendor-specific occurrences are explicitly historical/incumbent/reference Evidence, research, negative examples or property options rather than current substrate selection.
 
 D-018 strengthens the shared B1 Architecture Spike Evidence contract before any deciding ARR host/candidate Evidence is produced: every Evidence record carries `contractHash`, and the validator recomputes SHA-256 from the exact frozen contract bytes supplied through `--contract`.
 
@@ -184,8 +188,8 @@ Master ARR program plan 0.2.0:                  ACCEPTED — GATE-P0
 ARR-S0 plan 0.2.0:                              ACCEPTED — GATE-P0
 ARR P1 A1-A4 + B1 + P1-F01 + P1-F02:           ACCEPTED — GATE-R / D-017 / INTEGRATED
 PR #24 merge / integration:                     COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
-P1-F03 exact Spike-contract binding correction: ACCEPTED — D-018 / PR #26 / INTEGRATION_REQUIRED
-PR #26 merge / integration:                     NOT AUTHORIZED / NOT COMPLETE
+P1-F03 exact Spike-contract binding correction: ACCEPTED — D-018 / INTEGRATED
+PR #26 merge / integration:                     COMPLETE — 88c5e05964e8465ef4317a3b4174c6160d8cdefa
 ARR-S0 harness implementation:                  PROHIBITED pending GATE-S0-IMPLEMENT
 ARR-S0 real host probe:                         PROHIBITED pending later GATE-S0-EXECUTE
 ARR-S1/S2/S2W/S3 execution:                     PROHIBITED pending their later exact gates
@@ -194,12 +198,10 @@ Production Worker dispatch:                     PROHIBITED
 Automatic delivery / merge:                     NOT AUTHORIZED
 ```
 
-## Immediate next action — P1-F03 integration decision
+## Immediate next action — GATE-S0-IMPLEMENT review
 
-P1-F03 is accepted under D-018 at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27`, but the accepted correction is not yet integrated into canonical `main`.
+P1 and the accepted P1-F03 correction are now integrated into canonical `main`. The integration prerequisites from the ARR program and D-018 are therefore satisfied.
 
-The next Operator decision is whether to integrate PR #26. Acceptance alone does not authorize merge.
-
-Only after the accepted correction is integrated into `main` — or an exact later S0 base SHA explicitly includes it — does `GATE-S0-IMPLEMENT` return as the next possible gate. That gate will still require a separate exact Operator authorization.
+`GATE-S0-IMPLEMENT` is now the **next possible gate**, but it remains **NOT AUTHORIZED**. The Operator must separately authorize deterministic construction/testing of the ARR-S0 harness against an exact canonical base SHA and the accepted ARR-S0 plan.
 
 ARR-S0 real host probing, candidate execution, M02 production work and production Worker dispatch remain prohibited. Real probing of the canonical WSL2 host remains behind the later separate `GATE-S0-EXECUTE`.

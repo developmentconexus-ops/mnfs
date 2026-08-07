@@ -41,7 +41,7 @@ export function parseExecutionAuthorizationToken(token, expected) {
   if (contractHash !== expected.contractHash) {
     throw new TypeError('ARR-S0 execution authorization contract hash does not match');
   }
-  if (baseCommitSha !== expected.baseCommitSha) {
+  if (expected.baseCommitSha !== undefined && baseCommitSha !== expected.baseCommitSha) {
     throw new TypeError('ARR-S0 execution authorization source commit does not match');
   }
 

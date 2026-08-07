@@ -10,6 +10,7 @@ owners:
 related:
   - DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD
   - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
+  - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
   - DOC-PRODUCT-BLUEPRINT
   - DOC-CAPABILITY-ROADMAP
   - TRACKING-DECISIONS
@@ -45,62 +46,11 @@ D2 — Agent runtime and session/control strategy APPROVED — D-012
 D3 — Execution Environment architecture         APPROVED — D-013
 D4 — Implementation sourcing strategy           APPROVED — D-014
 SYNTHESIS — cross-decision architecture          APPROVED — D-015
-EXECUTION PLANNING DESIGN                         CURRENT
+EXECUTION PLANNING DESIGN                         APPROVED — D-016
+RECONCILIATION + SPIKE EXECUTION PLAN             CURRENT
 ```
 
-## Approved D1 — Planning and validation
-
-- preserve Mission/Milestone/Feature hierarchy and Acceptance Criterion model;
-- define Mission correctness before Milestone/Feature decomposition;
-- Mission Criteria + Verification Plans serve the Validation Contract role;
-- add explicit upward contribution lineage (`CONTRIBUTES_TO` or equivalent);
-- Validators judge and produce Findings; they do not implement corrections by default;
-- route Findings to Correction/new Attempt, new Feature or Decision/Replan according to what is wrong;
-- preserve hierarchical closure and proof-type diversity;
-- keep planning ceremony proportional to risk.
-
-## Approved D2 — Agent Runtime and Session/Coordination
-
-- MNFS owns Role/ActorRun/Attempt/Authority/Recovery/Claim/Evidence/Verdict semantics;
-- coding-agent loops, provider/model mechanics, runtime Sessions and live transport are replaceable substrates;
-- runtime Session identity is observational and domain recovery must work without session resume/transcript;
-- do not build a custom MNFS agent loop while credible open substrates exist;
-- ACP is a comparative `SPIKE`, not a preselected dependency;
-- Pi is the incumbent with accepted AS-02 Evidence; OpenCode/ACP is the leading challenger and a second ACP implementation is required before interoperability is considered proved;
-- Mastra AgentController/Signals and broader agent servers remain deferred until named consumers exist.
-
-## Approved D3 — Execution Environment
-
-- preserve separate Authority, Tool Capability, Process Sandbox, Execution Environment, Credential, Network/Egress, External Effect and Evidence/Reconcile planes;
-- supersede the ordinal `E0 → E4` technology/locality ladder as the semantic model;
-- describe environments through independent properties including agent placement, compute location, isolation boundary, workspace model, persistence, network posture, credential delivery and recovery capability;
-- `WriteTrack` owns isolated mutable workspace semantics, not an inherent Git worktree;
-- provider-neutral Git result identity (`baseCommitSha` + `resultTreeSha`, optional result commit) remains the accepted output boundary;
-- prefer `CONTROL_SIDE` agent placement when strict MNFS-brokered capability reduction is provable; otherwise use `IN_ENVIRONMENT` with brokered credentials/inference preferred over raw secrets;
-- perform host-capability, process-envelope and microVM-envelope comparative spikes before selecting local substrates;
-- defer VFS/AgentFS choice until the selected envelope proves whether another COW workspace substrate is still needed.
-
-## Approved D4 — Implementation sourcing
-
-Canonical direction:
-
-```text
-Thin Sovereign Semantic Kernel
-+
-Selective Open Substrates
-```
-
-MNFS owns differentiated semantics and authority. Commodity mechanics are presumed `ADOPT`/`ADAPT` when an open, replaceable substrate removes a meaningful machinery class without becoming a second source of truth.
-
-Capability-realization vocabulary:
-
-```text
-OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT
-```
-
-Every material sourcing decision must test semantic ownership, authority inversion, mechanical leverage, replaceability/exit, proofability, sovereignty/license and a named consumer. Prefer the lowest sufficient upstream layer, one primary production substrate per concern and concrete implementations until a second real consumer earns a generic abstraction.
-
-## Approved Architecture Synthesis — D-015
+## Approved architecture
 
 Canonical target:
 
@@ -120,7 +70,7 @@ Independent Evidence / Gates
 Capability-first Sourcing
 ```
 
-Disposition:
+Core disposition:
 
 ```text
 M0                          PRESERVE
@@ -144,7 +94,34 @@ ADR-0008                    SUPERSEDE
 
 Accepted M01 semantics/Evidence remain reusable where provider-neutral: durable WriteTrack/Attempt/ActorRun identities, fencing, Claim atomicity, Intent–Action–Observation, fresh-process Recovery/Reconcile and Git base/result lineage. Treehouse-specific physical realization remains historical implementation Evidence, not future constitutional architecture.
 
-Approved deciding-spike sequence:
+## Accepted Execution Planning Design — D-016
+
+`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0 is accepted.
+
+Canonical planning layers:
+
+```text
+L0 — Validation Baseline          frozen correctness
+L1 — Realization Baseline         frozen approved architecture
+L2 — Execution Graph              versioned bounded decomposition
+L3 — Tactical Agent Plan          adaptive / ephemeral
+```
+
+MCRM evolution:
+
+```text
+R3  Capability + Architecture + Sourcing
+R4A Validation Baseline
+R4B Decomposition + Allocation
+R5  Execution Design & Readiness
+R6  bounded proof-first Agent Execution Loop
+R7  independent Verification / Validation
+R8  Closeout / Learning / Calibration proposals
+```
+
+Every bounded execution unit uses role-specific compiled context, explicit write/resource/environment/tool authority, proof-first/TDD where applicable, finite retry/hypothesis policy and explicit `SUCCESS / BLOCKED / ESCALATE / HANDOFF_REQUIRED / REPLAN_REQUIRED` termination. Fresh-Actor recovery cannot depend on transcript/session continuity.
+
+## Deciding Architecture Spike sequence
 
 ```text
 ARR-S0  Host Capability Probe
@@ -154,43 +131,42 @@ ARR-S2W Workspace comparison — conditional only
 ARR-S3  Vertical Composition Proof
 ```
 
-Spike execution still requires a separate exact authorization gate.
+The sequence is governed by candidate-independent deciding contracts. Candidate tests/fixtures may not be weakened after observing a preferred candidate fail unless the contract is revised and every affected candidate is rerun under the same revision.
 
-## Current phase — Execution Planning Design
+## Current phase — Architecture Reconciliation + Spike Execution Planning
 
-Before authorizing any Architecture Spike, define the execution-planning method that turns approved architecture and Validation into reliable agent work.
+The current task is to produce the reviewed execution plan that converts D-011 through D-016 into bounded, exact work.
 
-The design must answer at least:
+The plan must:
 
-1. which parts of a plan are frozen Authority versus adaptive tactical reasoning;
-2. how Validation Baseline, Milestones, Features and executable work units relate;
-3. how every work unit proves upward coverage and receives only the required context;
-4. how repository localization, architecture, sourcing, security, environment, resources, concurrency and tool boundaries are captured before dispatch;
-5. how TDD, deterministic verification, independent validation, integration and live QA are scheduled;
-6. how retries, failed hypotheses, blocked states, escalation and Replan are bounded;
-7. what a fresh Actor must read before starting and what it must leave behind at handoff;
-8. how budgets, termination conditions and progress are made explicit;
-9. how findings and production learnings feed Evaluation/Calibration rather than silently mutating current Authority;
-10. how plan completeness is mechanically checked so no applicable concern from D1–D4/MCRM is omitted.
+1. identify which canonical documents are reconciled before any Spike and which must wait for Spike Evidence;
+2. keep accepted historical documents immutable where their authority/version must be preserved;
+3. define exact files/interfaces and proof steps for the first executable tranche;
+4. fully specify `ARR-S0` because it has no dependency on unresolved substrate selection;
+5. define candidate-independent contracts, outputs and gates for S1/S2/S2W/S3 without inventing implementation details that preceding Spikes must decide;
+6. mechanically prove coverage of D-011 through D-016 and the accepted planning completeness concerns;
+7. state explicit authorization tokens/gates so plan approval does not accidentally authorize execution;
+8. preserve M02 production prohibition until new CAP-EXECUTION/MIS-002 authority is created after S3.
 
 ## Authorization boundary
 
 Authorized:
 
-- research on effective planning/execution for AI agents;
-- Execution Planning Design;
-- Architecture/authority reconciliation proposals;
-- bounded Architecture Spike specification and planning.
+- architecture reconciliation planning;
+- exact design/plan documents for ARR-S0 through ARR-S3;
+- documentation/Decision proposals;
+- deterministic tests of documentation/planning tooling only when separately authorized by a later execution gate.
 
-Not authorized by this review alone:
+Not authorized by plan drafting or review alone:
 
-- Architecture Spike execution;
+- ARR-S0 host probing;
+- ARR-S1/S2/S2W/S3 candidate execution;
 - M02 production implementation;
 - production Worker dispatch;
 - changing accepted Mission contracts in place;
 - automatic merge/delivery;
-- concrete foundational runtime/environment adoption without the required approved spike/decision.
+- concrete foundational runtime/environment adoption without the required Spike Evidence and Decision.
 
 ## Current relationship to MIS-002/M02
 
-`MIS-002` revision 5 remains immutable historical/current authority until explicitly superseded, but D-015 decides that `MIS-002/M02` under revision 5 must not be implemented. Product M2 proceeds through Opportunity Replan after the deciding Architecture Spikes and final reconciliation.
+`MIS-002` revision 5 remains immutable historical/current authority until explicitly superseded, but D-015 decides that `MIS-002/M02` under revision 5 must not be implemented. Product M2 proceeds through Opportunity Replan after deciding Architecture Spikes and final authority reconciliation.

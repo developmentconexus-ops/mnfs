@@ -3,6 +3,7 @@ import { requireRunId } from './paths.mjs';
 export const RUN_PHASES = Object.freeze(['CREATED', 'OBSERVING', 'OBSERVED', 'FINALIZED']);
 const SHA_PATTERN = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u;
 const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/u;
+const GIT_BLOB_PATTERN = /^[a-f0-9]{40}$/u;
 const VERSION_PATTERN = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$/u;
 const NEXT_PHASE = new Map([
   ['CREATED', 'OBSERVING'],
@@ -17,6 +18,7 @@ function validateExecutionAuthorization(state, errors) {
     return;
   }
   if (authority.gate !== 'GATE-S0-EXECUTE') errors.push('executionAuthorization.gate is invalid');
+  if (!GIT_BLOB_PATTERN.test(authority.planGitBlob ?? '')) errors.push('executionAuthorization.planGitBlob is invalid');
   if (!SHA_PATTERN.test(authority.baseCommitSha ?? '')) errors.push('executionAuthorization.baseCommitSha is invalid');
   if (!DIGEST_PATTERN.test(authority.contractHash ?? '')) errors.push('executionAuthorization.contractHash is invalid');
   if (!Number.isSafeInteger(authority.verificationRunId) || authority.verificationRunId <= 0) {

@@ -140,7 +140,7 @@ Reference: [A practical guide to building agents](https://openai.com/business/gu
 
 MNFS interpretation:
 
-Every execution unit declares explicit `SUCCESS`, `BLOCKED`, `ESCALATE` and `REPLAN_REQUIRED` termination conditions. Resource or retry budget exhaustion can never imply success.
+Every execution unit declares explicit `SUCCESS`, `HANDOFF_REQUIRED`, `BLOCKED`, `ESCALATE` and `REPLAN_REQUIRED` termination conditions. Resource, context or retry budget exhaustion can never imply success.
 
 ### 3.5 Interface design and localization affect coding-agent performance
 
@@ -180,20 +180,21 @@ The following principles are normative for this design.
 4. **Every execution unit traces upward to approved correctness.**
 5. **No unresolved architecture decision is delegated to a Writer task.**
 6. **Proof-first always; test-first where the proof method is executable testing.**
-7. **Fresh Actor orientation must be sufficient without prior conversation.**
+7. **Fresh ActorRun orientation must be sufficient without prior conversation.**
 8. **Implementer completion never grants acceptance.**
 9. **Small eager context plus progressive disclosure for optional context.**
 10. **Repository localization precedes implementation when loci are materially uncertain.**
 11. **Environment, tools, write boundaries and resource authority are explicit before dispatch.**
 12. **Workers cannot silently expand network, credential, effect, write or architecture authority.**
 13. **Retries require bounded policy; repeated hypotheses require new evidence.**
-14. **Every unit has explicit success, block, escalation and Replan termination.**
+14. **Every unit has explicit success, safe-handoff, block, escalation and Replan termination.**
 15. **Parallelism follows proven independence, not agent availability.**
 16. **Handoffs communicate current structured truth, not conversational history.**
 17. **Planning completeness is mechanically derived from existing applicability and coverage sources.**
 18. **Milestone composition receives its own validation.**
 19. **Mission closure validates the original Operator outcome, not only child completion.**
 20. **Execution learnings feed governed Calibration; they do not mutate policy automatically.**
+21. **Role semantics are MNFS-owned; model/runtime specialization is local to each role and does not change Authority.**
 
 ---
 
@@ -267,6 +268,8 @@ Mission
 ```
 
 A new permanent `ExecutionUnit` domain entity is **not** required by this design. Usually a Feature is the execution unit. A large Feature may be decomposed into implementation tasks in the approved R5 design when those tasks each deserve an independent implementation/proof/review cycle.
+
+Every dependency edge that crosses execution-unit boundaries must expose the contract actually needed by the consumer. A downstream Actor should not need to infer an upstream private implementation from its diff or transcript.
 
 L2 is versioned execution planning. Material changes to dependency order, scope allocation, interface contracts, write/resource sets or proof responsibility must be recorded through the appropriate design/Replan mechanism rather than existing only in a Worker transcript.
 
@@ -384,6 +387,7 @@ Required properties:
 - child work declares upward contribution lineage (`CONTRIBUTES_TO` or equivalent);
 - parent criteria retain composition/outcome semantics not reducible to child aggregation;
 - dependency graph is satisfiable;
+- cross-unit interfaces are explicit enough for a downstream fresh Actor;
 - no implementation unit exists only because it is technically interesting.
 
 ### 6.7 R5 — Execution Design & Readiness
@@ -403,7 +407,7 @@ R5 includes current microdesign content plus:
 - context compilation plan;
 - proof-first implementation sequence;
 - finite retry/hypothesis policy;
-- success/block/escalation/Replan termination;
+- success/safe-handoff/block/escalation/Replan termination;
 - handoff/recovery expectations;
 - parallelism classification;
 - exact verification commands or bounded verification procedure;
@@ -413,9 +417,28 @@ R5 includes current microdesign content plus:
 
 R5 is not ready unless this statement is true:
 
-> **A technically capable Actor with a completely fresh context can receive the compiled pack, orient itself, prove the starting baseline, execute the bounded unit, know when it must stop, and produce a valid Claim without requiring the previous conversation.**
+> **A technically capable Actor with a completely fresh context can receive the compiled pack, orient itself, prove the starting baseline, execute the bounded unit, know when it must stop or hand off, and produce the required structured output without requiring the previous conversation.**
 
 If that statement is false, the design/context contract is incomplete.
+
+#### R5 independent planning review
+
+For medium/high-risk work, or whenever policy requires it, a fresh Reviewer inspects the R5 plan before implementation authority is issued.
+
+The planning Reviewer checks at least:
+
+- criteria and requirement coverage;
+- hidden Architecture Decisions;
+- false or guessed repository precision;
+- missing interfaces between tasks;
+- unsafe/unclear write/resource boundaries;
+- proof gaps;
+- missing failure/recovery cases;
+- impossible or stale environment assumptions;
+- task size and handoff viability;
+- whether a simpler realization would satisfy the same requirement.
+
+The planning Reviewer reports Findings; it does not silently rewrite approved architecture.
 
 ### 6.8 R6 — Agent Execution Loop
 
@@ -428,8 +451,8 @@ fresh Actor orientation
 → proof-first implementation
 → local deciding proof
 → regression proof
-→ Claim
-→ deterministic Receipts
+→ Claim or safe Handoff
+→ deterministic Receipts when claimed
 → independent validation when required
 → Finding routing
 → Correction / new Feature / Replan
@@ -446,7 +469,7 @@ R7 additionally checks that:
 - Worker self-assessment was never used as acceptance Evidence;
 - required fresh/independent review actually used independent context;
 - parent composition was exercised at the required level;
-- no budget exhaustion or blocked state was converted into PASS;
+- no budget exhaustion, safe handoff or blocked state was converted into PASS;
 - every deciding unit/criterion has current Evidence bound to the correct Git/result/contract identities.
 
 ### 6.10 R8 — Closeout and Learning
@@ -669,12 +692,17 @@ Every unit explicitly defines:
 
 ```text
 SUCCESS WHEN ...
+HANDOFF_REQUIRED WHEN ...
 BLOCKED WHEN ...
 ESCALATE WHEN ...
 REPLAN_REQUIRED WHEN ...
 ```
 
 Typical `SUCCESS` requires all deciding local proofs, a valid Git result identity and a structurally complete Claim. It never means “the model believes the task is done.”
+
+`HANDOFF_REQUIRED` covers a still-valid unit that reaches a context/run boundary before completion but can be left at an explicit safe checkpoint. A handoff is not a Claim of completion and cannot satisfy acceptance criteria by itself.
+
+A safe handoff records the exact current Git/workspace state, current proof status, open hypothesis/next action when relevant, and any non-green conditions. It must leave the next fresh Actor able to distinguish intentional partial work from corruption or false completion.
 
 `BLOCKED` covers unavailable prerequisites or environment/tool failures that cannot be solved inside current authority.
 
@@ -694,7 +722,7 @@ Each unit has finite resource/failure budgets appropriate to risk, such as:
 
 This design deliberately does not freeze universal numeric values. Exact defaults belong to future Role/Repository Profile/Execution Environment policy because different runtimes and task classes have materially different cost structures.
 
-Budget exhaustion produces `BLOCKED` or `ESCALATE`, never success.
+Budget exhaustion produces `HANDOFF_REQUIRED`, `BLOCKED` or `ESCALATE` according to state; never success.
 
 ### 8.14 Output contract
 
@@ -712,6 +740,100 @@ A Writer must emit a structured Claim containing at least the fields already req
 - unresolved unknowns;
 - requested correction/Replan disposition when it could not finish cleanly.
 
+A safe Handoff uses a separate non-acceptance handoff/checkpoint artifact or compiled state projection; it must never masquerade as a successful Claim.
+
+### 8.15 Role-specific compiled packs
+
+The Writer Pack is one specialization of a broader rule: **each Role receives the smallest complete pack for its own authority and output contract**.
+
+#### Lead Pack
+
+Contains:
+
+- current Mission/Milestone/Feature state;
+- attention items and blockers;
+- active Decisions and Authority requirements;
+- current approved contract/architecture hashes;
+- resource/environment summaries;
+- open Findings;
+- permitted next actions;
+- references to deeper Evidence rather than full transcripts.
+
+The Lead synthesizes and routes; it does not gain implementation/acceptance authority merely because it sees the complete state.
+
+#### Investigator / Localization Pack
+
+Contains:
+
+- bounded factual question or uncertainty;
+- known sources/loci;
+- permitted read/tool surface;
+- prohibited mutation/effects;
+- evidence/provenance requirements;
+- stopping rule;
+- required output: facts, uncertainty, candidate loci/options, and explicit limitations.
+
+An Investigator does not silently implement the solution it discovers unless separately assigned Writer authority.
+
+#### Planner Pack
+
+Contains:
+
+- L0 correctness and applicable requirements;
+- current L1 architecture/sourcing baseline;
+- repository/profile/localization evidence;
+- dependency/resource facts;
+- required proof/Golden Proof constraints;
+- planning completeness obligations;
+- explicit prohibition on solving unresolved product/architecture Decisions by assumption.
+
+The Planner outputs versioned decomposition/design proposals, not code changes.
+
+#### Writer Pack
+
+Contains the Execution Unit Contract described in this section plus exact current runtime/environment bindings.
+
+#### Reviewer / Validator Pack
+
+Contains:
+
+- target criteria and verification responsibilities;
+- exact Git/result identity and diff/artifacts to judge;
+- deterministic Receipts already produced;
+- applicable Standards/architecture constraints;
+- known Findings relevant to the review scope;
+- explicit no-write/no-fix authority by default;
+- Finding output schema and severity/locus requirements.
+
+It should avoid unnecessary implementation rationalization/history when that context could bias independent judgment.
+
+#### Integrator Pack
+
+Contains:
+
+- accepted child results and exact Git identities;
+- integration order/dependency constraints;
+- clean integration environment binding;
+- composition interfaces;
+- integration criteria and rollback/recovery plan;
+- no authority to waive failed child or parent criteria silently.
+
+#### QA Pack
+
+Contains:
+
+- integrated target Git identity;
+- persona/journey/mission outcome;
+- test environment and permitted effects;
+- Validation Baseline criteria relevant to the journey;
+- required observable Evidence;
+- pass/fail/block semantics;
+- explicit prohibition on inferring success from implementation internals when the criterion is user-observable.
+
+#### Role/runtime specialization
+
+Different Roles may use different models or runtimes when evidence supports that choice. Role authority and output semantics stay MNFS-owned and do not change because a more capable model is assigned.
+
 ---
 
 ## 9. Context Compiler design
@@ -724,12 +846,12 @@ Every Actor receives enough high-signal context to understand current authority 
 - target identity and bounded purpose;
 - Current Authority Snapshot;
 - relevant Validation Baseline criteria;
-- Execution Unit Contract / Writer Pack;
+- role-specific compiled pack;
 - relevant architecture/interface constraints;
-- write/resource boundary;
+- write/resource or read/effect boundary;
 - Environment/tool/security contract;
 - verification and termination contract;
-- current Git/base/result identities;
+- current Git/base/result identities where applicable;
 - current blockers/Findings that directly apply.
 
 ### 9.2 Lazy / progressive-disclosure context
@@ -759,23 +881,25 @@ Compiled packs bind to the exact current authority/hash/state needed by the run.
 
 ## 10. Fresh Actor orientation protocol
 
-A fresh ActorRun follows a deterministic orientation sequence before implementation:
+A fresh ActorRun follows a deterministic orientation sequence before implementation or another protected Role action:
 
 ```text
 1. validate current Authority Snapshot and approved hash
-2. validate target / Attempt / ActorRun binding
-3. validate Git base + mutable workspace + Environment identity
-4. load the Execution Unit Contract
+2. validate target / Attempt / ActorRun binding where applicable
+3. validate Git base + workspace + Environment identity where applicable
+4. load the role-specific compiled contract/pack
 5. load eager context and compact capability index
-6. inspect the planned repository loci / perform bounded localization
-7. execute the required baseline/smoke/failing proof
-8. classify any divergence before mutation
+6. inspect the planned repository loci / perform bounded localization when applicable
+7. execute the required baseline/smoke/failing proof or precondition check
+8. classify any divergence before mutation/effect
 9. begin tactical execution only when the baseline is coherent
 ```
 
 If the required baseline unexpectedly passes for a change that should start RED, or fails for an unrelated reason, the Actor stops and classifies the discrepancy rather than forcing implementation forward.
 
-This protocol makes a runtime Session replaceable. Resume may accelerate work but is never required for correctness.
+A new execution unit uses a fresh ActorRun by default. Reusing a runtime Session is only an optimization and must not preserve stale authority; the new ActorRun still revalidates the current pack and baseline. A runtime may be replaced entirely without changing domain identity.
+
+This protocol makes runtime Session continuity optional. Resume may accelerate work but is never required for correctness.
 
 ---
 
@@ -880,7 +1004,13 @@ Finding
 
 The Validator does not silently patch the code it judged.
 
-### 12.4 Escalation
+### 12.4 Context/run boundary
+
+If a still-valid unit approaches a context/run boundary before completion, the Actor must not accelerate toward a weak completion claim merely to finish the session.
+
+It produces a safe Handoff when policy allows, preserving exact current state and explicit non-completion, then a fresh ActorRun reorients from structured state.
+
+### 12.5 Escalation
 
 Repeated failure, contradictory observations, budget exhaustion or a requirement that exceeds current authority produces structured attention to the Lead/Operator rather than indefinite autonomous looping.
 
@@ -934,15 +1064,29 @@ A compiled handoff contains, as applicable:
 
 - current authority hash;
 - target and current lifecycle state;
+- exact current Git/workspace checkpoint;
 - accepted prior work/result tree;
 - active Attempt/ActorRun status;
+- current proof status, including intentional RED/non-green state;
 - open Findings/blockers;
 - Evidence references;
 - next permitted action;
 - environment/workspace observation;
 - specific unresolved hypothesis only when it is relevant and explicitly observational.
 
-### 14.2 Session memory
+### 14.2 Handoff is not acceptance
+
+A Handoff cannot:
+
+- close a Claim;
+- mark a Feature accepted;
+- satisfy a criterion merely because progress exists;
+- hide failing tests or unknowns;
+- be interpreted as a Worker completion event.
+
+It exists only to preserve coherent continuation across bounded ActorRuns.
+
+### 14.3 Session memory
 
 Runtime Session transcript, compaction and observational memory may improve continuity but never determine:
 
@@ -952,7 +1096,7 @@ Runtime Session transcript, compaction and observational memory may improve cont
 - whether a Feature/Milestone/Mission is closed;
 - which action is authorized.
 
-### 14.3 Recovery
+### 14.4 Recovery
 
 Fresh-process Recovery remains:
 
@@ -994,7 +1138,7 @@ More available agents is not evidence that parallel execution is beneficial.
 
 ## 16. Agent-facing plan quality rules
 
-A plan intended for an AI Worker must be actionable without becoming brittle pseudo-code.
+A plan intended for an AI Actor must be actionable without becoming brittle pseudo-code.
 
 ### 16.1 Required specificity
 
@@ -1004,7 +1148,7 @@ For each bounded unit, planning should provide:
 - exact authority/criteria references;
 - known files/loci or an explicit localization step;
 - interfaces consumed/produced;
-- write/resource boundary;
+- write/resource or read/effect boundary;
 - required tests/proofs and commands where stable;
 - expected pass/fail semantics;
 - environment/tool constraints;
@@ -1038,6 +1182,90 @@ A task is appropriately bounded when:
 - it leaves a clean, comprehensible state.
 
 Lines-of-code, file-count or clock-time limits may be useful telemetry but are not the semantic definition of task size.
+
+### 16.5 Canonical task-plan shape
+
+Each implementation task in a detailed execution plan must be independently actionable and reviewable. At minimum it declares:
+
+```text
+Task ID / title
+Purpose / upward criterion coverage
+Dependencies / preconditions
+Files/loci (exact when known; localization action otherwise)
+Interfaces consumed
+Interfaces produced
+Write/resource boundary
+Inherited global constraints
+Baseline RED / failing proof / precondition proof
+Implementation actions at evidence-supported specificity
+GREEN / deciding proof
+Regression proof
+Documentation/coverage update
+Claim/checkpoint output
+Commit/checkpoint boundary when repository policy uses commits
+SUCCESS / HANDOFF / BLOCKED / ESCALATE / REPLAN conditions
+```
+
+For code changes where TDD is applicable, the task plan separates the actual actions:
+
+```text
+write failing test/proof
+→ execute and observe expected RED
+→ implement minimum coherent behavior
+→ execute and observe GREEN
+→ run required regression/integration proof
+→ update documentation/coverage
+→ produce bounded checkpoint/commit and Claim
+```
+
+A commit/checkpoint is durable progress, **not acceptance**.
+
+### 16.6 Cross-task interface ledger
+
+Where Task B depends on Task A, the plan states what B consumes from A by interface/contract rather than by hidden internal knowledge.
+
+Examples:
+
+- function/type signature;
+- exported service/port;
+- migration/schema shape;
+- event/artifact format;
+- CLI contract;
+- Git/result identity;
+- generated file/projection contract.
+
+This allows Task B to be assigned to a fresh Actor without requiring Task A's transcript.
+
+### 16.7 Global constraints
+
+Project-/Milestone-wide constraints are defined once in the approved plan and inherited by every task. Tasks repeat a constraint only when its local interpretation is material.
+
+Examples include:
+
+- canonical Node/runtime version;
+- no new dependencies without authority;
+- no network/credentials/effects;
+- accepted architecture boundaries;
+- repository-specific verification commands;
+- naming/schema/version compatibility constraints.
+
+### 16.8 Plan self-review and independent review
+
+Before execution authority, the complete plan is checked for:
+
+- requirement/criterion coverage;
+- orphan tasks;
+- placeholders/vague steps;
+- type/interface consistency between tasks;
+- impossible dependency order;
+- duplicated work;
+- hidden architecture/sourcing decisions;
+- missing negative/failure cases;
+- over- or under-sized tasks;
+- context/handoff gaps;
+- mismatch between declared files and interfaces.
+
+Medium/high-risk plans then receive the independent R5 planning review described above.
 
 ---
 
@@ -1195,12 +1423,12 @@ S3 is not production M02 dispatch. It is the deciding proof that allows the proj
 | Approved Decision | Execution-planning realization in this design |
 |---|---|
 | D-011 correctness before decomposition | L0 Validation Baseline; R4A before R4B; upward `CONTRIBUTES_TO`; independent Validator routing |
-| D-012 replaceable Agent Runtime / Session non-authority | L1 runtime realization; Session-independent packs/handoffs; S1 comparative conformance; runtime transcript never authority |
-| D-013 property-based Execution Environment | Environment/tool contract in every unit; explicit agent placement/workspace/network/credential posture; S0/S2/S2W planning |
+| D-012 replaceable Agent Runtime / Session non-authority | L1 runtime realization; Session-independent role packs/handoffs; S1 comparative conformance; runtime transcript never authority |
+| D-013 property-based Execution Environment | Environment/tool contract in every applicable pack; explicit agent placement/workspace/network/credential posture; S0/S2/S2W planning |
 | D-014 Thin Sovereign Kernel + selective substrates | R3 sourcing gate; sourcing constraints in unit packs; lowest sufficient layer; no hidden dependency replacement by Workers |
 | D-015 Opportunity Replan + bounded Spikes | S0-S3 sequence; same candidate-independent Spike contract; no rev5 M02 production implementation |
 
-No approved D1-D4 architectural direction is delegated to an unstructured Worker decision.
+No approved D-011 through D-015 direction is delegated to an unstructured Actor decision.
 
 ---
 
@@ -1282,6 +1510,9 @@ CONTRACT_OR_OUTCOME_CHANGE
 ENVIRONMENT_DIVERGENCE
 → stop protected work; Recovery/Reconcile
 
+SAFE_HANDOFF
+→ current authority remains valid; preserve checkpoint and continue with a fresh ActorRun without implying completion
+
 FUTURE_IMPROVEMENT
 → backlog/defer with rationale, never silently expand current scope
 ```
@@ -1297,8 +1528,10 @@ The written design is ready to become accepted authority when review confirms:
 - R4A correctness precedes R4B decomposition;
 - R5 fresh-Actor readiness is testable;
 - the Execution Unit Contract can be compiled from existing/future authoritative artifacts without requiring another domain entity by default;
+- Role-specific packs preserve Role/Authority separation;
 - Context Compiler eager/lazy rules preserve all required authority;
 - Worker tactical freedom cannot alter security/scope/architecture silently;
+- safe handoff cannot be mistaken for Claim/acceptance;
 - retry and termination semantics cannot convert exhaustion/blocking into success;
 - independent validation and hierarchical closure remain intact;
 - planning completeness is a derived projection, not another checklist source;
@@ -1322,6 +1555,8 @@ write Architecture Reconciliation + Spike Execution Plan
         ↓
 self-review plan against D-011..D-015 and this design
         ↓
+independent plan review where required
+        ↓
 Operator reviews exact plan/gates
         ↓
 issue exact ARR-S0 execution authority
@@ -1341,7 +1576,7 @@ Blueprint/ADR/CAP-EXECUTION/MIS-002 reconciliation
 new M2/M02 R5 design and implementation plan
 ```
 
-The detailed execution plan must use small independently reviewable tasks, proof-first steps, exact files/interfaces where evidence supports exactness, explicit RED/GREEN cycles where TDD applies, frequent bounded commits and explicit gates between architecture-selection phases.
+The detailed execution plan must use small independently reviewable tasks, proof-first steps, exact files/interfaces where evidence supports exactness, explicit RED/GREEN cycles where TDD applies, frequent bounded commits/checkpoints and explicit gates between architecture-selection phases.
 
 ---
 
@@ -1357,10 +1592,10 @@ Operator intent
 → adversarial correctness review
 → decomposition + contribution coverage
 → Execution Design & Completeness Gate
-→ fresh compiled Actor Pack
-→ baseline proof
+→ fresh role-specific Actor Pack
+→ baseline proof / precondition check
 → adaptive bounded execution
-→ Claim
+→ Claim or safe Handoff
 → deterministic Evidence
 → independent validation
 → Finding routing / correction / Replan

@@ -5,6 +5,7 @@ import { sha256Bytes } from './artifacts.mjs';
 import { S0_PLAN_GIT_BLOB, S0_PLAN_VERSION } from './contract.mjs';
 import { requireRunId } from './paths.mjs';
 import { buildReportView } from './report.mjs';
+import { generateRunId } from './run-id.mjs';
 import { preflightS0, reportS0, runS0 } from './service.mjs';
 
 function invalid(message) {
@@ -94,6 +95,7 @@ export async function executeCli(argv, options = {}) {
   const run = options.run ?? runS0;
   const report = options.report ?? reportS0;
   const identitiesLoader = options.identitiesLoader ?? loadS0Identities;
+  const runIdGenerator = options.runIdGenerator ?? generateRunId;
 
   if (parsed.command === 'preflight') {
     const result = await preflight({ repoRoot, stateRoot });
@@ -102,7 +104,8 @@ export async function executeCli(argv, options = {}) {
   }
   if (parsed.command === 'run') {
     const identities = await identitiesLoader(repoRoot);
-    const result = await run({ repoRoot, stateRoot, identities });
+    const runId = runIdGenerator();
+    const result = await run({ repoRoot, stateRoot, identities, runId });
     writeJson(stdout, buildReportView(result));
     return result.verdict.status === 'REJECT' ? 3 : result.verdict.status === 'BLOCKED' ? 2 : 0;
   }

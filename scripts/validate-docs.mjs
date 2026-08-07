@@ -156,17 +156,18 @@ if (errors.length) {
 for (const warning of warnings) console.warn(`Documentation warning: ${warning}`);
 console.log(`Documentation validation passed (${metadataById.size} canonical IDs, ${registry.aliases.size} indexed aliases checked).`);
 
-
 async function runArchitectureSpikeEvidenceCli() {
   const evidenceFlag = '--architecture-spike-evidence';
   const artifactFlag = '--artifact-root';
+  const contractFlag = '--contract';
   let evidencePath;
   let artifactRoot;
+  let contractPath;
   const seen = new Set();
 
   for (let index = 2; index < process.argv.length; index += 1) {
     const flag = process.argv[index];
-    if (![evidenceFlag, artifactFlag].includes(flag)) {
+    if (![evidenceFlag, artifactFlag, contractFlag].includes(flag)) {
       failArchitectureSpikeEvidence(['unknown Architecture Spike Evidence argument ' + flag]);
     }
     if (seen.has(flag)) failArchitectureSpikeEvidence(['duplicate Architecture Spike Evidence argument ' + flag]);
@@ -176,11 +177,13 @@ async function runArchitectureSpikeEvidenceCli() {
     index += 1;
     if (flag === evidenceFlag) evidencePath = path.resolve(value);
     if (flag === artifactFlag) artifactRoot = path.resolve(value);
+    if (flag === contractFlag) contractPath = path.resolve(value);
   }
 
   const argumentErrors = [];
   if (!evidencePath) argumentErrors.push('missing required argument ' + evidenceFlag);
   if (!artifactRoot) argumentErrors.push('missing required argument ' + artifactFlag);
+  if (!contractPath) argumentErrors.push('missing required argument ' + contractFlag);
   if (argumentErrors.length) failArchitectureSpikeEvidence(argumentErrors);
 
   let schema;
@@ -198,7 +201,7 @@ async function runArchitectureSpikeEvidenceCli() {
 
   const validationErrors = validateJsonSchema(evidence, schema);
   if (validationErrors.length === 0) {
-    validationErrors.push(...await validateArchitectureSpikeEvidenceSemantics(evidence, artifactRoot));
+    validationErrors.push(...await validateArchitectureSpikeEvidenceSemantics(evidence, artifactRoot, contractPath));
   }
 
   if (validationErrors.length) failArchitectureSpikeEvidence(validationErrors);
@@ -212,8 +215,20 @@ function failArchitectureSpikeEvidence(validationErrors) {
   process.exit(1);
 }
 
-async function validateArchitectureSpikeEvidenceSemantics(evidence, artifactRoot) {
+async function validateArchitectureSpikeEvidenceSemantics(evidence, artifactRoot, contractPath) {
   const validationErrors = [];
+
+  let contractBytes;
+  try {
+    contractBytes = await readFile(contractPath);
+  } catch (error) {
+    validationErrors.push('contract file is unavailable (' + (error.code ?? error.message) + ')');
+    return validationErrors;
+  }
+  const observedContractHash = 'sha256:' + createHash('sha256').update(contractBytes).digest('hex');
+  if (observedContractHash !== evidence.contractHash) {
+    validationErrors.push('contract hash mismatch: expected ' + evidence.contractHash + ', observed ' + observedContractHash);
+  }
 
   const criterionIds = new Set();
   for (const criterion of evidence.criteria) {

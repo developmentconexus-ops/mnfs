@@ -5,7 +5,7 @@ document_type: architecture_spike_governance
 form: reference
 authority: standard_policy
 status: proposed
-version: 0.1.0
+version: 0.2.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -94,6 +94,8 @@ Before the first candidate run, the Spike plan/contract freezes at least:
 
 Candidate-specific configuration may differ only where the contract explicitly permits realization-specific setup.
 
+The exact contract hash is content-addressed over the bytes supplied to the Evidence validator. A semantic version alone is insufficient identity: every deciding Evidence record carries `contractHash`, and validation fails if the supplied contract bytes do not recompute to that SHA-256.
+
 ---
 
 ## 4. Same fixture and same criteria
@@ -163,6 +165,7 @@ Required identity includes:
 ```text
 spikeId
 contractVersion
+contractHash
 runId
 startedAt / finishedAt
 canonicalHost identity
@@ -175,9 +178,26 @@ measurements
 verdictInput
 ```
 
+`contractHash` is exactly:
+
+```text
+sha256:<64 lowercase hex>
+```
+
+Validation receives the frozen contract file explicitly and recomputes SHA-256 over its exact bytes:
+
+```bash
+node scripts/validate-docs.mjs \
+  --architecture-spike-evidence <evidence.json> \
+  --artifact-root <artifact-root> \
+  --contract <frozen-contract-file>
+```
+
+Missing contract bytes or a contract hash mismatch invalidates the Evidence record. A digest-shaped string without matching contract bytes is not deciding Evidence.
+
 Raw artifact bytes remain separate from the summary object and are referenced by ID/path/hash.
 
-The validator must read the promoted bytes and recompute SHA-256; a string that merely looks like a digest is not proof of the artifact content.
+The validator must read the promoted raw-artifact bytes and recompute SHA-256; a string that merely looks like a digest is not proof of artifact content.
 
 ---
 
@@ -252,7 +272,7 @@ If the contract itself is materially wrong:
 Finding
 → contract correction / version increment
 → invalidate affected comparison Evidence
-→ rerun every affected candidate under the new version
+→ rerun every affected candidate under the new version/hash
 ```
 
 Keeping one candidate's old PASS while rerunning only a failing competitor under easier rules is prohibited.
@@ -265,7 +285,7 @@ Raw Evidence is produced outside model self-assessment where practical and is ha
 
 A fresh Reviewer validates at least:
 
-- exact contract version;
+- exact contract version and recomputed contract SHA-256;
 - source and candidate provenance;
 - artifact hashes;
 - criterion completeness;
@@ -330,6 +350,8 @@ Each Spike defines its own criteria and fixture under this common contract. Acce
 This policy is ready for acceptance when:
 
 - the schema validates generic Spike identity/provenance/results/artifact references;
+- machine Evidence requires exact `contractHash` identity;
+- validation fails when supplied contract bytes do not match `contractHash`;
 - semantic validation rejects duplicate criterion IDs;
 - named candidate Evidence without provenance is rejected;
 - required criterion non-PASS prevents PASS verdict input;

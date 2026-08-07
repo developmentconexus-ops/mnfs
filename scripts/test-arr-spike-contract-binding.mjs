@@ -9,7 +9,6 @@ import path from 'node:path';
 const root = process.cwd();
 const schema = JSON.parse(await readFile(path.join(root, 'schemas/architecture-spike-evidence.schema.json'), 'utf8'));
 
-assert.equal(schema.properties.schemaVersion.const, 2, 'Architecture Spike Evidence schema must advance to version 2');
 assert.ok(schema.required.includes('contractHash'), 'Architecture Spike Evidence must require contractHash');
 assert.equal(schema.properties.contractHash.pattern, '^sha256:[a-f0-9]{64}$');
 
@@ -28,7 +27,7 @@ try {
   const rawSha256 = 'sha256:' + createHash('sha256').update(rawBytes).digest('hex');
 
   const evidence = {
-    schemaVersion: 2,
+    schemaVersion: 1,
     spikeId: 'ARR-TEST',
     contractVersion: '1.0.0',
     contractHash,

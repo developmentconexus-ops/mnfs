@@ -357,11 +357,14 @@ const missingProof = structuredClone(traceability);
 missingProof.requirements.find((item) => item.level === 'MUST').verifiedBy = [];
 assert.equal((await evaluateReadiness(missingProof, registry)).R2.result, 'BLOCKED');
 
-
 const spikeEvidenceTemp = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-spike-evidence-'));
 try {
   const artifactRoot = path.join(spikeEvidenceTemp, 'artifacts');
   await mkdir(artifactRoot, { recursive: true });
+  const contractPath = path.join(spikeEvidenceTemp, 'contract.md');
+  const contractBytes = Buffer.from('# Architecture Spike fixture contract\n', 'utf8');
+  await writeFile(contractPath, contractBytes);
+  const contractHash = 'sha256:' + createHash('sha256').update(contractBytes).digest('hex');
   const rawBytes = Buffer.from('raw-spike-evidence\n', 'utf8');
   await writeFile(path.join(artifactRoot, 'raw.bin'), rawBytes);
   const rawSha256 = 'sha256:' + createHash('sha256').update(rawBytes).digest('hex');
@@ -370,6 +373,7 @@ try {
     schemaVersion: 1,
     spikeId: 'ARR-TEST',
     contractVersion: '1.0.0',
+    contractHash,
     runId: 'arr-test-run-001',
     startedAt: '2026-08-07T12:00:00.000Z',
     finishedAt: '2026-08-07T12:00:01.000Z',
@@ -417,6 +421,8 @@ try {
         evidencePath,
         '--artifact-root',
         artifactRoot,
+        '--contract',
+        contractPath,
       ],
       {
         cwd: root,
@@ -442,6 +448,14 @@ try {
     const result = await invokeSpikeEvidenceValidator('missing-contract-version', evidence);
     assert.notEqual(result.status, 0, 'missing contractVersion must fail');
     assert.match(result.output, /missing required property contractVersion/u);
+  }
+
+  {
+    const evidence = structuredClone(validSpikeEvidence);
+    delete evidence.contractHash;
+    const result = await invokeSpikeEvidenceValidator('missing-contract-hash', evidence);
+    assert.notEqual(result.status, 0, 'missing contractHash must fail');
+    assert.match(result.output, /missing required property contractHash/u);
   }
 
   {
@@ -482,6 +496,14 @@ try {
     const result = await invokeSpikeEvidenceValidator('artifact-hash-mismatch', evidence);
     assert.notEqual(result.status, 0, 'artifact hash mismatch must fail');
     assert.match(result.output, /artifact hash mismatch for raw-001/u);
+  }
+
+  {
+    const evidence = structuredClone(validSpikeEvidence);
+    evidence.contractHash = 'sha256:' + '0'.repeat(64);
+    const result = await invokeSpikeEvidenceValidator('contract-hash-mismatch', evidence);
+    assert.notEqual(result.status, 0, 'contract hash mismatch must fail');
+    assert.match(result.output, /contract hash mismatch/u);
   }
 } finally {
   await rm(spikeEvidenceTemp, { recursive: true, force: true });

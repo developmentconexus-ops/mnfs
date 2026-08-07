@@ -147,9 +147,20 @@ export async function executeCli(argv, options = {}) {
   if (parsed.command === 'run') {
     const identities = await identitiesLoader(repoRoot, authorityOptions(options));
     const runId = runIdGenerator();
-    const result = await run({ repoRoot, stateRoot, identities, runId });
-    writeJson(stdout, buildReportView(result));
-    return result.verdict.status === 'REJECT' ? 3 : result.verdict.status === 'BLOCKED' ? 2 : 0;
+    try {
+      const result = await run({ repoRoot, stateRoot, identities, runId });
+      writeJson(stdout, buildReportView(result));
+      return result.verdict.status === 'REJECT' ? 3 : result.verdict.status === 'BLOCKED' ? 2 : 0;
+    } catch (error) {
+      writeJson(stdout, {
+        ok: false,
+        complete: false,
+        runId,
+        error: String(error?.message ?? error),
+        nextAction: `npm run arr-s0 -- report --run-id ${runId} --json`,
+      });
+      return 1;
+    }
   }
   const result = await report({ runId: parsed.runId, stateRoot });
   writeJson(stdout, result.complete ? { ...buildReportView(result), integrity: result.integrity } : result);

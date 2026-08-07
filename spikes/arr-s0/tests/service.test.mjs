@@ -88,6 +88,7 @@ test('preflight is read-only and requires canonical identity, clean repo, Linux-
       repoRoot: '/home/example/src/mnfs',
       stateRoot,
       identities: IDENTITIES,
+      sourceObserver: async () => ({ source: SOURCE, clean: true }),
       inspect: async () => preflightFacts(),
     });
     assert.equal(ok.ok, true);
@@ -97,7 +98,8 @@ test('preflight is read-only and requires canonical identity, clean repo, Linux-
       repoRoot: '/home/example/src/mnfs',
       stateRoot,
       identities: IDENTITIES,
-      inspect: async () => preflightFacts({ repository: { source: SOURCE, clean: false } }),
+      sourceObserver: async () => ({ source: SOURCE, clean: false }),
+      inspect: async () => preflightFacts(),
     });
     assert.equal(dirty.ok, false);
     assert.ok(dirty.checks.some((check) => check.id === 'checkoutClean' && !check.ok));
@@ -114,6 +116,7 @@ test('preflight fails closed when the state-root filesystem is not explicitly re
         repoRoot: '/home/example/src/mnfs',
         stateRoot,
         identities: IDENTITIES,
+        sourceObserver: async () => ({ source: SOURCE, clean: true }),
         inspect: async () => preflightFacts({ stateRootFilesystemSupported }),
       });
       assert.equal(result.ok, false);
@@ -133,6 +136,7 @@ test('deterministic run persists lifecycle, execution authority, Evidence manife
       runId: RUN_ID,
       identities: IDENTITIES,
       preflight: async () => ({ ok: true, facts: preflightFacts(), checks: [] }),
+      observeRunRootFilesystem: async () => ({ state: 'SUPPORTED', filesystemType: 'ext2/ext3', observedPath: stateRoot }),
       collect: async ({ capture }) => {
         const raw = await capture.bytes('fixture-raw', 'raw/fixture.bin', Buffer.from('fixture host bytes\n'));
         const observations = decisiveObservations().map((record) => ({ ...record, artifactRefs: [raw.id] }));
@@ -176,6 +180,7 @@ test('report detects post-recording artifact tamper and derives REJECT without t
       runId: RUN_ID,
       identities: IDENTITIES,
       preflight: async () => ({ ok: true, facts: preflightFacts(), checks: [] }),
+      observeRunRootFilesystem: async () => ({ state: 'SUPPORTED', filesystemType: 'ext2/ext3', observedPath: stateRoot }),
       collect: async ({ capture }) => {
         const raw = await capture.bytes('fixture-raw', 'raw/fixture.bin', Buffer.from('original\n'));
         return {
@@ -231,6 +236,7 @@ test('run refuses to start when preflight is not safe', async () => {
         runId: RUN_ID,
         identities: IDENTITIES,
         preflight: async () => ({ ok: false, checks: [{ id: 'checkoutClean', ok: false }], facts: preflightFacts() }),
+        observeRunRootFilesystem: async () => assert.fail('run-root filesystem must not be observed after blocked preflight'),
         collect: async () => assert.fail('collector must not run'),
       }),
       /ARR-S0 preflight blocked/u,

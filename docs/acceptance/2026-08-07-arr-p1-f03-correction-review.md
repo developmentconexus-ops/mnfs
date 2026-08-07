@@ -26,25 +26,71 @@ The accepted governance requires the Spike contract to freeze an exact version/h
 
 ## Correction boundary
 
-Authorized correction work is limited to:
+Correction work is limited to:
 
-- Architecture Spike Evidence schema/version;
+- Architecture Spike Evidence exact contract identity;
 - exact contract-byte hashing/validation path;
-- deterministic regression tests;
-- B1 governance wording/metadata required to describe the binding;
-- tracking needed to expose review state.
+- deterministic regression tests and CI path coverage;
+- B1 governance wording required to describe the binding;
+- review Evidence for this correction.
 
 This correction does not authorize ARR-S0 implementation or execution, candidate installation/execution, runtime/environment selection, ARR-S1/S2/S2W/S3, M02 production work or production Worker dispatch.
 
-## Required proof
+## TDD Evidence
 
-The correction is reviewable only after:
+```text
+branch:                    fix/p1-f03
+review surface:            PR #26
+base:                      dffd3c929eac0f939615408f4729781bd029f11a
 
-1. RED evidence demonstrates the accepted validator does not satisfy exact contract binding;
-2. valid schema-v2 Evidence with an exact contract SHA-256 passes;
-3. missing contract bytes fail closed;
-4. declared contract hash mismatch against the supplied bytes fails;
-5. `npm run verify` is green on the correction head;
-6. a fresh review reports Critical 0 / Important 0.
+initial RED workflow:      31202276551 — FAILURE
+refined RED head:          aa70e28da8e603990d523705e411daecef03dd54
+refined RED workflow:      31202444046 — FAILURE
+GREEN head:                cbf396a57a4171c053f475edce0e8366daa7dafa
+GREEN workflow:            31202977928 — SUCCESS — npm run verify
+```
 
-No acceptance or merge is implied by implementation completion.
+The refined RED removed an unnecessary schema-version assumption so the failing contract tests represented only the missing exact-byte binding.
+
+## Implemented correction
+
+The proposed B1 correction now requires:
+
+```text
+contractVersion
++
+contractHash = sha256:<64 lowercase hex>
++
+exact frozen contract bytes supplied to validation
+```
+
+The existing validation interface remains canonical:
+
+```bash
+node scripts/validate-docs.mjs \
+  --architecture-spike-evidence <evidence.json> \
+  --artifact-root <artifact-root> \
+  --contract <frozen-contract-file>
+```
+
+Validation fails closed when:
+
+- `contractHash` is absent or malformed;
+- `--contract` is absent;
+- contract bytes cannot be read;
+- SHA-256 recomputed from the supplied contract bytes differs from `contractHash`.
+
+Existing raw-artifact hash/size/path, provenance and criterion-result validation remains in place.
+
+## Review state
+
+```text
+implementation:        COMPLETE
+npm run verify:        GREEN — 31202977928
+fresh review:          REQUIRED
+Operator acceptance:   NOT GRANTED
+merge:                 NOT AUTHORIZED
+GATE-S0-IMPLEMENT:     NOT AUTHORIZED
+```
+
+A fresh review must report Critical 0 / Important 0 before this correction can be presented for Operator acceptance. No acceptance or merge is implied by implementation completion.

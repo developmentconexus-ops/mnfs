@@ -29,17 +29,19 @@ ARR-S0 answers one bounded question:
 
 This contract is provider-neutral. It records host facts, not named-substrate eligibility, conformance, safety or selection.
 
-The approved implementation plan is `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` version `0.2.0`, accepted under `GATE-P0`. The deterministic harness may be built and reviewed under the exact `GATE-S0-IMPLEMENT` authorization, but the **real host probe is PROHIBITED pending GATE-S0-EXECUTE**.
+The approved implementation plan is `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` version `0.2.0`, accepted under `GATE-P0`. The deterministic harness may be built and reviewed under the exact `GATE-S0-IMPLEMENT` authorization, but **all new real host observation is PROHIBITED pending `GATE-S0-EXECUTE`**.
 
-This document remains `status: proposed`, version `0.1.0`, until an explicit Operator Decision accepts exact contract bytes. Contract acceptance alone is never execution authority. A real run additionally requires the exact runtime Operator gate token supplied through the dedicated `MNFS_ARR_S0_EXECUTE_AUTHORIZATION` channel.
+This document remains `status: proposed`, version `0.1.0`, until an explicit Operator Decision accepts exact contract bytes. Contract acceptance alone is never execution authority. Both `preflight` and `run` require `GATE-S0-EXECUTE`; `preflight` is intentionally lighter than `run`, but it still observes real Git, filesystem and host facts and therefore is not executable under the implementation-only gate.
 
-The token grammar is exact and fail-closed:
+The exact runtime Operator gate token is supplied through the dedicated `MNFS_ARR_S0_EXECUTE_AUTHORIZATION` control-plane channel:
 
 ```text
 MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=<accepted-plan-git-blob> contract_sha256=<exact-contract-sha256> base_sha=<exact-canonical-commit> verify_run=<exact-successful-workflow-run> scope=canonical-host-probe-only
 ```
 
-The harness compares that token to the approved plan blob, the SHA-256 recomputed from the exact accepted contract bytes, and the exact repository commit observed at execution time. Missing, malformed, broader, stale or differently bound authority is rejected before a run identity is created. The authorization token is control-plane input only and is never propagated into probe subprocess environments.
+The execution-authority token is authenticated against the approved plan blob and SHA-256 recomputed from the exact accepted contract bytes **before any host or Git observation occurs**. Only after that authentication may the harness observe the repository source commit; it then revalidates the token's `base_sha` against that observed commit before host preflight may proceed. Missing, malformed, broader, stale or differently bound authority fails closed. The raw token is not persisted and is never propagated into probe subprocess environments; durable Evidence retains only its hash-bound authority identity.
+
+`report` does not require a new execution gate because it reopens existing durable Evidence and performs no new host probe or host observation.
 
 ---
 
@@ -47,7 +49,7 @@ The harness compares that token to the approved plan blob, the SHA-256 recompute
 
 ARR-S0 is observation-first and fail-closed.
 
-Allowed operations are limited to:
+Allowed operations after `GATE-S0-EXECUTE` authority validation are limited to:
 
 - bounded reads of reviewed Linux host files;
 - exact read-only commands with absolute executable paths;
@@ -62,7 +64,7 @@ Every subprocess uses exact argv, `shell: false`, closed stdin, explicit cwd, ex
 
 Git observation disables optional locks, terminal prompts, system/global Git configuration, `core.fsmonitor` and hooks. This keeps repository identity observation from refreshing the index or invoking repository-configured executable behavior.
 
-The harness must not inherit arbitrary host environment, proxy variables, credential-helper state or user credentials into probe subprocesses. The dedicated execution-authority token is consumed before probing and is not included in any probe environment.
+The harness must not inherit arbitrary host environment, proxy variables, credential-helper state or user credentials into probe subprocesses. The dedicated execution-authority token is consumed by the control plane before probing and is not included in any probe environment.
 
 The harness must not modify host configuration, install software, enable kernel/virtualization features, alter sysctl state, start services, create workloads, broaden network/credential/effect authority or dispatch a production Worker.
 
@@ -92,9 +94,9 @@ Lifecycle state and Verdict are separate concepts. An interrupted run is reporte
 Every run binds at least:
 
 - exact repository commit and tree;
-- exact approved S0 plan identity;
-- exact accepted S0 contract identity when real execution is later authorized;
-- exact `GATE-S0-EXECUTE` runtime authority identity;
+- exact approved S0 plan identity and approved plan Git blob;
+- exact accepted S0 contract identity;
+- exact `GATE-S0-EXECUTE` authority identity, including verification-run ID and token SHA-256 but never the raw Operator token;
 - canonical host identity;
 - raw and normalized Evidence artifacts;
 - content hashes used for integrity verification.
@@ -221,7 +223,7 @@ The no-replace operation must fail with an existing destination rather than over
 
 Before finalization, manifest records are reopened and checked for uniqueness, containment, regular-file type, exact byte count and recomputed SHA-256. `report` repeats integrity checks in a fresh process. Any later mismatch causes current Evidence to be treated as tampered and therefore rejected even if an earlier stored result said otherwise.
 
-The final state binds both manifest hash and result hash.
+The final state binds both manifest hash and result hash and preserves the hash-bound execution-authority projection so a fresh reviewer can verify which gate authorized the Evidence without access to the raw token.
 
 ---
 
@@ -235,11 +237,11 @@ run --json
 report --run-id RUN_ID --json
 ```
 
-`preflight` checks whether a real probe could run safely; it does not execute the complete capability suite. Among its safety checks, it requires both repository and state-root filesystem proof against the reviewed allowlist.
+`preflight` requires `GATE-S0-EXECUTE`. It is read-only and checks whether the complete probe could run safely, but it still performs real repository/filesystem/host observations. The exact execution-authority token is therefore authenticated before any host or Git observation, and `base_sha` is revalidated against the observed repository commit before the remaining preflight checks proceed.
 
-`run` is intentionally fail-closed until this contract is explicitly accepted at version `1.0.0` **and** the exact `GATE-S0-EXECUTE` Operator token is available through `MNFS_ARR_S0_EXECUTE_AUTHORIZATION`. The token is parsed strictly and binds the accepted plan blob, exact contract SHA-256, exact canonical base commit, exact successful deterministic verification run and scope `canonical-host-probe-only`.
+`run` requires the same authenticated `GATE-S0-EXECUTE` authority. It creates a run identity only after authority and preflight succeed, then performs the complete bounded capability suite and persists hash-bound Evidence.
 
-`report` reopens durable state/Evidence by machine-emitted run identity and never guesses or recomputes a run ID from time.
+`report` reopens existing durable Evidence and does not perform a new host probe or host observation. It rechecks manifest/result integrity by the machine-emitted run identity and never guesses or recomputes a run ID from time.
 
 There is no host-management or remediation command in ARR-S0.
 

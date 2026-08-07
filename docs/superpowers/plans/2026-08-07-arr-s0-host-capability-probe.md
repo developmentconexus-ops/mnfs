@@ -5,7 +5,7 @@ document_type: implementation_plan
 form: how_to
 authority: guidance
 status: proposed
-version: 0.1.0
+version: 0.2.0
 owners:
   - developmentconexus-ops
 related:
@@ -21,29 +21,30 @@ last_reviewed: 2026-08-07
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build and execute one bounded, evidence-producing host probe that determines which local execution-envelope hypotheses are physically supportable on the canonical Ubuntu WSL2 machine without installing candidates, changing host configuration or selecting a winner.
+**Goal:** Build and execute one bounded, evidence-producing host probe that records the physical capabilities of the canonical Ubuntu WSL2 machine needed to plan local execution-envelope experiments, without installing candidates, changing host configuration or selecting a winner.
 
-**Architecture:** `ARR-S0` is an observation-first standalone spike harness under `spikes/arr-s0`. It executes only reviewed read-only or ephemeral namespace/device-open probes, records raw stdout/stderr and filesystem observations as hash-bound artifacts outside the repository, derives normalized host capabilities, and classifies candidate eligibility mechanically. The harness never modifies WSL configuration, installs packages, launches candidate runtimes, writes the repository, or treats absence of an optional tool as proof that the kernel capability is absent.
+**Architecture:** `ARR-S0` is an observation-first standalone spike harness under `spikes/arr-s0`. It executes only reviewed read-only or ephemeral namespace/device-open probes, records raw stdout/stderr and filesystem observations as hash-bound artifacts outside the repository, derives normalized host capabilities, and derives only **capability-class eligibility hints**. Exact eligibility of `nono`, Sandbox Runtime, BoxLite, smolvm, Sandlock, VFS/AgentFS or another candidate is decided later by S1/S2/S2W planners using accepted S0 host Evidence plus refreshed primary-source candidate requirements.
 
 **Tech Stack:** Node.js 24.18.0+, ESM `.mjs`, `node:test`, Linux `/proc` and `/sys` observation, exact argv process execution with `shell: false`, Git CLI for read-only repository identity, canonical JSON, SHA-256, Ubuntu WSL2.
 
 ## Global Constraints
 
 - Govern S0 by D-013, D-015, D-016 and `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM`.
-- S0 decides **host eligibility only**. It does not select `nono`, Sandbox Runtime, BoxLite, smolvm, Sandlock, VFS/AgentFS or any other substrate.
+- S0 decides **host facts and broad capability-class eligibility only**. It does not decide that any named substrate is runnable, conformant, safe or selected.
+- Exact named-candidate eligibility is recomputed by S1/S2/S2W from accepted S0 Evidence plus refreshed upstream requirements when those plans are frozen; S0 Evidence itself is never rewritten because an upstream project changes requirements.
 - Do not install packages, enable KVM, edit `/etc/wsl.conf`, edit Windows `.wslconfig`, run `sudo`, change kernel/sysctl state, start/enable services or change Docker configuration.
 - Do not run `bwrap`, `nono`, BoxLite, smolvm, VFS/AgentFS or candidate workloads as part of S0.
-- Allowed active probes are limited to: exact read-only commands, opening a device node read/write without issuing device ioctls, and an ephemeral `unshare` user-namespace smoke when the executable is already present. These probes must not persist host state.
+- Allowed active probes are limited to: exact read-only commands, opening a device node without issuing device ioctls, and an ephemeral `unshare` user-namespace smoke when the executable is already present. These probes must not persist host state.
 - Probe raw outputs are Evidence; process text is never itself a Verdict. Normalize only after preserving exact bytes and metadata.
 - Every external process uses exact argv, closed stdin, explicit cwd, explicit allowlisted environment, `shell: false`, timeout and bounded stdout/stderr.
 - Never pass user HOME credentials, Git credential helpers, proxy variables or arbitrary host environment into probe subprocesses.
 - S0 artifacts live under the Linux MNFS state root, never under the repository and never below `/mnt/*`.
 - S0 must bind the run to exact repository commit/tree, WSL/kernel identity and plan/contract versions.
-- Missing observation produces `UNKNOWN` or `REQUIRES_SETUP`, never invented PASS.
-- Candidate eligibility values are exactly: `ELIGIBLE_FOR_SPIKE`, `REQUIRES_SETUP_DECISION`, `BLOCKED_BY_HOST`, `UNKNOWN`.
+- Missing observation produces `UNKNOWN`, never invented PASS.
+- Capability-class eligibility values are exactly: `PHYSICALLY_PLAUSIBLE`, `REQUIRES_SETUP_DECISION`, `BLOCKED_BY_HOST`, `UNKNOWN`.
 - S0 overall verdict values are exactly: `ACCEPT`, `ACCEPT_WITH_LIMITATIONS`, `BLOCKED`, `REJECT`.
-- `ACCEPT` means the required host evidence is complete enough to plan S1/S2; it does **not** mean any candidate is accepted.
-- `REJECT` is reserved for a material violation of the probe contract (unsafe mutation/fail-open/tampered Evidence), not for a host lacking KVM or FUSE.
+- `ACCEPT` means the required host Evidence is complete enough for fresh S1/S2 planners to determine named-candidate eligibility; it does **not** accept or select a candidate.
+- `REJECT` is reserved for a material violation of the probe contract (unsafe mutation/fail-open/tampered Evidence), not for a host lacking KVM, Landlock, Docker or FUSE.
 - No production Worker dispatch, M02 implementation, automatic merge or candidate adoption is authorized by S0.
 
 ---
@@ -54,8 +55,8 @@ last_reviewed: 2026-08-07
 
 ```ts
 export type ObservationState = 'PRESENT' | 'ABSENT' | 'SUPPORTED' | 'UNSUPPORTED' | 'UNKNOWN';
-export type CandidateEligibility =
-  | 'ELIGIBLE_FOR_SPIKE'
+export type CapabilityClassEligibility =
+  | 'PHYSICALLY_PLAUSIBLE'
   | 'REQUIRES_SETUP_DECISION'
   | 'BLOCKED_BY_HOST'
   | 'UNKNOWN';
@@ -79,11 +80,11 @@ export interface CapabilityObservation {
   readonly artifactRefs: readonly string[];
 }
 
-export interface CandidateEligibilityRecord {
-  readonly candidateId: string;
-  readonly eligibility: CandidateEligibility;
+export interface CapabilityClassRecord {
+  readonly classId: string;
+  readonly eligibility: CapabilityClassEligibility;
   readonly reasons: readonly string[];
-  readonly requiredCapabilities: readonly string[];
+  readonly relevantCapabilities: readonly string[];
 }
 ```
 
@@ -107,38 +108,37 @@ HOST-BWRAP
 HOST-GIT-READONLY
 ```
 
-### Candidate eligibility mapping
+### Capability-class IDs
 
-The S0 contract evaluates at least:
+S0 may derive only these coarse host classes:
 
 ```text
-anthropic-sandbox-runtime
-nono
-sandlock
-boxlite
-smol-machines-smolvm
-vfs-agentfs-cow
+CLASS-LOCAL-PROCESS-ISOLATION
+CLASS-LANDLOCK-ISOLATION
+CLASS-MICROVM-KVM
+CLASS-FUSE-COW
+CLASS-LOCAL-CONTAINER
 ```
 
-The mapping is deliberately host-property-based. Installation state of the candidate itself is not a required capability.
+The class mapping intentionally avoids named project requirements.
 
 Examples:
 
 ```text
-boxlite:
-  requires HOST-WSL2, HOST-CPU-VIRT, HOST-KVM-DEVICE, HOST-KVM-RW-OPEN
+CLASS-MICROVM-KVM
+→ relevant: HOST-WSL2, HOST-CPU-VIRT, HOST-KVM-DEVICE, HOST-KVM-RW-OPEN
 
-smol-machines-smolvm:
-  requires HOST-WSL2, HOST-CPU-VIRT, HOST-KVM-DEVICE, HOST-KVM-RW-OPEN
+CLASS-FUSE-COW
+→ relevant: HOST-WSL2, HOST-FUSE-DEVICE, HOST-FUSE-TOOLS
 
-sandlock:
-  requires HOST-WSL2, HOST-LANDLOCK-CONFIG, HOST-SECCOMP-CONFIG
+CLASS-LANDLOCK-ISOLATION
+→ relevant: HOST-WSL2, HOST-LANDLOCK-CONFIG, HOST-SECCOMP-CONFIG
 
-vfs-agentfs-cow:
-  requires HOST-WSL2, HOST-FUSE-DEVICE
+CLASS-LOCAL-CONTAINER
+→ relevant: HOST-WSL2, HOST-DOCKER-CLI, HOST-DOCKER-DAEMON
 ```
 
-If project-specific upstream prerequisites are stronger when the later S2/S2W plan freezes provenance, that later plan may downgrade eligibility; S0 must not claim support it did not observe.
+`PHYSICALLY_PLAUSIBLE` is deliberately weaker than “candidate eligible”. For example, a project may require a specific Landlock ABI, seccomp-notify behavior or kernel feature that S0 does not actively prove. The S2 planner must refresh that project's current primary documentation and map its exact requirements onto the immutable host observations before authorizing a candidate run.
 
 ---
 
@@ -205,28 +205,25 @@ Use the same Linux-owned path principles already exercised by AS-02/TC-01 rather
 
 - [ ] **Step 4: Write failing process-runner tests**
 
-```js
-test('probe runner uses exact argv, closed stdin and explicit environment', async () => {
-  // use a temporary node fixture that prints cwd/env/argv
-});
+Create a deterministic temporary Node fixture inside the test temp directory. It must expose argv/cwd/env and a descendant-process mode so the tests exercise real process behavior rather than a mock.
 
-test('probe runner rejects output above the exact byte limit', async () => {
-  // fixture writes limit + 1 bytes
-});
+Required tests:
 
-test('probe runner kills the descendant process group on timeout', async () => {
-  // mirror the accepted production/TC-01 process-runner behavior
-});
+```text
+probe runner uses exact argv, closed stdin and only explicit environment
+probe runner rejects output above the exact byte limit
+probe runner terminates the complete descendant process group on timeout
+spawn failure returns a typed probe error and never falls back to a shell
 ```
 
 - [ ] **Step 5: Implement `runProbeCommand`**
 
-Input:
+Input shape:
 
 ```js
 {
   argv: ['/usr/bin/uname', '-r'],
-  cwd: '/home/.../src/mnfs',
+  cwd: '/home/example/src/mnfs',
   env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' },
   timeoutMs: 5000,
   outputLimitBytes: 64 * 1024,
@@ -292,12 +289,12 @@ node --test spikes/arr-s0/tests/artifacts.test.mjs
 
 - [ ] **Step 3: Implement canonical JSON + artifacts**
 
-Canonical JSON sorts object keys recursively and preserves array order. Artifact metadata contains:
+Canonical JSON sorts object keys recursively and preserves array order. Artifact metadata shape:
 
 ```js
 {
   path: 'raw/host-kernel/stdout.bin',
-  sha256: 'sha256:...',
+  sha256: 'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
   sizeBytes: 123,
 }
 ```
@@ -313,7 +310,7 @@ OBSERVED
 FINALIZED
 ```
 
-Do not add “PASS” as a lifecycle phase; Verdict is derived separately.
+Do not add `PASS` as a lifecycle phase; Verdict is derived separately.
 
 - [ ] **Step 5: Verify and commit**
 
@@ -346,7 +343,7 @@ Host parsing fixtures cover:
 uname -m = x86_64
 ```
 
-Reject non-WSL2 as `HOST-WSL2=UNSUPPORTED`; do not crash report generation.
+Non-WSL2 produces `HOST-WSL2=UNSUPPORTED`; report generation still completes so the host mismatch is explicit Evidence.
 
 - [ ] **Step 2: Implement exact host commands**
 
@@ -355,14 +352,13 @@ Allowed commands:
 ```text
 /usr/bin/uname -m
 /usr/bin/git --version
-/usr/bin/node --version only when the resolved Node executable is trusted/current process identity; otherwise use process.version
 /usr/bin/stat -f -c %T <repo-root>
 /usr/bin/git rev-parse HEAD
 /usr/bin/git rev-parse HEAD^{tree}
 /usr/bin/git status --porcelain=v1 --untracked-files=normal
 ```
 
-Read `/proc/sys/kernel/osrelease` and `/etc/os-release` directly with bounded reads rather than invoking shell pipelines.
+Use `process.version` for Node identity instead of spawning another Node. Read `/proc/sys/kernel/osrelease` and `/etc/os-release` directly with bounded reads rather than shell pipelines.
 
 - [ ] **Step 3: Repository safety rule**
 
@@ -395,7 +391,7 @@ Rules:
 vmx or svm CPU flag → HOST-CPU-VIRT=SUPPORTED
 no flag → UNKNOWN rather than UNSUPPORTED when WSL virtualization masking could be involved
 /dev/kvm absent → HOST-KVM-DEVICE=ABSENT
-/dev/kvm present but not char device → REJECT probe integrity
+/dev/kvm present but not char device → probe integrity violation
 ```
 
 - [ ] **Step 2: Implement device observation**
@@ -403,19 +399,19 @@ no flag → UNKNOWN rather than UNSUPPORTED when WSL virtualization masking coul
 Use `lstat('/dev/kvm')`. If it is a character device, attempt:
 
 ```js
-await open('/dev/kvm', constants.O_RDWR | constants.O_CLOEXEC)
+await open('/dev/kvm', constants.O_RDWR)
 ```
 
 Immediately close the descriptor. Do not issue `ioctl`, create a VM or load modules.
 
-Map permission failure to `HOST-KVM-RW-OPEN=UNSUPPORTED` with errno artifact; map other inconclusive errors to `UNKNOWN`.
+Map permission failure to `HOST-KVM-RW-OPEN=UNSUPPORTED` with errno Evidence; map other inconclusive errors to `UNKNOWN`. The implementation must use only flags supported by Node's documented `fs.open` surface rather than inventing a non-portable constant.
 
 - [ ] **Step 3: Verify and commit**
 
 ```bash
 npm run test:arr-s0
 git add spikes/arr-s0
-git commit -m "spike: observe KVM eligibility without launching VMs"
+git commit -m "spike: observe KVM host capability without launching VMs"
 ```
 
 ---
@@ -433,16 +429,16 @@ git commit -m "spike: observe KVM eligibility without launching VMs"
 **Interfaces:**
 - Produces: `HOST-USERNS`, `HOST-SECCOMP-CONFIG`, `HOST-LANDLOCK-CONFIG`, `HOST-FUSE-DEVICE`, `HOST-FUSE-TOOLS`, `HOST-CGROUP-V2`.
 
-- [ ] **Step 1: Implement kernel-config discovery as observation, not assumption**
+- [ ] **Step 1: Write fixture-based RED tests for config discovery/parsing**
 
-Try in order:
+Try config sources in order:
 
 ```text
 /proc/config.gz
 /boot/config-<exact kernel release>
 ```
 
-If neither is readable, configuration-backed observations become `UNKNOWN`; kernel version alone must not be converted into `SUPPORTED`.
+If neither is readable, configuration-backed observations become `UNKNOWN`; kernel version alone must not become `SUPPORTED`.
 
 Parse only exact keys:
 
@@ -453,6 +449,8 @@ CONFIG_SECURITY_LANDLOCK=y
 CONFIG_USER_NS=y
 CONFIG_FUSE_FS=y
 ```
+
+When `/proc/config.gz` is used, decompress with Node's `zlib` rather than spawning a shell decompressor.
 
 - [ ] **Step 2: Add bounded userns active probe when `/usr/bin/unshare` exists**
 
@@ -466,13 +464,17 @@ Environment only `PATH=/usr/bin:/bin`, `LANG=C`, `LC_ALL=C`. Success with stdout
 
 - [ ] **Step 3: Observe FUSE**
 
-Check `/dev/fuse` character-device presence and whether current process can open it `O_RDWR|O_CLOEXEC`, then close immediately. Observe `fusermount3 --version` only if exact executable resolves under `/usr/bin` or `/bin`; otherwise `HOST-FUSE-TOOLS=ABSENT`.
+Check `/dev/fuse` character-device presence and whether current process can open it read/write, then close immediately. Observe `fusermount3 --version` only if exact executable resolves under `/usr/bin` or `/bin`; otherwise `HOST-FUSE-TOOLS=ABSENT`.
 
 - [ ] **Step 4: Observe cgroup v2**
 
-`/sys/fs/cgroup/cgroup.controllers` readable and filesystem type `cgroup2fs` → `SUPPORTED`; otherwise classify exactly from evidence.
+`/sys/fs/cgroup/cgroup.controllers` readable and filesystem type `cgroup2fs` → `SUPPORTED`; otherwise classify exactly from Evidence.
 
-- [ ] **Step 5: Verify and commit**
+- [ ] **Step 5: Explicit limitation**
+
+S0 does not claim specific Landlock ABI or seccomp-user-notification behavior unless a later contract revision adds a separately reviewed active probe. Named candidate planners must treat those project-specific capabilities as unresolved and refresh upstream requirements.
+
+- [ ] **Step 6: Verify and commit**
 
 ```bash
 npm run test:arr-s0
@@ -493,18 +495,18 @@ git commit -m "spike: observe local kernel isolation capabilities"
 
 - [ ] **Step 1: Write RED tests for exact executable resolution**
 
-Never search arbitrary PATH inherited from the user. Resolve only accepted fixed directories (`/usr/bin`, `/bin`, and an explicit plan-approved candidate path if later added by contract revision).
+Never search arbitrary PATH inherited from the user. Resolve only accepted fixed directories `/usr/bin` and `/bin`.
 
 - [ ] **Step 2: Observe Docker without mutation**
 
 If `/usr/bin/docker` exists:
 
 ```text
-docker --version
-docker version --format {{json .Server.Version}}
+/usr/bin/docker --version
+/usr/bin/docker version --format {{json .Server.Version}}
 ```
 
-The second command may contact an already-running daemon but must not create containers/images/networks. Daemon unavailability → `HOST-DOCKER-DAEMON=ABSENT` or `UNKNOWN` based on exit evidence, not REJECT.
+The second command may contact an already-running daemon but must not create containers/images/networks. Daemon unavailability → `HOST-DOCKER-DAEMON=ABSENT` or `UNKNOWN` based on Evidence, not `REJECT`.
 
 - [ ] **Step 3: Observe Bubblewrap version only**
 
@@ -524,41 +526,41 @@ git commit -m "spike: observe optional local sandbox prerequisites"
 
 ---
 
-### Task 7: Candidate eligibility derivation
+### Task 7: Capability-class eligibility derivation
 
 **Files:**
-- Create: `spikes/arr-s0/src/eligibility.mjs`
-- Create: `spikes/arr-s0/tests/eligibility.test.mjs`
+- Create: `spikes/arr-s0/src/class-eligibility.mjs`
+- Create: `spikes/arr-s0/tests/class-eligibility.test.mjs`
 
 **Interfaces:**
-- Consumes capability observations only.
-- Produces deterministic `CandidateEligibilityRecord[]`.
+- Consumes generic host capability observations only.
+- Produces deterministic `CapabilityClassRecord[]`.
 
 - [ ] **Step 1: Write table-driven RED tests**
 
 Examples:
 
 ```js
-assert.equal(eligibilityFor('boxlite', allKvmSupported).eligibility, 'ELIGIBLE_FOR_SPIKE');
-assert.equal(eligibilityFor('boxlite', kvmMissing).eligibility, 'BLOCKED_BY_HOST');
-assert.equal(eligibilityFor('sandlock', landlockUnknown).eligibility, 'UNKNOWN');
-assert.equal(eligibilityFor('vfs-agentfs-cow', fuseDeviceSupportedButToolMissing).eligibility, 'REQUIRES_SETUP_DECISION');
+assert.equal(classEligibility('CLASS-MICROVM-KVM', allKvmSupported).eligibility, 'PHYSICALLY_PLAUSIBLE');
+assert.equal(classEligibility('CLASS-MICROVM-KVM', kvmMissing).eligibility, 'BLOCKED_BY_HOST');
+assert.equal(classEligibility('CLASS-LANDLOCK-ISOLATION', landlockUnknown).eligibility, 'UNKNOWN');
+assert.equal(classEligibility('CLASS-FUSE-COW', fuseDeviceSupportedButToolAbsent).eligibility, 'REQUIRES_SETUP_DECISION');
 ```
 
-- [ ] **Step 2: Implement declarative requirement mapping**
+- [ ] **Step 2: Implement one declarative class mapping**
 
-Keep mapping in one immutable object. Do not inspect whether candidate package is installed. S0 answers physical/platform eligibility, not candidate setup completion.
+The mapping may contain only the class IDs frozen above and generic host capability IDs. Named projects are prohibited in this module.
 
 - [ ] **Step 3: Add rationale rules**
 
-Every eligibility result names the exact missing/unknown capability IDs. No human prose-only decision.
+Every result names the exact missing/unknown capability IDs and reiterates that `PHYSICALLY_PLAUSIBLE` does not prove a named candidate's current prerequisites.
 
 - [ ] **Step 4: Verify and commit**
 
 ```bash
 npm run test:arr-s0
 git add spikes/arr-s0
-git commit -m "spike: derive host eligibility for ARR candidates"
+git commit -m "spike: derive generic host capability classes"
 ```
 
 ---
@@ -570,33 +572,33 @@ git commit -m "spike: derive host eligibility for ARR candidates"
 - Create: `spikes/arr-s0/tests/verdict.test.mjs`
 
 **Interfaces:**
-- Produces overall S0 Verdict from Evidence completeness/integrity, not from candidate popularity.
+- Produces overall S0 Verdict from Evidence completeness/integrity, not from named-candidate popularity.
 
 **Verdict rules:**
 
 ```text
 REJECT
-→ unsafe mutation detected, evidence tamper/hash mismatch,
+→ unsafe mutation detected, Evidence tamper/hash mismatch,
   fail-open command behavior, escaped artifact root, or contract violation
 
 BLOCKED
 → canonical WSL2/repository identity cannot be established,
-  checkout not clean, or required probe evidence cannot be collected at all
+  checkout not clean, or core probe Evidence cannot be collected at all
 
 ACCEPT_WITH_LIMITATIONS
 → core host identity is proven and S1/S2 planning can continue,
-  but one or more optional candidate-class capabilities remain UNKNOWN
+  but one or more currently material capability-class facts remain UNKNOWN
 
 ACCEPT
-→ all required S0 observations are decisive enough to determine eligibility
-  for every currently material S1/S2 candidate class
+→ all required S0 observations are decisive enough for fresh S1/S2 planners
+  to map current named-candidate prerequisites onto the host Evidence
 ```
 
-A host without KVM can still produce `ACCEPT` when KVM absence is decisively proven; microVM candidates simply become `BLOCKED_BY_HOST`.
+A host without KVM can still produce `ACCEPT` when KVM absence is decisively proven; `CLASS-MICROVM-KVM` becomes `BLOCKED_BY_HOST`.
 
 - [ ] **Step 1: Write RED verdict matrix**
 
-Cover every branch above and assert model self-text cannot change result.
+Cover every branch above and assert that model/self-assessment text cannot change the result.
 
 - [ ] **Step 2: Implement pure verdict derivation**
 
@@ -631,8 +633,10 @@ CLI forms exactly:
 ```text
 npm run arr-s0 -- preflight --json
 npm run arr-s0 -- run --json
-npm run arr-s0 -- report --run-id <canonical-run-id> --json
+npm run arr-s0 -- report --run-id RUN_ID --json
 ```
+
+`RUN_ID` is a metavariable representing a value previously emitted by the machine-readable `run` command, not human-authored plan content.
 
 No `setup`, `install`, `enable`, `repair` or `cleanup-host` command exists.
 
@@ -670,14 +674,14 @@ create initial durable run state
 → move OBSERVING
 → collect raw host/repo observations
 → collect capability probes
-→ derive eligibility
+→ derive capability-class eligibility
 → derive Verdict
 → write final manifest/report inputs
 → verify every artifact hash
 → move FINALIZED
 ```
 
-If interrupted after initial state, `report` must identify incomplete state and never invent a Verdict.
+If interrupted after initial state, `report` identifies incomplete state and never invents a Verdict.
 
 - [ ] **Step 4: Implement deterministic report**
 
@@ -688,14 +692,14 @@ run id
 source commit/tree
 host identity
 capability table
-candidate eligibility table
+capability-class table
 Verdict
 limitations
 artifact manifest hash
 next governed action
 ```
 
-No secret/environment dump.
+No secret/environment dump and no named-candidate acceptance claim.
 
 - [ ] **Step 5: Add S0 tests to root verification**
 
@@ -725,17 +729,18 @@ git commit -m "spike: complete deterministic ARR-S0 harness"
 - Modify: `spikes/arr-s0/README.md`
 - Modify: `docs/DOCUMENTATION-MAP.md`
 - Modify: `docs/tracking/STATUS.md`
+- Modify: `scripts/test-documentation-tooling.mjs`
 
 **Interfaces:**
 - Produces immutable human-readable contract corresponding to harness constants and explains exactly what the real run does/does not do.
 
-- [ ] **Step 1: Document every capability/eligibility/verdict rule from the frozen plan**
+- [ ] **Step 1: Document every capability/class/verdict rule from the frozen plan**
 
-The contract version begins `1.0.0` only after Operator approval. Before approval it remains proposed and the real run is prohibited.
+The contract version becomes `1.0.0` only through Operator approval. Before approval it remains proposed and the real run is prohibited.
 
 - [ ] **Step 2: Add contract/harness consistency tests**
 
-Documentation tooling must assert that every required capability ID and candidate ID implemented by the harness appears in the contract, and vice versa.
+Documentation tooling asserts that every required host capability ID and capability-class ID implemented by the harness appears in the contract, and vice versa. Named candidate IDs are deliberately absent from this invariant.
 
 - [ ] **Step 3: Verify**
 
@@ -746,7 +751,7 @@ npm run verify
 - [ ] **Step 4: Commit**
 
 ```bash
-git add docs/spikes spikes/arr-s0/README.md docs/DOCUMENTATION-MAP.md docs/tracking/STATUS.md scripts
+git add docs/spikes spikes/arr-s0/README.md docs/DOCUMENTATION-MAP.md docs/tracking/STATUS.md scripts/test-documentation-tooling.mjs
 git commit -m "docs: freeze ARR-S0 host capability contract"
 ```
 
@@ -755,7 +760,7 @@ git commit -m "docs: freeze ARR-S0 host capability contract"
 ### Task 11: Independent deterministic review before real host execution
 
 **Files:**
-- No product changes expected; Findings may require a Correction task/commit.
+- No product changes expected; Findings may require a separate Correction task/commit.
 
 **Reviewer Pack:**
 
@@ -772,7 +777,7 @@ any shell or inherited env?
 any credential/proxy leak?
 any probe whose text directly determines Verdict?
 any false unsupported/supported inference?
-any candidate-specific bias?
+any named-candidate requirement leaked into the host-fact layer?
 any artifact path escape/tamper gap?
 any command beyond S0 authority?
 ```
@@ -788,7 +793,7 @@ any command beyond S0 authority?
 
 ### Task 12: Canonical WSL2 real run — separately authorized operation
 
-**Files written by operation:** Linux state-root artifacts only; repository must remain byte-for-byte/Git clean.
+**Files written by operation:** Linux state-root artifacts only; repository must remain Git-clean. The later acceptance-document promotion is an explicitly reviewed documentation change after the probe finishes.
 
 **Exact preconditions:**
 
@@ -806,32 +811,41 @@ working tree clean
 - [ ] **Step 1: Capture pre-run repository identity**
 
 ```bash
-git rev-parse HEAD
-git rev-parse 'HEAD^{tree}'
-git status --porcelain=v1 --untracked-files=normal
+BASE_HEAD="$(git rev-parse HEAD)"
+BASE_TREE="$(git rev-parse 'HEAD^{tree}')"
+BASE_STATUS="$(git status --porcelain=v1 --untracked-files=normal)"
+printf 'HEAD=%s\nTREE=%s\n' "$BASE_HEAD" "$BASE_TREE"
+test -z "$BASE_STATUS"
 ```
 
 Expected: exact authorized commit/tree and empty status.
 
-- [ ] **Step 2: Run S0 once**
+- [ ] **Step 2: Run S0 once and retain the machine output**
 
 ```bash
-npm run arr-s0 -- run --json
+RUN_JSON="$(npm run --silent arr-s0 -- run --json)"
+printf '%s\n' "$RUN_JSON"
+RUN_ID="$(node -e 'const value=JSON.parse(process.argv[1]); if(typeof value.runId!=="string") process.exit(2); process.stdout.write(value.runId)' "$RUN_JSON")"
+test -n "$RUN_ID"
 ```
 
-Capture stdout as an Evidence artifact outside the checkout. No automatic retry after a partial/inconclusive run; inspect durable run state first.
+Promote/capture the command stdout under the S0 Evidence root. No automatic retry after a partial/inconclusive run; inspect durable run state first.
 
-- [ ] **Step 3: Re-open report in a fresh process**
+- [ ] **Step 3: Re-open report in a fresh process using the emitted identity**
 
 ```bash
-npm run arr-s0 -- report --run-id <run-id-from-step-2> --json
+npm run --silent arr-s0 -- report --run-id "$RUN_ID" --json
 ```
 
-The actual run ID comes from Step 2's machine output; it is not guessed or recomputed.
+The run identity is machine output from Step 2; it is never guessed or recomputed from time.
 
 - [ ] **Step 4: Verify repository remained unchanged**
 
-Repeat the three Git commands from Step 1. Exact commit/tree/status must match.
+```bash
+test "$(git rev-parse HEAD)" = "$BASE_HEAD"
+test "$(git rev-parse 'HEAD^{tree}')" = "$BASE_TREE"
+test -z "$(git status --porcelain=v1 --untracked-files=normal)"
+```
 
 - [ ] **Step 5: Run fresh full verification after the real probe**
 
@@ -839,20 +853,26 @@ Repeat the three Git commands from Step 1. Exact commit/tree/status must match.
 npm run verify
 ```
 
-- [ ] **Step 6: Promote acceptance Evidence**
+- [ ] **Step 6: Promote acceptance Evidence at the exact canonical path**
 
-Create `docs/acceptance/<date>-arr-s0-host-capability-probe.md` containing only normalized, secret-free Evidence references/hashes and the mechanically derived Verdict. Raw probe bytes remain in content-addressed/state artifacts and are referenced by hash.
+Create:
+
+```text
+docs/acceptance/2026-08-07-arr-s0-host-capability-probe.md
+```
+
+It contains only normalized, secret-free Evidence references/hashes and the mechanically derived Verdict. Raw probe bytes remain in content-addressed/state artifacts and are referenced by hash.
 
 - [ ] **Step 7: Independent Evidence review**
 
-A fresh Reviewer verifies artifact hashes, contract version, source identity and Verdict derivation. No manual candidate promotion is allowed.
+A fresh Reviewer verifies artifact hashes, contract version, source identity and Verdict derivation. It then maps the accepted generic host facts into the input pack for refreshed S1/S2 candidate research; no named candidate is promoted by S0 itself.
 
 **Termination:**
 
-- `SUCCESS`: accepted S0 Evidence exists and the repository is unchanged; next action is S1/S2 planning.
+- `SUCCESS`: accepted S0 host Evidence exists, the repository remained unchanged during the probe, and fresh S1/S2 planners can consume the facts.
 - `BLOCKED`: host/probe Evidence is incomplete but no contract violation occurred; do not modify host automatically.
 - `REJECT`: unsafe mutation/fail-open/tamper or contract violation; stop ARR program and investigate.
-- `REPLAN_REQUIRED`: S0 contract itself is shown materially incapable of deciding candidate eligibility.
+- `REPLAN_REQUIRED`: S0 contract itself is materially incapable of producing the host facts required by S1/S2.
 
 ---
 
@@ -865,32 +885,39 @@ GATE-S0-PLAN
 → Operator accepts this plan and the S0 contract design
 → no host probing yet
 
+GATE-S0-IMPLEMENT
+→ optional separate Operator authorization for Tasks 1-11 only
+→ binds accepted plan version + exact base SHA
+→ builds/tests the probe but performs no full host run
+
 GATE-S0-EXECUTE
 → Operator authorization must bind:
    - PLAN-ARR-S0-HOST-CAPABILITY-PROBE accepted version
    - ARR-S0 contract accepted version/hash
    - exact canonical base commit SHA
    - exact deterministic verification Evidence
-→ authorizes Tasks 1-12 only within this plan's boundaries
+→ authorizes Task 12 real probe only within this plan's boundaries
 ```
 
-If plan implementation and real-run authority are intentionally split, the Operator may authorize Tasks 1-11 first and Task 12 later. No authorization is inferred from plan acceptance.
+No authorization is inferred from plan acceptance, S0 harness implementation or prior AS-02/TC-01 host execution.
 
 ---
 
 ## Self-review checklist
 
-- [ ] S0 cannot select a candidate; it only classifies eligibility.
+- [ ] S0 records host facts and coarse classes; it cannot declare a named candidate eligible/accepted.
+- [ ] Named candidate requirements are refreshed in S1/S2/S2W rather than embedded in S0 Evidence semantics.
 - [ ] No `sudo`, install, WSL config, sysctl, service-start or candidate execution path exists.
 - [ ] KVM probe opens/closes device only; no ioctl/VM creation.
 - [ ] Userns active probe is ephemeral and exact-argv.
 - [ ] Kernel config absence maps to UNKNOWN, not UNSUPPORTED.
 - [ ] Candidate package absence is not treated as host incapability.
-- [ ] A host lacking KVM can still yield ACCEPT with microVM candidates blocked.
+- [ ] Specific Landlock ABI/seccomp-notify support is not invented from generic config or kernel version.
+- [ ] A host lacking KVM can still yield ACCEPT with `CLASS-MICROVM-KVM=BLOCKED_BY_HOST`.
 - [ ] Raw outputs are preserved and hashed before normalization.
 - [ ] Verdict is pure/mechanical and cannot be changed by model narrative.
-- [ ] Repository must be clean before/after real run.
-- [ ] Full existing MNFS verification remains green after adding deterministic S0 harness tests.
+- [ ] Repository is clean before/after the real probe; Evidence-doc promotion is separately reviewed afterward.
+- [ ] Full existing MNFS verification remains green after deterministic S0 harness tests are added.
 - [ ] No M02/runtime/environment adoption authority is implied.
 
 ## Execution handoff
@@ -901,12 +928,12 @@ After accepted real S0 Evidence, compile two fresh Planner Packs in parallel if 
 S1 Planner Pack
 → D-012/D-014/D-016
 → accepted S0 host Evidence
-→ current Agent Runtime provenance research
+→ refreshed current Agent Runtime provenance/requirements
 
 S2 Planner Pack
 → D-013/D-014/D-016
 → accepted S0 host Evidence
-→ current eligible process/microVM candidate provenance
+→ refreshed current process/microVM candidate provenance/requirements
 ```
 
-Each Planner then writes a separate candidate-pinned plan. Neither inherits assumptions from this conversation or from the other Planner beyond accepted shared Evidence.
+Each Planner maps named candidate requirements onto the immutable S0 host facts, records any still-unproved prerequisite as a candidate-specific preflight requirement, and writes a separate candidate-pinned plan. Neither inherits assumptions from this conversation or from the other Planner beyond accepted shared Evidence.

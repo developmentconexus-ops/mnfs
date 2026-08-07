@@ -35,9 +35,49 @@ The review searches for the best-supported global solution rather than optimizin
 - mature adjacent runtime, workflow, sandbox, browser, MCP and observability primitives;
 - current MNFS implementation and canonical WSL2 constraints.
 
+## Decision progress
+
+```text
+D1 — Planning and validation semantics          APPROVED — D-011
+D2 — Agent runtime and session/control strategy IN REVIEW
+D3 — Execution workspace and isolation          PENDING
+D4 — Implementation sourcing strategy           PENDING
+```
+
+### Approved D1 direction — D-011
+
+Preserve the Mission/Milestone/Feature hierarchy and Acceptance Criterion model, while changing the planning order so correctness is defined before implementation decomposition.
+
+Approved semantic flow:
+
+```text
+Operator Intent
+→ Investigation
+→ Mission correctness definition
+→ adversarial correctness review
+→ Validation Baseline
+→ Milestone decomposition
+→ Feature decomposition
+→ child criteria + upward coverage
+→ architecture / implementation planning
+→ Operator review
+→ Approved Mission Contract
+```
+
+Decision rules:
+
+- Mission Acceptance Criteria + their Verification Plans serve the **Validation Contract role**; do not create a duplicate authoritative `ValidationContract` entity without another independent need;
+- add explicit upward contribution lineage (`CONTRIBUTES_TO` or equivalent) between child work/criteria and parent outcomes;
+- Validator/Reviewer judges and produces Findings by default; it does not implement corrections;
+- route Findings to Correction/new Attempt, new Feature or Decision/Replan according to what is actually wrong;
+- preserve Mission/Milestone/Feature hierarchical closure;
+- preserve proof-type diversity rather than reducing validation to black-box tests only;
+- planning ceremony remains proportional to risk;
+- staged draft/schema and Blueprint/MCRM changes are implementation consequences to reconcile after D2–D4 rather than being silently changed during D1.
+
 ## Review questions
 
-### D1 — Planning and validation semantics
+### D1 — Planning and validation semantics — APPROVED
 
 What is the best ordering and contract model for:
 
@@ -53,7 +93,9 @@ Operator intent
 → closure
 ```
 
-### D2 — Agent runtime and session strategy
+Disposition: **approved under D-011**, subject only to final cross-decision consistency review.
+
+### D2 — Agent runtime and session strategy — IN REVIEW
 
 What capabilities must MNFS require from agent runtimes and session/control infrastructure without assuming Pi, Mastra or another winner in advance?
 

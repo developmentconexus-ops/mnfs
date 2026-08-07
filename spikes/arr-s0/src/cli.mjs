@@ -133,10 +133,11 @@ export async function executeCli(argv, options = {}) {
     return result.ok ? 0 : 2;
   }
   if (parsed.command === 'run') {
-    const identities = await identitiesLoader(repoRoot, {
-      executionAuthorizationToken: options.executionAuthorizationToken,
-      env: options.env,
-    });
+    const authorityOptions = { env: options.env };
+    if (Object.prototype.hasOwnProperty.call(options, 'executionAuthorizationToken')) {
+      authorityOptions.executionAuthorizationToken = options.executionAuthorizationToken;
+    }
+    const identities = await identitiesLoader(repoRoot, authorityOptions);
     const runId = runIdGenerator();
     const result = await run({ repoRoot, stateRoot, identities, runId });
     writeJson(stdout, buildReportView(result));

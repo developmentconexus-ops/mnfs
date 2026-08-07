@@ -12,6 +12,7 @@ const PLAN = { version: '0.2.0', hash: `sha256:${'c'.repeat(64)}` };
 const CONTRACT = { version: '1.0.0', hash: `sha256:${'d'.repeat(64)}` };
 const EXECUTION_AUTHORIZATION = {
   gate: 'GATE-S0-EXECUTE',
+  planGitBlob: '3e78445fcbcca360f612edefd025c6cb0f84f8e5',
   baseCommitSha: SOURCE.commitSha,
   contractHash: CONTRACT.hash,
   verificationRunId: 31216915662,
@@ -55,6 +56,7 @@ test('strict run-state validator rejects malformed source, hashes and execution 
   const malformed = structuredClone(state);
   malformed.source.commitSha = 'not-a-sha';
   malformed.contract.hash = 'sha256:nope';
+  malformed.executionAuthorization.planGitBlob = 'not-a-blob';
   malformed.executionAuthorization.baseCommitSha = 'b'.repeat(40);
   malformed.executionAuthorization.contractHash = `sha256:${'f'.repeat(64)}`;
   malformed.executionAuthorization.tokenHash = 'sha256:nope';
@@ -62,6 +64,7 @@ test('strict run-state validator rejects malformed source, hashes and execution 
   const errors = validateRunState(malformed);
   assert.ok(errors.some((item) => item.includes('source.commitSha')));
   assert.ok(errors.some((item) => item.includes('contract.hash')));
+  assert.ok(errors.some((item) => item.includes('executionAuthorization.planGitBlob')));
   assert.ok(errors.some((item) => item.includes('executionAuthorization.baseCommitSha')));
   assert.ok(errors.some((item) => item.includes('executionAuthorization.contractHash')));
   assert.ok(errors.some((item) => item.includes('executionAuthorization.tokenHash')));

@@ -1,0 +1,75 @@
+name: ARR P1 F02 GREEN2 Transformer
+
+on:
+  push:
+    branches:
+      - reconcile/arr-p1-f02-green2-transform
+
+permissions:
+  contents: write
+
+jobs:
+  green:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: reconcile/arr-p1-f02-green2-transform
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - run: npm ci
+      - name: Syntax-check transport transformer
+        run: python3 -m py_compile scripts/arr-p1-f02-green2-transform.py
+      - name: Apply second P1-F02 cleanup
+        run: python3 scripts/arr-p1-f02-green2-transform.py
+      - name: Regenerate canonical projections
+        run: npm run docs:generate
+      - name: Prove strengthened F02 contract
+        run: npm run docs:test
+      - name: Validate complete documentation
+        run: npm run docs:check
+      - name: Verify complete repository
+        run: npm run verify
+      - name: Residual current-authority scan
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          files = [
+            'docs/product/blueprint/01-product-vision.md',
+            'docs/product/blueprint/02-domain-model.md',
+            'docs/product/blueprint/03-lifecycle-flows.md',
+            'docs/product/blueprint/05-system-architecture.md',
+            'docs/product/blueprint/06-roles-authority.md',
+            'docs/product/blueprint/07-quality-evidence.md',
+            'docs/product/blueprint/08-state-recovery.md',
+            'docs/product/blueprint/09-context-memory.md',
+            'docs/product/blueprint/10-security-isolation.md',
+            'docs/product/blueprint/12-capability-roadmap.md',
+            'docs/product/blueprint/13-documentation-governance.md',
+          ]
+          pat = re.compile(r'\b(?:Pi|Treehouse|E0|E1|E2|E3|E4|AB1|AS-01|AS-02|worktree|worktrees)\b', re.I)
+          for rel in files:
+              heading = '<frontmatter>'
+              for n, line in enumerate(Path(rel).read_text().splitlines(), 1):
+                  if line.startswith('#'):
+                      heading = line
+                  if pat.search(line):
+                      print(f'{rel}:{n}\n  under: {heading}\n  text: {line}')
+          PY
+      - name: Remove transport-only machinery
+        run: rm scripts/arr-p1-f02-green2-transform.py .github/workflows/arr-p1-f02-green2-transform.yml
+      - name: Commit final verified F02 correction tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --stat
+          git commit -m 'docs: remove residual stale realization authority'
+          git push origin HEAD:reconcile/arr-p1-f02-green2-transform

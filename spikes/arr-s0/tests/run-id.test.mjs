@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { generateRunId } from '../src/service.mjs';
+import { generateRunId } from '../src/run-id.mjs';
 import { requireRunId } from '../src/paths.mjs';
 
 test('run ids are generated from UTC milliseconds plus six lowercase hex bytes of identity', () => {

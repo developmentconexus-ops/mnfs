@@ -248,7 +248,7 @@ A necessidade de autorização é definida pelo Repository Profile e pela polít
 
 - escolher worker;
 - escrever prompts;
-- abrir worktrees;
+- abrir isolated mutable workspaces;
 - executar testes;
 - reconciliar estado;
 - interpretar logs;
@@ -328,7 +328,7 @@ Dentro do contrato:
 - alocação de workers;
 - seleção entre Golden Paths equivalentes;
 - retry permitido;
-- reuso de worktree;
+- reuso de isolated mutable workspace;
 - escalada de risco;
 - pedido de review;
 - investigação adicional;
@@ -713,7 +713,7 @@ Integrator compõe Write Tracks aceitas.
 - mascarar conflito;
 - realizar refactor amplo;
 - corrigir Feature sem Correction;
-- destruir worktree de origem;
+- destruir isolated mutable workspace de origem;
 - integrar Track não aceita.
 
 ## 6.11.5 Conflict classes
@@ -892,7 +892,7 @@ Actor pode executar ação reversível e isolada.
 
 Exemplos:
 
-- editar worktree;
+- editar isolated mutable workspace;
 - criar branch;
 - rodar testes;
 - gerar artefato;
@@ -1041,7 +1041,7 @@ Altera ordem ou estratégia operacional sem alterar outcome.
 
 Exemplos:
 
-- reusar worktree;
+- reusar isolated mutable workspace;
 - trocar Worker Run;
 - serializar Track;
 - executar investigation;
@@ -1341,7 +1341,7 @@ No cloud, capabilities poderão se tornar enforcement técnico.
 - retry local;
 - escolha de worker;
 - execução de testes;
-- criação de worktree;
+- criação de isolated mutable workspace;
 - correção pequena;
 - review adicional;
 - integração local reversível.

@@ -474,7 +474,7 @@ O MNFS adota apenas as ideias arquiteturais; qualquer implementação futura dev
 
 ---
 
-# 9.7 Candidato principal — `pi-observational-memory` V3
+# 9.7 Historical / Incumbent Candidate Study — `pi-observational-memory` V3
 
 ## 9.7.1 Estado pesquisado
 
@@ -638,7 +638,7 @@ sem migration do Domain State.
 
 ---
 
-# 9.8 Alternativa — `pi-observational-memory-extension`
+# 9.8 Historical / Incumbent Candidate Study — `pi-observational-memory-extension`
 
 ## 9.8.1 Capacidades
 
@@ -679,7 +679,7 @@ Não adotar project-scoped OM agora.
 
 ---
 
-# 9.9 Memórias persistentes de repositório
+# 9.9 Historical repository-memory candidate survey
 
 ## 9.9.1 `pi-memory`
 
@@ -761,7 +761,7 @@ Reutilizar padrões:
 
 ---
 
-# 9.10 Deliberate handoff — `pi-agenticoding`
+# 9.10 Historical handoff reference — `pi-agenticoding`
 
 ## 9.10.1 Capacidades
 
@@ -1216,9 +1216,11 @@ risks
 
 Pode usar:
 
-- Pi resume;
-- OM;
+- runtime-native resume when the selected Agent Runtime supports it;
+- optional Session Memory Adapter when separately applicable;
 - Current Authority Snapshot.
+
+Runtime-native resume is a convenience only; it never replaces Fresh Recovery or current Authority.
 
 ### Nova Session
 
@@ -1316,7 +1318,7 @@ Enviar Artifact refs.
 
 ---
 
-# 9.19 `pi-link`
+# 9.19 Historical transport reference — `pi-link`
 
 ## 9.19.1 Capacidades
 
@@ -1381,62 +1383,35 @@ M2 não depende de `pi-link`.
 
 ```text
 Lead
-→ process adapter starts Pi Worker with Dispatch Packet
+→ MNFS dispatches a bounded Actor through the selected Agent Runtime using the compiled Actor Pack
 
-Worker
-→ MNFS CLI opens/completes Claim
+Writer Actor
+→ MNFS CLI/API opens/completes Claim
 
 Lead dies
-→ Worker and worktree may continue
+→ Actor and bound workspace/environment may continue according to contract
 
-New Lead
-→ SQLite + process/filesystem reconcile
+Fresh Lead
+→ SQLite + Git + runtime/workspace/environment observations reconcile
 ```
 
-Não é necessário:
-
-- message bus;
-- WebSocket network;
-- shared OM;
-- project memory plugin;
-- SDK host.
+No message bus, transcript replay, shared OM, project-memory plugin or SDK-host assumption is required by the M2 outcome.
 
 ---
 
 # 9.21 Uma memória por concern
 
-Não instalar simultaneamente, para a mesma Role:
+Do not activate multiple overlapping Runtime Session memory/compaction plugins for the same Role without an explicit comparison/Decision. The current policy is:
 
 ```text
-pi-observational-memory
+at most one optional Session Memory Adapter per Role
 +
-pi-memory
+one canonical MNFS memory/authority system
 +
-pi-memctx
-+
-another compaction extension
+exact source-backed recall when material
 ```
 
-Riscos:
-
-- multiple context injections;
-- conflitos de precedência;
-- token bloat;
-- hidden writes;
-- compaction-hook collision;
-- múltiplos background agents;
-- debugging difícil;
-- stale memory duplication.
-
-Política:
-
-```text
-one Session Memory Adapter
-+
-one canonical MNFS memory system
-+
-exact recall
-```
+This avoids competing context injection, precedence conflicts, token bloat, hidden writes, hook collisions, duplicated background work and stale-memory duplication. Vendor-specific plugins studied earlier remain research/incumbent Evidence until the selected Agent Runtime creates a named consumer.
 
 ---
 
@@ -1679,7 +1654,7 @@ Novo Snapshot precisa vencer memória antiga.
 
 Falhar credentials ou model.
 
-Pi e MNFS continuam utilizáveis.
+The studied Pi runtime and MNFS remain usable in this historical scenario.
 
 ### S7 — Resume same Session
 
@@ -1734,23 +1709,19 @@ Desativar quando:
 
 ---
 
-# 9.27 Matriz de adoção
+# 9.27 Current memory realization matrix
 
-| Tool ou mecanismo | Decisão | Papel no MNFS |
+| Mechanism / class | Current disposition | Role in MNFS |
 |---|---|---|
-| Pi JSONL Sessions | Adotar | histórico exato de Session |
-| Pi native compaction | Manter | baseline e fallback |
-| `pi-observational-memory@3.0.3` | Candidato | Lead Session Memory Adapter |
-| Mastra OM package | Não incorporar | referência arquitetural |
-| `pi-observational-memory-extension` | Adiar | alternativa de pesquisa |
-| `pi-memory` | Não core | memória pessoal opcional |
-| `@josephakern/pi-memory` | Reusar padrões | capped index e writeback |
-| `pi-memctx` | Referência | retrieval e review queue |
-| `pi-agenticoding` | Reusar princípios | handoff deliberado |
-| `pi-link` | Adiar | transporte de notificação futuro |
-| Pi SDK/RPC | Futuro | controle programático |
-| MNFS SQLite | Adotar | coordenação durável |
-| Git Artifacts | Adotar | memória canônica versionada |
+| Exact Runtime Session history | `ADAPT` when available | observational exact history, never authority |
+| Runtime-native compaction | `REFERENCE / ADAPT` after runtime selection | optional runtime fallback |
+| Session Memory Adapter | `DEFER / SPIKE` until named consumer | optional Lead continuity |
+| Repository Profile / Context Index / Code Map | `OWN` semantics | canonical repository/context knowledge |
+| MNFS SQLite | `ADOPT` | durable operational coordination |
+| Git artifacts | `ADOPT` | canonical versioned code/result/doc identity |
+| Prior Pi JSONL / OM / pi-link / pi-memctx studies | `HISTORICAL / REFERENCE` | incumbent evidence and design patterns only |
+
+No memory plugin or runtime-specific transport is selected constitutionally by this matrix.
 
 ---
 
@@ -1761,7 +1732,7 @@ Desativar quando:
 Não depende de:
 
 - Observational Memory;
-- `pi-link`;
+- runtime-specific notification transport;
 - generic Context Compiler;
 - shared project memory;
 - SDK host.
@@ -1770,7 +1741,7 @@ M2 usa:
 
 - fixed Writer Pack;
 - Dispatch Packet;
-- child Pi process;
+- selected Agent Runtime execution;
 - CLI;
 - SQLite;
 - Claim;
@@ -1790,7 +1761,7 @@ Depois avaliar transport adapter.
 
 Repository Profile, Context Index e Code Map precisam existir.
 
-Só então comparar a abordagem própria com `pi-memctx`.
+Só então comparar a abordagem própria com suitable runtime/repository retrieval candidates; the prior `pi-memctx` study remains historical reference.
 
 ---
 
@@ -1814,8 +1785,8 @@ Decide:
 
 - estado e comandos duráveis no MNFS;
 - transporte apenas entrega ou desperta;
-- M2 usa child process + CLI;
-- `pi-link` adiado.
+- M2 uses durable MNFS state plus the selected concrete Agent Runtime boundary;
+- runtime-specific notification transport remains deferred; the prior `pi-link` study is historical reference.
 
 ---
 
@@ -1849,7 +1820,7 @@ Não construir agora:
 2. SQLite e Approved Contract vencem qualquer memória de Session.
 3. Current Authority Snapshot precede OM.
 4. OM é `SUPPORTING`, nunca `AUTHORITATIVE`.
-5. Pi JSONL é histórico exato da Session.
+5. Exact Runtime Session history, when available, is observational history rather than current domain state.
 6. História exata não é necessariamente estado atual.
 7. Session nova recupera sem OM.
 8. Role memory é isolada.
@@ -1867,13 +1838,13 @@ Não construir agora:
 20. Skills não armazenam current state.
 21. Prompt não é contrato.
 22. Uma Role possui no máximo um Session Memory Adapter ativo.
-23. Native compaction permanece fallback.
+23. Runtime-native compaction may be a fallback only after a concrete runtime is selected and proven.
 24. Plugin third-party é pinned e revisado.
 25. Upgrade de memory format exige drill.
 26. Observer cost entra no custo total.
 27. Compression ratio não substitui correctness.
 28. Reviewer inicial permanece cold.
-29. M2 não depende de OM ou `pi-link`.
+29. M2 não depende de OM ou runtime-specific notification transport.
 30. Tooling é adotado somente depois de spike com critérios e Removal Conditions.
 
 ---

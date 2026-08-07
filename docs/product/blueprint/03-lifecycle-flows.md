@@ -329,7 +329,7 @@ O Lead pode:
 Durante Intake:
 
 - nenhum worker escritor;
-- nenhum worktree de implementação;
+- nenhum isolated mutable workspace de implementação;
 - nenhuma mudança de código;
 - nenhuma approval implícita;
 - nenhuma questão de produto resolvida silenciosamente pelo modelo.
@@ -716,7 +716,7 @@ persistir binding/lease e policy identities
 emitir Domain Event correspondente
 ```
 
-A realization concreta pode ser worktree, COW filesystem, rootfs/disk privado, microVM workspace ou outra opção selecionada por Decision. Nenhuma delas é semântica obrigatória do WriteTrack.
+A realization concreta pode ser isolated mutable workspace, COW filesystem, rootfs/disk privado, microVM workspace ou outra opção selecionada por Decision. Nenhuma delas é semântica obrigatória do WriteTrack.
 
 ## 3.10.3 Validações
 
@@ -1168,7 +1168,7 @@ Finding local:
 
 ```text
 mesma Write Track
-mesmo worktree
+mesmo isolated mutable workspace
 novo Attempt
 mesma sessão, se saudável
 ```
@@ -1306,7 +1306,7 @@ Decision externa necessária.
 
 ## 3.19.6 Regra
 
-Worktrees de origem não são destruídos até:
+Isolated mutable workspaces de origem não são destruídos até:
 
 - integração aceita;
 - ou abandono explícito.
@@ -1586,15 +1586,15 @@ Nunca é silenciosamente reinterpretado sob novo contrato.
 
 | SQLite | Mundo externo | Resultado |
 |---|---|---|
-| Lease ACTIVE | worktree existe | healthy |
-| Lease ACTIVE | worktree ausente | divergence |
-| sem Lease | worktree MNFS órfão | divergence |
+| current workspace/environment binding | physical mutable workspace exists | healthy |
+| current workspace/environment binding | physical mutable workspace missing | divergence |
+| no current workspace binding | MNFS-like mutable workspace orphan | divergence |
 | Worker RUNNING | processo existe | healthy |
 | Worker RUNNING | processo ausente | LOST |
 | Claim OPEN | worker morto | recoverable |
 | Claim COMPLETED | gate ausente | awaiting verification |
 | Track ACCEPTED | integração ausente | awaiting integration |
-| Track RELEASED | worktree existe | cleanup divergence |
+| Track RELEASED | bound mutable workspace still exists | cleanup divergence |
 
 ## 3.25.5 Reparos
 

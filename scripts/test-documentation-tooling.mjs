@@ -269,12 +269,12 @@ assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
-assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — Pre-Spike Reconciliation Review`/u, 'STATUS current phase must be P1 review');
+assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — P1-F02 Constitutional Body Reconciliation \/ Fresh Review`/u, 'STATUS current phase must be P1-F02 fresh review');
 assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
 assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
-assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01:[^\n]*IMPLEMENTED \/ VERIFIED \/ REVIEW_REQUIRED/u, 'STATUS must record P1 implementation review state');
+assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*IMPLEMENTED \/ VERIFIED \/ FRESH_REVIEW_REQUIRED/u, 'STATUS must record P1-F02 fresh-review state');
 assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
-assert.match(statusText, /## Immediate next action — P1 review/u, 'STATUS next action must be P1 review');
+assert.match(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS next action must be P1-F02 fresh review');
 assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
 assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
 

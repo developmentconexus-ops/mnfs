@@ -64,7 +64,7 @@ O objetivo é impedir que:
 - um dependency script comprometa o host;
 - dois Tracks contaminem o mesmo banco ou provider;
 - um agent opere produção apenas porque possui credentials;
-- uma extensão Pi não revisada entre no trusted computing base;
+- uma third-party Agent Runtime extension não revisada entre no trusted computing base;
 - uma sandbox failure degrade silenciosamente para execução irrestrita.
 
 No MNFS:
@@ -159,7 +159,7 @@ Controla se uma tool call pode ser iniciada.
 
 Pode ser aplicada por:
 
-- Pi extension;
+- Agent Runtime extension;
 - allowlist;
 - denylist;
 - permission prompt;
@@ -350,7 +350,7 @@ Falíveis ou potencialmente não confiáveis:
 - web content;
 - logs;
 - generated files;
-- third-party Pi packages;
+- third-party Agent Runtime packages/extensions;
 - provider responses;
 - downloaded binaries.
 
@@ -366,7 +366,7 @@ Porém, prompt injection ou conteúdo comprometido pode fazê-los agir como cód
 
 ### T01 — Host write
 
-Worker altera arquivo fora do worktree.
+Worker altera arquivo fora do bound isolated mutable workspace.
 
 ### T02 — Secret read
 
@@ -414,14 +414,14 @@ Dependency executa código inesperado durante setup.
 
 ### T08 — Compromised extension
 
-Pi extension executa com os privilégios do usuário.
+Third-party Agent Runtime extension may execute with the privileges of its hosting process.
 
 ### T09 — Policy tampering
 
 Worker altera:
 
 - sandbox config;
-- Pi settings;
+- Agent Runtime settings;
 - MNFS policy;
 - CI workflow;
 - credentials binding.
@@ -475,7 +475,7 @@ Clone ou PR executa scripts maliciosos.
 
 ### T20 — False isolation assumption
 
-Sistema acredita estar protegido apenas por worktree, WSL ou container.
+Sistema acredita estar protegido apenas por mutable-workspace isolation, WSL ou container.
 
 ---
 
@@ -492,7 +492,7 @@ MNFS Core / Policy
    ▼
 Execution Boundary
    │
-   ├── Pi Actor
+   ├── Actor through selected Agent Runtime
    ├── repository code
    ├── dependencies
    └── tool processes
@@ -508,14 +508,13 @@ Inclui:
 - MNFS binary/code;
 - effective policy;
 - SQLite;
-- Pi runtime;
-- loaded Pi extensions;
-- sandbox runtime;
-- process adapter;
-- Treehouse;
-- operating-system enforcement.
+- selected Agent Runtime boundary and loaded runtime extensions;
+- selected Execution Environment / isolation realization;
+- selected Mutable Workspace realization;
+- process/runtime adapters;
+- operating-system enforcement used by the selected realization.
 
-Cada third-party package adicionado ao Pi pode ampliar a TCB.
+Cada third-party runtime/extension/package introduzido na execution path pode ampliar a TCB.
 
 ## 10.6.2 Untrusted content boundary
 
@@ -602,17 +601,17 @@ Contém:
 
 Autoriza temporariamente o uso de uma Environment Instance.
 
-É diferente do Treehouse Lease.
+É diferente do binding/lease do isolated mutable workspace. The concrete resource identity is realization-specific:
 
 ```text
-Treehouse Lease
-→ worktree físico
+Workspace Binding / Lease
+→ physical isolated mutable workspace
 
 Environment Lease
-→ runtime e recursos de execução
+→ runtime / compute / isolation resources
 ```
 
-No M2 local, ambos podem estar vinculados à mesma Track sem exigir um sistema genérico separado.
+The M01 Treehouse Lease is historical incumbent Evidence for the workspace side. M2 may bind workspace and Environment resources to the same Track without requiring a generic provider framework.
 
 ## 10.7.4 Credential Grant
 
@@ -708,7 +707,7 @@ WSL pode expor:
 
 ## 10.9.3 Política
 
-Para Worker E1:
+Para o protected local Writer profile:
 
 - Repository deve estar no filesystem Linux;
 - host mounts são negados por default;
@@ -1100,14 +1099,14 @@ HOST_BROAD
 Default Writer:
 
 ```text
-WORKTREE + required toolchain
+BOUND_MUTABLE_WORKSPACE + required toolchain
 ```
 
 ## 10.15.2 Write model
 
 Write é allow-only:
 
-- worktree;
+- bound isolated mutable workspace;
 - Attempt temp;
 - approved cache;
 - generated artifacts path.
@@ -1123,7 +1122,7 @@ Default:
 - Approved Contracts;
 - runtime SQLite;
 - active policy;
-- `.pi` security/extensions;
+- selected Agent Runtime security/extensions/config;
 - secret files;
 - shell profiles;
 - system executables;
@@ -1367,7 +1366,7 @@ Secret é entregue:
 - no momento necessário;
 - sem aparecer no prompt;
 - sem entrar no Context Pack;
-- sem ser escrito no worktree.
+- sem ser escrito no bound isolated mutable workspace.
 
 ## 10.18.6 Redaction
 
@@ -1926,7 +1925,7 @@ MNFS usa NIST SSDF 1.1 como linguagem de referência para:
 
 Não como programa de compliance completo no MVP.
 
-## 10.29.2 Pi package supply chain
+## 10.29.2 Agent Runtime extension/package supply chain
 
 Regras:
 
@@ -2014,7 +2013,7 @@ SEC-EFFECT-002
 Production effects use a separate executor and receipt.
 
 SEC-EXT-001
-Pi extensions and packages are pinned and reviewed.
+Agent Runtime extensions and packages are pinned and reviewed.
 
 SEC-SUPPLY-001
 Dependency installation follows a declared setup policy.
@@ -2042,13 +2041,15 @@ O ordinary Writer Pack inclui referências, não secrets.
 
 ```text
 Environment:
-  E1 LOCAL_SANDBOX
-Policy hash:
+  agentPlacement: <approved CONTROL_SIDE or IN_ENVIRONMENT>
+  isolationBoundary: <approved realization/property>
+  workspaceBinding: <current binding ref>
+Execution policy hash:
   sha256:...
 Network:
-  OFF
+  <contract posture; DENY_ALL for current M2 proof>
 Credentials:
-  NONE
+  NONE for ordinary M2 Writer
 Allowed effects:
   X0, X1
 Protected paths:
@@ -2335,48 +2336,44 @@ Substituir ou remover quando:
 
 # 10.35 M2 security slice
 
-M2 não implementa o Security System completo.
-
-Precisa garantir:
+M2 does not implement the complete future Security System. It proves one bounded Writer under the selected, evidence-backed local realization.
 
 ```text
-one Pi Worker
+one bounded Writer Actor
 does not mean
-full user authority
+full host-user authority
 ```
 
 ## Inclui
 
-- explicit cwd;
-- `shell: false`;
-- arguments separated;
+- exact workspace/environment binding;
+- explicit cwd/capability boundary where applicable;
+- shell/process invocation controlled by the selected realization;
 - environment allowlist;
-- no production credentials;
-- network off by default;
-- protected paths;
-- external effects denied;
-- security policy hash;
-- AS-02 or equivalent accepted local boundary before general execution;
-- security failure reflected in state;
-- no fail-open.
+- no raw production credentials;
+- contract-bound network posture, deny-by-default for the current local proof;
+- protected host/policy paths;
+- external effects denied beyond the contract;
+- frozen effective execution/security policy hash;
+- fail-closed initialization;
+- security failure reflected in durable state/Evidence;
+- provider-neutral Git result identity;
+- Fresh Recovery without Session/transcript authority.
 
 ## Não inclui
 
-- generic Credential Broker;
+- generic Credential Broker without a named consumer;
 - full Effect Executor;
-- Dev Container engine;
-- remote sandbox;
+- remote/cloud control plane;
 - production access;
-- OIDC;
-- SBOM;
 - multi-tenant security;
 - security dashboard.
 
 ## Contract reconciliation
 
-O Approved Contract de MIS-002 precisará ser reconciliado depois do Blueprint.
+Production M02 only resumes after ARR-S0/S1/S2/(S2W)/S3, substrate-selection Decision and superseding CAP-EXECUTION/MIS-002 authority. Historical AS-02 Evidence may inform the incumbent comparison but is not a current prerequisite or selecting gate.
 
-A arquitetura não permite que dispatch de um Writer signifique execução irrestrita sob toda a autoridade do usuário host.
+The architecture never permits Writer dispatch to degrade silently to unrestricted host execution.
 
 ---
 
@@ -2533,7 +2530,7 @@ Não construir agora:
 9. Sensitive reads são denied.
 10. Active security policy é imutável ao Worker.
 11. Sandbox failure não executa sem proteção.
-12. Pi packages são trusted code.
+12. Agent Runtime extensions/packages admitted to the execution path are trusted code and therefore pinned/reviewed.
 13. Third-party extensions são pinned e revisadas.
 14. Worker não recebe user environment inteiro.
 15. Secrets não entram em Context Pack.

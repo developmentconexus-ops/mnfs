@@ -998,7 +998,7 @@ MIS-020/M02/F01/AC-01
 - `Task` universal;
 - sessão como identidade do trabalho;
 - exit code como conclusão;
-- worktree novo para todo retry;
+- novo physical workspace para todo retry sem necessidade de isolamento adicional;
 - Claim como aceite;
 - teste isolado como fechamento de Feature;
 - Milestone marcada manualmente como concluída;

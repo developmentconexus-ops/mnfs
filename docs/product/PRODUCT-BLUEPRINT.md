@@ -32,7 +32,7 @@ tracking_issue: 6
 Source: docs/product/blueprint/*.md
 Generator: scripts/generate-product-blueprint.mjs
 Generator version: 2
-Source manifest hash: sha256:eb48e622e8ec8a6b7a49932b40caf04dd54c72ef926a27609ffd2712a28b7cd1
+Source manifest hash: sha256:ae325478931877568c3024434a58c6837dbc0e3d3e0e6313c6ebb404e3aa803f
 -->
 
 # MNFS Product Blueprint
@@ -311,7 +311,7 @@ O lead é responsável por traduzir a intenção do operador para o sistema e os
 
 ### O operador não precisa fazer
 
-- abrir worktrees;
+- materializar isolated mutable workspaces manualmente;
 - escolher qual worker recebe cada arquivo;
 - enviar prompt individual para cada agente;
 - interpretar logs brutos;
@@ -1651,7 +1651,7 @@ MIS-020/M02/F01/AC-01
 - `Task` universal;
 - sessão como identidade do trabalho;
 - exit code como conclusão;
-- worktree novo para todo retry;
+- novo physical workspace para todo retry sem necessidade de isolamento adicional;
 - Claim como aceite;
 - teste isolado como fechamento de Feature;
 - Milestone marcada manualmente como concluída;
@@ -1978,7 +1978,7 @@ O Lead pode:
 Durante Intake:
 
 - nenhum worker escritor;
-- nenhum worktree de implementação;
+- nenhum isolated mutable workspace de implementação;
 - nenhuma mudança de código;
 - nenhuma approval implícita;
 - nenhuma questão de produto resolvida silenciosamente pelo modelo.
@@ -2365,7 +2365,7 @@ persistir binding/lease e policy identities
 emitir Domain Event correspondente
 ```
 
-A realization concreta pode ser worktree, COW filesystem, rootfs/disk privado, microVM workspace ou outra opção selecionada por Decision. Nenhuma delas é semântica obrigatória do WriteTrack.
+A realization concreta pode ser isolated mutable workspace, COW filesystem, rootfs/disk privado, microVM workspace ou outra opção selecionada por Decision. Nenhuma delas é semântica obrigatória do WriteTrack.
 
 ## 3.10.3 Validações
 
@@ -2817,7 +2817,7 @@ Finding local:
 
 ```text
 mesma Write Track
-mesmo worktree
+mesmo isolated mutable workspace
 novo Attempt
 mesma sessão, se saudável
 ```
@@ -2955,7 +2955,7 @@ Decision externa necessária.
 
 ## 3.19.6 Regra
 
-Worktrees de origem não são destruídos até:
+Isolated mutable workspaces de origem não são destruídos até:
 
 - integração aceita;
 - ou abandono explícito.
@@ -3235,15 +3235,15 @@ Nunca é silenciosamente reinterpretado sob novo contrato.
 
 | SQLite | Mundo externo | Resultado |
 |---|---|---|
-| Lease ACTIVE | worktree existe | healthy |
-| Lease ACTIVE | worktree ausente | divergence |
-| sem Lease | worktree MNFS órfão | divergence |
+| current workspace/environment binding | physical mutable workspace exists | healthy |
+| current workspace/environment binding | physical mutable workspace missing | divergence |
+| no current workspace binding | MNFS-like mutable workspace orphan | divergence |
 | Worker RUNNING | processo existe | healthy |
 | Worker RUNNING | processo ausente | LOST |
 | Claim OPEN | worker morto | recoverable |
 | Claim COMPLETED | gate ausente | awaiting verification |
 | Track ACCEPTED | integração ausente | awaiting integration |
-| Track RELEASED | worktree existe | cleanup divergence |
+| Track RELEASED | bound mutable workspace still exists | cleanup divergence |
 
 ## 3.25.5 Reparos
 
@@ -5308,8 +5308,8 @@ Componentes:
 - CLI;
 - human-readable output;
 - `--json` output;
-- Pi project skills;
-- futura Pi extension;
+- project/runtime skills;
+- future Agent Runtime extension or protocol adapter when selected;
 - Lavish HTML;
 - futura web UI;
 - optional Herdr projection.
@@ -5406,7 +5406,7 @@ Implementa portas externas.
 - Git adapter;
 - filesystem artifact store;
 - process runner;
-- Pi adapter;
+- Agent Runtime adapter;
 - process sandbox adapter;
 - execution environment adapter;
 - credential provider adapter;
@@ -5416,7 +5416,7 @@ Implementa portas externas.
 - observability backend adapter;
 - evaluation backend adapter;
 - notification adapter;
-- Treehouse adapter;
+- Mutable Workspace adapter;
 - Lavish adapter;
 - Herdr adapter;
 - browser/QA adapter;
@@ -5772,7 +5772,7 @@ permitted next actions
 
 ## 5.6.10 Session Memory Adapter
 
-Porta opcional para memória auxiliar de uma Pi Session.
+Porta opcional para memória auxiliar de uma Runtime Session.
 
 Pode fornecer Observations, Reflections, source-backed recall, custo e falhas.
 
@@ -6016,7 +6016,7 @@ docs/
 
 ## 5.8.3 Operational state
 
-Vive fora dos worktrees:
+Vive fora dos isolated mutable workspaces:
 
 ```text
 ~/.local/state/mnfs/repos/<repo-id>/
@@ -6244,7 +6244,7 @@ A CLI é a API local principal do MNFS.
 Usada por:
 
 - operador;
-- Pi skills;
+- project/runtime skills;
 - workers;
 - scripts;
 - testes;
@@ -6311,7 +6311,7 @@ parse args
 A CLI não:
 
 - monta SQL;
-- chama Treehouse diretamente;
+- chama a workspace realization diretamente;
 - altera FSM;
 - infere risk;
 - lê transcript.
@@ -6564,7 +6564,7 @@ structured artifact
 → deterministic HTML
 → Lavish open
 → feedback
-→ Pi reasoning
+→ Planner/Actor reasoning
 → new structured artifact
 ```
 
@@ -6595,7 +6595,7 @@ Uma UI própria pode substituir Lavish sem mudar o Planning Domain.
 
 # 5.17 Herdr Adapter
 
-Herdr fornece workspaces, tabs, panes, persistência de terminal e estado visual de agentes; também expõe CLI e socket API para controle e possui integração direta com Pi. citeturn823284search1turn823284search2turn823284search5
+Herdr fornece workspaces, tabs, panes, persistência de terminal e estado visual de agentes; também expõe CLI e socket API para controle. A versão estudada historicamente possuía integração direta com Pi; isso é reference compatibility e não seleciona Pi como Agent Runtime atual. citeturn823284search1turn823284search2turn823284search5
 
 ## 5.17.1 Papel
 
@@ -6766,7 +6766,7 @@ Critérios de escolha:
 - diff;
 - referências;
 - estabilidade;
-- facilidade de edição pelo Pi.
+- facilidade de edição por humanos e Actors.
 
 ## 5.20.2 Separação recomendada
 
@@ -6875,9 +6875,9 @@ Conteúdo é autoridade de freshness.
 - packages confiáveis;
 - workers considerados falíveis, não maliciosos.
 
-## 5.22.2 Pi e extensions
+## 5.22.2 Agent Runtime extensions and packages
 
-Pi extensions executam com permissões do processo e podem registrar tools que executam código; somente fontes confiáveis devem ser instaladas. citeturn428383search1turn428383search8
+Agent Runtime extensions/packages execute inside the authority of their hosting process and may expose executable tools; only reviewed, pinned sources may enter the trusted computing base. The prior Pi extension analysis remains incumbent Evidence in Sections 5.13–5.14.
 
 ## 5.22.3 WSL2
 
@@ -6887,7 +6887,7 @@ Workers podem ter acesso às permissões do usuário.
 
 ## 5.22.4 Proteções iniciais
 
-- worktree isolation;
+- isolated mutable workspace boundaries;
 - allowed cwd;
 - protected paths;
 - tool allowlists quando aplicável;
@@ -6988,16 +6988,16 @@ Status mostra:
 
 Cada adapter possui failure behavior nomeado.
 
-## Pi failure
+## Agent Runtime failure
 
 - Worker Run LOST/EXITED;
 - Claim permanece;
-- Lease permanece;
+- workspace/environment bindings remain until explicit disposition;
 - recovery decide.
 
-## Treehouse failure
+## Workspace realization failure
 
-- Lease REQUESTED/DIVERGED;
+- workspace/environment binding BLOCKED/DIVERGED;
 - nenhum novo worker;
 - state preservado.
 
@@ -7035,25 +7035,15 @@ Cada adapter possui failure behavior nomeado.
 
 ## 5.25.1 Lead
 
-```text
-Pi interactive session
-+
-MNFS skill/extension
-+
-MNFS CLI
-```
+The MNFS Lead is a Role/ActorRun owned by MNFS semantics. Its concrete reasoning/runtime surface is selected separately and may be an interactive Agent Runtime session, a programmatic runtime boundary or a later UI-hosted Actor. Runtime Session identity is observational.
 
 ## 5.25.2 MNFS commands
 
-Podem rodar como subprocessos curtos.
-
-SQLite coordena estado.
+Podem rodar como subprocessos curtos. SQLite coordena estado.
 
 ## 5.25.3 Workers
 
-Processos Pi independentes.
-
-Um processo por active Worker Run.
+Bounded Writer/Reviewer/QA Actors execute through the selected Agent Runtime boundary. A concrete runtime process/session may exist per ActorRun, but MNFS does not require one provider or one process topology constitutionally.
 
 ## 5.25.4 Integration
 
@@ -7061,19 +7051,11 @@ Comando/processo MNFS separado ou executado pelo Lead por application service.
 
 ## 5.25.5 QA
 
-Processo separado quando browser ou ambiente live exigir.
+Processo/runtime separado quando browser ou ambiente live exigir.
 
 ## 5.25.6 Sem daemon obrigatório
 
-Reconcile ocorre em:
-
-- startup;
-- status;
-- antes de dispatch;
-- antes de integration;
-- ação explícita.
-
-Watcher contínuo entra se a experiência exigir notificação automática.
+Reconcile ocorre em startup, status, before dispatch/integration and explicit actions. Continuous watchers enter only when a named notification/coordination consumer proves the need.
 
 ---
 
@@ -7113,8 +7095,8 @@ Pi deliberadamente fornece modos interactive, print/JSON, RPC e SDK, permitindo 
 |---|---|
 | SQLite | PostgreSQL |
 | local filesystem | object storage |
-| child Pi process | remote worker runtime |
-| Treehouse local | workspace provisioner |
+| local Agent Runtime execution | remote Agent Runtime execution |
+| local workspace realization | remote workspace provisioner |
 | local credentials | scoped secret service |
 | CLI | API + web client |
 | local event table | outbox + queue/stream |
@@ -7166,7 +7148,7 @@ src/
 │   ├── filesystem/
 │   ├── git/
 │   ├── process/
-│   ├── pi/
+│   ├── agent-runtime/
 │   ├── sandbox/
 │   ├── environments/
 │   ├── credentials/
@@ -7174,14 +7156,14 @@ src/
 │   ├── telemetry/
 │   ├── evaluation/
 │   ├── notifications/
-│   ├── treehouse/
+│   ├── workspace/
 │   ├── lavish/
 │   ├── herdr/
 │   └── browser/
 │
 ├── interfaces/
 │   ├── cli/
-│   └── pi-extension/
+│   └── runtime-extension/
 │
 └── index.ts
 ```
@@ -7278,7 +7260,7 @@ Não construir agora:
 - Graph database;
 - universal knowledge base;
 - custom terminal multiplexer;
-- custom worktree manager;
+- custom mutable-workspace manager;
 - custom browser review server;
 - abstraction para todo provider existente.
 
@@ -7289,11 +7271,11 @@ Não construir agora:
 1. Domain Core não importa adapters externos.
 2. CLI não contém regra de negócio.
 3. Skills não alteram state diretamente.
-4. Pi não é source of truth.
+4. Agent Runtime and Runtime Session state are not source of truth.
 5. SQLite não armazena código.
 6. Git não armazena state operacional transitório.
 7. Herdr não decide lifecycle MNFS.
-8. Treehouse não decide ownership.
+8. Workspace realizations do not decide domain ownership.
 9. Lavish não aprova por conta própria.
 10. Process exit não fecha trabalho.
 11. Adapter failure não corrompe Domain State.
@@ -7544,7 +7526,7 @@ A necessidade de autorização é definida pelo Repository Profile e pela polít
 
 - escolher worker;
 - escrever prompts;
-- abrir worktrees;
+- abrir isolated mutable workspaces;
 - executar testes;
 - reconciliar estado;
 - interpretar logs;
@@ -7624,7 +7606,7 @@ Dentro do contrato:
 - alocação de workers;
 - seleção entre Golden Paths equivalentes;
 - retry permitido;
-- reuso de worktree;
+- reuso de isolated mutable workspace;
 - escalada de risco;
 - pedido de review;
 - investigação adicional;
@@ -8009,7 +7991,7 @@ Integrator compõe Write Tracks aceitas.
 - mascarar conflito;
 - realizar refactor amplo;
 - corrigir Feature sem Correction;
-- destruir worktree de origem;
+- destruir isolated mutable workspace de origem;
 - integrar Track não aceita.
 
 ## 6.11.5 Conflict classes
@@ -8188,7 +8170,7 @@ Actor pode executar ação reversível e isolada.
 
 Exemplos:
 
-- editar worktree;
+- editar isolated mutable workspace;
 - criar branch;
 - rodar testes;
 - gerar artefato;
@@ -8337,7 +8319,7 @@ Altera ordem ou estratégia operacional sem alterar outcome.
 
 Exemplos:
 
-- reusar worktree;
+- reusar isolated mutable workspace;
 - trocar Worker Run;
 - serializar Track;
 - executar investigation;
@@ -8637,7 +8619,7 @@ No cloud, capabilities poderão se tornar enforcement técnico.
 - retry local;
 - escolha de worker;
 - execução de testes;
-- criação de worktree;
+- criação de isolated mutable workspace;
 - correção pequena;
 - review adicional;
 - integração local reversível.
@@ -9133,7 +9115,7 @@ Sem Claim estruturado e sem evidência.
 
 ### FC-02 — Local Green
 
-Testes locais passam no worktree, mas:
+Testes locais passam no isolated mutable workspace, mas:
 
 - integração não ocorreu;
 - wiring não existe;
@@ -11182,7 +11164,7 @@ Esta seção define como o MNFS permanece correto quando:
 - o processo termina sem Claim;
 - SQLite confirma uma operação, mas a ferramenta externa falha;
 - a ferramenta externa conclui, mas SQLite não registra;
-- um worktree desaparece;
+- um bound isolated mutable workspace desaparece;
 - uma branch diverge;
 - um Receipt fica stale;
 - duas ações concorrentes disputam o mesmo recurso;
@@ -11259,8 +11241,8 @@ Exemplo:
 SQLite:
 Lease ACTIVE
 
-Treehouse:
-worktree não encontrado
+Workspace realization:
+mutable workspace not found
 ```
 
 Isso não significa automaticamente que SQLite está errado ou que o Lease deve ser apagado.
@@ -11319,7 +11301,7 @@ Não participa diretamente de gates.
 | Claim state | MNFS/SQLite | Worker, CLI |
 | Receipt | MNFS/SQLite + artifact | runner |
 | Terminal presentation | Herdr | Operator |
-| Visual feedback | Lavish até ser consumido | Pi, MNFS |
+| Visual feedback | presentation surface until consumed | Agent Runtime/presentation adapters, MNFS |
 | Decision | MNFS/SQLite + artefato quando necessário | Operator, Lead |
 | Integration candidate | Git + MNFS Integration Run | CI, QA |
 | Evidence artifact | artifact store + hash | Git quando promovido |
@@ -12273,7 +12255,7 @@ Candidate SHA não é reproduzível.
 Adotar recurso externo órfão quando:
 
 - identity corresponde;
-- worktree é válido;
+- mutable workspace identity/binding é válido;
 - base é válida;
 - nenhuma outra entidade possui o recurso;
 - policy permite.
@@ -12338,8 +12320,8 @@ Usado quando reparo pode:
 
 | Estado autoritativo | Observação | Classificação | Ação segura inicial |
 |---|---|---|---|
-| Lease REQUESTED | sem worktree | request incompleto | retry ou cancel |
-| Lease REQUESTED | worktree correspondente | órfão adotável | validate + adopt |
+| workspace binding REQUESTED | sem physical mutable workspace | request incompleto | retry ou cancel |
+| workspace binding REQUESTED | matching physical mutable workspace | órfão adotável | validate + adopt |
 | Lease ACTIVE | mutable workspace existe | healthy | nenhuma |
 | Lease ACTIVE | mutable workspace ausente | divergence | block dispatch |
 | sem Lease | mutable workspace MNFS-like existe | orphan | inspect/preserve |
@@ -12866,7 +12848,7 @@ MIS-002/M02/F01
 WT-004
 
 Safe actions:
-1. mark Lease DIVERGED and recreate worktree
+1. mark current workspace binding DIVERGED and re-materialize/rebind the mutable workspace
 2. inspect the selected workspace realization
 
 Recommended:
@@ -13035,7 +13017,7 @@ Não construir agora:
 - full event-sourced reconstruction;
 - cryptographic ledger;
 - global transaction coordinator;
-- custom worktree pool;
+- custom workspace pool;
 - automatic destructive repair;
 - invisible background cleanup;
 - retry infinito;
@@ -13546,7 +13528,7 @@ O MNFS adota apenas as ideias arquiteturais; qualquer implementação futura dev
 
 ---
 
-# 9.7 Candidato principal — `pi-observational-memory` V3
+# 9.7 Historical / Incumbent Candidate Study — `pi-observational-memory` V3
 
 ## 9.7.1 Estado pesquisado
 
@@ -13710,7 +13692,7 @@ sem migration do Domain State.
 
 ---
 
-# 9.8 Alternativa — `pi-observational-memory-extension`
+# 9.8 Historical / Incumbent Candidate Study — `pi-observational-memory-extension`
 
 ## 9.8.1 Capacidades
 
@@ -13751,7 +13733,7 @@ Não adotar project-scoped OM agora.
 
 ---
 
-# 9.9 Memórias persistentes de repositório
+# 9.9 Historical repository-memory candidate survey
 
 ## 9.9.1 `pi-memory`
 
@@ -13833,7 +13815,7 @@ Reutilizar padrões:
 
 ---
 
-# 9.10 Deliberate handoff — `pi-agenticoding`
+# 9.10 Historical handoff reference — `pi-agenticoding`
 
 ## 9.10.1 Capacidades
 
@@ -14288,9 +14270,11 @@ risks
 
 Pode usar:
 
-- Pi resume;
-- OM;
+- runtime-native resume when the selected Agent Runtime supports it;
+- optional Session Memory Adapter when separately applicable;
 - Current Authority Snapshot.
+
+Runtime-native resume is a convenience only; it never replaces Fresh Recovery or current Authority.
 
 ### Nova Session
 
@@ -14388,7 +14372,7 @@ Enviar Artifact refs.
 
 ---
 
-# 9.19 `pi-link`
+# 9.19 Historical transport reference — `pi-link`
 
 ## 9.19.1 Capacidades
 
@@ -14453,62 +14437,35 @@ M2 não depende de `pi-link`.
 
 ```text
 Lead
-→ process adapter starts Pi Worker with Dispatch Packet
+→ MNFS dispatches a bounded Actor through the selected Agent Runtime using the compiled Actor Pack
 
-Worker
-→ MNFS CLI opens/completes Claim
+Writer Actor
+→ MNFS CLI/API opens/completes Claim
 
 Lead dies
-→ Worker and worktree may continue
+→ Actor and bound workspace/environment may continue according to contract
 
-New Lead
-→ SQLite + process/filesystem reconcile
+Fresh Lead
+→ SQLite + Git + runtime/workspace/environment observations reconcile
 ```
 
-Não é necessário:
-
-- message bus;
-- WebSocket network;
-- shared OM;
-- project memory plugin;
-- SDK host.
+No message bus, transcript replay, shared OM, project-memory plugin or SDK-host assumption is required by the M2 outcome.
 
 ---
 
 # 9.21 Uma memória por concern
 
-Não instalar simultaneamente, para a mesma Role:
+Do not activate multiple overlapping Runtime Session memory/compaction plugins for the same Role without an explicit comparison/Decision. The current policy is:
 
 ```text
-pi-observational-memory
+at most one optional Session Memory Adapter per Role
 +
-pi-memory
+one canonical MNFS memory/authority system
 +
-pi-memctx
-+
-another compaction extension
+exact source-backed recall when material
 ```
 
-Riscos:
-
-- multiple context injections;
-- conflitos de precedência;
-- token bloat;
-- hidden writes;
-- compaction-hook collision;
-- múltiplos background agents;
-- debugging difícil;
-- stale memory duplication.
-
-Política:
-
-```text
-one Session Memory Adapter
-+
-one canonical MNFS memory system
-+
-exact recall
-```
+This avoids competing context injection, precedence conflicts, token bloat, hidden writes, hook collisions, duplicated background work and stale-memory duplication. Vendor-specific plugins studied earlier remain research/incumbent Evidence until the selected Agent Runtime creates a named consumer.
 
 ---
 
@@ -14751,7 +14708,7 @@ Novo Snapshot precisa vencer memória antiga.
 
 Falhar credentials ou model.
 
-Pi e MNFS continuam utilizáveis.
+The studied Pi runtime and MNFS remain usable in this historical scenario.
 
 ### S7 — Resume same Session
 
@@ -14806,23 +14763,19 @@ Desativar quando:
 
 ---
 
-# 9.27 Matriz de adoção
+# 9.27 Current memory realization matrix
 
-| Tool ou mecanismo | Decisão | Papel no MNFS |
+| Mechanism / class | Current disposition | Role in MNFS |
 |---|---|---|
-| Pi JSONL Sessions | Adotar | histórico exato de Session |
-| Pi native compaction | Manter | baseline e fallback |
-| `pi-observational-memory@3.0.3` | Candidato | Lead Session Memory Adapter |
-| Mastra OM package | Não incorporar | referência arquitetural |
-| `pi-observational-memory-extension` | Adiar | alternativa de pesquisa |
-| `pi-memory` | Não core | memória pessoal opcional |
-| `@josephakern/pi-memory` | Reusar padrões | capped index e writeback |
-| `pi-memctx` | Referência | retrieval e review queue |
-| `pi-agenticoding` | Reusar princípios | handoff deliberado |
-| `pi-link` | Adiar | transporte de notificação futuro |
-| Pi SDK/RPC | Futuro | controle programático |
-| MNFS SQLite | Adotar | coordenação durável |
-| Git Artifacts | Adotar | memória canônica versionada |
+| Exact Runtime Session history | `ADAPT` when available | observational exact history, never authority |
+| Runtime-native compaction | `REFERENCE / ADAPT` after runtime selection | optional runtime fallback |
+| Session Memory Adapter | `DEFER / SPIKE` until named consumer | optional Lead continuity |
+| Repository Profile / Context Index / Code Map | `OWN` semantics | canonical repository/context knowledge |
+| MNFS SQLite | `ADOPT` | durable operational coordination |
+| Git artifacts | `ADOPT` | canonical versioned code/result/doc identity |
+| Prior Pi JSONL / OM / pi-link / pi-memctx studies | `HISTORICAL / REFERENCE` | incumbent evidence and design patterns only |
+
+No memory plugin or runtime-specific transport is selected constitutionally by this matrix.
 
 ---
 
@@ -14833,7 +14786,7 @@ Desativar quando:
 Não depende de:
 
 - Observational Memory;
-- `pi-link`;
+- runtime-specific notification transport;
 - generic Context Compiler;
 - shared project memory;
 - SDK host.
@@ -14842,7 +14795,7 @@ M2 usa:
 
 - fixed Writer Pack;
 - Dispatch Packet;
-- child Pi process;
+- selected Agent Runtime execution;
 - CLI;
 - SQLite;
 - Claim;
@@ -14862,7 +14815,7 @@ Depois avaliar transport adapter.
 
 Repository Profile, Context Index e Code Map precisam existir.
 
-Só então comparar a abordagem própria com `pi-memctx`.
+Só então comparar a abordagem própria com suitable runtime/repository retrieval candidates; the prior `pi-memctx` study remains historical reference.
 
 ---
 
@@ -14886,8 +14839,8 @@ Decide:
 
 - estado e comandos duráveis no MNFS;
 - transporte apenas entrega ou desperta;
-- M2 usa child process + CLI;
-- `pi-link` adiado.
+- M2 uses durable MNFS state plus the selected concrete Agent Runtime boundary;
+- runtime-specific notification transport remains deferred; the prior `pi-link` study is historical reference.
 
 ---
 
@@ -14921,7 +14874,7 @@ Não construir agora:
 2. SQLite e Approved Contract vencem qualquer memória de Session.
 3. Current Authority Snapshot precede OM.
 4. OM é `SUPPORTING`, nunca `AUTHORITATIVE`.
-5. Pi JSONL é histórico exato da Session.
+5. Exact Runtime Session history, when available, is observational history rather than current domain state.
 6. História exata não é necessariamente estado atual.
 7. Session nova recupera sem OM.
 8. Role memory é isolada.
@@ -14939,13 +14892,13 @@ Não construir agora:
 20. Skills não armazenam current state.
 21. Prompt não é contrato.
 22. Uma Role possui no máximo um Session Memory Adapter ativo.
-23. Native compaction permanece fallback.
+23. Runtime-native compaction may be a fallback only after a concrete runtime is selected and proven.
 24. Plugin third-party é pinned e revisado.
 25. Upgrade de memory format exige drill.
 26. Observer cost entra no custo total.
 27. Compression ratio não substitui correctness.
 28. Reviewer inicial permanece cold.
-29. M2 não depende de OM ou `pi-link`.
+29. M2 não depende de OM ou runtime-specific notification transport.
 30. Tooling é adotado somente depois de spike com critérios e Removal Conditions.
 
 ---
@@ -15001,7 +14954,7 @@ O objetivo é impedir que:
 - um dependency script comprometa o host;
 - dois Tracks contaminem o mesmo banco ou provider;
 - um agent opere produção apenas porque possui credentials;
-- uma extensão Pi não revisada entre no trusted computing base;
+- uma third-party Agent Runtime extension não revisada entre no trusted computing base;
 - uma sandbox failure degrade silenciosamente para execução irrestrita.
 
 No MNFS:
@@ -15096,7 +15049,7 @@ Controla se uma tool call pode ser iniciada.
 
 Pode ser aplicada por:
 
-- Pi extension;
+- Agent Runtime extension;
 - allowlist;
 - denylist;
 - permission prompt;
@@ -15287,7 +15240,7 @@ Falíveis ou potencialmente não confiáveis:
 - web content;
 - logs;
 - generated files;
-- third-party Pi packages;
+- third-party Agent Runtime packages/extensions;
 - provider responses;
 - downloaded binaries.
 
@@ -15303,7 +15256,7 @@ Porém, prompt injection ou conteúdo comprometido pode fazê-los agir como cód
 
 ### T01 — Host write
 
-Worker altera arquivo fora do worktree.
+Worker altera arquivo fora do bound isolated mutable workspace.
 
 ### T02 — Secret read
 
@@ -15351,14 +15304,14 @@ Dependency executa código inesperado durante setup.
 
 ### T08 — Compromised extension
 
-Pi extension executa com os privilégios do usuário.
+Third-party Agent Runtime extension may execute with the privileges of its hosting process.
 
 ### T09 — Policy tampering
 
 Worker altera:
 
 - sandbox config;
-- Pi settings;
+- Agent Runtime settings;
 - MNFS policy;
 - CI workflow;
 - credentials binding.
@@ -15412,7 +15365,7 @@ Clone ou PR executa scripts maliciosos.
 
 ### T20 — False isolation assumption
 
-Sistema acredita estar protegido apenas por worktree, WSL ou container.
+Sistema acredita estar protegido apenas por mutable-workspace isolation, WSL ou container.
 
 ---
 
@@ -15429,7 +15382,7 @@ MNFS Core / Policy
    ▼
 Execution Boundary
    │
-   ├── Pi Actor
+   ├── Actor through selected Agent Runtime
    ├── repository code
    ├── dependencies
    └── tool processes
@@ -15445,14 +15398,13 @@ Inclui:
 - MNFS binary/code;
 - effective policy;
 - SQLite;
-- Pi runtime;
-- loaded Pi extensions;
-- sandbox runtime;
-- process adapter;
-- Treehouse;
-- operating-system enforcement.
+- selected Agent Runtime boundary and loaded runtime extensions;
+- selected Execution Environment / isolation realization;
+- selected Mutable Workspace realization;
+- process/runtime adapters;
+- operating-system enforcement used by the selected realization.
 
-Cada third-party package adicionado ao Pi pode ampliar a TCB.
+Cada third-party runtime/extension/package introduzido na execution path pode ampliar a TCB.
 
 ## 10.6.2 Untrusted content boundary
 
@@ -15539,17 +15491,17 @@ Contém:
 
 Autoriza temporariamente o uso de uma Environment Instance.
 
-É diferente do Treehouse Lease.
+É diferente do binding/lease do isolated mutable workspace. The concrete resource identity is realization-specific:
 
 ```text
-Treehouse Lease
-→ worktree físico
+Workspace Binding / Lease
+→ physical isolated mutable workspace
 
 Environment Lease
-→ runtime e recursos de execução
+→ runtime / compute / isolation resources
 ```
 
-No M2 local, ambos podem estar vinculados à mesma Track sem exigir um sistema genérico separado.
+The M01 Treehouse Lease is historical incumbent Evidence for the workspace side. M2 may bind workspace and Environment resources to the same Track without requiring a generic provider framework.
 
 ## 10.7.4 Credential Grant
 
@@ -15645,7 +15597,7 @@ WSL pode expor:
 
 ## 10.9.3 Política
 
-Para Worker E1:
+Para o protected local Writer profile:
 
 - Repository deve estar no filesystem Linux;
 - host mounts são negados por default;
@@ -16037,14 +15989,14 @@ HOST_BROAD
 Default Writer:
 
 ```text
-WORKTREE + required toolchain
+BOUND_MUTABLE_WORKSPACE + required toolchain
 ```
 
 ## 10.15.2 Write model
 
 Write é allow-only:
 
-- worktree;
+- bound isolated mutable workspace;
 - Attempt temp;
 - approved cache;
 - generated artifacts path.
@@ -16060,7 +16012,7 @@ Default:
 - Approved Contracts;
 - runtime SQLite;
 - active policy;
-- `.pi` security/extensions;
+- selected Agent Runtime security/extensions/config;
 - secret files;
 - shell profiles;
 - system executables;
@@ -16304,7 +16256,7 @@ Secret é entregue:
 - no momento necessário;
 - sem aparecer no prompt;
 - sem entrar no Context Pack;
-- sem ser escrito no worktree.
+- sem ser escrito no bound isolated mutable workspace.
 
 ## 10.18.6 Redaction
 
@@ -16863,7 +16815,7 @@ MNFS usa NIST SSDF 1.1 como linguagem de referência para:
 
 Não como programa de compliance completo no MVP.
 
-## 10.29.2 Pi package supply chain
+## 10.29.2 Agent Runtime extension/package supply chain
 
 Regras:
 
@@ -16951,7 +16903,7 @@ SEC-EFFECT-002
 Production effects use a separate executor and receipt.
 
 SEC-EXT-001
-Pi extensions and packages are pinned and reviewed.
+Agent Runtime extensions and packages are pinned and reviewed.
 
 SEC-SUPPLY-001
 Dependency installation follows a declared setup policy.
@@ -16979,13 +16931,15 @@ O ordinary Writer Pack inclui referências, não secrets.
 
 ```text
 Environment:
-  E1 LOCAL_SANDBOX
-Policy hash:
+  agentPlacement: <approved CONTROL_SIDE or IN_ENVIRONMENT>
+  isolationBoundary: <approved realization/property>
+  workspaceBinding: <current binding ref>
+Execution policy hash:
   sha256:...
 Network:
-  OFF
+  <contract posture; DENY_ALL for current M2 proof>
 Credentials:
-  NONE
+  NONE for ordinary M2 Writer
 Allowed effects:
   X0, X1
 Protected paths:
@@ -17272,48 +17226,44 @@ Substituir ou remover quando:
 
 # 10.35 M2 security slice
 
-M2 não implementa o Security System completo.
-
-Precisa garantir:
+M2 does not implement the complete future Security System. It proves one bounded Writer under the selected, evidence-backed local realization.
 
 ```text
-one Pi Worker
+one bounded Writer Actor
 does not mean
-full user authority
+full host-user authority
 ```
 
 ## Inclui
 
-- explicit cwd;
-- `shell: false`;
-- arguments separated;
+- exact workspace/environment binding;
+- explicit cwd/capability boundary where applicable;
+- shell/process invocation controlled by the selected realization;
 - environment allowlist;
-- no production credentials;
-- network off by default;
-- protected paths;
-- external effects denied;
-- security policy hash;
-- AS-02 or equivalent accepted local boundary before general execution;
-- security failure reflected in state;
-- no fail-open.
+- no raw production credentials;
+- contract-bound network posture, deny-by-default for the current local proof;
+- protected host/policy paths;
+- external effects denied beyond the contract;
+- frozen effective execution/security policy hash;
+- fail-closed initialization;
+- security failure reflected in durable state/Evidence;
+- provider-neutral Git result identity;
+- Fresh Recovery without Session/transcript authority.
 
 ## Não inclui
 
-- generic Credential Broker;
+- generic Credential Broker without a named consumer;
 - full Effect Executor;
-- Dev Container engine;
-- remote sandbox;
+- remote/cloud control plane;
 - production access;
-- OIDC;
-- SBOM;
 - multi-tenant security;
 - security dashboard.
 
 ## Contract reconciliation
 
-O Approved Contract de MIS-002 precisará ser reconciliado depois do Blueprint.
+Production M02 only resumes after ARR-S0/S1/S2/(S2W)/S3, substrate-selection Decision and superseding CAP-EXECUTION/MIS-002 authority. Historical AS-02 Evidence may inform the incumbent comparison but is not a current prerequisite or selecting gate.
 
-A arquitetura não permite que dispatch de um Writer signifique execução irrestrita sob toda a autoridade do usuário host.
+The architecture never permits Writer dispatch to degrade silently to unrestricted host execution.
 
 ---
 
@@ -17470,7 +17420,7 @@ Não construir agora:
 9. Sensitive reads são denied.
 10. Active security policy é imutável ao Worker.
 11. Sandbox failure não executa sem proteção.
-12. Pi packages são trusted code.
+12. Agent Runtime extensions/packages admitted to the execution path are trusted code and therefore pinned/reviewed.
 13. Third-party extensions são pinned e revisadas.
 14. Worker não recebe user environment inteiro.
 15. Secrets não entram em Context Pack.
@@ -20170,7 +20120,7 @@ Entretanto, ficou **arquiteturalmente stale** porque não inclui integralmente:
 Também exclui explicitamente isolamento além de worktree, o que conflita com o princípio atual:
 
 ```text
-one Pi Worker
+one bounded Writer
 ≠ unrestricted user process
 ```
 
@@ -22068,7 +22018,7 @@ sem rationale não é declaração válida para change material.
 | Domain Entity/FSM | Blueprint, Spec, ADR, Reference |
 | CLI | Reference, how-to, AGENTS bootstrap |
 | SQLite schema | Spec, migration reference, Recovery |
-| Pi adapter | Spec, adoption record, compatibility |
+| Agent Runtime adapter / selected realization | Spec, sourcing Decision, provenance, compatibility |
 | Security policy | ADR, Section 10, Profile, runbook |
 | Standard | Standard, Paths, Profile bindings |
 | Golden Path | Path, templates, examples |

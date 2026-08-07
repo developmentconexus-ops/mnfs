@@ -285,7 +285,7 @@ O lead é responsável por traduzir a intenção do operador para o sistema e os
 
 ### O operador não precisa fazer
 
-- abrir worktrees;
+- materializar isolated mutable workspaces manualmente;
 - escolher qual worker recebe cada arquivo;
 - enviar prompt individual para cada agente;
 - interpretar logs brutos;

@@ -110,11 +110,11 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 
 Accepted current architecture/planning authority includes D-010 through D-016, ADR-0013 through ADR-0015 and `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0.
 
-`GATE-P0` accepted the Architecture Reconciliation / ARR master plan and ARR-S0 plan. ARR P1 / GATE-R was accepted by D-017 for Tasks `A1,A2,A3,A4,B1` plus the explicitly authorized P1-F01/P1-F02 corrections, bound to PR #24 substantive head `02e99b25842562d111488d5c8c7008cb2635f3da`. PR integration/merge remains separately unauthorized.
+`GATE-P0` accepted the Architecture Reconciliation / ARR master plan and ARR-S0 plan. ARR P1 / GATE-R was accepted by D-017 for Tasks `A1,A2,A3,A4,B1` plus P1-F01/P1-F02 and was integrated into `main` by PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`. This integration does not authorize S0.
 
 ```text
-ARR P1 reconciliation A1-A4 + B1:       ACCEPTED — GATE-R / D-017
-PR #24 merge / integration:               NOT AUTHORIZED
+ARR P1 reconciliation A1-A4 + B1:       ACCEPTED — GATE-R / D-017 / INTEGRATED
+PR #24 merge / integration:               COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
 ARR-S0 implementation:                   PROHIBITED pending GATE-S0-IMPLEMENT
 ARR-S0 real host probe:                   PROHIBITED pending later GATE-S0-EXECUTE
 Candidate installation/execution:        PROHIBITED
@@ -126,4 +126,4 @@ Automatic merge/delivery:                NOT AUTHORIZED
 
 Real M01 R2/R3 Treehouse crash/lineage scenarios remain `FOLLOW_UP_REQUIRED` under Issue #20. Whether the Treehouse-specific form remains necessary is decided by the final architecture reconciliation; provider-neutral recovery/fencing proof remains mandatory before Product Milestone M2 exit.
 
-After the accepted P1 tree is integrated into the canonical branch, or an exact later S0 base SHA explicitly includes it, the next possible gate is **GATE-S0-IMPLEMENT** for deterministic construction/testing of the host-capability harness. That gate is not currently authorized. Real host probing remains separately gated and is not implied by S0 implementation approval.
+P1 is integrated into canonical `main` at `def9e5fe819f76950d61fba2cf5abcda1533c07f`. The next possible gate is **GATE-S0-IMPLEMENT** for deterministic construction/testing of the host-capability harness, but that gate is **not currently authorized**. Real host probing remains separately gated and is not implied by S0 implementation approval.

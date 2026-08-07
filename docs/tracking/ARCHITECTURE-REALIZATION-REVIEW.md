@@ -14,6 +14,7 @@ related:
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - ACCEPTANCE-ARR-P1-RECONCILIATION
+  - ACCEPTANCE-ARR-P1-INTEGRATION-CLOSEOUT
   - DOC-PRODUCT-BLUEPRINT
   - DOC-CAPABILITY-ROADMAP
   - TRACKING-DECISIONS
@@ -39,7 +40,8 @@ SYNTHESIS — cross-decision architecture          APPROVED — D-015
 EXECUTION PLANNING DESIGN                         APPROVED — D-016
 ARR PROGRAM PLAN                                 ACCEPTED — GATE-P0 — v0.2.0
 ARR-S0 PLAN                                      ACCEPTED — GATE-P0 — v0.2.0
-P1 / GATE-R                                      ACCEPTED — D-017
+P1 / GATE-R                                      ACCEPTED / INTEGRATED — D-017
+P1 integration                                   PR #24 — def9e5fe819f76950d61fba2cf5abcda1533c07f
 NEXT POSSIBLE GATE                               GATE-S0-IMPLEMENT — NOT AUTHORIZED
 ```
 
@@ -179,7 +181,7 @@ result:   SUCCESS
 
 These checks validate the repository/planning package only. They are not host-probe or candidate-conformance Evidence.
 
-## P1 / GATE-R closeout — ACCEPTED
+## P1 / GATE-R closeout — ACCEPTED / INTEGRATED
 
 On 2026-08-07 the Operator accepted ARR P1 / GATE-R, bound to:
 
@@ -192,11 +194,10 @@ Decision:     D-017
 Evidence:     ACCEPTANCE-ARR-P1-RECONCILIATION
 ```
 
-GATE-R accepts the pre-Spike semantic/authority reconciliation and shared Spike governance produced by A1-A4+B1 plus the explicitly authorized P1-F01/P1-F02 corrections.
+GATE-R accepts the pre-Spike semantic/authority reconciliation and shared Spike governance produced by A1-A4+B1 plus P1-F01/P1-F02. PR #24 was subsequently integrated by squash merge at `def9e5fe819f76950d61fba2cf5abcda1533c07f`.
 
 It does **not** authorize:
 
-- PR #24 merge/integration;
 - ARR-S0 implementation or host probing;
 - S1/S2/S2W/S3 execution;
 - candidate adoption/selection;
@@ -206,7 +207,7 @@ It does **not** authorize:
 
 ## Next possible gate — GATE-S0-IMPLEMENT (NOT AUTHORIZED)
 
-Before `GATE-S0-IMPLEMENT` can be issued, the accepted P1 tree must either be integrated into the canonical branch or be explicitly included in the exact later S0 base SHA. The S0 implementation gate must then be separately authorized. Real host probing remains separately controlled by `GATE-S0-EXECUTE`.
+The P1 integration prerequisite is satisfied by `main` commit `def9e5fe819f76950d61fba2cf5abcda1533c07f`. `GATE-S0-IMPLEMENT` may now be reviewed as the next possible gate, but remains separately **NOT AUTHORIZED**. Real host probing remains separately controlled by `GATE-S0-EXECUTE`.
 
 ## Current relationship to MIS-002/M02
 

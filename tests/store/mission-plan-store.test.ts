@@ -7,6 +7,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 import { MnfsError } from '../../src/domain/errors.js';
 import { hashPlanContent, type MissionPlanContent } from '../../src/domain/mission-plan.js';
+import { applyMigrations } from '../../src/store/migrations.js';
 import { SqliteStore } from '../../src/store/sqlite-store.js';
 
 function validPlan(title = 'Visual planning'): MissionPlanContent {
@@ -84,6 +85,7 @@ test('migration v2 creates revision storage and preserves v1 mission events', ()
     INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
       VALUES ('EVT-OLD', 'MISSION_OPENED', 'MIS-001', '2026-07-31T00:00:00.000Z', '{"goal":"Existing mission"}');
   `);
+  applyMigrations(database);
   database.close();
 
   const store = SqliteStore.open(databasePath);

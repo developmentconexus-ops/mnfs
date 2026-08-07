@@ -19,34 +19,67 @@ export interface Mission {
   readonly openedAt: string;
 }
 
-export interface MissionOpenedEvent {
+export const MISSION_EVENT_TYPES_V1 = [
+  'MISSION_OPENED',
+  'PLAN_REVISION_SAVED',
+  'PLAN_APPROVED',
+  'WRITE_TRACK_OPENED',
+  'WRITE_TRACK_ABANDONED',
+  'ATTEMPT_OPENED',
+  'ATTEMPT_SUPERSEDED',
+  'EXECUTION_SOURCE_REQUESTED',
+  'EXECUTION_SOURCE_READY',
+  'EXECUTION_SOURCE_DIVERGED',
+  'WORKER_RUN_OPENED',
+  'WORKER_RUN_STATE_CHANGED',
+  'CLAIM_OPENED',
+  'LEASE_REQUESTED',
+  'LEASE_ACTION_CLAIMED',
+  'LEASE_GRANTED',
+  'LEASE_RELEASE_REQUESTED',
+  'LEASE_RELEASED',
+  'LEASE_DIVERGED',
+] as const;
+
+export type MissionEventType = (typeof MISSION_EVENT_TYPES_V1)[number];
+export type M01ExecutionEventType = Exclude<
+  MissionEventType,
+  'MISSION_OPENED' | 'PLAN_REVISION_SAVED' | 'PLAN_APPROVED'
+>;
+
+interface VersionedMissionEvent {
   readonly seq: number;
   readonly eventId: string;
-  readonly type: 'MISSION_OPENED';
+  readonly payloadSchemaVersion: 1;
   readonly missionId: string;
   readonly occurredAt: string;
+}
+
+export interface MissionOpenedEvent extends VersionedMissionEvent {
+  readonly type: 'MISSION_OPENED';
   readonly payload: { readonly goal: string };
 }
 
-export interface PlanRevisionSavedEvent {
-  readonly seq: number;
-  readonly eventId: string;
+export interface PlanRevisionSavedEvent extends VersionedMissionEvent {
   readonly type: 'PLAN_REVISION_SAVED';
-  readonly missionId: string;
-  readonly occurredAt: string;
   readonly payload: { readonly revision: number; readonly contentHash: string };
 }
 
-export interface PlanApprovedEvent {
-  readonly seq: number;
-  readonly eventId: string;
+export interface PlanApprovedEvent extends VersionedMissionEvent {
   readonly type: 'PLAN_APPROVED';
-  readonly missionId: string;
-  readonly occurredAt: string;
   readonly payload: { readonly revision: number; readonly contentHash: string };
 }
 
-export type MissionEvent = MissionOpenedEvent | PlanRevisionSavedEvent | PlanApprovedEvent;
+export interface M01ExecutionEvent extends VersionedMissionEvent {
+  readonly type: M01ExecutionEventType;
+  readonly payload: Readonly<Record<string, unknown>>;
+}
+
+export type MissionEvent =
+  | MissionOpenedEvent
+  | PlanRevisionSavedEvent
+  | PlanApprovedEvent
+  | M01ExecutionEvent;
 
 export interface ProjectStatus {
   readonly schemaVersion: 1;

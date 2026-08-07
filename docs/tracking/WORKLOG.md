@@ -112,94 +112,103 @@ owners:
 - The pilot planned the smallest M2 one-worker slice: Pi worker, leased Treehouse worktree, durable CLAIM and lead restart recovery, with Herdr explicitly optional.
 - Pi, Lavish feedback, multiple structured revisions, exact-hash approval and fresh-process recovery succeeded.
 - The accepted `MIS-002` revision 3 was committed with hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
-- The pilot exposed two integration defects:
-  - each revision used a different HTML path, so Lavish opened a new session/tab and lost conversation continuity;
-  - the dependency panel displayed raw Mermaid source because no Mermaid runtime was loaded.
+- The pilot exposed two integration defects: revision-specific HTML paths lost Lavish continuity, and raw Mermaid source rendered without a runtime.
 
 ## 2026-08-01
 
-### M1.9 fixes — stable review path and static SVG
+### M1.9 fixes and final acceptance
 
-- Confirmed that Lavish session identity is the canonical HTML file path and that live reload preserves conversation only when the path remains stable.
-- Added one stable `artifacts/plans/<mission-id>/review.html` path while preserving revision-specific `rev-<NNNN>.html` snapshots.
-- Changed `plan open` and `plan poll` to use `review.html`; the Pi skill now opens once, renders later revisions and continues polling the same session.
-- Replaced raw Mermaid source with deterministic inline SVG generated directly from the validated milestone/feature dependency DAG.
-- Added topological columns, distinct milestone/feature nodes, arrows, escaped titles and accessible SVG metadata without adding a package, CDN or browser runtime.
-- Added tests for stable review/snapshot paths, open-once skill behavior, SVG nodes/edges, escaping, deterministic output and absence of raw Mermaid markup.
-
-### M1 final acceptance
-
-- Operator confirmed the corrected canonical `npm run verify` gate green.
-- Corrected browser retest preserved one Lavish tab and conversation history across revisions.
-- Revision updates used `plan render` and continued polling the stable `review.html` session rather than reopening.
-- Dependency graph rendered as deterministic inline SVG and updated through live reload.
-- Exact-hash approval and fresh-process recovery remained green after the fixes.
-- Issue #3 was closed as completed.
-- PR #5 was moved out of draft and marked ready for final review and integration.
-- M2 implementation remains unstarted; the approved contract is `.mnfs/missions/MIS-002/plan.json`.
+- Added stable `artifacts/plans/<mission-id>/review.html` while preserving immutable revision snapshots.
+- Changed planning open/poll to one stable Lavish session with live reload.
+- Replaced Mermaid source with deterministic inline SVG generated from the validated dependency DAG.
+- Operator confirmed the canonical suite and browser retest; Issue #3 completed.
+- Exact-hash approval and fresh-process recovery remained green.
 
 ## 2026-08-02
 
 ### Architecture Baseline integration
 
-- PR #11, `docs: establish MNFS architecture baseline`, was reviewed adversarially and merged into `main` at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`.
-- Published the 13-section Product Blueprint, MCRM, Capability Roadmap, ADR-0004 through ADR-0012, CAP-EXECUTION, research manifests and documentation governance/tooling.
-- Kept Issue #6 open because M2 remains explicitly blocked.
-- Selected Issue #7 as the next bounded enabler before AS-02 and the `MIS-002` Replan.
+- PR #11 was reviewed and merged into `main` at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`.
+- Published the Product Blueprint, MCRM, Capability Roadmap, ADR-0004–ADR-0012, CAP-EXECUTION, research manifests and documentation governance.
+- Kept M2 blocked and selected Plan Contract schema v2 and AS-02 as prerequisites.
 
-### Issue #7 — Mission Plan Contract schema v2
+### Mission Plan Contract schema v2
 
-- Created branch `feat/plan-schema-v2` and draft PR #12 from the accepted Architecture Baseline commit.
-- Replaced the monolithic plan type with a discriminated schema v1/v2 domain while preserving the historical v1 reader and canonical hash algorithm.
-- Added mandatory Mission, Milestone and Feature Acceptance Criteria with structured verification method, verifier, proof type and proof owner.
-- Added derived qualified identities for Milestones, Features and all criterion levels; v2 dependency references are fully qualified and same-level.
-- Added Product Milestone, Capability Spec and requirement references with hierarchical allocation validation.
-- Added reference-only Environment/Security Policy binding, optional exact policy hash, documentation impact and requirements impact.
-- Added strict unknown-field, downgrade, cross-level reference, duplicate, cycle and historical-rewind rejection.
-- Added SQLite migration v3 so multiple approved revisions remain immutable historical records; materialization selects the latest approved revision while a draft Replan leaves the previous approval authoritative.
-- Preserved existing v1 drafts, blocked approved-v1 rewrites and implemented the exact-hash v1-to-v2 Replan path.
-- Expanded Lavish to render and escape every deciding v2 field and qualified dependency node/edge without changing exact-hash approval controls.
-- Updated the project-local Pi skill and schema reference so new plans/Replans use v2 and accepted v1 history is never rewritten.
-- Added microdesign, implementation plan and automated acceptance evidence.
-- Adversarial review strengthened proof for approved-v2 fresh-process recovery, malformed requirement IDs, duplicate local IDs and Security Policy hashes.
-- Canonical GitHub Actions proof on Ubuntu 24.04 and Node.js 24.18.0 passed:
-  - TypeScript typecheck green;
-  - 94 tests passed, 0 failed;
-  - documentation tooling tests green;
-  - documentation validation green with 62 canonical IDs.
-- Automated tests verify `.mnfs/missions/MIS-002/plan.json` remains revision 3 with Git blob SHA `6b79117fe66cd5c9c8142099828812f470ce20de` and content hash `sha256:f95ffded37af764e5f76775ec6bbdda69d5638246609451ce37bf524908cf8c1`.
-- M2 remains blocked. Next sequence is Issue #8 AS-02, Issue #9 Replan, exact-hash Operator approval, mechanical R0–R4 recalculation and explicit unblock.
+- Added hierarchical Mission/Milestone/Feature criteria and qualified identities.
+- Preserved approved v1 history and implemented exact-hash v1-to-v2 Replan.
+- Added migration v3, strict validation, full Lavish rendering and Pi skill updates.
+- Canonical CI passed 94 tests and documentation validation with 62 canonical IDs.
 
 ## 2026-08-03
 
-### Issue #9 — M2 readiness reconciliation
+### M2 readiness, Capability and contract
 
-- Integrated accepted AS-02 evidence into CAP-EXECUTION without claiming M2 implementation verification.
-- Removed the obsolete AS-02 blocker; the approved schema-v2 MIS-002 Replan remains the contract blocker.
-- Preserved CAP-EXECUTION as `proposed`; explicit R3 Operator review is still required.
-- Clarified M2 Minimal Deterministic Receipt versus generalized Receipt/Evidence capability in M5+.
-- Kept M2 blocked pending Capability acceptance, exact-hash Replan approval, R0–R4 recalculation and explicit Operator unblock.
+- Integrated accepted AS-02 Evidence into CAP-EXECUTION.
+- Operator accepted CAP-EXECUTION version 0.1.0 for R3 while implementation remained planned.
+- Operator exact-hash approved MIS-002 revision 5 at `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`.
+- All 28 requirements were allocated to exact criteria; R0–R4 mechanically passed.
+- Operator supplied the M2 unblock decision for R5 microdesign only.
+- M01 implementation and Pi dispatch remained prohibited.
 
-### CAP-EXECUTION R3 acceptance
+### PR #14 integration and M01 R5 package
 
-- Operator supplied exact token `CAP_EXECUTION_ACCEPT version=0.1.0`; CAP-EXECUTION was promoted to `accepted` while implementation remained `planned`.
-- Created canonical acceptance evidence `ACCEPTANCE-CAP-EXECUTION-R3`.
-- Mechanical readiness now reports R3 `PASS`; R4 remains `BLOCKED` by the missing approved schema-v2 Replan and exact criterion allocations.
-- No Worker implementation, dispatch or M2 unblock was authorized.
+- PR #14 was merged into `main` at `dee12a9b53984d39045421c9586ee53665ebc5e5`.
+- Opened Issue #16, branch `design/mis-002-m01` and draft PR #17.
+- Published M01 research, source manifest, TC-01 protocol and proposed microdesign 0.3.0.
+- Self-review corrected Claim/release composition, empty-Track disposition, current-Track exclusivity, sequences and Claim result ownership.
 
+### M01 package approval and TC-01 plan
 
-### MIS-002 revision 5 approval and R4 allocation
+- Operator approved the design package for TC-01 planning while microdesign remained proposed.
+- TC-01 protocol became accepted version 0.2.0.
+- Wrote and reviewed TC-01 implementation/WSL2 plan version 1.0.3.
+- M01 production implementation and Pi dispatch remained prohibited.
 
-- Operator supplied exact approval token for `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3` after Lavish and adversarial review.
-- Planning service materialized MIS-002 revision 5 as the approved schema-v2 contract; revision 3 remains immutable history.
-- Converted all 28 proposed allocations to exact approved criterion identities and removed `BLOCK-MIS-002-REPLAN`.
-- Added acceptance evidence `ACCEPTANCE-MIS-002-REPLAN`; R0-R4 must pass mechanically with R5 NOT_STARTED.
-- M2 remains blocked pending a separate exact Operator decision; no Worker code, M01 microdesign or dispatch was authorized.
+## 2026-08-04
 
-### M2 R5 microdesign unblock
+### TC-01 Tasks 1–11 — deterministic harness
 
-- Operator supplied exact token `MNFS_UNBLOCK_M2 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 gates=R0,R1,R2,R3,R4`.
-- Recorded decision D-006 and evidence `ACCEPTANCE-M2-UNBLOCK`.
-- Authorized M2 to enter R5 for M01 microdesign only; R5 remains `NOT_STARTED` until that microdesign is written and reviewed.
-- M01 implementation and Pi Worker dispatch remain prohibited until a separately approved microdesign exists.
-- Material changes to the contract, SEC-E1, Capability, prerequisites or requirements trigger Replan/re-readiness before implementation.
+- Implemented the deterministic TC-01 harness task-by-task with observed RED/GREEN cycles.
+- Added shell-free bounded processes, Linux-owned fixtures, exact provenance, trusted Git observation, strict Treehouse JSON client, crash-durable Evidence, S01–S15 orchestration, Verdict/report and fail-closed cleanup.
+- Task 11 ended with 95 product tests, 119 AS-02 tests and 60 TC-01 tests green.
+- No installed Treehouse binary was invoked.
+
+### TC-01 Task 12 — complete adversarial review
+
+- Reviewed the harness against Blueprint, Roadmap, MCRM, ADR-0005, protocol, microdesign, pinned Treehouse source and primary platform documentation.
+- Corrected descendant processes surviving timeout, stale executable cleanup, missing S01 BLOCKED Evidence, weak source baseline, path escape, unsafe TOML, non-fatal UTF-8, inherited host environment, incorrect S13 private-state window and non-durable publication.
+- Published `ACCEPTANCE-TC-01-TASK-12-DETERMINISTIC-ADVERSARIAL-REVIEW`.
+- Final pre-WSL2 proof passed product 95/95, AS-02 119/119 and TC-01 75/75.
+
+### TC-01 Task 13 — real canonical WSL2 conformance
+
+- Operator executed canonical TC-01 on Ubuntu 26.04 WSL2 with Node `v24.18.0`, npm `12.0.2`, Git `2.53.0` and Treehouse raw version `v2.1.1` at `/usr/local/bin/treehouse`.
+- Strict version presentation was corrected through RED 75/1 and GREEN 76/76 while exact executable bytes remained hash-bound.
+- Run `tc01-20260804-144054-4315b6f2` produced `ACCEPT`; S01–S15 all passed with no limitation.
+- Fresh-process report revalidated manifest/artifact hashes and reproduced `ACCEPT`.
+- First cleanup failed closed without deleting anything; diagnosis exposed property-order-sensitive snapshot equality despite identical Git/filesystem hashes.
+- Canonical snapshot comparison was corrected through RED 76/1 and GREEN 77/77.
+- JSON errors were hardened to expose allowlisted blockers through RED 77/1 and GREEN 78/78.
+- Second cleanup returned `COMPLETED`, removed only registered ephemeral fixture resources and preserved all finalized Evidence.
+- Published `ACCEPTANCE-TC-01-TREEHOUSE-PRODUCTION-ADAPTER` and reconciled microdesign 0.4.0.
+
+### Task 14 — final constructive and adversarial R5 review
+
+- Operator explicitly authorized the final R5 design review.
+- Mapped all seven M01-owned requirements to exact contract criteria, state, service boundaries, typed failure and verification routes.
+- Constructive coverage completed for `CAP-EXEC-REQ-001`, `002`, `004`, `005`, `006`, `007` and `008`; no orphan and no M02 requirement pulled into implementation scope.
+- The adversarial pass found and closed three Critical issues: canonical checkout with `origin` escaped the TC-01 boundary; inherited Treehouse HOME/XDG hooks; and duplicate grant risk under concurrent callers or parent-death/child-survival.
+- The review found and closed eight Important issues: ancestry, Event payload version, migration/downgrade/backup, Git commit/tree identity, idempotency input binding, duplicate Reconcile identity, read-only Recovery contradiction and shared Git objects.
+- Microdesign 0.6.1 introduced Attempt-owned independent sources, controlled config/hooks, a durable LeaseActionRunner, versioned Events, exact ancestry FKs, canonical input hashes and byte-for-byte non-mutating Recovery.
+- Published `REVIEW-MIS-002-M01-R5-FINAL` with recommendation `APROVÁVEL`, 3/3 Critical closed, 8/8 Important closed and no Replan requirement.
+
+### M01 R5 approval and implementation planning
+
+- Operator supplied exact token `MNFS_APPROVE_M01_MICRODESIGN version=0.6.1 contract=sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3 treehouse=sha256:c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`.
+- Recorded `D-007` and `ACCEPTANCE-MIS-002-M01-R5-APPROVAL`.
+- Promoted microdesign 0.6.1 to `accepted` and MCRM R5 to `PASS`.
+- The approval authorized only preparation and review of a separate TDD implementation plan; code, Pi dispatch and automatic merge remained prohibited.
+- Wrote `PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE` version 1.0.0 with implementation/proof gates.
+- Self-review found Event migration ordering, maintenance/process-identity ordering and placeholder defects before execution.
+- Revised the plan to version 1.0.1 with 14 ordered gates, exact interfaces, no symbolic dates or deferred placeholders, complete seven-requirement mapping and explicit proof for every Task 14 Critical/Important correction.
+- Plan 1.0.1 is current and awaiting an exact Operator approval. Task 1 RED remains unauthorized; PR #17 remains draft and unmerged.

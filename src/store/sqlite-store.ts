@@ -1,21 +1,59 @@
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-import { MnfsError } from '../domain/errors.js';
+import { MnfsError, type MnfsErrorCode } from '../domain/errors.js';
 import {
   canonicalJson,
   hashPlanContent,
   validateMissionPlan,
   type MissionPlanRevision,
 } from '../domain/mission-plan.js';
-import type {
-  ApproveMissionPlanInput,
-  Mission,
-  MissionEvent,
-  SaveMissionPlanRevisionInput,
+import {
+  MISSION_EVENT_TYPES_V1,
+  type ApproveMissionPlanInput,
+  type Mission,
+  type MissionEvent,
+  type SaveMissionPlanRevisionInput,
 } from '../domain/types.js';
+import {
+  formatAttemptId,
+  formatClaimId,
+  formatLeaseId,
+  formatWorkerRunId,
+  formatWriteTrackId,
+  requireAttemptId,
+  requireLeaseId,
+  requireWorkerRunId,
+  requireWriteTrackId,
+} from '../execution/ids.js';
+import type {
+  Attempt,
+  AttemptStatus,
+  Claim,
+  Lease,
+  LeaseActionKind,
+  LeaseActionPhase,
+  LeaseStatus,
+  ProcessIdentity,
+  SourceStatus,
+  WorkerRun,
+  WorkerRunStatus,
+  WriteTrack,
+  WriteTrackStatus,
+} from '../execution/model.js';
+import { EventStore, type AppendEventInput } from './event-store.js';
+import {
+  ExecutionStore,
+  type AllocateAttemptInput,
+  type AllocateClaimInput,
+  type AllocateLeaseInput,
+  type AllocateWorkerRunInput,
+  type AllocateWriteTrackInput,
+} from './execution-store.js';
+import { inspectSupportedDatabaseSchema } from './sqlite-maintenance.js';
 import { applyMigrations } from './migrations.js';
+import { SqliteTransaction } from './sqlite-transaction.js';
 
 export interface OpenMissionInput {
   readonly missionId: string;
@@ -28,6 +66,202 @@ export interface OpenNextMissionInput {
   readonly goal: string;
   readonly openedAt: string;
 }
+
+export interface LeaseAllocationPreview {
+  readonly id: string;
+  readonly generation: number;
+}
+
+export interface SetLeaseLifecycleInput {
+  readonly id: string;
+  readonly expectedVersion: number;
+  readonly status: LeaseStatus;
+  readonly releaseIdempotencyKey?: string | null;
+  readonly releaseInputHash?: string | null;
+  readonly externalLeaseId?: string | null;
+  readonly worktreePath?: string | null;
+  readonly externalLeasedAt?: string | null;
+  readonly actionKind?: LeaseActionKind | null;
+  readonly actionToken?: string | null;
+  readonly actionPhase?: LeaseActionPhase | null;
+  readonly actionOwner?: ProcessIdentity | null;
+  readonly actionRunner?: ProcessIdentity | null;
+  readonly actionStartedRef?: string | null;
+  readonly actionResultRef?: string | null;
+  readonly releaseRequestedAt?: string | null;
+  readonly releaseObservedAt?: string | null;
+  readonly lastObservedAt?: string | null;
+  readonly lastErrorCode?: string | null;
+  readonly lastErrorRef?: string | null;
+  readonly updatedAt: string;
+}
+
+export interface ExecutionAtomicSession {
+  allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack;
+  allocateAttempt(input: AllocateAttemptInput): Attempt;
+  allocateWorkerRun(input: AllocateWorkerRunInput): WorkerRun;
+  previewLeaseAllocation(writeTrackId: string): LeaseAllocationPreview;
+  allocateLease(input: AllocateLeaseInput): Lease;
+  allocateClaim(input: AllocateClaimInput): Claim;
+  setWriteTrackStatus(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WriteTrackStatus;
+    readonly updatedAt: string;
+  }): WriteTrack;
+  setAttemptState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: AttemptStatus;
+    readonly sourceStatus: SourceStatus;
+    readonly sourcePath?: string;
+    readonly sourceFingerprint?: string;
+    readonly updatedAt: string;
+  }): Attempt;
+  setWorkerRunState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WorkerRunStatus;
+    readonly processIdentity?: ProcessIdentity;
+    readonly processStartedAt?: string;
+    readonly exitCode?: number;
+    readonly updatedAt: string;
+  }): WorkerRun;
+  setLeaseLifecycle(input: SetLeaseLifecycleInput): Lease;
+  appendEvent(input: AppendEventInput): void;
+}
+
+const CURRENT_WRITE_SCHEMA_VERSION = 4;
+
+const CURRENT_WRITE_TABLE_COLUMNS = {
+  schema_migrations: ['version', 'applied_at'],
+  missions: ['id', 'goal', 'status', 'opened_at'],
+  events: [
+    'seq',
+    'event_id',
+    'type',
+    'payload_schema_version',
+    'mission_id',
+    'occurred_at',
+    'payload_json',
+  ],
+  mission_plan_revisions: [
+    'mission_id',
+    'revision',
+    'status',
+    'content_hash',
+    'content_json',
+    'created_at',
+    'approved_at',
+  ],
+  event_types: ['type', 'payload_schema_version'],
+  entity_sequences: ['kind', 'next_value'],
+  write_tracks: [
+    'id',
+    'mission_id',
+    'milestone_qualified_id',
+    'feature_qualified_id',
+    'contract_hash',
+    'status',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  attempts: [
+    'id',
+    'write_track_id',
+    'ordinal',
+    'contract_hash',
+    'git_object_format',
+    'base_commit_sha',
+    'source_status',
+    'source_path',
+    'source_fingerprint',
+    'status',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  worker_runs: [
+    'id',
+    'attempt_id',
+    'ordinal',
+    'contract_hash',
+    'status',
+    'process_boot_id',
+    'process_id',
+    'process_start_ticks',
+    'process_started_at',
+    'exit_code',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  leases: [
+    'id',
+    'write_track_id',
+    'attempt_id',
+    'contract_hash',
+    'generation',
+    'status',
+    'grant_idempotency_key',
+    'grant_input_hash',
+    'release_idempotency_key',
+    'release_input_hash',
+    'holder',
+    'external_lease_id',
+    'worktree_path',
+    'external_leased_at',
+    'action_kind',
+    'action_token',
+    'action_phase',
+    'action_owner_boot_id',
+    'action_owner_pid',
+    'action_owner_start_ticks',
+    'action_runner_boot_id',
+    'action_runner_pid',
+    'action_runner_start_ticks',
+    'action_started_ref',
+    'action_result_ref',
+    'release_requested_at',
+    'release_observed_at',
+    'last_observed_at',
+    'last_error_code',
+    'last_error_ref',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+  claims: [
+    'id',
+    'write_track_id',
+    'attempt_id',
+    'worker_run_id',
+    'lease_id',
+    'contract_hash',
+    'ordinal',
+    'status',
+    'idempotency_key',
+    'input_hash',
+    'base_commit_sha',
+    'result_tree_sha',
+    'claimed_criteria_json',
+    'version',
+    'created_at',
+    'updated_at',
+  ],
+} as const;
+
+const CURRENT_WRITE_INDEXES = [
+  'events_mission_seq_idx',
+  'mission_plan_approved_revision_idx',
+  'write_tracks_one_current_per_feature',
+  'attempts_one_open_per_track',
+  'worker_runs_one_current_per_attempt',
+  'leases_one_current_per_track',
+  'leases_one_action_token',
+  'claims_one_current_per_attempt',
+] as const;
 
 function missionFromRow(row: Readonly<Record<string, unknown>>): Mission {
   return {
@@ -54,28 +288,781 @@ function planRevisionFromRow(row: Readonly<Record<string, unknown>>): MissionPla
   };
 }
 
+function quoteIdentifier(identifier: string): string {
+  return `"${identifier.replaceAll('"', '""')}"`;
+}
+
+function sameStrings(actual: readonly string[], expected: readonly string[]): boolean {
+  return actual.length === expected.length
+    && actual.every((value, index) => value === expected[index]);
+}
+
+function requireCurrentWriteSchemaShape(database: DatabaseSync): void {
+  for (const [tableName, expectedColumns] of Object.entries(CURRENT_WRITE_TABLE_COLUMNS)) {
+    const actualColumns = database.prepare(`PRAGMA table_info(${quoteIdentifier(tableName)})`)
+      .all()
+      .map((row) => String(row.name));
+    if (!sameStrings(actualColumns, expectedColumns)) {
+      throw new MnfsError(
+        'SCHEMA_VERSION_UNSUPPORTED',
+        `SQLite schema v4 table ${tableName} has columns [${actualColumns.join(', ')}], expected [${
+          expectedColumns.join(', ')
+        }].`,
+      );
+    }
+  }
+
+  const sequences = database.prepare(`
+    SELECT kind, next_value
+    FROM entity_sequences
+    ORDER BY kind
+  `).all().map((row) => ({
+    kind: String(row.kind),
+    nextValue: Number(row.next_value),
+  }));
+  if (
+    sequences.length !== 2
+    || sequences[0]?.kind !== 'LEASE'
+    || sequences[1]?.kind !== 'WRITE_TRACK'
+    || sequences.some((sequence) => !Number.isSafeInteger(sequence.nextValue) || sequence.nextValue <= 0)
+  ) {
+    throw new MnfsError(
+      'SCHEMA_VERSION_UNSUPPORTED',
+      'SQLite schema v4 entity sequence authority is missing or invalid.',
+    );
+  }
+
+  const indexNames = new Set(database.prepare(`
+    SELECT name
+    FROM sqlite_master
+    WHERE type = 'index'
+  `).all().map((row) => String(row.name)));
+  for (const indexName of CURRENT_WRITE_INDEXES) {
+    if (!indexNames.has(indexName)) {
+      throw new MnfsError(
+        'SCHEMA_VERSION_UNSUPPORTED',
+        `SQLite schema v4 is missing required index ${indexName}.`,
+      );
+    }
+  }
+
+  const registeredEventTypes = database.prepare(`
+    SELECT type, payload_schema_version
+    FROM event_types
+    ORDER BY type, payload_schema_version
+  `).all().map((row) => `${String(row.type)}@${Number(row.payload_schema_version)}`);
+  const expectedEventTypes = [...MISSION_EVENT_TYPES_V1]
+    .sort()
+    .map((eventType) => `${eventType}@1`);
+  if (!sameStrings(registeredEventTypes, expectedEventTypes)) {
+    throw new MnfsError(
+      'SCHEMA_VERSION_UNSUPPORTED',
+      'SQLite schema v4 Event registry does not match the accepted version-1 registry.',
+    );
+  }
+}
+
+function requireCurrentWriteSchema(database: DatabaseSync): void {
+  const schema = inspectSupportedDatabaseSchema(database, true);
+  if (schema.schemaVersion !== CURRENT_WRITE_SCHEMA_VERSION) {
+    throw new MnfsError(
+      'SCHEMA_VERSION_UNSUPPORTED',
+      `This MNFS writer supports schema ${CURRENT_WRITE_SCHEMA_VERSION}, not ${schema.schemaVersion}.`,
+    );
+  }
+  requireCurrentWriteSchemaShape(database);
+}
+
+function isSqliteConstraint(error: unknown): boolean {
+  const candidate = error as { readonly code?: unknown; readonly message?: unknown };
+  return (
+    typeof candidate.code === 'string'
+    && candidate.code.startsWith('SQLITE_CONSTRAINT')
+  ) || (
+    candidate.code === 'ERR_SQLITE_ERROR'
+    && typeof candidate.message === 'string'
+    && /constraint failed|not unique/i.test(candidate.message)
+  );
+}
+
+function translateExecutionConstraint(
+  error: unknown,
+  code: MnfsErrorCode,
+  message: string,
+): never {
+  if (error instanceof MnfsError) throw error;
+  if (isSqliteConstraint(error)) throw new MnfsError(code, message);
+  throw error;
+}
+
+export class SqliteExecutionStore extends ExecutionStore {
+  readonly #database: DatabaseSync;
+  readonly #transactions: SqliteTransaction;
+  readonly #events: EventStore;
+
+  constructor(database: DatabaseSync, transactions: SqliteTransaction, events: EventStore) {
+    super(database, transactions, events);
+    this.#database = database;
+    this.#transactions = transactions;
+    this.#events = events;
+  }
+
+  #nextEntitySequence(kind: 'WRITE_TRACK' | 'LEASE'): number {
+    const row = this.#database.prepare(`
+      SELECT next_value
+      FROM entity_sequences
+      WHERE kind = ?
+    `).get(kind) as { readonly next_value?: unknown } | undefined;
+    const value = Number(row?.next_value);
+    if (!Number.isSafeInteger(value) || value <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', `Execution sequence ${kind} is missing or invalid.`);
+    }
+    const result = this.#database.prepare(`
+      UPDATE entity_sequences
+      SET next_value = next_value + 1
+      WHERE kind = ? AND next_value = ?
+    `).run(kind, value);
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Execution sequence ${kind} changed concurrently.`);
+    }
+    return value;
+  }
+
+  #allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack {
+    try {
+      const id = formatWriteTrackId(this.#nextEntitySequence('WRITE_TRACK'));
+      this.#database.prepare(`
+        INSERT INTO write_tracks (
+          id, mission_id, milestone_qualified_id, feature_qualified_id,
+          contract_hash, status, version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, 'ACTIVE', 1, ?, ?)
+      `).run(
+        id,
+        input.missionId,
+        input.milestoneQualifiedId,
+        input.featureQualifiedId,
+        input.contractHash,
+        input.occurredAt,
+        input.occurredAt,
+      );
+      const value = super.getWriteTrack(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `WriteTrack ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      translateExecutionConstraint(error, 'WRITE_TRACK_CONFLICT', 'Could not allocate the Write Track.');
+    }
+  }
+
+  override allocateWriteTrack(input: AllocateWriteTrackInput): WriteTrack {
+    return this.#transactions.run(() => this.#allocateWriteTrack(input));
+  }
+
+  #allocateAttempt(input: AllocateAttemptInput): Attempt {
+    try {
+      const writeTrackId = requireWriteTrackId(input.writeTrackId);
+      const row = this.#database.prepare(`
+        SELECT COALESCE(MAX(ordinal), 0) + 1 AS next_value
+        FROM attempts
+        WHERE write_track_id = ?
+      `).get(writeTrackId) as { readonly next_value?: unknown } | undefined;
+      const ordinal = Number(row?.next_value ?? 1);
+      if (!Number.isSafeInteger(ordinal) || ordinal <= 0) {
+        throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Attempt ordinal.');
+      }
+      const id = formatAttemptId(writeTrackId, ordinal);
+      this.#database.prepare(`
+        INSERT INTO attempts (
+          id, write_track_id, ordinal, contract_hash, git_object_format,
+          base_commit_sha, source_status, source_path, source_fingerprint,
+          status, version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, 'REQUESTED', NULL, NULL, 'OPEN', 1, ?, ?)
+      `).run(
+        id,
+        writeTrackId,
+        ordinal,
+        input.contractHash,
+        input.gitObjectFormat,
+        input.baseCommitSha,
+        input.occurredAt,
+        input.occurredAt,
+      );
+      const value = super.getAttempt(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Attempt ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      translateExecutionConstraint(error, 'ATTEMPT_CONFLICT', 'Could not allocate the Attempt.');
+    }
+  }
+
+  #allocateWorkerRun(input: AllocateWorkerRunInput): WorkerRun {
+    try {
+      const attemptId = requireAttemptId(input.attemptId);
+      const row = this.#database.prepare(`
+        SELECT COALESCE(MAX(ordinal), 0) + 1 AS next_value
+        FROM worker_runs
+        WHERE attempt_id = ?
+      `).get(attemptId) as { readonly next_value?: unknown } | undefined;
+      const ordinal = Number(row?.next_value ?? 1);
+      if (!Number.isSafeInteger(ordinal) || ordinal <= 0) {
+        throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Worker Run ordinal.');
+      }
+      const id = formatWorkerRunId(attemptId, ordinal);
+      this.#database.prepare(`
+        INSERT INTO worker_runs (
+          id, attempt_id, ordinal, contract_hash, status,
+          process_boot_id, process_id, process_start_ticks, process_started_at,
+          exit_code, version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, 'STARTING', NULL, NULL, NULL, NULL, NULL, 1, ?, ?)
+      `).run(id, attemptId, ordinal, input.contractHash, input.occurredAt, input.occurredAt);
+      const value = super.getWorkerRun(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Worker Run ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      translateExecutionConstraint(error, 'WORKER_RUN_CONFLICT', 'Could not allocate the Worker Run.');
+    }
+  }
+
+  #setWriteTrackStatus(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WriteTrackStatus;
+    readonly updatedAt: string;
+  }): WriteTrack {
+    const result = this.#database.prepare(`
+      UPDATE write_tracks
+      SET status = ?, version = version + 1, updated_at = ?
+      WHERE id = ? AND version = ?
+    `).run(input.status, input.updatedAt, input.id, input.expectedVersion);
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Write Track version for ${input.id}.`);
+    }
+    const value = super.getWriteTrack(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Write Track ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
+  #setAttemptState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: AttemptStatus;
+    readonly sourceStatus: SourceStatus;
+    readonly sourcePath?: string;
+    readonly sourceFingerprint?: string;
+    readonly updatedAt: string;
+  }): Attempt {
+    const result = this.#database.prepare(`
+      UPDATE attempts
+      SET status = ?, source_status = ?, source_path = ?, source_fingerprint = ?,
+          version = version + 1, updated_at = ?
+      WHERE id = ? AND version = ?
+    `).run(
+      input.status,
+      input.sourceStatus,
+      input.sourcePath ?? null,
+      input.sourceFingerprint ?? null,
+      input.updatedAt,
+      input.id,
+      input.expectedVersion,
+    );
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Attempt version for ${input.id}.`);
+    }
+    const value = super.getAttempt(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Attempt ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
+  #setWorkerRunState(input: {
+    readonly id: string;
+    readonly expectedVersion: number;
+    readonly status: WorkerRunStatus;
+    readonly processIdentity?: ProcessIdentity;
+    readonly processStartedAt?: string;
+    readonly exitCode?: number;
+    readonly updatedAt: string;
+  }): WorkerRun {
+    const identity = input.processIdentity;
+    const result = this.#database.prepare(`
+      UPDATE worker_runs
+      SET status = ?, process_boot_id = ?, process_id = ?, process_start_ticks = ?,
+          process_started_at = ?, exit_code = ?, version = version + 1, updated_at = ?
+      WHERE id = ? AND version = ?
+    `).run(
+      input.status,
+      identity?.bootId ?? null,
+      identity?.pid ?? null,
+      identity?.startTicks ?? null,
+      input.processStartedAt ?? null,
+      input.exitCode ?? null,
+      input.updatedAt,
+      input.id,
+      input.expectedVersion,
+    );
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Worker Run version for ${input.id}.`);
+    }
+    const value = super.getWorkerRun(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Worker Run ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
+  getCurrentAttempt(writeTrackId: string): Attempt | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM attempts
+      WHERE write_track_id = ? AND status = 'OPEN'
+      LIMIT 1
+    `).get(writeTrackId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getAttempt(String(row.id));
+  }
+
+  getCurrentWorkerRun(attemptId: string): WorkerRun | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM worker_runs
+      WHERE attempt_id = ? AND status IN ('STARTING', 'RUNNING', 'IDLE')
+      LIMIT 1
+    `).get(attemptId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getWorkerRun(String(row.id));
+  }
+
+  getCurrentLease(writeTrackId: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE write_track_id = ?
+        AND status IN ('REQUESTED', 'ACTIVE', 'RELEASE_PENDING', 'DIVERGED')
+      ORDER BY generation DESC
+      LIMIT 1
+    `).get(writeTrackId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
+  getLatestLease(writeTrackId: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE write_track_id = ?
+      ORDER BY generation DESC
+      LIMIT 1
+    `).get(writeTrackId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
+  getLeaseByGrantIdempotencyKey(idempotencyKey: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE grant_idempotency_key = ?
+      LIMIT 1
+    `).get(idempotencyKey) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
+  getLeaseByReleaseIdempotencyKey(idempotencyKey: string): Lease | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM leases
+      WHERE release_idempotency_key = ?
+      LIMIT 1
+    `).get(idempotencyKey) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getLease(String(row.id));
+  }
+
+  getCurrentClaim(attemptId: string): Claim | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM claims
+      WHERE attempt_id = ? AND status = 'OPEN'
+      LIMIT 1
+    `).get(attemptId) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getClaim(String(row.id));
+  }
+
+  getClaimByIdempotencyKey(idempotencyKey: string): Claim | undefined {
+    const row = this.#database.prepare(`
+      SELECT id
+      FROM claims
+      WHERE idempotency_key = ?
+      LIMIT 1
+    `).get(idempotencyKey) as { readonly id?: unknown } | undefined;
+    return row === undefined ? undefined : super.getClaim(String(row.id));
+  }
+
+  #allocateClaim(input: AllocateClaimInput): Claim {
+    const criteria = [...input.claimedCriterionIds];
+    if (
+      criteria.length === 0
+      || criteria.some((criterion) => criterion.length === 0)
+      || new Set(criteria).size !== criteria.length
+    ) {
+      throw new MnfsError('CLAIM_CONFLICT', 'Claim criteria must be non-empty and unique.');
+    }
+
+    const writeTrackId = requireWriteTrackId(input.writeTrackId);
+    const attemptId = requireAttemptId(input.attemptId, writeTrackId);
+    const workerRunId = requireWorkerRunId(input.workerRunId, attemptId);
+    const leaseId = requireLeaseId(input.leaseId);
+
+    const existing = this.getClaimByIdempotencyKey(input.idempotencyKey);
+    if (existing !== undefined) {
+      const sameCriteria = JSON.stringify(existing.claimedCriterionIds) === JSON.stringify(criteria);
+      if (
+        existing.inputHash === input.inputHash
+        && existing.writeTrackId === writeTrackId
+        && existing.attemptId === attemptId
+        && existing.workerRunId === workerRunId
+        && existing.leaseId === leaseId
+        && existing.contractHash === input.contractHash
+        && existing.baseCommitSha === input.baseCommitSha
+        && existing.resultTreeSha === input.resultTreeSha
+        && sameCriteria
+      ) {
+        return existing;
+      }
+      throw new MnfsError(
+        'CLAIM_IDEMPOTENCY_CONFLICT',
+        `Claim idempotency key ${input.idempotencyKey} is bound to different input.`,
+      );
+    }
+
+    const ordinalRow = this.#database.prepare(`
+      SELECT COALESCE(MAX(ordinal), 0) + 1 AS next_value
+      FROM claims
+      WHERE attempt_id = ?
+    `).get(attemptId) as { readonly next_value?: unknown } | undefined;
+    const ordinal = Number(ordinalRow?.next_value ?? 1);
+    if (!Number.isSafeInteger(ordinal) || ordinal <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Claim ordinal.');
+    }
+    const id = formatClaimId(attemptId, ordinal);
+
+    try {
+      this.#database.prepare(`
+        INSERT INTO claims (
+          id, write_track_id, attempt_id, worker_run_id, lease_id,
+          contract_hash, ordinal, status, idempotency_key, input_hash,
+          base_commit_sha, result_tree_sha, claimed_criteria_json,
+          version, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'OPEN', ?, ?, ?, ?, ?, 1, ?, ?)
+      `).run(
+        id,
+        writeTrackId,
+        attemptId,
+        workerRunId,
+        leaseId,
+        input.contractHash,
+        ordinal,
+        input.idempotencyKey,
+        input.inputHash,
+        input.baseCommitSha,
+        input.resultTreeSha,
+        JSON.stringify(criteria),
+        input.occurredAt,
+        input.occurredAt,
+      );
+    } catch (error) {
+      translateExecutionConstraint(error, 'CLAIM_CONFLICT', 'Could not allocate the Claim.');
+    }
+
+    const value = super.getClaim(id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Claim ${id} disappeared after persistence.`);
+    }
+    return value;
+  }
+
+  #previewLeaseAllocation(writeTrackIdInput: string): LeaseAllocationPreview {
+    const writeTrackId = requireWriteTrackId(writeTrackIdInput);
+    const sequenceRow = this.#database.prepare(`
+      SELECT next_value
+      FROM entity_sequences
+      WHERE kind = 'LEASE'
+    `).get() as { readonly next_value?: unknown } | undefined;
+    const nextIdentity = Number(sequenceRow?.next_value);
+    if (!Number.isSafeInteger(nextIdentity) || nextIdentity <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', 'Lease identity sequence is missing or invalid.');
+    }
+    const generationRow = this.#database.prepare(`
+      SELECT COALESCE(MAX(generation), 0) + 1 AS next_value
+      FROM leases
+      WHERE write_track_id = ?
+    `).get(writeTrackId) as { readonly next_value?: unknown } | undefined;
+    const generation = Number(generationRow?.next_value ?? 1);
+    if (!Number.isSafeInteger(generation) || generation <= 0) {
+      throw new MnfsError('INTERNAL_ERROR', 'Could not preview the next Lease generation.');
+    }
+    return { id: formatLeaseId(nextIdentity), generation };
+  }
+
+  #allocateLease(input: AllocateLeaseInput): Lease {
+    try {
+      const existingRow = this.#database.prepare(`
+        SELECT id
+        FROM leases
+        WHERE grant_idempotency_key = ?
+      `).get(input.grantIdempotencyKey) as { readonly id?: unknown } | undefined;
+      if (existingRow !== undefined) {
+        const existing = super.getLease(String(existingRow.id));
+        if (existing === undefined) {
+          throw new MnfsError('INTERNAL_ERROR', 'Lease idempotency row disappeared.');
+        }
+        if (
+          existing.grantInputHash === input.grantInputHash
+          && existing.writeTrackId === input.writeTrackId
+          && existing.attemptId === input.attemptId
+          && existing.contractHash === input.contractHash
+          && existing.holder === input.holder
+        ) return existing;
+        throw new MnfsError(
+          'LEASE_IDEMPOTENCY_CONFLICT',
+          `Lease idempotency key ${input.grantIdempotencyKey} is bound to different input.`,
+        );
+      }
+
+      const writeTrackId = requireWriteTrackId(input.writeTrackId);
+      const attemptId = requireAttemptId(input.attemptId, writeTrackId);
+      const id = formatLeaseId(this.#nextEntitySequence('LEASE'));
+      const generationRow = this.#database.prepare(`
+        SELECT COALESCE(MAX(generation), 0) + 1 AS next_value
+        FROM leases
+        WHERE write_track_id = ?
+      `).get(writeTrackId) as { readonly next_value?: unknown } | undefined;
+      const generation = Number(generationRow?.next_value ?? 1);
+      if (!Number.isSafeInteger(generation) || generation <= 0) {
+        throw new MnfsError('INTERNAL_ERROR', 'Could not allocate the next Lease generation.');
+      }
+      this.#database.prepare(`
+        INSERT INTO leases (
+          id, write_track_id, attempt_id, contract_hash, generation, status,
+          grant_idempotency_key, grant_input_hash,
+          release_idempotency_key, release_input_hash, holder,
+          external_lease_id, worktree_path, external_leased_at,
+          action_kind, action_token, action_phase,
+          action_owner_boot_id, action_owner_pid, action_owner_start_ticks,
+          action_runner_boot_id, action_runner_pid, action_runner_start_ticks,
+          action_started_ref, action_result_ref,
+          release_requested_at, release_observed_at, last_observed_at,
+          last_error_code, last_error_ref, version, created_at, updated_at
+        ) VALUES (
+          ?, ?, ?, ?, ?, 'REQUESTED', ?, ?, NULL, NULL, ?,
+          NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, 1, ?, ?
+        )
+      `).run(
+        id,
+        writeTrackId,
+        attemptId,
+        input.contractHash,
+        generation,
+        input.grantIdempotencyKey,
+        input.grantInputHash,
+        input.holder,
+        input.occurredAt,
+        input.occurredAt,
+      );
+      const value = super.getLease(id);
+      if (value === undefined) {
+        throw new MnfsError('INTERNAL_ERROR', `Lease ${id} disappeared after persistence.`);
+      }
+      return value;
+    } catch (error) {
+      if (error instanceof MnfsError && error.code === 'LEASE_IDEMPOTENCY_CONFLICT') throw error;
+      translateExecutionConstraint(error, 'LEASE_CONFLICT', 'Could not allocate the Lease.');
+    }
+  }
+
+  override allocateLease(input: AllocateLeaseInput): Lease {
+    return this.#transactions.run(() => this.#allocateLease(input));
+  }
+
+  #setLeaseLifecycle(input: SetLeaseLifecycleInput): Lease {
+    const owner = input.actionOwner;
+    const runner = input.actionRunner;
+    let result;
+    try {
+      result = this.#database.prepare(`
+        UPDATE leases
+        SET status = ?,
+            release_idempotency_key = ?, release_input_hash = ?,
+            external_lease_id = ?, worktree_path = ?, external_leased_at = ?,
+            action_kind = ?, action_token = ?, action_phase = ?,
+            action_owner_boot_id = ?, action_owner_pid = ?, action_owner_start_ticks = ?,
+            action_runner_boot_id = ?, action_runner_pid = ?, action_runner_start_ticks = ?,
+            action_started_ref = ?, action_result_ref = ?,
+            release_requested_at = ?, release_observed_at = ?, last_observed_at = ?,
+            last_error_code = ?, last_error_ref = ?,
+            version = version + 1, updated_at = ?
+        WHERE id = ? AND version = ?
+      `).run(
+        input.status,
+        input.releaseIdempotencyKey ?? null,
+        input.releaseInputHash ?? null,
+        input.externalLeaseId ?? null,
+        input.worktreePath ?? null,
+        input.externalLeasedAt ?? null,
+        input.actionKind ?? null,
+        input.actionToken ?? null,
+        input.actionPhase ?? null,
+        owner?.bootId ?? null,
+        owner?.pid ?? null,
+        owner?.startTicks ?? null,
+        runner?.bootId ?? null,
+        runner?.pid ?? null,
+        runner?.startTicks ?? null,
+        input.actionStartedRef ?? null,
+        input.actionResultRef ?? null,
+        input.releaseRequestedAt ?? null,
+        input.releaseObservedAt ?? null,
+        input.lastObservedAt ?? null,
+        input.lastErrorCode ?? null,
+        input.lastErrorRef ?? null,
+        input.updatedAt,
+        input.id,
+        input.expectedVersion,
+      );
+    } catch (error) {
+      translateExecutionConstraint(error, 'LEASE_CONFLICT', 'Could not update the Lease lifecycle.');
+    }
+    if (Number(result.changes) !== 1) {
+      throw new MnfsError('CONCURRENCY_CONFLICT', `Stale Lease version for ${input.id}.`);
+    }
+    const value = super.getLease(input.id);
+    if (value === undefined) {
+      throw new MnfsError('INTERNAL_ERROR', `Lease ${input.id} disappeared after update.`);
+    }
+    return value;
+  }
+
+  runAtomic<T>(operation: (session: ExecutionAtomicSession) => T): T {
+    return this.#transactions.run(() => {
+      let active = true;
+      const requireActive = (): void => {
+        if (!active) {
+          throw new MnfsError('INTERNAL_ERROR', 'Atomic execution session is no longer active.');
+        }
+      };
+      const session: ExecutionAtomicSession = Object.freeze({
+        allocateWriteTrack: (input: AllocateWriteTrackInput) => {
+          requireActive();
+          return this.#allocateWriteTrack(input);
+        },
+        allocateAttempt: (input: AllocateAttemptInput) => {
+          requireActive();
+          return this.#allocateAttempt(input);
+        },
+        allocateWorkerRun: (input: AllocateWorkerRunInput) => {
+          requireActive();
+          return this.#allocateWorkerRun(input);
+        },
+        previewLeaseAllocation: (writeTrackId: string) => {
+          requireActive();
+          return this.#previewLeaseAllocation(writeTrackId);
+        },
+        allocateLease: (input: AllocateLeaseInput) => {
+          requireActive();
+          return this.#allocateLease(input);
+        },
+        allocateClaim: (input: AllocateClaimInput) => {
+          requireActive();
+          return this.#allocateClaim(input);
+        },
+        setWriteTrackStatus: (
+          input: Parameters<ExecutionAtomicSession['setWriteTrackStatus']>[0],
+        ) => {
+          requireActive();
+          return this.#setWriteTrackStatus(input);
+        },
+        setAttemptState: (
+          input: Parameters<ExecutionAtomicSession['setAttemptState']>[0],
+        ) => {
+          requireActive();
+          return this.#setAttemptState(input);
+        },
+        setWorkerRunState: (
+          input: Parameters<ExecutionAtomicSession['setWorkerRunState']>[0],
+        ) => {
+          requireActive();
+          return this.#setWorkerRunState(input);
+        },
+        setLeaseLifecycle: (input: SetLeaseLifecycleInput) => {
+          requireActive();
+          return this.#setLeaseLifecycle(input);
+        },
+        appendEvent: (input: AppendEventInput) => {
+          requireActive();
+          this.#events.append(input);
+        },
+      });
+      try {
+        return operation(session);
+      } finally {
+        active = false;
+      }
+    });
+  }
+}
+
 export class SqliteStore {
   readonly #database: DatabaseSync;
+  readonly #transactions: SqliteTransaction;
+  readonly #events: EventStore;
+  readonly execution: SqliteExecutionStore;
 
   private constructor(database: DatabaseSync) {
     this.#database = database;
+    this.#transactions = new SqliteTransaction(database);
+    this.#events = new EventStore(database);
+    this.execution = new SqliteExecutionStore(database, this.#transactions, this.#events);
   }
 
   static open(path: string): SqliteStore {
     mkdirSync(dirname(path), { recursive: true });
+    const databaseAlreadyExists = existsSync(path);
     const database = new DatabaseSync(path);
-    applyMigrations(database);
-    return new SqliteStore(database);
+    try {
+      if (databaseAlreadyExists) {
+        requireCurrentWriteSchema(database);
+      } else {
+        applyMigrations(database);
+        requireCurrentWriteSchema(database);
+      }
+      return new SqliteStore(database);
+    } catch (error) {
+      database.close();
+      throw error;
+    }
   }
 
-  #transaction<T>(operation: () => T): T {
-    this.#database.exec('BEGIN IMMEDIATE');
+  static openCurrent(path: string): SqliteStore {
+    let verifier: DatabaseSync | undefined;
     try {
-      const result = operation();
-      this.#database.exec('COMMIT');
-      return result;
+      verifier = new DatabaseSync(path, { readOnly: true });
+      requireCurrentWriteSchema(verifier);
+    } finally {
+      verifier?.close();
+    }
+
+    const database = new DatabaseSync(path);
+    try {
+      requireCurrentWriteSchema(database);
+      database.exec('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
+      return new SqliteStore(database);
     } catch (error) {
-      if (this.#database.isTransaction) this.#database.exec('ROLLBACK');
+      database.close();
       throw error;
     }
   }
@@ -91,12 +1078,14 @@ export class SqliteStore {
     this.#database
       .prepare('INSERT INTO missions (id, goal, status, opened_at) VALUES (?, ?, ?, ?)')
       .run(mission.id, mission.goal, mission.status, mission.openedAt);
-    this.#database
-      .prepare(`
-        INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
-        VALUES (?, 'MISSION_OPENED', ?, ?, ?)
-      `)
-      .run(input.eventId, mission.id, mission.openedAt, JSON.stringify({ goal: mission.goal }));
+    this.#events.append({
+      eventId: input.eventId,
+      type: 'MISSION_OPENED',
+      payloadSchemaVersion: 1,
+      missionId: mission.id,
+      occurredAt: mission.openedAt,
+      payload: { goal: mission.goal },
+    });
 
     return mission;
   }
@@ -149,11 +1138,11 @@ export class SqliteStore {
   }
 
   openMission(input: OpenMissionInput): Mission {
-    return this.#transaction(() => this.#insertMissionAndEvent(input));
+    return this.#transactions.run(() => this.#insertMissionAndEvent(input));
   }
 
   openNextMission(input: OpenNextMissionInput): Mission {
-    return this.#transaction(() => {
+    return this.#transactions.run(() => {
       const row = this.#database
         .prepare(`
           SELECT COALESCE(MAX(CAST(substr(id, 5) AS INTEGER)), 0) + 1 AS next_number
@@ -174,7 +1163,7 @@ export class SqliteStore {
   }
 
   saveMissionPlanRevision(input: SaveMissionPlanRevisionInput): MissionPlanRevision {
-    return this.#transaction(() => {
+    return this.#transactions.run(() => {
       this.#requireOpenMission(input.missionId);
       const contentHash = hashPlanContent(input.content);
       const current = this.#getCurrentMissionPlan(input.missionId);
@@ -233,17 +1222,14 @@ export class SqliteStore {
           canonicalJson(revision.content),
           revision.createdAt,
         );
-      this.#database
-        .prepare(`
-          INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
-          VALUES (?, 'PLAN_REVISION_SAVED', ?, ?, ?)
-        `)
-        .run(
-          `EVT-${input.missionId}-PLAN-R${String(revisionNumber).padStart(4, '0')}`,
-          input.missionId,
-          input.createdAt,
-          JSON.stringify({ revision: revisionNumber, contentHash }),
-        );
+      this.#events.append({
+        eventId: `EVT-${input.missionId}-PLAN-R${String(revisionNumber).padStart(4, '0')}`,
+        type: 'PLAN_REVISION_SAVED',
+        payloadSchemaVersion: 1,
+        missionId: input.missionId,
+        occurredAt: input.createdAt,
+        payload: { revision: revisionNumber, contentHash },
+      });
 
       return revision;
     });
@@ -270,7 +1256,7 @@ export class SqliteStore {
   }
 
   approveMissionPlan(input: ApproveMissionPlanInput): MissionPlanRevision {
-    return this.#transaction(() => {
+    return this.#transactions.run(() => {
       this.#requireOpenMission(input.missionId);
       const current = this.#getCurrentMissionPlan(input.missionId);
       if (current === undefined) {
@@ -297,17 +1283,14 @@ export class SqliteStore {
           WHERE mission_id = ? AND revision = ? AND status = 'DRAFT'
         `)
         .run(input.approvedAt, input.missionId, current.revision);
-      this.#database
-        .prepare(`
-          INSERT INTO events (event_id, type, mission_id, occurred_at, payload_json)
-          VALUES (?, 'PLAN_APPROVED', ?, ?, ?)
-        `)
-        .run(
-          `EVT-${input.missionId}-PLAN-APPROVED-R${String(current.revision).padStart(4, '0')}`,
-          input.missionId,
-          input.approvedAt,
-          JSON.stringify({ revision: current.revision, contentHash: current.contentHash }),
-        );
+      this.#events.append({
+        eventId: `EVT-${input.missionId}-PLAN-APPROVED-R${String(current.revision).padStart(4, '0')}`,
+        type: 'PLAN_APPROVED',
+        payloadSchemaVersion: 1,
+        missionId: input.missionId,
+        occurredAt: input.approvedAt,
+        payload: { revision: current.revision, contentHash: current.contentHash },
+      });
 
       return {
         ...current,
@@ -325,21 +1308,7 @@ export class SqliteStore {
   }
 
   listEvents(): MissionEvent[] {
-    return this.#database
-      .prepare(`
-        SELECT seq, event_id, type, mission_id, occurred_at, payload_json
-        FROM events
-        ORDER BY seq
-      `)
-      .all()
-      .map((row) => ({
-        seq: Number(row.seq),
-        eventId: String(row.event_id),
-        type: String(row.type) as MissionEvent['type'],
-        missionId: String(row.mission_id),
-        occurredAt: String(row.occurred_at),
-        payload: JSON.parse(String(row.payload_json)) as MissionEvent['payload'],
-      })) as MissionEvent[];
+    return this.#events.list();
   }
 
   close(): void {

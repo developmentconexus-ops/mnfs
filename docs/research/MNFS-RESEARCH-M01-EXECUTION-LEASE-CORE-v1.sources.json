@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "reportId": "DOC-RESEARCH-MNFS-RESEARCH-M01-EXECUTION-LEASE-CORE-v1",
+  "asOf": "2026-08-03",
+  "sources": [
+    {
+      "id": "openai-harness-engineering",
+      "title": "Harness engineering: leveraging Codex in an agent-first world",
+      "url": "https://openai.com/index/harness-engineering/",
+      "kind": "product_docs",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Repository-owned knowledge, depth-first capability growth, enforceable architecture and agent-first feedback loops"
+      ]
+    },
+    {
+      "id": "anthropic-agent-evals",
+      "title": "Demystifying evals for AI agents",
+      "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+      "kind": "product_docs",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Outcome grading, deterministic verification and separation between agent output and acceptance"
+      ]
+    },
+    {
+      "id": "anthropic-long-running",
+      "title": "Long-running agent harness examples",
+      "url": "https://github.com/anthropics/cwc-long-running-agents",
+      "kind": "repository",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Default-failing criteria, fresh evaluator context, durable progress artifacts and Git-backed handoff"
+      ]
+    },
+    {
+      "id": "pi-extensions",
+      "title": "Pi coding agent extensions",
+      "url": "https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md",
+      "kind": "repository",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Custom tools, lifecycle events, dynamic tool inventory and the trusted-code security boundary of Pi extensions"
+      ]
+    },
+    {
+      "id": "pi-usage",
+      "title": "Pi coding agent usage",
+      "url": "https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/usage.md",
+      "kind": "repository",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Explicit extension loading, builtin-tool disabling and controlled runtime invocation"
+      ]
+    },
+    {
+      "id": "sandbox-runtime",
+      "title": "Anthropic Sandbox Runtime",
+      "url": "https://github.com/anthropic-experimental/sandbox-runtime",
+      "kind": "repository",
+      "version": "0.0.67",
+      "accessed": "2026-08-03",
+      "supports": [
+        "OS-level filesystem and network isolation, Linux limitations, fail-closed design and version-pinned revalidation"
+      ]
+    },
+    {
+      "id": "openai-symphony",
+      "title": "OpenAI Symphony specification",
+      "url": "https://github.com/openai/symphony/blob/main/SPEC.md",
+      "kind": "repository",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Repository-owned workflow policy, per-item workspaces, attempts, reconciliation and operator observability"
+      ]
+    },
+    {
+      "id": "firstmate",
+      "title": "Firstmate agent distribution",
+      "url": "https://github.com/kunchenguid/firstmate",
+      "kind": "repository",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Worktree-per-task operation, visible supervision and single-coordinator UX patterns"
+      ]
+    },
+    {
+      "id": "git-worktree",
+      "title": "Git worktree documentation",
+      "url": "https://git-scm.com/docs/git-worktree.html",
+      "kind": "official_docs",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Shared and per-worktree Git state, linked-worktree metadata discovery and worktree isolation limits"
+      ]
+    },
+    {
+      "id": "sqlite-partial-index",
+      "title": "SQLite partial indexes",
+      "url": "https://www.sqlite.org/partialindex.html",
+      "kind": "official_docs",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Unique lifecycle-state invariants without duplicate currentness flags"
+      ]
+    },
+    {
+      "id": "sqlite-foreign-keys",
+      "title": "SQLite foreign key support",
+      "url": "https://www.sqlite.org/foreignkeys.html",
+      "kind": "official_docs",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Composite parent-child contract binding and relational integrity"
+      ]
+    },
+    {
+      "id": "treehouse-get",
+      "title": "Treehouse get command",
+      "url": "https://github.com/kunchenguid/treehouse/blob/939cb59ba0bd69036ae52fc19b5b41e0a3f167d3/cmd/get.go",
+      "kind": "repository",
+      "version": "source 939cb59; target 2.1.1",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Durable JSON Lease acquisition, holder semantics and acquisition-side effects"
+      ]
+    },
+    {
+      "id": "treehouse-status",
+      "title": "Treehouse status command",
+      "url": "https://github.com/kunchenguid/treehouse/blob/939cb59ba0bd69036ae52fc19b5b41e0a3f167d3/cmd/status.go",
+      "kind": "repository",
+      "version": "source 939cb59; target 2.1.1",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Machine-readable worktree, Lease ID, holder and process observations"
+      ]
+    },
+    {
+      "id": "treehouse-return",
+      "title": "Treehouse return command",
+      "url": "https://github.com/kunchenguid/treehouse/blob/939cb59ba0bd69036ae52fc19b5b41e0a3f167d3/cmd/return_cmd.go",
+      "kind": "repository",
+      "version": "source 939cb59; target 2.1.1",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Conditional release by Lease ID and holder, dirty-worktree behavior and reset lifecycle"
+      ]
+    },
+    {
+      "id": "treehouse-pool",
+      "title": "Treehouse pool implementation",
+      "url": "https://github.com/kunchenguid/treehouse/blob/939cb59ba0bd69036ae52fc19b5b41e0a3f167d3/internal/pool/pool.go",
+      "kind": "repository",
+      "version": "source 939cb59; target 2.1.1",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Stable external Lease identity, fetch behavior, conditional release locking and state observation"
+      ]
+    },
+    {
+      "id": "treehouse-state",
+      "title": "Treehouse state persistence",
+      "url": "https://github.com/kunchenguid/treehouse/blob/939cb59ba0bd69036ae52fc19b5b41e0a3f167d3/internal/pool/state.go",
+      "kind": "repository",
+      "version": "source 939cb59; target 2.1.1",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Atomic private-state persistence and conservative recovery after corrupt or truncated state"
+      ]
+    },
+    {
+      "id": "treehouse-changelog",
+      "title": "Treehouse changelog",
+      "url": "https://github.com/kunchenguid/treehouse/blob/939cb59ba0bd69036ae52fc19b5b41e0a3f167d3/CHANGELOG.md",
+      "kind": "repository",
+      "version": "2.1.1",
+      "accessed": "2026-08-03",
+      "supports": [
+        "Version history for durable leases, stable Lease identity and safe state persistence"
+      ]
+    }
+  ]
+}

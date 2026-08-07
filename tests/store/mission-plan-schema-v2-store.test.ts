@@ -7,6 +7,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 import { MnfsError } from '../../src/domain/errors.js';
 import { canonicalJson, hashPlanContent } from '../../src/domain/mission-plan.js';
+import { applyMigrations } from '../../src/store/migrations.js';
 import { SqliteStore } from '../../src/store/sqlite-store.js';
 import { validPlanV1, validPlanV2 } from '../fixtures/mission-plans.js';
 
@@ -94,6 +95,7 @@ test('migration v3 preserves an approved v1 row and permits a later approved v2 
       '2026-07-31T01:00:00.000Z',
       '2026-07-31T02:00:00.000Z',
     );
+  applyMigrations(database);
   database.close();
 
   const store = SqliteStore.open(databasePath);

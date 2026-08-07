@@ -6,7 +6,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { sha256Bytes } from '../src/artifacts.mjs';
 import { executeCli, loadS0Identities } from '../src/cli.mjs';
-import { buildExecutionAuthorizationToken, parseExecutionAuthorizationToken } from '../src/execution-authority.mjs';
+import { parseExecutionAuthorizationToken } from '../src/execution-authority.mjs';
 import { preflightS0 } from '../src/service.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
@@ -32,12 +32,7 @@ async function acceptedFixtureRepo() {
 }
 
 function token(contractHash, baseCommitSha = SOURCE.commitSha) {
-  return buildExecutionAuthorizationToken({
-    planGitBlob: PLAN_BLOB,
-    contractHash,
-    baseCommitSha,
-    verificationRunId: VERIFY_RUN,
-  });
+  return `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=${PLAN_BLOB} contract_sha256=${contractHash} base_sha=${baseCommitSha} verify_run=${VERIFY_RUN} scope=canonical-host-probe-only`;
 }
 
 function authenticatedIdentities() {

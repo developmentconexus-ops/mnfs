@@ -34,7 +34,11 @@ function section(text, heading, nextHeading) {
 assert.match(contract, /^status: proposed$/mu, 'S0 contract must remain proposed before Operator approval');
 assert.match(contract, /^version: 0\.1\.0$/mu, 'S0 contract draft version must remain 0.1.0 before approval');
 assert.match(contract, /GATE-S0-EXECUTE/u, 'S0 contract must name the separate real-host execution gate');
-assert.match(contract, /real host probe[^\n]*(?:PROHIBITED|prohibited)/iu, 'S0 contract must explicitly prohibit real host probing before GATE-S0-EXECUTE');
+assert.match(
+  contract,
+  /(?:all new )?real host (?:probe|observation)[^\n]*(?:PROHIBITED|prohibited)[^\n]*GATE-S0-EXECUTE|GATE-S0-EXECUTE[^\n]*(?:PROHIBITED|prohibited)[^\n]*real host (?:probe|observation)/iu,
+  'S0 contract must explicitly prohibit all new real host observation before GATE-S0-EXECUTE',
+);
 assert.match(contract, /PHYSICALLY_PLAUSIBLE[^\n]*does not[^\n]*named candidate/iu, 'S0 contract must preserve class-hint semantics');
 assert.match(contract, /MNFS_ARR_S0_EXECUTE_AUTHORIZATION/u, 'S0 contract must name the dedicated runtime execution-authority channel');
 assert.match(contract, /MNFS_AUTHORIZE_ARR_S0_EXECUTE[^\n]*plan_blob[^\n]*contract_sha256[^\n]*base_sha[^\n]*verify_run[^\n]*canonical-host-probe-only/u, 'S0 contract must document the exact execution token binding');

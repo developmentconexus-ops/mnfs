@@ -71,6 +71,10 @@ reject('03-lifecycle-flows.md', /\| Alocação \| MNFS \+ Treehouse/u, 'phase ta
 reject('03-lifecycle-flows.md', /\| Dispatch \| MNFS \+ Pi adapter/u, 'phase table still binds dispatch to Pi');
 reject('03-lifecycle-flows.md', /## 3\.11\.3 Pi Worker/u, 'execution section still defines Pi Worker as canonical actor');
 reject('03-lifecycle-flows.md', /solicitar worktree ao Treehouse/u, 'workspace allocation still requires Treehouse');
+reject('03-lifecycle-flows.md', /^mesmo worktree$/mu, 'correction default still hard-codes worktree reuse');
+reject('03-lifecycle-flows.md', /Worktrees de origem não são destruídos/u, 'integration lifecycle still hard-codes worktrees');
+reject('03-lifecycle-flows.md', /\| Lease ACTIVE \| worktree existe \| healthy \|/u, 'reconcile matrix still hard-codes worktree/Lease semantics');
+reject('03-lifecycle-flows.md', /\| sem Lease \| worktree MNFS órfão \| divergence \|/u, 'reconcile matrix still hard-codes orphan worktree semantics');
 assert.match(texts['03-lifecycle-flows.md'], /Agent Runtime/u);
 assert.match(texts['03-lifecycle-flows.md'], /isolated mutable workspace/u);
 
@@ -81,21 +85,54 @@ reject('05-system-architecture.md', /processos Pi separados para workers/u, 'mod
 reject('05-system-architecture.md', /Worktree physical\s+→ Treehouse/u, 'authority mapping still selects Treehouse');
 reject('05-system-architecture.md', /Agent reasoning\s+→ Pi/u, 'authority mapping still selects Pi');
 reject('05-system-architecture.md', /Pi executa raciocínio e workers; Treehouse fornece worktrees/u, 'chapter conclusion still selects Pi/Treehouse');
+reject('05-system-architecture.md', /- Pi project skills;/u, 'current Interface Layer still selects Pi skills');
+reject('05-system-architecture.md', /- futura Pi extension;/u, 'current Interface Layer still assumes Pi extension');
+reject('05-system-architecture.md', /- Pi adapter;/u, 'current Infrastructure Layer still selects Pi adapter');
+reject('05-system-architecture.md', /- Treehouse adapter;/u, 'current Infrastructure Layer still selects Treehouse adapter');
+reject('05-system-architecture.md', /Porta opcional para memória auxiliar de uma Pi Session/u, 'current Session Memory Adapter still means Pi Session');
+reject('05-system-architecture.md', /→ Pi reasoning/u, 'current presentation flow still binds reasoning to Pi');
+reject('05-system-architecture.md', /^## Pi failure$/mu, 'current failure model still names Pi as selected runtime');
+reject('05-system-architecture.md', /^## Treehouse failure$/mu, 'current failure model still names Treehouse as selected workspace');
+reject('05-system-architecture.md', /^Pi interactive session$/mu, 'current Lead topology still selects Pi');
+reject('05-system-architecture.md', /^Processos Pi independentes\.$/mu, 'current Worker topology still selects Pi');
+reject('05-system-architecture.md', /│   ├── pi\//u, 'recommended current code structure still bakes in Pi adapter');
+reject('05-system-architecture.md', /│   ├── treehouse\//u, 'recommended current code structure still bakes in Treehouse adapter');
+reject('05-system-architecture.md', /│   └── pi-extension\//u, 'recommended current code structure still bakes in Pi extension');
 assert.match(texts['05-system-architecture.md'], /Historical \/ Incumbent Evidence — Pi Integration Architecture/u);
 assert.match(texts['05-system-architecture.md'], /Historical \/ Incumbent Evidence — Treehouse Adapter/u);
 
-// Recovery truth is provider-neutral. Concrete Treehouse/Pi examples must not own the current source-of-truth matrix or conclusion.
+// Roles and quality talk about semantic workspaces, not Git-worktree-specific authority.
+reject('06-roles-authority.md', /- abrir worktrees;/u, 'current role duties still encode worktrees');
+reject('06-roles-authority.md', /- reuso de worktree;/u, 'current Lead decision authority still encodes worktree reuse');
+reject('06-roles-authority.md', /- destruir worktree de origem;/u, 'current Integrator rule still encodes worktree source');
+reject('06-roles-authority.md', /- editar worktree;/u, 'current autonomy level still encodes worktree');
+reject('06-roles-authority.md', /- criação de worktree;/u, 'current role allocation still encodes worktree creation');
+reject('07-quality-evidence.md', /Testes locais passam no worktree/u, 'local-green failure class still assumes worktree');
+
+// Recovery truth is provider-neutral. Concrete Treehouse/Pi examples must not own the current source-of-truth matrix or recovery rules.
 reject('08-state-recovery.md', /\| Worktree físico \| Treehouse \+ Git/u, 'source-of-truth matrix still selects Treehouse');
 reject('08-state-recovery.md', /\| Worker Run state \| MNFS\/SQLite \| process adapter, Pi events/u, 'source-of-truth matrix still selects Pi events');
 reject('08-state-recovery.md', /reconcilia esse estado com Git, Treehouse, processos, Pi sessions/u, 'chapter conclusion still selects Pi/Treehouse observations');
+reject('08-state-recovery.md', /^Treehouse:$/mu, 'current observed-state example still treats Treehouse as selected workspace');
+reject('08-state-recovery.md', /\| Lease REQUESTED \| sem worktree \| request incompleto/u, 'recovery matrix still hard-codes Lease/worktree');
+reject('08-state-recovery.md', /\| Lease REQUESTED \| worktree correspondente \| órfão adotável/u, 'recovery matrix still hard-codes adoptable worktree');
+reject('08-state-recovery.md', /recreate worktree/u, 'current divergence action still hard-codes worktree recreation');
 assert.match(texts['08-state-recovery.md'], /Mutable Workspace binding/u);
 assert.match(texts['08-state-recovery.md'], /Runtime Session/u);
 
-// Memory architecture is session-provider-neutral; Pi research is reference evidence, not the memory model.
+// Memory architecture is session-provider-neutral; all Pi-specific candidate/adoption material must be explicitly historical/reference.
 reject('09-context-memory.md', /L3 — Exact Pi Session History/u, 'memory strata still define Pi-specific L3');
 reject('09-context-memory.md', /## 9\.4\.4 L3 — Exact Pi Session History/u, 'memory model still defines Pi-specific L3');
 reject('09-context-memory.md', /Não incorporar `@mastra\/memory` ao MNFS Pi-first/u, 'current memory decision is still Pi-first');
 reject('09-context-memory.md', /Pi JSONL é reutilizado como ledger exato da Session/u, 'chapter conclusion still requires Pi JSONL');
+reject('09-context-memory.md', /^# 9\.7 Candidato principal — `pi-observational-memory` V3$/mu, 'candidate study still looks like current selected primary');
+reject('09-context-memory.md', /^# 9\.8 Alternativa — `pi-observational-memory-extension`$/mu, 'candidate alternative still looks current');
+reject('09-context-memory.md', /^# 9\.19 `pi-link`$/mu, 'Pi transport study is not labeled historical/reference');
+reject('09-context-memory.md', /process adapter starts Pi Worker with Dispatch Packet/u, 'current M2 communication model still selects Pi Worker');
+reject('09-context-memory.md', /\| Pi JSONL Sessions \| Adotar \|/u, 'current adoption matrix still says adopt Pi JSONL');
+reject('09-context-memory.md', /\| Pi native compaction \| Manter \|/u, 'current adoption matrix still says retain Pi compaction');
+reject('09-context-memory.md', /- child Pi process;/u, 'current M2 memory slice still selects child Pi process');
+reject('09-context-memory.md', /5\. Pi JSONL é histórico exato da Session\./u, 'current invariant still hard-codes Pi JSONL');
 assert.match(texts['09-context-memory.md'], /L3 — Exact Runtime Session History/u);
 assert.match(texts['09-context-memory.md'], /Historical \/ Incumbent Runtime Reference — Pi session capabilities/u);
 
@@ -105,6 +142,16 @@ for (const level of ['E0', 'E1', 'E2', 'E3', 'E4']) {
 }
 reject('10-security-isolation.md', /O target local do Writer será E1/u, 'chapter conclusion still selects fixed E1');
 reject('10-security-isolation.md', /# 10\.34 AS-02 — Local Pi Sandbox on WSL2/u, 'AS-02 is still presented as a current architecture spike');
+reject('10-security-isolation.md', /\s├── Pi Actor/u, 'current trust-boundary diagram still selects Pi Actor');
+reject('10-security-isolation.md', /- Pi runtime;\n- loaded Pi extensions;/u, 'current TCB still selects Pi runtime/extensions');
+reject('10-security-isolation.md', /- Treehouse;\n- operating-system enforcement/u, 'current TCB still selects Treehouse');
+reject('10-security-isolation.md', /Para Worker E1:/u, 'current WSL policy still refers to superseded E1');
+reject('10-security-isolation.md', /^WORKTREE \+ required toolchain$/mu, 'current filesystem read model still assumes worktree');
+reject('10-security-isolation.md', /^- worktree;$/mu, 'current filesystem write model still assumes worktree');
+reject('10-security-isolation.md', /^  E1 LOCAL_SANDBOX$/mu, 'current Security Context Pack still emits E1 ordinal');
+reject('10-security-isolation.md', /^one Pi Worker$/mu, 'current M2 security slice still selects Pi Worker');
+reject('10-security-isolation.md', /AS-02 or equivalent accepted local boundary before general execution/u, 'current M2 security slice still depends on historical AS-02');
+reject('10-security-isolation.md', /12\. Pi packages são trusted code\./u, 'current invariant still hard-codes Pi packages');
 assert.match(texts['10-security-isolation.md'], /# 10\.8 Execution Environment property model/u);
 assert.match(texts['10-security-isolation.md'], /Historical \/ Incumbent Evidence — AS-02 Local Pi Sandbox on WSL2/u);
 
@@ -122,6 +169,7 @@ assert.match(texts['12-capability-roadmap.md'], /ARR-S0[\s\S]*ARR-S1[\s\S]*ARR-S
 assert.match(texts['12-capability-roadmap.md'], /M2 — Secure One-Worker Vertical Slice[\s\S]*OPPORTUNITY_REPLAN/u);
 
 reject('13-documentation-governance.md', /AB1 só fecha depois/u, 'documentation-governance conclusion still points to AB1');
+reject('13-documentation-governance.md', /\| Pi adapter \| Spec, adoption record, compatibility \|/u, 'impact matrix still treats Pi adapter as current generic architecture');
 
 const aggregate = await readFile(path.join(root, 'docs/product/PRODUCT-BLUEPRINT.md'), 'utf8');
 const roadmap = await readFile(path.join(root, 'docs/roadmap.md'), 'utf8');
@@ -137,6 +185,8 @@ for (const marker of [
 }
 assert.doesNotMatch(aggregate, /\| AB1 \| Architecture Baseline and Contract Reconciliation \| `CURRENT GATE`/u);
 assert.doesNotMatch(aggregate, /Um único Pi Worker executa uma tarefa fixa/u);
+assert.doesNotMatch(aggregate, /process adapter starts Pi Worker with Dispatch Packet/u);
+assert.doesNotMatch(aggregate, /^one Pi Worker$/mu);
 assert.doesNotMatch(roadmap, /\| AB1 \| Architecture Baseline and Contract Reconciliation \| `CURRENT GATE`/u);
 assert.doesNotMatch(roadmap, /Um único Pi Worker executa uma tarefa fixa/u);
 assert.match(roadmap, /M2 Opportunity Replan/u);

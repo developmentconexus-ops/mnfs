@@ -6,7 +6,6 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { sha256Bytes } from '../src/artifacts.mjs';
 import { loadS0Identities } from '../src/cli.mjs';
-import { buildExecutionAuthorizationToken } from '../src/execution-authority.mjs';
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(testDir, '../../..');
@@ -34,12 +33,7 @@ function sourceLoader(source = SOURCE) {
 }
 
 function token(contractHash, baseCommitSha = SOURCE.commitSha) {
-  return buildExecutionAuthorizationToken({
-    planGitBlob: '3e78445fcbcca360f612edefd025c6cb0f84f8e5',
-    contractHash,
-    baseCommitSha,
-    verificationRunId: VERIFY_RUN,
-  });
+  return `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=3e78445fcbcca360f612edefd025c6cb0f84f8e5 contract_sha256=${contractHash} base_sha=${baseCommitSha} verify_run=${VERIFY_RUN} scope=canonical-host-probe-only`;
 }
 
 test('accepted contract alone never enables ARR-S0 run authority', async () => {
@@ -54,7 +48,7 @@ test('accepted contract alone never enables ARR-S0 run authority', async () => {
   }
 });
 
-test('loader binds runtime Operator token to exact contract bytes and current source commit', async () => {
+test('loader binds externally supplied runtime Operator token to exact contract bytes and current source commit', async () => {
   const { temp, contractBytes } = await fixtureRepo();
   try {
     const contractHash = sha256Bytes(contractBytes);

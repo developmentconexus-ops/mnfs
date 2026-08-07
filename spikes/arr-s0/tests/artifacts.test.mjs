@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import { lstat, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import {
   sha256Bytes,
+  verifyArtifactRecords,
   writeCanonicalJsonArtifact,
   writeRawArtifact,
 } from '../src/artifacts.mjs';
@@ -56,6 +57,44 @@ test('artifact publication rejects traversal and symlink destinations', async ()
     await assert.rejects(() => writeRawArtifact(root, 'linked.bin', Buffer.from('x')), /symlink/u);
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('artifact publication rejects a run root that is itself a symlink', async () => {
+  const temp = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-run-root-link-'));
+  try {
+    const outside = path.join(temp, 'outside-run');
+    const linkedRoot = path.join(temp, 'linked-run');
+    await mkdir(outside, { recursive: true });
+    await symlink(outside, linkedRoot, 'dir');
+    await assert.rejects(
+      () => writeRawArtifact(linkedRoot, 'raw/out.bin', Buffer.from('must-not-escape')),
+      /symlink|realpath|root/u,
+    );
+    await assert.rejects(() => readFile(path.join(outside, 'raw/out.bin')));
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test('artifact verification rejects a symlinked parent even when final bytes/hash match', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-verify-root-'));
+  const outside = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-verify-outside-'));
+  try {
+    const bytes = Buffer.from('outside-but-matching\n');
+    await writeFile(path.join(outside, 'a.bin'), bytes);
+    await symlink(outside, path.join(root, 'raw'), 'dir');
+    const integrity = await verifyArtifactRecords(root, [{
+      id: 'raw-a',
+      path: 'raw/a.bin',
+      sha256: sha256Bytes(bytes),
+      sizeBytes: bytes.length,
+    }]);
+    assert.equal(integrity.ok, false);
+    assert.ok(integrity.errors.some((error) => /symlink|escape|realpath/u.test(error)));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+    await rm(outside, { recursive: true, force: true });
   }
 });
 

@@ -3,6 +3,8 @@ import { runProbeCommand } from '../process.mjs';
 
 const FIXED_ENV = Object.freeze({ PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' });
 const READ_LIMIT = 64 * 1024;
+const REVIEWED_LINUX_OWNED_FILESYSTEMS = new Set(['ext2/ext3', 'xfs', 'btrfs', 'overlayfs', 'tmpfs']);
+const REVIEWED_WINDOWS_BACKED_FILESYSTEMS = new Set(['drvfs', '9p', 'fuseblk']);
 
 function unquote(value) {
   const trimmed = value.trim();
@@ -35,10 +37,13 @@ function parseGitVersion(text) {
 export function classifyLinuxFilesystem(filesystemType) {
   const value = String(filesystemType ?? '').trim().toLowerCase();
   if (!value) return { state: 'UNKNOWN', rationale: 'repository filesystem type was not observed' };
-  if (['drvfs', '9p', 'fuseblk'].includes(value)) {
-    return { state: 'UNSUPPORTED', rationale: `repository filesystem ${value} is not Linux-owned for ARR-S0` };
+  if (REVIEWED_WINDOWS_BACKED_FILESYSTEMS.has(value)) {
+    return { state: 'UNSUPPORTED', rationale: `repository filesystem ${value} is Windows-backed or otherwise outside the ARR-S0 Linux-owned boundary` };
   }
-  return { state: 'SUPPORTED', rationale: `repository filesystem ${value} is Linux-owned` };
+  if (REVIEWED_LINUX_OWNED_FILESYSTEMS.has(value)) {
+    return { state: 'SUPPORTED', rationale: `repository filesystem ${value} is on the reviewed Linux-owned allowlist` };
+  }
+  return { state: 'UNKNOWN', rationale: `repository filesystem ${value} is not on the reviewed ARR-S0 filesystem allowlist` };
 }
 
 export function normalizeHostIdentity({

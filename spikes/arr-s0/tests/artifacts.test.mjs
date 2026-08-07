@@ -109,6 +109,7 @@ test('publication orders temp write, file fsync, rename and directory fsync', as
   const ops = {
     async mkdir() { calls.push('mkdir'); },
     async lstat() { const error = new Error('missing'); error.code = 'ENOENT'; throw error; },
+    async realpath(target) { return target; },
     async open(target, flags) {
       const label = flags === 'r' ? 'dir' : 'temp';
       const handle = fakeHandle(label);

@@ -36,10 +36,10 @@ Generator version: 3
 | Requirements with proposed allocation | 0/28 |
 | Requirements with approved allocation | 28/28 |
 | Requirements with verification method | 28/28 |
-| Designed | 28 |
+| Designed | 21 |
 | Blocked | 0 |
-| Verified | 0 |
-| Evidenced | 6 |
+| Verified | 7 |
+| Evidenced | 13 |
 
 ## Readiness Gates
 

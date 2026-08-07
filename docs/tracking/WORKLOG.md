@@ -11,6 +11,18 @@ owners:
 
 # Worklog
 
+## 2026-08-06
+
+### MIS-002/M01 implementation closeout preparation
+
+- Prepared the uncommitted canonical implementation closeout at `ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT`.
+- Recorded final external `npm run verify` as green: product 321/321, AS-02 119/119, TC-01 78/78 and documentation validation with 95 canonical IDs.
+- Recorded historical real Treehouse 2.1.1 Scenario A as `HISTORICAL_PASS / implementation verification` with SHA-256 `c0b45a6b7cd7ee5b79bd614136847d84b4c6c3fc8dbe0fd80b71703b7a102cf3`; final evidence was finalized before fixture-only cleanup, after which the successful fixture/run root was cleaned and raw successful artifacts were not retained.
+- Preserved only the failed/inconclusive audit-trail root at `/home/leandrotheodoro/.local/state/mnfs/test-runs/m01-20260807003246324-76483-f006f672-d9c4-4023-85bf-410287f797c5`; it is not retained raw successful evidence.
+- Marked hardened real R2 crash/recovery and real R3 lineage as `FOLLOW_UP_REQUIRED`/deferred; neither is claimed as passing evidence.
+- Reconciled the canonical Documentation Map, Status, Worklog and seven M01 traceability entries with the post-PR implementation/test delta; no Mission contract, Capability Spec implementation status, scratch report or M02 requirement changed.
+- Closeout state is `CLOSEOUT_PREPARED / ACCEPTANCE_PENDING_OPERATOR_REVIEW`; Pi Worker dispatch and M02 remain prohibited.
+
 ## 2026-07-31
 
 ### M0 — Pi-first foundation

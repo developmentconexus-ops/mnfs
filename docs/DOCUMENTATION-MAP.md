@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 1.4.1
+version: 1.4.3
 owners:
   - developmentconexus-ops
 approvers:
@@ -23,6 +23,7 @@ related:
   - REVIEW-MIS-002-M01-R5-FINAL
   - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
   - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-PLAN-APPROVAL
+  - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
   - PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
 review_triggers:
@@ -44,7 +45,7 @@ M2 — Secure One-Worker Vertical Slice
 MIS-002/M01 — Durable Execution and Lease Core
 MCRM R5 — PASS
 M01 implementation plan 1.0.1 — APPROVED
-M01 implementation — NOT STARTED
+M01 implementation — CLOSEOUT_PREPARED / ACCEPTANCE_PENDING_OPERATOR_REVIEW
 ```
 
 Current state:
@@ -55,12 +56,14 @@ Current state:
 - MIS-002 revision 5 is the approved schema-v2 contract at `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`;
 - R0–R5 pass for accepted M01 microdesign version 0.6.1;
 - PR #14 is integrated in `main` at `dee12a9b53984d39045421c9586ee53665ebc5e5`;
-- Issue #16 and draft PR #17 own the current M01 work;
+- Issue #16 tracks the M01 closeout; PR #17 is merged in `main` at `3722235a2c7a4d4d5fc11e55d8c4b8e6f025a8f7`, and the current closeout is the post-PR implementation delta awaiting publication in a new PR;
 - canonical TC-01 WSL2 Evidence is `ACCEPT`, S01–S15 all `PASS`, cleanup `COMPLETED`;
 - final R5 review closed all 3 Critical and all 8 Important findings;
 - Operator decision `D-007` accepted microdesign 0.6.1 and closed R5;
 - Operator decision `D-008` approved implementation plan 1.0.1;
-- Task 1 RED, later tasks, real implementation proof, Pi dispatch and automatic merge require separate authority.
+- M01 implementation verification is green for the deterministic suite and normal real Treehouse Scenario A (`HISTORICAL_PASS`); successful raw run artifacts were cleaned after evidence finalization and are not retained;
+- real R2 crash/recovery and R3 lineage evidence remain FOLLOW_UP_REQUIRED;
+- formal M01 acceptance, Pi dispatch and automatic merge require separate operator authority.
 
 ## 2. Authority hierarchy
 
@@ -219,8 +222,8 @@ Final R5 review:          accepted Evidence
 M01 microdesign:          accepted specification version 0.6.1
 MCRM R5:                  PASS
 M01 implementation plan: current guidance version 1.0.1 / Operator approved
-Task 1 RED:               prohibited until separate continuation
-M01 production code:      not started
+M01 implementation:      verified in the post-PR local working tree / closeout prepared
+Real Scenario A:          HISTORICAL_PASS; evidence finalized before fixture cleanup, successful raw root not retained; R2/R3 follow-up required
 Pi Worker dispatch:       prohibited
 ```
 
@@ -279,6 +282,7 @@ docs/acceptance/2026-08-04-tc-01-task-12-deterministic-adversarial-review.md
 docs/acceptance/2026-08-04-mis-002-m01-final-r5-review.md
 docs/acceptance/2026-08-04-mis-002-m01-r5-approval.md
 docs/acceptance/2026-08-04-mis-002-m01-implementation-plan-approval.md
+docs/acceptance/2026-08-06-mis-002-m01-implementation-closeout.md
 ```
 
 Tracking never owns architecture. Evidence records observations and authority decisions; each implementation task still requires its own continuation when the approved plan says so.
@@ -358,13 +362,15 @@ No unresolved authority-map blocker remains from AB1, the MIS-002 Replan, TC-01,
 Current gate:
 
 ```text
-explicit Operator continuation for M01 Task 1 RED only
+Operator review of the uncommitted M01 implementation closeout
 ```
 
-That continuation does not authorize later tasks or real Treehouse execution.
+The closeout review does not authorize M02/Pi dispatch, merge or delivery; any further real scenario or formal acceptance action remains separately governed.
 
 ```text
-M01 implementation:  NOT STARTED
+M01 implementation:  VERIFIED / CLOSEOUT_PREPARED
+M01 acceptance:      PENDING_OPERATOR_REVIEW
 Pi Worker dispatch:   PROHIBITED
-PR #17 merge:         NOT AUTHORIZED
+PR #17:              MERGED / historical implementation baseline
+New closeout PR:     PENDING PUBLICATION
 ```

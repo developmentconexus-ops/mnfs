@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { fileURLToPath, URL } from 'node:url';
 
 import { MnfsError } from '../domain/errors.js';
 import { requireAttemptId, requireWriteTrackId } from '../execution/ids.js';
@@ -121,6 +122,20 @@ export function resolveExecutionSourcePath(
 export function resolveLeaseActionRoot(runtimeRoot: string): string {
   const root = requireLinuxOwnedAbsolutePath(runtimeRoot);
   return requireContainedRuntimePath(root, join(root, 'lease-actions'), 'Lease action root');
+}
+
+export function resolveTrustedLeaseActionEntry(moduleUrl: string): string {
+  try {
+    return requireLinuxOwnedAbsolutePath(
+      fileURLToPath(new URL('../runtime/lease-action-entry.js', moduleUrl)),
+    );
+  } catch (error) {
+    if (error instanceof MnfsError) throw error;
+    throw new MnfsError(
+      'EXECUTION_SOURCE_INVALID',
+      `Invalid trusted LeaseAction module URL: ${moduleUrl}.`,
+    );
+  }
 }
 
 export function resolveExecutionAttemptRuntimePaths(

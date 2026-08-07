@@ -46,6 +46,7 @@ import {
   resolveMissionPlanHtmlPath,
   resolveMissionPlanReviewPath,
   resolveRuntimeRoot,
+  resolveTrustedLeaseActionEntry,
 } from '../runtime/paths.js';
 import { runProcess } from '../runtime/process-runner.js';
 import { ExecutionService } from '../services/execution-service.js';
@@ -915,11 +916,7 @@ resultRef: operation.operation.resultPath,
         operation,
       });
 
-      const helperPath = join(
-        context.identity.projectRoot,
-        'bin',
-        'mnfs-lease-action.mjs',
-      );
+      const helperPath = resolveTrustedLeaseActionEntry(import.meta.url);
       if (!await isCanonicalFile(helperPath)) {
         throw new MnfsError(
 'LEASE_ACTION_INCONCLUSIVE',
@@ -939,10 +936,11 @@ input.actionToken,
 '--operation-sha256',
 published.operationSha256,
         ],
-        cwd: context.identity.projectRoot,
+        cwd: dirname(helperPath),
         env: {
 PATH: `${dirname(process.execPath)}:/usr/bin:/bin`,
-HOME: homedir(),
+HOME: physical.boundary.homePath,
+XDG_CONFIG_HOME: physical.boundary.xdgConfigHome,
 LANG: 'C.UTF-8',
 LC_ALL: 'C.UTF-8',
         },

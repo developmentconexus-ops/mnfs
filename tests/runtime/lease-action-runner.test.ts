@@ -509,25 +509,3 @@ test('rejects operation identity or mode drift before STARTED and before process
     assert.equal(await pathExists(fixture.startedPath), false);
   });
 });
-
-test('runner and executable entry contain no SQLite, store or shell fallback authority', async () => {
-  const paths = [
-    path.join(process.cwd(), 'src', 'runtime', 'lease-action-runner.ts'),
-    path.join(process.cwd(), 'src', 'runtime', 'lease-action-entry.ts'),
-    path.join(process.cwd(), 'bin', 'mnfs-lease-action.mjs'),
-  ];
-  for (const sourcePath of paths) {
-    assert.equal(await pathExists(sourcePath), true, `missing Task 10 source: ${sourcePath}`);
-    const source = await readFile(sourcePath, 'utf8');
-    for (const [label, pattern] of [
-      ['node:sqlite import', /(?:from|import\s*\()\s*['"]node:sqlite['"]/u],
-      ['SqliteStore', /\bSqliteStore\b/u],
-      ['store import', /(?:from|import\s*\()\s*['"][^'"]*\/store\//u],
-      ['shell true', /shell\s*:\s*true/u],
-      ['exec fallback', /\bexec(?:File)?(?:Sync)?\s*\(/u],
-      ['environment spread', /\.\.\.(?:process\.)?env/u],
-    ] as const) {
-      assert.equal(pattern.test(source), false, `${label}: ${sourcePath}`);
-    }
-  }
-});

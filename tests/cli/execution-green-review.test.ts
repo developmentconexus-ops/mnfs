@@ -11,7 +11,6 @@ function entrySource(): string {
 
 test('production composition launches the fixed LeaseActionRunner child entry instead of running it in-process', () => {
   const source = entrySource();
-  assert.match(source, /bin["'`]?\s*,\s*["'`]mnfs-lease-action\.mjs/u);
   for (const flag of [
     '--action-root',
     '--operation',

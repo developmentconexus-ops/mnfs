@@ -11,6 +11,8 @@ import {
 import path from 'node:path';
 import { canonicalJsonBytes } from './canonical-json.mjs';
 
+const REQUIRED_ARTIFACT_MODE = 0o600;
+
 const defaultOps = {
   link: fsLink,
   lstat: fsLstat,
@@ -39,6 +41,12 @@ function requireContainedRelativePath(relativePath) {
     throw new TypeError('invalid ARR-S0 artifact path');
   }
   return normalized;
+}
+
+function requirePrivateArtifactMode(stats, label) {
+  if (!Number.isInteger(stats?.mode) || (stats.mode & 0o777) !== REQUIRED_ARTIFACT_MODE) {
+    throw new TypeError(`ARR-S0 artifact ${label} must have exact 0600 permissions`);
+  }
 }
 
 async function rejectExistingSymlinkComponents(absolutePath, lstat = fsLstat) {
@@ -90,6 +98,7 @@ async function existingArtifactMetadata(ops, root, finalPath, relativePath, byte
   }
   if (stats.isSymbolicLink?.()) throw new TypeError('ARR-S0 artifact destination is a symlink');
   if (!stats.isFile?.()) throw new TypeError('ARR-S0 artifact destination is not a regular file');
+  requirePrivateArtifactMode(stats, 'destination');
   if (typeof ops.readFile !== 'function') throw new TypeError('artifact ops missing readFile for existing artifact');
   if (typeof ops.realpath === 'function') await assertRealpathContained(root, finalPath, ops.realpath);
   const existing = await ops.readFile(finalPath);
@@ -125,7 +134,7 @@ export async function writeRawArtifact(runRoot, relativePath, inputBytes, option
   let tempHandle;
   let tempExists = false;
   try {
-    tempHandle = await ops.open(tempPath, 'wx', 0o600);
+    tempHandle = await ops.open(tempPath, 'wx', REQUIRED_ARTIFACT_MODE);
     tempExists = true;
     await tempHandle.writeFile(bytes);
     await tempHandle.sync();
@@ -148,6 +157,8 @@ export async function writeRawArtifact(runRoot, relativePath, inputBytes, option
     await ops.unlink(tempPath);
     tempExists = false;
     await rejectExistingSymlinkComponents(finalPath, ops.lstat);
+    const finalStats = await ops.lstat(finalPath);
+    requirePrivateArtifactMode(finalStats, 'published file');
     if (typeof ops.realpath === 'function') await assertRealpathContained(root, finalPath, ops.realpath);
     const dirHandle = await ops.open(parent, 'r');
     try {
@@ -237,6 +248,10 @@ export async function verifyArtifactRecords(runRoot, records, options = {}) {
     }
     if (!stats.isFile?.()) {
       errors.push(`artifact is not a regular file for ${record.id}`);
+      continue;
+    }
+    if (!Number.isInteger(stats.mode) || (stats.mode & 0o777) !== REQUIRED_ARTIFACT_MODE) {
+      errors.push(`artifact mode must be 0600 for ${record.id}`);
       continue;
     }
 

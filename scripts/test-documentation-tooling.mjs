@@ -102,6 +102,7 @@ function approvedContractFor(data) {
 const documentationWorkflow = await readFile(path.join(root, '.github/workflows/docs.yml'), 'utf8');
 assert.match(documentationWorkflow, /'policies\/\*\*'/u);
 assert.match(documentationWorkflow, /'scripts\/sec-e1-policy\.mjs'/u);
+assert.match(documentationWorkflow, /'scripts\/test-arr-s0-contract-consistency\.mjs'/u);
 
 const historicalMissionText = await readFile(
   path.join(root, '.mnfs/missions/MIS-002/history/revision-0003.json'),
@@ -260,6 +261,7 @@ for (const id of [
   'ADR-0015',
   'DESIGN-LAYERED-AGENT-EXECUTION-PLANNING',
   'PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM',
+  'DOC-ARR-S0-HOST-CAPABILITY-CONTRACT',
 ]) {
   assert.ok(documentationMapText.includes(id), `Documentation Map missing ${id}`);
 }
@@ -272,29 +274,29 @@ assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
-assert.match(statusText, /\*\*Current phase:\*\* `ARR P1-F03 — ACCEPTED \/ INTEGRATED`/u, 'STATUS current phase must expose integrated P1-F03');
-assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
-assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
-assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*ACCEPTED — GATE-R \/ D-017 \/ INTEGRATED/u, 'STATUS must record P1 integration');
-assert.match(statusText, /P1-F02 fresh review:[^\n]*Critical 0 \/ Important 0[^\n]*31194963494/u, 'STATUS must record F02 fresh-review evidence');
-assert.match(statusText, /P1-F03 Operator acceptance:[^\n]*D-018[^\n]*ACCEPTED/u, 'STATUS must record D-018 acceptance');
-assert.match(statusText, /P1-F03 integration:[^\n]*COMPLETE[^\n]*PR #26 MERGED/u, 'STATUS must record completed F03 integration');
-assert.match(statusText, /P1-F03 integrated commit:[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'STATUS must bind F03 integration to the real merge commit');
-assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
-assert.match(statusText, /PR #24 merge \/ integration:[^\n]*COMPLETE[^\n]*def9e5fe819f76950d61fba2cf5abcda1533c07f/u, 'STATUS must bind P1 integration to the real merge commit');
-assert.match(statusText, /## Immediate next action — GATE-S0-IMPLEMENT review/u, 'STATUS next action must be GATE-S0-IMPLEMENT review');
-assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
-assert.doesNotMatch(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS must not point to completed F02 fresh review');
+assert.match(statusText, /\*\*Current phase:\*\* `ARR-S0 — DETERMINISTIC HARNESS IMPLEMENTED \/ REVIEW_REQUIRED`/u, 'STATUS current phase must expose ARR-S0 deterministic review gate');
+assert.match(statusText, /Master program plan:[^\n]*ACCEPTED — GATE-P0[^\n]*52033adcdfb7163f63606034b9912942b018f38e/u, 'STATUS must record master plan acceptance');
+assert.match(statusText, /ARR-S0 plan:[^\n]*ACCEPTED — GATE-P0[^\n]*3e78445fcbcca360f612edefd025c6cb0f84f8e5/u, 'STATUS must record S0 plan acceptance');
+assert.match(statusText, /P1 Operator acceptance:[^\n]*D-017[^\n]*ACCEPTED/u, 'STATUS must preserve D-017 acceptance');
+assert.match(statusText, /P1 integrated commit:[^\n]*def9e5fe819f76950d61fba2cf5abcda1533c07f/u, 'STATUS must preserve P1 integration identity');
+assert.match(statusText, /P1-F03 Operator acceptance:[^\n]*D-018[^\n]*ACCEPTED/u, 'STATUS must preserve D-018 acceptance');
+assert.match(statusText, /P1-F03 integrated commit:[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'STATUS must preserve F03 integration identity');
+assert.match(statusText, /ARR-S0 implementation token:[^\n]*MNFS_AUTHORIZE_ARR_S0_IMPLEMENT/u, 'STATUS must record exact S0 implementation authorization class');
+assert.match(statusText, /ARR-S0 implementation base:[^\n]*ad913dd1e0ff3b286280081b5dd4ba90eb390972/u, 'STATUS must bind S0 implementation to the authorized base');
+assert.match(statusText, /GATE-S0-IMPLEMENT:[^\n]*AUTHORIZED[^\n]*deterministic-harness-only/u, 'STATUS must expose bounded S0 implementation authority');
+assert.match(statusText, /ARR-S0 deterministic harness:[^\n]*IMPLEMENTED \/ REVIEW_REQUIRED/u, 'STATUS must expose deterministic harness review gate');
+assert.match(statusText, /ARR-S0 host contract:[^\n]*PROPOSED[^\n]*0\.1\.0[^\n]*NOT ACCEPTED/u, 'STATUS must keep S0 contract proposed');
+assert.match(statusText, /ARR-S0 real host probe:[^\n]*PROHIBITED pending GATE-S0-EXECUTE/u, 'STATUS must keep real host probe gated');
+assert.match(statusText, /## Immediate next action — ARR-S0 deterministic review/u, 'STATUS next action must be Task 10/11 deterministic review');
+assert.doesNotMatch(statusText, /## Immediate next action — GATE-S0-IMPLEMENT review/u, 'STATUS must not point back to the already-authorized implementation gate');
 assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
 assert.match(p1AcceptanceText, /MNFS_ACCEPT_ARR_P1 program_blob=52033adcdfb7163f63606034b9912942b018f38e pr=24 head=02e99b25842562d111488d5c8c7008cb2635f3da findings=critical:0,important:0/u, 'P1 acceptance record must bind the exact Operator token');
 assert.match(decisionsText, /\| D-017 \| 2026-08-07 \| Accept ARR P1 \/ GATE-R[\s\S]*02e99b25842562d111488d5c8c7008cb2635f3da/u, 'D-017 must record exact P1 acceptance authority');
 assert.match(decisionsText, /\| D-018 \| 2026-08-07 \| Accept the bounded ARR P1-F03[\s\S]*0b9fe9747887ef5817fffbb586db04ccb3292b27/u, 'D-018 must record exact P1-F03 acceptance authority');
-assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must record integrated GATE-R');
-assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-S0-IMPLEMENT — NOT AUTHORIZED/u, 'ARR review must keep S0 implementation unapproved');
-assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must orient fresh actors to accepted P1');
-assert.match(agentsText, /P1-F03 exact contract-binding correction:[^\n]*ACCEPTED — D-018 \/ INTEGRATED/u, 'AGENTS must orient fresh actors to integrated F03');
-assert.match(agentsText, /PR #26 merge \/ integration:[^\n]*COMPLETE[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'AGENTS must bind F03 integration to the real merge commit');
-assert.match(documentationMapText, /ARR P1 A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'Documentation Map must record accepted P1');
+assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must preserve integrated GATE-R history');
+assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must preserve accepted P1 authority');
+assert.match(agentsText, /P1-F03 exact contract-binding correction:[^\n]*ACCEPTED — D-018 \/ INTEGRATED/u, 'AGENTS must preserve integrated F03 authority');
+assert.match(agentsText, /PR #26 merge \/ integration:[^\n]*COMPLETE[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'AGENTS must preserve F03 integration identity');
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];
@@ -356,11 +358,14 @@ assert.equal((await evaluateReadiness(unassessed, registry)).R1.result, 'BLOCKED
 
 const unresolvedSource = structuredClone(traceability);
 unresolvedSource.requirements[0].source = ['DOC-NOT-REAL'];
-assert.equal((await evaluateReadiness(unresolvedSource, registry)).R2.result, 'BLOCKED');
+assert.equal(
+  (await evaluateReadiness(unresolvedSource, registry, { currentContract })).R2.result,
+  'BLOCKED',
+);
 
 const missingProof = structuredClone(traceability);
 missingProof.requirements.find((item) => item.level === 'MUST').verifiedBy = [];
-assert.equal((await evaluateReadiness(missingProof, registry)).R2.result, 'BLOCKED');
+assert.equal((await evaluateReadiness(missingProof, registry, { currentContract })).R2.result, 'BLOCKED');
 
 const spikeEvidenceTemp = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-spike-evidence-'));
 try {

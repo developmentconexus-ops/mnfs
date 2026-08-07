@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.8.49
+version: 1.8.51
 owners:
   - developmentconexus-ops
 related:
@@ -18,6 +18,7 @@ related:
   - REVIEW-MIS-002-M01-R5-FINAL
   - ACCEPTANCE-MIS-002-M01-R5-APPROVAL
   - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-PLAN-APPROVAL
+  - ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT
   - DESIGN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
   - PLAN-MIS-002-M01-DURABLE-EXECUTION-LEASE-CORE
 tracking_issue: 16
@@ -31,8 +32,8 @@ tracking_issue: 16
 - **Architecture baseline:** merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`
 - **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`
 - **Approved M2 contract:** MIS-002 revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`
-- **Current enabler:** Issue #16 — Task 14 canonical WSL2 preflight awaits explicit authority
-- **Current design/implementation PR:** #17 — `design/mis-002-m01` (draft; unmerged)
+- **Current enabler:** Issue #16 — M01 closeout PR #19 awaits Operator review
+- **Current design/implementation PR:** #19 — `design/mis-002-m01` (open; post-PR M01 closeout)
 
 ## Readiness result
 
@@ -61,12 +62,16 @@ Task 12 GREEN:                     VERIFIED / REVIEWED
 Task 13 RED:                       OBSERVED / ACCEPTABLE
 Task 13 GREEN:                     VERIFIED / REVIEWED
 Task 14 deterministic proof:      VERIFIED / REVIEWED
-Task 14 WSL2 preflight:           NOT AUTHORIZED
-Real Treehouse execution:         PROHIBITED until the explicit real-proof gate
+Canonical npm run verify:         VERIFIED — 321/321, 119/119, 78/78, docs 95 IDs
+Real Treehouse Scenario A:        HISTORICAL_PASS — evidence finalized before fixture cleanup; successful raw root not retained
+Real Treehouse R2 crash/recovery: FOLLOW_UP_REQUIRED / DEFERRED
+Real Treehouse R3 lineage:        FOLLOW_UP_REQUIRED / DEFERRED
+M01 implementation closeout:      PREPARED / UNCOMMITTED
+M01 acceptance:                    PENDING OPERATOR REVIEW
 Pi Worker dispatch:               PROHIBITED
-M01 acceptance:                    NOT AUTHORIZED
 Automatic merge:                  NOT AUTHORIZED
-PR:                               #17 DRAFT
+PR #17:                           MERGED — historical implementation baseline
+PR #19:                           OPEN — M01 closeout pending operator review
 ```
 
 ## Accepted implementation baseline
@@ -706,7 +711,7 @@ MNFS_AUTHORIZE_M01_TASK_14_WSL2_PREFLIGHT plan=1.0.1 microdesign=0.6.1 determini
 - dirty, missing, unmanaged, ambiguous or non-bijective work is preserved;
 - no reset, clean, force, destroy, prune or product deletion is authorized;
 - no Pi process, SEC-E1 production creation, Receipt or Gate exists in M01;
-- PR #17 remains draft and unmerged.
+- PR #17 is merged in `main`; PR #19 carries the post-PR closeout delta and awaits operator review.
 
 ## Current authorization boundary
 
@@ -719,13 +724,17 @@ Task 12 GREEN:              VERIFIED / REVIEWED
 Task 13 RED:                OBSERVED / ACCEPTABLE
 Task 13 GREEN:              VERIFIED / REVIEWED
 Task 14 deterministic:      VERIFIED / REVIEWED
-Task 14 WSL2 preflight:     NOT AUTHORIZED
-Real Treehouse execution:   NOT AUTHORIZED
+Canonical npm run verify:   VERIFIED — 321/321, 119/119, 78/78, docs 95 IDs
+Real Treehouse Scenario A:  HISTORICAL_PASS — evidence finalized before fixture cleanup; successful raw root not retained
+Real Treehouse R2:          FOLLOW_UP_REQUIRED / DEFERRED
+Real Treehouse R3:          FOLLOW_UP_REQUIRED / DEFERRED
+M01 closeout:               PREPARED / UNCOMMITTED
+M01 acceptance:             PENDING OPERATOR REVIEW
 Pi Worker dispatch:         PROHIBITED
-M01 acceptance:             NOT AUTHORIZED
-PR #17 merge:               NOT AUTHORIZED
+PR #17:                     MERGED / historical implementation baseline
+PR #19:                     OPEN / M01 closeout pending operator review
 ```
 
 ## Immediate next action
 
-A separate exact Operator continuation is required for the canonical WSL2 preflight, bound to deterministic head `680b2e55d01f76da35922675c18ef997c56403d3`. The preflight is read-only and must prove the exact Linux-local checkout, Node/Git/Treehouse provenance, clean full gate and no environment drift. Real Treehouse Scenario A, M01 acceptance, Pi dispatch and merge remain separately unauthorized.
+The current gate is Operator review of `ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT`. That review may accept the normal-path implementation closeout or require the deferred real R2/R3 evidence; it does not authorize Pi dispatch, M02, merge or delivery.

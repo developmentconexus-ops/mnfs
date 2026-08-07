@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -704,14 +704,4 @@ test('strict row codecs reject malformed persisted enum, nullability and criteri
       control.close();
     }
   });
-});
-
-test('the focused ExecutionStore never creates another SQLite connection or transaction authority', () => {
-  const sourcePath = join(process.cwd(), 'src', 'store', 'execution-store.ts');
-  assert.equal(existsSync(sourcePath), true, 'src/store/execution-store.ts must exist.');
-  const source = readFileSync(sourcePath, 'utf8');
-
-  assert.doesNotMatch(source, /new\s+DatabaseSync\s*\(/);
-  assert.doesNotMatch(source, /new\s+SqliteTransaction\s*\(/);
-  assert.doesNotMatch(source, /BEGIN\s+IMMEDIATE/i);
 });

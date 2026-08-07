@@ -40,13 +40,19 @@
         "MIS-002/M01/AC-01"
       ],
       "realizedBy": [
-        "AttemptStore unique/current invariant"
+        "src/store/execution-store.ts current Attempt uniqueness and lifecycle persistence",
+        "tests/store/execution-store.test.ts",
+        "tests/integration/m01-fresh-process.test.ts"
       ],
       "verifiedBy": [
-        "unit:FSM-current-attempt"
+        "tests/store/execution-store.test.ts current Attempt invariant",
+        "tests/integration/m01-fresh-process.test.ts fresh-process lifecycle",
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT verification record"
       ],
-      "evidencedBy": [],
-      "state": "DESIGNED",
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT"
+      ],
+      "state": "VERIFIED",
       "blockers": []
     },
     {
@@ -63,13 +69,21 @@
         "MIS-002/M01/AC-02"
       ],
       "realizedBy": [
-        "WorkerRun entity and Attempt relation"
+        "src/execution/model.ts WorkerRun and Attempt identities",
+        "src/store/execution-store.ts Worker Run persistence",
+        "tests/execution/ids.test.ts",
+        "tests/integration/m01-fresh-process.test.ts"
       ],
       "verifiedBy": [
-        "unit:worker-run-replacement"
+        "tests/execution/ids.test.ts identity separation",
+        "tests/store/execution-store.test.ts Worker Run replacement",
+        "tests/integration/m01-fresh-process.test.ts Scenario B lineage",
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT verification record"
       ],
-      "evidencedBy": [],
-      "state": "DESIGNED",
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT"
+      ],
+      "state": "VERIFIED",
       "blockers": []
     },
     {
@@ -112,13 +126,20 @@
         "MIS-002/M01/AC-03"
       ],
       "realizedBy": [
-        "ClaimService transaction"
+        "src/services/claim-service.ts Claim OPEN transaction",
+        "src/store/execution-store.ts Claim/Event persistence",
+        "tests/services/claim-service.test.ts",
+        "tests/integration/m01-fresh-process.test.ts"
       ],
       "verifiedBy": [
-        "unit:claim-event-atomicity"
+        "tests/services/claim-service.test.ts Claim/Event atomicity",
+        "tests/integration/m01-fresh-process.test.ts Scenario B Claim lineage",
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT verification record"
       ],
-      "evidencedBy": [],
-      "state": "DESIGNED",
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT"
+      ],
+      "state": "VERIFIED",
       "blockers": []
     },
     {
@@ -135,13 +156,21 @@
         "MIS-002/M01/AC-04"
       ],
       "realizedBy": [
-        "contract binding fields and validation"
+        "src/execution/model.ts contractHash bindings",
+        "src/services/execution-service.ts contract validation",
+        "tests/domain/mis-002-current-contract.test.ts",
+        "tests/integration/m01-fresh-process.test.ts"
       ],
       "verifiedBy": [
-        "unit:contract-hash-conflict"
+        "tests/domain/mis-002-current-contract.test.ts exact contract identity",
+        "tests/store/execution-store.test.ts contract-hash conflict",
+        "tests/integration/m01-fresh-process.test.ts exact approved contract binding",
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT verification record"
       ],
-      "evidencedBy": [],
-      "state": "DESIGNED",
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT"
+      ],
+      "state": "VERIFIED",
       "blockers": []
     },
     {
@@ -158,14 +187,22 @@
         "MIS-002/M01/AC-05"
       ],
       "realizedBy": [
-        "LeaseService external operation protocol"
+        "src/services/lease-service.ts Intent–Action–Observation grant/release",
+        "src/runtime/lease-action-protocol.ts durable action protocol",
+        "src/runtime/lease-action-runner.ts single bounded invocation",
+        "src/adapters/treehouse.ts Treehouse boundary"
       ],
       "verifiedBy": [
-        "unit:lease-crash-windows",
-        "real:treehouse"
+        "tests/services/lease-service-grant.test.ts grant matrix",
+        "tests/services/lease-service-release.test.ts release matrix",
+        "tests/integration/m01-fresh-process.test.ts Intent–Action–Observation recovery",
+        "tests/integration/m01-real-treehouse.real.ts Scenario A historical real proof",
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT verification record"
       ],
-      "evidencedBy": [],
-      "state": "DESIGNED",
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT"
+      ],
+      "state": "VERIFIED",
       "blockers": []
     },
     {
@@ -182,14 +219,20 @@
         "MIS-002/M01/AC-06"
       ],
       "realizedBy": [
-        "Lease generation/external ID validation"
+        "src/services/lease-service.ts internal/external Lease fencing",
+        "src/store/execution-store.ts Lease generation and idempotency fields",
+        "tests/services/lease-service-release.test.ts"
       ],
       "verifiedBy": [
-        "unit:release-idempotency",
-        "DR-03"
+        "tests/services/lease-service-release.test.ts release idempotency and fencing",
+        "tests/integration/m01-fresh-process.test.ts release replay and exact identity",
+        "tests/integration/m01-real-treehouse.real.ts Scenario A historical real proof",
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT verification record"
       ],
-      "evidencedBy": [],
-      "state": "DESIGNED",
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT"
+      ],
+      "state": "VERIFIED",
       "blockers": []
     },
     {
@@ -205,14 +248,21 @@
         "MIS-002/M01/AC-07"
       ],
       "realizedBy": [
-        "RecoveryService divergence taxonomy"
+        "src/services/recovery-service.ts read-only divergence taxonomy",
+        "src/adapters/execution-source.ts source observation",
+        "src/adapters/treehouse.ts Lease observation",
+        "tests/services/recovery-service.test.ts"
       ],
       "verifiedBy": [
-        "DR-04",
-        "DR-05"
+        "tests/services/recovery-service.test.ts orphan and missing-worktree classifications",
+        "tests/integration/m01-fresh-process.test.ts read-only Recovery scenarios",
+        "tests/integration/m01-composition.test.ts fresh-process Recovery composition",
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT verification record"
       ],
-      "evidencedBy": [],
-      "state": "DESIGNED",
+      "evidencedBy": [
+        "ACCEPTANCE-MIS-002-M01-IMPLEMENTATION-CLOSEOUT"
+      ],
+      "state": "VERIFIED",
       "blockers": []
     },
     {

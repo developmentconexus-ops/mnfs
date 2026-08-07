@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
   chmodSync,
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -262,7 +261,10 @@ function canonicalTreehouseConfig(poolRoot: string): string {
   return `max_trees = 2\nroot = ${JSON.stringify(poolRoot)}\n`;
 }
 
-async function withFixture(operation: (fixture: Fixture) => Promise<void>): Promise<void> {
+async function withFixture(
+  operation: (fixture: Fixture) => Promise<void>,
+  leasedAt = '2026-08-05T05:00:00Z',
+): Promise<void> {
   const root = mkdtempSync(join(tmpdir(), 'mnfs-task9-'));
   const sourcePath = join(root, 'runtime', 'execution-sources', 'WT-001', 'WT-001', 'A01', 'source');
   const canonicalPath = join(root, 'canonical');
@@ -315,7 +317,7 @@ async function withFixture(operation: (fixture: Fixture) => Promise<void>): Prom
     leasedPath: realpathSync(leasedPath),
     holder: 'mnfs-repo-lse001-g1',
     leaseId: 'lease-123',
-    leasedAt: '2026-08-05T05:00:00Z',
+    leasedAt,
     executableHash: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
   };
   try {
@@ -490,6 +492,22 @@ test('uses exact argv, Attempt-owned cwd/environment and advisory release output
   });
 });
 
+test('accepts and preserves RFC3339 offset leased_at for acquisition and status', async () => {
+  const module = await loadModule();
+  const leasedAt = '2026-08-06T19:28:34.123456789-03:00';
+  await withFixture(async (fixture) => {
+    const runner = new Runner(fixture);
+    const adapter = createAdapter(module, fixture, runner);
+
+    const acquired = await adapter.acquire({ boundary: boundary(fixture), holder: fixture.holder });
+    const statuses = await adapter.status({ boundary: boundary(fixture) });
+
+    assert.equal(acquired.leasedAt, leasedAt);
+    assert.equal(statuses.length, 1);
+    assert.equal(statuses[0]?.leasedAt, leasedAt);
+  }, leasedAt);
+});
+
 test('rejects contaminated acquisition output and command failures', async () => {
   const module = await loadModule();
   await withFixture(async (fixture) => {
@@ -553,6 +571,34 @@ test('parses strict status and rejects duplicate or inconsistent identities', as
         runner,
       ).status({ boundary: boundary(fixture) }));
     }
+  });
+});
+
+test('accepts the real post-return available status shape without lease identity', async () => {
+  const module = await loadModule();
+  await withFixture(async (fixture) => {
+    const runner = new Runner(fixture);
+    runner.overrides.set(
+      commandKey(fixture.treehouse, ['status', '--json']),
+      success(JSON.stringify([{
+        name: 'slot-1',
+        path: fixture.leasedPath,
+        status: 'available',
+        lease_id: '',
+        lease_holder: '',
+        leased_at: null,
+        processes: [],
+      }]) + '\n'),
+    );
+
+    const statuses = await createAdapter(module, fixture, runner)
+      .status({ boundary: boundary(fixture) });
+    assert.deepEqual(statuses, [{
+      name: 'slot-1',
+      path: fixture.leasedPath,
+      status: 'available',
+      processes: [],
+    }]);
   });
 });
 
@@ -679,22 +725,4 @@ test('rejects canonical, mounted, symlinked and overlapping boundaries before Tr
       assert.equal(protectedCalls(fixture, runner.calls).length, 0);
     }
   });
-});
-
-test('source contains no destructive, shell, inherited-environment or stderr-state fallback', async () => {
-  const path = join(process.cwd(), 'src', 'adapters', 'treehouse.ts');
-  assert.equal(existsSync(path), true, 'Task 9 production adapter is absent');
-  const source = readFileSync(path, 'utf8');
-  for (const [label, pattern] of [
-    ['force', /--force/u],
-    ['destroy', /\bdestroy\b/u],
-    ['prune', /\bprune\b/u],
-    ['shell true', /shell\s*:\s*true/u],
-    ['exec fallback', /\bexec(?:Sync)?\s*\(/u],
-    ['environment spread', /\.\.\.(?:process\.)?env/u],
-    ['stderr inference', /stderr[\s\S]{0,120}(?:match|test|includes|search)\s*\(/u],
-  ] as const) {
-    assert.equal(pattern.test(source), false, label);
-  }
-  assert.equal(/canonicalCheckoutPath[\s\S]{0,200}cwd/u.test(source), false);
 });

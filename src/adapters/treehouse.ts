@@ -19,6 +19,7 @@ const SHA1_OBJECT_PATTERN = /^[0-9a-f]{40}$/;
 const SHA256_OBJECT_PATTERN = /^[0-9a-f]{64}$/;
 const SAFE_VALUE_PATTERN = /^[^\0\n\r]+$/;
 const CAPABILITY_FLAG_PATTERN = /--[a-z0-9-]+/gu;
+const RFC3339_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u;
 
 export interface ReadyTreehouseSourceIdentity {
   readonly fingerprint: string;
@@ -249,8 +250,8 @@ function requireExactKeys(
 
 function requireIsoTimestamp(value: unknown, label: string): string {
   const timestamp = requireStringValue(value, label, 'TREEHOUSE_OUTPUT_INVALID');
-  if (!timestamp.endsWith('Z') || !Number.isFinite(Date.parse(timestamp))) {
-    fail('TREEHOUSE_OUTPUT_INVALID', `${label} must be a valid UTC timestamp.`);
+  if (!RFC3339_TIMESTAMP_PATTERN.test(timestamp) || !Number.isFinite(Date.parse(timestamp))) {
+    fail('TREEHOUSE_OUTPUT_INVALID', `${label} must be a valid RFC3339 timestamp.`);
   }
   return timestamp;
 }
@@ -907,13 +908,28 @@ export class TreehouseAdapter {
       if (status !== 'available' && status !== 'leased') {
         fail('TREEHOUSE_OUTPUT_INVALID', `Treehouse status item ${index} has an invalid state.`);
       }
-      requireExactKeys(
-        item,
-        status === 'leased'
-          ? ['name', 'path', 'status', 'lease_id', 'lease_holder', 'leased_at', 'processes']
-          : ['name', 'path', 'status', 'processes'],
-        `Treehouse status item ${index}`,
-      );
+      if (status === 'leased') {
+        requireExactKeys(
+          item,
+          ['name', 'path', 'status', 'lease_id', 'lease_holder', 'leased_at', 'processes'],
+          `Treehouse status item ${index}`,
+        );
+      } else {
+        const legacyAvailable = Object.keys(item).sort().join('\u0000')
+          === ['name', 'path', 'status', 'processes'].sort().join('\u0000');
+        const realAvailable = Object.keys(item).sort().join('\u0000')
+          === ['name', 'path', 'status', 'lease_id', 'lease_holder', 'leased_at', 'processes']
+            .sort().join('\u0000');
+        if (!legacyAvailable && !realAvailable) {
+          fail('TREEHOUSE_OUTPUT_INVALID', `Treehouse status item ${index} has an unexpected shape.`);
+        }
+        if (
+          realAvailable
+          && (item.lease_id !== '' || item.lease_holder !== '' || item.leased_at !== null)
+        ) {
+          fail('TREEHOUSE_OUTPUT_INVALID', `Treehouse available item ${index} has a lease identity.`);
+        }
+      }
       const path = await this.#canonicalPoolPath(
         requireStringValue(item.path, 'Treehouse status path', 'TREEHOUSE_OUTPUT_INVALID'),
         poolRoot,

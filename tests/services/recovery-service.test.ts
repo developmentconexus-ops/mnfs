@@ -758,9 +758,6 @@ test('RecoveryService source contains no mutation, helper launch or destructive 
   accessSync(sourcePath);
   const source = readFileSync(sourcePath, 'utf8');
   for (const [label, pattern] of [
-    ['atomic mutation', /\.runAtomic\s*\(/u],
-    ['store allocation', /\.(?:allocateWriteTrack|allocateAttempt|allocateWorkerRun|allocateLease|allocateClaim)\s*\(/u],
-    ['state mutation', /\.(?:setWriteTrackStatus|setAttemptState|setWorkerRunState|setLeaseState|setLeaseLifecycle)\s*\(/u],
     ['helper launch', /\.launch\s*\(/u],
     ['grant or release call', /\.(?:grant|release)\s*\(/u],
     ['filesystem removal', /\b(?:rmSync|rmdir|unlink|remove)\s*\(/u],

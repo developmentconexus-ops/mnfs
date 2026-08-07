@@ -8,7 +8,11 @@ import {
 } from './artifacts.mjs';
 import { createEvidenceCapture, collectDefaultS0 } from './collector.mjs';
 import { deriveCapabilityClasses } from './class-eligibility.mjs';
-import { S0_CAPABILITY_IDS } from './contract.mjs';
+import { S0_CAPABILITY_IDS, S0_PLAN_GIT_BLOB, S0_PLAN_VERSION } from './contract.mjs';
+import {
+  executionAuthorizationEvidence,
+  requireAuthenticatedExecutionAuthorization,
+} from './execution-authority.mjs';
 import { createInitialRunState, transitionRunState } from './model.mjs';
 import { requireRunId, resolveS0RunRoot, resolveS0StateRoot } from './paths.mjs';
 import { observeFilesystemOwnership, observeHostIdentity } from './probes/host-identity.mjs';
@@ -16,8 +20,6 @@ import { observeRepositoryIdentity } from './probes/repository.mjs';
 import { deriveS0Verdict } from './verdict.mjs';
 
 const POSITIVE_NODE = Object.freeze([24, 18, 0]);
-const SHA_PATTERN = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u;
-const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 
 function nodeVersionAtLeast(value, minimum = POSITIVE_NODE) {
   const match = String(value ?? '').match(/^v?(\d+)\.(\d+)\.(\d+)/u);
@@ -37,35 +39,21 @@ function isLinuxOwnedAbsolute(value) {
 }
 
 function requireExecutionAuthorization(identities, source = null) {
-  const authority = identities?.executionAuthorization;
   if (!identities?.plan || !identities?.contract) {
     throw new TypeError('ARR-S0 run requires exact plan and contract identities');
   }
-  if (!authority || typeof authority !== 'object' || Array.isArray(authority)) {
-    throw new TypeError('ARR-S0 run requires exact GATE-S0-EXECUTE execution authorization');
+  if (identities.plan.version !== S0_PLAN_VERSION) {
+    throw new TypeError('ARR-S0 run plan version does not match accepted implementation plan');
   }
-  if (authority.gate !== 'GATE-S0-EXECUTE') {
-    throw new TypeError('ARR-S0 execution authorization gate must be GATE-S0-EXECUTE');
+  if (identities.contract.version !== '1.0.0') {
+    throw new TypeError('ARR-S0 run requires accepted contract version 1.0.0');
   }
-  if (!SHA_PATTERN.test(authority.baseCommitSha ?? '')) {
-    throw new TypeError('ARR-S0 execution authorization base commit is invalid');
-  }
-  if (!DIGEST_PATTERN.test(authority.contractHash ?? '') || authority.contractHash !== identities.contract.hash) {
-    throw new TypeError('ARR-S0 execution authorization contract hash does not match');
-  }
-  if (!Number.isSafeInteger(authority.verificationRunId) || authority.verificationRunId <= 0) {
-    throw new TypeError('ARR-S0 execution authorization verification run is invalid');
-  }
-  if (!DIGEST_PATTERN.test(authority.tokenHash ?? '')) {
-    throw new TypeError('ARR-S0 execution authorization token hash is invalid');
-  }
-  if (Object.hasOwn(authority, 'operatorToken')) {
-    throw new TypeError('ARR-S0 execution authorization must not retain the raw Operator token');
-  }
-  if (source?.commitSha && authority.baseCommitSha !== source.commitSha) {
-    throw new TypeError('ARR-S0 execution authorization source commit does not match preflight source');
-  }
-  return structuredClone(authority);
+  const authority = requireAuthenticatedExecutionAuthorization(identities.executionAuthorization, {
+    planGitBlob: S0_PLAN_GIT_BLOB,
+    contractHash: identities.contract.hash,
+    ...(source?.commitSha ? { baseCommitSha: source.commitSha } : {}),
+  });
+  return executionAuthorizationEvidence(authority);
 }
 
 async function defaultInspect({ repoRoot, stateRoot }) {

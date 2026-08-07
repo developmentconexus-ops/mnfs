@@ -69,6 +69,14 @@ jobs:
       - run: npm run build --silent
       - run: node scripts/test-documentation-tooling.mjs
         continue-on-error: true
+      - run: node scripts/test-mis-002-replan-builder.mjs
+        continue-on-error: true
+      - run: node scripts/test-approved-mis-002-allocations.mjs
+        continue-on-error: true
+      - run: node scripts/test-arr-p1-blueprint-reconciliation.mjs
+        continue-on-error: true
+      - run: node scripts/test-arr-spike-contract-binding.mjs
+        continue-on-error: true
       - run: node scripts/test-arr-s0-contract-consistency.mjs
         continue-on-error: true
       - run: node scripts/validate-docs.mjs

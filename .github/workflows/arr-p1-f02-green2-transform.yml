@@ -25,6 +25,33 @@ jobs:
         run: python3 -m py_compile scripts/arr-p1-f02-green2-transform.py
       - name: Apply second P1-F02 cleanup
         run: python3 scripts/arr-p1-f02-green2-transform.py
+      - name: Align tracking regression with active F02 review
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/test-documentation-tooling.mjs')
+          s = p.read_text()
+          replacements = [
+            (
+              "assert.match(statusText, /\\*\\*Current phase:\\*\\* `ARR P1 — Pre-Spike Reconciliation Review`/u, 'STATUS current phase must be P1 review');",
+              "assert.match(statusText, /\\*\\*Current phase:\\*\\* `ARR P1 — P1-F02 Constitutional Body Reconciliation \\/ Fresh Review`/u, 'STATUS current phase must be P1-F02 fresh review');",
+            ),
+            (
+              "assert.match(statusText, /ARR P1 A1-A4 \\+ B1 \\+ P1-F01:[^\\n]*IMPLEMENTED \\/ VERIFIED \\/ REVIEW_REQUIRED/u, 'STATUS must record P1 implementation review state');",
+              "assert.match(statusText, /ARR P1 A1-A4 \\+ B1 \\+ P1-F01 \\+ P1-F02:[^\\n]*IMPLEMENTED \\/ VERIFIED \\/ FRESH_REVIEW_REQUIRED/u, 'STATUS must record P1-F02 fresh-review state');",
+            ),
+            (
+              "assert.match(statusText, /## Immediate next action — P1 review/u, 'STATUS next action must be P1 review');",
+              "assert.match(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS next action must be P1-F02 fresh review');",
+            ),
+          ]
+          for old, new in replacements:
+              if old not in s:
+                  raise SystemExit(f'missing tracking assertion: {old}')
+              s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
       - name: Regenerate canonical projections
         run: npm run docs:generate
       - name: Prove strengthened F02 contract

@@ -975,7 +975,7 @@ docs/
 
 ## 5.8.3 Operational state
 
-Vive fora dos worktrees:
+Vive fora dos isolated mutable workspaces:
 
 ```text
 ~/.local/state/mnfs/repos/<repo-id>/
@@ -1554,7 +1554,7 @@ Uma UI própria pode substituir Lavish sem mudar o Planning Domain.
 
 # 5.17 Herdr Adapter
 
-Herdr fornece workspaces, tabs, panes, persistência de terminal e estado visual de agentes; também expõe CLI e socket API para controle e possui integração direta com Pi. citeturn823284search1turn823284search2turn823284search5
+Herdr fornece workspaces, tabs, panes, persistência de terminal e estado visual de agentes; também expõe CLI e socket API para controle. A versão estudada historicamente possuía integração direta com Pi; isso é reference compatibility e não seleciona Pi como Agent Runtime atual. citeturn823284search1turn823284search2turn823284search5
 
 ## 5.17.1 Papel
 
@@ -2219,7 +2219,7 @@ Não construir agora:
 - Graph database;
 - universal knowledge base;
 - custom terminal multiplexer;
-- custom worktree manager;
+- custom mutable-workspace manager;
 - custom browser review server;
 - abstraction para todo provider existente.
 

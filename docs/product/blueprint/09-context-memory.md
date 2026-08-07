@@ -1216,9 +1216,11 @@ risks
 
 Pode usar:
 
-- Pi resume;
-- OM;
+- runtime-native resume when the selected Agent Runtime supports it;
+- optional Session Memory Adapter when separately applicable;
 - Current Authority Snapshot.
+
+Runtime-native resume is a convenience only; it never replaces Fresh Recovery or current Authority.
 
 ### Nova Session
 

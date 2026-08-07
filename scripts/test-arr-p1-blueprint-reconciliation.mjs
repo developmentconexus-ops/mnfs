@@ -129,6 +129,7 @@ reject('09-context-memory.md', /^# 9\.7 Candidato principal — `pi-observationa
 reject('09-context-memory.md', /^# 9\.8 Alternativa — `pi-observational-memory-extension`$/mu, 'candidate alternative still looks current');
 reject('09-context-memory.md', /^# 9\.19 `pi-link`$/mu, 'Pi transport study is not labeled historical/reference');
 reject('09-context-memory.md', /process adapter starts Pi Worker with Dispatch Packet/u, 'current M2 communication model still selects Pi Worker');
+reject('09-context-memory.md', /^- Pi resume;$/mu, 'current Session handoff still selects Pi-native resume');
 reject('09-context-memory.md', /\| Pi JSONL Sessions \| Adotar \|/u, 'current adoption matrix still says adopt Pi JSONL');
 reject('09-context-memory.md', /\| Pi native compaction \| Manter \|/u, 'current adoption matrix still says retain Pi compaction');
 reject('09-context-memory.md', /- child Pi process;/u, 'current M2 memory slice still selects child Pi process');

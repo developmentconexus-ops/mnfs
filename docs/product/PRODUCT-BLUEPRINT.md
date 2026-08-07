@@ -32,7 +32,7 @@ tracking_issue: 6
 Source: docs/product/blueprint/*.md
 Generator: scripts/generate-product-blueprint.mjs
 Generator version: 2
-Source manifest hash: sha256:8af07de6755217becbaebe5692bfeabdaf624b6ecfdbaa8b49500618fadf5c79
+Source manifest hash: sha256:ae325478931877568c3024434a58c6837dbc0e3d3e0e6313c6ebb404e3aa803f
 -->
 
 # MNFS Product Blueprint
@@ -6016,7 +6016,7 @@ docs/
 
 ## 5.8.3 Operational state
 
-Vive fora dos worktrees:
+Vive fora dos isolated mutable workspaces:
 
 ```text
 ~/.local/state/mnfs/repos/<repo-id>/
@@ -6595,7 +6595,7 @@ Uma UI própria pode substituir Lavish sem mudar o Planning Domain.
 
 # 5.17 Herdr Adapter
 
-Herdr fornece workspaces, tabs, panes, persistência de terminal e estado visual de agentes; também expõe CLI e socket API para controle e possui integração direta com Pi. citeturn823284search1turn823284search2turn823284search5
+Herdr fornece workspaces, tabs, panes, persistência de terminal e estado visual de agentes; também expõe CLI e socket API para controle. A versão estudada historicamente possuía integração direta com Pi; isso é reference compatibility e não seleciona Pi como Agent Runtime atual. citeturn823284search1turn823284search2turn823284search5
 
 ## 5.17.1 Papel
 
@@ -7260,7 +7260,7 @@ Não construir agora:
 - Graph database;
 - universal knowledge base;
 - custom terminal multiplexer;
-- custom worktree manager;
+- custom mutable-workspace manager;
 - custom browser review server;
 - abstraction para todo provider existente.
 
@@ -14270,9 +14270,11 @@ risks
 
 Pode usar:
 
-- Pi resume;
-- OM;
+- runtime-native resume when the selected Agent Runtime supports it;
+- optional Session Memory Adapter when separately applicable;
 - Current Authority Snapshot.
+
+Runtime-native resume is a convenience only; it never replaces Fresh Recovery or current Authority.
 
 ### Nova Session
 

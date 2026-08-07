@@ -41,8 +41,38 @@ assert.match(contract, /MNFS_AUTHORIZE_ARR_S0_EXECUTE[^\n]*plan_blob[^\n]*contra
 assert.match(contract, /state[- ]root filesystem[^\n]*(?:allowlist|reviewed|stat)/iu, 'S0 contract must require state-root filesystem proof');
 assert.match(contract, /no-replace|hard-link|hard link/iu, 'S0 contract must document no-replace artifact publication');
 assert.doesNotMatch(contract, /atomic rename/iu, 'S0 contract must not claim replace-capable rename publication');
+assert.match(
+  contract,
+  /`preflight`[^\n]*(?:requires|is gated by)[^\n]*GATE-S0-EXECUTE|GATE-S0-EXECUTE[^\n]*`preflight`/iu,
+  'S0 contract must state that preflight itself requires GATE-S0-EXECUTE',
+);
+assert.match(
+  contract,
+  /(?:before any|before .*?)host(?:\/Git| or Git| and Git)? observation[^\n]*execution-authority token|execution-authority token[^\n]*(?:before any|before .*?)host(?:\/Git| or Git| and Git)? observation/iu,
+  'S0 contract must state that execution authority is authenticated before host/Git observation',
+);
+assert.match(
+  contract,
+  /`report`[^\n]*(?:does not require|does not perform|reopens)[^\n]*(?:host|probe|Evidence)|(?:Evidence|host)[^\n]*`report`/iu,
+  'S0 contract must explain that report only reopens existing Evidence and performs no new host observation',
+);
 assert.match(readme, /MNFS_ARR_S0_EXECUTE_AUTHORIZATION/u, 'ARR-S0 README must document the dedicated runtime execution-authority channel');
 assert.match(readme, /no-replace|hard-link|hard link/iu, 'ARR-S0 README must document no-replace publication');
+assert.match(
+  readme,
+  /`preflight`[^\n]*(?:requires|is gated by)[^\n]*GATE-S0-EXECUTE|GATE-S0-EXECUTE[^\n]*`preflight`/iu,
+  'ARR-S0 README must state that preflight requires GATE-S0-EXECUTE',
+);
+assert.match(
+  readme,
+  /execution-authority token[^\n]*(?:before any|before .*?)(?:Git|host) observation|(?:before any|before .*?)(?:Git|host) observation[^\n]*execution-authority token/iu,
+  'ARR-S0 README must state that authority is authenticated before Git/host observation',
+);
+assert.match(
+  readme,
+  /`report`[^\n]*(?:reopens|reads)[^\n]*Evidence[^\n]*(?:without|no)[^\n]*(?:host|probe)|`report`[^\n]*(?:without|no)[^\n]*(?:host|probe)/iu,
+  'ARR-S0 README must state that report does not perform new host probing',
+);
 
 const capabilitySection = section(contract, '## 4. Required host capability observations', '## 5. Generic capability classes');
 const classSection = section(contract, '## 5. Generic capability classes', '## 6. Mechanical overall Verdict');

@@ -15,6 +15,7 @@ const traceabilitySchema = JSON.parse(await readFile(path.join(root, 'schemas/ca
 const currentContract = JSON.parse(await readFile(path.join(root, '.mnfs/missions/MIS-002/plan.json'), 'utf8'));
 const capabilitySpecText = await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/SPEC.md'), 'utf8');
 const domainModelText = await readFile(path.join(root, 'docs/product/blueprint/02-domain-model.md'), 'utf8');
+const mcrmText = await readFile(path.join(root, 'docs/product/CAPABILITY-REALIZATION-METHOD.md'), 'utf8');
 
 function registryWithCapabilityStatus(status) {
   const documents = new Map(registry.documents);
@@ -178,6 +179,18 @@ assert.match(
   domainModelText,
   /M2 implementa apenas um Minimal Deterministic Receipt delimitado[^\n]*Golden Proof/iu,
 );
+
+for (const marker of [
+  'R4A — Validation Baseline',
+  'R4B — Decomposition and Allocation',
+  'Fresh Actor',
+  'HANDOFF_REQUIRED',
+  'OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT',
+]) {
+  assert.ok(mcrmText.includes(marker), `MCRM missing accepted execution-planning marker: ${marker}`);
+}
+assert.equal((mcrmText.match(/^# 10\. O ciclo MCRM$/gmu) ?? []).length, 1, 'MCRM must keep one canonical R0-R8 lifecycle');
+assert.match(mcrmText, /R0 Baseline[\s\S]*R8 Closeout and Learning/u);
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];

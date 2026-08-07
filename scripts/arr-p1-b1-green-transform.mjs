@@ -71,7 +71,7 @@ async function runArchitectureSpikeEvidenceCli() {
     failArchitectureSpikeEvidence(['evidence file is unreadable or invalid JSON (' + error.message + ')']);
   }
 
-  const validationErrors = validateJsonSchema(evidence, schema, '$');
+  const validationErrors = validateJsonSchema(evidence, schema);
   if (validationErrors.length === 0) {
     validationErrors.push(...await validateArchitectureSpikeEvidenceSemantics(evidence, artifactRoot));
   }

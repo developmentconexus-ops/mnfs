@@ -54,6 +54,13 @@ jobs:
           PY
       - name: Regenerate canonical projections
         run: npm run docs:generate
+      - name: Locate exact residual aggregate phrases
+        shell: bash
+        run: |
+          echo '=== one Pi Worker ==='
+          grep -R -n -B2 -A2 -E '^one Pi Worker$' docs/product/blueprint || true
+          echo '=== process adapter starts Pi Worker ==='
+          grep -R -n -B2 -A2 -F 'process adapter starts Pi Worker' docs/product/blueprint || true
       - name: Prove strengthened F02 contract
         run: npm run docs:test
       - name: Validate complete documentation

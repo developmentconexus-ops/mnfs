@@ -21,6 +21,18 @@ jobs:
           node-version: 24.18.0
           cache: npm
       - run: npm ci
+      - name: Normalize transport-only Markdown quoting
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/arr-p1-f02-green-transform.mjs')
+          s = p.read_text()
+          s = s.replace('`CONTROL_SIDE`', 'CONTROL_SIDE')
+          s = s.replace('`IN_ENVIRONMENT`', 'IN_ENVIRONMENT')
+          p.write_text(s)
+          PY
+          node --check scripts/arr-p1-f02-green-transform.mjs
       - name: Apply P1-F02 constitutional reconciliation
         run: node scripts/arr-p1-f02-green-transform.mjs
       - name: Regenerate canonical projections

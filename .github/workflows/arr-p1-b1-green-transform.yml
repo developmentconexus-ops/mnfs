@@ -1,0 +1,42 @@
+name: ARR P1 B1 GREEN Transformer
+
+on:
+  push:
+    branches:
+      - reconcile/arr-p1-b1-green-transform
+
+permissions:
+  contents: write
+
+jobs:
+  green:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: reconcile/arr-p1-b1-green-transform
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - run: npm ci
+      - name: Apply reviewed validator hook
+        run: node scripts/arr-p1-b1-green-transform.mjs
+      - name: Run B1 GREEN tests
+        run: npm run docs:test
+      - name: Run complete documentation validation
+        run: npm run docs:check
+      - name: Run full repository verification
+        run: npm run verify
+      - name: Remove transport-only machinery
+        run: rm .github/workflows/arr-p1-b1-green-transform.yml scripts/arr-p1-b1-green-transform.mjs
+      - name: Commit final B1 tree
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --stat
+          git commit -m 'feat: define architecture spike evidence contract'
+          git push origin HEAD:reconcile/arr-p1-b1-green-transform

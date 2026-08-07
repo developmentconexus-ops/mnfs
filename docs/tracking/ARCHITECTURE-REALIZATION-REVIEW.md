@@ -32,6 +32,7 @@ The review searches for the best-supported global solution rather than optimizin
 - Mastra Software Factory / AgentController / Signals / ACP research;
 - Pi SDK/RPC/extensions/session research;
 - Factory.ai Software Factory / Missions / Droid / open-source VFS research;
+- open agent-runtime interoperability research including ACP and open coding-agent runtimes;
 - mature adjacent runtime, workflow, sandbox, browser, MCP and observability primitives;
 - current MNFS implementation and canonical WSL2 constraints.
 
@@ -39,8 +40,8 @@ The review searches for the best-supported global solution rather than optimizin
 
 ```text
 D1 — Planning and validation semantics          APPROVED — D-011
-D2 — Agent runtime and session/control strategy IN REVIEW
-D3 — Execution workspace and isolation          PENDING
+D2 — Agent runtime and session/control strategy APPROVED — D-012
+D3 — Execution workspace and isolation          IN REVIEW
 D4 — Implementation sourcing strategy           PENDING
 ```
 
@@ -75,60 +76,67 @@ Decision rules:
 - planning ceremony remains proportional to risk;
 - staged draft/schema and Blueprint/MCRM changes are implementation consequences to reconcile after D2–D4 rather than being silently changed during D1.
 
+### Approved D2 direction — D-012
+
+Separate canonical MNFS execution semantics from coding-agent runtime and live session mechanics.
+
+```text
+MNFS Domain
+  Role / ActorRun / Attempt / Authority / Recovery / Claim / Evidence / Verdict
+        ↓
+replaceable Agent Runtime boundary
+        ↓
+open coding-agent substrate
+```
+
+Decision rules:
+
+- runtime Session identity is observational and never Mission/ActorRun authority;
+- fresh MNFS recovery MUST NOT depend on runtime-session resume, transcript or runtime-owned memory;
+- do not build a custom MNFS agent loop while credible open substrates exist;
+- ACP is `SPIKE`, not `ADOPT`: a comparative spike must prove that an open protocol boundary lowers total complexity without weakening deterministic resource control, E1 composition or recovery;
+- Pi remains the incumbent candidate because AS-02 already supplies accepted real WSL2/E1 Evidence;
+- OpenCode/ACP is the strongest new challenger;
+- proving ACP interoperability requires at least two real implementations, not only one ACP runtime;
+- the comparative proof must cover exact cwd/environment, deterministic resource inventory, auth/provider compatibility, E1, cancellation, lifecycle/final-turn events, bounded output, process death, fresh recovery, structured results, version pinning and operational complexity;
+- if ACP does not earn the abstraction, use a concrete runtime-specific adapter rather than inventing a generic provider layer;
+- Mastra AgentController/Signals are `REFERENCE / DEFER` until a named long-lived live-session/control consumer exists;
+- OpenHands is `REFERENCE / DEFER` for broader remote/server execution;
+- no production runtime or Worker dispatch is selected or authorized by D2.
+
 ## Review questions
 
 ### D1 — Planning and validation semantics — APPROVED
 
-What is the best ordering and contract model for:
-
-```text
-Operator intent
-→ investigation
-→ validation/correctness contract
-→ criteria
-→ decomposition
-→ implementation
-→ independent validation
-→ correction
-→ closure
-```
-
 Disposition: **approved under D-011**, subject only to final cross-decision consistency review.
 
-### D2 — Agent runtime and session strategy — IN REVIEW
+### D2 — Agent runtime and session strategy — APPROVED
 
-What capabilities must MNFS require from agent runtimes and session/control infrastructure without assuming Pi, Mastra or another winner in advance?
+Disposition: **approved under D-012**, subject to a later comparative Agent Runtime Architecture Spike before runtime selection.
 
-Evaluate open and replaceable candidates against:
-
-- headless control;
-- streaming/events;
-- tool/resource control;
-- provider/model access;
-- session lifecycle;
-- interruption/recovery;
-- structured output;
-- multi-role support;
-- security composition;
-- sovereignty and exit strategy;
-- maintenance cost.
-
-Proprietary systems such as Factory Droid are architectural references by default, not desired foundational dependencies.
-
-### D3 — Execution workspace and isolation strategy
+### D3 — Execution workspace and isolation strategy — IN REVIEW
 
 What is the best long-term workspace substrate for local and future remote Workers?
+
+The review must separate four concerns rather than treating `sandbox` or `worktree` as one thing:
+
+```text
+Workspace identity / ownership
+Writable-state substrate
+Execution-security environment
+Integration / delivery boundary
+```
 
 Compare relevant shapes such as:
 
 ```text
 Git/Treehouse worktree + E1 sandbox
 Git worktree + COW/virtual filesystem
-VFS/AgentFS-style portable delta
+VFS/AgentFS-style portable delta + execution sandbox
 remote sandbox/provider workspace
 ```
 
-Evaluate Git fidelity, isolation, recovery, handoff, portability, integration, parallelism, performance and cleanup.
+Evaluate Git fidelity, isolation, result-tree identity, recovery, crash behavior, handoff, portability, integration, parallelism, performance, dependency compatibility, cleanup, local-first usability and remote evolution.
 
 ### D4 — Implementation sourcing strategy
 
@@ -168,7 +176,7 @@ Authorized:
 Not authorized by this review alone:
 
 - M02 production implementation;
-- production Pi/Droid/Mastra Worker dispatch;
+- production Pi/Droid/Mastra/OpenCode Worker dispatch;
 - changing accepted Mission contracts in place;
 - automatic merge/delivery;
 - adopting a proprietary runtime as foundational dependency.

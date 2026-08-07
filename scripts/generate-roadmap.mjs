@@ -20,7 +20,7 @@ document_type: product_roadmap
 form: reference
 authority: generated_projection
 status: generated
-version: 2.1.0
+version: 2.0.0
 owners:
   - developmentconexus-ops
 generated_from:
@@ -41,7 +41,7 @@ Generator version: 2
 # MNFS capability roadmap
 
 **Status:** M2 Opportunity Replan — Architecture Realization Review  
-**Version:** 2.1.0  
+**Version:** 2.0.0  
 **Current program:** ARR-S0 → ARR-S1/ARR-S2 → conditional ARR-S2W → ARR-S3 → evidence-backed M2 Replan  
 **Exact execution authority:** see \`docs/tracking/STATUS.md\`
 

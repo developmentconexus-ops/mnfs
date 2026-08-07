@@ -4,10 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { sha256Bytes, writeCanonicalJsonArtifact } from '../src/artifacts.mjs';
-import {
-  buildExecutionAuthorizationToken,
-  parseExecutionAuthorizationToken,
-} from '../src/execution-authority.mjs';
+import { parseExecutionAuthorizationToken } from '../src/execution-authority.mjs';
 import { createInitialRunState } from '../src/model.mjs';
 import { preflightS0, reportS0, runS0 } from '../src/service.mjs';
 
@@ -15,13 +12,9 @@ const RUN_ID = 'arr-s0-20260807t120000000z-a1b2c3';
 const PLAN_BLOB = '3e78445fcbcca360f612edefd025c6cb0f84f8e5';
 const SOURCE = { commitSha: 'a'.repeat(40), treeSha: 'b'.repeat(40) };
 const CONTRACT_HASH = `sha256:${'d'.repeat(64)}`;
+const EXECUTION_TOKEN = `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=${PLAN_BLOB} contract_sha256=${CONTRACT_HASH} base_sha=${SOURCE.commitSha} verify_run=31216915662 scope=canonical-host-probe-only`;
 const EXECUTION_AUTHORIZATION = parseExecutionAuthorizationToken(
-  buildExecutionAuthorizationToken({
-    planGitBlob: PLAN_BLOB,
-    contractHash: CONTRACT_HASH,
-    baseCommitSha: SOURCE.commitSha,
-    verificationRunId: 31216915662,
-  }),
+  EXECUTION_TOKEN,
   {
     planGitBlob: PLAN_BLOB,
     contractHash: CONTRACT_HASH,

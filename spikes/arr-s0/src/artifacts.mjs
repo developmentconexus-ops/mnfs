@@ -128,3 +128,65 @@ export async function writeRawArtifact(runRoot, relativePath, inputBytes, option
 export async function writeCanonicalJsonArtifact(runRoot, relativePath, value, options = {}) {
   return await writeRawArtifact(runRoot, relativePath, canonicalJsonBytes(value), options);
 }
+
+export async function verifyArtifactRecords(runRoot, records, options = {}) {
+  const lstat = options.lstat ?? fsLstat;
+  const readFile = options.readFile ?? fsReadFile;
+  const errors = [];
+  const seenIds = new Set();
+  const seenPaths = new Set();
+  const root = path.resolve(runRoot);
+
+  for (const record of records ?? []) {
+    if (!record || typeof record.id !== 'string') {
+      errors.push('artifact record is missing id');
+      continue;
+    }
+    if (seenIds.has(record.id)) errors.push(`duplicate artifact id ${record.id}`);
+    seenIds.add(record.id);
+
+    let normalized;
+    try {
+      normalized = requireContainedRelativePath(record.path);
+    } catch {
+      errors.push(`invalid artifact path for ${record.id}`);
+      continue;
+    }
+    if (seenPaths.has(normalized)) errors.push(`duplicate artifact path ${normalized}`);
+    seenPaths.add(normalized);
+
+    const candidate = path.resolve(root, normalized);
+    if (candidate !== root && !candidate.startsWith(`${root}${path.sep}`)) {
+      errors.push(`artifact root escape for ${record.id}`);
+      continue;
+    }
+
+    let stats;
+    try {
+      stats = await lstat(candidate);
+    } catch (error) {
+      errors.push(`artifact missing for ${record.id} (${error?.code ?? 'unknown'})`);
+      continue;
+    }
+    if (stats.isSymbolicLink?.()) {
+      errors.push(`artifact symlink is not allowed for ${record.id}`);
+      continue;
+    }
+    if (!stats.isFile?.()) {
+      errors.push(`artifact is not a regular file for ${record.id}`);
+      continue;
+    }
+
+    let bytes;
+    try {
+      bytes = Buffer.from(await readFile(candidate));
+    } catch (error) {
+      errors.push(`artifact unreadable for ${record.id} (${error?.code ?? 'unknown'})`);
+      continue;
+    }
+    if (bytes.length !== record.sizeBytes) errors.push(`artifact size mismatch for ${record.id}`);
+    if (sha256Bytes(bytes) !== record.sha256) errors.push(`artifact hash mismatch for ${record.id}`);
+  }
+
+  return { ok: errors.length === 0, errors };
+}

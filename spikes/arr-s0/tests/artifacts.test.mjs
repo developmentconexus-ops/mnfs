@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { chmod, lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -95,6 +95,38 @@ test('artifact verification rejects a symlinked parent even when final bytes/has
   } finally {
     await rm(root, { recursive: true, force: true });
     await rm(outside, { recursive: true, force: true });
+  }
+});
+
+test('pre-existing identical artifact with permissive mode is rejected', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-artifact-mode-existing-'));
+  try {
+    const finalPath = path.join(root, 'raw/existing.bin');
+    const bytes = Buffer.from('same bytes\n');
+    await mkdir(path.dirname(finalPath), { recursive: true });
+    await writeFile(finalPath, bytes, { mode: 0o644 });
+    await assert.rejects(
+      () => writeRawArtifact(root, 'raw/existing.bin', bytes),
+      /0600|mode|permissions/u,
+    );
+    assert.equal((await lstat(finalPath)).mode & 0o777, 0o644);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('fresh verification rejects artifact permission drift from 0600', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-artifact-mode-drift-'));
+  try {
+    const bytes = Buffer.from('private evidence\n');
+    const meta = await writeRawArtifact(root, 'raw/private.bin', bytes);
+    const finalPath = path.join(root, meta.path);
+    await chmod(finalPath, 0o644);
+    const integrity = await verifyArtifactRecords(root, [{ id: 'raw-private', ...meta }]);
+    assert.equal(integrity.ok, false);
+    assert.ok(integrity.errors.some((error) => /mode|0600|permissions/u.test(error)));
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });
 

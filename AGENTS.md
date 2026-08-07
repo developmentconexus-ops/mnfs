@@ -114,13 +114,17 @@ Accepted architecture/planning authority includes D-010 through D-018, ADR-0013 
 
 A post-integration Important finding, P1-F03, identified that B1 Evidence carried only semantic `contractVersion` rather than binding to the exact frozen Spike contract bytes. D-018 accepted the bounded correction at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27`. PR #26 is now integrated into canonical `main` at `88c5e05964e8465ef4317a3b4174c6160d8cdefa`; deciding Architecture Spike Evidence carries `contractHash`, and validation recomputes SHA-256 from the exact bytes supplied through `--contract`.
 
+The Operator has explicitly authorized `GATE-S0-IMPLEMENT` for deterministic ARR-S0 Tasks 1–11 only, bound to master-plan blob `52033adcdfb7163f63606034b9912942b018f38e`, ARR-S0-plan blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`, canonical implementation base `ad913dd1e0ff3b286280081b5dd4ba90eb390972`, and scope `deterministic-harness-only`. This authorization does not imply `GATE-S0-EXECUTE` or any downstream Spike/production authority.
+
 ```text
 ARR P1 reconciliation A1-A4 + B1:          ACCEPTED — GATE-R / D-017 / INTEGRATED
 PR #24 merge / integration:                  COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
 P1-F03 exact contract-binding correction:    ACCEPTED — D-018 / INTEGRATED
 PR #26 merge / integration:                  COMPLETE — 88c5e05964e8465ef4317a3b4174c6160d8cdefa
-ARR-S0 implementation:                       PROHIBITED pending GATE-S0-IMPLEMENT
-ARR-S0 real host probe:                       PROHIBITED pending later GATE-S0-EXECUTE
+GATE-S0-IMPLEMENT:                            AUTHORIZED — deterministic-harness-only
+ARR-S0 deterministic harness:                IMPLEMENTED / REVIEW_REQUIRED — PR #27
+ARR-S0 host contract:                         PROPOSED — 0.1.0 / NOT ACCEPTED
+ARR-S0 real host probe:                       PROHIBITED pending GATE-S0-EXECUTE
 Candidate installation/execution:             PROHIBITED
 Agent Runtime / Environment selection:        PROHIBITED pending deciding Evidence
 M02 production implementation:                PROHIBITED
@@ -130,4 +134,4 @@ Automatic merge/delivery:                     NOT AUTHORIZED
 
 Real M01 R2/R3 Treehouse crash/lineage scenarios remain `FOLLOW_UP_REQUIRED` under Issue #20. Whether the Treehouse-specific form remains necessary is decided by the final architecture reconciliation; provider-neutral recovery/fencing proof remains mandatory before Product Milestone M2 exit.
 
-P1 and the accepted P1-F03 correction are integrated into canonical `main`. The next possible gate is **GATE-S0-IMPLEMENT** for deterministic construction/testing of the host-capability harness, but that gate is **not currently authorized**. Real host probing remains separately gated behind `GATE-S0-EXECUTE` and is not implied by S0 implementation approval.
+P1 and the accepted P1-F03 correction are integrated into canonical `main`. The exact `GATE-S0-IMPLEMENT` authorization is active for deterministic Tasks 1–11 and the current action is **Task 11 independent deterministic review / correction** of PR #27. The ARR-S0 host contract remains proposed at version `0.1.0` and is not accepted. Real host probing remains separately gated behind `GATE-S0-EXECUTE`, which is **not authorized**; no candidate/runtime/environment selection or downstream gate is implied by S0 implementation approval.

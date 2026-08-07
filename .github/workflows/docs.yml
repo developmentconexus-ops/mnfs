@@ -67,4 +67,17 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
-      - run: npm run verify
+      - name: Current verify - typecheck
+        run: npm run typecheck
+      - name: Current verify - unit
+        run: npm run test:unit
+      - name: Current verify - AS-02
+        run: npm run test:as02
+      - name: Current verify - TC-01
+        run: npm run test:tc01
+      - name: Current verify - ARR-S0
+        run: npm run test:arr-s0
+      - name: Current verify - documentation regressions
+        run: node scripts/run-documentation-tests.mjs
+      - name: Current verify - documentation validator
+        run: node scripts/validate-docs.mjs

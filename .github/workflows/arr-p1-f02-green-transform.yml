@@ -21,7 +21,7 @@ jobs:
           node-version: 24.18.0
           cache: npm
       - run: npm ci
-      - name: Normalize transport-only Markdown quoting
+      - name: Normalize transport-only transformer text
         shell: bash
         run: |
           python3 - <<'PY'
@@ -30,6 +30,10 @@ jobs:
           s = p.read_text()
           s = s.replace('`CONTROL_SIDE`', 'CONTROL_SIDE')
           s = s.replace('`IN_ENVIRONMENT`', 'IN_ENVIRONMENT')
+          s = s.replace(
+              "'Pi sandbox extension pattern\\n+\\nAnthropic Sandbox Runtime\\n+\\nTreehouse worktree',",
+              "'Pi sandbox extension pattern\\n+\\n@anthropic-ai/sandbox-runtime\\n+\\nTreehouse worktree\\n+\\nWSL2',",
+          )
           p.write_text(s)
           PY
           node --check scripts/arr-p1-f02-green-transform.mjs

@@ -24,11 +24,13 @@
     "arr-s0": "node spikes/arr-s0/bin/arr-s0.mjs",
     "docs:generate": "node scripts/generate-product-blueprint.mjs && node scripts/generate-roadmap.mjs && node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
     "docs:coverage": "node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
+    "docs:test:prepared": "node scripts/test-documentation-tooling.mjs && node scripts/test-mis-002-replan-builder.mjs && node scripts/test-approved-mis-002-allocations.mjs && node scripts/test-arr-p1-blueprint-reconciliation.mjs && node scripts/test-arr-spike-contract-binding.mjs && node scripts/test-arr-s0-contract-consistency.mjs",
+    "docs:test": "npm run build --silent && npm run docs:test:prepared",
+    "docs:check:prepared": "npm run docs:test:prepared && node scripts/validate-docs.mjs",
     "docs:check": "npm run docs:test && node scripts/validate-docs.mjs",
-    "verify": "npm run typecheck && npm run test:unit && npm run test:as02 && npm run test:tc01 && npm run test:arr-s0 && npm run docs:check",
+    "verify": "npm run typecheck && npm run test:unit && npm run test:as02 && npm run test:tc01 && npm run test:arr-s0 && npm run docs:check:prepared",
     "doctor": "npm run build --silent && node bin/mnfs.mjs doctor",
-    "docs:roadmap": "node scripts/generate-roadmap.mjs",
-    "docs:test": "npm run build --silent && node scripts/test-documentation-tooling.mjs && node scripts/test-mis-002-replan-builder.mjs && node scripts/test-approved-mis-002-allocations.mjs && node scripts/test-arr-p1-blueprint-reconciliation.mjs && node scripts/test-arr-spike-contract-binding.mjs && node scripts/test-arr-s0-contract-consistency.mjs"
+    "docs:roadmap": "node scripts/generate-roadmap.mjs"
   },
   "devDependencies": {
     "@types/node": "24.12.4",

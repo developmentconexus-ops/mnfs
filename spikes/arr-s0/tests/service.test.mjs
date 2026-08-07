@@ -4,22 +4,42 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { sha256Bytes, writeCanonicalJsonArtifact } from '../src/artifacts.mjs';
+import {
+  buildExecutionAuthorizationToken,
+  parseExecutionAuthorizationToken,
+} from '../src/execution-authority.mjs';
 import { createInitialRunState } from '../src/model.mjs';
 import { preflightS0, reportS0, runS0 } from '../src/service.mjs';
 
 const RUN_ID = 'arr-s0-20260807t120000000z-a1b2c3';
+const PLAN_BLOB = '3e78445fcbcca360f612edefd025c6cb0f84f8e5';
 const SOURCE = { commitSha: 'a'.repeat(40), treeSha: 'b'.repeat(40) };
 const CONTRACT_HASH = `sha256:${'d'.repeat(64)}`;
+const EXECUTION_AUTHORIZATION = parseExecutionAuthorizationToken(
+  buildExecutionAuthorizationToken({
+    planGitBlob: PLAN_BLOB,
+    contractHash: CONTRACT_HASH,
+    baseCommitSha: SOURCE.commitSha,
+    verificationRunId: 31216915662,
+  }),
+  {
+    planGitBlob: PLAN_BLOB,
+    contractHash: CONTRACT_HASH,
+    baseCommitSha: SOURCE.commitSha,
+  },
+);
+const EXECUTION_AUTHORIZATION_EVIDENCE = {
+  gate: EXECUTION_AUTHORIZATION.gate,
+  planGitBlob: EXECUTION_AUTHORIZATION.planGitBlob,
+  baseCommitSha: EXECUTION_AUTHORIZATION.baseCommitSha,
+  contractHash: EXECUTION_AUTHORIZATION.contractHash,
+  verificationRunId: EXECUTION_AUTHORIZATION.verificationRunId,
+  tokenHash: EXECUTION_AUTHORIZATION.tokenHash,
+};
 const IDENTITIES = {
   plan: { version: '0.2.0', hash: `sha256:${'c'.repeat(64)}` },
-  contract: { version: '0.1.0', hash: CONTRACT_HASH },
-  executionAuthorization: {
-    gate: 'GATE-S0-EXECUTE',
-    baseCommitSha: SOURCE.commitSha,
-    contractHash: CONTRACT_HASH,
-    verificationRunId: 31216915662,
-    tokenHash: `sha256:${'e'.repeat(64)}`,
-  },
+  contract: { version: '1.0.0', hash: CONTRACT_HASH },
+  executionAuthorization: EXECUTION_AUTHORIZATION,
 };
 const CAPABILITY_IDS = [
   'HOST-WSL2',
@@ -134,7 +154,7 @@ test('deterministic run persists lifecycle, execution authority, Evidence manife
     assert.equal(result.phase, 'FINALIZED');
     assert.equal(result.verdict.status, 'ACCEPT');
     assert.equal(result.source.commitSha, SOURCE.commitSha);
-    assert.deepEqual(result.executionAuthorization, IDENTITIES.executionAuthorization);
+    assert.deepEqual(result.executionAuthorization, EXECUTION_AUTHORIZATION_EVIDENCE);
     assert.equal(Object.hasOwn(result.executionAuthorization, 'operatorToken'), false);
     assert.equal(result.capabilities.length, CAPABILITY_IDS.length);
     assert.equal(result.capabilityClasses.length, 5);
@@ -144,7 +164,7 @@ test('deterministic run persists lifecycle, execution authority, Evidence manife
     assert.equal(report.complete, true);
     assert.equal(report.phase, 'FINALIZED');
     assert.equal(report.verdict.status, 'ACCEPT');
-    assert.deepEqual(report.executionAuthorization, IDENTITIES.executionAuthorization);
+    assert.deepEqual(report.executionAuthorization, EXECUTION_AUTHORIZATION_EVIDENCE);
     assert.equal(report.integrity.ok, true);
   } finally {
     await rm(stateRoot, { recursive: true, force: true });
@@ -187,12 +207,18 @@ test('report identifies an incomplete CREATED run and never invents a Verdict', 
   try {
     const runRoot = path.join(stateRoot, 'spikes', 'arr-s0', RUN_ID);
     await mkdir(runRoot, { recursive: true });
-    const state = createInitialRunState({ runId: RUN_ID, source: SOURCE, ...IDENTITIES });
+    const state = createInitialRunState({
+      runId: RUN_ID,
+      source: SOURCE,
+      plan: IDENTITIES.plan,
+      contract: IDENTITIES.contract,
+      executionAuthorization: EXECUTION_AUTHORIZATION_EVIDENCE,
+    });
     await writeCanonicalJsonArtifact(runRoot, 'state/created.json', state);
     const report = await reportS0({ runId: RUN_ID, stateRoot });
     assert.equal(report.complete, false);
     assert.equal(report.phase, 'CREATED');
-    assert.deepEqual(report.state.executionAuthorization, IDENTITIES.executionAuthorization);
+    assert.deepEqual(report.state.executionAuthorization, EXECUTION_AUTHORIZATION_EVIDENCE);
     assert.equal(report.verdict, null);
   } finally {
     await rm(stateRoot, { recursive: true, force: true });

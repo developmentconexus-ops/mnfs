@@ -157,6 +157,8 @@ test('concurrent destination creation is never replaced by artifact publication'
 test('publication orders temp write, file fsync, no-replace link, temp unlink and directory fsync', async () => {
   const calls = [];
   const handles = new Map();
+  const finalPath = '/home/test/.local/state/mnfs/run/raw/a.bin';
+  let finalPublished = false;
   const fakeHandle = (label) => ({
     async writeFile(bytes) { calls.push(`${label}:write:${bytes.length}`); },
     async sync() { calls.push(`${label}:fsync`); },
@@ -164,7 +166,16 @@ test('publication orders temp write, file fsync, no-replace link, temp unlink an
   });
   const ops = {
     async mkdir() { calls.push('mkdir'); },
-    async lstat() { const error = new Error('missing'); error.code = 'ENOENT'; throw error; },
+    async lstat(target) {
+      if (finalPublished && target === finalPath) {
+        return {
+          mode: 0o100600,
+          isSymbolicLink: () => false,
+          isFile: () => true,
+        };
+      }
+      const error = new Error('missing'); error.code = 'ENOENT'; throw error;
+    },
     async realpath(target) { return target; },
     async open(target, flags) {
       const label = flags === 'r' ? 'dir' : 'temp';
@@ -173,7 +184,11 @@ test('publication orders temp write, file fsync, no-replace link, temp unlink an
       calls.push(`${label}:open`);
       return handle;
     },
-    async link() { calls.push('link'); },
+    async link(_tempPath, targetPath) {
+      assert.equal(targetPath, finalPath);
+      finalPublished = true;
+      calls.push('link');
+    },
     async unlink() { calls.push('unlink'); },
   };
   await writeRawArtifact('/home/test/.local/state/mnfs/run', 'raw/a.bin', Buffer.from('abc'), { ops });

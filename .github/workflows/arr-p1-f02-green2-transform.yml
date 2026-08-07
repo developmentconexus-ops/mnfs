@@ -25,6 +25,19 @@ jobs:
         run: python3 -m py_compile scripts/arr-p1-f02-green2-transform.py
       - name: Apply second P1-F02 cleanup
         run: python3 scripts/arr-p1-f02-green2-transform.py
+      - name: Generalize residual historical Writer principle
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('docs/product/blueprint/12-capability-roadmap.md')
+          s = p.read_text()
+          old = 'one Pi Worker\n≠ unrestricted user process'
+          new = 'one bounded Writer\n≠ unrestricted user process'
+          if old not in s:
+              raise SystemExit('missing Section 12 historical Writer principle')
+          p.write_text(s.replace(old, new, 1))
+          PY
       - name: Align tracking regression with active F02 review
         shell: bash
         run: |
@@ -54,13 +67,6 @@ jobs:
           PY
       - name: Regenerate canonical projections
         run: npm run docs:generate
-      - name: Locate exact residual aggregate phrases
-        shell: bash
-        run: |
-          echo '=== one Pi Worker ==='
-          grep -R -n -B2 -A2 -E '^one Pi Worker$' docs/product/blueprint || true
-          echo '=== process adapter starts Pi Worker ==='
-          grep -R -n -B2 -A2 -F 'process adapter starts Pi Worker' docs/product/blueprint || true
       - name: Prove strengthened F02 contract
         run: npm run docs:test
       - name: Validate complete documentation

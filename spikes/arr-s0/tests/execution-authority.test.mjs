@@ -1,9 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  buildExecutionAuthorizationToken,
-  parseExecutionAuthorizationToken,
-} from '../src/execution-authority.mjs';
+import { parseExecutionAuthorizationToken } from '../src/execution-authority.mjs';
 
 const EXPECTED = {
   planGitBlob: '3e78445fcbcca360f612edefd025c6cb0f84f8e5',
@@ -12,9 +9,9 @@ const EXPECTED = {
   verificationRunId: 31214388675,
 };
 
-const TOKEN = buildExecutionAuthorizationToken(EXPECTED);
+const TOKEN = `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=${EXPECTED.planGitBlob} contract_sha256=${EXPECTED.contractHash} base_sha=${EXPECTED.baseCommitSha} verify_run=${EXPECTED.verificationRunId} scope=canonical-host-probe-only`;
 
-test('accepts only an exact runtime GATE-S0-EXECUTE Operator token and retains no raw token', () => {
+test('accepts only an exact externally supplied runtime GATE-S0-EXECUTE Operator token and retains no raw token', () => {
   const result = parseExecutionAuthorizationToken(TOKEN, {
     planGitBlob: EXPECTED.planGitBlob,
     contractHash: EXPECTED.contractHash,
@@ -48,7 +45,7 @@ test('execution token is strict and cannot broaden or change its bound authority
   }
 });
 
-test('execution authorization token binds plan, contract, base, verification and scope', () => {
+test('execution authorization token fixture binds plan, contract, base, verification and scope', () => {
   assert.equal(
     TOKEN,
     `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=${EXPECTED.planGitBlob} contract_sha256=${EXPECTED.contractHash} base_sha=${EXPECTED.baseCommitSha} verify_run=${EXPECTED.verificationRunId} scope=canonical-host-probe-only`,

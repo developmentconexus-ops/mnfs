@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current Evidence and acceptance rules
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 **Implementer completion never grants acceptance**. Claim, deterministic Receipt, independent Finding/Review and Verdict remain distinct evidence stages.
 
@@ -1570,7 +1570,7 @@ Testes precisam declarar recursos:
 - clock;
 - network.
 
-Worktree isolation não resolve esses recursos automaticamente.
+Isolated mutable workspace não resolve esses recursos automaticamente.
 
 ## 7.21.5 Flake
 
@@ -2095,7 +2095,7 @@ M2 não precisa implementar o Quality System completo.
 Precisa provar a lei central:
 
 ```text
-Pi worker completes
+Writer Worker completes
 ≠ Claim accepted
 ```
 
@@ -2162,7 +2162,7 @@ Não construir agora:
 14. Finding bloqueante precisa de confirmação.
 15. Review não cria escopo.
 16. Critério live não é provado apenas por mock.
-17. Worktree green não prova integration.
+17. Isolated mutable workspace green não prova integration.
 18. Integration green não prova user outcome quando QA é exigido.
 19. Accepted Risk não falsifica critério.
 20. Waiver não apaga Acceptance Criterion.

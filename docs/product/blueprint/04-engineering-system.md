@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Capability-first sourcing
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 Material realization uses the canonical vocabulary:
 
@@ -272,7 +272,7 @@ Exemplos:
 - reconcile;
 - migration expand/contract;
 - release gradual;
-- worktree preservado após integração falha.
+- isolated mutable workspace preservado após integração falha.
 
 Safety Net não justifica ignorar qualidade.
 

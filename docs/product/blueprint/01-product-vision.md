@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current constitutional direction
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 The current product architecture is:
 
@@ -45,7 +45,7 @@ Pi, Treehouse and the historical fixed E1 realization remain useful implementati
 
 ## 1.1 Definição
 
-MNFS é uma **development harness planning-first e evidence-driven**, construída sobre Pi, que transforma um objetivo do operador em uma entrega de software planejada, executada, verificada, integrada e comprovada.
+MNFS é uma **development harness planning-first e evidence-driven** que governa Agent Runtimes substituíveis e transforma um objetivo do operador em uma entrega de software planejada, executada, verificada, integrada e comprovada.
 
 O operador conversa com um único agente principal, o **MNFS Lead**. Esse lead conduz o planejamento, coordena agentes especializados, apresenta decisões, acompanha a execução e devolve resultados consolidados.
 
@@ -80,7 +80,7 @@ operador aprova um contrato por hash
         ↓
 MNFS divide o trabalho em trilhas seguras
         ↓
-workers Pi executam em worktrees isolados
+Actors delimitados executam por um Agent Runtime dentro de isolated mutable workspaces e Execution Environments governados
         ↓
 workers emitem CLAIMS e evidências
         ↓
@@ -330,7 +330,7 @@ O antigo `mnfs-harness` dependia fortemente de:
 
 Essa abordagem foi útil para descobrir o método, mas não é a arquitetura final.
 
-No MNFS Pi-first, a regra é:
+No MNFS code-first, a regra é:
 
 > **Tudo que pode ser decidido deterministicamente deve sair da prosa e entrar no código.**
 
@@ -347,7 +347,7 @@ No MNFS Pi-first, a regra é:
 - retries permitidos;
 - limites;
 - resolução de paths;
-- criação de worktrees;
+- materialização e lifecycle de isolated mutable workspaces;
 - dispatch;
 - reconciliação;
 - recovery;
@@ -390,7 +390,7 @@ No MNFS Pi-first, a regra é:
 
 ### Skills são portas de entrada, não o control plane
 
-Uma skill pode orientar o Pi a:
+Uma skill pode orientar um Actor a:
 
 ```text
 analisar objetivo
@@ -435,7 +435,7 @@ O MNFS é:
 O MNFS não é:
 
 - um modelo de linguagem;
-- um substituto do Pi;
+- um substituto de um Agent Runtime;
 - um fork completo do FirstMate;
 - apenas uma coleção de prompts;
 - apenas uma biblioteca de skills;
@@ -448,7 +448,7 @@ O MNFS não é:
 - um sistema que maximiza o número de workers;
 - uma plataforma cloud no primeiro momento.
 
-FirstMate permanece uma referência operacional e uma fonte seletiva de padrões; Pi é o primeiro runtime; Lavish, Treehouse e ferramentas futuras entram por fronteiras estreitas. Nenhum adapter se torna autoridade do domínio.
+FirstMate permanece uma referência operacional e uma fonte seletiva de padrões. Agent Runtime, workspace, Execution Environment e presentation realizations entram por fronteiras estreitas e são selecionadas por Evidence e Decision; Pi, Treehouse e Lavish permanecem incumbents/references onde já produziram Evidence. Nenhum adapter se torna autoridade do domínio.
 
 ---
 
@@ -488,7 +488,7 @@ Uma afirmação sem artefato ou verificação não pode fechar critério.
 
 ### P6 — Trabalho isolado precisa ser composto
 
-Um worktree verde não prova que o sistema integrado está verde.
+Um isolated mutable workspace verde não prova que o sistema integrado está verde.
 
 <a id="pb-p7"></a>
 
@@ -524,12 +524,11 @@ Nova abstração, adapter ou serviço precisa de uma necessidade presente e uma 
 
 ### P12 — Nenhuma ferramenta externa é autoridade de domínio
 
-- Pi executa;
-- Lavish apresenta;
-- Treehouse gerencia worktrees;
-- Herdr apresenta terminais;
-- Git guarda código;
-- SQLite guarda runtime;
+- Agent Runtime executa Actors;
+- presentation adapters apresentam;
+- workspace realizations materializam isolated mutable workspaces;
+- Git guarda código e result identity;
+- SQLite guarda estado operacional;
 - MNFS decide o estado da missão.
 
 <a id="pb-p13"></a>
@@ -607,15 +606,15 @@ Windows
 → navegador e apresentação
 
 WSL2
-→ MNFS, Pi, Git, SQLite, worktrees e testes
+→ MNFS, Git, SQLite, Agent Runtime selecionado, isolated mutable workspaces e testes
 ```
 
 ### Próxima evolução
 
 ```text
-Pi Lead
-→ múltiplos Pi workers
-→ Treehouse
+MNFS Lead
+→ bounded Actors through the selected Agent Runtime
+→ isolated mutable workspaces + governed Execution Environments
 → integração
 → gates
 → QA
@@ -628,7 +627,7 @@ MNFS Web / Cloud
         ↓
 control plane remoto
         ↓
-Pi SDK ou RPC
+selected Agent Runtime boundary / open protocol or concrete adapter
         ↓
 workers em ambientes isolados
 ```

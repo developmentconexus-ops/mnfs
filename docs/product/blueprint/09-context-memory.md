@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current Context and handoff model
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 Authority-critical context is eager: current Authority Snapshot, target, relevant Validation criteria, Execution Unit/Role Contract, architecture/interface constraints, write/resource boundaries, Environment/tool/security policy, proof contract and termination conditions.
 
@@ -54,7 +54,7 @@ O MNFS adota uma arquitetura estratificada:
 L0 — Authoritative Product and Domain Memory
 L1 — Current Authority Snapshot and Compiled Context
 L2 — Session Observational Memory
-L3 — Exact Pi Session History
+L3 — Exact Runtime Session History
 L4 — Ephemeral Transport
 ```
 
@@ -102,7 +102,7 @@ Por isso, uma ferramenta promissora continua sendo candidata até passar por um 
 
 ---
 
-# 9.3 O que Pi já oferece
+# 9.3 Historical / Incumbent Runtime Reference — Pi session capabilities
 
 ## 9.3.1 Session ledger JSONL
 
@@ -258,7 +258,7 @@ O Current Authority Snapshot precisa preceder qualquer memória observacional re
 
 ## 9.4.3 L2 — Session Observational Memory
 
-É a continuidade probabilística de uma Pi Session.
+É a continuidade probabilística de uma Runtime Session, quando a realization selecionada oferece ou integra esse recurso.
 
 Pode conter:
 
@@ -281,11 +281,11 @@ Propriedades:
 - desativável;
 - nunca autoritativa.
 
-## 9.4.4 L3 — Exact Pi Session History
+## 9.4.4 L3 — Exact Runtime Session History
 
-É o JSONL da Session.
+É o histórico exato fornecido pela Runtime Session realization, quando disponível. Pi JSONL é o incumbent histórico já estudado.
 
-Contém fontes exatas de:
+Pode conter fontes exatas de:
 
 - mensagens;
 - tool calls;
@@ -307,7 +307,7 @@ Propriedades:
 Inclui:
 
 - process stdin;
-- Pi message queue;
+- runtime queue/protocol;
 - lifecycle Events;
 - WebSocket;
 - terminal notification;
@@ -460,7 +460,7 @@ Não mede:
 
 ## 9.6.4 Decisão
 
-Não incorporar `@mastra/memory` ao MNFS Pi-first.
+Não incorporar `@mastra/memory` como segunda autoridade ou framework fundacional sem consumidor nomeado e conformance proof.
 
 Isso adicionaria:
 
@@ -470,7 +470,7 @@ Isso adicionaria:
 - outro sistema de memória;
 - outra fonte potencial de autoridade.
 
-O MNFS adota as ideias arquiteturais e avalia implementação Pi-native.
+O MNFS adota apenas as ideias arquiteturais; qualquer implementação futura deve encaixar na boundary de Runtime Session sem inverter autoridade.
 
 ---
 
@@ -609,7 +609,7 @@ Não há evidência publicada suficiente para afirmar benefício líquido no flu
 
 ```text
 CANDIDATE
-→ ADOPT ONLY AFTER AS-01
+→ HISTORICAL CANDIDATE / future spike required before adoption
 ```
 
 Uso inicial proposto:
@@ -1615,7 +1615,7 @@ Isso pode causar perda de qualidade.
 
 ---
 
-# 9.26 Architecture Spike AS-01
+# 9.26 Historical / Deferred Candidate Study — AS-01 Session Memory
 
 ## 9.26.1 Objetivo
 
@@ -1778,7 +1778,7 @@ M2 usa:
 
 ## Pós-M2
 
-Executar AS-01 antes de tornar long-running Lead com OM o default.
+Qualquer futuro default de long-running Session Memory exige um novo bounded spike/Decision sobre a Runtime selecionada.
 
 ## Antes de múltiplos Actors live
 
@@ -1880,6 +1880,6 @@ Não construir agora:
 
 # Decisão resumida da Seção 9
 
-> **O MNFS separa memória canônica, contexto compilado, memória observacional, histórico exato da Pi Session e transporte efêmero. SQLite, Git e o Approved Contract permanecem soberanos. Pi JSONL é reutilizado como ledger exato da Session. `pi-observational-memory` V3 é o candidato mais forte para continuidade do Lead, mas entra somente após um Architecture Spike, com Current Authority Snapshot acima da memória, isolamento por Role e nenhuma autoridade sobre completion. Plugins de memória de repositório não serão adotados como fontes concorrentes; seus melhores padrões serão incorporados ao Repository Profile, Context Index e Memory Promotion Gateway. M2 continua simples, sem OM e sem message bus.**
+> **O MNFS separa memória canônica, contexto compilado, memória observacional, Exact Runtime Session History e transporte efêmero. SQLite, Git e o Approved Contract permanecem soberanos. Runtime Session history e memory são observacionais, opcionais e substituíveis; nenhuma implementação recebe autoridade sobre completion. Pi JSONL e pi-observational-memory permanecem incumbent/research Evidence, não seleção constitucional. Plugins de memória não viram fontes concorrentes; novos consumidores exigem spike/Decision próprio. M2 permanece independente de OM e de transcript.**
 
 ---

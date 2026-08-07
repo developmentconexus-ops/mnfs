@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current planning and execution lifecycle
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 The current lifecycle is validation-first:
 
@@ -149,9 +149,9 @@ APROVAÇÃO DO CONTRATO POR HASH
         ↓
 PREPARAÇÃO DA EXECUÇÃO
         ↓
-WRITE TRACKS + LEASES
+WRITE TRACKS + WORKSPACE / ENVIRONMENT BINDINGS
         ↓
-DISPATCH DE WORKERS PI
+DISPATCH DE BOUNDED ACTORS
         ↓
 EXECUÇÃO ISOLADA
         ↓
@@ -204,8 +204,8 @@ Esses fluxos não podem ser tratados como exceções improvisadas. Eles fazem pa
 | Revisão visual | operador + Lavish | Plan Revision | feedback ou aprovação solicitada | operador aprovou hash corrente |
 | Aprovação | MNFS | hash aprovado | Approved Mission Contract | sem questões bloqueantes |
 | Preparação | MNFS Lead | contrato aprovado | tracks, packs e políticas | execução satisfatível |
-| Alocação | MNFS + Treehouse | Write Track | Lease ativo | workspace e base válidos |
-| Dispatch | MNFS + Pi adapter | pack e lease | Worker Run | boot confirmado |
+| Alocação | MNFS + selected workspace/environment realization | Write Track | bindings/leases válidos | workspace, environment e base válidos |
+| Dispatch | MNFS + Agent Runtime adapter | Actor Pack + current bindings | Worker Run | boot confirmado |
 | Execução | Writer Worker | pack | mudança + Claim | Claim completo e válido |
 | Verificação | MNFS runners | Claim | Receipts | critérios determinísticos decididos |
 | Review | Reviewer | diff, contrato e receipts | Findings + Verdict | findings decisivos resolvidos |
@@ -362,7 +362,7 @@ Investigator
 
 Pode ser:
 
-- Pi em sessão read-only;
+- Agent Runtime em modo read-only, quando necessário;
 - processo especializado;
 - ferramenta determinística;
 - pesquisa externa;
@@ -415,7 +415,7 @@ Transformar a intenção em um contrato executável e verificável.
 
 ## 3.7.2 Planejamento é produção de estrutura
 
-Pi pode raciocinar e propor conteúdo.
+O Planner Actor pode raciocinar e propor conteúdo.
 
 MNFS controla:
 
@@ -557,9 +557,9 @@ Não é fonte de verdade.
 
 ## 3.8.3 Feedback
 
-Feedback retorna ao Pi.
+Feedback retorna ao Planner Actor.
 
-Pi propõe uma nova revisão completa.
+O Planner Actor propõe uma nova revisão completa.
 
 MNFS:
 
@@ -692,11 +692,11 @@ A Write Track só pode ser alocada quando:
 
 ---
 
-# 3.10 Fluxo F — Alocação do workspace
+# 3.10 Fluxo F — Alocação do isolated mutable workspace e Execution Environment
 
 ## 3.10.1 Solicitação
 
-MNFS solicita ao Treehouse um worktree para a Write Track.
+MNFS registra a intenção de materializar ou vincular o isolated mutable workspace exigido pela Write Track e, quando aplicável, uma Execution Environment Instance. A escolha física pertence à realization selecionada; o lifecycle de domínio pertence ao MNFS.
 
 ## 3.10.2 Ordem recomendada
 
@@ -705,50 +705,51 @@ A alocação deve tolerar crash entre o mundo externo e SQLite.
 Fluxo conceitual:
 
 ```text
-registrar intenção de alocação
+registrar intenção de workspace/environment binding
         ↓
-solicitar worktree ao Treehouse
+invocar a realization selecionada
         ↓
-validar worktree real
+observar e validar o workspace/environment real
         ↓
-persistir lease ativo
+persistir binding/lease e policy identities
         ↓
-emitir LEASE_GRANTED
+emitir Domain Event correspondente
 ```
 
-A ordem exata será definida pelo microdesign de M2 com compensação para ambos os lados de divergência.
+A realization concreta pode ser worktree, COW filesystem, rootfs/disk privado, microVM workspace ou outra opção selecionada por Decision. Nenhuma delas é semântica obrigatória do WriteTrack.
 
 ## 3.10.3 Validações
 
-- path é worktree real;
-- não é checkout principal;
-- branch existe;
-- `HEAD` corresponde ao `expected_base_sha`, ou há rebase autorizado;
-- worktree não está leased para outra Track;
-- write-set não colide com writer ativo sem autorização.
+- workspace pertence ao binding atual da Write Track;
+- base Git corresponde ao expected base ou existe Replan/rebase autorizado;
+- workspace não é compartilhado com outro writer quando exclusividade é exigida;
+- Execution Environment e effective policy correspondem às identities aprovadas;
+- write/resource sets não colidem com outro Actor ativo sem serialização explícita;
+- network, credential e effect posture satisfazem o contrato.
 
 ## 3.10.4 Saída
 
 ```text
-Lease ACTIVE
+Workspace Binding READY
+Environment Lease/Binding READY when applicable
 Write Track ALLOCATED
 ```
 
 ## 3.10.5 Falhas
 
-### Treehouse indisponível
+### Realization indisponível
 
 ```text
-LEASE_REQUEST_FAILED
+ALLOCATION_BLOCKED
 ```
 
-Track permanece sem workspace.
+Track permanece sem dispatch. Não existe fallback silencioso para host irrestrito.
 
-### Worktree criado, persistência falhou
+### Recurso físico criado, persistência falhou
 
-Recovery detecta órfão.
+Recovery observa o recurso e o classifica como adotável, divergente ou cleanup-pending conforme identity/fence.
 
-### Lease existe, worktree desapareceu
+### Binding existe, recurso físico desapareceu
 
 ```text
 DIVERGED
@@ -758,21 +759,11 @@ Nenhum reparo silencioso.
 
 ---
 
-# 3.11 Fluxo G — Dispatch e boot do worker
+# 3.11 Fluxo G — Dispatch e boot do Actor
 
-## 3.11.1 Brief antes do processo
+## 3.11.1 Brief antes do processo/runtime
 
-O worker não nasce de uma mensagem longa improvisada.
-
-MNFS grava:
-
-```text
-dispatch packet
-context pack
-prompt file
-```
-
-A mensagem ou comando contém apenas referências.
+O Actor não nasce de uma mensagem longa improvisada. O Context Compiler materializa um Role/Execution Pack com authority, target, boundaries, proof e termination contract.
 
 ## 3.11.2 Dispatch Packet
 
@@ -787,35 +778,38 @@ Exemplo conceitual:
   "attemptId": "WT-001/A01",
   "contractHash": "sha256:...",
   "expectedBaseSha": "...",
-  "leaseId": "LEASE-001",
-  "worktreePath": "...",
+  "workspaceBindingRef": "...",
+  "environmentBindingRef": "...",
+  "executionPolicyHash": "sha256:...",
   "contextPackRef": "...",
   "claimCommand": "..."
 }
 ```
 
-## 3.11.3 Pi Worker
+Campos não aplicáveis são omitidos; o packet nunca inventa uma provider identity.
 
-Pi adapter inicia o processo com:
+## 3.11.3 Agent Runtime
 
-- `cwd` igual ao worktree leased;
-- environment mínimo;
-- prompt via arquivo ou stdin controlado;
-- provider/modelo resolvido por policy;
-- stdout/stderr capturados como logs;
-- lifecycle observado estruturalmente quando possível.
+O Agent Runtime adapter inicia ou conecta o Actor com:
+
+- cwd/boundary exato do isolated mutable workspace quando o runtime executa localmente;
+- environment mínimo e policy compilada;
+- prompt/context por artifact ou protocolo controlado;
+- provider/modelo resolvido por policy separada da autoridade de domínio;
+- outputs/events limitados e observáveis;
+- cancellation explícita;
+- Session ref apenas como observação opcional.
 
 ## 3.11.4 Boot checks
 
-Antes de escrever, o worker ou adapter confirma:
+Antes de escrever, MNFS confirma:
 
-- contract hash;
-- Feature identity qualificada;
-- Attempt atual;
-- Lease ativo;
-- worktree path;
-- base SHA;
-- write-set.
+- contract/authority hashes;
+- target qualificado e Attempt atual;
+- workspace/environment bindings atuais;
+- base Git;
+- write/resource boundaries;
+- effective execution/security policy.
 
 ## 3.11.5 Estado
 
@@ -828,21 +822,17 @@ Attempt RUNNING
 
 ## 3.11.6 Falhas
 
-### Processo não inicia
+### Runtime não inicia
 
-Attempt pode ficar `FAILED` ou voltar a `CREATED`, conforme política.
+Attempt permanece incompleto e a falha é observada; não existe success por process text.
 
-### Base mismatch
+### Base ou binding mismatch
 
-Worker não escreve.
+Actor não escreve. A Track fica stale/diverged conforme o finding.
 
-Track fica `STALE_BASE`.
+### Lead morre após dispatch
 
-### Lead morre após spawn
-
-Worker pode continuar.
-
-Novo Lead recupera pelo SQLite e filesystem.
+O Actor/recurso pode continuar conforme o contrato. Um Fresh Lead recupera por SQLite, Git e observação das realizations, sem depender de transcript.
 
 ### Mensagem não chega
 
@@ -1579,10 +1569,10 @@ Nunca é silenciosamente reinterpretado sob novo contrato.
 
 - SQLite;
 - Git;
-- Treehouse;
+- selected workspace realization;
 - filesystem;
 - process state;
-- Pi session state;
+- Runtime Session state;
 - artifacts.
 
 ## 3.25.3 Não usa como fonte autoritativa
@@ -1718,7 +1708,7 @@ MNFS autoriza.
 |---|---|---|---|
 | Intake | entrevista | Mission draft | IDs, persistência, policy |
 | Investigação | pergunta e rubric | report | refs, status |
-| Planning | raciocínio Pi | plan JSON | schema, DAG, hash |
+| Planning | Planner Actor reasoning | plan JSON | schema, DAG, hash |
 | Lavish | explicação visual | feedback | revision control |
 | Approval | confirmação humana | approved contract | exact-hash gate |
 | Dispatch | worker role | context/dispatch pack | leases, attempts, spawn |
@@ -1743,8 +1733,8 @@ MNFS autoriza.
 | Exact-hash approval | M1 implementado |
 | Contract materialization | M1 implementado |
 | Preparation/context packs | futuro |
-| Treehouse Lease | M2 |
-| Pi worker dispatch | M2 |
+| Workspace / Environment binding | M2 |
+| Agent Runtime dispatch | M2 |
 | Claim lifecycle | M2 |
 | Recovery de worker | M2 |
 | Review independente | M3 |
@@ -1771,8 +1761,8 @@ MNFS autoriza.
 9. Nenhuma Track aceita fecha automaticamente a Feature.
 10. Nenhuma soma de Features substitui critérios da Milestone.
 11. Nenhuma soma de Milestones substitui critérios da Mission.
-12. Nenhum worktree é removido antes de integração ou abandono explícito.
-13. Nenhuma integração é provada apenas em worktrees isolados.
+12. Nenhum isolated mutable workspace é liberado antes de integração, abandono ou disposition explícita.
+13. Nenhuma integração é provada apenas em isolated mutable workspaces.
 14. Nenhum critério live é aprovado por mock.
 15. Nenhuma mensagem é a única memória.
 16. Nenhum restart exige reconstruir estado por transcript.

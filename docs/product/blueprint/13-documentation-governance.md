@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current development/documentation governance
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 The Development Governance Method and accepted **Layered Agent Execution Planning** design govern how architecture inquiry, Decisions and bounded execution relate. MCRM remains the single Capability Realization lifecycle; execution-planning completeness is a derived projection rather than a second manual checklist.
 
@@ -1362,7 +1362,7 @@ promote to canonical source
 
 Issue #6:
 
-- initiated AB1;
+- initiated the historical architecture-baseline cycle now superseded by ARR;
 - defines deliverables;
 - tracks approval.
 
@@ -2049,7 +2049,7 @@ Após aprovação desta Section:
 20. Replan MIS-002
 ```
 
-AB1 não fecha apenas porque o Blueprint foi escrito.
+Nenhum architecture/reconciliation gate fecha apenas porque o Blueprint foi escrito.
 
 Fecha quando o sistema documental canônico estiver versionado e reconciliado.
 
@@ -2145,4 +2145,4 @@ Não construir agora:
 
 # Decisão resumida da Seção 13
 
-> **O MNFS trata documentação como parte do control plane. Git guarda a doutrina, decisões, specifications, Standards e guidance; `.mnfs` guarda identidade e contratos/evidence machine-readable; SQLite guarda state operacional. Cada conceito possui um documento owner, Authority e lifecycle. ADRs aceitos e Mission Contracts aprovados não são semanticamente reescritos; mudanças usam supersession ou Replan. O Product Blueprint terá 13 fontes modulares e um agregado gerado. Capability Specs seguem processo KEP/RFC-like; Research permanece Evidence não normativa; Issues e PRs são veículos de trabalho. README e AGENTS.md permanecem curtos; `DOCUMENTATION-MAP.md` é o índice autoritativo. Metadata, CODEOWNERS, docs-impact e CI reduzem drift. AB1 só fecha depois que esse sistema documental estiver publicado, revisado e usado para reconciliar MIS-002.**
+> **O MNFS trata documentação como parte do control plane. Git guarda doutrina, Decisions, Specifications, Standards e Guidance; `.mnfs` guarda identity e machine-readable contracts/evidence; SQLite guarda estado operacional. Cada conceito possui owner, Authority e lifecycle. Accepted ADRs/Mission Contracts mudam por supersession/Replan, não por reinterpretação silenciosa. O Product Blueprint possui 13 fontes modulares e aggregate gerado; Research permanece Evidence não normativa; Issues/PRs são veículos de trabalho. A current ARR/P1 reconciliation só pode fechar quando uma Fresh Actor lê as fontes correntes sem encontrar duas arquiteturas concorrentes, todas as projections estão regeneradas e os gates apontam para uma única next action.**

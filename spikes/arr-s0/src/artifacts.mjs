@@ -1,23 +1,23 @@
 import { createHash, randomBytes } from 'node:crypto';
 import {
+  link as fsLink,
   lstat as fsLstat,
   mkdir as fsMkdir,
   open as fsOpen,
   readFile as fsReadFile,
   realpath as fsRealpath,
-  rename as fsRename,
   unlink as fsUnlink,
 } from 'node:fs/promises';
 import path from 'node:path';
 import { canonicalJsonBytes } from './canonical-json.mjs';
 
 const defaultOps = {
+  link: fsLink,
   lstat: fsLstat,
   mkdir: fsMkdir,
   open: fsOpen,
   readFile: fsReadFile,
   realpath: fsRealpath,
-  rename: fsRename,
   unlink: fsUnlink,
 };
 
@@ -123,13 +123,30 @@ export async function writeRawArtifact(runRoot, relativePath, inputBytes, option
 
   const tempPath = `${finalPath}.tmp-${process.pid}-${randomBytes(6).toString('hex')}`;
   let tempHandle;
+  let tempExists = false;
   try {
     tempHandle = await ops.open(tempPath, 'wx', 0o600);
+    tempExists = true;
     await tempHandle.writeFile(bytes);
     await tempHandle.sync();
     await tempHandle.close();
     tempHandle = null;
-    await ops.rename(tempPath, finalPath);
+
+    try {
+      await ops.link(tempPath, finalPath);
+    } catch (error) {
+      if (error?.code !== 'EEXIST') throw error;
+      try {
+        await ops.unlink(tempPath);
+        tempExists = false;
+      } catch {}
+      const concurrent = await existingArtifactMetadata(ops, root, finalPath, normalized, bytes);
+      if (concurrent) return concurrent;
+      throw error;
+    }
+
+    await ops.unlink(tempPath);
+    tempExists = false;
     await rejectExistingSymlinkComponents(finalPath, ops.lstat);
     if (typeof ops.realpath === 'function') await assertRealpathContained(root, finalPath, ops.realpath);
     const dirHandle = await ops.open(parent, 'r');
@@ -142,7 +159,9 @@ export async function writeRawArtifact(runRoot, relativePath, inputBytes, option
     if (tempHandle) {
       try { await tempHandle.close(); } catch {}
     }
-    try { await ops.unlink(tempPath); } catch {}
+    if (tempExists) {
+      try { await ops.unlink(tempPath); } catch {}
+    }
     throw error;
   }
 

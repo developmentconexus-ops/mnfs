@@ -1,0 +1,64 @@
+name: ARR P1 F02 Final Fresh Review
+
+on:
+  push:
+    branches:
+      - review/arr-p1-f02-final-20260807
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - run: npm ci
+      - name: Re-run canonical verification
+        run: npm run verify
+      - name: Scan current constitutional sources with nearest heading
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          files = [
+            'docs/product/blueprint/01-product-vision.md',
+            'docs/product/blueprint/02-domain-model.md',
+            'docs/product/blueprint/03-lifecycle-flows.md',
+            'docs/product/blueprint/04-engineering-system.md',
+            'docs/product/blueprint/05-system-architecture.md',
+            'docs/product/blueprint/06-roles-authority.md',
+            'docs/product/blueprint/07-quality-evidence.md',
+            'docs/product/blueprint/08-state-recovery.md',
+            'docs/product/blueprint/09-context-memory.md',
+            'docs/product/blueprint/10-security-isolation.md',
+            'docs/product/blueprint/12-capability-roadmap.md',
+            'docs/product/blueprint/13-documentation-governance.md',
+          ]
+          pat = re.compile(r'\b(?:Pi|Treehouse|E0|E1|E2|E3|E4|AB1|AS-01|AS-02|worktree|worktrees)\b', re.I)
+          for rel in files:
+              heading = '<frontmatter>'
+              print(f'### {rel}')
+              for n, line in enumerate(Path(rel).read_text().splitlines(), 1):
+                  if line.startswith('#'):
+                      heading = line
+                  if pat.search(line):
+                      print(f'{n}\t{heading}\t{line}')
+          PY
+      - name: Show current gate surfaces
+        shell: bash
+        run: |
+          echo '=== STATUS ==='
+          grep -nE 'Current phase|Current authorization boundary|Immediate next action|ARR-S0 harness|M02|Production Worker|Automatic delivery' docs/tracking/STATUS.md
+          echo '=== AGENTS ==='
+          grep -nE 'Current gate|P1|ARR-S0|M02|Production Worker|Automatic merge' AGENTS.md
+          echo '=== DOCUMENTATION MAP ==='
+          grep -nE 'OPPORTUNITY_REPLAN|SUPERSEDED_AS_EXECUTION_PATH|ARR-S0|P1' docs/DOCUMENTATION-MAP.md
+          echo '=== ROADMAP CURRENT PATH ==='
+          grep -nE 'M2 Opportunity Replan|ARR-S0|CURRENT GATE|Pi Worker|Treehouse Lease|AS-02.*PREREQUISITE' docs/roadmap.md || true

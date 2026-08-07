@@ -3,7 +3,7 @@ id: DOC-TOOLING-ADOPTION
 title: MNFS Tooling Adoption
 document_type: tooling_reference
 form: reference
-authority: projection
+authority: reference
 status: current
 version: 3.0.0
 owners:

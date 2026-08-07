@@ -33,7 +33,8 @@ The review searches for the best-supported global solution rather than optimizin
 - Pi SDK/RPC/extensions/session research;
 - Factory.ai Software Factory / Missions / Droid / open-source VFS research;
 - open agent-runtime interoperability research including ACP and open coding-agent runtimes;
-- mature adjacent runtime, workflow, sandbox, browser, MCP and observability primitives;
+- local/remote sandbox landscape including Anthropic Sandbox Runtime, nono, Sandlock, BoxLite, `smol-machines/smolvm`, CelestoAI/SmolVM, microsandbox, OpenShell, OpenSandbox, E2B, Mitos, Sandbox0, Kubernetes Agent Sandbox, Cleanroom/SporeVM and VFS/AgentFS;
+- mature adjacent workflow, browser, MCP and observability primitives;
 - current MNFS implementation and canonical WSL2 constraints.
 
 ## Decision progress
@@ -41,8 +42,8 @@ The review searches for the best-supported global solution rather than optimizin
 ```text
 D1 — Planning and validation semantics          APPROVED — D-011
 D2 — Agent runtime and session/control strategy APPROVED — D-012
-D3 — Execution workspace and isolation          IN REVIEW
-D4 — Implementation sourcing strategy           PENDING
+D3 — Execution Environment architecture         APPROVED — D-013
+D4 — Implementation sourcing strategy           IN REVIEW
 ```
 
 ### Approved D1 direction — D-011
@@ -104,6 +105,27 @@ Decision rules:
 - OpenHands is `REFERENCE / DEFER` for broader remote/server execution;
 - no production runtime or Worker dispatch is selected or authorized by D2.
 
+### Approved D3 direction — D-013
+
+Model Execution Environments by required properties rather than an ordinal technology/locality ladder.
+
+Decision rules:
+
+- preserve separate Domain Authority, Tool Capability, Process Sandbox, Execution Environment, Credential, Network/Egress, External Effect and Evidence/Reconcile planes;
+- supersede the old `E0 → E4` ladder as the semantic model;
+- make Agent Runtime placement explicit: `CONTROL_SIDE` when the runtime can be strictly reduced to MNFS-brokered capabilities, or `IN_ENVIRONMENT` when that reduction cannot be proved;
+- prefer brokered credentials/inference over raw secrets for whole-agent execution;
+- a `WriteTrack` owns an isolated mutable workspace semantically, not inherently a physical Git worktree;
+- preserve provider-neutral Git result identity (`baseCommitSha` + `resultTreeSha`, optionally a result commit) as the accepted output boundary;
+- worktree paths, COW deltas, VM disks/snapshots and remote volumes remain execution artifacts, never acceptance authority;
+- keep implementation concrete: property-independent semantics do not authorize generic provider/plugin factories without a second real consumer;
+- run a canonical host-capability probe before local substrate selection;
+- compare the accepted Anthropic Sandbox Runtime process incumbent against a leading process challenger such as `nono`; consider Sandlock only if host-kernel support is satisfied;
+- compare BoxLite and `smol-machines/smolvm` as the leading current local microVM challengers;
+- defer VFS/AgentFS selection until the chosen execution envelope demonstrates that another workspace/COW substrate is still needed;
+- retain OpenShell/OpenSandbox as strong whole-agent/control-plane references and E2B/Mitos/Sandbox0/Kubernetes Agent Sandbox as future remote/parallel candidates;
+- no Execution Environment substrate or production Worker dispatch is selected or authorized by D3.
+
 ## Review questions
 
 ### D1 — Planning and validation semantics — APPROVED
@@ -114,31 +136,11 @@ Disposition: **approved under D-011**, subject only to final cross-decision cons
 
 Disposition: **approved under D-012**, subject to a later comparative Agent Runtime Architecture Spike before runtime selection.
 
-### D3 — Execution workspace and isolation strategy — IN REVIEW
+### D3 — Execution Environment architecture — APPROVED
 
-What is the best long-term workspace substrate for local and future remote Workers?
+Disposition: **approved under D-013**, subject to host-capability and comparative local-envelope spikes before substrate selection.
 
-The review must separate four concerns rather than treating `sandbox` or `worktree` as one thing:
-
-```text
-Workspace identity / ownership
-Writable-state substrate
-Execution-security environment
-Integration / delivery boundary
-```
-
-Compare relevant shapes such as:
-
-```text
-Git/Treehouse worktree + E1 sandbox
-Git worktree + COW/virtual filesystem
-VFS/AgentFS-style portable delta + execution sandbox
-remote sandbox/provider workspace
-```
-
-Evaluate Git fidelity, isolation, result-tree identity, recovery, crash behavior, handoff, portability, integration, parallelism, performance, dependency compatibility, cleanup, local-first usability and remote evolution.
-
-### D4 — Implementation sourcing strategy
+### D4 — Implementation sourcing strategy — IN REVIEW
 
 For each capability, decide what MNFS must `OWN` versus `ADOPT`, `ADAPT`, `SPIKE`, `REFERENCE`, `DEFER` or `REJECT`.
 
@@ -149,7 +151,10 @@ The review must explicitly check for:
 - vendor lock-in;
 - speculative abstraction;
 - hidden maintenance tail;
-- missing exit path.
+- missing exit path;
+- whether a dependency eliminates an entire meaningful machinery class or merely adds another integration surface;
+- whether a capability has a named current consumer;
+- whether the candidate can be proved against canonical MNFS criteria and removed without migrating domain meaning.
 
 ## Required outputs
 

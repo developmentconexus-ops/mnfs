@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current domain semantics
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 **Runtime Session is observational**. Role, ActorRun, Attempt, Authority, Claim, Evidence and Verdict remain MNFS domain truth; losing or replacing a runtime Session cannot lose or redefine them.
 
@@ -541,7 +541,7 @@ DIVERGED
 UNKNOWN
 ```
 
-Novo Attempt não implica novo worktree.
+Novo Attempt não implica novo isolated mutable workspace.
 
 ---
 
@@ -559,7 +559,7 @@ RELEASED
 DIVERGED
 ```
 
-Treehouse administra o lifecycle físico; MNFS administra a semântica.
+A workspace realization selecionada administra o lifecycle físico; MNFS administra a semântica e a autoridade do binding.
 
 ### 2.13.1 Execution Environment
 
@@ -582,11 +582,11 @@ A Environment possui identity, policy hash, resource limits, network policy e ad
 
 Environment Lease autoriza temporariamente uma Write Track ou Actor a usar uma Execution Environment Instance.
 
-É diferente do Treehouse Lease:
+É diferente do workspace binding/lease concreto. O Treehouse Lease provado em M01 é uma realização histórica, não a semântica universal:
 
 ```text
-Treehouse Lease
-→ workspace de código
+Workspace Binding / Lease
+→ isolated mutable workspace concreto
 
 Environment Lease
 → runtime e recursos de execução
@@ -623,13 +623,13 @@ WT-001/A01
 WT-001/A02
 ```
 
-Attempts podem reutilizar a mesma sessão e worktree quando contrato, write-set e trust permanecem válidos.
+Attempts podem reutilizar a mesma Runtime Session e o mesmo isolated mutable workspace quando contrato, write-set e trust permanecem válidos.
 
 ---
 
 ## 2.15 Worker Run
 
-Worker Run representa uma execução concreta de um agente Pi.
+Worker Run representa uma execução concreta de um Agent Runtime para um ActorRun/Attempt.
 
 Lifecycle:
 
@@ -733,7 +733,7 @@ Mudança de escopo, contrato, arquitetura, orçamento, risco aceito ou operaçã
 
 Correction é trabalho delimitado destinado a resolver Findings sem reabrir desnecessariamente toda a Feature.
 
-Por padrão reutiliza Write Track e worktree quando a trust boundary continua válida.
+Por padrão reutiliza Write Track e isolated mutable workspace quando a trust boundary continua válida.
 
 ---
 
@@ -859,14 +859,14 @@ Papéis não são acoplados a providers específicos.
 | Entidade | Pode propor | Pode persistir | Pode aceitar/encerrar |
 |---|---|---|---|
 | Mission | Operator/Lead | MNFS | Operator/MNFS closeout |
-| Plan Revision | Pi/Lead | MNFS | — |
+| Plan Revision | Planner/Lead Actor | MNFS | — |
 | Approved Contract | Operator requests | MNFS | Operator-authorized gate |
 | Milestone | Planner | MNFS | MNFS gate |
 | Feature | Planner | MNFS | MNFS gate |
 | Write Track | Lead/orchestrator | MNFS | MNFS/integrator |
-| Lease | Lead requests | MNFS + Treehouse adapter | MNFS |
+| Workspace/Environment binding or lease | Lead requests | MNFS + selected realization adapter | MNFS |
 | Attempt | Lead/policy | MNFS | MNFS |
-| Worker Run | Pi adapter | MNFS observes | MNFS records exit/cancel |
+| Worker Run | Agent Runtime adapter | MNFS observes | MNFS records exit/cancel |
 | Claim | Worker | MNFS validates/persists | MNFS gate |
 | Receipt | Runner | MNFS | — |
 | Verdict | Gate authority | MNFS | Authority defined by risk |
@@ -892,13 +892,13 @@ Estado operacional atual, missões, revisões, leases, tracks, attempts, runs, c
 
 Logs, prompts, HTML, screenshots, traces e outputs temporários.
 
-### Pi
+### Agent Runtime
 
-Contexto e execução probabilística, nunca domínio autoritativo.
+Contexto e execução probabilística, nunca domínio autoritativo. Runtime Session state é observacional.
 
-### Treehouse
+### Mutable Workspace realization
 
-Estado físico dos worktrees.
+Estado físico do isolated mutable workspace e seus bindings. Treehouse/worktree é uma realização histórica/incumbent já provada em M01, não o owner semântico universal.
 
 ### Lavish
 

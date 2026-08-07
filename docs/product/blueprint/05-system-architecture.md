@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current system architecture
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 The architecture is a Thin Sovereign Semantic Kernel with a **Replaceable Agent Runtime** and a property-based Execution Environment outside the semantic core.
 
@@ -78,47 +78,37 @@ Não serão criados microserviços, daemon obrigatório, broker, workflow engine
 ```text
 WINDOWS — apresentação
 ┌──────────────────────────────────────────────────────────────┐
-│ Browser                                                     │
-│   └── Lavish review                                         │
+│ Browser / review surfaces                                   │
 │ Windows Terminal / editor conectado ao WSL                  │
 └──────────────────────────────┬───────────────────────────────┘
                                │ localhost / terminal
-WSL2 — execução                │
+WSL2 — canonical local host    │
 ┌──────────────────────────────▼───────────────────────────────┐
-│ Pi Lead                                                     │
-│   ├── project skills                                        │
-│   ├── futura MNFS Pi extension                              │
-│   └── MNFS CLI / application services                       │
-│                                                              │
+│ Operator Surface / MNFS Lead                                │
+│        ↓                                                     │
 │ MNFS Modular Monolith                                       │
-│   ├── Domain Core                                           │
-│   ├── Application Services                                  │
-│   ├── Engineering System                                    │
-│   ├── Policy / Gate Engine                                  │
-│   ├── Persistence                                           │
-│   ├── Artifact Management                                   │
-│   └── External Adapters                                     │
-│                                                              │
-│ Local runtime                                               │
-│   ├── SQLite                                                │
-│   ├── generated artifacts                                   │
-│   ├── logs                                                  │
-│   └── process observations                                  │
-│                                                              │
-│ Worker execution                                            │
-│   ├── Treehouse worktree WT-001 → Pi Worker WR-001          │
-│   ├── Treehouse worktree WT-002 → Pi Worker WR-002          │
-│   └── clean integration workspace                           │
-│                                                              │
-│ Optional projection                                         │
-│   └── Herdr panes / workspaces                              │
-└──────────────────────────────────────────────────────────────┘
+│   ├── Sovereign Domain / Authority Kernel                    │
+│   ├── Planning + Context Compiler                            │
+│   ├── Application Services / Gates                           │
+│   ├── SQLite + Artifact Management                           │
+│   └── Concrete External Adapters                             │
+│        ↓                                                     │
+│ Actor Control Plane                                          │
+│   └── selected replaceable Agent Runtime                     │
+│        ↓                                                     │
+│ Execution Environment                                        │
+│   ├── isolated mutable workspace                             │
+│   ├── compute/isolation boundary                             │
+│   ├── network/credential/resource policy                     │
+│   └── result extraction                                      │
+└──────────────────────────────┬───────────────────────────────┘
                                │
                                ▼
                          Git repository
-                 code · commits · approved contracts
-                    accepted evidence · documentation
+              baseCommitSha · resultTreeSha · optional commit
 ```
+
+The constitutional diagram names semantic boundaries, not a selected runtime/workspace/environment provider.
 
 ---
 
@@ -135,7 +125,7 @@ um package TypeScript
 +
 um banco SQLite
 +
-processos Pi separados para workers
+Actors executados pelo Agent Runtime selecionado quando processo/runtime separado for necessário
 ```
 
 Módulos internos possuem fronteiras claras, mas continuam no mesmo repositório, package e release.
@@ -192,12 +182,11 @@ Exemplos:
 
 ```text
 Mission state          → SQLite / MNFS Core
-Code tree              → Git
+Code / result identity → Git
 Approved contract      → SQLite + materialização versionada
-Worktree physical      → Treehouse
-Agent reasoning        → Pi
-Visual feedback        → Lavish
-Terminal presentation  → Herdr
+Mutable workspace      → selected workspace realization, observed by MNFS
+Agent execution        → selected Agent Runtime, observed by MNFS
+Visual/terminal output → presentation adapters
 ```
 
 Dois componentes podem observar o mesmo fenômeno.
@@ -206,7 +195,7 @@ Somente um é autoridade de domínio.
 
 ## 5.3.4 CLI e interfaces são finas
 
-CLI, skill Pi, futura extensão e futura UI:
+CLI, skills, Agent Runtime adapters e futura UI:
 
 - coletam input;
 - chamam application services;
@@ -218,7 +207,7 @@ CLI, skill Pi, futura extensão e futura UI:
 
 ## 5.3.5 Processos são recursos, não domínio
 
-Um processo Pi pode:
+Uma execução do Agent Runtime pode:
 
 - iniciar;
 - produzir output;
@@ -1288,9 +1277,9 @@ A CLI não:
 
 ---
 
-# 5.13 Pi Integration Architecture
+# 5.13 Historical / Incumbent Evidence — Pi Integration Architecture
 
-Pi oferece quatro formas relevantes de integração:
+The following records the Pi integration surface studied/proved before D-012. It is incumbent Evidence for ARR-S1 and does not select the future Agent Runtime. Pi offered four relevant integration forms:
 
 - skills e prompt templates;
 - TypeScript extensions;
@@ -1390,7 +1379,7 @@ O adapter Pi importa o Core ou chama a CLI.
 
 ---
 
-# 5.14 Pi Worker Process Adapter
+# 5.14 Historical / Incumbent Evidence — Pi Worker Process Adapter
 
 ## 5.14.1 Porta conceitual
 
@@ -1459,9 +1448,9 @@ Claim absent
 
 ---
 
-# 5.15 Treehouse Adapter
+# 5.15 Historical / Incumbent Evidence — Treehouse Adapter
 
-Treehouse administra um pool de worktrees reutilizáveis, possui leases duráveis que sobrevivem sem processos e oferece JSON para aquisição e status. Também oferece retorno condicionado por `lease_id`, útil para evitar liberar uma aquisição posterior do mesmo path. citeturn221202view0
+This subsection is historical/incumbent M01 workspace Evidence, not the current WriteTrack definition. Treehouse administra um pool de worktrees reutilizáveis, possui leases duráveis que sobrevivem sem processos e oferece JSON para aquisição e status. Também oferece retorno condicionado por `lease_id`, útil para evitar liberar uma aquisição posterior do mesmo path. citeturn221202view0
 
 ## 5.15.1 Responsabilidade
 
@@ -2047,7 +2036,7 @@ Watcher contínuo entra se a experiência exigir notificação automática.
 
 ---
 
-# 5.26 Roadmap de Integração Pi
+# 5.26 Historical / Incumbent Evidence — Roadmap de Integração Pi
 
 | Estágio | Capability | Razão |
 |---|---|---|
@@ -2281,6 +2270,6 @@ Não construir agora:
 
 # Decisão resumida da Seção 5
 
-> **O MNFS será inicialmente um modular monolith TypeScript executado no WSL2. Domain Core, Application Services e Engineering System definem a semântica; SQLite guarda estado operacional; Git guarda código e contratos aprovados; Pi executa raciocínio e workers; Treehouse fornece worktrees; Lavish apresenta revisão; Herdr projeta terminais opcionalmente. CLI, skills, extensions e futuras UIs permanecem clientes finos do mesmo core. As fronteiras são desenhadas hoje para permitir evolução a SDK/RPC e cloud, mas nenhuma infraestrutura distribuída será construída antes de o produto local completo provar sua necessidade.**
+> **O MNFS começa como um modular monolith TypeScript no WSL2. O Thin Sovereign Semantic Kernel, Application Services e Engineering System definem a semântica; SQLite guarda estado operacional; Git guarda código e result identity; Agent Runtime, isolated mutable workspace, Execution Environment e presentation surfaces são realizations substituíveis selecionadas por Evidence. Adapters e UIs permanecem clientes finos do mesmo core. Nenhuma infraestrutura distribuída ou provider framework é construída antes de um consumidor/proof concreto exigir.**
 
 ---

@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current M2 Opportunity-Replan path
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 Product M2 preserves the secure one-Worker vertical-slice outcome while its realization follows the accepted Architecture Realization Review path:
 
@@ -379,1754 +379,207 @@ Retirado do roadmap com rationale.
 
 ---
 
-# 12.7 Horizontes
+# 12.7 Horizontes atuais
 
 ## H0 — Proven Foundation
 
 ```text
-M0
-M1
+M0 Foundation Walking Skeleton      ACCEPTED
+M1 Visual Mission Planning          ACCEPTED
 ```
-
-A intenção pode ser persistida e aprovada.
 
 ## H1 — Trusted Local Harness
 
 ```text
-AB1
-AS-02
-M2
-M3
-AS-01
-M4
+ARR P1 constitutional reconciliation
+→ ARR-S0 Host Capability Probe
+→ ARR-S1 Agent Runtime Conformance
+  + ARR-S2 Local Execution Envelope Conformance
+→ conditional ARR-S2W Workspace Conformance
+→ ARR-S3 Vertical Composition Proof
+→ substrate-selection Decision
+→ CAP-EXECUTION / MIS-002 Opportunity Replan
+→ new M02 R5 Execution Design + implementation
+→ M2 Golden Proof
 ```
-
-Resultado:
-
-- um Repository;
-- local;
-- um Writer;
-- um Reviewer;
-- execution segura;
-- Repository-aware;
-- recoverable;
-- governed.
 
 ## H2 — Complete Local Software Factory
 
-```text
-M5
-M6
-M7
-M8
-M9
-```
-
-Resultado:
-
-- parallel work;
-- Integration;
-- live QA;
-- external effects;
-- delivery;
-- empirical Calibration.
+After M2, capabilities expand only from proven consumers: Repository Profile/Engineering System, independent Review/Integration, parallel tracks, adaptive Quality/QA, governed Effects/Delivery, Observability/Evaluation/Calibration.
 
 ## H3 — Platform Expansion
 
-```text
-M10
-M11
-AS-04
-M12
-```
+Web/operator surfaces, multi-repository operation and remote/cloud execution remain options/targets whose contracts are created only when earlier local capabilities prove the need.
 
-Resultado:
-
-- integrated Web Console;
-- multi-repository platform;
-- remote/cloud execution;
-- teams and tenants.
-
-Horizonte representa confiança.
-
-Não representa data.
+Horizonte representa confiança e dependency order, não data.
 
 ---
 
 # 12.8 Visão resumida
 
-| Item | Nome | Estado |
+| Item | Nome | Estado atual |
 |---|---|---|
 | M0 | Foundation Walking Skeleton | `ACCEPTED` |
 | M1 | Visual Mission Planning | `ACCEPTED` |
-| AB1 | Architecture Baseline and Contract Reconciliation | `CURRENT GATE` |
-| AS-02 | Local Pi Sandbox on WSL2 | `PREREQUISITE` |
-| M2 | Secure One-Worker Vertical Slice | `COMMITTED` |
-| M3 | Repository Profile and Engineering System v1 | `PLANNED` |
-| AS-01 | Pi Session Memory and Messaging | `PLANNED SPIKE` |
-| M4 | Independent Review and Local Correction | `PLANNED` |
-| M5 | Parallel Write Tracks and Integration | `PLANNED` |
-| M6 | Adaptive Quality, Evidence and Live QA | `PLANNED` |
-| M7 | Credentials, External Integrations and Effects | `TARGET` |
-| M8 | Delivery, Closeout and Operational Proof | `TARGET` |
-| M9 | Observability, Evaluation and Calibration | `TARGET` |
-| M10 | Operator Web Console and DevEx | `OPTION` |
-| M11 | Multi-Repository Software Factory | `OPTION` |
-| AS-04 | Remote Execution Environment | `FUTURE SPIKE` |
-| M12 | Remote Execution and Cloud Control Plane | `OPTION` |
+| ARR-P1 | Architecture / constitutional reconciliation | `CURRENT REVIEW / CORRECTION` |
+| ARR-S0 | Host Capability Probe | `NEXT POSSIBLE GATED SPIKE` |
+| ARR-S1 | Agent Runtime Conformance | `PLANNED AFTER S0` |
+| ARR-S2 | Local Execution Envelope Conformance | `PLANNED AFTER S0` |
+| ARR-S2W | Workspace Conformance | `CONDITIONAL` |
+| ARR-S3 | Vertical Composition Proof | `PLANNED AFTER S1/S2(/S2W)` |
+| M2 | Secure One-Worker Vertical Slice | `OPPORTUNITY_REPLAN` |
+| M3 | Repository Profile and Engineering System | `PLANNED AFTER M2` |
+| M4 | Independent Review and Integration | `PLANNED` |
+| M5 | Parallel Write Tracks | `PLANNED` |
+| M6 | Adaptive Quality and Live QA | `PLANNED` |
+| M7–M9 | Effects, Delivery, Observability/Evaluation | `TARGET` |
+| M10–M12 | Web, multi-repository, remote/cloud | `OPTION / TARGET` |
+
+The exact current execution gate lives in `docs/tracking/STATUS.md`; this roadmap never hard-codes a transient Operator authorization.
 
 ---
 
-# 12.9 AB1 — Architecture Baseline and Contract Reconciliation
+# 12.9 Current ARR decision program
+
+## ARR-S0 — Host Capability Probe
+
+Produces immutable host facts and coarse capability classes for the canonical WSL2 host. It does not install candidates and does not select a runtime/environment winner.
+
+## ARR-S1 — Agent Runtime Conformance
+
+Freezes a candidate-independent contract after S0, refreshes primary-source provenance, and compares only runtime shapes that can alter the decision. Recovery cannot depend on Session/transcript.
+
+## ARR-S2 — Local Execution Envelope Conformance
+
+Uses the same fixture/criteria across eligible process-envelope and microVM-class candidates. It proves host-read/write denial, network/credential posture, containment, fail-closed behavior, workspace semantics, Git fidelity, recovery and cleanup.
+
+## ARR-S2W — Workspace Conformance, conditional
+
+Exists only if the selected envelope still needs a separate workspace substrate. Do not stack an extra workspace manager when the environment already supplies sufficient private mutable workspace semantics.
+
+## ARR-S3 — Vertical Composition Proof
+
+```text
+accepted fixed Spike contract
+→ provider-neutral M01 semantic core
+→ selected Agent Runtime
+→ selected Execution Environment/workspace
+→ fixed repository change
+→ Claim(baseCommitSha,resultTreeSha)
+→ terminate Lead
+→ Fresh Lead Recovery
+→ deterministic Receipt
+→ MNFS Gate
+→ accepted Git result
+→ idempotent resource disposition
+```
+
+S3 is architecture Evidence, not production M02.
+
+---
+
+# 12.10 M2 — Secure One-Worker Vertical Slice
 
 ## Estado
 
 ```text
-CURRENT GATE
+OPPORTUNITY_REPLAN
 ```
 
-## Outcome
+## Outcome preservado
 
-A arquitetura necessária para retomar implementação está documentada, reconciliada e versionada.
-
-## Valor
-
-Evita que M2 implemente uma versão localmente correta de uma arquitetura que já foi superada pelas decisões do Product Blueprint.
-
-## Entry Criteria
-
-- M0 accepted;
-- M1 accepted;
-- Issue arquitetural aberta;
-- Product Blueprint em elaboração.
-
-## Capabilities e deliverables
-
-### AB1.C1 Product Blueprint
-
-Seções 1–13.
-
-### AB1.C2 Canonical supporting documents
-
-- Domain Model;
-- End-to-End Flows;
-- Quality and Evidence;
-- Research Maps;
-- Documentation Map.
-
-### AB1.C3 ADR set
-
-Criar e consolidar, conforme as decisões aprovadas:
+A single bounded Writer:
 
 ```text
-ADR-0004 Memory strata
-ADR-0005 Durable coordination versus transport
-ADR-0006 Security planes
-ADR-0007 Credential Grants and Effects
-ADR-0008 Execution Environments
-ADR-0009 Operator surfaces
-ADR-0010 Telemetry and OTel
-ADR-0011 Evaluation and Calibration
+receives a fresh Authority Snapshot and fixed contract
+→ executes through the selected Agent Runtime
+→ mutates only its isolated mutable workspace inside the approved Execution Environment
+→ produces a durable Claim bound to baseCommitSha/resultTreeSha
+→ survives Lead death through Fresh Recovery
+→ is independently verified by runner-owned Receipt(s)
+→ is accepted only by an MNFS Gate
+→ yields an accepted provider-neutral Git result
+→ resources are safely and idempotently dispositioned
 ```
 
-Outras ADRs podem ser separadas se o conteúdo ficar amplo demais.
+## Realization rules
 
-### AB1.C4 Roadmap v2
+- Worker completion is never acceptance.
+- Runtime Session/transcript is never recovery authority.
+- Agent Runtime, workspace substrate and Execution Environment are selected by post-Spike Decision, not by this Product outcome.
+- Protected execution fails closed.
+- Raw production credentials are denied for the M2 proof.
+- Current network posture is contract-bound and deny-by-default for the local proof.
+- Result identity remains Git-provider-neutral.
+- M01 durable WriteTrack/Attempt/WorkerRun/Claim/fencing semantics are reused where provider-neutral; prior Pi/Treehouse specifics remain historical Evidence.
 
-Substituir o roadmap raso atual.
+## Entry before production implementation
 
-### AB1.C5 Contract reconciliation
-
-- preservar MIS-002 revision 3;
-- abrir Replan;
-- gerar nova revision;
-- revisar visualmente;
-- aprovar novo hash.
-
-### AB1.C6 Documentation authority map
-
-Definir:
-
-- source of truth;
-- owner;
-- update triggers;
-- review cadence;
-- relationship between docs.
+- ARR P1 accepted/integrated or exact base includes its accepted tree;
+- ARR-S0/S1/S2 and any applicable S2W accepted;
+- ARR-S3 accepted;
+- substrate selection Decision published;
+- superseding CAP-EXECUTION and MIS-002 revision approved;
+- new M02 R5 Execution Design and implementation plan approved.
 
 ## Golden Proof
 
-Um novo Lead, sem o transcript desta conversa, consegue:
-
-1. localizar o Product Blueprint;
-2. entender o estado do produto;
-3. identificar o próximo Product Milestone;
-4. localizar os ADRs;
-5. explicar por que MIS-002 precisa de Replan;
-6. iniciar o processo correto sem inventar arquitetura.
-
-## Exit Criteria
-
-- Seções 1–13 aprovadas;
-- nenhuma contradição material entre Blueprint, ADRs e roadmap;
-- Roadmap v2 versionado;
-- M2 contract reconciliado ou formalmente aguardando AS-02;
-- todos os novos conceitos possuem source of truth;
-- old docs são atualizados, superseded ou marcados historical;
-- next action é inequívoca.
+The production M2 proof must reproduce the semantic flow established by ARR-S3 using the selected concrete realizations and current authority, including failure/recovery drills and independent Gate acceptance.
 
 ## Non-goals
 
-- implementar M2;
-- escrever todos os capability specs futuros;
-- definir todos os Standards;
-- fechar cloud architecture;
-- criar Web Console.
-
----
-
-# 12.10 AS-02 — Local Pi Sandbox on WSL2
-
-## Timing
-
-```text
-before the unrestricted M2 Worker proof
-```
-
-## Objetivo
-
-Decidir se:
-
-```text
-Pi sandbox extension pattern
-+
-Anthropic Sandbox Runtime
-+
-Treehouse
-+
-WSL2
-```
-
-é uma boundary local suficiente para E1.
-
-## Output
-
-- acceptance test report;
-- performance;
-- bypass analysis;
-- toolchain compatibility;
-- policy;
-- adapter recommendation;
-- ADR-0006 decision.
-
-## Blocking
-
-M2 pode desenvolver partes puramente de domínio e fake adapters em paralelo.
-
-A prova real do Worker não pode fechar antes do AS-02 ou de uma alternativa aprovada.
-
----
-
-# 12.11 M2 — Secure One-Worker Vertical Slice
-
-## Estado
-
-```text
-COMMITTED AFTER CONTRACT RECONCILIATION
-```
-
-## Outcome
-
-Um único Pi Worker executa uma tarefa fixa e determinística dentro de:
-
-- Treehouse worktree;
-- approved E1 Environment;
-- frozen Security Policy;
-
-produz um Claim durável, sobrevive ao restart do Lead e é aceito somente por um MNFS Gate.
-
-## Valor para o Operator
-
-O Operator pode delegar uma tarefa bounded sem:
-
-- perder state;
-- confiar no texto do processo;
-- depender do transcript;
-- conceder autoridade total do usuário;
-- administrar worktree manualmente.
-
-## Entry Criteria
-
-- AB1 closed;
-- new MIS-002 revision approved;
-- ADRs aplicáveis;
-- Treehouse healthy;
-- Pi version pinned;
-- AS-02 accepted ou equivalent boundary approved;
-- fixed demo task;
-- canonical WSL2 healthy;
-- milestone and feature criteria present.
-
-## Capability slices
-
-### M2.C1 Qualified execution identity
-
-- `MIS-002/M01/F01`;
-- Write Track;
-- Attempt;
-- Worker Run;
-- Claim;
-- version fields;
-- typed errors.
-
-### M2.C2 Treehouse Lease
-
-- Intent;
-- acquire;
-- inspect;
-- release;
-- fencing;
-- idempotency;
-- orphan detection.
-
-### M2.C3 Minimal Local Security Profile
-
-- E1 Environment;
-- policy hash;
-- explicit `cwd`;
-- `shell: false`;
-- environment allowlist;
-- write allowlist;
-- sensitive read deny;
-- network off;
-- no credentials;
-- X0/X1 only;
-- no fail-open.
-
-### M2.C4 Fixed Writer Pack
-
-- Current Authority Snapshot;
-- qualified target;
-- contract hash;
-- task;
-- write-set;
-- output contract;
-- Claim command;
-- security policy ref;
-- termination condition.
-
-### M2.C5 Pi Worker Process Adapter
-
-- start;
-- observe;
-- cancel;
-- logs;
-- process identity;
-- Session ref when available;
-- exit classification;
-- no transcript parsing.
-
-### M2.C6 Durable Claim
-
-- Claim transaction;
-- Claim Event;
-- worker completion;
-- no acceptance;
-- result tree;
-- criteria refs.
-
-### M2.C7 Minimal verification and Gate
-
-- deterministic demo check;
-- Receipt;
-- explicit Claim acceptance;
-- wrong SHA and invalid transition rejection.
-
-### M2.C8 Recovery
-
-- fresh Lead;
-- Lease/Attempt/Worker Run/Claim reconcile;
-- late result protection;
-- no duplicate;
-- divergence report;
-- recommended next action.
-
-## Golden Proof
-
-```text
-initialize canonical repository
-→ approve reconciled MIS-002
-→ grant Treehouse Lease
-→ create E1 Environment
-→ launch sandboxed Pi Worker
-→ Worker performs fixed edit
-→ Worker opens and completes Claim
-→ kill Lead
-→ start fresh Lead
-→ recover same Track, Lease, Attempt, Worker Run and Claim
-→ verify protected sentinels were inaccessible
-→ execute deterministic verification
-→ accept Claim through Gate
-→ release Environment and Treehouse Lease idempotently
-```
-
-## Required failure drills
-
-- duplicate Lease;
-- orphan worktree;
-- Lease without worktree;
-- Worker exit without Claim;
-- Lead crash;
-- late completion;
-- stale Claim;
-- sandbox unavailable;
-- sandbox violation;
-- release repeat.
-
-## Exit Criteria
-
-- Mission Criteria satisfied;
-- all M2 Mission Milestone Criteria satisfied;
-- all Feature Criteria satisfied;
-- no host escape;
-- no secret access;
-- network denied;
-- no duplicate Claim;
-- no transcript parsing;
-- no Herdr dependency;
-- fresh-process WSL2 proof;
-- human and JSON CLI stable;
-- Evidence preserved;
-- release idempotent.
-
-## Non-goals
-
-- arbitrary task text;
-- independent Reviewer;
-- multiple Workers;
-- Integration queue;
-- OM;
-- `pi-link`;
+- generic provider/plugin framework without a second consumer;
+- arbitrary production Effects;
+- multiple parallel Writers;
 - Web Console;
-- remote Environment;
-- production effect;
-- generic Engineering System.
-
-## Replan Triggers
-
-- AS-02 fails;
-- Treehouse lifecycle differs materially;
-- Pi process cannot be observed safely;
-- fixed task cannot prove boundaries;
-- security exceptions become broad;
-- Claim schema requires contract change.
+- remote/cloud control plane unless separately selected later.
 
 ---
 
-# 12.12 M3 — Repository Profile and Engineering System v1
+# 12.11 Later Product Milestones
 
-## Estado
+The original M3–M12 outcomes remain directional, but their detailed contracts are intentionally deferred until M2 Evidence exists. Their ordering principle remains:
 
 ```text
-PLANNED
+Repository-aware engineering governance
+→ independent Review / Integration
+→ safe parallelism
+→ adaptive Quality / live QA
+→ governed external Effects and Delivery
+→ Observability / Evaluation / Calibration
+→ richer Operator surfaces
+→ multi-repository / remote expansion
 ```
 
-## Outcome
-
-MNFS consegue compreender um Repository, selecionar um Golden Path e executar uma Feature real sem depender de tarefa hardcoded ou prompt manual reconstruído.
-
-## Valor para o Operator
-
-A Harness deixa de ser uma demonstração e se torna útil para um workflow real do Repository.
-
-## Entry Criteria
-
-- M2 accepted;
-- one real Repository or realistic fixture;
-- stable E1 boundary;
-- one recurring task class selected.
-
-## Capabilities
-
-### M3.C1 Bootstrap
-
-- stack detection;
-- command discovery;
-- architecture clues;
-- contracts;
-- Environments;
-- external systems;
-- open questions.
-
-### M3.C2 Repository Profile v1
-
-- build/test/typecheck;
-- modules;
-- protected paths;
-- resource declarations;
-- Environment bindings;
-- live QA capability;
-- ratified assumptions.
-
-### M3.C3 Standards Registry v1
-
-Candidates:
-
-```text
-CORE-001
-ARCH-001
-TEST-001
-INT-001
-SEC baseline
-```
-
-### M3.C4 Golden Path v1
-
-Preferred:
-
-```text
-GP-BUGFIX
-```
-
-Rationale:
-
-- high frequency;
-- bounded;
-- regression proof;
-- low external effect;
-- exercises real context.
-
-Alternative `GP-API-ENDPOINT` requires a stronger fixture justification.
-
-### M3.C5 Context Compiler v1
-
-- Current Authority Snapshot;
-- Role Contract;
-- Profile;
-- Standards;
-- Golden Path;
-- code refs;
-- command bindings;
-- Security Profile.
-
-### M3.C6 Fitness Runner v1
-
-- command binding;
-- Receipt;
-- Standard mapping;
-- actionable diagnostics.
-
-### M3.C7 Real Writer
-
-- non-hardcoded Feature;
-- Profile-driven;
-- Claim;
-- deterministic proof.
-
-### M3.C8 Context Index v1
-
-- Artifacts;
-- Profile sections;
-- symbols and paths;
-- exact refs;
-- no vector database.
-
-## Golden Proof
-
-Onboard um segundo Repository ou fixture realista, compilar Profile, selecionar o Golden Path e entregar um bug fix real com regression proof sem instruções hardcoded do MNFS.
-
-## Exit Criteria
-
-- nenhuma section obrigatória silenciosamente `OPEN`;
-- Golden Path reduz trabalho manual;
-- Context Pack é compilado;
-- Fitness Functions produzem Receipts;
-- new Session understands Repository from Artifacts;
-- one real Feature accepted;
-- no duplicate project-memory source.
-
-## Non-goals
-
-- large Standards catalog;
-- multiple Golden Paths;
-- semantic search;
-- remote execution;
-- independent Reviewer;
-- portal.
-
-## Replan Triggers
-
-- Profile becomes repository ontology;
-- Golden Path only works for MNFS itself;
-- code discovery requires unbounded LLM scan;
-- Standards cause high false-positive rate.
+No later milestone may retroactively turn a candidate substrate into constitutional semantics.
 
 ---
 
-# 12.13 AS-01 — Pi Session Memory and Messaging
+# 12.12 Historical roadmap realizations
 
-## Timing
+The prior roadmap named AB1, AS-02 Local Pi Sandbox, Pi Session AS-01, Treehouse worktrees and fixed E1 as current steps. Those exact choices are preserved in Git history, accepted M01/AS-02 Evidence and superseded ADRs. They are not duplicated here as current roadmap authority because D-012 through D-015 superseded that realization path.
 
-```text
-end of M3
-```
-
-## Reason
-
-Antes de avaliar Observational Memory, precisamos ter:
-
-- Current Authority Snapshot;
-- Handoff Pack;
-- Context Pack;
-- exact domain state;
-- Role isolation.
-
-## Output
-
-- native compaction baseline;
-- `pi-observational-memory` result;
-- cost;
-- false-memory test;
-- Role policy;
-- ADR-0004;
-- decision on `pi-link`.
-
-AS-01 não bloqueia M4 se o fallback permanecer Pi native compaction.
+Historical Evidence remains usable for migration cost, incumbent comparison and regression constraints. It does not select a winner for ARR-S1/S2/S2W.
 
 ---
 
-# 12.14 M4 — Independent Review and Local Correction
-
-## Estado
-
-```text
-PLANNED
-```
-
-## Outcome
-
-Um Claim é avaliado por um Reviewer independente, rejeitado com Findings confirmados, corrigido na mesma Write Track válida e aceito por delta verification.
-
-## Valor para o Operator
-
-A Harness encontra e corrige problemas sem exigir review manual do Operator nem restart amplo da Feature.
-
-## Entry Criteria
-
-- M3 accepted;
-- stable Context Packs;
-- result tree identity;
-- deterministic runner;
-- Role isolation;
-- review target and rubric.
-
-## Capabilities
-
-- risk classification v1;
-- Review Pack;
-- cold Reviewer;
-- Finding;
-- severity;
-- anchor-or-abstain;
-- Verdict;
-- contested flow;
-- Correction Contract;
-- new Attempt;
-- same worktree reuse;
-- same Session reuse when valid;
-- delta verification;
-- anti-loop v1;
-- Reviewer telemetry.
-
-## Golden Proof
-
-Uma Feature deliberadamente defeituosa passa pelos checks locais do Writer, é rejeitada pelo Reviewer por um Finding confirmado, corrigida no mesmo Track e aceita após re-review do delta.
-
-## Exit Criteria
-
-- Reviewer não recebe Writer OM;
-- Finding possui locus e Evidence;
-- Reviewer não implementa;
-- Correction não amplia scope;
-- old Claim remains historical;
-- new tree receives new Evidence;
-- retry bounded;
-- operator not interrupted for local correction.
-
-## Non-goals
-
-- dual Review universal;
-- multiple Tracks;
-- browser QA;
-- full risk compiler;
-- model voting.
-
-## Replan Triggers
-
-- Review Findings mostly mechanical;
-- Reviewer context becomes unbounded;
-- same-worktree correction contaminates Evidence;
-- repeated false positives.
-
----
-
-# 12.15 M5 — Parallel Write Tracks and Integration
-
-## Estado
-
-```text
-PLANNED
-```
-
-## Outcome
-
-Duas Write Tracks independentes executam em paralelo, respeitam ownership e resources, e compõem um candidate verificável num workspace limpo.
-
-## Valor para o Operator
-
-O MNFS obtém concurrency real sem perder trabalho, esconder conflitos ou depender de merge manual tardio.
-
-## Entry Criteria
-
-- M4 accepted;
-- stable Claim/Correction;
-- resource declarations;
-- Integration Criteria;
-- two suitable Features.
-
-## Capabilities
-
-- write-set ownership;
-- seam ownership;
-- two Workers;
-- Environment per Track;
-- resource reservation mínimo;
-- concurrency/fencing;
-- serial Integration queue;
-- clean Integration workspace;
-- base CAS;
-- merge order;
-- conflict taxonomy;
-- composition Receipts;
-- Integration Verdict;
-- worktree preservation;
-- optional Herdr projection.
-
-## Golden Proof
-
-Duas Features disjuntas executam em paralelo, produzem Claims aceitos, integram serialmente e satisfazem um Milestone Criterion de composição.
-
-Segundo cenário:
-
-```text
-semantic conflict
-→ no automatic merge
-→ explicit return to correction/replan
-```
-
-## Exit Criteria
-
-- no write collision;
-- resources isolated or serialized;
-- accepted Track changed → stale;
-- candidate reproducible;
-- semantic conflict preserved;
-- source worktrees retained;
-- Herdr optional;
-- Milestone Criteria prove composition.
-
-## Non-goals
-
-- Worker pool;
-- scheduler;
-- parallel Integration;
-- remote Workers;
-- auto-scaling;
-- fleet UI.
-
-## Replan Triggers
-
-- resource isolation dominates implementation;
-- integration queue requires distributed coordinator;
-- two-Track proof does not generalize to the selected Repository.
-
----
-
-# 12.16 M6 — Adaptive Quality, Evidence and Live QA
-
-## Estado
-
-```text
-PLANNED
-```
-
-## Outcome
-
-MNFS compila uma Gate DAG proporcional ao risco, decide critérios com Evidence fresca, valida comportamento user-facing e fecha a hierarquia corretamente.
-
-## Valor para o Operator
-
-O resultado entregue é provado no nível de produto, não somente no nível de arquivos ou testes locais.
-
-## Entry Criteria
-
-- M5 accepted;
-- Integration candidate;
-- criteria hierarchy;
-- Environment binding;
-- one user-facing flow.
-
-## Capabilities
-
-- full Acceptance Criterion model;
-- STATIC/EXECUTABLE/LIVE/JUDGMENT;
-- Verification Plan;
-- Evidence Item;
-- complete Receipt;
-- freshness;
-- staleness;
-- adaptive Gate DAG;
-- targeted second Reviewer;
-- QA Journey;
-- browser/API adapter;
-- Evidence Bundle;
-- hierarchical closure;
-- accepted risk;
-- anti-loop v2;
-- false-completion taxonomy.
-
-## Golden Proof
-
-Uma user-facing capability atravessa múltiplos components, integra, executa QA real e fecha Feature, Milestone e Mission somente depois dos critérios próprios de cada nível.
-
-Segundo cenário:
-
-```text
-Receipt created
-→ code changes
-→ Receipt becomes stale
-→ closure is blocked
-```
-
-## Exit Criteria
-
-- no `PASS_WITH_ASSUMPTION`;
-- live seam is real;
-- parent criteria separate;
-- provenance resolves;
-- stale Evidence rejected;
-- QA failure creates Correction;
-- Bundle explains acceptance;
-- gate cost measured.
-
-## Non-goals
-
-- production deployment;
-- universal browser suite;
-- external observability backend;
-- compliance platform;
-- full credential broker.
-
-## Replan Triggers
-
-- gate stack adds no unique information;
-- QA environment is not reproducible;
-- Evidence volume becomes operationally excessive;
-- live criteria cannot be bounded.
-
----
-
-# 12.17 M7 — Credentials, External Integrations and Effects
-
-## Estado
-
-```text
-TARGET
-```
-
-## Outcome
-
-MNFS utiliza um provider sandbox ou shared non-production resource com credentials scoped e External Effect lifecycle durável.
-
-## Valor para o Operator
-
-Agentes passam a executar integrações úteis sem receber poder amplo de cloud, GitHub ou produção.
-
-## Entry Criteria
-
-- M6 accepted;
-- stable Security Environment;
-- Effect model;
-- real sandbox provider;
-- Credential Requirement defined.
-
-## Capabilities
-
-- Credential Requirement;
-- Credential Grant;
-- optional 1Password/SOPS binding;
-- workload identity design;
-- provider sandbox;
-- Network Policy;
-- Effect Request;
-- Effect Executor;
-- Effect Receipt;
-- unknown-effect Reconcile;
-- Security Violation;
-- incident flow;
-- Dev Container binding v1.
-
-## Golden Proof
-
-Um Actor solicita um efeito num provider sandbox, recebe credential temporária scoped por um executor separado, executa uma operação idempotente, registra Receipt e reconcilia um timeout simulado sem duplicar o efeito.
-
-## Exit Criteria
-
-- no secret in Packs/logs/OM;
-- no production credential for Writer;
-- correct Effect class;
-- unknown effect reconciled;
-- credential expires;
-- network enforced;
-- Evidence preserved;
-- policy violation visible.
-
-## Non-goals
-
-- production automation;
-- enterprise secret manager;
-- universal multi-cloud broker;
-- remote Workers.
-
-## Replan Triggers
-
-- provider lacks safe sandbox;
-- credential delivery requires broad host exposure;
-- Effect cannot be made observable or idempotent;
-- network policy is too permissive.
-
----
-
-# 12.18 M8 — Delivery, Closeout and Operational Proof
-
-## Estado
-
-```text
-TARGET
-```
-
-## Outcome
-
-Uma Mission aceita cria delivery artifact, passa por PR/CI, preserva Evidence e fecha com resultado operacional auditável.
-
-## Valor para o Operator
-
-O lifecycle termina em entrega verificável, não em código local aguardando trabalho manual.
-
-## Entry Criteria
-
-- M7 accepted;
-- candidate integrated;
-- delivery binding;
-- Effect Authority;
-- CI observable.
-
-## Capabilities
-
-- Delivery Gate;
-- branch/PR Effect Request;
-- optional no-mistakes adapter;
-- CI observation;
-- OIDC/workload identity when applicable;
-- failed-delivery reconcile;
-- Mission Evidence Bundle;
-- Closeout;
-- delivered SHA;
-- release notes;
-- known limitations;
-- rollback/recovery;
-- Quality Posture delta.
-
-## Golden Proof
-
-MNFS cria uma PR a partir do candidate, observa CI, processa uma falha, abre Correction, atualiza a PR e fecha a Mission somente após Evidence completa.
-
-## Exit Criteria
-
-- Effect Authority respected;
-- CI binds candidate SHA;
-- unknown state reconciled;
-- closeout covers criteria;
-- risks/Waivers included;
-- work preserved;
-- final summary accurate;
-- delivery receipt present.
-
-## Non-goals
-
-- production deployment by default;
-- all provider delivery adapters;
-- organization-wide compliance;
-- release train.
-
-## Replan Triggers
-
-- no-mistakes duplicates authority;
-- CI cannot be correlated to SHA;
-- provider API requires unsafe credentials;
-- delivery dominates core architecture.
-
----
-
-# 12.19 M9 — Observability, Evaluation and Calibration
-
-## Estado
-
-```text
-TARGET
-```
-
-## Outcome
-
-MNFS explica execuções por telemetria vendor-neutral, compara candidates em Golden Missions e altera policy através de Calibration Decisions.
-
-## Valor para o Operator
-
-A Harness passa a melhorar por Evidence, não por preferência, marketing de modelos ou intuição isolada.
-
-## Entry Criteria
-
-- M8 full flow;
-- stable Domain Events;
-- accepted Missions;
-- dataset candidates;
-- telemetry privacy policy.
-
-## Capabilities
-
-- `mnfs.*` semantic attributes;
-- OpenTelemetry;
-- OTLP;
-- AS-03;
-- Phoenix/Langfuse adapter decision;
-- Golden Missions;
-- Evaluation Result;
-- deterministic/human/LLM evaluators;
-- Experiment Run;
-- segmentation;
-- Calibration Candidate;
-- Calibration Decision;
-- shadow/canary/rollback;
-- cost/quality scorecard;
-- alert quality.
-
-## Golden Proof
-
-Executar a mesma Golden Mission sob duas configurações, comparar quality, false completion, cost e latency, aprovar candidate por Calibration Decision, aplicar em shadow/canary e fazer rollback quando um threshold de regressão for introduzido.
-
-## Exit Criteria
-
-- Domain State independent from backend;
-- raw sensitive content off;
-- reproducible experiments;
-- Evaluation ≠ Verdict;
-- no universal score;
-- evidence-backed policy;
-- rollback proven;
-- coverage explicit.
-
-## Non-goals
-
-- autonomous self-tuning;
-- individual engineer ranking;
-- mandatory SaaS;
-- enterprise DORA program;
-- raw prompt warehouse.
-
-## Replan Triggers
-
-- backend maintenance exceeds value;
-- OTel conventions unstable for required fields;
-- evaluator agreement too low;
-- datasets lack representative coverage.
-
----
-
-# 12.20 M10 — Operator Web Console and DevEx
-
-## Estado
-
-```text
-OPTION
-```
-
-## Outcome
-
-O Operator controla o lifecycle local completo por uma interface Mission-first integrada aos mesmos Application Services da CLI.
-
-## Valor para o Operator
-
-A operação se torna mais visual e acessível sem sacrificar Authority, explainability e CLI automation.
-
-## Entry Criteria
-
-- M8 accepted;
-- stable CLI JSON;
-- stable Application Services;
-- operator workflows measured;
-- UI need proven.
-
-## Capabilities
-
-- local API;
-- Mission Control;
-- Mission Workspace;
-- Decision Inbox;
-- Execution;
-- Quality/Evidence;
-- Recovery;
-- Security/Effects;
-- Engineering System;
-- Calibration Lab;
-- Audit;
-- notifications;
-- Herdr attach;
-- Lavish integration or replacement Decision.
-
-## Golden Proof
-
-O Operator conclui uma Mission pela Web Console e uma segunda client Session observa o mesmo estado via CLI, sem divergência ou frontend-owned rules.
-
-## Exit Criteria
-
-- no duplicated domain logic;
-- consistent UI/CLI state;
-- accessibility;
-- usable latency;
-- recoverable UI failure;
-- actions show Authority;
-- Evidence-first completion.
-
-## Non-goals
-
-- multi-tenant SaaS;
-- mobile app;
-- custom terminal emulator;
-- Backstage dependency;
-- frontend-only state machine.
-
-## Replan Triggers
-
-- CLI remains sufficient;
-- user research does not show value;
-- web server complicates local security;
-- Application Services are not stable.
-
----
-
-# 12.21 M11 — Multi-Repository Software Factory
-
-## Estado
-
-```text
-OPTION
-```
-
-## Outcome
-
-MNFS governa múltiplos repositories, reusable Golden Paths, ownership, documentation e Engineering Standards como produto de plataforma.
-
-## Valor
-
-A Harness evolui para Software Factory reutilizável.
-
-## Entry Criteria
-
-- multiple real Repositories;
-- repeated Profile patterns;
-- repeated Golden Paths;
-- demand from multiple users/teams;
-- local platform stable.
-
-## Capabilities
-
-- Repository Catalog;
-- ownership;
-- Profile inheritance;
-- Golden Path Catalog;
-- Software Templates;
-- scorecards;
-- documentation portal;
-- cross-repo contracts;
-- shared Standards;
-- contribution model;
-- notifications;
-- permissions;
-- AS-05.
-
-## Golden Proof
-
-Dois repositories materialmente diferentes são onboarded, usam Standards e Golden Paths compartilhados sem duplicação de configuration e entregam uma Feature cada.
-
-## Exit Criteria
-
-- platform not bottleneck;
-- contribution model works;
-- inheritance explainable;
-- repository-specific bindings preserved;
-- adoption and task success measured;
-- portal not authority.
-
-## Non-goals
-
-- universal repository ontology;
-- forced adoption;
-- enterprise marketplace;
-- remote multi-tenant compute.
-
-## Replan Triggers
-
-- only one Repository continues using MNFS;
-- inheritance becomes more complex than explicit config;
-- Backstage/custom portal has no proven customer.
-
----
-
-# 12.22 AS-04 — Remote Execution Environment
-
-## Timing
-
-```text
-before detailed M12 contract
-```
-
-## Candidates
-
-- Daytona;
-- E2B;
-- VM provider;
-- self-hosted runner.
-
-## Questions
-
-- persistent workspace;
-- Pi integration;
-- isolation;
-- credentials;
-- network;
-- snapshots;
-- cost;
-- resume;
-- filesystem;
-- observability;
-- reconcile;
-- vendor lock-in.
-
-## Output
-
-- adapter recommendation;
-- E3/E4 decision;
-- threat model;
-- cost model;
-- migration path;
-- Removal Conditions.
-
----
-
-# 12.23 M12 — Remote Execution and Cloud Control Plane
-
-## Estado
-
-```text
-OPTION
-```
-
-## Outcome
-
-MNFS executa Workers remotamente com forte isolamento e shared control-plane state, preservando as semânticas do produto local.
-
-## Valor
-
-Suporta equipes, maior concurrency e untrusted workloads sem depender de uma máquina WSL2.
-
-## Entry Criteria
-
-- local Software Factory proven;
-- scaling/security need;
-- Environment Adapter stable;
-- user/team requirements;
-- cost model;
-- AS-04.
-
-## Capabilities
-
-- remote Environment Adapter;
-- Pi SDK/RPC host;
-- PostgreSQL;
-- object storage;
-- outbox/queue;
-- workload identity;
-- E3/E4;
-- users;
-- teams;
-- tenants;
-- RBAC/capabilities;
-- audit;
-- quota;
-- cost;
-- cloud Recovery;
-- remote telemetry.
-
-## Golden Proof
-
-Dois remote Workers executam Tracks isolados, sobrevivem ao restart do control plane, integram pelo mesmo Claim/Evidence/Gate model e não acessam filesystem, credentials ou tenant state um do outro.
-
-## Exit Criteria
-
-- local/remote semantics match;
-- tenant isolation;
-- delivery/reconcile;
-- quotas;
-- cost visibility;
-- disaster recovery;
-- no local-only assumptions;
-- independent security review.
-
-## Non-goals
-
-- custom Firecracker platform;
-- all clouds;
-- unlimited autoscaling;
-- complete compliance at first release.
-
-## Replan Triggers
-
-- local product does not need scale;
-- cost does not justify remote;
-- provider semantics leak into domain;
-- security isolation cannot be proven.
-
----
-
-# 12.24 Capability Dependency Graph
-
-```text
-M0 Foundation
-        ↓
-M1 Planning
-        ↓
-AB1 Architecture Baseline
-        ↓
-AS-02 Local Sandbox
-        ↓
-M2 Secure One Worker
-        ↓
-M3 Profile + Engineering System
-        ↓
-AS-01 Session Memory
-        ↓
-M4 Review + Correction
-        ↓
-M5 Parallel + Integration
-        ↓
-M6 Quality + Live QA
-        ↓
-M7 Credentials + Effects
-        ↓
-M8 Delivery + Closeout
-        ↓
-M9 Observability + Calibration
-       ├──────────────────┐
-       ↓                  ↓
-M10 Web Console      M11 Multi-Repo Factory
-       └──────────────┬──────────────────┘
-                      ↓
-                 AS-04 Remote
-                      ↓
-                 M12 Cloud
-```
-
-M10 e M11 podem trocar de ordem.
-
-A decisão depende de:
-
-- operator demand;
-- number of repositories;
-- number of users;
-- CLI friction;
-- adoption evidence.
-
----
-
-# 12.25 Por que esta ordem
-
-## 12.25.1 M2 antes do Engineering System genérico
-
-Precisamos provar o loop físico real antes de generalizá-lo.
-
-## 12.25.2 Engineering System antes de arbitrary tasks
-
-Sem Profile e Golden Path, cada task vira prompt improvisado.
-
-## 12.25.3 Review antes de parallelism
-
-Primeiro aprender a julgar e corrigir uma Track.
-
-Depois multiplicar Writers.
-
-## 12.25.4 Parallelism antes do Quality System completo
-
-Parallelism cria um problema real de composição para o Integration Gate e Milestone Criteria.
-
-## 12.25.5 Quality antes de external effects
-
-Antes de conceder credentials e network, o Harness precisa saber verificar resultados.
-
-## 12.25.6 External Effects antes de Delivery
-
-PR, CI e deploy são External Effects especializados.
-
-## 12.25.7 Delivery antes de Calibration completa
-
-Calibration precisa observar o lifecycle completo e outcomes reais.
-
-## 12.25.8 CLI antes de Web Console
-
-A interface visual deve compor contracts estáveis, não inventá-los.
-
-## 12.25.9 Local antes de cloud
-
-Cloud amplifica:
-
-- state;
-- security;
-- cost;
-- concurrency;
-- operations.
-
-As semânticas precisam estar provadas localmente.
-
----
-
-# 12.26 Architecture Runway Policy
-
-O MNFS constrói somente a arquitetura necessária para o próximo proof.
-
-Exemplos:
-
-```text
-M2:
-Minimal Security Profile
-not full Credential Broker
-
-M3:
-Repository Profile v1
-not universal repository ontology
-
-M4:
-one Reviewer path
-not review marketplace
-
-M5:
-serial Integration queue
-not distributed scheduler
-
-M7:
-one provider sandbox
-not universal cloud adapter
-
-M9:
-optional OTLP
-not observability platform
-```
-
-## Regra
-
-Um Enabler sem consumidor no Product Milestone atual ou seguinte é candidato a deferimento.
-
----
-
-# 12.27 Product Milestone Contract
-
-Antes de iniciar cada Product Milestone, uma Mission ou conjunto de Missions precisa materializar:
-
-- Product Milestone outcome;
-- Mission hierarchy;
-- criteria at all levels;
-- proof;
-- risks;
-- non-goals;
-- architecture spikes;
-- tools;
-- Removal Conditions;
-- canonical environment;
-- docs affected.
-
-O Product Roadmap não substitui o Mission Contract.
-
----
-
-# 12.28 Entry Gate
-
-Um Product Milestone só inicia quando:
-
-- dependencies estão accepted;
-- critical Spikes foram decididos;
-- contract é satisfatível;
-- Environment existe;
-- Golden Proof é executável;
-- required tools estão disponíveis;
-- Security baseline existe;
-- documentação não contradiz o plano;
-- Operator aprova o contrato aplicável.
-
----
-
-# 12.29 Exit Gate
-
-Um Product Milestone só fecha quando:
-
-- seus próprios Acceptance Criteria são satisfeitos;
-- Golden Proof foi executado;
-- fresh Evidence existe;
-- failure drills aplicáveis passam;
-- Security/Recovery criteria passam;
-- implementation e docs correspondem;
-- ADRs estão atualizadas;
-- non-goals permaneceram fora;
-- assumptions do próximo Milestone foram reavaliadas.
-
-Merge não é Exit Gate.
-
----
-
-# 12.30 Release Strategy
-
-## 12.30.1 Pre-1.0
-
-O produto permanece pre-1.0 até possuir pelo menos:
-
-- M8 accepted;
-- end-to-end delivery;
-- Recovery;
-- Security;
-- upgrade policy;
-- one real Repository usage period.
-
-## 12.30.2 Candidate 1.0
-
-Possível definição:
-
-```text
-M0–M8 accepted
-+
-critical drills green
-+
-documentation complete
-+
-upgrade compatibility
-+
-real Repository evidence
-```
-
-M9 pode ser incluído se observability/calibration for considerada operabilidade essencial.
-
-Isso será uma Decision futura.
-
-## 12.30.3 SemVer
-
-Milestones não precisam mapear um-para-um para versions.
-
-Não prometer números agora.
-
----
-
-# 12.31 Roadmap Change Protocol
-
-Mudança de roadmap é uma Product Decision.
-
-Registra:
-
-- Evidence;
-- reason;
-- affected Product Milestones;
-- dependencies;
-- work preserved;
-- work invalidated;
-- new order;
-- confidence state;
-- risk.
-
-## Mudanças permitidas
-
-- split;
-- merge;
-- reorder;
-- defer;
-- remove;
-- add;
-- replace tool;
-- change Golden Proof.
-
-## Mudanças proibidas
-
-- alterar accepted history silenciosamente;
-- mudar outcome mantendo o mesmo nome sem Decision;
-- começar downstream sem Entry Gate;
-- adicionar ferramenta sem consumer;
-- transformar Option em Commitment sem Evidence.
-
----
-
-# 12.32 Tool Adoption Lifecycle
-
-```text
-RESEARCHED
-→ CANDIDATE
-→ SPIKE
-→ PILOT
-→ ADOPTED
-→ DEPRECATED
-→ REMOVED
-```
-
-Todo tool adotado possui:
-
-- consumer;
-- adapter;
-- exact version;
-- capability;
-- proof;
-- operational owner;
-- Removal Conditions;
-- replacement path.
-
----
-
-# 12.33 Telemetry por horizonte
-
-## H1
-
-Medir:
-
-- correctness;
-- Worker/Lead Recovery;
-- false completion;
-- operator intervention;
-- security violations;
-- latency;
-- token coverage.
-
-## H2
-
-Adicionar:
-
-- conflict rate;
-- Integration delay;
-- parallel efficiency;
-- Evidence coverage;
-- QA defects;
-- Effect unknowns;
-- delivery stability;
-- cost.
-
-## H3
-
-Adicionar:
-
-- adoption;
-- retention;
-- task success;
-- DevEx;
-- Golden Path usage;
-- cross-repo health;
-- platform cost;
-- DORA where applicable.
-
----
-
-# 12.34 Immediate Execution Sequence
-
-Após aprovação de Sections 12 e 13:
-
-```text
-1. Consolidate Product Blueprint
-2. Write canonical GitHub documents
-3. Create ADR-0004 through ADR-0012
-4. Replace docs/roadmap.md
-5. Create Documentation Map
-6. Create capability-spec backlog
-7. Preserve MIS-002 revision 3
-8. Open Replan for MIS-002
-9. Execute AS-02
-10. Approve new MIS-002 revision
-11. Begin M2 implementation
-```
-
-## Regra
-
-Não começar a implementar M2 contra revision 3 e corrigir a arquitetura “durante o caminho”.
-
-Isso recriaria drift logo após documentarmos como evitá-lo.
-
----
-
-# 12.35 Non-goals
-
-O roadmap não contém:
-
-- datas inventadas;
-- estimativas sem velocity;
-- team allocation fictícia;
-- commitment de cloud;
-- obligation de Backstage;
-- obligation de Phoenix ou Langfuse;
-- universal Standards catalog;
-- microservice plan;
-- multi-year fixed design;
-- every possible adapter;
-- every possible Golden Path;
-- automatic AI maturity level;
-- marketing maturity score.
-
----
-
-# 12.36 Invariantes do roadmap
-
-1. Roadmap é orientado a capabilities.
-2. Cada Product Milestone possui Golden Proof.
-3. Cada Product Milestone possui critérios próprios.
-4. Merge não fecha Product Milestone.
-5. M0 e M1 permanecem accepted history.
-6. MIS-002 revision 3 não é editada.
-7. M2 exige contract reconciliation.
-8. M2 não executa unrestricted Pi.
-9. Security baseline precede real Writer proof.
-10. Arbitrary tasks dependem de Repository Profile.
-11. Review precede parallelism.
-12. Parallelism possui Integration proof.
-13. Live QA precede production-oriented effects.
-14. External Effects precedem Delivery automation.
-15. Delivery precede full Calibration.
-16. CLI precede Web Console.
-17. Local semantics precedem cloud.
-18. Architecture Spike não é product delivery.
-19. Tooling passa por adoption lifecycle.
-20. Enabler possui consumer.
-21. Horizon não é data.
-22. Option não é commitment.
-23. Roadmap change é Decision.
-24. Accepted history não é reescrita.
-25. Product Milestone e Mission Milestone não são confundidos.
-26. Entry Gate precede implementation.
-27. Exit Gate exige Evidence.
-28. Non-goals são vinculantes.
-29. Future capability não dita abstração prematura.
-30. O roadmap é reavaliado após cada Product Milestone.
+# 12.13 Roadmap invariants
+
+1. Product outcomes are more stable than substrate choices.
+2. Correctness is frozen before decomposition; realization is frozen before bounded execution.
+3. Every Architecture Spike has a candidate-independent contract and deciding Evidence.
+4. Same fixture/criteria apply to compared candidates; changing the contract invalidates prior comparison runs.
+5. Product M2 cannot resume through revision-5 M02.
+6. No Agent Runtime, workspace or Environment winner exists before selecting Decision.
+7. S0 host facts are immutable Evidence; candidate eligibility is recomputed from fresh provenance.
+8. S2W is conditional, not automatic.
+9. S3 must use real selected realizations for deciding Evidence.
+10. CAP-EXECUTION/MIS-002 Replan occurs after deciding Spikes, never by mutating accepted historical versions in place.
+11. Later milestones receive detailed contracts only near execution.
+12. Exact transient execution authority lives in STATUS/Operator gates, not in this generated roadmap.
 
 ---
 
 # Decisão resumida da Seção 12
 
-> **O MNFS adota um roadmap de capacidades cumulativas e proofs, organizado em quatro horizontes. M0 e M1 permanecem aceitos. O próximo passo é o Architecture Baseline Gate AB1, seguido do AS-02 e de um M2 reconciliado e seguro. Repository Profile e Engineering System entram antes de tarefas arbitrárias; Review antes de paralelismo; paralelismo antes do Quality System completo; qualidade antes de External Effects; Delivery antes de Calibration; CLI antes de Web Console; local antes de cloud. Product Milestones possuem Entry Gate, Golden Proof, Exit Criteria e Non-goals. Architecture Spikes são decisões delimitadas, não entrega. O roadmap pode mudar por Evidence e Decision, mas nunca reescreve silenciosamente a história aceita.**
-
----
+> **M0 e M1 permanecem aceitos. M2 preserva o outcome de um Writer local seguro, recuperável e aceito por Evidence, mas sua realização está em Opportunity Replan. O caminho corrente é ARR P1 → S0 → S1/S2 → S2W somente se necessário → S3 → substrate-selection Decision → CAP-EXECUTION/MIS-002 Replan → novo M02 R5 → M2. Pi, Treehouse, fixed E1 e os antigos AB1/AS-02/AS-01 permanecem historical/incumbent Evidence, não current roadmap authority.**

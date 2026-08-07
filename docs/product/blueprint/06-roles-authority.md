@@ -23,7 +23,7 @@ tracking_issue: 6
 
 ## ARR-RECONCILIATION-2026-08-07 — Current Role and Authority rules
 
-This reconciliation block has precedence over older realization-specific wording in this section. Any conflicting tool-specific statement below is historical realization context, not current constitutional authority.
+The body below is reconciled to D-011 through D-016 and ADR-0013 through ADR-0015. Vendor-specific material is normative only when a later selecting Decision explicitly says so; sections labeled Historical / Incumbent Evidence are reference evidence, not current provider selection.
 
 Role authority belongs to MNFS identities, not runtime Sessions. Planner, Investigator, Writer, Reviewer/Validator, Integrator and QA receive role-specific compiled packs with current Authority, target, proof and effect boundaries.
 
@@ -113,8 +113,8 @@ Exemplo:
 
 ```text
 MNFS Lead role
-├── Pi session S-001
-└── Pi session S-002 após restart
+├── Runtime Session S-001
+└── Runtime Session S-002 após restart
 ```
 
 ## 6.2.4 Process
@@ -144,7 +144,7 @@ Authority e Permission não são equivalentes.
 Exemplo:
 
 ```text
-Worker possui permissão de escrever no worktree.
+Worker possui permissão de escrever apenas no isolated mutable workspace autorizado.
 Worker não possui autoridade para aceitar o próprio Claim.
 ```
 
@@ -426,7 +426,7 @@ Planner transforma intenção e evidência em proposta estruturada.
 Planner pode ser:
 
 - o próprio Lead;
-- Pi especializado;
+- Actor especializado via Agent Runtime;
 - outro modelo;
 - combinação de investigadores;
 - co-planner independente.
@@ -1204,7 +1204,7 @@ Status mostra:
 | Ação | Worker | Reviewer | Runner | Integrator | Lead | Operator |
 |---|---:|---:|---:|---:|---:|---:|
 | Ler contrato | Sim | Sim | Sim | Sim | Sim | Sim |
-| Alterar worktree | Sim | Não | Não | Só integração | Limitado | Não |
+| Alterar isolated mutable workspace | Sim | Não | Não | Só integração | Limitado | Não |
 | Criar Claim | Solicita | Não | Não | Não | Pode coordenar | Não |
 | Produzir Receipt | Não autoritativo | Não | Sim | Sim para integração | Não | Não |
 | Abrir Finding | Pode reportar | Sim | Sim mecânico | Sim | Sim | Sim |
@@ -1630,7 +1630,7 @@ Writer Worker Contract
 ├── Context Pack
 ├── Claim schema
 ├── authority policy
-├── Pi skill/template
+├── runtime skill/template
 └── process adapter
 ```
 

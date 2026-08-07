@@ -7,6 +7,7 @@ on:
       - '.mnfs/**'
       - 'policies/**'
       - 'schemas/**'
+      - 'spikes/arr-s0/**'
       - 'scripts/generate-*.mjs'
       - 'scripts/build-mis-002-replan.mjs'
       - 'scripts/sec-e1-policy.mjs'
@@ -17,6 +18,7 @@ on:
       - 'scripts/test-approved-mis-002-allocations.mjs'
       - 'scripts/test-arr-p1-blueprint-reconciliation.mjs'
       - 'scripts/test-arr-spike-contract-binding.mjs'
+      - 'scripts/run-arr-s0-tests.mjs'
       - 'README.md'
       - 'AGENTS.md'
       - 'package.json'
@@ -32,6 +34,7 @@ on:
       - '.mnfs/**'
       - 'policies/**'
       - 'schemas/**'
+      - 'spikes/arr-s0/**'
       - 'scripts/generate-*.mjs'
       - 'scripts/build-mis-002-replan.mjs'
       - 'scripts/sec-e1-policy.mjs'
@@ -42,6 +45,10 @@ on:
       - 'scripts/test-approved-mis-002-allocations.mjs'
       - 'scripts/test-arr-p1-blueprint-reconciliation.mjs'
       - 'scripts/test-arr-spike-contract-binding.mjs'
+      - 'scripts/run-arr-s0-tests.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/docs.yml'
 
 permissions:
   contents: read
@@ -56,4 +63,5 @@ jobs:
           node-version: '24.18.0'
           cache: npm
       - run: npm ci
+      - run: npm run test:arr-s0
       - run: npm run verify

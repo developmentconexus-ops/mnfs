@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.11.0
+version: 1.12.0
 owners:
   - developmentconexus-ops
 related:
@@ -42,27 +42,26 @@ M2 — Secure One-Worker Vertical Slice                   ARCHITECTURE_REASSESSM
 ```
 
 - **Canonical environment:** Ubuntu on WSL2; Windows remains the browser, terminal and desktop host.
-- **Architecture baseline:** accepted historical/current baseline merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`; it is an input to the current review, not a boundary on inquiry.
-- **M2 contract reconciliation:** merged through PR #14 at `dee12a9b53984d39045421c9586ee53665ebc5e5`.
-- **Approved Mission contract:** `MIS-002` revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`; remains authoritative until explicitly superseded.
-- **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / Operator decision `D-010`.
-- **Architecture Review decisions:** D1 approved as `D-011`; D2 approved as `D-012`; D3 approved as `D-013`; D4 Implementation Sourcing Strategy is the current decision area.
-- **Current planning container:** Issue #23 — global Architecture Realization Review.
-- **Paused prior planning container:** Issue #21 — `MIS-002/M02` R5 Milestone Microdesign; resume only after the Architecture Realization Review decides preserve/supersede/replan impact.
+- **Architecture baseline:** accepted historical/current baseline merged through PR #11 at `f28cf2b58b7f1682450399c6edb50c983fff0cc2`; it remains an input and Evidence source, not the current inquiry boundary.
+- **Approved Mission contract:** `MIS-002` revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`; authoritative until explicitly superseded.
+- **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
+- **Architecture Review decisions:** D1 `D-011`, D2 `D-012`, D3 `D-013`, D4 `D-014` — all APPROVED.
+- **Current phase:** Architecture Synthesis & Reconciliation under Issue #23.
+- **Paused prior planning container:** Issue #21 — `MIS-002/M02` R5 Milestone Microdesign.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
 ## MCRM readiness inherited by M2
 
 ```text
-R0 Baseline              HISTORICAL PASS — subject to refreshed architecture inputs
-R1 Applicability         HISTORICAL PASS — subject to refreshed architecture inputs
-R2 Requirements          HISTORICAL PASS — subject to review impact
-R3 Capability Readiness  HISTORICAL PASS — subject to review impact
+R0 Baseline              HISTORICAL PASS — requires architecture reconciliation
+R1 Applicability         HISTORICAL PASS — requires architecture reconciliation
+R2 Requirements          HISTORICAL PASS — subject to synthesis impact
+R3 Capability Readiness  HISTORICAL PASS — subject to synthesis impact
 R4 Contract Readiness    HISTORICAL PASS — revision 5 remains approved unless superseded
 M01 R5 Microdesign       PASS / ACCEPTED / CLOSED
 ```
 
-These results are not revoked. The Architecture Realization Review may determine that some R0–R4 inputs need supersession or a new Replan before M02 resumes.
+These results and their Evidence are not revoked. The synthesis decides which semantics remain current and which prior realization assumptions are superseded.
 
 ## M01 final result
 
@@ -80,24 +79,22 @@ M01 closeout:                     ACCEPTED — D-009
 M01 lifecycle status:             ACCEPTED / CLOSED
 ```
 
+M01 Evidence remains reusable where it proves provider-neutral semantics such as durable identities, fencing, recovery and Git/result lineage. It does not by itself mandate Treehouse or another physical substrate after D3.
+
 ### Residual hardening
 
 ```text
 Real R2 crash/recovery:  FOLLOW_UP_REQUIRED / NON_BLOCKING / Issue #20
 Real R3 lineage:         FOLLOW_UP_REQUIRED / NON_BLOCKING / Issue #20
-Destination:             before Product Milestone M2 exit (MCRM R7/R8),
-                         or earlier if the selected next architecture exposes a concrete dependency
+Destination:             before Product Milestone M2 exit,
+                         or earlier if the synthesized architecture exposes a concrete dependency
 ```
 
-R2/R3 are **not claimed as PASS**. Operator decision `D-009` classifies them as supplemental real-environment hardening rather than the sole proof of any M01 deciding criterion.
-
-## Development governance clarification
-
-Operator decision `D-010` separates MNFS development into:
+## Development governance
 
 ```text
 Discovery Loop
-→ challenge assumptions and search the global candidate space
+→ challenge assumptions and search globally
 
 Decision Loop
 → compare, falsify and explicitly preserve/supersede/replan
@@ -106,19 +103,7 @@ Execution Loop
 → implement only under frozen accepted authority
 ```
 
-Current accepted documents remain authority for bounded execution until superseded, but they are not the boundary of architecture inquiry.
-
-Replan may be:
-
-```text
-Necessity Replan
-→ current plan cannot satisfy the outcome
-
-Opportunity Replan
-→ current plan could work, but stronger Evidence supports a materially better architecture
-```
-
-Sunk cost is migration cost, not architectural justification.
+Replan may be by necessity or by opportunity. Sunk cost is migration cost, not architectural justification.
 
 ## Architecture Realization Review progress
 
@@ -126,46 +111,48 @@ Sunk cost is migration cost, not architectural justification.
 D1 — Planning and validation semantics          APPROVED — D-011
 D2 — Agent runtime and session/control strategy APPROVED — D-012
 D3 — Execution Environment architecture         APPROVED — D-013
-D4 — Implementation sourcing strategy           IN REVIEW
+D4 — Implementation sourcing strategy           APPROVED — D-014
+Architecture Synthesis & Reconciliation          IN REVIEW
 ```
 
-D1–D3 approve semantic/boundary direction only. They do not select a production Agent Runtime or Execution Environment substrate and do not authorize Worker dispatch.
+Approved synthesis direction so far:
+
+```text
+Thin Sovereign Semantic Kernel
++
+Selective Open Substrates
+```
+
+No concrete Agent Runtime or Execution Environment substrate has yet been selected.
 
 ## Current authorization boundary
 
 ```text
-M01 implementation / closeout:        ACCEPTED / CLOSED
-M01 R2/R3 hardening:                   FOLLOW_UP_REQUIRED under Issue #20
-Architecture Discovery / Decision:     AUTHORIZED under Issue #23 / D-010
-D4 Implementation Sourcing Review:     CURRENT
-M02 R5 microdesign as next gate:       PAUSED pending Architecture Realization Review
-M02 production implementation:        PROHIBITED
-Production Worker dispatch:            PROHIBITED
-Automatic delivery / merge:            NOT AUTHORIZED by this status
+M01 implementation / closeout:             ACCEPTED / CLOSED
+M01 R2/R3 hardening:                        FOLLOW_UP_REQUIRED under Issue #20
+D1–D4 architecture decisions:               APPROVED
+Architecture Synthesis & Reconciliation:    CURRENT under Issue #23
+Architecture Spike design:                  AUTHORIZED
+Architecture Spike execution:               requires exact gate produced by synthesis
+M02 R5 microdesign as next gate:            PAUSED
+M02 production implementation:              PROHIBITED
+Production Worker dispatch:                 PROHIBITED
+Automatic delivery / merge:                 NOT AUTHORIZED
 ```
 
 ## Immediate next action
 
-Complete D4 — Implementation Sourcing Strategy for the global Architecture Realization Review.
+Perform the cross-decision Architecture Synthesis & Reconciliation.
 
-D4 must classify each material capability as:
+It must produce:
 
-```text
-OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT
-```
+1. one coherent canonical target architecture;
+2. end-to-end lifecycle and trust boundaries;
+3. capability ownership / sourcing map;
+4. exact `PRESERVE / SUPERSEDE / REPLAN` disposition for Blueprint, ADRs, Roadmap, CAP-EXECUTION and MIS-002;
+5. reusable versus realization-specific interpretation of M01/AS-02 Evidence;
+6. bounded deciding Architecture Spikes and their order;
+7. exact gate that authorizes those spikes;
+8. exact post-spike path back to M2/M02.
 
-and explicitly test:
-
-- authority/state duplication;
-- unnecessary custom infrastructure;
-- sovereignty and license/lock-in;
-- maintenance tail;
-- named current consumer;
-- integration cost versus machinery eliminated;
-- proofability in the canonical environment;
-- removal/replacement path;
-- speculative abstractions.
-
-After D4 is approved, perform the cross-decision architecture synthesis and produce exact `PRESERVE / SUPERSEDE / REPLAN` impact on Blueprint, ADRs, Roadmap, CAP-EXECUTION and MIS-002 plus the bounded Architecture Spikes and next execution gate.
-
-Do not implement M02 until those decisions are reconciled and a new exact execution gate is issued.
+Do not resume M02 implementation until synthesis, reconciliation and deciding spikes have produced new accepted authority.

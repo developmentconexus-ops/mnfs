@@ -49,7 +49,6 @@ export function parseExecutionAuthorizationToken(token, expected) {
     baseCommitSha,
     contractHash,
     verificationRunId,
-    operatorToken: token,
     tokenHash: sha256Bytes(Buffer.from(token, 'utf8')),
   };
 }

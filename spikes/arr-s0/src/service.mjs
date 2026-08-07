@@ -11,7 +11,7 @@ import { deriveCapabilityClasses } from './class-eligibility.mjs';
 import { S0_CAPABILITY_IDS } from './contract.mjs';
 import { createInitialRunState, transitionRunState } from './model.mjs';
 import { requireRunId, resolveS0RunRoot, resolveS0StateRoot } from './paths.mjs';
-import { observeHostIdentity } from './probes/host-identity.mjs';
+import { observeFilesystemOwnership, observeHostIdentity } from './probes/host-identity.mjs';
 import { observeRepositoryIdentity } from './probes/repository.mjs';
 import { deriveS0Verdict } from './verdict.mjs';
 
@@ -34,9 +34,10 @@ function isLinuxOwnedAbsolute(value) {
   return normalized !== '/mnt' && !normalized.startsWith(`/mnt${path.sep}`);
 }
 
-async function defaultInspect({ repoRoot }) {
+async function defaultInspect({ repoRoot, stateRoot }) {
   let host;
   let repository;
+  let stateRootFilesystem;
   let requiredReadsAvailable = true;
   try {
     host = await observeHostIdentity({ repoRoot });
@@ -49,6 +50,11 @@ async function defaultInspect({ repoRoot }) {
   } catch {
     repository = { source: null, clean: false };
   }
+  try {
+    stateRootFilesystem = await observeFilesystemOwnership(stateRoot);
+  } catch {
+    stateRootFilesystem = { state: 'UNKNOWN', filesystemType: '', observedPath: null };
+  }
   for (const target of ['/proc/sys/kernel/osrelease', '/etc/os-release']) {
     try { await access(target, constants.R_OK); } catch { requiredReadsAvailable = false; }
   }
@@ -56,6 +62,8 @@ async function defaultInspect({ repoRoot }) {
   return {
     hostIdentity: host.identity,
     linuxFilesystemSupported: linuxFs?.state === 'SUPPORTED',
+    stateRootFilesystem,
+    stateRootFilesystemSupported: stateRootFilesystem?.state === 'SUPPORTED',
     repository,
     requiredReadsAvailable,
   };
@@ -90,7 +98,8 @@ export async function preflightS0({ repoRoot = process.cwd(), stateRoot, inspect
     { id: 'canonicalWsl2', ok: facts?.hostIdentity?.isWsl2 === true, rationale: 'canonical host must be WSL2' },
     { id: 'repoRootLinuxOwned', ok: isLinuxOwnedAbsolute(repoRoot), rationale: 'repository must be on a Linux-owned absolute path' },
     { id: 'stateRootLinuxOwned', ok: isLinuxOwnedAbsolute(resolvedStateRoot), rationale: 'state root must be on a Linux-owned absolute path' },
-    { id: 'linuxFilesystem', ok: facts?.linuxFilesystemSupported === true, rationale: 'repository filesystem must be Linux-owned' },
+    { id: 'linuxFilesystem', ok: facts?.linuxFilesystemSupported === true, rationale: 'repository filesystem must be on the reviewed Linux-owned allowlist' },
+    { id: 'stateRootFilesystem', ok: facts?.stateRootFilesystemSupported === true, rationale: 'state-root filesystem must be on the reviewed Linux-owned allowlist' },
     { id: 'repositoryIdentity', ok: Boolean(facts?.repository?.source?.commitSha && facts?.repository?.source?.treeSha), rationale: 'exact Git source identity is required' },
     { id: 'checkoutClean', ok: facts?.repository?.clean === true, rationale: 'checkout must be clean' },
     { id: 'nodeVersion', ok: nodeVersionAtLeast(facts?.hostIdentity?.nodeVersion), rationale: 'Node.js >=24.18.0 is required' },

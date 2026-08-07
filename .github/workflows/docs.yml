@@ -66,24 +66,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build --silent
-      - name: Documentation tooling regression
-        run: node scripts/test-documentation-tooling.mjs
-        continue-on-error: true
-      - name: MIS-002 replan builder regression
-        run: node scripts/test-mis-002-replan-builder.mjs
-        continue-on-error: true
-      - name: Approved allocation regression
-        run: node scripts/test-approved-mis-002-allocations.mjs
-        continue-on-error: true
-      - name: P1 blueprint reconciliation regression
-        run: node scripts/test-arr-p1-blueprint-reconciliation.mjs
-        continue-on-error: true
-      - name: Spike contract binding regression
-        run: node scripts/test-arr-spike-contract-binding.mjs
-        continue-on-error: true
-      - name: ARR-S0 contract consistency regression
-        run: node scripts/test-arr-s0-contract-consistency.mjs
-        continue-on-error: true
-      - name: Documentation validator
-        run: node scripts/validate-docs.mjs
-        continue-on-error: true
+      - name: Prepared docs wrapper only
+        run: npm run docs:test:prepared

@@ -5,7 +5,7 @@ document_type: implementation_plan
 form: how_to
 authority: guidance
 status: proposed
-version: 0.1.0
+version: 0.2.0
 owners:
   - developmentconexus-ops
 related:
@@ -171,6 +171,8 @@ git commit -m "docs: align MCRM with agent execution planning"
 - Modify: `docs/adr/0006-security-planes-and-local-execution-isolation.md`
 - Modify: `docs/adr/0008-reproducible-and-remote-execution-environments.md`
 - Modify: `docs/adr/README.md`
+- Test/validate: `scripts/test-documentation-tooling.mjs`
+- Test/validate: `scripts/validate-docs.mjs`
 
 **Interfaces:**
 - Consumes: D-012, D-013, D-015.
@@ -223,19 +225,20 @@ Concrete local envelope selection requires ARR-S0/S2 Evidence.
 
 - [ ] **Step 5: Mark predecessor ADRs superseded without deleting historical decision text**
 
-Set their metadata/status and reciprocal `superseded_by` fields. Do not rewrite the old Decision body to match the new architecture.
+Set metadata `status: superseded`, add reciprocal `superseded_by`, and update the visible ADR status line. Do not rewrite the historical Decision/Context body to pretend the old choice was never made.
 
 - [ ] **Step 6: Validate**
 
 ```bash
+npm run docs:test
 npm run docs:check
 ```
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add docs/adr
- git commit -m "docs: supersede tool-specific runtime and environment ADRs"
+git add docs/adr scripts/test-documentation-tooling.mjs
+git commit -m "docs: supersede tool-specific runtime and environment ADRs"
 ```
 
 **Termination:**
@@ -260,10 +263,11 @@ git add docs/adr
 - Modify: `docs/product/blueprint/12-capability-roadmap.md`
 - Modify: `docs/product/blueprint/13-documentation-governance.md`
 - Regenerate: `docs/product/PRODUCT-BLUEPRINT.md`
+- Test: `scripts/test-documentation-tooling.mjs`
 
 **Interfaces:**
 - Consumes: D-011 through D-016 and ADR-0013..0015.
-- Produces: constitutional architecture that no longer names Pi/Treehouse/E0-E4 as the product semantics while intentionally leaving concrete S1/S2 winners open.
+- Produces: constitutional architecture that no longer names Pi/Treehouse/E0-E4 as product semantics while intentionally leaving concrete S1/S2 winners open.
 
 **Write boundary:** Blueprint/doc sources only. Do not change `CAP-EXECUTION` 0.1.0 or `.mnfs/missions/MIS-002/plan.json`.
 
@@ -303,7 +307,7 @@ Intent → Investigation → Validation Baseline → adversarial review
 
 - [ ] **Step 6: Update quality/recovery/context**
 
-`07`, `08`, `09` must preserve Claim/Receipt/Finding/Verdict, fresh recovery without transcript, eager authority + lazy optional context, `HANDOFF_REQUIRED`, and hierarchical validation.
+`07-quality-evidence.md`, `08-state-recovery.md`, `09-context-memory.md` must preserve Claim/Receipt/Finding/Verdict, fresh recovery without transcript, eager authority + lazy optional context, `HANDOFF_REQUIRED`, and hierarchical validation.
 
 - [ ] **Step 7: Update roadmap/documentation governance text without selecting candidates**
 
@@ -325,19 +329,25 @@ git commit -m "docs: reconcile product blueprint with D-011 through D-016"
 
 ---
 
-### Task A4: Reconcile roadmap, documentation map, AGENTS and tooling projection
+### Task A4: Reconcile roadmap generator, documentation map, AGENTS and tooling projection
 
 **Files:**
-- Modify: `docs/roadmap.md` source if generated from another source as indicated by existing tooling; otherwise modify its canonical source only.
+- Modify: `scripts/generate-roadmap.mjs`
+- Regenerate: `docs/roadmap.md`
 - Modify: `docs/DOCUMENTATION-MAP.md`
 - Modify: `AGENTS.md`
 - Modify only if needed for consistency: `docs/tooling-adoption.md`
-- Update generated projections through existing generators.
+- Test: `scripts/test-documentation-tooling.mjs`
 
 **Interfaces:**
-- Produces: a fresh-session read path that leads to D-016 and this plan rather than Issue #21/M02 rev5.
+- Consumes: canonical roadmap source `docs/product/blueprint/12-capability-roadmap.md` from Task A3.
+- Produces: generated roadmap metadata/current-gate text and a fresh-session read path that lead to D-016 + this program rather than Issue #21/M02 rev5.
 
-- [ ] **Step 1: Update read order/current gate**
+- [ ] **Step 1: Update generated roadmap framing**
+
+`generate-roadmap.mjs` currently hard-codes the historical Architecture Baseline gate. Change its generated metadata/framing so the projection describes the current Opportunity-Replan/ARR path while continuing to copy roadmap body from Blueprint Section 12.
+
+- [ ] **Step 2: Update read order/current gate**
 
 A fresh Actor must encounter:
 
@@ -351,31 +361,23 @@ Development Governance
 
 before any superseded M02 implementation plan.
 
-- [ ] **Step 2: Update Product Roadmap active M2 path**
-
-Represent:
-
-```text
-reconciliation → S0 → S1/S2 → conditional S2W → S3
-→ substrate decision → CAP-EXECUTION/MIS-002 Replan → new M02 R5
-```
-
 - [ ] **Step 3: Confirm tooling registry remains projection-only**
 
 Pi/Treehouse/Sandbox Runtime remain incumbents/Evidence where applicable, not selected current architecture.
 
-- [ ] **Step 4: Verify**
+- [ ] **Step 4: Regenerate and verify**
 
 ```bash
 npm run docs:generate
+npm run docs:test
 npm run docs:check
 ```
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add AGENTS.md docs/DOCUMENTATION-MAP.md docs/roadmap.md docs/tooling-adoption.md docs/product
- git commit -m "docs: make ARR planning the canonical M2 path"
+git add AGENTS.md scripts/generate-roadmap.mjs docs/DOCUMENTATION-MAP.md docs/roadmap.md docs/tooling-adoption.md
+git commit -m "docs: make ARR planning the canonical M2 path"
 ```
 
 ---
@@ -456,8 +458,8 @@ npm run docs:check
 - [ ] **Step 6: Commit**
 
 ```bash
-git add schemas/architecture-spike-evidence.schema.json docs/spikes scripts
- git commit -m "feat: define architecture spike evidence contract"
+git add schemas/architecture-spike-evidence.schema.json docs/spikes scripts/validate-docs.mjs scripts/test-documentation-tooling.mjs
+git commit -m "feat: define architecture spike evidence contract"
 ```
 
 ---
@@ -475,22 +477,22 @@ git add schemas/architecture-spike-evidence.schema.json docs/spikes scripts
 - S0 plan exact version/hash approved;
 - Operator authorization names base SHA, plan version and S0 contract version.
 
-**Output:** accepted or rejected S0 Evidence plus a Host Capability Decision that classifies candidate eligibility without selecting a runtime/environment winner.
+**Output:** accepted or rejected S0 Evidence plus a Host Capability Decision that classifies the observed host properties without selecting a runtime/environment winner.
 
-**No later phase may infer eligibility from prior conversation; consume the promoted S0 Evidence.**
+No later phase may infer host capability from prior conversation; consume the promoted S0 Evidence.
 
 ---
 
 ## Phase D — ARR-S1 Agent Runtime
 
-### Task D1: Freeze the S1 Validation Contract after S0, then write a dedicated S1 implementation plan
+### Task D1: Freeze the S1 Validation Contract after S0, then write the dedicated S1 implementation plan
 
 **Files to create after S0:**
-- `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md`
-- `docs/superpowers/plans/<date>-arr-s1-agent-runtime-conformance.md`
-- later spike harness under `spikes/arr-s1/`
+- Create: `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md`
+- Create: `docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md`
+- Later implementation root: `spikes/arr-s1/`
 
-**Inputs:** D-012, D-014, D-016, accepted S0 Evidence, current runtime source/provenance research.
+**Inputs:** D-012, D-014, D-016, accepted S0 Evidence, refreshed primary-source runtime provenance research performed when S1 is frozen.
 
 **Candidate-independent criteria that MUST remain in S1:**
 
@@ -514,9 +516,9 @@ MNFS machinery and maintenance eliminated vs added
 
 1. Pi incumbent through a supported public SDK/RPC/process boundary, without inheriting uncontrolled host environment.
 2. ACP path with OpenCode native ACP.
-3. At least one second real ACP implementation before ACP interoperability can PASS; Pi-ACP or Goose is eligible only if current provenance/support satisfies D-014 at plan-freeze time.
+3. At least one second real ACP implementation before ACP interoperability can PASS; Pi-ACP or Goose is eligible only if refreshed provenance/support satisfies D-014 when the S1 plan is frozen.
 
-**Planning rule:** the dedicated S1 plan must pin exact candidate versions/commits and public API docs immediately before execution. It must not copy versions from this master plan if upstream has changed.
+**Planning rule:** the dedicated S1 plan pins exact candidate versions/commits and primary documentation immediately before execution. It must not reuse stale candidate provenance merely because it appears in historical research.
 
 **Decision output:**
 
@@ -534,12 +536,12 @@ No generic `AgentRuntimeProvider` framework is authorized by S1 selection alone.
 
 ## Phase E — ARR-S2 Local Execution Envelope
 
-### Task E1: Freeze the S2 Validation Contract after S0, then write a dedicated S2 implementation plan
+### Task E1: Freeze the S2 Validation Contract after S0, then write the dedicated S2 implementation plan
 
 **Files to create after S0:**
-- `docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md`
-- `docs/superpowers/plans/<date>-arr-s2-execution-envelope-conformance.md`
-- later harness under `spikes/arr-s2/`
+- Create: `docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md`
+- Create: `docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md`
+- Later implementation root: `spikes/arr-s2/`
 
 **Candidate-independent criteria:**
 
@@ -563,14 +565,14 @@ startup, disk, repeat-run and maintenance cost
 **Candidate classes:**
 
 - process incumbent: accepted Anthropic Sandbox Runtime realization;
-- process challenger: `nono` if S0 supports its prerequisites;
-- Sandlock only if S0 proves its host prerequisites and it can materially alter the process-class decision;
-- microVM challenger: BoxLite if S0 proves KVM/platform prerequisites;
-- microVM challenger: `smol-machines/smolvm` if S0 proves prerequisites.
+- process challenger: `nono` if S0 supports its required host properties;
+- Sandlock only if S0 + refreshed upstream requirements show it can materially alter the process-class decision;
+- microVM challenger: BoxLite if S0 proves required KVM/platform properties;
+- microVM challenger: `smol-machines/smolvm` if S0 + refreshed upstream requirements prove the canonical WSL2 execution path is eligible.
 
-Do not execute a candidate that S0 classifies `BLOCKED_BY_HOST` unless a separate Decision authorizes host modification and all comparison fairness rules are updated.
+Do not execute a candidate that S0/fresh provenance classifies `BLOCKED_BY_HOST` unless a separate Decision authorizes host modification and all comparison fairness rules are updated.
 
-**Decision output:** select one concrete local envelope class/realization or block for new evidence. Whole-agent vs control-side placement is selected only if the S1/S2 combined evidence proves the required capability/credential boundary.
+**Decision output:** select one concrete local envelope class/realization or block for new Evidence. Whole-agent vs control-side placement is selected only if S1/S2 combined Evidence proves the required capability/credential boundary.
 
 ---
 
@@ -580,7 +582,7 @@ Do not execute a candidate that S0 classifies `BLOCKED_BY_HOST` unless a separat
 
 **Input:** accepted S2 Decision.
 
-Create S2W only when the selected envelope lacks an economically sufficient private mutable workspace/result-extraction mechanism.
+Create `docs/spikes/ARR-S2W-WORKSPACE-CONTRACT.md` and `docs/superpowers/plans/2026-08-07-arr-s2w-workspace-conformance.md` only when the selected envelope lacks an economically sufficient private mutable workspace/result-extraction mechanism.
 
 If NOT_APPLICABLE, record exact rationale:
 
@@ -590,10 +592,10 @@ Git result extraction is sufficient
 additional workspace manager would duplicate lifecycle/maintenance
 ```
 
-If APPLICABLE, dedicated plan compares only candidates that can still alter the decision, normally:
+If APPLICABLE, the dedicated plan compares only candidates that can still alter the decision, normally:
 
 - current Treehouse/native Git worktree mechanics as incumbent/control;
-- VFS/AgentFS-style COW only if it eliminates meaningful remaining machinery.
+- VFS/AgentFS-style COW only if refreshed provenance shows it eliminates meaningful remaining machinery.
 
 Do not stack Treehouse + VFS by default.
 
@@ -604,9 +606,9 @@ Do not stack Treehouse + VFS by default.
 ### Task G1: Freeze S3 only after S1, S2 and any S2W Decision are accepted
 
 **Files to create later:**
-- `docs/spikes/ARR-S3-VERTICAL-COMPOSITION-CONTRACT.md`
-- `docs/superpowers/plans/<date>-arr-s3-vertical-composition.md`
-- harness under `spikes/arr-s3/` or production-adjacent test location selected by the S3 design.
+- Create: `docs/spikes/ARR-S3-VERTICAL-COMPOSITION-CONTRACT.md`
+- Create: `docs/superpowers/plans/2026-08-07-arr-s3-vertical-composition.md`
+- Later harness root: `spikes/arr-s3/` or a production-adjacent test location explicitly selected by the S3 design.
 
 **Required flow:**
 
@@ -639,12 +641,13 @@ accepted fixed Spike contract
 
 ## Phase H — Post-S3 authority reconciliation
 
-### Task H1: Select substrates and supersede realization-specific authority
+### Task H1: Select substrates and publish exact realization authority
 
 **Files:**
-- Decision register and new selecting ADR(s) if the selected substrate is architectural enough to warrant an ADR.
-- `docs/tooling-adoption.md` projection.
-- exact source manifests/provenance Evidence.
+- Modify: `docs/tracking/DECISIONS.md`
+- Create selecting ADR(s) only when the selected substrate/boundary is architectural enough to require durable decision authority.
+- Modify: `docs/tooling-adoption.md` projection.
+- Add exact source/provenance Evidence referenced by the Decision.
 
 Record:
 
@@ -667,7 +670,9 @@ No candidate becomes foundational merely because it won one benchmark dimension;
 
 **Files:**
 - Modify/supersede according to documentation lifecycle: `docs/capabilities/CAP-EXECUTION/SPEC.md`
-- Modify: `TRACEABILITY.json`, `APPLICABILITY.md`, generated `COVERAGE.md`
+- Modify: `docs/capabilities/CAP-EXECUTION/TRACEABILITY.json`
+- Modify: `docs/capabilities/CAP-EXECUTION/APPLICABILITY.md`
+- Regenerate: `docs/capabilities/CAP-EXECUTION/COVERAGE.md`
 - Add acceptance/review artifacts required by MCRM.
 
 Preserve provider-neutral requirements from 0.1.0 where still valid; replace Pi/Treehouse/fixed-E1 wording with selected realization bindings only where a concrete binding is required.
@@ -692,7 +697,7 @@ Only after the new contract, R0-R5 approval and a separate implementation-plan g
 ## Program review gates
 
 ```text
-GATE-P0  This master plan + ARR-S0 plan approved
+GATE-P0  Master plan + ARR-S0 plan approved
           → authorizes no execution by itself
 
 GATE-R   Pre-Spike semantic reconciliation accepted
@@ -718,19 +723,18 @@ No lower gate implies a higher one.
 
 ## Plan self-review checklist
 
-Before this plan may be approved:
-
 - [ ] Every D-011..D-016 Decision has at least one explicit task/constraint consumer.
 - [ ] Historical M0/M1/M01/MIS-002 rev5/CAP-EXECUTION 0.1.0 preservation is explicit.
 - [ ] No concrete S1/S2 winner is selected in advance.
-- [ ] S0 is the only fully executable Spike plan frozen before host evidence.
+- [ ] S0 is the only fully executable Spike plan frozen before host Evidence.
 - [ ] S1/S2 candidate-independent deciding criteria are explicit.
+- [ ] Future candidate provenance is explicitly refreshed when each plan is frozen.
 - [ ] S2W is conditional rather than automatic.
 - [ ] S3 requires real selected substrates and fresh recovery.
-- [ ] No placeholder such as TBD/TODO determines implementation behavior.
-- [ ] Every future unresolved detail is represented as a preceding Evidence/Decision dependency, not vague prose.
+- [ ] Every future unresolved detail is represented as a preceding Evidence/Decision dependency, not vague implementation prose.
+- [ ] Roadmap projection is regenerated from Blueprint Section 12 and its generator framing is updated explicitly.
 - [ ] Plan approval cannot be misread as Spike execution authority.
 
 ## Execution handoff
 
-After this master plan and the dedicated ARR-S0 plan are approved, the next action is **not** “start all Spikes”. The next action is to issue the exact `GATE-S0` Operator authorization bound to the approved plan versions and canonical base SHA, then execute ARR-S0 only.
+After this master plan and the dedicated ARR-S0 plan are approved, the next action is **not** “start all Spikes”. First perform/accept the pre-Spike reconciliation under its approved gate. Then issue the exact `GATE-S0` Operator authorization bound to the approved plan versions and canonical base SHA, and execute ARR-S0 only.

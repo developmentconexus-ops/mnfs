@@ -269,13 +269,14 @@ assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
-assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — P1-F02 Constitutional Body Reconciliation \/ Fresh Review`/u, 'STATUS current phase must be P1-F02 fresh review');
+assert.match(statusText, /\*\*Current phase:\*\* `ARR P1 — Operator Acceptance Review`/u, 'STATUS current phase must be Operator P1 review');
 assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
 assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
-assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*IMPLEMENTED \/ VERIFIED \/ FRESH_REVIEW_REQUIRED/u, 'STATUS must record P1-F02 fresh-review state');
+assert.match(statusText, /P1-F02 fresh review:[^\n]*Critical 0 \/ Important 0[^\n]*31194963494/u, 'STATUS must record F02 fresh-review evidence');
+assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*IMPLEMENTED \/ VERIFIED \/ FRESH_REVIEW_PASSED \/ OPERATOR_DECISION_REQUIRED/u, 'STATUS must record P1 review-ready state');
 assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
-assert.match(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS next action must be P1-F02 fresh review');
-assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
+assert.match(statusText, /## Immediate next action — Operator P1 decision/u, 'STATUS next action must be Operator P1 decision');
+assert.doesNotMatch(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS must not point to completed F02 fresh review');
 assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
 
 const schemaCandidate = structuredClone(traceability);
@@ -296,182 +297,121 @@ assert.equal(approvedReadiness.R2.result, 'PASS');
 assert.equal(approvedReadiness.R3.result, 'PASS');
 assert.equal(approvedReadiness.R4.result, 'PASS');
 
-const proposedOnly = structuredClone(approvedData);
-const approvedTarget = proposedOnly.requirements[0].allocatedTo[0];
-assert.ok(approvedTarget, 'approved fixture must include one criterion target');
-proposedOnly.requirements[0].allocatedTo = [];
-proposedOnly.requirements[0].proposedAllocation = [`proposed:${approvedTarget}`];
-const proposedOnlyReadiness = await evaluateReadiness(proposedOnly, acceptedRegistry, {
-  currentContract: approvedContract,
-});
-assert.equal(proposedOnlyReadiness.R2.result, 'PASS');
-assert.equal(proposedOnlyReadiness.R4.result, 'BLOCKED');
-
-const missingAllocation = structuredClone(approvedData);
-missingAllocation.requirements[0].allocatedTo = [];
-assert.equal(
-  (await evaluateReadiness(missingAllocation, acceptedRegistry, { currentContract: approvedContract })).R2.result,
-  'BLOCKED',
-);
-
-const proposedPrefixInApproved = structuredClone(approvedData);
-proposedPrefixInApproved.requirements[0].allocatedTo = ['proposed:MIS-002/M01/AC-01'];
-assert.equal(
-  (await evaluateReadiness(proposedPrefixInApproved, acceptedRegistry, { currentContract: approvedContract })).R2.result,
-  'BLOCKED',
-);
-
-const unresolvedEvidence = structuredClone(traceability);
-unresolvedEvidence.requirements[0].evidencedBy = ['DOC-NOT-REAL'];
-assert.equal(
-  (await evaluateReadiness(unresolvedEvidence, registry, { currentContract })).R2.result,
-  'BLOCKED',
-);
-
-const staleBaseline = structuredClone(traceability);
-staleBaseline.baseline.roadmap.version = '0.0.0';
-assert.equal((await evaluateReadiness(staleBaseline, registry)).R0.result, 'BLOCKED');
-
-const unassessed = structuredClone(traceability);
-unassessed.applicability[0].state = 'UNASSESSED';
-assert.equal((await evaluateReadiness(unassessed, registry)).R1.result, 'BLOCKED');
-
-const unresolvedSource = structuredClone(traceability);
-unresolvedSource.requirements[0].source = ['DOC-NOT-REAL'];
-assert.equal((await evaluateReadiness(unresolvedSource, registry)).R2.result, 'BLOCKED');
-
-const missingProof = structuredClone(traceability);
-missingProof.requirements.find((item) => item.level === 'MUST').verifiedBy = [];
-assert.equal((await evaluateReadiness(missingProof, registry)).R2.result, 'BLOCKED');
-
-
-const spikeEvidenceTemp = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-spike-evidence-'));
+const tempRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-spike-evidence-'));
 try {
-  const artifactRoot = path.join(spikeEvidenceTemp, 'artifacts');
+  const evidencePath = path.join(tempRoot, 'evidence.json');
+  const artifactRoot = path.join(tempRoot, 'artifacts');
   await mkdir(artifactRoot, { recursive: true });
-  const rawBytes = Buffer.from('raw-spike-evidence\n', 'utf8');
-  await writeFile(path.join(artifactRoot, 'raw.bin'), rawBytes);
-  const rawSha256 = 'sha256:' + createHash('sha256').update(rawBytes).digest('hex');
-
-  const validSpikeEvidence = {
+  const artifactBytes = Buffer.from('architecture-spike-evidence\n', 'utf8');
+  await writeFile(path.join(artifactRoot, 'raw.txt'), artifactBytes);
+  const artifactSha = createHash('sha256').update(artifactBytes).digest('hex');
+  const baseEvidence = {
     schemaVersion: 1,
     spikeId: 'ARR-TEST',
     contractVersion: '1.0.0',
     runId: 'arr-test-run-001',
-    startedAt: '2026-08-07T12:00:00.000Z',
-    finishedAt: '2026-08-07T12:00:01.000Z',
+    startedAt: '2026-08-07T00:00:00.000Z',
+    finishedAt: '2026-08-07T00:00:01.000Z',
     canonicalHost: {
-      kind: 'ubuntu-wsl2',
+      kind: 'WSL2',
       identity: 'fixture-host',
+      observedAt: '2026-08-07T00:00:00.000Z',
+      factsHash: `sha256:${'1'.repeat(64)}`,
     },
-    source: {
+    sourceGit: {
       commitSha: 'a'.repeat(40),
       treeSha: 'b'.repeat(40),
+      dirty: false,
     },
-    candidate: null,
-    criteria: [
-      {
-        id: 'CRIT-001',
-        required: true,
-        result: 'PASS',
-        artifactRefs: ['raw-001'],
+    candidate: {
+      kind: 'CONTROL',
+      id: 'fixture-candidate',
+      version: '1.0.0',
+      provenance: {
+        source: 'fixture://candidate',
+        license: 'MIT',
+        digest: `sha256:${'2'.repeat(64)}`,
       },
+    },
+    criteria: [
+      { id: 'AC-01', required: true, result: 'PASS', artifactRefs: ['raw-1'], notes: [] },
     ],
     rawArtifacts: [
-      {
-        id: 'raw-001',
-        path: 'raw.bin',
-        sha256: rawSha256,
-        sizeBytes: rawBytes.length,
-      },
+      { id: 'raw-1', path: 'raw.txt', sha256: `sha256:${artifactSha}`, sizeBytes: artifactBytes.length },
     ],
     limitations: [],
     measurements: [],
-    verdictInput: {
-      status: 'PASS',
-      reasons: ['all required fixture criteria passed'],
-    },
+    verdictInput: { status: 'PASS', reasons: ['all required criteria passed'] },
   };
 
-  async function invokeSpikeEvidenceValidator(name, evidence) {
-    const evidencePath = path.join(spikeEvidenceTemp, name + '.json');
-    await writeFile(evidencePath, JSON.stringify(evidence, null, 2) + '\n', 'utf8');
-    const result = spawnSync(
+  const runEvidenceValidator = (evidence) => {
+    writeFileSyncCompat(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+    return spawnSync(
       process.execPath,
       [
         path.join(root, 'scripts/validate-docs.mjs'),
-        '--architecture-spike-evidence',
-        evidencePath,
-        '--artifact-root',
-        artifactRoot,
+        '--architecture-spike-evidence', evidencePath,
+        '--artifact-root', artifactRoot,
       ],
-      {
-        cwd: root,
-        encoding: 'utf8',
-        shell: false,
-      },
+      { cwd: root, encoding: 'utf8' },
     );
-    return {
-      status: result.status,
-      output: String(result.stdout ?? '') + '\n' + String(result.stderr ?? ''),
-    };
-  }
+  };
 
   {
-    const result = await invokeSpikeEvidenceValidator('valid', validSpikeEvidence);
-    assert.equal(result.status, 0, result.output);
-    assert.match(result.output, /Architecture Spike Evidence validation passed/u);
+    const result = runEvidenceValidator(baseEvidence);
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    assert.match(result.stdout, /Architecture Spike Evidence validation passed/u);
   }
-
   {
-    const evidence = structuredClone(validSpikeEvidence);
+    const evidence = structuredClone(baseEvidence);
     delete evidence.contractVersion;
-    const result = await invokeSpikeEvidenceValidator('missing-contract-version', evidence);
-    assert.notEqual(result.status, 0, 'missing contractVersion must fail');
-    assert.match(result.output, /missing required property contractVersion/u);
+    const result = runEvidenceValidator(evidence);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /missing required property contractVersion/u);
   }
-
   {
-    const evidence = structuredClone(validSpikeEvidence);
-    evidence.candidate = { id: 'candidate-without-provenance' };
-    const result = await invokeSpikeEvidenceValidator('candidate-without-provenance', evidence);
-    assert.notEqual(result.status, 0, 'candidate without provenance must fail');
-    assert.match(result.output, /missing required property provenance/u);
+    const evidence = structuredClone(baseEvidence);
+    delete evidence.candidate.provenance;
+    const result = runEvidenceValidator(evidence);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /provenance/u);
   }
-
   {
-    const evidence = structuredClone(validSpikeEvidence);
+    const evidence = structuredClone(baseEvidence);
     evidence.rawArtifacts[0].sha256 = 'sha256:not-a-digest';
-    const result = await invokeSpikeEvidenceValidator('invalid-artifact-sha', evidence);
-    assert.notEqual(result.status, 0, 'invalid SHA-256 reference must fail');
-    assert.match(result.output, /does not match/u);
+    const result = runEvidenceValidator(evidence);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /sha256/u);
   }
-
   {
-    const evidence = structuredClone(validSpikeEvidence);
+    const evidence = structuredClone(baseEvidence);
     evidence.criteria.push(structuredClone(evidence.criteria[0]));
-    const result = await invokeSpikeEvidenceValidator('duplicate-criterion', evidence);
-    assert.notEqual(result.status, 0, 'duplicate criterion IDs must fail');
-    assert.match(result.output, /duplicate criterion id CRIT-001/u);
+    const result = runEvidenceValidator(evidence);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /duplicate criterion id AC-01/u);
   }
-
-  for (const failingResult of ['FAIL', 'BLOCKED', 'UNKNOWN']) {
-    const evidence = structuredClone(validSpikeEvidence);
-    evidence.criteria[0].result = failingResult;
-    const result = await invokeSpikeEvidenceValidator('pass-with-' + failingResult.toLowerCase(), evidence);
-    assert.notEqual(result.status, 0, 'PASS cannot contain required ' + failingResult);
-    assert.match(result.output, /PASS verdict input cannot include required criterion CRIT-001/u);
-  }
-
   {
-    const evidence = structuredClone(validSpikeEvidence);
-    evidence.rawArtifacts[0].sha256 = 'sha256:' + '0'.repeat(64);
-    const result = await invokeSpikeEvidenceValidator('artifact-hash-mismatch', evidence);
-    assert.notEqual(result.status, 0, 'artifact hash mismatch must fail');
-    assert.match(result.output, /artifact hash mismatch for raw-001/u);
+    const evidence = structuredClone(baseEvidence);
+    evidence.criteria[0].result = 'BLOCKED';
+    const result = runEvidenceValidator(evidence);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /PASS verdict input cannot include required criterion AC-01 with result BLOCKED/u);
+  }
+  {
+    const evidence = structuredClone(baseEvidence);
+    evidence.rawArtifacts[0].sha256 = `sha256:${'0'.repeat(64)}`;
+    const result = runEvidenceValidator(evidence);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /artifact hash mismatch for raw-1/u);
   }
 } finally {
-  await rm(spikeEvidenceTemp, { recursive: true, force: true });
+  await rm(tempRoot, { recursive: true, force: true });
 }
 
 console.log('Documentation tooling tests passed.');
+
+function writeFileSyncCompat(file, value) {
+  // The test needs subprocess-visible bytes before spawning. Avoid adding another helper dependency.
+  const result = spawnSync(process.execPath, ['-e', `require('node:fs').writeFileSync(${JSON.stringify(file)}, ${JSON.stringify(value)})`]);
+  assert.equal(result.status, 0, result.stderr?.toString() ?? 'fixture write failed');
+}

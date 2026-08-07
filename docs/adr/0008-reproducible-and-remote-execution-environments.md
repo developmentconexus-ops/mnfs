@@ -4,14 +4,14 @@ title: Reproducible and remote Execution Environments
 document_type: architecture_decision_record
 form: explanation
 authority: decision
-status: accepted
+status: superseded
 date: 2026-08-02
 owners:
   - developmentconexus-ops
 approvers:
   - operator
 supersedes: []
-superseded_by: null
+superseded_by: ADR-0015
 related:
   - DOC-PRODUCT-BLUEPRINT-05
   - DOC-PRODUCT-BLUEPRINT-10
@@ -69,7 +69,7 @@ Use HOST_INSPECTION/LOCAL_SANDBOX or replace the remote adapter.
 
 ## Supersession
 
-This ADR is accepted. A semantic change requires a new ADR that explicitly supersedes this record.
+ADR-0015 preserves the separation between environment lifecycle and MNFS authority but supersedes the ordinal E0–E4 ladder and provider-specific future ranking with independent environment properties and evidence-driven realization selection.
 
 ## Related documents
 

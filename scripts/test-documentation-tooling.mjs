@@ -16,6 +16,19 @@ const currentContract = JSON.parse(await readFile(path.join(root, '.mnfs/mission
 const capabilitySpecText = await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/SPEC.md'), 'utf8');
 const domainModelText = await readFile(path.join(root, 'docs/product/blueprint/02-domain-model.md'), 'utf8');
 const mcrmText = await readFile(path.join(root, 'docs/product/CAPABILITY-REALIZATION-METHOD.md'), 'utf8');
+const adrIndexText = await readFile(path.join(root, 'docs/adr/README.md'), 'utf8');
+const adrFiles = {
+  'ADR-0001': 'docs/adr/0001-pi-first-wsl2.md',
+  'ADR-0003': 'docs/adr/0003-worktree-write-tracks.md',
+  'ADR-0006': 'docs/adr/0006-security-planes-and-local-execution-isolation.md',
+  'ADR-0008': 'docs/adr/0008-reproducible-and-remote-execution-environments.md',
+  'ADR-0013': 'docs/adr/0013-wsl2-host-and-replaceable-agent-runtime.md',
+  'ADR-0014': 'docs/adr/0014-isolated-mutable-workspace-per-write-track.md',
+  'ADR-0015': 'docs/adr/0015-property-based-execution-environments.md',
+};
+const adrTexts = Object.fromEntries(await Promise.all(
+  Object.entries(adrFiles).map(async ([id, rel]) => [id, await readFile(path.join(root, rel), 'utf8')]),
+));
 
 function registryWithCapabilityStatus(status) {
   const documents = new Map(registry.documents);
@@ -191,6 +204,23 @@ for (const marker of [
 }
 assert.equal((mcrmText.match(/^# 10\. O ciclo MCRM$/gmu) ?? []).length, 1, 'MCRM must keep one canonical R0-R8 lifecycle');
 assert.match(mcrmText, /R0 Baseline[\s\S]*R8 Closeout and Learning/u);
+
+for (const id of ['ADR-0013', 'ADR-0014', 'ADR-0015']) {
+  assert.ok(adrIndexText.includes(id), `ADR index must include ${id}`);
+}
+for (const [previous, successor] of [
+  ['ADR-0001', 'ADR-0013'],
+  ['ADR-0003', 'ADR-0014'],
+  ['ADR-0006', 'ADR-0015'],
+  ['ADR-0008', 'ADR-0015'],
+]) {
+  const previousMeta = parseFrontmatter(adrTexts[previous], adrFiles[previous]).metadata;
+  const successorMeta = parseFrontmatter(adrTexts[successor], adrFiles[successor]).metadata;
+  assert.equal(previousMeta.status, 'superseded', `${previous} must preserve history as superseded`);
+  assert.equal(previousMeta.superseded_by, successor, `${previous} must point to ${successor}`);
+  assert.ok((successorMeta.supersedes ?? []).includes(previous), `${successor} must reciprocally supersede ${previous}`);
+  assert.equal(successorMeta.status, 'accepted', `${successor} must be accepted provider-neutral authority`);
+}
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];

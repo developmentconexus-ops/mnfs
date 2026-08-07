@@ -4,12 +4,13 @@ title: ARR P1-F03 Contract-Binding Correction Review
 document_type: review_record
 form: reference
 authority: evidence
-status: proposed
+status: accepted
 owners:
   - developmentconexus-ops
 related:
   - ACCEPTANCE-ARR-P1-RECONCILIATION
   - ACCEPTANCE-ARR-P1-INTEGRATION-CLOSEOUT
+  - ACCEPTANCE-ARR-P1-F03-CONTRACT-BINDING
   - DOC-ARR-SPIKE-GOVERNANCE
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
 tracking_issue: 23
@@ -20,13 +21,13 @@ last_reviewed: 2026-08-07
 
 ## Finding
 
-A post-integration review of PR #24 identified that the shared Architecture Spike Evidence schema records `contractVersion` but does not bind deciding Evidence to the exact frozen Spike contract bytes.
+A post-integration review of PR #24 identified that the shared Architecture Spike Evidence schema records `contractVersion` but did not bind deciding Evidence to the exact frozen Spike contract bytes.
 
 The accepted governance requires the Spike contract to freeze an exact version/hash before candidate execution. The correction therefore strengthens B1 so machine Evidence carries and validates the exact SHA-256 of the contract bytes used for the run.
 
 ## Correction boundary
 
-Correction work is limited to:
+Correction work was limited to:
 
 - Architecture Spike Evidence exact contract identity;
 - exact contract-byte hashing/validation path;
@@ -34,7 +35,7 @@ Correction work is limited to:
 - B1 governance wording required to describe the binding;
 - review Evidence for this correction.
 
-This correction does not authorize ARR-S0 implementation or execution, candidate installation/execution, runtime/environment selection, ARR-S1/S2/S2W/S3, M02 production work or production Worker dispatch.
+The correction does not authorize ARR-S0 implementation or execution, candidate installation/execution, runtime/environment selection, ARR-S1/S2/S2W/S3, M02 production work or production Worker dispatch.
 
 ## TDD Evidence
 
@@ -46,15 +47,15 @@ base:                      dffd3c929eac0f939615408f4729781bd029f11a
 initial RED workflow:      31202276551 — FAILURE
 refined RED head:          aa70e28da8e603990d523705e411daecef03dd54
 refined RED workflow:      31202444046 — FAILURE
-GREEN head:                cbf396a57a4171c053f475edce0e8366daa7dafa
-GREEN workflow:            31202977928 — SUCCESS — npm run verify
+accepted substantive head: 0b9fe9747887ef5817fffbb586db04ccb3292b27
+accepted-head workflow:    31203105413 — SUCCESS — npm run verify
 ```
 
 The refined RED removed an unnecessary schema-version assumption so the failing contract tests represented only the missing exact-byte binding.
 
 ## Implemented correction
 
-The proposed B1 correction now requires:
+The accepted B1 correction requires:
 
 ```text
 contractVersion
@@ -82,15 +83,26 @@ Validation fails closed when:
 
 Existing raw-artifact hash/size/path, provenance and criterion-result validation remains in place.
 
-## Review state
+## Review result
 
 ```text
 implementation:        COMPLETE
-npm run verify:        GREEN — 31202977928
-fresh review:          REQUIRED
-Operator acceptance:   NOT GRANTED
-merge:                 NOT AUTHORIZED
+npm run verify:        GREEN — 31203105413
+fresh review:          Critical 0 / Important 0
+review threads:        0
+Operator acceptance:   GRANTED — D-018
+merge/integration:     NOT AUTHORIZED
 GATE-S0-IMPLEMENT:     NOT AUTHORIZED
 ```
 
-A fresh review must report Critical 0 / Important 0 before this correction can be presented for Operator acceptance. No acceptance or merge is implied by implementation completion.
+## Operator Decision
+
+The Operator explicitly accepted the correction with:
+
+```text
+MNFS_ACCEPT_ARR_P1_F03 program_blob=52033adcdfb7163f63606034b9912942b018f38e pr=26 head=0b9fe9747887ef5817fffbb586db04ccb3292b27 findings=critical:0,important:0
+```
+
+The canonical acceptance record is `ACCEPTANCE-ARR-P1-F03-CONTRACT-BINDING`.
+
+Acceptance closes P1-F03 for the exact substantive head above. It does not imply merge/integration or authorize ARR-S0 implementation, real host probing, candidate execution, downstream ARR Spikes, M02 production work or production Worker dispatch.

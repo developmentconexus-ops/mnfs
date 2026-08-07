@@ -306,7 +306,9 @@ M01 R2/R3 hardening:                      FOLLOW_UP_REQUIRED — Issue #20
 Architecture synthesis:                   APPROVED — D-015
 Layered Agent Execution Planning:         ACCEPTED — D-016
 GATE-P0 plans:                            ACCEPTED — exact reviewed blobs
-ARR P1 A1-A4 + B1:                        AUTHORIZED / CURRENT — PR #24
+ARR P1 A1-A4 + B1:                        ACCEPTED — GATE-R / D-017 — PR #24
+P1 acceptance record:                      ACCEPTANCE-ARR-P1-RECONCILIATION
+PR #24 merge / integration:                 NOT AUTHORIZED
 ARR-S0 implementation:                    PROHIBITED pending GATE-S0-IMPLEMENT
 ARR-S0 real host execution:               PROHIBITED pending later GATE-S0-EXECUTE
 Agent Runtime / Environment selection:    PROHIBITED pending deciding Evidence
@@ -315,4 +317,4 @@ Production Worker dispatch:               PROHIBITED
 Automatic merge/delivery:                 NOT AUTHORIZED
 ```
 
-The next action inside the current authority is to complete and independently verify P1 only. Finishing P1 does not infer S0 authority; a fresh gate must explicitly authorize the next tranche.
+P1 is accepted but not integrated. The immediate next action is a separate Operator integration decision for PR #24. P1 acceptance does not infer merge or S0 authority; after the accepted tree is integrated (or explicitly included in a later exact S0 base SHA), a fresh `GATE-S0-IMPLEMENT` must still explicitly authorize the next tranche.

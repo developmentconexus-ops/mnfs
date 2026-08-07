@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.18.0
+version: 1.19.0
 owners:
   - developmentconexus-ops
 related:
@@ -19,6 +19,7 @@ related:
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
   - ACCEPTANCE-ARR-GATE-P0-PLAN-APPROVAL
+  - ACCEPTANCE-ARR-P1-RECONCILIATION
   - ACCEPTANCE-CAP-EXECUTION-R3
   - ACCEPTANCE-MIS-002-REPLAN
   - ACCEPTANCE-M2-UNBLOCK
@@ -51,10 +52,10 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
 - **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
-- **Current phase:** `ARR P1 — Operator Acceptance Review` under Issue #23 / PR #24.
+- **Current phase:** `ARR P1 — ACCEPTED / INTEGRATION_PENDING` under Issue #23 / PR #24.
 - **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — ACCEPTED — GATE-P0 — blob `52033adcdfb7163f63606034b9912942b018f38e`.
 - **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — ACCEPTED — GATE-P0 — blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`.
-- **Current P1 tranche:** A1–A4 + B1 + P1-F01 + P1-F02 implemented and verified. The P1-F02 fresh review found no Critical/Important finding; P1 now awaits explicit Operator acceptance or rejection.
+- **Current P1 tranche:** A1–A4 + B1 + P1-F01 + P1-F02 is ACCEPTED under GATE-R / D-017, bound to program blob `52033adcdfb7163f63606034b9912942b018f38e`, PR #24 head `02e99b25842562d111488d5c8c7008cb2635f3da`, and findings Critical 0 / Important 0. Integration/merge remains separately unauthorized.
 - **Superseded prior planning container:** Issue #21 — prior `MIS-002/M02` R5 path; do not resume under revision 5.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
@@ -145,6 +146,10 @@ P1-F01 correction:          RESOLVED
 P1-F02 constitutional tree: d741b64b41bb04d4ceabaf0efa4b565a9d7e935e
 P1-F02 PR verification:     31194802381 — SUCCESS — npm run verify
 P1-F02 fresh review:        Critical 0 / Important 0 — 31194963494 — SUCCESS
+P1 accepted head verify:     31195841392 — SUCCESS — npm run verify
+P1 Operator acceptance:      GATE-R — D-017 — ACCEPTED
+P1 accepted head:            02e99b25842562d111488d5c8c7008cb2635f3da
+P1 acceptance record:        ACCEPTANCE-ARR-P1-RECONCILIATION
 ```
 
 The P1-F02 review used the provider-neutral constitutional tree and a fresh contextual scan of residual Pi/Treehouse/E0–E4/AB1/AS-01/AS-02/worktree language. Remaining vendor-specific occurrences are explicitly historical/incumbent/reference Evidence, research, negative examples, or property options rather than current substrate selection.
@@ -159,7 +164,8 @@ D1–D4 + Architecture Synthesis:             APPROVED
 Execution Planning Design 1.0.0:            ACCEPTED — D-016
 Master ARR program plan 0.2.0:              ACCEPTED — GATE-P0
 ARR-S0 plan 0.2.0:                          ACCEPTED — GATE-P0
-ARR P1 A1-A4 + B1 + P1-F01 + P1-F02:       IMPLEMENTED / VERIFIED / FRESH_REVIEW_PASSED / OPERATOR_DECISION_REQUIRED
+ARR P1 A1-A4 + B1 + P1-F01 + P1-F02:       ACCEPTED — GATE-R / D-017
+PR #24 merge / integration:                     NOT AUTHORIZED
 ARR-S0 harness implementation:              PROHIBITED pending GATE-S0-IMPLEMENT
 ARR-S0 real host probe:                      PROHIBITED pending later GATE-S0-EXECUTE
 ARR-S1/S2/S2W/S3 execution:                 PROHIBITED pending their later exact gates
@@ -168,9 +174,9 @@ Production Worker dispatch:                 PROHIBITED
 Automatic delivery / merge:                 NOT AUTHORIZED
 ```
 
-## Immediate next action — Operator P1 decision
+## Immediate next action — P1 integration decision
 
-The Operator reviews PR #24 and explicitly accepts P1 or requests/rejects further changes. The fresh-review result supports acceptance but does not grant it automatically.
+P1 is accepted under GATE-R / D-017. PR #24 remains open/draft and its merge/integration is not authorized by the acceptance token. The next Operator decision is whether to integrate the accepted P1 tree or provide a later exact S0 base SHA that includes it.
 
 P1 acceptance does **not** implicitly authorize ARR-S0 implementation, real host probing, candidate execution, M02 production work, Worker dispatch or automatic merge.
 

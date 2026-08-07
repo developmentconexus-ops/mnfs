@@ -4,8 +4,8 @@ import path from 'node:path';
 import { sha256Bytes } from './artifacts.mjs';
 import { S0_PLAN_GIT_BLOB, S0_PLAN_VERSION } from './contract.mjs';
 import {
-  EXECUTION_AUTHORIZATION_RELATIVE_PATH,
-  validateExecutionAuthorization,
+  EXECUTION_AUTHORIZATION_ENV,
+  parseExecutionAuthorizationToken,
 } from './execution-authority.mjs';
 import { requireRunId } from './paths.mjs';
 import { observeRepositoryIdentity } from './probes/repository.mjs';
@@ -73,7 +73,6 @@ export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
   const sourceLoader = options.sourceLoader ?? defaultSourceLoader;
   const planPath = path.join(repoRoot, 'docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md');
   const contractPath = path.join(repoRoot, 'docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md');
-  const authorizationPath = path.join(repoRoot, EXECUTION_AUTHORIZATION_RELATIVE_PATH);
   const [planBytes, contractBytes] = await Promise.all([fileReader(planPath), fileReader(contractPath)]);
   if (gitBlobSha1(planBytes) !== S0_PLAN_GIT_BLOB) {
     throw new Error('ARR-S0 plan bytes do not match the GATE-P0 approved Git blob');
@@ -89,26 +88,21 @@ export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
     throw new Error('ARR-S0 real run remains prohibited until contract 1.0.0 is explicitly accepted');
   }
 
-  let authorizationRecord;
-  try {
-    authorizationRecord = JSON.parse((await fileReader(authorizationPath)).toString('utf8'));
-  } catch (error) {
-    throw new Error(`ARR-S0 GATE-S0-EXECUTE execution authorization is unavailable or invalid (${error?.message ?? error})`);
-  }
-
   const repository = await sourceLoader(repoRoot);
   const source = repository?.source;
   if (!source?.commitSha) {
     throw new Error('ARR-S0 execution authorization cannot bind because current repository source commit is unavailable');
   }
 
+  const env = options.env ?? process.env;
+  const executionAuthorizationToken = Object.prototype.hasOwnProperty.call(options, 'executionAuthorizationToken')
+    ? options.executionAuthorizationToken
+    : env?.[EXECUTION_AUTHORIZATION_ENV];
   const contractHash = sha256Bytes(contractBytes);
-  const executionAuthorization = validateExecutionAuthorization(authorizationRecord, {
+  const executionAuthorization = parseExecutionAuthorizationToken(executionAuthorizationToken, {
     planGitBlob: S0_PLAN_GIT_BLOB,
-    contractVersion,
     contractHash,
     baseCommitSha: source.commitSha,
-    verificationRunId: authorizationRecord?.verification?.workflowRunId,
   });
 
   return {
@@ -139,7 +133,10 @@ export async function executeCli(argv, options = {}) {
     return result.ok ? 0 : 2;
   }
   if (parsed.command === 'run') {
-    const identities = await identitiesLoader(repoRoot);
+    const identities = await identitiesLoader(repoRoot, {
+      executionAuthorizationToken: options.executionAuthorizationToken,
+      env: options.env,
+    });
     const runId = runIdGenerator();
     const result = await run({ repoRoot, stateRoot, identities, runId });
     writeJson(stdout, buildReportView(result));

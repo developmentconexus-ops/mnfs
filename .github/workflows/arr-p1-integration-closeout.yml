@@ -1,0 +1,40 @@
+name: ARR P1 Integration Closeout
+
+on:
+  push:
+    branches:
+      - reconcile/arr-p1-integration-closeout
+
+permissions:
+  contents: write
+
+jobs:
+  closeout:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: reconcile/arr-p1-integration-closeout
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.0
+          cache: npm
+      - run: npm ci
+      - name: Run RED, GREEN and full verification
+        run: python3 scripts/tmp-arr-p1-integration-closeout.py
+      - name: Commit verified clean closeout tree
+        shell: bash
+        run: |
+          rm -f .github/workflows/arr-p1-integration-closeout.yml scripts/tmp-arr-p1-integration-closeout.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git ls-files | grep -Eq 'arr-p1-integration-closeout|__pycache__|\.pyc$'; then
+            echo 'transport artifact remains tracked' >&2
+            exit 1
+          fi
+          git diff --cached --check
+          git status --short
+          git commit -m 'docs: close ARR P1 integration'
+          git push origin HEAD:reconcile/arr-p1-integration-closeout

@@ -8,21 +8,6 @@ const AUTHENTICATED_AUTHORITIES = new WeakSet();
 
 export const EXECUTION_AUTHORIZATION_ENV = 'MNFS_ARR_S0_EXECUTE_AUTHORIZATION';
 
-export function buildExecutionAuthorizationToken({
-  planGitBlob,
-  contractHash,
-  baseCommitSha,
-  verificationRunId,
-}) {
-  if (!GIT_BLOB_PATTERN.test(planGitBlob ?? '')) throw new TypeError('ARR-S0 execution authorization plan blob is invalid');
-  if (!DIGEST_PATTERN.test(contractHash ?? '')) throw new TypeError('ARR-S0 execution authorization contract hash is invalid');
-  if (!SHA_PATTERN.test(baseCommitSha ?? '')) throw new TypeError('ARR-S0 execution authorization base commit is invalid');
-  if (!Number.isSafeInteger(verificationRunId) || verificationRunId <= 0) {
-    throw new TypeError('ARR-S0 execution authorization verification run is invalid');
-  }
-  return `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=${planGitBlob} contract_sha256=${contractHash} base_sha=${baseCommitSha} verify_run=${verificationRunId} scope=canonical-host-probe-only`;
-}
-
 export function parseExecutionAuthorizationToken(token, expected) {
   if (typeof token !== 'string') {
     throw new TypeError('ARR-S0 execution authorization token is required');

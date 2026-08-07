@@ -56,9 +56,16 @@ function requireExecutionAuthorization(identities, source = null) {
   return executionAuthorizationEvidence(authority);
 }
 
-async function defaultInspect({ repoRoot, stateRoot }) {
+async function defaultSourceObserver({ repoRoot }) {
+  try {
+    return await observeRepositoryIdentity({ repoRoot });
+  } catch {
+    return { source: null, clean: false };
+  }
+}
+
+async function defaultInspect({ repoRoot, stateRoot, repository }) {
   let host;
-  let repository;
   let stateRootFilesystem;
   let requiredReadsAvailable = true;
   try {
@@ -66,11 +73,6 @@ async function defaultInspect({ repoRoot, stateRoot }) {
   } catch {
     host = { identity: { platform: 'linux', isWsl2: false, nodeVersion: process.version }, observations: [] };
     requiredReadsAvailable = false;
-  }
-  try {
-    repository = await observeRepositoryIdentity({ repoRoot });
-  } catch {
-    repository = { source: null, clean: false };
   }
   try {
     stateRootFilesystem = await observeFilesystemOwnership(stateRoot);
@@ -91,7 +93,13 @@ async function defaultInspect({ repoRoot, stateRoot }) {
   };
 }
 
-export async function preflightS0({ repoRoot = process.cwd(), stateRoot, identities, inspect = defaultInspect } = {}) {
+export async function preflightS0({
+  repoRoot = process.cwd(),
+  stateRoot,
+  identities,
+  sourceObserver = defaultSourceObserver,
+  inspect = defaultInspect,
+} = {}) {
   const executionAuthorization = requireExecutionAuthorization(identities);
 
   let resolvedStateRoot;
@@ -107,22 +115,45 @@ export async function preflightS0({ repoRoot = process.cwd(), stateRoot, identit
     };
   }
 
-  let facts;
+  let repository;
   try {
-    facts = await inspect({ repoRoot, stateRoot: resolvedStateRoot });
+    repository = await sourceObserver({ repoRoot });
   } catch (error) {
     return {
       ok: false,
-      checks: [{ id: 'inspect', ok: false, rationale: String(error.message ?? error) }],
+      checks: [{ id: 'repositoryIdentity', ok: false, rationale: String(error.message ?? error) }],
       facts: null,
       stateRoot: resolvedStateRoot,
       executionAuthorization,
     };
   }
 
-  if (facts?.repository?.source?.commitSha) {
-    requireExecutionAuthorization(identities, facts.repository.source);
+  if (!repository?.source?.commitSha || !repository?.source?.treeSha) {
+    return {
+      ok: false,
+      checks: [{ id: 'repositoryIdentity', ok: false, rationale: 'exact Git source identity is required before host inspection' }],
+      facts: { repository: repository ?? { source: null, clean: false } },
+      stateRoot: resolvedStateRoot,
+      executionAuthorization,
+    };
   }
+
+  // Rebind the exact Operator authority to the source before any remaining host observation.
+  requireExecutionAuthorization(identities, repository.source);
+
+  let facts;
+  try {
+    facts = await inspect({ repoRoot, stateRoot: resolvedStateRoot, repository });
+  } catch (error) {
+    return {
+      ok: false,
+      checks: [{ id: 'inspect', ok: false, rationale: String(error.message ?? error) }],
+      facts: { repository },
+      stateRoot: resolvedStateRoot,
+      executionAuthorization,
+    };
+  }
+  facts = { ...facts, repository };
 
   const checks = [
     { id: 'canonicalWsl2', ok: facts?.hostIdentity?.isWsl2 === true, rationale: 'canonical host must be WSL2' },
@@ -130,8 +161,8 @@ export async function preflightS0({ repoRoot = process.cwd(), stateRoot, identit
     { id: 'stateRootLinuxOwned', ok: isLinuxOwnedAbsolute(resolvedStateRoot), rationale: 'state root must be on a Linux-owned absolute path' },
     { id: 'linuxFilesystem', ok: facts?.linuxFilesystemSupported === true, rationale: 'repository filesystem must be on the reviewed Linux-owned allowlist' },
     { id: 'stateRootFilesystem', ok: facts?.stateRootFilesystemSupported === true, rationale: 'state-root filesystem must be on the reviewed Linux-owned allowlist' },
-    { id: 'repositoryIdentity', ok: Boolean(facts?.repository?.source?.commitSha && facts?.repository?.source?.treeSha), rationale: 'exact Git source identity is required' },
-    { id: 'checkoutClean', ok: facts?.repository?.clean === true, rationale: 'checkout must be clean' },
+    { id: 'repositoryIdentity', ok: Boolean(repository.source.commitSha && repository.source.treeSha), rationale: 'exact Git source identity is required' },
+    { id: 'checkoutClean', ok: repository.clean === true, rationale: 'checkout must be clean' },
     { id: 'nodeVersion', ok: nodeVersionAtLeast(facts?.hostIdentity?.nodeVersion), rationale: 'Node.js >=24.18.0 is required' },
     { id: 'requiredReads', ok: facts?.requiredReadsAvailable === true, rationale: 'required host identity files must be readable' },
   ];
@@ -176,6 +207,7 @@ export async function runS0({
   runId,
   identities,
   preflight = preflightS0,
+  observeRunRootFilesystem = observeFilesystemOwnership,
   collect = collectDefaultS0,
 } = {}) {
   const executionAuthorization = requireExecutionAuthorization(identities);
@@ -188,6 +220,10 @@ export async function runS0({
 
   const resolvedStateRoot = preflightResult.stateRoot ?? await resolveS0StateRoot(stateRoot === undefined ? {} : { stateRoot });
   const runRoot = await resolveS0RunRoot(canonicalRunId, { stateRoot: resolvedStateRoot });
+  const runRootFilesystem = await observeRunRootFilesystem(runRoot);
+  if (runRootFilesystem?.state !== 'SUPPORTED') {
+    throw new Error(`ARR-S0 run-root filesystem must be on the reviewed Linux-owned allowlist (observed ${runRootFilesystem?.filesystemType || 'unknown'})`);
+  }
   const evidenceRecords = [];
 
   let state = createInitialRunState({

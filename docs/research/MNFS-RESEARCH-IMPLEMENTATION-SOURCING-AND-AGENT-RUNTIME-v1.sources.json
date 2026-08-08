@@ -1,0 +1,378 @@
+{
+  "schemaVersion": 1,
+  "reportId": "DOC-RESEARCH-MNFS-RESEARCH-IMPLEMENTATION-SOURCING-AND-AGENT-RUNTIME-v1",
+  "asOf": "2026-08-07",
+  "sources": [
+    {
+      "id": "mnfs-documentation-map",
+      "title": "MNFS Documentation Map",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/DOCUMENTATION-MAP.md",
+      "kind": "repository",
+      "version": "1.5.0",
+      "accessed": "2026-08-07",
+      "supports": ["Authority hierarchy, canonical M02 read path and current authorization boundary"]
+    },
+    {
+      "id": "mnfs-blueprint-vision",
+      "title": "MNFS Product Blueprint Section 1 — Product Vision",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/product/blueprint/01-product-vision.md",
+      "kind": "repository",
+      "version": "1.0.0",
+      "accessed": "2026-08-07",
+      "supports": ["Probabilistic actors versus deterministic MNFS control plane and CLAIM/RECEIPT/VERDICT separation"]
+    },
+    {
+      "id": "mnfs-blueprint-engineering",
+      "title": "MNFS Product Blueprint Section 4 — Engineering System",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/product/blueprint/04-engineering-system.md",
+      "kind": "repository",
+      "version": "1.0.0",
+      "accessed": "2026-08-07",
+      "supports": ["Engineering Governance, Golden Paths, external enforcement bindings and progressive standardization"]
+    },
+    {
+      "id": "mnfs-blueprint-architecture",
+      "title": "MNFS Product Blueprint Section 5 — System Architecture",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/product/blueprint/05-system-architecture.md",
+      "kind": "repository",
+      "version": "1.0.0",
+      "accessed": "2026-08-07",
+      "supports": ["Modular monolith, domain-inward/adapters-outward, one authority per concept and replaceable infrastructure"]
+    },
+    {
+      "id": "mnfs-blueprint-recovery",
+      "title": "MNFS Product Blueprint Section 8 — State and Recovery",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/product/blueprint/08-state-recovery.md",
+      "kind": "repository",
+      "version": "1.0.0",
+      "accessed": "2026-08-07",
+      "supports": ["SQLite authority, external observation, Intent-Action-Observation, idempotency, fencing and Reconcile semantics"]
+    },
+    {
+      "id": "mnfs-blueprint-security",
+      "title": "MNFS Product Blueprint Section 10 — Security and Execution Environments",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/product/blueprint/10-security-isolation.md",
+      "kind": "repository",
+      "version": "1.0.0",
+      "accessed": "2026-08-07",
+      "supports": ["Eight security planes, E1 semantics, credentials/effects separation and trusted-computing-base constraints"]
+    },
+    {
+      "id": "mnfs-blueprint-roadmap",
+      "title": "MNFS Product Blueprint Section 12 — Capability Roadmap",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/product/blueprint/12-capability-roadmap.md",
+      "kind": "repository",
+      "version": "1.0.0",
+      "accessed": "2026-08-07",
+      "supports": ["Outcome-based milestones, M2-M12 scope, non-goals, architecture spikes and replan triggers"]
+    },
+    {
+      "id": "mnfs-mcrm",
+      "title": "MNFS Capability Realization Method",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/product/CAPABILITY-REALIZATION-METHOD.md",
+      "kind": "repository",
+      "version": "1.0.0",
+      "accessed": "2026-08-07",
+      "supports": ["R0-R8 lifecycle, applicability, traceability, R5 design obligations and evidence-driven implementation"]
+    },
+    {
+      "id": "mnfs-adr-pi-first",
+      "title": "ADR-0001 — Pi-first runtime on WSL2",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/adr/0001-pi-first-wsl2.md",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Pi as first execution runtime and adapter surface rather than domain dependency"]
+    },
+    {
+      "id": "mnfs-adr-transport",
+      "title": "ADR-0005 — Durable coordination versus ephemeral transport",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/adr/0005-durable-coordination-versus-ephemeral-transport.md",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["SQLite/artifact durability, transport replaceability and Pi RPC as non-authoritative delivery machinery"]
+    },
+    {
+      "id": "mnfs-adr-security",
+      "title": "ADR-0006 — Security planes and local execution isolation",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/adr/0006-security-planes-and-local-execution-isolation.md",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["E1 local Writer boundary and distinction between authority, tools, sandbox and environment"]
+    },
+    {
+      "id": "mnfs-adr-environments",
+      "title": "ADR-0008 — Reproducible and remote execution environments",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/adr/0008-reproducible-and-remote-execution-environments.md",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Environment adapter evolution and future remote-provider replaceability"]
+    },
+    {
+      "id": "mnfs-cap-execution-traceability",
+      "title": "CAP-EXECUTION Traceability",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/capabilities/CAP-EXECUTION/TRACEABILITY.json",
+      "kind": "repository",
+      "version": "CAP-EXECUTION 0.1.0",
+      "accessed": "2026-08-07",
+      "supports": ["Exact M02 requirement allocation and intended PiProcessAdapter, Recovery, Receipt and Gate responsibilities"]
+    },
+    {
+      "id": "mnfs-as02-acceptance",
+      "title": "AS-02 Local Pi Sandbox on WSL2 acceptance",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/docs/acceptance/2026-08-02-as-02-local-pi-sandbox-wsl2.md",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Accepted Pi 0.83.0, Sandbox Runtime 0.0.67, Treehouse 2.1.1 and seven-tool E1 composition"]
+    },
+    {
+      "id": "mnfs-process-runner",
+      "title": "MNFS bounded Linux process runner",
+      "url": "https://github.com/developmentconexus-ops/mnfs/blob/4ebd4df793fcef67543189d5888c04504b453e19/src/runtime/process-runner.ts",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Explicit environment, shell=false, process-group termination and bounded stdout/stderr precedent"]
+    },
+    {
+      "id": "pi-rpc-doc",
+      "title": "Pi 0.83.0 RPC protocol",
+      "url": "https://github.com/earendil-works/pi/blob/v0.83.0/packages/coding-agent/docs/rpc.md",
+      "kind": "repository",
+      "version": "0.83.0",
+      "accessed": "2026-08-07",
+      "supports": ["Headless JSONL protocol, request correlation, lifecycle events, agent_settled, abort/state/stats and session controls"]
+    },
+    {
+      "id": "pi-jsonl",
+      "title": "Pi 0.83.0 strict JSONL framing implementation",
+      "url": "https://github.com/earendil-works/pi/blob/v0.83.0/packages/coding-agent/src/modes/rpc/jsonl.ts",
+      "kind": "repository",
+      "version": "0.83.0",
+      "accessed": "2026-08-07",
+      "supports": ["LF-only framing and requirement not to use Node readline for protocol parsing"]
+    },
+    {
+      "id": "pi-rpc-mode",
+      "title": "Pi 0.83.0 RPC mode implementation",
+      "url": "https://github.com/earendil-works/pi/blob/v0.83.0/packages/coding-agent/src/modes/rpc/rpc-mode.ts",
+      "kind": "repository",
+      "version": "0.83.0",
+      "accessed": "2026-08-07",
+      "supports": ["RPC event streaming, agent_settled shutdown semantics, direct RPC bash behavior and session statistics"]
+    },
+    {
+      "id": "pi-rpc-client",
+      "title": "Pi 0.83.0 internal RPC client",
+      "url": "https://github.com/earendil-works/pi/blob/v0.83.0/packages/coding-agent/src/modes/rpc/rpc-client.ts",
+      "kind": "repository",
+      "version": "0.83.0",
+      "accessed": "2026-08-07",
+      "supports": ["Reference client behavior and host process.env inheritance that is incompatible with direct M02 adoption"]
+    },
+    {
+      "id": "pi-usage-083",
+      "title": "Pi 0.83.0 CLI usage and resource loading",
+      "url": "https://github.com/earendil-works/pi/blob/v0.83.0/packages/coding-agent/docs/usage.md",
+      "kind": "repository",
+      "version": "0.83.0",
+      "accessed": "2026-08-07",
+      "supports": ["No-discovery flags, explicit extensions, builtin-tool disabling, project trust behavior and headless modes"]
+    },
+    {
+      "id": "pi-package-083",
+      "title": "Pi coding-agent package metadata at 0.83.0",
+      "url": "https://github.com/earendil-works/pi/blob/v0.83.0/packages/coding-agent/package.json",
+      "kind": "repository",
+      "version": "0.83.0",
+      "accessed": "2026-08-07",
+      "supports": ["Public export boundary and absence of the internal RpcClient from the package exports"]
+    },
+    {
+      "id": "mastra-factory-template",
+      "title": "Mastra Software Factory template",
+      "url": "https://github.com/mastra-ai/softwarefactory-template/tree/ebcf8889fddde238f016ddc7468e45f195c440a4",
+      "kind": "repository",
+      "version": "template commit ebcf888",
+      "accessed": "2026-08-07",
+      "supports": ["Concrete Factory deployment shape, dependencies, integrations, local/remote storage and sandbox configuration"]
+    },
+    {
+      "id": "mastra-factory-package",
+      "title": "@mastra/factory package metadata",
+      "url": "https://github.com/mastra-ai/mastra/blob/8e23a0b207f34b84bd28f3bf554c6931d8025b97/mastracode/factory/package.json",
+      "kind": "repository",
+      "version": "0.6.0-alpha.1",
+      "accessed": "2026-08-07",
+      "supports": ["Factory package maturity, dependency surface and rapid alpha-version movement"]
+    },
+    {
+      "id": "mastra-factory-dispatcher",
+      "title": "Mastra Factory deferred-decision dispatcher",
+      "url": "https://github.com/mastra-ai/mastra/blob/8e23a0b207f34b84bd28f3bf554c6931d8025b97/mastracode/factory/src/rules/dispatcher.ts",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Leases, retry/backoff, bounded concurrency, causal chains, deferred effects and notification delivery patterns"]
+    },
+    {
+      "id": "mastra-agent-controller",
+      "title": "Mastra AgentController documentation",
+      "url": "https://github.com/mastra-ai/mastra/blob/8e23a0b207f34b84bd28f3bf554c6931d8025b97/docs/src/content/en/docs/harness/agent-controller.mdx",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Session/runtime host responsibilities, persistent threads, approvals, subagents and beta maturity warning"]
+    },
+    {
+      "id": "mastra-signals",
+      "title": "Mastra long-running agent Signals documentation",
+      "url": "https://github.com/mastra-ai/mastra/blob/8e23a0b207f34b84bd28f3bf554c6931d8025b97/docs/src/content/en/docs/long-running-agents/signals.mdx",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Wake/deliver/persist semantics, state lanes, notification inboxes and beta maturity warning"]
+    },
+    {
+      "id": "mastra-workspace-sandbox",
+      "title": "Mastra WorkspaceSandbox interface",
+      "url": "https://github.com/mastra-ai/mastra/blob/8e23a0b207f34b84bd28f3bf554c6931d8025b97/packages/core/src/workspace/sandbox/sandbox.ts",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Provider-neutral clone/reattach, command, process, networking and filesystem sandbox seam"]
+    },
+    {
+      "id": "mastra-acp",
+      "title": "@mastra/acp README",
+      "url": "https://github.com/mastra-ai/mastra/blob/8e23a0b207f34b84bd28f3bf554c6931d8025b97/agent-sdks/acp/README.md",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["ACP-compatible coding agents as tools/subagents, permission handling, session persistence and environment behavior"]
+    },
+    {
+      "id": "sandbox-runtime",
+      "title": "Anthropic Sandbox Runtime",
+      "url": "https://github.com/anthropic-experimental/sandbox-runtime",
+      "kind": "repository",
+      "version": "M02 accepted target 0.0.67",
+      "accessed": "2026-08-07",
+      "supports": ["OS filesystem/network sandboxing with Bubblewrap on Linux and Beta Research Preview maturity"]
+    },
+    {
+      "id": "inngest-self-host",
+      "title": "Inngest self-hosting architecture",
+      "url": "https://www.inngest.com/docs/self-hosting",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Event API, stream, runner, queue, executor, state store, SQLite/Postgres persistence and scaling model"]
+    },
+    {
+      "id": "inngest-durable",
+      "title": "How Inngest functions execute",
+      "url": "https://www.inngest.com/docs/learn/how-functions-are-executed",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Step checkpointing, retries, memoization, concurrency and durable function semantics"]
+    },
+    {
+      "id": "dbos-architecture",
+      "title": "DBOS architecture",
+      "url": "https://docs.dbos.dev/architecture",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Postgres-backed durable workflows and Conductor control-plane model"]
+    },
+    {
+      "id": "dbos-typescript",
+      "title": "DBOS TypeScript programming guide",
+      "url": "https://docs.dbos.dev/typescript/programming-guide",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Checkpoint/recovery model and Postgres requirement for TypeScript durable workflows"]
+    },
+    {
+      "id": "restate-overview",
+      "title": "Restate overview",
+      "url": "https://docs.restate.dev/",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Durable execution, built-in state and Restate Server ownership of execution history"]
+    },
+    {
+      "id": "restate-workflows",
+      "title": "Restate workflows",
+      "url": "https://docs.restate.dev/tour/workflows",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Journal replay and server-mediated workflow recovery"]
+    },
+    {
+      "id": "temporal-docs",
+      "title": "Temporal platform documentation",
+      "url": "https://docs.temporal.io/",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Crash-proof durable execution and required Temporal Service/Cloud runtime model"]
+    },
+    {
+      "id": "playwright-isolation",
+      "title": "Playwright browser-context isolation",
+      "url": "https://playwright.dev/docs/browser-contexts",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Per-test isolated browser contexts for deterministic browser verification"]
+    },
+    {
+      "id": "playwright-tracing",
+      "title": "Playwright tracing",
+      "url": "https://playwright.dev/docs/api/class-tracing",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Trace artifacts suitable for later QA evidence inspection"]
+    },
+    {
+      "id": "agent-browser",
+      "title": "Vercel Labs agent-browser",
+      "url": "https://github.com/vercel-labs/agent-browser",
+      "kind": "repository",
+      "accessed": "2026-08-07",
+      "supports": ["Accessibility-tree snapshots, compact element refs, domain allowlists and action-policy primitives for agentic QA"]
+    },
+    {
+      "id": "mcp-2026-spec",
+      "title": "Model Context Protocol 2026-07-28 specification release",
+      "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+      "kind": "official_docs",
+      "version": "2026-07-28",
+      "accessed": "2026-08-07",
+      "supports": ["Stateless MCP core, extensions, Tasks, authorization hardening, routing and deprecation policy"]
+    },
+    {
+      "id": "mcp-security",
+      "title": "Model Context Protocol security best practices",
+      "url": "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Token-passthrough prohibition and transport authorization security constraints"]
+    },
+    {
+      "id": "otel-semconv",
+      "title": "OpenTelemetry semantic conventions",
+      "url": "https://opentelemetry.io/docs/specs/semconv/",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Vendor-neutral semantic-convention model and ongoing evolution of GenAI conventions"]
+    },
+    {
+      "id": "backstage-catalog",
+      "title": "Backstage Software Catalog",
+      "url": "https://backstage.io/docs/features/software-catalog/",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Source-controlled repository metadata, ownership/catalog concerns and plugin-oriented developer portal integration"]
+    },
+    {
+      "id": "backstage-templates",
+      "title": "Backstage Software Templates",
+      "url": "https://backstage.io/docs/features/software-templates/",
+      "kind": "official_docs",
+      "accessed": "2026-08-07",
+      "supports": ["Reusable scaffolding/template machinery for future multi-repository Golden Path surfaces"]
+    }
+  ]
+}

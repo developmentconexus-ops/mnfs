@@ -5,7 +5,7 @@ document_type: execution_planning_design
 form: explanation
 authority: specification
 status: accepted
-version: 1.0.0
+version: 1.1.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -23,7 +23,7 @@ related:
   - DOC-PRODUCT-BLUEPRINT-09
   - DOC-PRODUCT-BLUEPRINT-10
 tracking_issue: 23
-last_reviewed: 2026-08-07
+last_reviewed: 2026-08-08
 ---
 
 # Layered Agent Execution Planning Design
@@ -194,6 +194,7 @@ The following principles are normative for this design.
 18. **Milestone composition receives its own validation.**
 19. **Mission closure validates the original Operator outcome, not only child completion.**
 20. **Execution learnings feed governed Calibration; they do not mutate policy automatically.**
+21. **Planning completeness means no material hidden decision is left accidentally to the Actor; it does not mean maximum detail, mechanism, ceremony or hypothetical future hardening.**
 
 ---
 

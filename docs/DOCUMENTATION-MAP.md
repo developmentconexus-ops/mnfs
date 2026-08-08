@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 2.0.3
+version: 2.0.4
 owners:
   - developmentconexus-ops
 approvers:
@@ -25,6 +25,7 @@ related:
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
+  - ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE
   - CAP-EXECUTION
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
@@ -60,7 +61,7 @@ Current durable authority includes:
 - `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.1.0;
 - `DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION` 1.0.0;
 - `DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE` 1.0.0;
-- accepted ARR program/task plans and accepted contracts where applicable.
+- accepted ARR program/task plans, accepted contracts and accepted deciding Evidence where applicable.
 
 `CAP-EXECUTION` 0.1.0 and `MIS-002` revision 5 remain immutable authority/history for the versions they describe. D-015 prohibits implementing revision-5 M02.
 
@@ -121,7 +122,8 @@ Operational history: commits/diffs, PRs/reviews, CI/workflow results, merge iden
 | `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md` | FAST / BOUNDED / CONTROLLED execution-depth policy | accepted specification |
 | `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md` | `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM`; ARR sequence | accepted guidance by GATE-P0 |
 | `docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md` | ARR-S0 bounded design/execution plan | accepted guidance by GATE-P0 |
-| `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`; S0 host-fact contract 1.0.0 | accepted contract — D-021 / Task 12 CONTROLLED input |
+| `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`; S0 host-fact contract 1.0.0 | accepted contract — D-021 |
+| `docs/acceptance/2026-08-07-arr-s0-host-capability-probe.md` | `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`; accepted generic host facts and limitations | accepted deciding Evidence |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated constitutional projection | generated projection |
 | `docs/roadmap.md` | generated capability/program sequence | generated projection |
 
@@ -146,6 +148,8 @@ AGENTS.md
 → current implementation where compatibility/migration cost matters
 ```
 
+For ARR-S1 or ARR-S2 planning, `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE` is a required shared Evidence input.
+
 A narrow already-designed FAST/BOUNDED unit may use a smaller compiled pack, but it must still contain the current target, applicable deciding Authority, boundaries, proof and escalation conditions.
 
 ## 6. Current architecture authorities
@@ -158,7 +162,7 @@ ADR-0015 — property-based Execution Environments
 
 Current principles include Thin Sovereign Semantic Kernel, Validation-first Planning, replaceable Agent Runtime / Session non-authority, isolated mutable workspace semantics, property-based Execution Environment, provider-neutral Git result identity, independent Evidence / Gate acceptance, capability-first sourcing and fresh Recovery without transcript.
 
-No concrete Agent Runtime, process sandbox, microVM or workspace substrate is selected by these authorities alone.
+No concrete Agent Runtime, process sandbox, microVM or workspace substrate is selected by these authorities or by ARR-S0 Evidence alone.
 
 ## 7. Risk-proportional execution governance
 
@@ -175,9 +179,9 @@ Natural-language Operator approval may bind an unambiguous FAST/BOUNDED envelope
 ## 8. M2 Opportunity-Replan path
 
 ```text
-ARR-S0 Host Capability Probe
-→ ARR-S1 Agent Runtime Conformance
-  + ARR-S2 Local Execution Envelope Conformance
+ARR-S0 Host Capability Probe                    ACCEPT_WITH_LIMITATIONS / COMPLETE
+→ ARR-S1 Agent Runtime Conformance             NEXT
+  + ARR-S2 Local Execution Envelope Conformance NEXT
 → ARR-S2W Workspace comparison only if S2 proves it is needed
 → ARR-S3 Vertical Composition Proof
 → substrate selection Decision
@@ -193,26 +197,29 @@ Durable orientation anchors:
 ARR P1 A1-A4 + B1: ACCEPTED — GATE-R / D-017 / INTEGRATED
 P1-F03:             ACCEPTED — D-018 / INTEGRATED
 CPR reconciliation: ACCEPTED — D-019 / INTEGRATED
-ARR-S0 Task 11:     COMPLETE / REVIEW CLEAR
 ARR-S0 contract:    ACCEPTED 1.0.0 — D-021
+ARR-S0 Evidence:    ACCEPT_WITH_LIMITATIONS / COMPLETE
 ```
 
 ## 9. Current execution boundary
 
-ARR-S0 Task 11 is `COMPLETE / REVIEW CLEAR`. The admitted final pre-write source-integrity defect is corrected: after run-root filesystem validation and before first durable Evidence, `runS0` re-observes source, requires the same clean commit/tree and revalidates exact-bound Governance authorization.
+ARR-S0 is complete. `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE` records the accepted provider-neutral host facts and the mechanical `ACCEPT_WITH_LIMITATIONS` Verdict.
 
-Finding disposition remains:
+Shared downstream host-class inputs are:
 
 ```text
-final pre-write Git/source re-observation  → IMPLEMENTATION_DEFECT / CORRECTED
-non-forgeable/signed Operator authority   → THREAT_MODEL_EXPANSION / not S0 scope
+CLASS-LOCAL-PROCESS-ISOLATION  PHYSICALLY_PLAUSIBLE
+CLASS-LANDLOCK-ISOLATION       PHYSICALLY_PLAUSIBLE
+CLASS-MICROVM-KVM              BLOCKED_BY_HOST
+CLASS-FUSE-COW                 PHYSICALLY_PLAUSIBLE
+CLASS-LOCAL-CONTAINER          REQUIRES_SETUP_DECISION
 ```
 
-`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version 1.0.0 is accepted under D-021. That acceptance freezes the provider-neutral host-fact contract but does not grant `GATE-S0-EXECUTE` authority.
+The S0 limitation is `HOST-DOCKER-DAEMON=UNKNOWN` because Docker CLI is absent under the reviewed interface. KVM's generic class is blocked under the observed facts because `/dev/kvm` read/write open failed with `EACCES` even though the character device exists.
 
-ARR-S0 Task 12 real host observation is `CONTROLLED`, `NOT EXECUTED` and prohibited until separately authorized. Before that authorization, the merged canonical source and fresh deterministic verification must be bound with the accepted plan blob and exact contract SHA-256.
+S0 acceptance authorizes no automatic host mutation, candidate installation/execution, runtime/environment selection, revision-5 M02 production implementation or production Worker dispatch.
 
-Candidate execution/selection, revision-5 M02 production implementation and production Worker dispatch remain prohibited pending later deciding authority/Evidence.
+The next allowed work is fresh S1/S2 research and planning. Candidate execution requires each later accepted contract/plan and exact execution authority.
 
 ## 10. Evidence proportionality
 

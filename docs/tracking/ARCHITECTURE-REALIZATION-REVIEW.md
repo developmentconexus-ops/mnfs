@@ -16,6 +16,7 @@ related:
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION
   - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
+  - ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE
   - DOC-PRODUCT-BLUEPRINT
   - DOC-CAPABILITY-ROADMAP
   - TRACKING-DECISIONS
@@ -45,7 +46,9 @@ D-019 proportionality/review admission          ACCEPTED / INTEGRATED
 D-020 risk-proportional execution governance    ACCEPTED / INTEGRATED
 ARR-S0 Task 11                                  COMPLETE / REVIEW CLEAR
 ARR-S0 contract 1.0.0                           ACCEPTED — D-021
-ARR-S0 Task 12                                  CONTROLLED / NOT AUTHORIZED / NOT EXECUTED
+ARR-S0 Task 12                                  COMPLETE — ACCEPT_WITH_LIMITATIONS
+ARR-S1 planning                                 NEXT / NOT EXECUTED
+ARR-S2 planning                                 NEXT / NOT EXECUTED
 ```
 
 ## Accepted architecture
@@ -92,9 +95,9 @@ Fresh-Actor recovery cannot depend on transcript/session continuity. Proof-first
 ## ARR sequence
 
 ```text
-ARR-S0  Host Capability Probe
-ARR-S1  Agent Runtime Conformance
-ARR-S2  Local Execution Envelope Conformance
+ARR-S0  Host Capability Probe                    COMPLETE — ACCEPT_WITH_LIMITATIONS
+ARR-S1  Agent Runtime Conformance                NEXT
+ARR-S2  Local Execution Envelope Conformance     NEXT
 ARR-S2W Workspace comparison — conditional only
 ARR-S3  Vertical Composition Proof
 → substrate selection Decision
@@ -106,33 +109,63 @@ Every comparative Spike freezes a candidate-independent deciding contract before
 
 ## D-019 / D-020 application to ARR-S0
 
-Finding Admission is complete for the Task 11 review set:
+Finding Admission for the deterministic harness is complete:
 
 - final pre-write Git/source re-observation → `IMPLEMENTATION_DEFECT` → **CORRECTED**;
 - non-forgeable/signed Operator authority → `THREAT_MODEL_EXPANSION` → not current S0 correction scope;
+- ambient-umask dependence in one permissive-mode test fixture → `IMPLEMENTATION_DEFECT` → **CORRECTED** before the real run;
 - non-deciding defense-in-depth → `FUTURE_HARDENING` / follow-up when applicable.
 
-The correction preserves existing source-first preflight and run-root filesystem checks, then adds one final read-only source observation immediately before first durable Evidence. Drift, missing exact identity or dirty state fails closed before `state/created.json` and before collector execution.
-
-Execution authorization terminology reflects the accepted threat model: parser-validated, exact-bound **Governance authorization** under trusted Operator + trusted MNFS control-plane assumptions. It is not represented as cryptographic authentication, personal-origin proof or non-repudiation. No PKI, Ed25519, signer/trust-root service or generic signed-capability subsystem was added.
-
-Task 11 is `COMPLETE / REVIEW CLEAR`.
+The final harness validates exact-bound Governance authorization before host observation, validates source and state-root boundaries, and re-observes exact clean source immediately before first durable Evidence.
 
 ## D-021 — ARR-S0 contract acceptance
 
-The Operator explicitly accepted the exact `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` bytes as version 1.0.0 under D-021, bound to the accepted S0 plan blob and the canonical pre-acceptance base named by the Operator token.
+The Operator accepted the exact `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` bytes as version 1.0.0 under D-021. The contract remains provider-neutral and freezes the S0 host-fact semantics, safety boundary, capability classes, mechanical Verdict vocabulary and Evidence-integrity rules.
 
-D-021 freezes the provider-neutral host facts, capability-class semantics, mechanical Verdict vocabulary, safety boundary, Evidence integrity rules and machine interface for the Task 12 operation. It authorizes canonicalization/review/merge of the accepted contract only.
+Contract acceptance did not itself authorize the host run. Task 12 later executed only under the separately exact-bound `GATE-S0-EXECUTE` authority.
 
-D-021 does **not** authorize `preflight`, `run`, Task 12 host observation, candidate execution/selection, substrate selection, S1/S2/S2W/S3, revision-5 M02 production work or production Worker dispatch.
+## Accepted ARR-S0 Evidence
+
+Canonical durable Evidence is `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`.
+
+The accepted real run is:
+
+```text
+run id:          arr-s0-20260808t210139618z-ff3979
+source commit:   8150eeddf3ed32485ac4c36b917e6a904ef6b683
+source tree:     c878641bf1da29dc5427aa4e426263b825f1dff3
+verdict:         ACCEPT_WITH_LIMITATIONS
+fresh integrity: PASS
+post-run verify: PASS
+```
+
+Accepted generic host classes:
+
+```text
+CLASS-LOCAL-PROCESS-ISOLATION  PHYSICALLY_PLAUSIBLE
+CLASS-LANDLOCK-ISOLATION       PHYSICALLY_PLAUSIBLE
+CLASS-MICROVM-KVM              BLOCKED_BY_HOST
+CLASS-FUSE-COW                 PHYSICALLY_PLAUSIBLE
+CLASS-LOCAL-CONTAINER          REQUIRES_SETUP_DECISION
+```
+
+The sole mechanical Verdict limitation is `HOST-DOCKER-DAEMON=UNKNOWN`, because the Docker CLI is absent under the reviewed interface. The KVM class is blocked under the observed facts because `/dev/kvm` exists but read/write open failed with `EACCES`.
+
+These are generic host facts. S0 does not declare any named Agent Runtime, process sandbox, microVM implementation, container runtime or workspace substrate accepted or rejected.
 
 ## Current boundary
 
-Real ARR-S0 host observation remains prohibited. Task 12 is a separate `CONTROLLED` operation and requires explicit `GATE-S0-EXECUTE` authority protecting its deciding canonical Evidence boundary.
+ARR-S0 is complete. The next allowed work is fresh ARR-S1 and ARR-S2 research/planning using current primary upstream evidence and the accepted S0 host facts.
 
-Before that gate can be formed, the accepted plan requires the exact accepted contract SHA-256, the exact canonical `main` commit containing D-021/contract 1.0.0, and a fresh successful deterministic verification on that exact commit.
+S1/S2 planners must:
 
-After those identities are frozen, the Operator may authorize only the bounded host-probe scope. Contract acceptance never implies execution authority.
+- refresh current named-candidate provenance and requirements;
+- map those requirements onto immutable S0 generic host facts;
+- keep project-specific prerequisites unresolved unless separately proved;
+- define candidate-independent deciding contracts before candidate execution;
+- avoid automatic host setup or permission changes.
+
+Candidate execution remains behind later exact gates. S0 acceptance does not authorize candidate installation/execution, substrate selection, S2W/S3 execution, revision-5 M02 production work or production Worker dispatch.
 
 ## Durable P1 anchor
 

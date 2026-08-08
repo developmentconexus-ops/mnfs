@@ -49,7 +49,7 @@ assert.match(s1Contract, /Upgrade Policy[\s\S]{0,120}Removal Conditions/iu, 'S1 
 assert.match(s1Contract, /not selection-eligible[\s\S]{0,180}`S1-C16`/iu, 'S1 must block selection when upgrade/removal evidence is incomplete');
 assert.match(s1Contract, /No candidate execution is authorized by this proposed contract/iu, 'proposed S1 contract must grant no execution authority');
 assert.match(s1Plan, /later exact `GATE-S1`/iu, 'S1 plan must keep real operations behind a later exact gate');
-assert.match(s1Plan, /OpenCode native ACP must be exercised before final S1 selection[\s\S]{0,180}triggers Replan/iu, 'S1 plan must require the external challenger or replan');
+assert.match(s1Plan, /OpenCode native ACP must be exercised and finalized under the same contract before final S1 selection[\s\S]{0,220}`BLOCKED`[\s\S]{0,100}`REPLAN_REQUIRED`/iu, 'S1 plan must require completed external challenger comparison or block/replan');
 assert.match(s1Plan, /do not globally install/iu, 'S1 must not globally install candidates');
 assert.match(s1Plan, /Provider\/subscription credentials remain control-side|Never persist raw provider credentials/iu, 'S1 must preserve credential boundary');
 assert.match(s1Plan, /Upgrade Policy/iu, 'S1 plan must produce candidate-specific Upgrade Policy evidence');

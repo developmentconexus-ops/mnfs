@@ -10,11 +10,12 @@ Before changing anything, establish current authority:
 4. `docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md`
 5. `docs/product/CAPABILITY-REALIZATION-METHOD.md`
 6. `docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md`
-7. `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md`
-8. `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md`
-9. current task-specific ADR / Capability / Mission / Evidence / bounded design or plan when applicable.
+7. `docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md`
+8. `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md`
+9. `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md`
+10. current task-specific ADR / Capability / Mission / Evidence / bounded design or plan when applicable.
 
-For architecture/planning/cross-cutting work, also read `docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md` and the relevant canonical Blueprint source sections. Do not load the full Product Blueprint for a narrow implementation task unless applicability or the Context Pack requires it.
+For architecture/planning/cross-cutting work, inspect the relevant canonical Blueprint source sections as needed. Do not load the full Product Blueprint for a narrow implementation task unless applicability or the Context Pack requires it.
 
 ## Governance depth
 
@@ -133,7 +134,7 @@ P1-F03 contract binding:               ACCEPTED / INTEGRATED
 CPR canonical reconciliation:          ACCEPTED / INTEGRATED — D-019
 ARR-S0 Task 11:                        REPLAN_REQUIRED / NOT CLOSED
 ARR-S0 admitted source correction:     BOUNDED next product correction
-ARR-S0 Task 12 real host Evidence:     CONTROLLED / NOT YET EXECUTED
+ARR-S0 real host probe / Task 12:      PROHIBITED pending later CONTROLLED authority
 Candidate execution/selection:         PROHIBITED pending deciding Evidence
 M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED

@@ -199,10 +199,12 @@ OpenCode native ACP is mandatory before a final S1 selection because D-012 requi
 After Pi qualification and OpenCode ACP, S1 may terminate without another runtime when all of the following are true:
 
 1. one Pi integration shape PASSes every required criterion;
-2. OpenCode ACP has been executed under the same contract, or is honestly `BLOCKED` for a reason that does not invalidate the comparison baseline;
+2. OpenCode ACP has been **executed and finalized under the same contract** with a candidate verdict of `PASS` or `FAIL`; `BLOCKED` does not satisfy the required external comparison and cannot authorize a final runtime/boundary selection;
 3. OpenCode exposes no unique required capability and does not eliminate a named material MNFS machinery class that the passing Pi shape requires;
 4. remaining differences are optional ergonomics, ecosystem breadth or non-deciding performance/maintenance observations;
 5. no unresolved finding can still change runtime or boundary selection.
+
+If OpenCode ACP is `BLOCKED` before a meaningful real comparison completes, S1 cannot select Pi merely from incumbent Evidence. The spike terminates `BLOCKED` or `REPLAN_REQUIRED` according to whether the missing comparison can be completed under the accepted contract and authority.
 
 If Pi-ACP and OpenCode ACP both PASS via the same MNFS ACP client, ACP interoperability has two real implementations and a selecting Decision may choose `ACP boundary + Pi initial runtime` without a third ACP candidate.
 

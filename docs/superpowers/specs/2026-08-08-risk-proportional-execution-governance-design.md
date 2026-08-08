@@ -4,8 +4,8 @@ title: MNFS Risk-Proportional Execution and Governance Design
 document_type: development_governance_design
 form: explanation
 authority: specification
-status: proposed
-version: 0.1.0
+status: accepted
+version: 1.0.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -30,14 +30,7 @@ The governing principle is:
 
 > **Use the minimum governance depth that protects the current material risk. Every human interruption, artifact and gate must justify what decision, risk or irreversible effect it protects.**
 
-This design operationalizes rules already present in accepted MNFS authority:
-
-- rigor scales with impact, risk, irreversibility, architectural reach, number of consumers and external effect;
-- a tiny low-risk change may use a reduced lane while preserving lineage, authority and proof;
-- planning completeness reduces hidden material decisions; it does not maximize detail, mechanism or ceremony;
-- material complexity carries a current-benefit burden of proof;
-- reviewer severity does not independently create requirement Authority;
-- Governance Gates are distinct from adversarial Security Boundaries.
+Accepted MNFS authority already establishes that planning rigor is proportional to risk, planning completeness does not mean maximum ceremony, material complexity carries a current-benefit burden of proof, reviewer severity does not independently create requirement Authority, and Governance Gates are distinct from adversarial Security Boundaries. This design adds the explicit operational profiles `FAST / BOUNDED / CONTROLLED` to make that proportionality executable in daily work.
 
 This is a refinement of existing governance, not a second lifecycle, scoring system, FSM or policy engine.
 
@@ -168,6 +161,8 @@ material boundary/risk/effect decision             → CONTROLLED
 
 When uncertain between FAST and BOUNDED, use BOUNDED. CONTROLLED requires a named current reason.
 
+A lane may remove accidental ceremony; it may never remove an applicable deciding obligation already frozen by higher Authority. Required correctness, architecture, threat/security boundary, proof method, independent validation, external-effect restriction or contract requirement remains binding regardless of lane.
+
 ## 5. Automatic escalation
 
 A lane never authorizes silent scope expansion.
@@ -217,6 +212,8 @@ material review findings are admitted/cleared
 delivery target remains the approved target
 no new high-risk external effect appears
 ```
+
+Delivery authority must be unambiguous from the active work envelope. A request to inspect, analyze or discuss a change does not by itself authorize merge or delivery. When the Operator clearly asks to implement/finish the bounded work and delivery is part of the presented envelope, a second mechanical merge approval is unnecessary.
 
 If any condition fails, delivery authority is suspended and the Lead escalates instead of improvising.
 
@@ -412,7 +409,7 @@ The method should reduce Operator interruptions and intent-to-merge lead time wi
 Adopt through the smallest coherent edits to existing authority:
 
 1. reconcile the lane model and human-interruption rule into Development Governance;
-2. operationalize reduced-lane semantics in MCRM without changing R0–R8;
+2. operationalize risk-proportional governance depth in MCRM without changing R0–R8;
 3. allow risk-proportional Execution Briefs in Layered Planning without changing L0–L3;
 4. simplify `AGENTS.md` orientation enough to prevent ceremony-by-default;
 5. protect only stable normative markers with documentation tests;

@@ -156,6 +156,11 @@ assert.equal(
   'current S0 contract bytes must remain exactly the Git blob accepted by D-021',
 );
 const contractSha256 = `sha256:${createHash('sha256').update(contractBytes).digest('hex')}`;
+assert.match(
+  acceptance,
+  new RegExp(`^\\| Contract SHA-256 \\| \`${contractSha256}\` \\|$`, 'mu'),
+  'S0 acceptance must bind the current contract hash',
+);
 assert.equal(
   contractSha256,
   'sha256:2891a1a2dda0dc1cfe146174839c988be7d76dc3c710cd4d15d1b247f0753f5d',

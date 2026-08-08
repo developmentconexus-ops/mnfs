@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 1.21.0
+version: 1.22.0
 owners:
   - developmentconexus-ops
 related:
@@ -14,6 +14,8 @@ related:
   - DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD
   - DOC-MNFS-CAPABILITY-REALIZATION-METHOD
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
+  - DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION
+  - PLAN-COMPLEXITY-PROPORTIONALITY-RECONCILIATION
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - TRACKING-DECISIONS
@@ -55,11 +57,15 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
 - **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
-- **Current phase:** `ARR P1-F03 — ACCEPTED / INTEGRATED` under Issue #23 / PR #26.
+- **Complexity Proportionality and Review Admission:** `DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION` 1.0.0 ACCEPTED / D-019.
+- **Current phase:** `GATE-CPR-CANONICAL — AUTHORIZED / IN PROGRESS` under Issue #23 / PR #28; Tasks 1–3 only.
 - **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — ACCEPTED — GATE-P0 — blob `52033adcdfb7163f63606034b9912942b018f38e`.
 - **First executable-tranche plan:** `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` 0.2.0 — ACCEPTED — GATE-P0 — blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`.
+- **Complexity reconciliation plan:** `PLAN-COMPLEXITY-PROPORTIONALITY-RECONCILIATION` 1.0.0 — ACCEPTED — blob `040f09303712ac47104ffa9a7cc2756b94b10886`; Tasks 1–3 authorized only by `GATE-CPR-CANONICAL`.
 - **P1 base reconciliation:** A1–A4 + B1 + P1-F01 + P1-F02 is ACCEPTED under GATE-R / D-017 and INTEGRATED into `main` by squash merge of PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`.
 - **P1-F03 post-integration correction:** exact Architecture Spike contract-byte binding is ACCEPTED under D-018 at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27` and INTEGRATED into canonical `main` by squash merge at `88c5e05964e8465ef4317a3b4174c6160d8cdefa`.
+- **ARR-S0 deterministic harness:** PR #27 contains Tasks 1–11 at reviewed head `e153eafeaf0854bc13d2eb59cf3ee41783487b6d`; Task 11 is `REPLAN_REQUIRED`, the proportionality path is selected, and the bounded final-source correction has not been executed.
+- **ARR-S0 Task 12 / `GATE-S0-EXECUTE`:** NOT AUTHORIZED.
 - **Superseded prior planning container:** Issue #21 — prior `MIS-002/M02` R5 path; do not resume under revision 5.
 - **Deferred operational hardening:** Issue #20 — real M01 R2/R3 crash/lineage scenarios.
 
@@ -170,13 +176,24 @@ P1-F03 integrated commit:       88c5e05964e8465ef4317a3b4174c6160d8cdefa
 P1-F03 integration workflow:    31205404945 — SUCCESS — npm run verify
 P1-F03 integration record:      ACCEPTANCE-ARR-P1-F03-INTEGRATION-CLOSEOUT
 P1-F03 integration:             COMPLETE — PR #26 MERGED
+
+CPR design reviewed head:       636294c984b3ece40d2d91d9c94a9aecf16108fd
+CPR design decision:            D-019 — ACCEPTED
+CPR accepted plan blob:         040f09303712ac47104ffa9a7cc2756b94b10886
+CPR gate base:                  0c543ed6d7bdf371d3c6a6d5a93d121f1496b2a9
+CPR gate verification:          31259254113 — SUCCESS — npm run verify
+CPR execution gate:             GATE-CPR-CANONICAL — AUTHORIZED — Tasks 1–3 only
+CPR Task 1 RED head:            863f76200d00c5941b54f0053f2584c46f092702
+CPR Task 1 RED workflow:        31260363389 — FAILURE — expected missing D-019/design acceptance
 ```
 
 The P1-F02 review used the provider-neutral constitutional tree and a fresh contextual scan of residual Pi/Treehouse/E0–E4/AB1/AS-01/AS-02/worktree language. Remaining vendor-specific occurrences are explicitly historical/incumbent/reference Evidence, research, negative examples or property options rather than current substrate selection.
 
 D-018 strengthens the shared B1 Architecture Spike Evidence contract before any deciding ARR host/candidate Evidence is produced: every Evidence record carries `contractHash`, and the validator recomputes SHA-256 from the exact frozen contract bytes supplied through `--contract`.
 
-The accepted GATE-P0 package approves plan authority only. None of P1, P1-F03 or their acceptance/integration records are ARR-S0 host Evidence or authorization to execute ARR-S0.
+D-019 adds a current-benefit burden of proof for material complexity, Finding admission before Correction, and an explicit Governance Gate versus Security Boundary distinction. It classifies ARR-S0 non-forgeability as `THREAT_MODEL_EXPANSION` and the final Git/source re-observation as an `IMPLEMENTATION_DEFECT`.
+
+The accepted GATE-P0 package approves plan authority only. P1/P1-F03 Evidence is not ARR-S0 host Evidence, and `GATE-CPR-CANONICAL` authorizes only the current governance reconciliation Tasks 1–3.
 
 ## Current authorization boundary
 
@@ -184,24 +201,28 @@ The accepted GATE-P0 package approves plan authority only. None of P1, P1-F03 or
 M01 implementation / closeout:                 ACCEPTED / CLOSED
 D1–D4 + Architecture Synthesis:                 APPROVED
 Execution Planning Design 1.0.0:                ACCEPTED — D-016
+Complexity Proportionality Design 1.0.0:        ACCEPTED — D-019
+Complexity Reconciliation Plan 1.0.0:           ACCEPTED
+GATE-CPR-CANONICAL:                             AUTHORIZED — Tasks 1–3 only
 Master ARR program plan 0.2.0:                  ACCEPTED — GATE-P0
 ARR-S0 plan 0.2.0:                              ACCEPTED — GATE-P0
 ARR P1 A1-A4 + B1 + P1-F01 + P1-F02:           ACCEPTED — GATE-R / D-017 / INTEGRATED
 PR #24 merge / integration:                     COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
 P1-F03 exact Spike-contract binding correction: ACCEPTED — D-018 / INTEGRATED
 PR #26 merge / integration:                     COMPLETE — 88c5e05964e8465ef4317a3b4174c6160d8cdefa
-ARR-S0 harness implementation:                  PROHIBITED pending GATE-S0-IMPLEMENT
-ARR-S0 real host probe:                         PROHIBITED pending later GATE-S0-EXECUTE
+ARR-S0 deterministic harness Tasks 1–11:        PR #27 / REPLAN_REQUIRED — Task 11 NOT CLOSED
+ARR-S0 bounded correction Task 4:               NOT AUTHORIZED pending later GATE-CPR-S0-CORRECTION
+ARR-S0 real host probe / Task 12:               NOT AUTHORIZED — GATE-S0-EXECUTE not issued
 ARR-S1/S2/S2W/S3 execution:                     PROHIBITED pending their later exact gates
 MIS-002 revision 5 M02 implementation:           PROHIBITED / SUPERSEDED PATH
 Production Worker dispatch:                     PROHIBITED
 Automatic delivery / merge:                     NOT AUTHORIZED
 ```
 
-## Immediate next action — GATE-S0-IMPLEMENT review
+## Immediate next action — complete GATE-CPR-CANONICAL Tasks 1–3
 
-P1 and the accepted P1-F03 correction are now integrated into canonical `main`. The integration prerequisites from the ARR program and D-018 are therefore satisfied.
+The Operator issued the exact `MNFS_AUTHORIZE_CPR_CANONICAL` gate bound to design blob `e253a747cbc5d01ccb972ebbfcb4fb844c880c93`, accepted plan blob `040f09303712ac47104ffa9a7cc2756b94b10886`, branch base `0c543ed6d7bdf371d3c6a6d5a93d121f1496b2a9`, canonical `main` `ad913dd1e0ff3b286280081b5dd4ba90eb390972`, verification run `31259254113` and scope `tasks-1-3-only`.
 
-`GATE-S0-IMPLEMENT` is now the **next possible gate**, but it remains **NOT AUTHORIZED**. The Operator must separately authorize deterministic construction/testing of the ARR-S0 harness against an exact canonical base SHA and the accepted ARR-S0 plan.
+Task 1 records D-019 and the accepted design. Tasks 2–3 reconcile the rule into the existing methods and shared Architecture Spike governance. Stop after Task 3.
 
-ARR-S0 real host probing, candidate execution, M02 production work and production Worker dispatch remain prohibited. Real probing of the canonical WSL2 host remains behind the later separate `GATE-S0-EXECUTE`.
+ARR-S0 Task 4 correction, `GATE-S0-EXECUTE`, Task 12, candidate execution, S1/S2/S2W/S3, production Worker dispatch and merge/delivery remain unauthorized.

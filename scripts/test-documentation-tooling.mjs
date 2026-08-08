@@ -276,7 +276,7 @@ assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
-assert.match(statusText, /\*\*Current phase:\*\* `ARR P1-F03 — ACCEPTED \/ INTEGRATED`/u, 'STATUS current phase must expose integrated P1-F03');
+assert.match(statusText, /\*\*Current phase:\*\* `GATE-CPR-CANONICAL — AUTHORIZED \/ IN PROGRESS`/u, 'STATUS current phase must expose the authorized proportionality reconciliation');
 assert.match(statusText, /Master ARR program plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record master plan acceptance');
 assert.match(statusText, /ARR-S0 plan 0\.2\.0:[^\n]*ACCEPTED — GATE-P0/u, 'STATUS must record S0 plan acceptance');
 assert.match(statusText, /ARR P1 A1-A4 \+ B1 \+ P1-F01 \+ P1-F02:[^\n]*ACCEPTED — GATE-R \/ D-017 \/ INTEGRATED/u, 'STATUS must record P1 integration');
@@ -284,9 +284,12 @@ assert.match(statusText, /P1-F02 fresh review:[^\n]*Critical 0 \/ Important 0[^\
 assert.match(statusText, /P1-F03 Operator acceptance:[^\n]*D-018[^\n]*ACCEPTED/u, 'STATUS must record D-018 acceptance');
 assert.match(statusText, /P1-F03 integration:[^\n]*COMPLETE[^\n]*PR #26 MERGED/u, 'STATUS must record completed F03 integration');
 assert.match(statusText, /P1-F03 integrated commit:[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'STATUS must bind F03 integration to the real merge commit');
-assert.match(statusText, /ARR-S0 harness implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'STATUS must keep S0 implementation gated');
+assert.match(statusText, /Complexity Proportionality Design 1\.0\.0:[^\n]*ACCEPTED — D-019/u, 'STATUS must record accepted proportionality authority');
+assert.match(statusText, /GATE-CPR-CANONICAL:[^\n]*AUTHORIZED — Tasks 1–3 only/u, 'STATUS must bind the canonical reconciliation scope');
+assert.match(statusText, /ARR-S0 deterministic harness Tasks 1–11:[^\n]*PR #27 \/ REPLAN_REQUIRED — Task 11 NOT CLOSED/u, 'STATUS must expose the current S0 replan state');
+assert.match(statusText, /ARR-S0 real host probe \/ Task 12:[^\n]*NOT AUTHORIZED/u, 'STATUS must keep Task 12 unauthorized');
 assert.match(statusText, /PR #24 merge \/ integration:[^\n]*COMPLETE[^\n]*def9e5fe819f76950d61fba2cf5abcda1533c07f/u, 'STATUS must bind P1 integration to the real merge commit');
-assert.match(statusText, /## Immediate next action — GATE-S0-IMPLEMENT review/u, 'STATUS next action must be GATE-S0-IMPLEMENT review');
+assert.match(statusText, /## Immediate next action — complete GATE-CPR-CANONICAL Tasks 1–3/u, 'STATUS next action must remain inside the authorized tranche');
 assert.doesNotMatch(statusText, /Pre-Spike reconciliation execution:[^\n]*PROHIBITED pending plan approval\/gate/u, 'STATUS must not prohibit the already-authorized P1 tranche');
 assert.doesNotMatch(statusText, /## Immediate next action — P1-F02 fresh review/u, 'STATUS must not point to completed F02 fresh review');
 assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');

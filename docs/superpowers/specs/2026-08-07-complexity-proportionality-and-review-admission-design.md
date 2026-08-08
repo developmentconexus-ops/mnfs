@@ -4,8 +4,8 @@ title: MNFS Complexity Proportionality and Review Admission Replan Design
 document_type: development_governance_design
 form: explanation
 authority: specification
-status: proposed
-version: 0.1.0
+status: accepted
+version: 1.0.0
 owners:
   - developmentconexus-ops
 approvers:

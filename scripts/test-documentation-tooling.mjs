@@ -27,6 +27,14 @@ const statusText = await readFile(path.join(root, 'docs/tracking/STATUS.md'), 'u
 const decisionsText = await readFile(path.join(root, 'docs/tracking/DECISIONS.md'), 'utf8');
 const arrReviewText = await readFile(path.join(root, 'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md'), 'utf8');
 const p1AcceptanceText = await readFile(path.join(root, 'docs/acceptance/2026-08-07-arr-p1-reconciliation-acceptance.md'), 'utf8');
+const proportionalityDesignText = await readFile(
+  path.join(root, 'docs/superpowers/specs/2026-08-07-complexity-proportionality-and-review-admission-design.md'),
+  'utf8',
+);
+const riskProportionalDesignText = await readFile(
+  path.join(root, 'docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md'),
+  'utf8',
+);
 const adrFiles = {
   'ADR-0001': 'docs/adr/0001-pi-first-wsl2.md',
   'ADR-0003': 'docs/adr/0003-worktree-write-tracks.md',
@@ -102,7 +110,6 @@ function approvedContractFor(data) {
 const documentationWorkflow = await readFile(path.join(root, '.github/workflows/docs.yml'), 'utf8');
 assert.match(documentationWorkflow, /'policies\/\*\*'/u);
 assert.match(documentationWorkflow, /'scripts\/sec-e1-policy\.mjs'/u);
-assert.match(documentationWorkflow, /'scripts\/test-arr-s0-contract-consistency\.mjs'/u);
 
 const historicalMissionText = await readFile(
   path.join(root, '.mnfs/missions/MIS-002/history/revision-0003.json'),
@@ -243,6 +250,7 @@ const canonicalFreshReadPath = [
   'docs/product/CAPABILITY-REALIZATION-METHOD.md',
   'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md',
   'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md',
+  'docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md',
   'docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md',
 ];
 let previousReadPathIndex = -1;
@@ -254,49 +262,58 @@ for (const rel of canonicalFreshReadPath) {
 }
 assert.match(agentsText, /MIS-002\/M02[^\n]*SUPERSEDED/iu);
 assert.match(agentsText, /ARR-S0[^\n]*PROHIBITED/iu);
+assert.match(agentsText, /FAST[\s\S]*BOUNDED[\s\S]*CONTROLLED/u, 'AGENTS must expose risk-proportional execution profiles');
+assert.match(agentsText, /D-010 through D-020/u, 'AGENTS must orient fresh actors to current governance Decisions');
 
 for (const id of [
   'ADR-0013',
   'ADR-0014',
   'ADR-0015',
   'DESIGN-LAYERED-AGENT-EXECUTION-PLANNING',
+  'DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE',
   'PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM',
-  'DOC-ARR-S0-HOST-CAPABILITY-CONTRACT',
 ]) {
   assert.ok(documentationMapText.includes(id), `Documentation Map missing ${id}`);
 }
 assert.match(documentationMapText, /M2 — Secure One-Worker Vertical Slice[^\n]*OPPORTUNITY_REPLAN/u);
 assert.match(documentationMapText, /MIS-002\/M02[\s\S]{0,160}SUPERSEDED_AS_EXECUTION_PATH/u);
 assert.match(documentationMapText, /ARR-S0[\s\S]*ARR-S3/u);
+assert.match(documentationMapText, /D-010 through D-020/u, 'Documentation Map must expose current Decision range');
+assert.match(documentationMapText, /BOUNDED[^\n]*default/u, 'Documentation Map must expose the default bounded profile');
 
 assert.match(toolingText, /projection of current capability-realization decisions/u);
 assert.match(toolingText, /no production winner selected/u);
 assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
-assert.match(statusText, /\*\*Current phase:\*\* `ARR-S0 — DETERMINISTIC HARNESS IMPLEMENTED \/ REVIEW_REQUIRED`/u, 'STATUS current phase must expose ARR-S0 deterministic review gate');
-assert.match(statusText, /Master program plan:[^\n]*ACCEPTED — GATE-P0[^\n]*52033adcdfb7163f63606034b9912942b018f38e/u, 'STATUS must record master plan acceptance');
-assert.match(statusText, /ARR-S0 plan:[^\n]*ACCEPTED — GATE-P0[^\n]*3e78445fcbcca360f612edefd025c6cb0f84f8e5/u, 'STATUS must record S0 plan acceptance');
-assert.match(statusText, /P1 Operator acceptance:[^\n]*D-017[^\n]*ACCEPTED/u, 'STATUS must preserve D-017 acceptance');
-assert.match(statusText, /P1 integrated commit:[^\n]*def9e5fe819f76950d61fba2cf5abcda1533c07f/u, 'STATUS must preserve P1 integration identity');
-assert.match(statusText, /P1-F03 Operator acceptance:[^\n]*D-018[^\n]*ACCEPTED/u, 'STATUS must preserve D-018 acceptance');
-assert.match(statusText, /P1-F03 integrated commit:[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'STATUS must preserve F03 integration identity');
-assert.match(statusText, /ARR-S0 implementation token:[^\n]*MNFS_AUTHORIZE_ARR_S0_IMPLEMENT/u, 'STATUS must record exact S0 implementation authorization class');
-assert.match(statusText, /ARR-S0 implementation base:[^\n]*ad913dd1e0ff3b286280081b5dd4ba90eb390972/u, 'STATUS must bind S0 implementation to the authorized base');
-assert.match(statusText, /GATE-S0-IMPLEMENT:[^\n]*AUTHORIZED[^\n]*deterministic-harness-only/u, 'STATUS must expose bounded S0 implementation authority');
-assert.match(statusText, /ARR-S0 deterministic harness:[^\n]*IMPLEMENTED \/ REVIEW_REQUIRED/u, 'STATUS must expose deterministic harness review gate');
-assert.match(statusText, /ARR-S0 host contract:[^\n]*PROPOSED[^\n]*0\.1\.0[^\n]*NOT ACCEPTED/u, 'STATUS must keep S0 contract proposed');
-assert.match(statusText, /ARR-S0 real host probe:[^\n]*PROHIBITED pending GATE-S0-EXECUTE/u, 'STATUS must keep real host probe gated');
-assert.match(statusText, /## Immediate next action — ARR-S0 deterministic review/u, 'STATUS next action must be Task 10/11 deterministic review');
-assert.doesNotMatch(statusText, /## Immediate next action — GATE-S0-IMPLEMENT review/u, 'STATUS must not point back to the already-authorized implementation gate');
-assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS must not point back to completed GATE-P0');
+assert.match(statusText, /Risk-Proportional Execution Governance 1\.0\.0/u, 'STATUS must expose D-020 governance');
+assert.match(statusText, /ARR-S0 Task 11:\s+REPLAN_REQUIRED \/ NOT CLOSED/u, 'STATUS must keep Task 11 open');
+assert.match(statusText, /Final source re-observation finding:\s+IMPLEMENTATION_DEFECT \/ admitted correction/u, 'STATUS must preserve admitted correction classification');
+assert.match(statusText, /Non-forgeable Operator authority:\s+THREAT_MODEL_EXPANSION/u, 'STATUS must preserve threat-model-expansion disposition');
+assert.match(statusText, /ARR-S0 Task 12 real host Evidence:\s+NOT EXECUTED/u, 'STATUS must keep Task 12 unexecuted');
+assert.match(statusText, /profile: BOUNDED/u, 'STATUS must classify the next S0 correction as BOUNDED');
+assert.match(statusText, /Operator approval of that bounded envelope/u, 'STATUS must preserve separate bounded approval before Task 4 implementation');
+assert.match(statusText, /ARR-S0 Task 4 implementation before its BOUNDED approval envelope/u, 'STATUS must keep Task 4 unauthorized until bounded approval');
+assert.doesNotMatch(statusText, /GATE-CPR-CANONICAL — AUTHORIZED \/ IN PROGRESS/u, 'STATUS must not project completed CPR reconciliation as active');
+
 assert.match(p1AcceptanceText, /MNFS_ACCEPT_ARR_P1 program_blob=52033adcdfb7163f63606034b9912942b018f38e pr=24 head=02e99b25842562d111488d5c8c7008cb2635f3da findings=critical:0,important:0/u, 'P1 acceptance record must bind the exact Operator token');
 assert.match(decisionsText, /\| D-017 \| 2026-08-07 \| Accept ARR P1 \/ GATE-R[\s\S]*02e99b25842562d111488d5c8c7008cb2635f3da/u, 'D-017 must record exact P1 acceptance authority');
 assert.match(decisionsText, /\| D-018 \| 2026-08-07 \| Accept the bounded ARR P1-F03[\s\S]*0b9fe9747887ef5817fffbb586db04ccb3292b27/u, 'D-018 must record exact P1-F03 acceptance authority');
-assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must preserve integrated GATE-R history');
-assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must preserve accepted P1 authority');
-assert.match(agentsText, /P1-F03 exact contract-binding correction:[^\n]*ACCEPTED — D-018 \/ INTEGRATED/u, 'AGENTS must preserve integrated F03 authority');
-assert.match(agentsText, /PR #26 merge \/ integration:[^\n]*COMPLETE[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'AGENTS must preserve F03 integration identity');
+assert.match(decisionsText, /\| D-019 \| 2026-08-08 \|/u, 'D-019 must record the accepted complexity-proportionality decision');
+assert.match(decisionsText, /\| D-020 \| 2026-08-08 \| Accept `DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE` version 1\.0\.0/u, 'D-020 must record the accepted risk-proportional governance decision');
+assert.match(proportionalityDesignText, /status: accepted/u, 'proportionality design must be canonically accepted');
+assert.match(proportionalityDesignText, /version: 1\.0\.0/u, 'proportionality design must be promoted to version 1.0.0');
+assert.match(proportionalityDesignText, /A good plan minimizes uncertainty; it does not maximize complexity\./u);
+assert.match(riskProportionalDesignText, /status: accepted/u, 'risk-proportional design must be canonically accepted');
+assert.match(riskProportionalDesignText, /version: 1\.0\.0/u, 'risk-proportional design must be promoted to version 1.0.0');
+assert.match(riskProportionalDesignText, /FAST[\s\S]*BOUNDED[\s\S]*CONTROLLED/u, 'risk-proportional design must define all execution profiles');
+assert.match(riskProportionalDesignText, /A lane may remove accidental ceremony; it may never remove an applicable deciding obligation/u, 'lane simplification must preserve higher-authority deciding obligations');
+assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must record integrated GATE-R');
+assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-CPR-S0-CORRECTION — NOT AUTHORIZED/u, 'ARR review must keep the S0 correction unauthorized until its own authority');
+assert.match(arrReviewText, /THREAT_MODEL_EXPANSION/u, 'ARR review must classify non-forgeability as a threat-model expansion');
+assert.match(arrReviewText, /IMPLEMENTATION_DEFECT/u, 'ARR review must classify final source re-observation as an implementation defect');
+assert.match(arrReviewText, /ARR-S0 Task 11[^\n]*REPLAN_REQUIRED[^\n]*NOT CLOSED/u, 'ARR review must keep Task 11 open');
+assert.match(documentationMapText, /ARR P1 A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'Documentation Map must retain the durable P1 acceptance anchor');
 
 const schemaCandidate = structuredClone(traceability);
 for (const requirement of schemaCandidate.requirements) requirement.allocatedTo = [];
@@ -517,6 +534,78 @@ try {
   }
 } finally {
   await rm(spikeEvidenceTemp, { recursive: true, force: true });
+}
+
+const developmentGovernanceText = await readFile(
+  path.join(root, 'docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md'),
+  'utf8',
+);
+const layeredPlanningText = await readFile(
+  path.join(root, 'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md'),
+  'utf8',
+);
+const layeredPlanningMetadata = parseFrontmatter(
+  layeredPlanningText,
+  'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md',
+).metadata;
+assert.equal(layeredPlanningMetadata.version, '1.1.0', 'canonical execution-planning design must be version 1.1.0');
+assert.match(
+  agentsText,
+  /Layered Agent Execution Planning 1\.1\.0/u,
+  'AGENTS must project the current execution-planning design version',
+);
+assert.doesNotMatch(
+  agentsText,
+  /Layered Agent Execution Planning 1\.0\.0/u,
+  'AGENTS must not project the historical execution-planning design version as current',
+);
+assert.match(
+  arrReviewText,
+  /`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1\.1\.0 is accepted/u,
+  'ARR review must project the current execution-planning design version',
+);
+assert.doesNotMatch(
+  arrReviewText,
+  /`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1\.0\.0 is accepted/u,
+  'ARR review must not project the historical execution-planning design version as current',
+);
+assert.match(
+  statusText,
+  /Layered Agent Execution Planning 1\.1\.0/u,
+  'STATUS must project the current execution-planning design version',
+);
+assert.doesNotMatch(
+  statusText,
+  /Layered Agent Execution Planning 1\.0\.0/u,
+  'STATUS must not project the historical execution-planning design version as current',
+);
+for (const marker of [
+  'CONTRACT_VIOLATION',
+  'IMPLEMENTATION_DEFECT',
+  'DERIVED_REQUIREMENT',
+  'THREAT_MODEL_EXPANSION',
+  'FUTURE_HARDENING',
+]) {
+  assert.match(developmentGovernanceText, new RegExp(marker, 'u'), `Development Governance missing ${marker}`);
+}
+assert.match(developmentGovernanceText, /Governance Gate/u);
+assert.match(developmentGovernanceText, /Security Boundary/u);
+assert.match(developmentGovernanceText, /complexity.*burden|burden.*complexity/iu);
+assert.match(mcrmText, /Finding Admission/u, 'MCRM must classify Findings before Correction scope');
+assert.match(layeredPlanningText, /Planning completeness[^\n]*does not mean maximum detail, mechanism, ceremony or hypothetical future hardening/iu);
+
+const spikeGovernanceText = await readFile(
+  path.join(root, 'docs/spikes/ARR-SPIKE-GOVERNANCE.md'),
+  'utf8',
+);
+assert.match(spikeGovernanceText, /threat\/trust boundary/iu, 'Spike governance must freeze the current threat/trust boundary');
+for (const marker of [
+  'Governance Gate',
+  'Security Boundary',
+  'THREAT_MODEL_EXPANSION',
+  'FUTURE_HARDENING',
+]) {
+  assert.match(spikeGovernanceText, new RegExp(marker, 'u'), `Spike governance missing ${marker}`);
 }
 
 console.log('Documentation tooling tests passed.');

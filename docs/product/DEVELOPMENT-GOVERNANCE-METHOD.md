@@ -5,7 +5,7 @@ document_type: development_method
 form: reference
 authority: standard_policy
 status: accepted
-version: 1.0.0
+version: 1.1.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -21,7 +21,7 @@ related:
   - DOC-DOCUMENTATION-MAP
   - DOC-CAPABILITY-ROADMAP
 tracking_issue: 23
-last_reviewed: 2026-08-07
+last_reviewed: 2026-08-08
 ---
 
 # MNFS Development Governance Method
@@ -156,6 +156,54 @@ The Decision Loop:
 8. updates authoritative documents before bounded execution resumes.
 
 No candidate wins because it is already implemented, fashionable, familiar or easy to describe.
+
+#### 3.2.1 Complexity Burden of Proof
+
+Planning completeness reduces uncertainty; it does not maximize machinery. Material complexity may enter current scope only when it names a current capability, requirement, failure mode, security risk, Recovery/Evidence obligation, operational simplification or meaningful machinery elimination.
+
+For each material mechanism, the Decision or design MUST answer:
+
+1. what current consumer/risk/failure requires it;
+2. why the simpler alternative is insufficient for that current need;
+3. what implementation, operational and maintenance cost it adds;
+4. whether it eliminates more machinery than it introduces;
+5. whether it can stay concrete rather than becoming a generic framework;
+6. whether it can safely be deferred until a real consumer exists.
+
+When material current benefit is not established, use `DEFER` rather than speculative implementation. There is no numerical complexity score.
+
+#### 3.2.2 Finding Admission
+
+A material review Finding is classified against frozen authority before it becomes Correction scope:
+
+- `CONTRACT_VIOLATION` — contradicts an accepted requirement, criterion, contract, design or threat model; Correction is admissible.
+- `IMPLEMENTATION_DEFECT` — fails to preserve an already-required property; Correction is admissible.
+- `DERIVED_REQUIREMENT` — new requirement genuinely required by accepted higher authority; admit/update authority first when material, then correct.
+- `THREAT_MODEL_EXPANSION` — matters only under an adversary/compromise not present in the accepted threat model; return to Discovery/Decision/Replan.
+- `FUTURE_HARDENING` — useful defense-in-depth that does not affect current correctness, accepted risk or deciding Evidence; defer/follow up.
+
+Reviewer severity is evidence of impact, not requirement Authority:
+
+```text
+severity ≠ requirement authority
+```
+
+A high-severity Finding under a stronger assumed threat model is not ignored; it is routed to the Decision Loop instead of silently expanding implementation.
+
+#### 3.2.3 Governance Gate and Security Boundary
+
+A **Governance Gate** asks whether the current Actor/process has explicit authority to advance a workflow state. It fails closed on missing, malformed or stale authority and binds scope/source/contract when required, but does not by default promise resistance to a malicious process able to rewrite the control plane itself.
+
+A **Security Boundary** asks what a malicious or compromised Actor/process is technically prevented from doing. It is justified by an accepted adversarial threat model and a named current consumer such as production credentials, privileged host mutation, destructive infrastructure, external financial effects, untrusted-code isolation or production deployment.
+
+Default classification:
+
+```text
+workflow transition → Governance Gate
+adversarial credential/effect/isolation enforcement → Security Boundary
+```
+
+Review implication alone does not promote a Governance Gate into a Security Boundary.
 
 ### 3.3 Execution Loop
 

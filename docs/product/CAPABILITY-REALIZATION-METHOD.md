@@ -5,7 +5,7 @@ document_type: development_method
 form: reference
 authority: standard_policy
 status: accepted
-version: 1.1.0
+version: 1.2.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -22,7 +22,7 @@ related:
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
   - TRACKING-DECISIONS
 tracking_issue: 23
-last_reviewed: 2026-08-07
+last_reviewed: 2026-08-08
 ---
 
 # MNFS Capability Realization Method
@@ -828,7 +828,9 @@ Para cada decisão material, registrar quando aplicável:
 - license/sovereignty impact;
 - proof required before adoption;
 - upgrade policy;
-- removal/replacement conditions.
+- removal/replacement conditions;
+- current material benefit/risk addressed;
+- simpler alternative and why it is insufficient for the current need.
 
 A regra é capability-first:
 
@@ -867,6 +869,7 @@ Evitar múltiplos source documents duplicando conteúdo.
 - impact matrix complete;
 - architecture satisfies requirements;
 - sourcing decisions/dispositions complete enough;
+- material complexity has a named current consumer/benefit and a recorded reason the simpler alternative is insufficient;
 - no duplicate authority introduced;
 - failure modes named;
 - security and Recovery addressed;
@@ -1129,6 +1132,7 @@ Cada concern deve resolver para authoritative source, `NOT_APPLICABLE + rational
 - context/termination/handoff defined;
 - rollback/recovery named;
 - no speculative platform work;
+- no speculative mechanism exists only to satisfy an unadmitted review scenario;
 - Fresh Actor readiness passes;
 - Execution Planning Completeness has no unexplained blank concern.
 
@@ -1257,6 +1261,17 @@ FUTURE_IMPROVEMENT
 ```
 
 Material architecture/security/outcome change exige Decision/Replan antes de mutation correspondente.
+
+## 17.8.1 Finding Admission before Correction
+
+Finding Admission ocorre antes de qualquer mutation motivada por review. O Actor classifica o Finding contra a Authority e o threat model congelados:
+
+- `CONTRACT_VIOLATION` e `IMPLEMENTATION_DEFECT` podem abrir Correction no scope atual;
+- `DERIVED_REQUIREMENT` precisa de materiality/admission e atualização de Authority quando material antes da Correction;
+- `THREAT_MODEL_EXPANSION` retorna a Discovery/Decision/Replan;
+- `FUTURE_HARDENING` é deferred/follow-up quando não decide correctness, accepted risk ou Evidence atual.
+
+Reviewer severity não cria Authority por si só. Somente Correction admitida pode alterar o implementation delta atual.
 
 ## 17.9 Independent validation
 
@@ -2031,9 +2046,10 @@ Uma tiny change pode usar reduced lane preservando lineage, authority e proof.
 28. Frozen Authority cannot be silently changed by tactical execution.
 29. Blocked, escalation, budget exhaustion or handoff cannot be converted into success.
 30. Implementer self-assessment never grants acceptance.
+31. Review Findings are admitted against current Authority before Correction mutation.
 
 ---
 
 # Decisão resumida
 
-> **O MNFS Capability Realization Method transforma Product intent em execução através de um Coverage Graph bidirecional e um único lifecycle R0–R8. Correctness é definida em R4A antes da decomposition em R4B. R3 inclui architecture e capability-first sourcing. R5 compila Execution Design suficiente para um Fresh Actor trabalhar sem conversa anterior, com explicit Environment/tool/write/resource boundaries, proof, budgets, termination e handoff. R6 permite tactical adaptation dentro de frozen Authority, exige continuous coverage e separa Claim de independent Verification/Validation. Todo requirement relevante é identificado, alocado, realizado e provado — ou recebe disposition explícita. Readiness e closeout são Gates baseados em Evidence, não opinião ou Session continuity.**
+> **O MNFS Capability Realization Method transforma Product intent em execução através de um Coverage Graph bidirecional e um único lifecycle R0–R8. Correctness é definida em R4A antes da decomposition em R4B. R3 inclui architecture e capability-first sourcing com complexidade proporcional ao consumidor atual. R5 compila Execution Design suficiente para um Fresh Actor trabalhar sem conversa anterior, com explicit Environment/tool/write/resource boundaries, proof, budgets, termination e handoff, sem speculative machinery para cenário de review não admitido. R6 permite tactical adaptation dentro de frozen Authority, classifica Findings antes de Correction, exige continuous coverage e separa Claim de independent Verification/Validation. Todo requirement relevante é identificado, alocado, realizado e provado — ou recebe disposition explícita. Readiness e closeout são Gates baseados em Evidence, não opinião ou Session continuity.**

@@ -7,82 +7,102 @@ Before changing anything, establish current authority:
 1. `docs/DOCUMENTATION-MAP.md`
 2. `docs/tracking/STATUS.md`
 3. `docs/tracking/DECISIONS.md`
-
-For the current M2 Opportunity Replan, architecture work, planning, sourcing, execution-design or cross-cutting review, continue in this exact order before relying on older Mission/microdesign assumptions:
-
 4. `docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md`
 5. `docs/product/CAPABILITY-REALIZATION-METHOD.md`
 6. `docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md`
 7. `docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md`
-8. `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md`
-9. the relevant current ADRs, Capability Spec, accepted Mission/Evidence and the exact bounded plan/gate for the task.
+8. `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md`
+9. `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md`
+10. current task-specific ADR / Capability / Mission / Evidence / bounded design or plan when applicable.
 
-Do not load the full Product Blueprint for a narrow implementation task unless the Context Pack or applicability analysis says it is required. For architecture/planning/cross-cutting work, inspect the relevant canonical Blueprint source sections and current Decisions rather than relying on generated projections alone.
+For architecture/planning/cross-cutting work, inspect the relevant canonical Blueprint source sections as needed. Do not load the full Product Blueprint for a narrow implementation task unless applicability or the Context Pack requires it.
 
-## Hard rules
+## Governance depth
+
+MNFS uses one lifecycle with three execution-depth profiles:
+
+```text
+FAST       local/reversible/architecture-preserving
+BOUNDED    material work inside accepted boundaries — default
+CONTROLLED architecture/threat/irreversible/external-effect boundary
+```
+
+Use the least-heavy sufficient profile. `CONTROLLED` requires a named current reason. When uncertain between FAST and BOUNDED, use BOUNDED.
+
+A lane may remove accidental ceremony; it may never remove an applicable deciding obligation already frozen by higher Authority.
+
+Every Operator interruption must protect a named decision, risk, irreversible effect or acceptance. Mechanical SHA/hash propagation is not a human decision: the Lead/system resolves exact identities. Natural-language approval is sufficient for an unambiguous FAST/BOUNDED envelope. One approval may include conditional delivery only when that envelope explicitly includes delivery and scope, architecture/threat model, proofs, review and target remain unchanged.
+
+Escalate automatically:
+
+```text
+FAST + material design/risk discovery        → BOUNDED or CONTROLLED
+BOUNDED + architecture/threat/effect change  → CONTROLLED
+```
+
+Never expand scope silently.
+
+## Hard invariants
 
 - Ubuntu WSL2 is canonical; repositories live on the Linux filesystem, never `/mnt/c`.
 - SQLite is operational authority; Git is code/result identity and canonical-document authority.
-- Conversations, issues, tracking, transcripts and observational runtime memory are not product doctrine.
-- **Authority freezes execution, not inquiry.** Discovery may challenge current Blueprint/ADR/Roadmap/Contract assumptions; bounded execution may not silently ignore accepted authority.
-- Architecture Discovery searches the best-supported global solution, not the best solution inside prior choices. Sunk cost is migration cost, not technical justification.
-- Development uses three loops: **Discovery → Decision → Execution**. A material finding returns control to Decision/Replan before implementation continues.
-- Replan may be triggered by necessity or by opportunity when stronger Evidence supports a materially better architecture.
-- Proprietary products are architectural references by default. Foundational adoption requires explicit sovereignty, licensing, dependency and exit analysis.
-- Before building material infrastructure, classify the capability as `OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT`. Do not create generic provider/plugin abstractions before a second real production consumer exists.
-- The Layered Agent Execution Planning model is binding for material execution: L0 correctness and L1 realization are frozen; L2 decomposition is versioned; L3 tactical reasoning may adapt only inside those bounds.
-- Fresh Actor orientation must be sufficient without a previous conversation. Runtime Session identity and transcript are observational, never Mission/ActorRun/Attempt/acceptance authority.
-- Approved Mission revisions are immutable. `.mnfs/missions/MIS-002/plan.json` remains revision 5 history/current contract material and must not be edited in place.
-- **MIS-002/M02 revision-5 execution path: SUPERSEDED under D-015. Do not implement or resume it.** A new M02 execution path requires post-Spike CAP-EXECUTION/MIS-002 Replan and a new R5 design.
-- A `WriteTrack` owns an isolated mutable workspace semantically; it is not inherently a Git worktree. Treehouse/worktree Evidence remains historical/incumbent realization Evidence only.
-- A Worker may Claim; implementer completion, runtime exit or terminal `done` never grants acceptance. Only the governed MNFS Gate or explicitly assigned Operator authority may accept.
-- Messages notify; durable state and Artifacts remember.
-- Execution Environment, Tool Capability, Credential, Network/Egress and External Effect authority are separate. Protected execution must fail closed; never silently fall back to unrestricted host execution.
+- Conversations, issues, transcripts and runtime Sessions are not product doctrine or acceptance authority.
+- **Authority freezes execution, not inquiry.** Discovery may challenge prior choices; bounded execution may not silently ignore accepted authority.
+- Development uses **Discovery → Decision → Execution**. Material findings return to Decision/Replan.
+- Before building material infrastructure, classify `OWN / ADOPT / ADAPT / SPIKE / REFERENCE / DEFER / REJECT`.
+- L0 correctness and L1 realization are frozen; L2 decomposition is versioned; L3 tactics may adapt only inside those bounds.
+- Fresh Actor recovery must not depend on prior conversation or runtime-session resume.
+- Approved Mission revisions are immutable. `.mnfs/missions/MIS-002/plan.json` revision 5 is preserved history/current-version material and must not be edited in place.
+- **MIS-002/M02 revision-5 execution is superseded under D-015. Do not implement or resume it.**
+- A `WriteTrack` owns isolated mutable workspace semantics, not necessarily a Git worktree.
+- Worker completion/Claim never grants acceptance by itself.
+- Execution Environment, Tool, Credential, Network/Egress and External Effect authority remain separate; protected execution fails closed.
 - Never launch a real M2 Writer under unrestricted host authority.
-- Proof-first is universal. Use TDD for behavior changes when `TEST` is the correct deciding proof: write/observe RED, implement minimally, observe GREEN, then regression proof.
-- Deciding Evidence is criterion-driven, not test-inventory-driven. Supplemental hardening is not automatically a Milestone blocker when deciding criteria are already sufficiently evidenced; deferment must name destination, rationale, residual risk and Operator authority.
-- Use real dependencies when the physical integration boundary itself is under test. Mocks/fakes may isolate logic but do not count as deciding proof of a real external integration.
-- Do not create a harness merely to test another harness when existing unit/integration surfaces can prove the criterion.
-- Do not edit generated files directly. Regenerate them from canonical sources and verify freshness.
+- Proof-first is universal. Use TDD when `TEST` is the correct deciding proof. Normal FAST/BOUNDED RED may be observed locally; a separate RED commit/workflow is required only when the failure itself is durable deciding Evidence.
+- Finding Admission precedes Correction: `CONTRACT_VIOLATION`, `IMPLEMENTATION_DEFECT`, `DERIVED_REQUIREMENT`, `THREAT_MODEL_EXPANSION`, `FUTURE_HARDENING`.
+- Reviewer severity does not independently create requirement Authority.
+- Do not create generic provider/plugin abstractions before a second real production consumer exists.
+- Do not edit generated files directly; regenerate and verify.
 - Do not copy third-party code without origin/license records.
 
-## Execution planning invariants
+## Execution materialization
 
-For a material bounded unit, the approved pack/design must make explicit as applicable:
+### FAST
 
-- target and upward criterion/requirement lineage;
-- Current Authority Snapshot / exact contract and policy identities;
-- repository localization evidence;
-- interfaces consumed/produced;
-- write/resource boundaries;
-- Environment/tool/network/credential/effect constraints;
-- proof owner and deciding verification;
-- retry/hypothesis budget;
-- `SUCCESS / BLOCKED / ESCALATE / HANDOFF_REQUIRED / REPLAN_REQUIRED` termination;
-- structured handoff that survives Session loss.
+Normally: intent → Finding Admission when finding-driven → implementation → targeted proof → scope audit → final verify/CI → delivery when already authorized.
 
-A Worker cannot expand architecture, foundational dependency, public contract, security posture, credential/network/effect authority or materially larger mutation scope merely because it makes implementation easier.
+If a Finding is not trivially admissible inside existing Authority/scope, escalate before mutation. No separate Design, Plan, acceptance record, exact manual token or fresh Reviewer is required unless a material concern or higher-authority obligation requires one.
 
-## Change impact
+### BOUNDED
 
-Every material Claim or PR declares:
+Normally use one Execution Brief containing only what is material:
 
-```yaml
-documentation_impact:
-  status: NONE | UPDATED | FOLLOW_UP_REQUIRED
-  affected: []
-  rationale: ""
-  follow_up: null
+- `profile: BOUNDED` and concise selection rationale;
+- outcome and relevant Authority;
+- scope/non-goals and known loci;
+- interfaces/write/resource/environment boundaries as applicable;
+- proof and review expectation;
+- approval scope and whether conditional delivery is included;
+- failure/escalation/Replan conditions;
+- escalation outcome only if escalation occurs.
 
-requirements_impact:
-  status: NONE | UPDATED | NEW_REQUIREMENT | REPLAN_REQUIRED
-  affected: []
-  rationale: ""
-```
+Then: approval when needed → Writer/local proof → fresh review when material → Finding Admission → final CI → delivery only if the approved envelope explicitly includes it.
+
+### CONTROLLED
+
+Retain every applicable Design/Decision, Plan, exact authority, independent/adversarial validation, acceptance and delivery checkpoint when it protects a distinct material boundary. Omission/non-applicability requires the authority owning that boundary and durable rationale; CONTROLLED checkpoints are not optional merely to reduce ceremony.
+
+## Git and documentation
+
+Git/GitHub/CI carry mechanical operational history: commits, diffs, reviews, workflow results and merge identity.
+
+Durable MNFS documents preserve what Git alone does not explain well: material Decisions, architecture/threat model, accepted risk, authoritative capability/contract and deciding Evidence that must survive the PR.
+
+Do not create acceptance/integration records for ordinary implementation tranches unless they carry durable material knowledge.
 
 ## Verification
 
-Run:
+Default final verification:
 
 ```bash
 npm run verify
@@ -96,9 +116,7 @@ npm run docs:coverage
 npm run docs:check
 ```
 
-## Current gate
-
-Program state:
+## Current product state
 
 ```text
 M0 — Foundation Walking Skeleton                         ACCEPTED
@@ -108,30 +126,20 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
   MIS-002/M02 revision-5 execution path                  SUPERSEDED
 ```
 
-Accepted architecture/planning authority includes D-010 through D-018, ADR-0013 through ADR-0015 and `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0.
+Current architecture/planning authority includes D-010 through D-020, ADR-0013 through ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality/Review Admission 1.0.0 and Risk-Proportional Execution Governance 1.0.0.
 
-`GATE-P0` accepted the Architecture Reconciliation / ARR master plan and ARR-S0 plan. ARR P1 / GATE-R was accepted by D-017 for Tasks `A1,A2,A3,A4,B1` plus P1-F01/P1-F02 and was integrated into `main` by PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`.
-
-A post-integration Important finding, P1-F03, identified that B1 Evidence carried only semantic `contractVersion` rather than binding to the exact frozen Spike contract bytes. D-018 accepted the bounded correction at substantive PR #26 head `0b9fe9747887ef5817fffbb586db04ccb3292b27`. PR #26 is now integrated into canonical `main` at `88c5e05964e8465ef4317a3b4174c6160d8cdefa`; deciding Architecture Spike Evidence carries `contractHash`, and validation recomputes SHA-256 from the exact bytes supplied through `--contract`.
-
-The Operator has explicitly authorized `GATE-S0-IMPLEMENT` for deterministic ARR-S0 Tasks 1–11 only, bound to master-plan blob `52033adcdfb7163f63606034b9912942b018f38e`, ARR-S0-plan blob `3e78445fcbcca360f612edefd025c6cb0f84f8e5`, canonical implementation base `ad913dd1e0ff3b286280081b5dd4ba90eb390972`, and scope `deterministic-harness-only`. This authorization does not imply `GATE-S0-EXECUTE` or any downstream Spike/production authority.
+Current ARR state:
 
 ```text
-ARR P1 reconciliation A1-A4 + B1:          ACCEPTED — GATE-R / D-017 / INTEGRATED
-PR #24 merge / integration:                  COMPLETE — def9e5fe819f76950d61fba2cf5abcda1533c07f
-P1-F03 exact contract-binding correction:    ACCEPTED — D-018 / INTEGRATED
-PR #26 merge / integration:                  COMPLETE — 88c5e05964e8465ef4317a3b4174c6160d8cdefa
-GATE-S0-IMPLEMENT:                            AUTHORIZED — deterministic-harness-only
-ARR-S0 deterministic harness:                IMPLEMENTED / REVIEW_REQUIRED — PR #27
-ARR-S0 host contract:                         PROPOSED — 0.1.0 / NOT ACCEPTED
-ARR-S0 real host probe:                       PROHIBITED pending GATE-S0-EXECUTE
-Candidate installation/execution:             PROHIBITED
-Agent Runtime / Environment selection:        PROHIBITED pending deciding Evidence
-M02 production implementation:                PROHIBITED
-Production Worker dispatch:                   PROHIBITED
-Automatic merge/delivery:                     NOT AUTHORIZED
+ARR P1 reconciliation:                 ACCEPTED / INTEGRATED
+P1-F03 contract binding:               ACCEPTED / INTEGRATED
+CPR canonical reconciliation:          ACCEPTED / INTEGRATED — D-019
+ARR-S0 Task 11:                        REPLAN_REQUIRED / NOT CLOSED
+ARR-S0 admitted source correction:     BOUNDED next product correction
+ARR-S0 real host probe / Task 12:      PROHIBITED pending later CONTROLLED authority
+Candidate execution/selection:         PROHIBITED pending deciding Evidence
+M02 production implementation:         PROHIBITED
+Production Worker dispatch:            PROHIBITED
 ```
 
-Real M01 R2/R3 Treehouse crash/lineage scenarios remain `FOLLOW_UP_REQUIRED` under Issue #20. Whether the Treehouse-specific form remains necessary is decided by the final architecture reconciliation; provider-neutral recovery/fencing proof remains mandatory before Product Milestone M2 exit.
-
-P1 and the accepted P1-F03 correction are integrated into canonical `main`. The exact `GATE-S0-IMPLEMENT` authorization is active for deterministic Tasks 1–11 and the current action is **Task 11 independent deterministic review / correction** of PR #27. The ARR-S0 host contract remains proposed at version `0.1.0` and is not accepted. Real host probing remains separately gated behind `GATE-S0-EXECUTE`, which is **not authorized**; no candidate/runtime/environment selection or downstream gate is implied by S0 implementation approval.
+The next product action is to prepare and approve the BOUNDED Execution Brief for the already-admitted ARR-S0 final source re-observation/terminology correction, then implement/review/verify it inside that envelope. Real Task 12 host observation remains a separate CONTROLLED operation.

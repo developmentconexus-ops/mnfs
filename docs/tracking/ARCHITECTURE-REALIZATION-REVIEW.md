@@ -13,6 +13,8 @@ related:
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
+  - DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION
+  - PLAN-COMPLEXITY-PROPORTIONALITY-RECONCILIATION
   - ACCEPTANCE-ARR-P1-RECONCILIATION
   - ACCEPTANCE-ARR-P1-INTEGRATION-CLOSEOUT
   - DOC-PRODUCT-BLUEPRINT
@@ -42,7 +44,9 @@ ARR PROGRAM PLAN                                 ACCEPTED — GATE-P0 — v0.2.0
 ARR-S0 PLAN                                      ACCEPTED — GATE-P0 — v0.2.0
 P1 / GATE-R                                      ACCEPTED / INTEGRATED — D-017
 P1 integration                                   PR #24 — def9e5fe819f76950d61fba2cf5abcda1533c07f
-NEXT POSSIBLE GATE                               GATE-S0-IMPLEMENT — NOT AUTHORIZED
+D-019 / proportionality review admission         ACCEPTED
+GATE-CPR-CANONICAL                               AUTHORIZED — Tasks 1–3 only
+NEXT POSSIBLE GATE                               GATE-CPR-S0-CORRECTION — NOT AUTHORIZED
 ```
 
 ## Accepted architecture
@@ -164,6 +168,19 @@ ARR-S3  Vertical Composition Proof
 
 Every comparative Spike must freeze a candidate-independent deciding contract first. Tests/fixtures may not be weakened after a preferred candidate fails unless the contract is formally revised and affected candidates are rerun under that same revision.
 
+## Current proportionality and review-admission reconciliation
+
+The accepted D-019 proportionality rule applies to the shared Spike governance without creating a second lifecycle or security subsystem. Each future Spike contract/plan must freeze its current trust assumptions, in-scope and out-of-scope adversaries/failures, gate class, allowed effects and forbidden effects. Findings are classified against that frozen authority before they become Correction scope.
+
+For the current ARR-S0 replan:
+
+- ARR-S0 Task 11 remains `REPLAN_REQUIRED` and **NOT CLOSED**; the proportionality path is selected, but its bounded correction has not been executed.
+- Non-forgeable or signed Operator authority is `THREAT_MODEL_EXPANSION` under the current accepted S0 threat model. It is not current S0 correction scope and does not authorize Ed25519, PKI, signer/trust-root infrastructure or generic signed-capability machinery.
+- Final pre-write Git/source re-observation is an `IMPLEMENTATION_DEFECT` against an already-required source-integrity property. Its bounded correction remains separately gated.
+- Useful non-deciding defense-in-depth is `FUTURE_HARDENING`; it receives a named follow-up and is not represented as a current PASS requirement.
+
+The current S0 correction path is therefore `GATE-CPR-S0-CORRECTION`, not the superseded pre-replan `GATE-S0-IMPLEMENT` orientation. This is a Governance Gate for workflow authority. `GATE-S0-EXECUTE` remains a separate later gate for real host observation and is **NOT AUTHORIZED**.
+
 ## Plan verification
 
 ```text
@@ -205,9 +222,9 @@ It does **not** authorize:
 - production Worker dispatch;
 - automatic merge/delivery.
 
-## Next possible gate — GATE-S0-IMPLEMENT (NOT AUTHORIZED)
+## Next possible gate — GATE-CPR-S0-CORRECTION (NOT AUTHORIZED)
 
-The P1 integration prerequisite is satisfied by `main` commit `def9e5fe819f76950d61fba2cf5abcda1533c07f`. `GATE-S0-IMPLEMENT` may now be reviewed as the next possible gate, but remains separately **NOT AUTHORIZED**. Real host probing remains separately controlled by `GATE-S0-EXECUTE`.
+The accepted proportionality/review-admission reconciliation must be integrated and accepted before a later exact Operator gate can authorize the one admitted ARR-S0 correction. `GATE-CPR-S0-CORRECTION` may authorize only the bounded final source re-observation correction and required terminology alignment; it remains separately **NOT AUTHORIZED**. Real host probing remains separately controlled by `GATE-S0-EXECUTE`, which is also **NOT AUTHORIZED**.
 
 ## Current relationship to MIS-002/M02
 

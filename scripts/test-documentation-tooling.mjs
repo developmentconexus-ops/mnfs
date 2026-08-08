@@ -301,10 +301,15 @@ assert.match(proportionalityDesignText, /status: accepted/u, 'proportionality de
 assert.match(proportionalityDesignText, /version: 1\.0\.0/u, 'proportionality design must be promoted to version 1.0.0');
 assert.match(proportionalityDesignText, /A good plan minimizes uncertainty; it does not maximize complexity\./u);
 assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must record integrated GATE-R');
-assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-S0-IMPLEMENT — NOT AUTHORIZED/u, 'ARR review must keep S0 implementation unapproved');
+assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-CPR-S0-CORRECTION — NOT AUTHORIZED/u, 'ARR review must expose the current bounded-correction gate');
+assert.match(arrReviewText, /THREAT_MODEL_EXPANSION/u, 'ARR review must classify non-forgeability as a threat-model expansion');
+assert.match(arrReviewText, /IMPLEMENTATION_DEFECT/u, 'ARR review must classify final source re-observation as an implementation defect');
+assert.match(arrReviewText, /ARR-S0 Task 11[^\n]*REPLAN_REQUIRED[^\n]*NOT CLOSED/u, 'ARR review must keep Task 11 open');
 assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must orient fresh actors to accepted P1');
 assert.match(agentsText, /P1-F03 exact contract-binding correction:[^\n]*ACCEPTED — D-018 \/ INTEGRATED/u, 'AGENTS must orient fresh actors to integrated F03');
 assert.match(agentsText, /PR #26 merge \/ integration:[^\n]*COMPLETE[^\n]*88c5e05964e8465ef4317a3b4174c6160d8cdefa/u, 'AGENTS must bind F03 integration to the real merge commit');
+assert.match(agentsText, /Accepted architecture\/planning authority includes D-010 through D-019/u, 'AGENTS must orient fresh actors to accepted proportionality authority');
+assert.match(agentsText, /GATE-CPR-S0-CORRECTION[^\n]*NOT AUTHORIZED/u, 'AGENTS must expose the current bounded-correction gate');
 assert.match(documentationMapText, /ARR P1 A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'Documentation Map must record accepted P1');
 
 const schemaCandidate = structuredClone(traceability);

@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 2.2.0
+version: 2.3.0
 owners:
   - developmentconexus-ops
 related:
@@ -16,6 +16,7 @@ related:
   - DESIGN-LAYERED-AGENT-EXECUTION-PLANNING
   - DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION
   - DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE
+  - ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
 tracking_issue: 23
@@ -57,47 +58,45 @@ ARR P1 A1-A4 + B1:                    ACCEPTED / INTEGRATED — D-017
 P1-F03 exact Spike-contract binding:  ACCEPTED / INTEGRATED — D-018
 CPR canonical reconciliation:         ACCEPTED / INTEGRATED — D-019
 ARR-S0 deterministic harness:         Tasks 1–11 COMPLETE / REVIEW CLEAR
-ARR-S0 Task 11:                       COMPLETE / REVIEW CLEAR
-Final source re-observation finding:  IMPLEMENTATION_DEFECT / CORRECTED
 ARR-S0 host capability contract:      ACCEPTED 1.0.0 — D-021
-Non-forgeable Operator authority:     THREAT_MODEL_EXPANSION / not S0 correction scope
-ARR-S0 Task 12 real host Evidence:    NOT EXECUTED / CONTROLLED / NOT AUTHORIZED
+ARR-S0 Task 12 real host Evidence:    ACCEPT_WITH_LIMITATIONS / COMPLETE
+ARR-S0 fresh report integrity:        PASS
+ARR-S1 planning:                      NEXT / NOT EXECUTED
+ARR-S2 planning:                      NEXT / NOT EXECUTED
 ```
 
-D-021 accepts the exact ARR-S0 host-fact contract bytes as version 1.0.0. Contract acceptance is not `GATE-S0-EXECUTE`: neither `preflight` nor `run` is authorized by D-021 alone.
+Accepted ARR-S0 Evidence is `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`. It records provider-neutral host facts only and does not select a named runtime, process sandbox, microVM, container or workspace substrate.
 
-No Agent Runtime, Execution Environment, workspace substrate or named candidate has been selected by current ARR Evidence.
+Durable S0 planning inputs now include:
+
+```text
+local process isolation      PHYSICALLY_PLAUSIBLE
+Landlock isolation           PHYSICALLY_PLAUSIBLE
+FUSE COW                     PHYSICALLY_PLAUSIBLE
+microVM / KVM                BLOCKED_BY_HOST
+local container              REQUIRES_SETUP_DECISION
+Docker daemon observation    UNKNOWN
+```
+
+The KVM result reflects the accepted S0 observation that `/dev/kvm` exists but read/write open failed with `EACCES`. No permission or host-configuration change is authorized by S0.
 
 ## Immediate next action
 
-Integrate the accepted 1.0.0 contract into canonical `main`, then bind that exact canonical commit to a fresh successful deterministic verification and prepare the separate exact `GATE-S0-EXECUTE` CONTROLLED authority.
+Compile fresh ARR-S1 Agent Runtime and ARR-S2 Local Execution Envelope Planner Packs from current primary evidence and the accepted ARR-S0 host facts. S1 and S2 planning may proceed in parallel.
 
-Only that later gate may authorize Task 12 real host observation. Its binding must include the accepted S0 plan blob, accepted contract SHA-256, exact canonical commit, exact successful verification Evidence and scope `canonical-host-probe-only`.
+The planners must refresh named-candidate provenance and requirements rather than inheriting stale candidate assumptions. Candidate execution remains behind its later exact gate; S0 acceptance itself grants no candidate execution or selection authority.
 
 ## Still prohibited until later authority/Evidence
 
-- ARR-S0 `preflight` or `run` before explicit `GATE-S0-EXECUTE`;
-- ARR-S0 Task 12 real host observation before its CONTROLLED authority;
-- candidate installation/execution or substrate selection before its deciding Spike;
+- candidate installation/execution before the corresponding accepted Spike contract/plan and execution gate;
+- runtime, execution-environment or workspace-substrate selection before deciding comparative Evidence;
+- automatic KVM/Docker/host setup or permission changes;
+- ARR-S2W unless S2 demonstrates a separate workspace substrate is still required;
+- ARR-S3 before the required S1/S2 inputs and later authority are ready;
 - revision-5 M02 production implementation;
 - production Worker dispatch;
 - silent architecture/threat/effect expansion;
-- cryptographic Operator-authority machinery for ARR-S0 under the current threat model;
 - unrestricted-host fallback for protected execution.
-
-## Durable transition note
-
-The entry state for the completed Task 4 remains historical context only:
-
-```text
-historical entry — ARR-S0 Task 11: REPLAN_REQUIRED / NOT CLOSED
-historical entry — Final source re-observation finding: IMPLEMENTATION_DEFECT / admitted correction
-historical entry — profile: BOUNDED
-historical entry — Operator approval of that bounded envelope was required before implementation
-historical entry — ARR-S0 Task 4 implementation before its BOUNDED approval envelope was prohibited
-```
-
-That entry state is superseded by the current `COMPLETE / REVIEW CLEAR` state. Detailed PR heads, workflow IDs, merge SHAs and mechanical CI history remain in Git/GitHub.
 
 ## Durable follow-up
 

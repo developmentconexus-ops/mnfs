@@ -137,9 +137,30 @@ Every executed runtime shape is evaluated against the same criteria. Values are 
 | `S1-C13` | exact provenance and license | executable/package/source identity and license are pinned in Evidence |
 | `S1-C14` | no authority inversion | runtime Session, internal plan, permission UX or completion cannot override MNFS Mission/Attempt/Claim/Gate authority |
 | `S1-C15` | machinery leverage | integration eliminates or avoids a named MNFS machinery class rather than merely adding another translation layer |
-| `S1-C16` | maintenance/upgrade boundedness | required adapter surface, upgrade coupling and failure modes are explicit and small enough for M2 |
+| `S1-C16` | upgrade and removal boundedness | candidate-specific Upgrade Policy and Removal Conditions are recorded, including version pinning, upgrade trigger, mandatory conformance rerun/rollback rule, removal triggers and a viable replacement/exit path |
 
 No candidate may PASS by weakening tool inventory, discovery rules, recovery requirements or other criteria after another candidate has run.
+
+A runtime or boundary is **not selection-eligible** unless `S1-C12`, `S1-C13` and `S1-C16` all PASS. A selecting Decision must therefore carry the exact supported boundary/provenance plus the candidate-specific Upgrade Policy and Removal Conditions required by D-014; these cannot be deferred to post-selection implementation.
+
+For each selection-eligible candidate/boundary, the final S1 report must record at minimum:
+
+```text
+upgradePolicy:
+  pinningRule
+  upgradeTrigger
+  mandatoryConformanceRerun
+  rollbackRule
+
+removalConditions:
+  removeOrReplaceWhen
+  authorityOrSecurityTrigger
+  provenanceOrLicenseTrigger
+  maintenanceTrigger
+  replacementOrExitPath
+```
+
+These are Evidence fields, not generic aspirational prose. Their values may differ by candidate but must be concrete enough for a later selecting Decision to enforce.
 
 ---
 
@@ -198,7 +219,7 @@ OpenCode native ACP is mandatory before a final S1 selection because D-012 requi
 
 After Pi qualification and OpenCode ACP, S1 may terminate without another runtime when all of the following are true:
 
-1. one Pi integration shape PASSes every required criterion;
+1. one Pi integration shape PASSes every required criterion, including the D-014 selection-eligibility requirements in `S1-C12`, `S1-C13` and `S1-C16`;
 2. OpenCode ACP has been **executed and finalized under the same contract** with a candidate verdict of `PASS` or `FAIL`; `BLOCKED` does not satisfy the required external comparison and cannot authorize a final runtime/boundary selection;
 3. OpenCode exposes no unique required capability and does not eliminate a named material MNFS machinery class that the passing Pi shape requires;
 4. remaining differences are optional ergonomics, ecosystem breadth or non-deciding performance/maintenance observations;
@@ -206,7 +227,7 @@ After Pi qualification and OpenCode ACP, S1 may terminate without another runtim
 
 If OpenCode ACP is `BLOCKED` before a meaningful real comparison completes, S1 cannot select Pi merely from incumbent Evidence. The spike terminates `BLOCKED` or `REPLAN_REQUIRED` according to whether the missing comparison can be completed under the accepted contract and authority.
 
-If Pi-ACP and OpenCode ACP both PASS via the same MNFS ACP client, ACP interoperability has two real implementations and a selecting Decision may choose `ACP boundary + Pi initial runtime` without a third ACP candidate.
+If Pi-ACP and OpenCode ACP both PASS via the same MNFS ACP client, ACP interoperability has two real implementations and a selecting Decision may choose `ACP boundary + Pi initial runtime` without a third ACP candidate, provided the selected boundary also satisfies D-014 Upgrade Policy and Removal Conditions.
 
 If Pi SDK wins but OpenCode ACP reveals a material boundary advantage, execute a second independent ACP implementation before selecting ACP generically.
 
@@ -238,6 +259,8 @@ SELECT another tested runtime only when Evidence materially defeats Pi
 BLOCK / REPLAN runtime assumption
 ```
 
+No `SELECT` output is valid unless the selected candidate/boundary has complete Upgrade Policy and Removal Conditions Evidence under `S1-C16`.
+
 No `AgentRuntimeProviderFactory`, plugin registry or generic runtime framework is authorized by selection alone.
 
 ---
@@ -253,6 +276,7 @@ Every real run must use the shared Architecture Spike Evidence schema and bind:
 - criterion results;
 - raw artifact references/hashes;
 - limitations and measurements;
+- candidate-specific Upgrade Policy and Removal Conditions;
 - mechanically derived candidate verdict.
 
 S1 does **not** by itself:

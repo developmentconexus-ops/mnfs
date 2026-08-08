@@ -95,6 +95,16 @@ GATE-S0-EXECUTE remains separately required for Task 12
 
 No S0 correction should be implemented against authority that has not yet incorporated the proportionality/review-admission Decision, unless a later exact Operator gate explicitly binds both trees and resolves that ordering.
 
+### Exact next gate
+
+The exact next execution authorization is intentionally compact and binds the approved design, accepted plan, reviewed branch head and unchanged canonical `main`:
+
+```text
+MNFS_AUTHORIZE_CPR_CANONICAL design_blob=e253a747cbc5d01ccb972ebbfcb4fb844c880c93 plan_blob=040f09303712ac47104ffa9a7cc2756b94b10886 base_sha=980296dda65a835c7f42210ba188ea0f1af550b7 main_sha=ad913dd1e0ff3b286280081b5dd4ba90eb390972 scope=tasks-1-3-only
+```
+
+This gate, if issued exactly, authorizes Tasks 1–3 only. It does not authorize Task 4, Task 5 review-triggered corrections, `GATE-S0-EXECUTE`, Task 12, S1/S2/S2W/S3, production Worker dispatch or merge/delivery.
+
 ---
 
 ## Task 1: Record the accepted proportionality Decision without creating a new method

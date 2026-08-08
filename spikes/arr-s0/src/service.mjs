@@ -11,7 +11,7 @@ import { deriveCapabilityClasses } from './class-eligibility.mjs';
 import { S0_CAPABILITY_IDS, S0_PLAN_GIT_BLOB, S0_PLAN_VERSION } from './contract.mjs';
 import {
   executionAuthorizationEvidence,
-  requireAuthenticatedExecutionAuthorization,
+  requireValidatedExecutionAuthorization,
 } from './execution-authority.mjs';
 import { createInitialRunState, transitionRunState } from './model.mjs';
 import { requireRunId, resolveS0RunRoot, resolveS0StateRoot } from './paths.mjs';
@@ -48,7 +48,7 @@ function requireExecutionAuthorization(identities, source = null) {
   if (identities.contract.version !== '1.0.0') {
     throw new TypeError('ARR-S0 execution authorization requires accepted contract version 1.0.0');
   }
-  const authority = requireAuthenticatedExecutionAuthorization(identities.executionAuthorization, {
+  const authority = requireValidatedExecutionAuthorization(identities.executionAuthorization, {
     planGitBlob: S0_PLAN_GIT_BLOB,
     contractHash: identities.contract.hash,
     ...(source?.commitSha ? { baseCommitSha: source.commitSha } : {}),
@@ -208,6 +208,7 @@ export async function runS0({
   identities,
   preflight = preflightS0,
   observeRunRootFilesystem = observeFilesystemOwnership,
+  finalSourceObserver = defaultSourceObserver,
   collect = collectDefaultS0,
 } = {}) {
   const executionAuthorization = requireExecutionAuthorization(identities);
@@ -217,13 +218,25 @@ export async function runS0({
   const source = preflightResult.facts?.repository?.source;
   if (!source) throw new Error('ARR-S0 preflight did not establish repository identity');
   requireExecutionAuthorization(identities, source);
-
   const resolvedStateRoot = preflightResult.stateRoot ?? await resolveS0StateRoot(stateRoot === undefined ? {} : { stateRoot });
   const runRoot = await resolveS0RunRoot(canonicalRunId, { stateRoot: resolvedStateRoot });
   const runRootFilesystem = await observeRunRootFilesystem(runRoot);
   if (runRootFilesystem?.state !== 'SUPPORTED') {
     throw new Error(`ARR-S0 run-root filesystem must be on the reviewed Linux-owned allowlist (observed ${runRootFilesystem?.filesystemType || 'unknown'})`);
   }
+
+  const finalRepository = await finalSourceObserver({ repoRoot });
+  if (!finalRepository?.source?.commitSha || !finalRepository?.source?.treeSha || finalRepository.clean !== true) {
+    throw new Error('ARR-S0 final source observation must establish one clean exact Git identity before Evidence creation');
+  }
+  if (
+    finalRepository.source.commitSha !== source.commitSha
+    || finalRepository.source.treeSha !== source.treeSha
+  ) {
+    throw new Error('ARR-S0 source changed after preflight before Evidence creation');
+  }
+  requireExecutionAuthorization(identities, finalRepository.source);
+
   const evidenceRecords = [];
 
   let state = createInitialRunState({

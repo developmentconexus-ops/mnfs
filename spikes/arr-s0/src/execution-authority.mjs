@@ -4,7 +4,7 @@ const SHA_PATTERN = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u;
 const DIGEST_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const GIT_BLOB_PATTERN = /^[a-f0-9]{40}$/u;
 const TOKEN_PATTERN = /^MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=([a-f0-9]{40}) contract_sha256=(sha256:[a-f0-9]{64}) base_sha=((?:[a-f0-9]{40}|[a-f0-9]{64})) verify_run=([1-9][0-9]*) scope=canonical-host-probe-only$/u;
-const AUTHENTICATED_AUTHORITIES = new WeakSet();
+const VALIDATED_AUTHORITIES = new WeakSet();
 
 export const EXECUTION_AUTHORIZATION_ENV = 'MNFS_ARR_S0_EXECUTE_AUTHORIZATION';
 
@@ -38,13 +38,13 @@ export function parseExecutionAuthorizationToken(token, expected) {
     verificationRunId,
     tokenHash: sha256Bytes(Buffer.from(token, 'utf8')),
   });
-  AUTHENTICATED_AUTHORITIES.add(authority);
+  VALIDATED_AUTHORITIES.add(authority);
   return authority;
 }
 
-export function requireAuthenticatedExecutionAuthorization(authority, expected = {}) {
-  if (!authority || typeof authority !== 'object' || !AUTHENTICATED_AUTHORITIES.has(authority)) {
-    throw new TypeError('ARR-S0 execution authorization must be authenticated by the exact Operator token parser');
+export function requireValidatedExecutionAuthorization(authority, expected = {}) {
+  if (!authority || typeof authority !== 'object' || !VALIDATED_AUTHORITIES.has(authority)) {
+    throw new TypeError('ARR-S0 execution authorization must be validated by the exact-bound Operator token parser');
   }
   if (authority.gate !== 'GATE-S0-EXECUTE') {
     throw new TypeError('ARR-S0 execution authorization gate must be GATE-S0-EXECUTE');
@@ -62,7 +62,7 @@ export function requireAuthenticatedExecutionAuthorization(authority, expected =
 }
 
 export function executionAuthorizationEvidence(authority) {
-  requireAuthenticatedExecutionAuthorization(authority);
+  requireValidatedExecutionAuthorization(authority);
   return {
     gate: authority.gate,
     planGitBlob: authority.planGitBlob,

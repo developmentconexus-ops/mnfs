@@ -16,7 +16,7 @@ related:
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - ACCEPTANCE-ARR-S0-IMPLEMENT-AUTHORIZATION
 tracking_issue: 23
-last_reviewed: 2026-08-07
+last_reviewed: 2026-08-08
 ---
 
 # ARR-S0 Host Capability Contract
@@ -39,7 +39,9 @@ The exact runtime Operator gate token is supplied through the dedicated `MNFS_AR
 MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=<accepted-plan-git-blob> contract_sha256=<exact-contract-sha256> base_sha=<exact-canonical-commit> verify_run=<exact-successful-workflow-run> scope=canonical-host-probe-only
 ```
 
-The execution-authority token is authenticated against the approved plan blob and SHA-256 recomputed from the exact accepted contract bytes **before any host or Git observation occurs**. Only after that authentication may the harness observe the repository source commit; it then revalidates the token's `base_sha` against that observed commit before host preflight may proceed. Missing, malformed, broader, stale or differently bound authority fails closed. The raw token is not persisted and is never propagated into probe subprocess environments; durable Evidence retains only its hash-bound authority identity.
+The execution-authority token is parsed and validated as an exact-bound Governance authorization against the approved plan blob and SHA-256 recomputed from the exact accepted contract bytes **before any host or Git observation occurs**. Only after that validation may the harness observe the repository source commit; it then revalidates the token's `base_sha` against that observed commit before host preflight may proceed. This is a Governance Gate under the trusted Operator + trusted MNFS control-plane assumption; it is not cryptographic authentication, personal-origin proof, non-repudiation or a Security Boundary against a process that can rewrite the control plane. Missing, malformed, broader, stale or differently bound authority fails closed. The raw token is not persisted and is never propagated into probe subprocess environments; durable Evidence retains only its hash-bound authority identity.
+
+Immediately after the run-root filesystem has been validated and before the first durable Evidence write, `run` performs one final read-only Git/source observation. That observation must establish the same exact clean commit/tree already bound by preflight and execution authority. Drift, missing identity or a dirty checkout fails closed before `state/created.json` exists and before the collector can run.
 
 `report` does not require a new execution gate because it reopens existing durable Evidence and performs no new host probe or host observation.
 
@@ -237,9 +239,9 @@ run --json
 report --run-id RUN_ID --json
 ```
 
-`preflight` requires `GATE-S0-EXECUTE`. It is read-only and checks whether the complete probe could run safely, but it still performs real repository/filesystem/host observations. The exact execution-authority token is therefore authenticated before any host or Git observation, and `base_sha` is revalidated against the observed repository commit before the remaining preflight checks proceed.
+`preflight` requires `GATE-S0-EXECUTE`. It is read-only and checks whether the complete probe could run safely, but it still performs real repository/filesystem/host observations. The exact execution-authority token is therefore validated as exact-bound Governance authorization before any host or Git observation, and `base_sha` is revalidated against the observed repository commit before the remaining preflight checks proceed.
 
-`run` requires the same authenticated `GATE-S0-EXECUTE` authority. It creates a run identity only after authority and preflight succeed, then performs the complete bounded capability suite and persists hash-bound Evidence.
+`run` requires the same validated `GATE-S0-EXECUTE` Governance authorization. It creates a run identity only after authority and preflight succeed, performs the final clean source re-observation after run-root filesystem validation and before first Evidence creation, then performs the complete bounded capability suite and persists hash-bound Evidence.
 
 `report` reopens existing durable Evidence and does not perform a new host probe or host observation. It rechecks manifest/result integrity by the machine-emitted run identity and never guesses or recomputes a run ID from time.
 

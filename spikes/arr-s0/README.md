@@ -24,7 +24,7 @@ Contract acceptance is not execution authority. The exact runtime Operator token
 MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=<accepted-plan-git-blob> contract_sha256=<exact-contract-sha256> base_sha=<exact-canonical-commit> verify_run=<exact-successful-workflow-run> scope=canonical-host-probe-only
 ```
 
-The execution-authority token is authenticated against the accepted plan blob and SHA-256 recomputed from the exact accepted contract bytes **before any Git observation or host observation occurs**. Only then may the loader observe the repository commit and revalidate `base_sha`. A missing, malformed, broader, stale or differently bound token fails closed.
+The execution-authority token is parsed and validated as exact-bound Governance authorization against the accepted plan blob and SHA-256 recomputed from the exact accepted contract bytes **before any Git or host observation occurs**. Only then may the loader observe the repository commit and revalidate `base_sha`. This is a Governance Gate under the trusted Operator + trusted MNFS control-plane assumption, not cryptographic authentication, non-repudiation or a Security Boundary against a process able to rewrite the control plane. A missing, malformed, broader, stale or differently bound token fails closed.
 
 The raw token is consumed by the control plane only. It is never passed to probe subprocesses and is never persisted; durable Evidence retains only its hash-bound authority projection (`gate`, plan blob, base commit, contract hash, verification run and token SHA-256).
 
@@ -40,7 +40,7 @@ npm run arr-s0 -- report --run-id RUN_ID --json
 
 `preflight` requires `GATE-S0-EXECUTE`. After authority validation it checks whether the complete probe could run safely. It does not execute the complete capability suite, but it does perform bounded real observations of repository identity, repository/state-root filesystem boundaries, WSL2/Node identity and required reads. For a not-yet-created state root, it stats the nearest existing ancestor and accepts only a reviewed Linux-owned filesystem type.
 
-`run` requires the same authenticated execution authority. It generates the run identity only after exact plan/contract/source/execution authority and preflight have succeeded, then persists durable lifecycle state, preserves raw observations, derives normalized host facts/classes, derives the mechanical Verdict, verifies artifact hashes and finalizes only after integrity checks.
+`run` requires the same validated exact-bound Governance authorization. It generates the run identity only after exact plan/contract/source/execution authority and preflight have succeeded. After the actual run-root filesystem is validated and immediately before the first durable Evidence write, `run` re-observes Git source identity once more and requires the same clean commit/tree. Drift, missing identity or dirty state fails closed before `state/created.json` and before collector execution. Only then does the run persist lifecycle state, preserve raw observations, derive normalized host facts/classes, derive the mechanical Verdict, verify artifact hashes and finalize after integrity checks.
 
 `report` reopens existing durable Evidence without a new host probe or host observation. It re-verifies manifest/result integrity by the machine-emitted run identity and never invents a Verdict for an incomplete run.
 
@@ -64,7 +64,7 @@ Subprocesses use exact argv, `shell: false`, closed stdin, explicit cwd, explici
 
 The harness has no path that intentionally:
 
-- observes the real canonical host before authenticated `GATE-S0-EXECUTE` authority;
+- observes the real canonical host before validated exact-bound `GATE-S0-EXECUTE` Governance authorization;
 - installs packages or changes host configuration;
 - enables kernel or virtualization features;
 - changes sysctl/service configuration;

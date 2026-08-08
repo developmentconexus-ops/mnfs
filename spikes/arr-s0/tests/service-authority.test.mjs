@@ -62,15 +62,15 @@ test('runS0 rejects a perfectly shaped but forged plain authorization object', a
         preflight: preflight(),
         collect: async () => assert.fail('collector must not run'),
       }),
-      /execution authorization|authenticated|GATE-S0-EXECUTE/u,
+      /execution authorization|validated|GATE-S0-EXECUTE/u,
     );
   } finally {
     await rm(stateRoot, { recursive: true, force: true });
   }
 });
 
-test('runS0 accepts only parser-authenticated authority and still binds current source/contract', async () => {
-  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-authenticated-authority-'));
+test('runS0 accepts only parser-validated authority and still binds current source/contract', async () => {
+  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-validated-authority-'));
   try {
     await assert.rejects(
       () => runS0({
@@ -82,7 +82,7 @@ test('runS0 accepts only parser-authenticated authority and still binds current 
         collect: async () => assert.fail('collector must not run'),
       }),
       /preflight blocked/u,
-      'authenticated authority should pass authority gate and reach preflight',
+      'validated authority should pass authority gate and reach preflight',
     );
 
     await assert.rejects(

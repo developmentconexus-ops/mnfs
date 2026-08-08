@@ -50,11 +50,11 @@ assert.match(
   /`preflight`[^\n]*(?:requires|is gated by)[^\n]*GATE-S0-EXECUTE|GATE-S0-EXECUTE[^\n]*`preflight`/iu,
   'S0 contract must state that preflight itself requires GATE-S0-EXECUTE',
 );
-assert.match(
-  contract,
-  /(?:before any|before .*?)host(?:\/Git| or Git| and Git)? observation[^\n]*execution-authority token|execution-authority token[^\n]*(?:before any|before .*?)host(?:\/Git| or Git| and Git)? observation/iu,
-  'S0 contract must state that execution authority is authenticated before host/Git observation',
-);
+assert.match(contract, /parsed and validated as an exact-bound Governance authorization/iu, 'S0 contract must describe execution authority as validated exact-bound governance authorization');
+assert.match(contract, /trusted Operator \+ trusted MNFS control-plane assumption/iu, 'S0 contract must state the current trust assumption');
+assert.match(contract, /not cryptographic authentication[^\n]*non-repudiation/iu, 'S0 contract must reject cryptographic/non-repudiation claims');
+assert.match(contract, /final read-only Git\/source observation/iu, 'S0 contract must require final pre-write source observation');
+assert.match(contract, /before `state\/created\.json` exists[^\n]*collector/iu, 'S0 contract must bind final source validation before first Evidence and collector execution');
 assert.match(
   contract,
   /`report`[^\n]*(?:does not require|does not perform|reopens)[^\n]*(?:host|probe|Evidence)|(?:Evidence|host)[^\n]*`report`/iu,
@@ -67,11 +67,12 @@ assert.match(
   /`preflight`[^\n]*(?:requires|is gated by)[^\n]*GATE-S0-EXECUTE|GATE-S0-EXECUTE[^\n]*`preflight`/iu,
   'ARR-S0 README must state that preflight requires GATE-S0-EXECUTE',
 );
-assert.match(
-  readme,
-  /execution-authority token[^\n]*(?:before any|before .*?)(?:Git|host) observation|(?:before any|before .*?)(?:Git|host) observation[^\n]*execution-authority token/iu,
-  'ARR-S0 README must state that authority is authenticated before Git/host observation',
-);
+assert.match(readme, /parsed and validated as exact-bound Governance authorization/iu, 'ARR-S0 README must describe authority as validated exact-bound governance authorization');
+assert.match(readme, /trusted Operator \+ trusted MNFS control-plane assumption/iu, 'ARR-S0 README must state the current trust assumption');
+assert.match(readme, /not cryptographic authentication[^\n]*non-repudiation/iu, 'ARR-S0 README must reject cryptographic/non-repudiation claims');
+assert.match(readme, /re-observes Git source identity once more/iu, 'ARR-S0 README must document final pre-write source re-observation');
+assert.doesNotMatch(contract, /token is authenticated|same authenticated|before authenticated/iu, 'S0 contract must not describe governance authorization as authenticated');
+assert.doesNotMatch(readme, /token is authenticated|same authenticated|before authenticated/iu, 'ARR-S0 README must not describe governance authorization as authenticated');
 assert.match(
   readme,
   /`report`[^\n]*(?:reopens|reads)[^\n]*Evidence[^\n]*(?:without|no)[^\n]*(?:host|probe)|`report`[^\n]*(?:without|no)[^\n]*(?:host|probe)/iu,

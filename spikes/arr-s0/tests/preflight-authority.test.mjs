@@ -35,7 +35,7 @@ function token(contractHash, baseCommitSha = SOURCE.commitSha) {
   return `MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=${PLAN_BLOB} contract_sha256=${contractHash} base_sha=${baseCommitSha} verify_run=${VERIFY_RUN} scope=canonical-host-probe-only`;
 }
 
-function authenticatedIdentities() {
+function validatedIdentities() {
   const contractHash = `sha256:${'d'.repeat(64)}`;
   const executionAuthorization = parseExecutionAuthorizationToken(
     token(contractHash),
@@ -94,7 +94,7 @@ test('CLI preflight validates identities before invoking real preflight inspecti
   assert.equal(preflightCalls, 0, 'preflight inspection must not run before authority validation');
 });
 
-test('direct preflightS0 invocation refuses missing authenticated execution authority before inspect', async () => {
+test('direct preflightS0 invocation refuses missing validated execution authority before inspect', async () => {
   const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-preflight-direct-'));
   let inspectCalls = 0;
   try {
@@ -109,20 +109,20 @@ test('direct preflightS0 invocation refuses missing authenticated execution auth
       }),
       /execution authorization|GATE-S0-EXECUTE/u,
     );
-    assert.equal(inspectCalls, 0, 'host inspection must not run without authenticated execution authority');
+    assert.equal(inspectCalls, 0, 'host inspection must not run without validated execution authority');
   } finally {
     await rm(stateRoot, { recursive: true, force: true });
   }
 });
 
-test('authenticated preflight authority may reach inspection and remains bound to observed source', async () => {
-  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-preflight-authenticated-'));
+test('validated preflight authority may reach inspection and remains bound to observed source', async () => {
+  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-preflight-validated-'));
   let inspectCalls = 0;
   try {
     const result = await preflightS0({
       repoRoot: '/home/example/src/mnfs',
       stateRoot,
-      identities: authenticatedIdentities(),
+      identities: validatedIdentities(),
       sourceObserver: async () => ({ source: SOURCE, clean: true }),
       inspect: async () => {
         inspectCalls += 1;

@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 2.0.2
+version: 2.0.3
 owners:
   - developmentconexus-ops
 approvers:
@@ -55,7 +55,7 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 
 Current durable authority includes:
 
-- D-010 through D-020;
+- D-010 through D-020, plus D-021;
 - `ADR-0013`, `ADR-0014`, `ADR-0015`;
 - `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.1.0;
 - `DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION` 1.0.0;
@@ -121,7 +121,7 @@ Operational history: commits/diffs, PRs/reviews, CI/workflow results, merge iden
 | `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md` | FAST / BOUNDED / CONTROLLED execution-depth policy | accepted specification |
 | `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md` | `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM`; ARR sequence | accepted guidance by GATE-P0 |
 | `docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md` | ARR-S0 bounded design/execution plan | accepted guidance by GATE-P0 |
-| `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`; S0 host-fact contract | proposed contract / next CONTROLLED input |
+| `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`; S0 host-fact contract 1.0.0 | accepted contract — D-021 / Task 12 CONTROLLED input |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated constitutional projection | generated projection |
 | `docs/roadmap.md` | generated capability/program sequence | generated projection |
 
@@ -194,6 +194,7 @@ ARR P1 A1-A4 + B1: ACCEPTED — GATE-R / D-017 / INTEGRATED
 P1-F03:             ACCEPTED — D-018 / INTEGRATED
 CPR reconciliation: ACCEPTED — D-019 / INTEGRATED
 ARR-S0 Task 11:     COMPLETE / REVIEW CLEAR
+ARR-S0 contract:    ACCEPTED 1.0.0 — D-021
 ```
 
 ## 9. Current execution boundary
@@ -207,9 +208,11 @@ final pre-write Git/source re-observation  → IMPLEMENTATION_DEFECT / CORRECTED
 non-forgeable/signed Operator authority   → THREAT_MODEL_EXPANSION / not S0 scope
 ```
 
-`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` remains proposed at 0.1.0. Task 11 completion neither accepts that contract nor grants `GATE-S0-EXECUTE` authority.
+`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version 1.0.0 is accepted under D-021. That acceptance freezes the provider-neutral host-fact contract but does not grant `GATE-S0-EXECUTE` authority.
 
-ARR-S0 Task 12 real host observation is `CONTROLLED`, `NOT EXECUTED` and prohibited until separately authorized. Candidate execution/selection, revision-5 M02 production implementation and production Worker dispatch remain prohibited pending later deciding authority/Evidence.
+ARR-S0 Task 12 real host observation is `CONTROLLED`, `NOT EXECUTED` and prohibited until separately authorized. Before that authorization, the merged canonical source and fresh deterministic verification must be bound with the accepted plan blob and exact contract SHA-256.
+
+Candidate execution/selection, revision-5 M02 production implementation and production Worker dispatch remain prohibited pending later deciding authority/Evidence.
 
 ## 10. Evidence proportionality
 

@@ -34,13 +34,14 @@ last_reviewed: 2026-08-08
 - Canonical host Evidence: `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`.
 - Preserve D-012/D-014/D-016 and ADR-0013: MNFS owns Role/ActorRun/Attempt/Authority/Claim/Evidence/Verdict/Recovery; runtime Session is observational.
 - Pi-first determines execution order only; criteria remain candidate-independent.
-- OpenCode native ACP must be exercised before final S1 selection unless a contract-level blocker makes the comparison invalid and triggers Replan.
+- OpenCode native ACP must be exercised and finalized under the same contract before final S1 selection. `BLOCKED` does not count as the required external comparison and forces `BLOCKED`/`REPLAN_REQUIRED` rather than incumbent-only selection.
 - Pi SDK and Pi-ACP are the two primary Pi integration shapes. Direct Pi RPC is conditional diagnostic/full-candidate work only when the contract-defined ambiguity trigger fires.
 - Do not create `AgentRuntimeProviderFactory`, runtime plugin registries or generalized production abstractions in the spike.
 - Candidate packages/binaries are staged below the validated Linux MNFS state root; do not globally install or mutate host configuration.
 - Candidate acquisition, provider network calls and use of operator authentication require later exact `GATE-S1`; planning/implementation tests use fixtures/fakes only.
 - Never persist raw provider credentials, OAuth tokens, cookies, complete environment dumps or prompt/model secrets in Evidence.
 - Candidate subprocesses use exact argv, `shell:false`, bounded output, explicit cwd/env and descendant termination.
+- D-014 dependency admission is deciding: every selection-eligible runtime/boundary must have candidate-specific **Upgrade Policy** and **Removal Conditions** Evidence before `SUCCESS` can support a selecting Decision.
 - Any material contract revision after the first real candidate run invalidates affected comparison Evidence and requires rerun under one revision.
 
 ---
@@ -125,7 +126,7 @@ npm run verify
 
 ```bash
 git add spikes/arr-s1 package.json scripts
- git commit -m "spike: register ARR-S1 runtime contract"
+git commit -m "spike: register ARR-S1 runtime contract"
 ```
 
 ---
@@ -328,7 +329,7 @@ Require an explicit operator-authorized supported login path for the chosen mode
 
 ---
 
-### Task 10: Implement S1 orchestration, report and early stop
+### Task 10: Implement S1 orchestration, dependency-admission report and early stop
 
 **Files:**
 - Create: `spikes/arr-s1/src/run.mjs`
@@ -346,6 +347,25 @@ run --json
 report --run-id RUN_ID --json
 ```
 
+- Every finalized candidate/boundary report record must contain candidate-specific:
+
+```text
+upgradePolicy:
+  pinningRule
+  upgradeTrigger
+  mandatoryConformanceRerun
+  rollbackRule
+
+removalConditions:
+  removeOrReplaceWhen
+  authorityOrSecurityTrigger
+  provenanceOrLicenseTrigger
+  maintenanceTrigger
+  replacementOrExitPath
+```
+
+These values are observed/researched for the frozen candidate during the controlled run and review; the deterministic harness validates their shape/completeness but does not invent generic values.
+
 - [ ] **Step 1: RED-test phase order**
 
 ```text
@@ -354,6 +374,7 @@ preflight
 → PI-ACP real run
 → choose best passing Pi shape
 → OPENCODE-ACP real run
+→ require OpenCode finalized PASS or FAIL before any selection
 → compute applicability for PI-RPC / SECOND-ACP
 → execute only required conditional shape(s)
 → finalize report
@@ -361,11 +382,41 @@ preflight
 
 - [ ] **Step 2: RED-test early-stop rules**
 
-The orchestrator must not execute a second ACP or direct RPC when applicability is `NOT_REQUIRED`.
+The orchestrator must not execute a second ACP or direct RPC when applicability is `NOT_REQUIRED`. It also must not produce selection-ready `SUCCESS` if OpenCode is `BLOCKED` or otherwise lacks a completed external comparison.
 
-- [ ] **Step 3: Implement deterministic report with separate fields for `runtimeDecisionInput` and `boundaryDecisionInput`**
-- [ ] **Step 4: Add full deterministic S1 tests to `npm run verify`**
-- [ ] **Step 5: Run full verification and commit**
+- [ ] **Step 3: RED-test D-014 selection eligibility**
+
+Table-driven tests must prove that a candidate with otherwise-PASS criteria is **not selection-eligible** when any of these is missing or blank:
+
+```text
+upgradePolicy.pinningRule
+upgradePolicy.upgradeTrigger
+upgradePolicy.mandatoryConformanceRerun
+upgradePolicy.rollbackRule
+removalConditions.removeOrReplaceWhen
+removalConditions.authorityOrSecurityTrigger
+removalConditions.provenanceOrLicenseTrigger
+removalConditions.maintenanceTrigger
+removalConditions.replacementOrExitPath
+```
+
+Expected result: report may preserve candidate conformance observations, but `runtimeDecisionInput.selectionEligible=false`, `boundaryDecisionInput.selectionEligible=false` where applicable, and the Spike cannot terminate `SUCCESS` for a selecting Decision.
+
+- [ ] **Step 4: Implement deterministic report with separate `runtimeDecisionInput` and `boundaryDecisionInput`**
+
+Both decision inputs must reference the exact candidate verdict plus supported-boundary/provenance Evidence and the complete Upgrade Policy/Removal Conditions Evidence. ACP boundary selection must bind the boundary's own upgrade/removal semantics separately from the initial runtime when they differ.
+
+- [ ] **Step 5: Run RED/GREEN for dependency-admission eligibility**
+
+```bash
+node --test spikes/arr-s1/tests/report.test.mjs
+npm run test:arr-s1
+```
+
+Expected: all missing-field cases remain non-selection-eligible; complete candidate-specific Evidence permits eligibility only when every other contract condition is also satisfied.
+
+- [ ] **Step 6: Add full deterministic S1 tests to `npm run verify`**
+- [ ] **Step 7: Run full verification and commit**
 
 ---
 
@@ -382,9 +433,12 @@ Pi SDK uses public supported boundary
 Pi-ACP limitations are not hidden
 ACP client does not invent filesystem/terminal delegation
 OpenCode challenger gets the same logical fixture
+OpenCode BLOCKED cannot yield incumbent-only selection
 credential/provider data cannot leak into Evidence
 runtime Session cannot become Recovery authority
 conditional candidates cannot run unless applicability says REQUIRED
+Upgrade Policy and Removal Conditions are concrete per selection-eligible dependency/boundary
+no selection-ready SUCCESS can exist without complete D-014 dependency-admission Evidence
 no global installation or host mutation path
 ```
 
@@ -412,13 +466,29 @@ GATE-S1 exact authority
 - [ ] **Step 2: Execute S1 exactly once through the orchestrator; do not manually repeat individual candidates after partial failure**
 - [ ] **Step 3: Reopen report in a fresh process and verify raw artifact hashes**
 - [ ] **Step 4: Verify repository remained clean and unchanged**
-- [ ] **Step 5: Run fresh `npm run verify`**
-- [ ] **Step 6: Promote normalized Evidence to `docs/acceptance/` and perform independent Evidence review**
+- [ ] **Step 5: Verify selection eligibility before interpreting `SUCCESS`**
+
+A selecting `SUCCESS` requires all of these:
+
+```text
+required Pi qualification Evidence complete
+OpenCode external comparison executed/finalized with PASS or FAIL
+all required conditional candidate runs completed
+selected runtime decision input selectionEligible=true
+selected boundary decision input selectionEligible=true
+selected dependency/boundary Upgrade Policy complete
+selected dependency/boundary Removal Conditions complete
+```
+
+If conformance is otherwise sufficient but D-014 dependency-admission Evidence is missing/incomplete, terminate `BLOCKED`; do not create a selecting Decision from partial admission data.
+
+- [ ] **Step 6: Run fresh `npm run verify`**
+- [ ] **Step 7: Promote normalized Evidence to `docs/acceptance/` and perform independent Evidence review**
 
 **Termination:**
 
-- `SUCCESS`: enough valid comparative Evidence exists to make an S1 runtime + boundary selecting Decision.
-- `BLOCKED`: prerequisite/provider/candidate proof cannot complete without changing authority.
+- `SUCCESS`: enough valid comparative Evidence **and complete D-014 Upgrade Policy/Removal Conditions Evidence** exist to make an S1 runtime + boundary selecting Decision.
+- `BLOCKED`: prerequisite/provider/candidate proof, required external comparison or dependency-admission Evidence cannot complete without changing authority.
 - `REJECT`: unsafe mutation, credential leak, fail-open, tamper or contract violation.
 - `REPLAN_REQUIRED`: contract cannot fairly answer runtime/boundary selection.
 

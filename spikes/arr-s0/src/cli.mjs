@@ -6,7 +6,7 @@ import { S0_PLAN_GIT_BLOB, S0_PLAN_VERSION } from './contract.mjs';
 import {
   EXECUTION_AUTHORIZATION_ENV,
   parseExecutionAuthorizationToken,
-  requireAuthenticatedExecutionAuthorization,
+  requireValidatedExecutionAuthorization,
 } from './execution-authority.mjs';
 import { requireRunId } from './paths.mjs';
 import { observeRepositoryIdentity } from './probes/repository.mjs';
@@ -95,7 +95,7 @@ export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
     : env?.[EXECUTION_AUTHORIZATION_ENV];
   const contractHash = sha256Bytes(contractBytes);
 
-  // Authenticate plan + exact contract bytes before any repository/host observation.
+  // Validate plan + exact contract bytes before any repository/host observation.
   const executionAuthorization = parseExecutionAuthorizationToken(executionAuthorizationToken, {
     planGitBlob: S0_PLAN_GIT_BLOB,
     contractHash,
@@ -106,7 +106,7 @@ export async function loadS0Identities(repoRoot = process.cwd(), options = {}) {
   if (!source?.commitSha) {
     throw new Error('ARR-S0 execution authorization cannot bind because current repository source commit is unavailable');
   }
-  requireAuthenticatedExecutionAuthorization(executionAuthorization, { baseCommitSha: source.commitSha });
+  requireValidatedExecutionAuthorization(executionAuthorization, { baseCommitSha: source.commitSha });
 
   return {
     plan: { version: S0_PLAN_VERSION, hash: sha256Bytes(planBytes) },

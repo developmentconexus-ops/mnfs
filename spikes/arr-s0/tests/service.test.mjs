@@ -81,6 +81,10 @@ function preflightFacts(overrides = {}) {
   };
 }
 
+function finalSourceObserver() {
+  return async () => ({ source: SOURCE, clean: true });
+}
+
 test('preflight is read-only and requires canonical identity, clean repo, Linux-owned roots and Node 24.18+', async () => {
   const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-preflight-'));
   try {
@@ -137,6 +141,7 @@ test('deterministic run persists lifecycle, execution authority, Evidence manife
       identities: IDENTITIES,
       preflight: async () => ({ ok: true, facts: preflightFacts(), checks: [] }),
       observeRunRootFilesystem: async () => ({ state: 'SUPPORTED', filesystemType: 'ext2/ext3', observedPath: stateRoot }),
+      finalSourceObserver: finalSourceObserver(),
       collect: async ({ capture }) => {
         const raw = await capture.bytes('fixture-raw', 'raw/fixture.bin', Buffer.from('fixture host bytes\n'));
         const observations = decisiveObservations().map((record) => ({ ...record, artifactRefs: [raw.id] }));
@@ -181,6 +186,7 @@ test('report detects post-recording artifact tamper and derives REJECT without t
       identities: IDENTITIES,
       preflight: async () => ({ ok: true, facts: preflightFacts(), checks: [] }),
       observeRunRootFilesystem: async () => ({ state: 'SUPPORTED', filesystemType: 'ext2/ext3', observedPath: stateRoot }),
+      finalSourceObserver: finalSourceObserver(),
       collect: async ({ capture }) => {
         const raw = await capture.bytes('fixture-raw', 'raw/fixture.bin', Buffer.from('original\n'));
         return {

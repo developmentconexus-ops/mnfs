@@ -70,6 +70,39 @@ A candidate run cannot modify:
 
 If any of those must change materially, revise the Spike contract and rerun every candidate whose Evidence would otherwise be compared under different rules.
 
+### 2.1 Frozen threat/trust scope and gate class
+
+Before execution, every future Spike plan/contract identifies the current **threat/trust boundary** using the existing contract/plan structure or explicit prose:
+
+- current trust assumptions;
+- adversaries and failures in scope;
+- adversaries and failures explicitly out of scope;
+- the current gate class and why it applies;
+- allowed effects;
+- forbidden effects.
+
+The current threat/trust boundary is part of the frozen deciding context. A review comment or test failure does not widen it by implication.
+
+A **Governance Gate** establishes whether the current Actor/process has authority to advance a workflow under the named plan, contract, source and scope. It fails closed on missing, malformed or stale authority, but does not by default claim resistance to a malicious process that can rewrite the control plane.
+
+A **Security Boundary** establishes what a malicious or compromised Actor/process is technically prevented from doing. It requires an explicitly accepted adversarial threat model and a named current security/effect need such as credential protection, privileged host mutation, untrusted-code isolation or production external effects. A gate is not promoted to a Security Boundary merely because a reviewer asks for stronger non-forgeability.
+
+### 2.2 Finding admission before Correction
+
+Every review finding is classified against the frozen Spike authority and threat model before it changes implementation scope:
+
+```text
+CONTRACT_VIOLATION   → admitted Correction
+IMPLEMENTATION_DEFECT → admitted Correction
+DERIVED_REQUIREMENT   → Decision/authority update before material Correction
+THREAT_MODEL_EXPANSION → Decision/Replan, not current Correction
+FUTURE_HARDENING      → follow-up/deferred when it is not deciding Evidence
+```
+
+The classification is part of the review record. Reviewer severity is Evidence of impact, not Authority to add a mechanism or alter the threat/trust boundary. In particular, non-forgeable or signed Operator authority is a `THREAT_MODEL_EXPANSION` unless an accepted Decision names that adversary and boundary; useful but non-deciding defense-in-depth is `FUTURE_HARDENING`.
+
+Only an admitted `CONTRACT_VIOLATION`, `IMPLEMENTATION_DEFECT` or authorized `DERIVED_REQUIREMENT` correction may proceed within the current Spike scope. A `THREAT_MODEL_EXPANSION` returns to the Decision/Replan loop, and `FUTURE_HARDENING` receives a named follow-up without being represented as a current PASS requirement.
+
 ---
 
 ## 3. Contract-before-candidates rule

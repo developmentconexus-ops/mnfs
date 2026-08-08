@@ -94,3 +94,52 @@ test('run verifies the actual run-root filesystem before creating the first arti
     await rm(stateRoot, { recursive: true, force: true });
   }
 });
+
+test('run re-observes source after preflight inspection before first Evidence write', async () => {
+  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-final-source-'));
+  const expectedRunRoot = path.join(stateRoot, 'spikes', 'arr-s0', RUN_ID);
+  let finalSourceObserverCalls = 0;
+  let collectCalls = 0;
+  let failure = null;
+  try {
+    try {
+      await runS0({
+        repoRoot: '/home/example/src/mnfs',
+        stateRoot,
+        runId: RUN_ID,
+        identities: identities(),
+        preflight: async () => ({
+          ok: true,
+          stateRoot,
+          checks: [],
+          facts: safeHostFacts(),
+        }),
+        observeRunRootFilesystem: async () => ({
+          state: 'SUPPORTED',
+          filesystemType: 'ext4',
+          observedPath: stateRoot,
+        }),
+        finalSourceObserver: async () => {
+          finalSourceObserverCalls += 1;
+          return { source: DRIFTED_SOURCE, clean: true };
+        },
+        collect: async () => {
+          collectCalls += 1;
+          throw new Error('collector must not run after final source drift');
+        },
+      });
+    } catch (error) {
+      failure = error;
+    }
+
+    assert.equal(finalSourceObserverCalls, 1, 'run must perform exactly one final source observation');
+    assert.equal(collectCalls, 0, 'collector must not run after final source drift');
+    await assert.rejects(
+      () => lstat(path.join(expectedRunRoot, 'state', 'created.json')),
+      (error) => error?.code === 'ENOENT',
+    );
+    assert.match(String(failure?.message ?? failure), /source changed after preflight before Evidence creation|final source observation/u);
+  } finally {
+    await rm(stateRoot, { recursive: true, force: true });
+  }
+});

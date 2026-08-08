@@ -45,11 +45,15 @@ assert.match(s1Contract, /Pi-first is an execution-order optimization, not winne
 assert.match(s1Contract, /OpenCode ACP has been \*\*executed and finalized under the same contract\*\*[\s\S]{0,220}`PASS` or `FAIL`/iu, 'S1 must require completed external comparison before selection');
 assert.match(s1Contract, /`BLOCKED` does not satisfy the required external comparison/iu, 'S1 must not treat a blocked challenger as completed comparison');
 assert.match(s1Contract, /If OpenCode ACP is `BLOCKED`[\s\S]{0,300}cannot select Pi/iu, 'S1 must prevent incumbent-only selection when challenger comparison is blocked');
+assert.match(s1Contract, /Upgrade Policy[\s\S]{0,120}Removal Conditions/iu, 'S1 contract must require D-014 upgrade and removal evidence');
+assert.match(s1Contract, /not selection-eligible[\s\S]{0,180}`S1-C16`/iu, 'S1 must block selection when upgrade/removal evidence is incomplete');
 assert.match(s1Contract, /No candidate execution is authorized by this proposed contract/iu, 'proposed S1 contract must grant no execution authority');
 assert.match(s1Plan, /later exact `GATE-S1`/iu, 'S1 plan must keep real operations behind a later exact gate');
 assert.match(s1Plan, /OpenCode native ACP must be exercised before final S1 selection[\s\S]{0,180}triggers Replan/iu, 'S1 plan must require the external challenger or replan');
 assert.match(s1Plan, /do not globally install/iu, 'S1 must not globally install candidates');
 assert.match(s1Plan, /Provider\/subscription credentials remain control-side|Never persist raw provider credentials/iu, 'S1 must preserve credential boundary');
+assert.match(s1Plan, /Upgrade Policy/iu, 'S1 plan must produce candidate-specific Upgrade Policy evidence');
+assert.match(s1Plan, /Removal Conditions/iu, 'S1 plan must produce candidate-specific Removal Conditions evidence');
 
 // S2: current-host eligible process candidates only.
 for (const marker of [
@@ -70,9 +74,13 @@ assert.match(s2Contract, /smolvm \/ KVM microVM[\s\S]*BLOCKED_BY_HOST/u, 'S2 mus
 assert.match(s2Contract, /Docker\/local container[\s\S]*REQUIRES_SETUP_DECISION/u, 'S2 must not introduce Docker setup as a candidate');
 assert.match(s2Contract, /controlled local endpoint/iu, 'S2 network proof must use controlled local endpoints');
 assert.match(s2Contract, /Real SSH keys, cloud credentials, browser profiles or operator secrets are never opened/iu, 'S2 must use synthetic secret evidence only');
+assert.match(s2Contract, /Upgrade Policy[\s\S]{0,120}Removal Conditions/iu, 'S2 contract must require D-014 upgrade and removal evidence');
+assert.match(s2Contract, /not selection-eligible[\s\S]{0,180}`S2-C15`/iu, 'S2 must block selection when upgrade/removal evidence is incomplete');
 assert.match(s2Contract, /No candidate execution, installation or host remediation is authorized/iu, 'proposed S2 contract must grant no execution authority');
 assert.match(s2Plan, /Do not change KVM permissions, sysctl, AppArmor, WSL settings, services or Docker state/u, 'S2 plan must prohibit host remediation');
 assert.match(s2Plan, /public Internet availability cannot decide the result/u, 'S2 network verdict must not depend on public Internet');
+assert.match(s2Plan, /Upgrade Policy/iu, 'S2 plan must produce candidate-specific Upgrade Policy evidence');
+assert.match(s2Plan, /Removal Conditions/iu, 'S2 plan must produce candidate-specific Removal Conditions evidence');
 
 for (const [name, text] of [
   ['STATUS', status],

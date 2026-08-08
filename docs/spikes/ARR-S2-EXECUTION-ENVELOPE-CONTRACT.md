@@ -156,10 +156,29 @@ Every executed candidate is evaluated against the same criteria with values `PAS
 | `S2-C12` | safe cleanup/disposition | cleanup is path-scoped/idempotent and refuses ambiguous, dirty or identity-drifted resources |
 | `S2-C13` | canonical WSL2 support | the frozen candidate runs on the accepted Ubuntu WSL2 host without undocumented host privilege escalation |
 | `S2-C14` | bounded startup/repeat cost | startup, repeat-run and disk/workspace overhead are measured under identical fixture conditions; no universal threshold is invented |
-| `S2-C15` | supported boundary/provenance | tested CLI/library/policy boundary and exact version/source/license are recorded |
+| `S2-C15` | dependency admission / supported boundary | tested CLI/library/policy boundary, exact version/source/license, candidate-specific Upgrade Policy and Removal Conditions are recorded |
 | `S2-C16` | machinery leverage | candidate eliminates a named environment/workspace/security machinery class or is simpler than maintaining that machinery ourselves |
 
 A candidate that cannot establish a required security property may not compensate with lower latency or better ergonomics.
+
+A candidate is **not selection-eligible** until `S2-C15` PASSes. Before any selecting Decision, the final S2 report must therefore carry the D-014 dependency-admission fields:
+
+```text
+upgradePolicy:
+  pinningRule
+  upgradeTrigger
+  mandatoryConformanceRerun
+  rollbackRule
+
+removalConditions:
+  removeOrReplaceWhen
+  authorityOrSecurityTrigger
+  provenanceOrLicenseTrigger
+  maintenanceTrigger
+  replacementOrExitPath
+```
+
+The policy must be candidate-specific and actionable. Merely stating “keep dependencies updated” or “replace if needed” is insufficient. A future upgrade cannot float automatically into production authority; the Upgrade Policy must state which provenance changes require renewed conformance Evidence before use.
 
 ---
 
@@ -238,6 +257,8 @@ one concrete local envelope with native workspace sufficient
 BLOCK / REPLAN local execution assumption
 ```
 
+No `SELECT` output is valid unless the selected candidate has complete Upgrade Policy and Removal Conditions Evidence under `S2-C15`.
+
 No remote platform or production environment provider is selected by S2.
 
 ---
@@ -273,6 +294,7 @@ Every real S2 run binds:
 - criterion results;
 - raw artifact refs/hashes;
 - performance measurements and limitations;
+- candidate-specific Upgrade Policy and Removal Conditions;
 - candidate verdict and workspace-applicability observation.
 
 S2 does **not** by itself:

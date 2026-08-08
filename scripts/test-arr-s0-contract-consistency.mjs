@@ -114,13 +114,13 @@ for (const forbiddenCommand of [' setup ', ' install ', ' enable ', ' repair ', 
 }
 
 assert.match(documentationMap, /DOC-ARR-S0-HOST-CAPABILITY-CONTRACT/u, 'Documentation Map must index the S0 contract');
-assert.match(status, /ARR-S0 deterministic harness:[^\n]*IMPLEMENTED \/ REVIEW_REQUIRED/u, 'STATUS must expose deterministic implementation review gate');
-assert.match(status, /ARR-S0 real host probe:[^\n]*PROHIBITED pending GATE-S0-EXECUTE/u, 'STATUS must keep real probe prohibited');
-assert.match(agents, /GATE-S0-IMPLEMENT:[^\n]*AUTHORIZED[^\n]*deterministic-harness-only/u, 'AGENTS must expose the already-authorized deterministic S0 implementation gate');
-assert.match(agents, /ARR-S0 deterministic harness:[^\n]*IMPLEMENTED \/ REVIEW_REQUIRED/u, 'AGENTS must expose the current deterministic S0 review state');
-assert.match(agents, /ARR-S0 real host probe:[^\n]*PROHIBITED pending GATE-S0-EXECUTE/u, 'AGENTS must keep only the real host probe behind GATE-S0-EXECUTE');
-assert.doesNotMatch(agents, /ARR-S0 implementation:[^\n]*PROHIBITED pending GATE-S0-IMPLEMENT/u, 'AGENTS must not regress to the pre-authorization S0 implementation snapshot');
-assert.doesNotMatch(agents, /GATE-S0-IMPLEMENT[^\n]*not currently authorized/iu, 'AGENTS must not claim the already-authorized implementation gate is unauthorized');
+assert.match(status, /ARR-S0 deterministic harness:[^\n]*Tasks 1–11 implemented/u, 'STATUS must expose the implemented deterministic S0 harness');
+assert.match(status, /ARR-S0 Task 11:[^\n]*REPLAN_REQUIRED \/ NOT CLOSED/u, 'STATUS must keep Task 11 open until the admitted correction is completed');
+assert.match(status, /ARR-S0 Task 12 real host observation[^\n]*CONTROLLED|ARR-S0 Task 12 real host Evidence:[^\n]*NOT EXECUTED/u, 'STATUS must keep Task 12 separate from the bounded correction');
+assert.match(status, /ARR-S0 Task 12 real host observation before its CONTROLLED authority/u, 'STATUS must keep Task 12 prohibited before separate CONTROLLED authority');
+assert.match(agents, /ARR-S0 Task 11:[^\n]*REPLAN_REQUIRED \/ NOT CLOSED/u, 'AGENTS must orient Fresh Actors to the current S0 blocker');
+assert.match(agents, /ARR-S0 real host probe \/ Task 12:[^\n]*PROHIBITED pending later CONTROLLED authority/u, 'AGENTS must keep the real host probe behind separate CONTROLLED authority');
+assert.match(agents, /Risk-Proportional Execution Governance 1\.0\.0/u, 'AGENTS must include the current D-020 governance authority');
 
 const pkg = JSON.parse(packageText);
 assert.match(pkg.scripts.verify, /test:arr-s0/u, 'root verify must include ARR-S0 deterministic tests');

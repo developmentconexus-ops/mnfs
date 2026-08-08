@@ -46,7 +46,11 @@ assert.match(s1Contract, /OpenCode ACP has been \*\*executed and finalized under
 assert.match(s1Contract, /`BLOCKED` does not satisfy the required external comparison/iu, 'S1 must not treat a blocked challenger as completed comparison');
 assert.match(s1Contract, /If OpenCode ACP is `BLOCKED`[\s\S]{0,300}cannot select Pi/iu, 'S1 must prevent incumbent-only selection when challenger comparison is blocked');
 assert.match(s1Contract, /Upgrade Policy[\s\S]{0,120}Removal Conditions/iu, 'S1 contract must require D-014 upgrade and removal evidence');
-assert.match(s1Contract, /not selection-eligible[\s\S]{0,180}`S1-C16`/iu, 'S1 must block selection when upgrade/removal evidence is incomplete');
+assert.match(s1Contract, /single authoritative selection predicate is `S1_SELECTION_ELIGIBLE\(candidateOrBoundary\)`/iu, 'S1 must define one authoritative selection predicate');
+assert.match(s1Contract, /candidateOrBoundary\.verdict == PASS[\s\S]{0,220}EVERY required result S1-C01\.\.S1-C16 == PASS/iu, 'S1 selection predicate must require candidate PASS and every required criterion PASS');
+assert.match(s1Contract, /required `FAIL`, `BLOCKED` or `UNKNOWN` criterion has `S1_SELECTION_ELIGIBLE=false`/iu, 'S1 must make any non-PASS required criterion non-selectable');
+assert.match(s1Contract, /When runtime and integration boundary are distinct selection objects[\s\S]{0,180}both[\s\S]{0,120}`S1_SELECTION_ELIGIBLE`/iu, 'S1 must qualify runtime and boundary independently when distinct');
+assert.match(s1Contract, /Every\*\* `SELECT` output[\s\S]{0,180}`S1_SELECTION_ELIGIBLE=true`/iu, 'every S1 SELECT must depend on the authoritative predicate');
 assert.match(s1Contract, /No candidate execution is authorized by this proposed contract/iu, 'proposed S1 contract must grant no execution authority');
 assert.match(s1Plan, /later exact `GATE-S1`/iu, 'S1 plan must keep real operations behind a later exact gate');
 assert.match(s1Plan, /OpenCode native ACP must be exercised and finalized under the same contract before final S1 selection[\s\S]{0,220}`BLOCKED`[\s\S]{0,100}`REPLAN_REQUIRED`/iu, 'S1 plan must require completed external challenger comparison or block/replan');
@@ -54,6 +58,7 @@ assert.match(s1Plan, /do not globally install/iu, 'S1 must not globally install 
 assert.match(s1Plan, /Provider\/subscription credentials remain control-side|Never persist raw provider credentials/iu, 'S1 must preserve credential boundary');
 assert.match(s1Plan, /Upgrade Policy/iu, 'S1 plan must produce candidate-specific Upgrade Policy evidence');
 assert.match(s1Plan, /Removal Conditions/iu, 'S1 plan must produce candidate-specific Removal Conditions evidence');
+assert.match(s1Plan, /selectionEligible=false/iu, 'S1 plan must implement a machine selection-eligibility result');
 
 // S2: current-host eligible process candidates + mandatory common resource governor.
 for (const marker of [
@@ -77,7 +82,6 @@ assert.match(s2Contract, /Docker\/local container[\s\S]*REQUIRES_SETUP_DECISION/
 assert.match(s2Contract, /controlled local endpoint/iu, 'S2 network proof must use controlled local endpoints');
 assert.match(s2Contract, /Real SSH keys, cloud credentials, browser profiles or operator secrets are never opened/iu, 'S2 must use synthetic secret evidence only');
 assert.match(s2Contract, /Upgrade Policy[\s\S]{0,120}Removal Conditions/iu, 'S2 contract must require D-014 upgrade and removal evidence');
-assert.match(s2Contract, /not selection-eligible[\s\S]{0,220}`S2-C15`[\s\S]{0,80}`S2-C17`/iu, 'S2 must require dependency admission and resource binding before selection');
 assert.match(s2Contract, /`S2-C17` \| resource\/process budget binding/iu, 'S2 contract must define the mandatory resource/process criterion');
 for (const resourceMarker of [
   'cpu.max       = 100000 100000',
@@ -91,6 +95,10 @@ assert.match(s2Contract, /HOST-CGROUP-V2=SUPPORTED[^\n]*proves[^\n]*not/iu, 'S2 
 assert.match(s2Contract, /already-delegated cgroup-v2 parent/iu, 'S2 must require pre-existing cgroup delegation');
 assert.match(s2Contract, /must not[\s\S]{0,260}cgroup\.subtree_control/iu, 'S2 must not enable parent cgroup controllers');
 assert.match(s2Contract, /candidate workload cannot write the governor control files or migrate its process tree out/iu, 'S2 must prove governor escape prevention');
+assert.match(s2Contract, /single authoritative selection predicate is `S2_SELECTION_ELIGIBLE\(candidate\)`/iu, 'S2 must define one authoritative selection predicate');
+assert.match(s2Contract, /candidate\.verdict == PASS[\s\S]{0,220}EVERY required result S2-C01\.\.S2-C17 == PASS/iu, 'S2 selection predicate must require candidate PASS and every required criterion PASS');
+assert.match(s2Contract, /required `FAIL`, `BLOCKED` or `UNKNOWN` criterion has `S2_SELECTION_ELIGIBLE=false`/iu, 'S2 must make any non-PASS required criterion non-selectable');
+assert.match(s2Contract, /Every\*\* `SELECT` output[\s\S]{0,180}`S2_SELECTION_ELIGIBLE=true`/iu, 'every S2 SELECT must depend on the authoritative predicate');
 assert.match(s2Contract, /No candidate execution, installation or host remediation is authorized/iu, 'proposed S2 contract must grant no execution authority');
 
 assert.match(s2Plan, /S2-C01\.\.S2-C17/u, 'S2 plan must implement all seventeen deciding criteria');
@@ -104,6 +112,7 @@ assert.match(s2Plan, /Do not change KVM permissions, sysctl, AppArmor, WSL setti
 assert.match(s2Plan, /public Internet availability cannot decide the result/u, 'S2 network verdict must not depend on public Internet');
 assert.match(s2Plan, /Upgrade Policy/iu, 'S2 plan must produce candidate-specific Upgrade Policy evidence');
 assert.match(s2Plan, /Removal Conditions/iu, 'S2 plan must produce candidate-specific Removal Conditions evidence');
+assert.match(s2Plan, /candidate\.selectionEligible = false/iu, 'S2 plan must implement a machine selection-eligibility result');
 
 for (const [name, text] of [
   ['STATUS', status],

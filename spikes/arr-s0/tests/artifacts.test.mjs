@@ -105,6 +105,8 @@ test('pre-existing identical artifact with permissive mode is rejected', async (
     const bytes = Buffer.from('same bytes\n');
     await mkdir(path.dirname(finalPath), { recursive: true });
     await writeFile(finalPath, bytes, { mode: 0o644 });
+    await chmod(finalPath, 0o644);
+    assert.equal((await lstat(finalPath)).mode & 0o777, 0o644, 'fixture must force permissive mode independently of process umask');
     await assert.rejects(
       () => writeRawArtifact(root, 'raw/existing.bin', bytes),
       /0600|mode|permissions/u,

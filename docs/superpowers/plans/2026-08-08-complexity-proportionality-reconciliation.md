@@ -4,8 +4,8 @@ title: Complexity Proportionality Reconciliation and ARR-S0 Bounded Correction P
 document_type: implementation_plan
 form: how_to
 authority: guidance
-status: proposed
-version: 0.1.0
+status: approved
+version: 1.0.0
 owners:
   - developmentconexus-ops
 related:
@@ -48,6 +48,12 @@ The accepted principle is:
 
 > **A good plan minimizes uncertainty; it does not maximize complexity.**
 
+## Plan approval
+
+The Operator approved this implementation plan on 2026-08-08 after review of proposed version `0.1.0` at Git blob `b5f4e0f622a0bd129c32db84ce23447651d0cc3f` and branch head `18b7d760ab0e971e5deb429a09c5d8a0738a9d13`, verified by workflow `31258687645` — SUCCESS.
+
+Approval of this plan authorizes no implementation by implication. `GATE-CPR-CANONICAL` remains separately required before Tasks 1–3.
+
 ## Global Constraints
 
 - Preserve D-009, D-010 through D-018 and all accepted M0/M1/M01 Evidence unless explicitly superseded by a later Operator Decision.
@@ -61,7 +67,7 @@ The accepted principle is:
 - `GATE-S0-EXECUTE`, Task 12 real WSL2 host observation, candidate execution, host mutation, S1/S2/S2W/S3 execution, runtime/environment selection, M02 production implementation, production Worker dispatch and automatic merge/delivery remain prohibited.
 - Documentation tests should protect stable normative semantics (IDs, enums, gates, relationships, required markers) rather than ordinary prose wording.
 - Final independent review uses a frozen exact head. Findings are grouped and classified before another correction cycle begins.
-- This plan approval, if granted, authorizes **no implementation by implication**. Each execution tranche requires its own exact Operator gate.
+- This plan approval authorizes **no implementation by implication**. Each execution tranche requires its own exact Operator gate.
 
 ## Execution gates and dependency graph
 
@@ -221,16 +227,14 @@ for (const marker of [
   'THREAT_MODEL_EXPANSION',
   'FUTURE_HARDENING',
 ]) {
-  assert.match(developmentGovernanceText, new RegExp(marker, 'u'));
+  assert.match(governanceText, new RegExp(marker, 'u'));
 }
-
-assert.match(developmentGovernanceText, /Governance Gate/u);
-assert.match(developmentGovernanceText, /Security Boundary/u);
-assert.match(mcrmText, /THREAT_MODEL_EXPANSION/u);
-assert.match(layeredPlanningText, /READY_FOR_REVIEW/u);
+assert.match(governanceText, /Governance Gate/u);
+assert.match(governanceText, /Security Boundary/u);
+assert.match(governanceText, /complexity.*burden|burden.*complexity/iu);
 ```
 
-Do not assert complete explanatory sentences.
+Also assert one MCRM marker for Finding admission before correction and one Layered Planning marker that planning completeness does not imply maximum mechanism/detail.
 
 - [ ] **Step 2: Run RED**
 
@@ -238,69 +242,59 @@ Do not assert complete explanatory sentences.
 npm run docs:test
 ```
 
-Expected: FAIL on the new markers because existing authority has the principle but not the explicit admission taxonomy/review-freeze rule.
+Expected: FAIL on the new markers only.
 
-- [ ] **Step 3: Strengthen Development Governance with two compact rules**
+- [ ] **Step 3: Strengthen Development Governance in place**
 
-Add a bounded subsection, not a new lifecycle:
-
-```text
-Complexity burden of proof
-- name current consumer / requirement / failure / threat / evidence need;
-- explain why simpler realization is insufficient;
-- account for implementation + operational + maintenance cost;
-- defer when current material benefit is absent.
-
-Finding admission
-- CONTRACT_VIOLATION → Correction;
-- IMPLEMENTATION_DEFECT → Correction;
-- DERIVED_REQUIREMENT → admit through appropriate authority before Correction when material;
-- THREAT_MODEL_EXPANSION → Discovery/Decision/Replan;
-- FUTURE_HARDENING → defer/follow-up unless promoted by accepted authority.
-```
-
-State explicitly:
+Add one bounded subsection under Decision/Adversarial review semantics that states:
 
 ```text
-review severity ≠ requirement authority
+Complexity Burden of Proof
+- name current consumer/risk/failure/obligation;
+- show why the simpler alternative is insufficient;
+- compare machinery introduced versus eliminated;
+- DEFER when current material benefit is not established.
+
+Finding Admission
+CONTRACT_VIOLATION
+IMPLEMENTATION_DEFECT
+DERIVED_REQUIREMENT
+THREAT_MODEL_EXPANSION
+FUTURE_HARDENING
+
+severity != Authority
 ```
 
-and distinguish Governance Gate from adversarial Security Boundary.
+Add the Governance Gate versus Security Boundary distinction without creating new lifecycle phases.
 
-- [ ] **Step 4: Strengthen MCRM at existing R3/R5/R6 seams**
+- [ ] **Step 4: Strengthen MCRM only at existing decision points**
 
-Make only the minimum additions:
+In R3/R5/R6:
 
 ```text
-R3: material new mechanism must pass complexity burden of proof / named-consumer test.
-R5: readiness rejects speculative machinery not justified by a current accepted concern.
-R6: material Findings are classified/admitted before mutation; threat-model expansion returns to Decision/Replan.
+R3: material realization complexity names consumer/benefit and simpler alternative.
+R5: no speculative mechanism is added merely to satisfy an unadmitted review scenario.
+R6: material Finding is classified before mutation; only admitted Correction executes.
 ```
 
-Do not create R9, a new coverage-state enum, a new persisted Finding entity or a second checklist.
+Preserve the existing R0–R8 lifecycle exactly.
 
-- [ ] **Step 5: Strengthen Layered Execution Planning review discipline**
+- [ ] **Step 5: Clarify Layered Execution Planning**
 
-Add the bounded final-review sequence:
+Add a concise normative rule near design principles/stability semantics:
 
 ```text
-READY_FOR_REVIEW
-→ freeze exact head
-→ independent review completes
-→ classify/admit Findings
-→ coherent correction batch
-→ full verification
-→ new frozen-head review when required
+Planning completeness = no material hidden decision left to the Actor.
+Planning completeness != maximum detail, mechanism, ceremony or hypothetical-future hardening.
 ```
 
-Preserve L0/L1/L2/L3 unchanged.
+Preserve L0–L3 exactly.
 
-- [ ] **Step 6: Run GREEN and full verification**
+- [ ] **Step 6: Run GREEN**
 
 ```bash
 npm run docs:test
 npm run docs:check
-npm run verify
 ```
 
 Expected: PASS.
@@ -313,35 +307,36 @@ git add \
   docs/product/CAPABILITY-REALIZATION-METHOD.md \
   docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md \
   scripts/test-documentation-tooling.mjs
-git commit -m "docs: make complexity and review admission proportional"
+git commit -m "docs: make planning rigor complexity-proportional"
 ```
-
-**Termination:**
-- `SUCCESS`: existing methods express the accepted rules without new lifecycle machinery.
-- `REPLAN_REQUIRED`: rules cannot be represented without changing accepted D-010/D-016 architecture.
 
 ---
 
-## Task 3: Apply the same bounded threat/admission contract to Architecture Spikes
+## Task 3: Make Architecture Spike threat/review scope explicit
 
 **Files:**
 - Modify: `docs/spikes/ARR-SPIKE-GOVERNANCE.md`
+- Modify: `docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md`
+- Modify: `AGENTS.md`
 - Test: `scripts/test-documentation-tooling.mjs`
 
 **Interfaces:**
-- Consumes: Task 1 Decision and Task 2 canonical admission vocabulary.
-- Produces: a shared Spike rule requiring each Spike to state the threat/trust boundary relevant to the current decision, without inventing security requirements from a hypothetical future production environment.
+- Consumes: Tasks 1–2.
+- Produces: future S0/S1/S2/S2W/S3 review contracts that state current trust/threat boundaries and classify new findings before implementation scope changes.
 
-- [ ] **Step 1: Add RED assertions for Spike-specific markers**
+- [ ] **Step 1: Add RED assertions**
 
-Load `docs/spikes/ARR-SPIKE-GOVERNANCE.md` in `scripts/test-documentation-tooling.mjs` and add stable assertions:
+Add stable documentation assertions for these markers in the shared Spike governance source:
 
-```js
-assert.match(arrSpikeGovernanceText, /threat\/trust boundary/u);
-assert.match(arrSpikeGovernanceText, /Governance Gate/u);
-assert.match(arrSpikeGovernanceText, /THREAT_MODEL_EXPANSION/u);
-assert.match(arrSpikeGovernanceText, /Finding/u);
+```text
+threat/trust boundary
+Governance Gate
+Security Boundary
+THREAT_MODEL_EXPANSION
+FUTURE_HARDENING
 ```
+
+Do not require identical explanatory sentences.
 
 - [ ] **Step 2: Run RED**
 
@@ -349,34 +344,47 @@ assert.match(arrSpikeGovernanceText, /Finding/u);
 npm run docs:test
 ```
 
-Expected: FAIL because shared Spike governance currently defines security/effect boundaries but not the explicit threat-model/admission rule.
+Expected: FAIL because shared Spike governance does not yet state the new admission boundary.
 
-- [ ] **Step 3: Add one compact Spike-governance subsection**
+- [ ] **Step 3: Extend shared Spike governance minimally**
 
-Require every new Spike contract/plan to state, using prose or existing contract fields rather than a new schema entity:
+Require each future Spike contract/plan to identify, using prose/existing structure rather than a new schema entity:
 
 ```text
 current trust assumptions
 in-scope adversaries/failures
-out-of-scope adversaries/failures
+explicitly out-of-scope adversaries/failures
+current gate class
 allowed effects
 forbidden effects
-gate classification when material
 ```
 
-Add this routing rule:
+Add the rule:
 
 ```text
-Finding violates current Spike authority/property
-→ Correction
-
-Finding requires stronger adversary/guarantee than current contract
-→ THREAT_MODEL_EXPANSION → Decision/Replan
+review finding
+→ classify against frozen Spike authority/threat model
+→ Correction only if admitted
+→ Decision/Replan for threat-model expansion
+→ Follow-up/Deferred for non-deciding hardening
 ```
 
-Preserve fail-closed behavior **inside** the declared boundary.
+Preserve all existing contract-before-candidate, fairness, Evidence and no-test-weakening rules.
 
-- [ ] **Step 4: Run GREEN and full verification**
+- [ ] **Step 4: Update ARR tracking and AGENTS current path**
+
+Record only current governance truth:
+
+```text
+ARR-S0 Task 11: Replan decision accepted; implementation correction still gated
+non-forgeability: threat-model expansion, not current S0 correction
+final source re-observation: admitted current S0 correction
+Task 12: not authorized
+```
+
+Do not claim Task 11 complete.
+
+- [ ] **Step 5: Full canonical verification**
 
 ```bash
 npm run docs:test
@@ -386,283 +394,250 @@ npm run verify
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add docs/spikes/ARR-SPIKE-GOVERNANCE.md scripts/test-documentation-tooling.mjs
-git commit -m "docs: bound Architecture Spike threat models"
+git add \
+  docs/spikes/ARR-SPIKE-GOVERNANCE.md \
+  docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md \
+  AGENTS.md \
+  scripts/test-documentation-tooling.mjs
+git commit -m "docs: bound spike review findings to accepted threat models"
 ```
 
-**Canonical-tranche closeout:** After Tasks 1–3, freeze the exact head and obtain the required independent review/Operator integration authority before treating these rules as canonical `main` authority. Do not begin Task 4 merely because Tasks 1–3 are green.
+**Tranche termination:**
+
+After Task 3, stop. Do not implement Task 4 from the same gate.
+
+Required output before the next gate:
+
+```text
+exact Tasks 1–3 head SHA
+full npm run verify SUCCESS workflow/run
+canonical Decision ID
+changed-file list
+confirmation: no S0 production source changed
+```
+
+Canonical integration/acceptance must be explicit before `GATE-CPR-S0-CORRECTION`.
 
 ---
 
-## Task 4: Correct ARR-S0 terminology and final source integrity — nothing broader
+## Task 4: Apply the one admitted ARR-S0 correction and align authority terminology
 
-**Separate prerequisite:** A new exact `GATE-CPR-S0-CORRECTION` (name may be replaced only by an explicit Operator-issued equivalent) must bind the integrated proportionality authority and the exact PR #27 correction base. Existing `GATE-S0-IMPLEMENT` must not be reinterpreted to authorize this Replan correction.
+**Prerequisite:** Tasks 1–3 authority is integrated/accepted and a separate exact `GATE-CPR-S0-CORRECTION` binds that canonical authority plus the S0 correction base.
 
 **Files:**
+- Modify: `spikes/arr-s0/tests/service-ordering-filesystem.test.mjs`
+- Modify: `spikes/arr-s0/src/service.mjs`
+- Modify: `spikes/arr-s0/src/execution-authority.mjs`
+- Modify: `spikes/arr-s0/tests/execution-authority.test.mjs`
+- Modify: `spikes/arr-s0/tests/execution-authority-surface.test.mjs`
 - Modify: `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md`
 - Modify: `spikes/arr-s0/README.md`
-- Modify: `spikes/arr-s0/src/execution-authority.mjs`
-- Modify: `spikes/arr-s0/src/service.mjs`
-- Test: `spikes/arr-s0/tests/execution-authority.test.mjs`
-- Test: `spikes/arr-s0/tests/execution-authority-surface.test.mjs`
-- Test: `spikes/arr-s0/tests/service-ordering-filesystem.test.mjs`
-- Modify only if an existing exact-string contract test requires semantic alignment: `scripts/test-arr-s0-contract-consistency.mjs`
+- Modify: `docs/tracking/STATUS.md`
 
 **Interfaces:**
-- Consumes: existing PR #27 exact-bound authorization parser, `preflightS0`, `runS0`, `defaultSourceObserver` semantics and accepted proportionality authority.
-- Produces: same fail-closed Governance Gate behavior without cryptographic-authentication claims, plus one final pre-Evidence Git source revalidation.
+- Consumes: accepted proportionality authority; current ARR-S0 harness; current exact S0 execution-authority token format.
+- Produces: source identity revalidated immediately before first durable run Evidence; governance-token terminology that does not claim cryptographic/non-forgeable authentication.
 
-### Task 4A — terminology is governance validation, not cryptographic authentication
+### 4A — RED: prove the stale-source pre-write defect
 
-- [ ] **Step 1: Write RED API/wording tests**
+- [ ] **Step 1: Add one focused failing test**
 
-Change the execution-authority tests first so the desired API is explicit:
-
-```js
-import {
-  parseExecutionAuthorizationToken,
-  requireValidatedExecutionAuthorization,
-} from '../src/execution-authority.mjs';
-```
-
-The tests must continue proving:
-
-```text
-- malformed/missing token rejected;
-- wrong plan blob rejected;
-- wrong contract hash rejected;
-- wrong base SHA rejected;
-- plain forged object rejected because it did not come through the exact parser;
-- raw token not exposed in Evidence.
-```
-
-The surface test must fail while production still exports/imports `requireAuthenticatedExecutionAuthorization`.
-
-- [ ] **Step 2: Run directed RED**
-
-```bash
-node --test \
-  spikes/arr-s0/tests/execution-authority.test.mjs \
-  spikes/arr-s0/tests/execution-authority-surface.test.mjs
-```
-
-Expected: FAIL because the validated/governance terminology is not implemented yet.
-
-- [ ] **Step 3: Perform a mechanical minimal rename**
-
-In `spikes/arr-s0/src/execution-authority.mjs`:
-
-```text
-AUTHENTICATED_AUTHORITIES
-→ VALIDATED_AUTHORIZATIONS
-
-requireAuthenticatedExecutionAuthorization
-→ requireValidatedExecutionAuthorization
-```
-
-Use an error meaning equivalent to:
-
-```text
-ARR-S0 execution authorization must originate from the exact execution-authorization parser
-```
-
-Do not add signatures, secrets, network lookup, GitHub lookup or durable signer state.
-
-Update the import/use in `service.mjs`. Update contract/README wording from cryptographic-style “authenticated authority” to “exact-bound Governance Gate authorization validated by the reviewed parser”. Preserve the exact field binding and fail-closed behavior.
-
-- [ ] **Step 4: Run directed GREEN**
-
-```bash
-node --test \
-  spikes/arr-s0/tests/execution-authority.test.mjs \
-  spikes/arr-s0/tests/execution-authority-surface.test.mjs
-```
-
-Expected: PASS.
-
-### Task 4B — final Git re-observation before first durable Evidence
-
-- [ ] **Step 5: Write the failing source-drift test before production changes**
-
-Add to `spikes/arr-s0/tests/service-ordering-filesystem.test.mjs` a test using the existing `AUTHORIZED_SOURCE` and `DRIFTED_SOURCE` fixtures. The test shape must be:
+Extend `service-ordering-filesystem.test.mjs` with a test named exactly:
 
 ```js
-test('run re-observes exact Git source after host checks and before first Evidence write', async () => {
-  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s0-final-source-'));
-  const expectedRunRoot = path.join(stateRoot, 'spikes', 'arr-s0', RUN_ID);
-  let finalSourceCalls = 0;
-  let collectCalls = 0;
-  try {
-    await assert.rejects(
-      () => runS0({
-        repoRoot: '/home/example/src/mnfs',
-        stateRoot,
-        runId: RUN_ID,
-        identities: identities(),
-        preflight: async () => ({
-          ok: true,
-          stateRoot,
-          checks: [],
-          facts: safeHostFacts(),
-        }),
-        observeRunRootFilesystem: async () => ({
-          state: 'SUPPORTED',
-          filesystemType: 'ext4',
-          observedPath: stateRoot,
-        }),
-        sourceObserver: async () => {
-          finalSourceCalls += 1;
-          return { source: DRIFTED_SOURCE, clean: true };
-        },
-        collect: async () => {
-          collectCalls += 1;
-          assert.fail('collector must not run after final source drift');
-        },
-      }),
-      /source identity changed|source commit|base_sha/u,
-    );
-    assert.equal(finalSourceCalls, 1);
-    assert.equal(collectCalls, 0);
-    await assert.rejects(
-      () => lstat(path.join(expectedRunRoot, 'state', 'created.json')),
-      (error) => error?.code === 'ENOENT',
-    );
-  } finally {
-    await rm(stateRoot, { recursive: true, force: true });
-  }
+test('run re-observes source after preflight inspection before first Evidence write', async () => {
+  // Arrange preflight with AUTHORIZED_SOURCE.
+  // Inject finalSourceObserver returning DRIFTED_SOURCE.
+  // Assert run rejects before state/created.json exists.
 });
 ```
 
-- [ ] **Step 6: Run RED**
+The implementation seam should be a single optional `finalSourceObserver` dependency on `runS0`, defaulting to the existing read-only repository observer. The test must assert:
+
+```text
+preflight succeeds
+run-root filesystem succeeds
+final source observer is called once
+source drift causes rejection
+state/created.json does not exist
+collector is never called
+```
+
+Do not add a generalized multi-phase source-monitor abstraction.
+
+- [ ] **Step 2: Run targeted RED**
 
 ```bash
 node --test spikes/arr-s0/tests/service-ordering-filesystem.test.mjs
 ```
 
-Expected: FAIL because current `runS0` does not accept/use a final `sourceObserver` after the run-root filesystem proof.
+Expected: FAIL because `runS0` does not yet perform the final observation/injected seam.
 
-- [ ] **Step 7: Implement the minimum final-source revalidation**
+### 4B — GREEN: minimum source revalidation
 
-Add `sourceObserver = defaultSourceObserver` to `runS0` injection parameters.
+- [ ] **Step 3: Add the single `runS0` seam and final check**
 
-Immediately **after** successful run-root filesystem validation and **before** `createInitialRunState` / `state/created.json`, perform one final read-only repository observation:
+Change the `runS0` dependency list from conceptually:
 
 ```js
-const finalRepository = await sourceObserver({ repoRoot });
-if (
-  !finalRepository?.source?.commitSha ||
-  !finalRepository?.source?.treeSha ||
-  finalRepository.clean !== true
-) {
-  throw new Error('ARR-S0 source identity became invalid before Evidence creation');
+runS0({
+  preflight,
+  observeRunRootFilesystem,
+  collect,
+})
+```
+
+to:
+
+```js
+runS0({
+  preflight,
+  observeRunRootFilesystem,
+  finalSourceObserver = defaultSourceObserver,
+  collect,
+})
+```
+
+Immediately after successful run-root filesystem validation and **before** `createInitialRunState()` / `writeCanonicalJsonArtifact(... 'state/created.json' ...)`:
+
+```js
+const finalRepository = await finalSourceObserver({ repoRoot });
+if (!finalRepository?.source?.commitSha || !finalRepository?.source?.treeSha || finalRepository.clean !== true) {
+  throw new Error('ARR-S0 final source observation must establish one clean exact Git identity before Evidence creation');
 }
 if (
   finalRepository.source.commitSha !== source.commitSha ||
   finalRepository.source.treeSha !== source.treeSha
 ) {
-  throw new Error('ARR-S0 source identity changed after preflight');
+  throw new Error('ARR-S0 source changed after preflight before Evidence creation');
 }
 requireExecutionAuthorization(identities, finalRepository.source);
 ```
 
-Properties that must remain true:
+Use the existing repository observer and existing authority rebind. Do not introduce hashing/signing, background monitoring or filesystem watchers.
 
-```text
-- final Git observation is read-only;
-- it occurs after remaining host/run-root inspection;
-- it occurs before the first durable Evidence write;
-- any dirty/missing/drifted source fails without `created.json`;
-- no automatic retry;
-- no Task 12 real probe is executed by tests;
-- the collector still owns the later complete observation suite only after the gate passes.
-```
-
-- [ ] **Step 8: Run directed GREEN**
+- [ ] **Step 4: Run targeted GREEN**
 
 ```bash
-node --test \
-  spikes/arr-s0/tests/service-ordering-filesystem.test.mjs \
-  spikes/arr-s0/tests/service-authority.test.mjs \
-  spikes/arr-s0/tests/service.test.mjs
+node --test spikes/arr-s0/tests/service-ordering-filesystem.test.mjs
 ```
 
 Expected: PASS.
 
-- [ ] **Step 9: Run S0 deterministic suite and full repository verification**
+### 4C — Terminology correction, not new security machinery
+
+- [ ] **Step 5: Add RED terminology assertions**
+
+Update the existing authority surface tests so production code/docs no longer claim the token parser provides adversarial/cryptographic authentication. Stable intended terminology:
+
+```text
+parsed execution authorization
+validated execution authorization
+exact-bound governance authorization
+```
+
+Do not assert ordinary explanatory sentences.
+
+- [ ] **Step 6: Rename local implementation terminology narrowly**
+
+Rename functions/messages only where required to remove the misleading `authenticated` claim, for example:
+
+```text
+requireAuthenticatedExecutionAuthorization
+→ requireValidatedExecutionAuthorization
+
+AUTHENTICATED_AUTHORITIES
+→ VALIDATED_AUTHORITIES
+```
+
+This is a semantics-preserving rename. Keep the WeakSet/parser provenance behavior if still useful for object-shape control; do not represent it as non-forgeability.
+
+Align S0 contract/README language to:
+
+```text
+exact-bound Governance Gate
+trusted Operator + MNFS control-plane assumption
+not cryptographic authentication/non-repudiation
+```
+
+- [ ] **Step 7: Run all ARR-S0 tests**
 
 ```bash
 npm run test:arr-s0
+```
+
+Expected: PASS.
+
+- [ ] **Step 8: Run full verification**
+
+```bash
 npm run verify
 ```
 
-Expected: PASS. No real WSL2 host probe/candidate workload is executed.
+Expected: PASS.
 
-- [ ] **Step 10: Commit one coherent bounded correction**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add \
-  docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md \
-  spikes/arr-s0/README.md \
-  spikes/arr-s0/src/execution-authority.mjs \
   spikes/arr-s0/src/service.mjs \
+  spikes/arr-s0/src/execution-authority.mjs \
+  spikes/arr-s0/tests/service-ordering-filesystem.test.mjs \
   spikes/arr-s0/tests/execution-authority.test.mjs \
   spikes/arr-s0/tests/execution-authority-surface.test.mjs \
-  spikes/arr-s0/tests/service-ordering-filesystem.test.mjs \
-  scripts/test-arr-s0-contract-consistency.mjs
-git commit -m "fix: bound ARR-S0 authority and source evidence"
+  docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md \
+  spikes/arr-s0/README.md \
+  docs/tracking/STATUS.md
+git commit -m "fix: revalidate S0 source before Evidence creation"
 ```
 
-If `scripts/test-arr-s0-contract-consistency.mjs` is unchanged, omit it from `git add` rather than touching it gratuitously.
-
 **Termination:**
-- `SUCCESS`: only terminology/trust-model alignment + final source-integrity correction changed.
-- `REPLAN_REQUIRED`: fixing the admitted source defect requires a cryptographic trust system, host mutation, a new execution framework or other scope not justified by the accepted design.
+- `SUCCESS`: one final Git re-observation + terminology correction; no security subsystem added.
+- `REPLAN_REQUIRED`: the bounded correction cannot be expressed using the existing observer/authority seams or requires a new threat model.
 
 ---
 
-## Task 5: Freeze exact head, classify fresh-review findings, and decide Task 11 only
+## Task 5: Freeze exact head and perform one independent review cycle
+
+**Prerequisite:** Task 4 exact head has full `npm run verify` SUCCESS.
 
 **Files:**
-- Modify only after verification/review Evidence exists: PR #27 description/comments and the existing S0 tracking/acceptance projection required by the accepted S0 plan.
-- Do not change production code while the deciding review is in flight.
+- No production edits during active review.
+- PR/tracking metadata only after review classification.
 
-**Interfaces:**
-- Consumes: Task 4 exact correction head and successful full verification.
-- Produces: a deciding Task 11 review state; it does **not** produce `GATE-S0-EXECUTE`.
-
-- [ ] **Step 1: Freeze exact review head**
+- [ ] **Step 1: Freeze review head**
 
 Record:
 
 ```text
-exact correction head SHA
-exact accepted proportionality Decision/design identity
-exact S0 plan blob 3e78445fcbcca360f612edefd025c6cb0f84f8e5
-exact contract hash at the review head
-exact npm run verify workflow/run
+exact head SHA
+workflow/run proving npm run verify SUCCESS
+changed files since accepted S0 base
+admitted Finding set
 ```
 
-Do not push another implementation commit after requesting this review unless the current review is explicitly abandoned.
+Do not push another implementation commit while that review is active. If the branch changes, explicitly abandon the old review before requesting another.
 
-- [ ] **Step 2: Request one independent fresh review with the accepted threat boundary**
+- [ ] **Step 2: Request fresh independent review**
 
-The review request must state:
+Review scope must explicitly state the accepted ARR-S0 threat model and ask the reviewer to classify findings against it.
+
+Review deciding questions:
 
 ```text
-Review the frozen exact head only.
-ARR-S0 is a read-only Architecture Spike under a trusted Operator + trusted MNFS governance/control-plane assumption.
-Governance authorization must fail closed for missing/malformed/stale/wrong bindings.
-Cryptographic proof of human origin, non-repudiation, malicious control-plane rewrite resistance and compromised-root resistance are out of the current S0 threat model.
-Classify findings against accepted authority before recommending Correction.
-Task 12 real host execution remains out of scope.
+1. Does final Git source re-observation occur before first durable Evidence write?
+2. Can stale/dirty/different source identity become CREATED Evidence?
+3. Are current read-only/effect/environment/Evidence boundaries preserved?
+4. Does documentation accurately describe the gate as governance authority rather than cryptographic authentication?
+5. Did the correction add any unapproved security subsystem or broader effect?
 ```
 
-- [ ] **Step 3: Classify every material Finding before any code change**
+- [ ] **Step 3: Classify all findings before changing code**
 
-For each Critical/Important candidate Finding, record one of:
+Every material finding gets one of:
 
 ```text
 CONTRACT_VIOLATION
@@ -672,69 +647,82 @@ THREAT_MODEL_EXPANSION
 FUTURE_HARDENING
 ```
 
-A finding classified `CONTRACT_VIOLATION` or `IMPLEMENTATION_DEFECT` against a deciding S0 property blocks Task 11 until corrected/reviewed.
+Only the first three may become current Correction scope, and `DERIVED_REQUIREMENT` must pass material admission first.
 
-A finding classified `THREAT_MODEL_EXPANSION` does not become implementation scope without a new Decision/Replan.
+- [ ] **Step 4: Determine Task 11 closeout**
 
-- [ ] **Step 4: Decide whether another correction cycle is required**
+Task 11 may close only when:
 
 ```text
-zero unresolved admitted Critical/Important defects
-→ Task 11 may proceed to closeout Decision
-
-one or more admitted Critical/Important defects
-→ one coherent new correction batch, separately authorized if scope changed
-
-new threat-model expansion only
-→ route to Decision/Replan; do not code it into S0 by reviewer implication
+no unresolved Critical/Important CONTRACT_VIOLATION
+no unresolved Critical/Important IMPLEMENTATION_DEFECT
+no admitted blocking DERIVED_REQUIREMENT
+full exact-head verify remains SUCCESS
+non-forgeability remains dispositioned as THREAT_MODEL_EXPANSION unless Operator later changes the threat model
 ```
 
-- [ ] **Step 5: Preserve the Task 12 boundary**
+Do not require zero hypothetical future-hardening suggestions.
 
-Even after Task 11 closes:
+- [ ] **Step 5: Stop before Task 12**
+
+Even after Task 11 closeout:
 
 ```text
 GATE-S0-EXECUTE = NOT AUTHORIZED
-Task 12 real canonical WSL2 run = NOT AUTHORIZED
-S1/S2/S2W/S3 = NOT AUTHORIZED
+Task 12 = NOT EXECUTED
 ```
 
-A later Operator authorization must bind the accepted S0 contract, exact canonical source and deciding deterministic verification Evidence.
+A later Operator decision must bind the exact accepted contract/source/verification state before the real canonical WSL2 probe.
 
 ---
 
-## Plan self-review checklist
+## Self-review result
 
 ### Spec coverage
 
-- Complexity burden of proof → Tasks 1–3.
-- Finding admission taxonomy → Tasks 1–3 and Task 5.
-- Governance Gate vs Security Boundary → Tasks 1–4.
-- Exact-head review freeze/correction batching → Task 2 + Task 5.
-- Avoid prose-as-API tests → Tasks 1–3 test design.
-- S0 non-forgeability finding classified as threat-model expansion → Tasks 1 and 4.
-- No Ed25519/PKI/trust-root machinery → Global Constraints + Task 4.
-- Final Git re-observation defect → Task 4B.
-- Preserve useful existing hardening → Global Constraints + Task 4.
-- Carry bounded threat model into later Spikes → Task 3.
-- No Task 12 authority by implication → Global Constraints + Task 5.
+Covered:
+
+- complexity burden of proof → Tasks 1–2;
+- no new methodology/entity → Tasks 1–3 constraints;
+- Finding admission taxonomy → Tasks 1–3 and Task 5;
+- Governance Gate vs Security Boundary → Tasks 1–3;
+- review-head freeze/correction batching → Task 5;
+- semantic documentation tests rather than prose APIs → Tasks 1–3;
+- S0 non-forgeability deferred as threat-model expansion → Tasks 1 and 4;
+- final Git re-observation corrected → Task 4;
+- no Ed25519/PKI/trust-root framework → Global Constraints + Task 4;
+- S1/S2/S2W/S3 receive future threat-scope rule through shared Spike governance → Task 3;
+- Task 12 remains separately prohibited → Global Constraints + Task 5.
 
 ### Placeholder scan
 
-This plan contains no `TBD`, `TODO`, “implement later”, unspecified error-handling step or unnamed test obligation. Decision-ID collision has an explicit stop/re-resolve rule rather than a placeholder.
+No `TBD`, implementation placeholders or unresolved function names remain. Task 4 uses existing concrete `runS0`, `defaultSourceObserver`, `requireExecutionAuthorization` and `writeCanonicalJsonArtifact` seams from the current S0 implementation.
 
-### Interface consistency
+### Scope/proportionality check
 
-- `parseExecutionAuthorizationToken` remains unchanged as the parsing entry point.
-- Proposed renamed verifier is consistently `requireValidatedExecutionAuthorization`.
-- `runS0` gains only the existing-shape injected `sourceObserver`, matching `defaultSourceObserver({ repoRoot })`.
-- `AUTHORIZED_SOURCE` / `DRIFTED_SOURCE` reuse the existing test fixtures.
-- Final source validation happens before `createInitialRunState` / `state/created.json`.
+This plan deliberately avoids:
 
-## Approval boundary
+- new database/schema state;
+- new domain entities;
+- new dependencies;
+- generic policy engines;
+- cryptographic authority;
+- S1/S2 implementation;
+- refactoring already-green S0 artifact/process machinery.
 
-Approving this plan authorizes neither tranche automatically.
+The only production behavior change planned is one final read-only Git observation before first durable S0 Evidence creation.
 
-The next exact authorization after plan approval should cover **Tasks 1–3 only** (`GATE-CPR-CANONICAL` or an Operator-issued equivalent bound to this exact plan bytes/head). Only after that authority is canonical/integrated should a separate exact gate authorize **Task 4 + deterministic Task 5 preparation** on PR #27.
+## Approval and execution boundary
 
-`GATE-S0-EXECUTE` remains a third, later and independent decision.
+Plan status is `approved` version `1.0.0` as of 2026-08-08. This approval does not authorize execution.
+
+The next exact execution gate is:
+
+```text
+GATE-CPR-CANONICAL
+scope: Tasks 1–3 only
+```
+
+Tasks 4–5 remain separately unauthorized until Tasks 1–3 are accepted/integrated and a new exact correction gate is issued.
+
+Task 12 / `GATE-S0-EXECUTE` remains separately unauthorized throughout this plan.

@@ -110,8 +110,22 @@ const exactAcceptance = 'MNFS_ACCEPT_ARR_S0_CONTRACT version=1.0.0 contract_blob
 assert.ok(decisions.includes(exactAcceptance), 'D-021 must preserve the exact Operator contract-acceptance authority');
 assert.match(decisions, /\| D-021 \| 2026-08-08 \| Accept `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version 1\.0\.0/u, 'Decision register must contain D-021');
 
-const contractSha256 = `sha256:${createHash('sha256').update(Buffer.from(contract, 'utf8')).digest('hex')}`;
-assert.match(contractSha256, /^sha256:[a-f0-9]{64}$/u);
+const contractBytes = Buffer.from(contract, 'utf8');
+const contractGitBlob = createHash('sha1')
+  .update(`blob ${contractBytes.length}\0`)
+  .update(contractBytes)
+  .digest('hex');
+assert.equal(
+  contractGitBlob,
+  'd564359e5a366d9e17194dcd687b95f764bcf2f2',
+  'current S0 contract bytes must remain exactly the Git blob accepted by D-021',
+);
+const contractSha256 = `sha256:${createHash('sha256').update(contractBytes).digest('hex')}`;
+assert.equal(
+  contractSha256,
+  'sha256:2891a1a2dda0dc1cfe146174839c988be7d76dc3c710cd4d15d1b247f0753f5d',
+  'current S0 contract bytes must remain exactly the SHA-256 accepted for the Task 12 gate binding',
+);
 
 const pkg = JSON.parse(packageText);
 assert.match(pkg.scripts.verify, /test:arr-s0/u, 'root verify must include ARR-S0 deterministic tests');

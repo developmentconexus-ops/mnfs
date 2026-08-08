@@ -42,8 +42,12 @@ assert.match(s1Contract, /OpenCode native ACP is mandatory before a final S1 sel
 assert.match(s1Contract, /Direct Pi RPC is not a mandatory full third candidate/iu, 'direct Pi RPC must remain conditional');
 assert.match(s1Contract, /second independent ACP implementation before selecting ACP generically/iu, 'S1 must require a second ACP only when ACP remains decision-relevant');
 assert.match(s1Contract, /Pi-first is an execution-order optimization, not winner preselection/iu, 'Pi preference must not change deciding criteria');
+assert.match(s1Contract, /OpenCode ACP has been \*\*executed and finalized under the same contract\*\*[\s\S]{0,220}`PASS` or `FAIL`/iu, 'S1 must require completed external comparison before selection');
+assert.match(s1Contract, /`BLOCKED` does not satisfy the required external comparison/iu, 'S1 must not treat a blocked challenger as completed comparison');
+assert.match(s1Contract, /If OpenCode ACP is `BLOCKED`[\s\S]{0,300}cannot select Pi/iu, 'S1 must prevent incumbent-only selection when challenger comparison is blocked');
 assert.match(s1Contract, /No candidate execution is authorized by this proposed contract/iu, 'proposed S1 contract must grant no execution authority');
 assert.match(s1Plan, /later exact `GATE-S1`/iu, 'S1 plan must keep real operations behind a later exact gate');
+assert.match(s1Plan, /OpenCode native ACP must be exercised before final S1 selection[\s\S]{0,180}triggers Replan/iu, 'S1 plan must require the external challenger or replan');
 assert.match(s1Plan, /do not globally install/iu, 'S1 must not globally install candidates');
 assert.match(s1Plan, /Provider\/subscription credentials remain control-side|Never persist raw provider credentials/iu, 'S1 must preserve credential boundary');
 
@@ -78,8 +82,12 @@ for (const [name, text] of [
 ]) {
   assert.match(text, /ARR-S1[\s\S]{0,180}PROPOSED 0\.1\.0/iu, `${name} must expose proposed S1 pack`);
   assert.match(text, /ARR-S2[\s\S]{0,180}PROPOSED 0\.1\.0/iu, `${name} must expose proposed S2 pack`);
-  assert.match(text, /candidate[^\n]*(?:execution|installation)[^\n]*(?:PROHIBITED|remain|requires)|candidate execution[^\n]*remain/iu, `${name} must not imply candidate execution authority`);
 }
+
+assert.match(status, /## Still prohibited until later authority\/Evidence[\s\S]{0,700}candidate acquisition\/installation\/execution/iu, 'STATUS must keep candidate operations explicitly prohibited');
+assert.match(map, /Candidate installation\/execution[\s\S]{0,240}remain prohibited/iu, 'Documentation Map must keep candidate execution prohibited');
+assert.match(agents, /Candidate execution\/selection:\s+PROHIBITED/iu, 'AGENTS must keep candidate execution prohibited');
+assert.match(arr, /Candidate installation\/execution[\s\S]{0,260}remain prohibited/iu, 'ARR review must keep candidate execution prohibited');
 
 for (const id of [
   'DOC-ARR-S1-AGENT-RUNTIME-CONTRACT',

@@ -4,7 +4,7 @@ title: Complexity Proportionality Reconciliation and ARR-S0 Bounded Correction P
 document_type: implementation_plan
 form: how_to
 authority: guidance
-status: approved
+status: accepted
 version: 1.0.0
 owners:
   - developmentconexus-ops

@@ -43,7 +43,7 @@ assert.match(s1Contract, /Direct Pi RPC is not a mandatory full third candidate/
 assert.match(s1Contract, /second independent ACP implementation before selecting ACP generically/iu, 'S1 must require a second ACP only when ACP remains decision-relevant');
 assert.match(s1Contract, /Pi-first is an execution-order optimization, not winner preselection/iu, 'Pi preference must not change deciding criteria');
 assert.match(s1Contract, /No candidate execution is authorized by this proposed contract/iu, 'proposed S1 contract must grant no execution authority');
-assert.match(s1Plan, /GATE-S1[^\n]*later exact/iu, 'S1 plan must keep real operations behind a later exact gate');
+assert.match(s1Plan, /later exact `GATE-S1`/iu, 'S1 plan must keep real operations behind a later exact gate');
 assert.match(s1Plan, /do not globally install/iu, 'S1 must not globally install candidates');
 assert.match(s1Plan, /Provider\/subscription credentials remain control-side|Never persist raw provider credentials/iu, 'S1 must preserve credential boundary');
 

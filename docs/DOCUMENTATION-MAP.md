@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 2.0.0
+version: 2.0.1
 owners:
   - developmentconexus-ops
 approvers:
@@ -24,6 +24,7 @@ related:
   - DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
+  - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
   - CAP-EXECUTION
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
@@ -133,6 +134,7 @@ Do not duplicate those facts into Markdown unless they carry durable decision va
 | `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md` | FAST / BOUNDED / CONTROLLED execution-depth policy | accepted specification |
 | `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md` | `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM`; ARR sequence | accepted guidance by GATE-P0 |
 | `docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md` | ARR-S0 bounded design/execution plan | accepted guidance by GATE-P0 |
+| `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`; current S0 host-fact contract under review | proposed contract / S0 review input |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated constitutional projection | generated projection |
 | `docs/roadmap.md` | generated capability/program sequence | generated projection |
 
@@ -230,6 +232,8 @@ Current finding disposition:
 final pre-write Git/source re-observation  → IMPLEMENTATION_DEFECT
 non-forgeable/signed Operator authority   → THREAT_MODEL_EXPANSION
 ```
+
+The current ARR-S0 branch carries `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` as the human-readable host-fact contract under review. Its presence does not authorize real host observation.
 
 The source re-observation correction is a `BOUNDED` candidate under D-020 but still requires its own bounded Operator approval envelope before implementation. Natural-language approval is sufficient when bound to the presented Brief.
 

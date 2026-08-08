@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 2.0.0
+version: 2.0.1
 owners:
   - developmentconexus-ops
 related:
@@ -100,10 +100,13 @@ candidate execution: no
 external effect: no
 ```
 
+D-019 still requires this correction to receive its own bounded execution authority. Under D-020 that authority may be one natural-language Operator approval of the presented Execution Brief; no exact manual gate token is required unless a material boundary makes the explicit token itself useful.
+
 Expected flow:
 
 ```text
 one bounded Execution Brief / current accepted correction scope
+→ Operator approval of that bounded envelope
 → implementation with local targeted RED/GREEN
 → ARR-S0 regression/full verification
 → fresh review + Finding Admission
@@ -115,6 +118,8 @@ After that, ARR-S0 Task 12 remains a separate `CONTROLLED` operation because it 
 
 ## Still prohibited until later authority/Evidence
 
+- ARR-S0 Task 4 implementation before its BOUNDED approval envelope;
+- ARR-S0 Task 12 real host observation before its CONTROLLED authority;
 - revision-5 M02 production implementation;
 - production Worker dispatch;
 - candidate installation/execution or substrate selection before its deciding Spike;

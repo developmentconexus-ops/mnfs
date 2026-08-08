@@ -137,8 +137,10 @@ CPR canonical reconciliation:          ACCEPTED / INTEGRATED — D-019
 ARR-S0 host capability contract:       ACCEPTED 1.0.0 — D-021
 ARR-S0 real host Evidence:             ACCEPT_WITH_LIMITATIONS / COMPLETE
 ARR-S0 fresh report integrity:         PASS
-ARR-S1 planning:                       NEXT / NOT EXECUTED
-ARR-S2 planning:                       NEXT / NOT EXECUTED
+ARR-S1 contract:                       PROPOSED 0.1.0 / REVIEW REQUIRED / NOT EXECUTABLE
+ARR-S1 implementation plan:            PROPOSED 0.1.0 / REVIEW REQUIRED
+ARR-S2 contract:                       PROPOSED 0.1.0 / REVIEW REQUIRED / NOT EXECUTABLE
+ARR-S2 implementation plan:            PROPOSED 0.1.0 / REVIEW REQUIRED
 Candidate execution/selection:         PROHIBITED pending later deciding Evidence/gates
 M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED
@@ -146,4 +148,8 @@ Production Worker dispatch:            PROHIBITED
 
 Canonical S0 Evidence is `docs/acceptance/2026-08-07-arr-s0-host-capability-probe.md` (`ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`). It records provider-neutral host facts only and grants no named-candidate selection or execution authority.
 
-The next governed ARR action is to compile fresh S1 Agent Runtime and S2 Local Execution Envelope Planner Packs from current primary sources and the accepted S0 Evidence. Planning may proceed in parallel; candidate execution remains separately gated.
+The proposed S1 pack is `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md` + `docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md`. It is Pi-first for investigation order, separates runtime choice from SDK/RPC/ACP boundary choice, and still requires the OpenCode native ACP external challenger before final S1 selection.
+
+The proposed S2 pack is `docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md` + `docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md`. It compares SRT/nono and conditionally Sandlock; KVM microVM and Docker/container execution remain excluded under accepted S0 facts/current authority.
+
+The next governed ARR action is independent review, Finding Admission/correction, full verification and exact Operator acceptance of the proposed S1/S2 packs. Proposed contract/plan presence grants no harness implementation or real candidate execution authority by itself.

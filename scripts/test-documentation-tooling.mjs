@@ -27,6 +27,10 @@ const statusText = await readFile(path.join(root, 'docs/tracking/STATUS.md'), 'u
 const decisionsText = await readFile(path.join(root, 'docs/tracking/DECISIONS.md'), 'utf8');
 const arrReviewText = await readFile(path.join(root, 'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md'), 'utf8');
 const p1AcceptanceText = await readFile(path.join(root, 'docs/acceptance/2026-08-07-arr-p1-reconciliation-acceptance.md'), 'utf8');
+const proportionalityDesignText = await readFile(
+  path.join(root, 'docs/superpowers/specs/2026-08-07-complexity-proportionality-and-review-admission-design.md'),
+  'utf8',
+);
 const adrFiles = {
   'ADR-0001': 'docs/adr/0001-pi-first-wsl2.md',
   'ADR-0003': 'docs/adr/0003-worktree-write-tracks.md',
@@ -289,6 +293,10 @@ assert.doesNotMatch(statusText, /## Immediate next action — GATE-P0/u, 'STATUS
 assert.match(p1AcceptanceText, /MNFS_ACCEPT_ARR_P1 program_blob=52033adcdfb7163f63606034b9912942b018f38e pr=24 head=02e99b25842562d111488d5c8c7008cb2635f3da findings=critical:0,important:0/u, 'P1 acceptance record must bind the exact Operator token');
 assert.match(decisionsText, /\| D-017 \| 2026-08-07 \| Accept ARR P1 \/ GATE-R[\s\S]*02e99b25842562d111488d5c8c7008cb2635f3da/u, 'D-017 must record exact P1 acceptance authority');
 assert.match(decisionsText, /\| D-018 \| 2026-08-07 \| Accept the bounded ARR P1-F03[\s\S]*0b9fe9747887ef5817fffbb586db04ccb3292b27/u, 'D-018 must record exact P1-F03 acceptance authority');
+assert.match(decisionsText, /\| D-019 \| 2026-08-08 \|/u, 'D-019 must record the accepted complexity-proportionality decision');
+assert.match(proportionalityDesignText, /status: accepted/u, 'proportionality design must be canonically accepted');
+assert.match(proportionalityDesignText, /version: 1\.0\.0/u, 'proportionality design must be promoted to version 1.0.0');
+assert.match(proportionalityDesignText, /A good plan minimizes uncertainty; it does not maximize complexity\./u);
 assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must record integrated GATE-R');
 assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-S0-IMPLEMENT — NOT AUTHORIZED/u, 'ARR review must keep S0 implementation unapproved');
 assert.match(agentsText, /ARR P1 reconciliation A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'AGENTS must orient fresh actors to accepted P1');
@@ -356,11 +364,14 @@ assert.equal((await evaluateReadiness(unassessed, registry)).R1.result, 'BLOCKED
 
 const unresolvedSource = structuredClone(traceability);
 unresolvedSource.requirements[0].source = ['DOC-NOT-REAL'];
-assert.equal((await evaluateReadiness(unresolvedSource, registry)).R2.result, 'BLOCKED');
+assert.equal(
+  (await evaluateReadiness(unresolvedSource, registry, { currentContract })).R2.result,
+  'BLOCKED',
+);
 
 const missingProof = structuredClone(traceability);
 missingProof.requirements.find((item) => item.level === 'MUST').verifiedBy = [];
-assert.equal((await evaluateReadiness(missingProof, registry)).R2.result, 'BLOCKED');
+assert.equal((await evaluateReadiness(missingProof, registry, { currentContract })).R2.result, 'BLOCKED');
 
 const spikeEvidenceTemp = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-spike-evidence-'));
 try {

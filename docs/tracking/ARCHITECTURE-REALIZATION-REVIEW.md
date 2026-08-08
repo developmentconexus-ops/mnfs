@@ -17,6 +17,10 @@ related:
   - DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION
   - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
   - ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE
+  - DOC-ARR-S1-AGENT-RUNTIME-CONTRACT
+  - PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE
+  - DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT
+  - PLAN-ARR-S2-EXECUTION-ENVELOPE-CONFORMANCE
   - DOC-PRODUCT-BLUEPRINT
   - DOC-CAPABILITY-ROADMAP
   - TRACKING-DECISIONS
@@ -47,8 +51,8 @@ D-020 risk-proportional execution governance    ACCEPTED / INTEGRATED
 ARR-S0 Task 11                                  COMPLETE / REVIEW CLEAR
 ARR-S0 contract 1.0.0                           ACCEPTED — D-021
 ARR-S0 Task 12                                  COMPLETE — ACCEPT_WITH_LIMITATIONS
-ARR-S1 planning                                 NEXT / NOT EXECUTED
-ARR-S2 planning                                 NEXT / NOT EXECUTED
+ARR-S1 contract + plan                          PROPOSED 0.1.0 / REVIEW REQUIRED
+ARR-S2 contract + plan                          PROPOSED 0.1.0 / REVIEW REQUIRED
 ```
 
 ## Accepted architecture
@@ -96,8 +100,8 @@ Fresh-Actor recovery cannot depend on transcript/session continuity. Proof-first
 
 ```text
 ARR-S0  Host Capability Probe                    COMPLETE — ACCEPT_WITH_LIMITATIONS
-ARR-S1  Agent Runtime Conformance                NEXT
-ARR-S2  Local Execution Envelope Conformance     NEXT
+ARR-S1  Agent Runtime Conformance                CONTRACT+PLAN PROPOSED 0.1.0
+ARR-S2  Local Execution Envelope Conformance     CONTRACT+PLAN PROPOSED 0.1.0
 ARR-S2W Workspace comparison — conditional only
 ARR-S3  Vertical Composition Proof
 → substrate selection Decision
@@ -153,19 +157,61 @@ The sole mechanical Verdict limitation is `HOST-DOCKER-DAEMON=UNKNOWN`, because 
 
 These are generic host facts. S0 does not declare any named Agent Runtime, process sandbox, microVM implementation, container runtime or workspace substrate accepted or rejected.
 
+## Proposed ARR-S1 Planner Pack
+
+`DOC-ARR-S1-AGENT-RUNTIME-CONTRACT` and `PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE` are proposed at version 0.1.0. They are not accepted authority and authorize no harness implementation or candidate execution by themselves.
+
+The proposed investigation order is deliberately Pi-first while keeping the Validation Contract candidate-independent:
+
+```text
+Pi SDK primary integration hypothesis
+Pi-ACP ACP-boundary hypothesis
+Pi RPC only if a deciding ambiguity remains
+→ mandatory OpenCode native ACP challenger
+→ second ACP only if ACP remains decision-relevant and two ACP paths have not already passed
+```
+
+This separates two decisions that must not be conflated:
+
+```text
+runtime winner
+integration-boundary winner (concrete Pi adapter vs ACP)
+```
+
+Frozen planning provenance includes Pi 0.84.1, Pi-ACP 0.0.33, ACP TypeScript SDK 1.3.0 and OpenCode 1.18.15. All are revalidated before any real execution.
+
+## Proposed ARR-S2 Planner Pack
+
+`DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT` and `PLAN-ARR-S2-EXECUTION-ENVELOPE-CONFORMANCE` are proposed at version 0.1.0. They are not accepted authority and authorize no harness implementation or candidate execution by themselves.
+
+The proposed comparison is restricted to candidates that can still alter the decision under current S0 facts:
+
+```text
+Anthropic Sandbox Runtime 0.0.71   incumbent
+nono 0.72.0                        challenger
+Sandlock 0.8.6                     conditional on actual Landlock ABI/seccomp preflight
+```
+
+KVM-backed BoxLite/smolvm remain excluded because the accepted host class is `BLOCKED_BY_HOST`. Docker/container setup remains excluded because it requires a separate setup Decision.
+
+Sandlock is specifically decision-relevant because eligible native COW could eliminate a later separate workspace substrate and make ARR-S2W not applicable.
+
 ## Current boundary
 
-ARR-S0 is complete. The next allowed work is fresh ARR-S1 and ARR-S2 research/planning using current primary upstream evidence and the accepted S0 host facts.
+ARR-S0 is complete. Fresh S1/S2 research and detailed planning have produced proposed contract/plan packs, but neither pack is accepted yet.
 
-S1/S2 planners must:
+The next governed work is:
 
-- refresh current named-candidate provenance and requirements;
-- map those requirements onto immutable S0 generic host facts;
-- keep project-specific prerequisites unresolved unless separately proved;
-- define candidate-independent deciding contracts before candidate execution;
-- avoid automatic host setup or permission changes.
+```text
+independent review of exact proposed S1/S2 bytes
+→ Finding Admission / bounded correction
+→ full repository verification
+→ explicit Operator acceptance of exact reviewed packs
+```
 
-Candidate execution remains behind later exact gates. S0 acceptance does not authorize candidate installation/execution, substrate selection, S2W/S3 execution, revision-5 M02 production work or production Worker dispatch.
+Only after pack acceptance may deterministic S1/S2 harness implementation proceed under the accepted plans. Real provider/candidate operations remain later separate CONTROLLED gates (`GATE-S1` / `GATE-S2`).
+
+Candidate installation/execution, runtime/environment selection, KVM/Docker/host remediation, S2W/S3 execution, revision-5 M02 production work and production Worker dispatch remain prohibited.
 
 ## Durable P1 anchor
 

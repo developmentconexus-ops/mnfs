@@ -201,7 +201,7 @@ A candidate that cannot establish a required security or resource-control proper
 
 `S2-C17` is mandatory for every executed candidate. `HOST-CGROUP-V2=SUPPORTED` alone cannot satisfy it. If the common governor cannot be established, no candidate may receive `PASS` and no selecting Decision may be produced.
 
-A candidate is **not selection-eligible** until `S2-C15` and `S2-C17` both PASS. Before any selecting Decision, the final S2 report must therefore carry the D-014 dependency-admission fields:
+Before any selecting Decision, the final S2 report must carry the D-014 dependency-admission fields:
 
 ```text
 upgradePolicy:
@@ -219,6 +219,28 @@ removalConditions:
 ```
 
 The policy must be candidate-specific and actionable. Merely stating “keep dependencies updated” or “replace if needed” is insufficient. A future upgrade cannot float automatically into production authority; the Upgrade Policy must state which provenance changes require renewed conformance Evidence before use.
+
+### S2 selection predicate
+
+The single authoritative selection predicate is `S2_SELECTION_ELIGIBLE(candidate)`.
+
+It is `true` **only when all of the following are true**:
+
+```text
+candidate.verdict == PASS
+EVERY required result S2-C01..S2-C17 == PASS
+S2-C15 == PASS
+S2-C17 == PASS
+required candidate Evidence integrity == valid
+Upgrade Policy fields are complete and candidate-specific
+Removal Conditions fields are complete and candidate-specific
+resourceGovernor exact limits/read-back/membership Evidence is complete and untampered
+resourceGovernor.escapeAttemptResult == PASS
+```
+
+`S2-C15` and `S2-C17` are repeated above intentionally because dependency admission and resource binding are selection gates as well as required criteria. Their repetition does not permit any other required criterion to be ignored.
+
+Any candidate with a required `FAIL`, `BLOCKED` or `UNKNOWN` criterion has `S2_SELECTION_ELIGIBLE=false`, even when its Upgrade Policy, Removal Conditions and cgroup Evidence are complete.
 
 ---
 
@@ -297,13 +319,13 @@ Selection is separate from conformance. A candidate may PASS and still lose if a
 A final S2 Decision may select:
 
 ```text
-one concrete local process envelope
-one concrete local envelope + external workspace requirement
-one concrete local envelope with native workspace sufficient
+SELECT one concrete local process envelope
+SELECT one concrete local envelope + external workspace requirement
+SELECT one concrete local envelope with native workspace sufficient
 BLOCK / REPLAN local execution assumption
 ```
 
-No `SELECT` output is valid unless the selected candidate has complete Upgrade Policy and Removal Conditions Evidence under `S2-C15` and finite resource/process binding under `S2-C17`.
+**Every** `SELECT` output above is invalid unless the selected candidate satisfies `S2_SELECTION_ELIGIBLE=true`. Complete D-014 or resource-governor Evidence can never make a non-PASS candidate selectable.
 
 No remote platform or production environment provider is selected by S2.
 
@@ -346,7 +368,8 @@ Every real S2 run binds:
 - raw artifact refs/hashes;
 - performance measurements and limitations;
 - candidate-specific Upgrade Policy and Removal Conditions;
-- candidate verdict and workspace-applicability observation.
+- candidate verdict and workspace-applicability observation;
+- mechanically derived `S2_SELECTION_ELIGIBLE` for every candidate considered for selection.
 
 S2 does **not** by itself:
 

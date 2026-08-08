@@ -18,7 +18,7 @@ related:
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - TRACKING-DECISIONS
 tracking_issue: 23
-last_reviewed: 2026-08-07
+last_reviewed: 2026-08-08
 ---
 
 # MNFS Complexity Proportionality and Review Admission Replan Design
@@ -27,85 +27,80 @@ last_reviewed: 2026-08-07
 
 ARR-S0 review exposed a governance gap: a reviewer Finding could be technically valid under a stronger hypothetical threat model and then drift directly into implementation scope.
 
-MNFS should prevent that without weakening rigorous planning or review.
-
-The governing principle is:
+The design response is deliberately small:
 
 > **A good plan minimizes uncertainty; it does not maximize complexity.**
 
-Planning completeness means freezing the material correctness, authority, boundaries and proof an Actor must not reinterpret. It does **not** mean implementing every conceivable defense, future abstraction or reviewer-imagined threat.
-
-This is a clarification of existing MNFS policy, not a new lifecycle or framework.
-
-Existing authority already points here:
-
-- D-009: supplemental hardening is not automatically blocking unless it is required by deciding criteria/authority;
-- D-011: planning rigor remains proportional to risk;
-- D-014: material machinery needs a named consumer and generic abstraction is rejected without a second real consumer;
-- Development Governance: research stops at diminishing decision value;
-- MCRM R5: no speculative platform work;
-- Layered Execution Planning: freeze invariants and Evidence boundaries while keeping legitimate tactics adaptive.
-
-The missing rule is explicit admission between:
+MNFS therefore keeps its existing Discovery → Decision → Execution model and adds one missing admission rule:
 
 ```text
 Finding
-→ Correction
+→ classify against accepted authority/threat model
+→ only admitted current requirements become Correction scope
 ```
 
----
+This design was explicitly approved by the Operator on 2026-08-08 at reviewed head `636294c984b3ece40d2d91d9c94a9aecf16108fd`, design blob `46c0fbc28d9fcdaf19f1ecfa7a853747b910bf87`, verification workflow `31224951872` SUCCESS. Formal canonical acceptance/version promotion remains Task 1 of the separately gated reconciliation plan; this administrative approval record does not authorize those edits by implication.
 
-## 2. Trigger
+This does **not** create:
 
-ARR-S0 answers one bounded question:
+- a new lifecycle;
+- a complexity score;
+- a policy engine;
+- a new persisted domain entity;
+- a generic security framework.
 
-> What physical capabilities and broad capability classes are observable on the canonical Ubuntu WSL2 host?
-
-It is read-only by design and does not authorize candidate execution, installation, host remediation, runtime selection or production Worker dispatch.
-
-A late review Finding argued that the S0 Operator gate was reconstructible and therefore should be non-forgeable through an independent trust root/signature.
-
-That would be required only if ARR-S0 promised protection against a malicious local Actor deliberately forging Operator identity or bypassing a control plane it can modify.
-
-That adversary was not part of the accepted S0 problem.
-
-The Finding is useful; silently converting it into PKI/Ed25519 machinery would not be.
+It clarifies D-009, D-011 and D-014, which already establish criterion-driven blocking, risk-proportional planning and named-consumer/YAGNI discipline.
 
 ---
 
-## 3. Complexity burden of proof
+## 2. Complexity burden of proof
 
-A material mechanism enters current scope only when it names a **current** benefit such as:
-
-- required product capability;
-- accepted failure/recovery mode;
-- accepted security threat;
-- deciding Evidence property;
-- meaningful operational simplification;
-- meaningful machinery elimination.
-
-Before admitting the mechanism, answer:
-
-1. What current consumer/requirement needs it?
-2. What concrete failure/risk does it prevent?
-3. Why is the simpler alternative insufficient?
-4. What implementation/maintenance/operational cost does it add?
-5. Does it eliminate more machinery than it introduces?
-6. Can it remain concrete instead of becoming a framework?
-7. Can the decision safely wait for a real consumer?
-
-No numeric complexity score is introduced.
-
-Default:
+Material complexity enters current scope only when it names a current benefit such as:
 
 ```text
-no material current benefit
-→ DEFER
+CURRENT_CAPABILITY
+CURRENT_FAILURE_MODE
+CURRENT_SECURITY_RISK
+CURRENT_RECOVERY_REQUIREMENT
+CURRENT_EVIDENCE_REQUIREMENT
+CURRENT_OPERATIONAL_SIMPLIFICATION
+CURRENT_MACHINERY_ELIMINATION
 ```
 
-Simplicity is not permission for vague plans. MNFS still specifies correctness, architecture, authority, interfaces, state/security/effect boundaries, write/resource constraints, proof and termination precisely.
+For a material mechanism, the design/Decision must answer:
 
-Target:
+1. What current consumer, requirement, failure or risk requires it?
+2. Why is the simpler alternative insufficient?
+3. What implementation/operational/maintenance cost does it add?
+4. Does it remove more machinery than it creates?
+5. Can it stay concrete rather than becoming a framework?
+6. Can it safely be deferred until a real consumer exists?
+
+Default when no material current benefit is established:
+
+```text
+DEFER
+```
+
+There is intentionally no numerical complexity score.
+
+---
+
+## 3. Simplicity is not under-specification
+
+MNFS must remain precise about what an Actor cannot reinterpret:
+
+- correctness;
+- architecture boundaries;
+- authority;
+- interfaces;
+- state invariants;
+- security/effect boundaries;
+- write/resource boundaries;
+- proof/Evidence obligations;
+- termination/Replan conditions.
+
+The target is:
 
 ```text
 high semantic precision
@@ -113,38 +108,69 @@ high semantic precision
 low accidental machinery
 ```
 
+Planning completeness means **no material hidden decision is accidentally delegated to the Actor**. It does not mean maximum detail, ceremony, mechanism or future hardening.
+
 ---
 
-## 4. Review Finding admission
+## 4. Finding admission
 
-A material Finding is classified against accepted authority before it becomes implementation scope.
+Every material review Finding is classified before implementation changes are authorized.
 
-| Class | Meaning | Default route |
-|---|---|---|
-| Existing-authority defect | Violates accepted requirement, criterion, contract, design or required property | Correction |
-| Derived requirement | Newly discovered requirement is necessary to satisfy accepted higher-level authority | Decision/admission, then Correction |
-| Threat-model expansion | Requires protection against an adversary/compromise not in accepted threat model | Discovery/Decision/Replan |
-| Future hardening | Useful defense-in-depth but not required for current correctness/risk | Defer/follow-up |
+### `CONTRACT_VIOLATION`
 
-Examples of existing-authority defects:
+Implementation contradicts an accepted requirement, criterion, contract, design or threat model.
 
-- Evidence records stale source identity even though exact source identity is required;
-- subprocess environment leaks credentials despite an explicit closed-environment contract;
-- immutable Evidence publication can overwrite a conflicting destination.
+```text
+→ Correction
+```
 
-Examples of threat-model expansion:
+### `IMPLEMENTATION_DEFECT`
 
-- a governance token must cryptographically prove which human issued it;
-- a local read-only Spike must remain secure after a malicious Actor rewrites its own control-plane implementation;
-- every workflow approval must provide non-repudiation.
+Implementation fails to preserve an already-required property, even if the exact failure case was not previously enumerated.
 
-A reviewer may correctly rate a scenario P1/Critical under its assumed model while MNFS classifies it as a threat-model expansion relative to current authority.
+```text
+→ Correction
+```
 
-The Finding is not ignored; it is routed correctly.
+### `DERIVED_REQUIREMENT`
 
-> **Reviewer severity does not create requirement authority.**
+A new requirement is necessary to satisfy accepted higher-level authority but was not represented explicitly.
 
-A blocking Correction should therefore trace to an accepted requirement/criterion, contract/design clause, accepted threat model, or a newly admitted derived requirement.
+```text
+→ materiality/admission
+→ update authority if material
+→ Correction only after admission
+```
+
+### `THREAT_MODEL_EXPANSION`
+
+The Finding matters only if MNFS promises protection against an adversary/compromise not present in the accepted threat model.
+
+```text
+→ Discovery / Decision / Replan
+```
+
+It is not automatically a code defect.
+
+### `FUTURE_HARDENING`
+
+Useful defense-in-depth that does not affect current correctness, current accepted risk or deciding Evidence.
+
+```text
+→ DEFER / FOLLOW_UP / Calibration input
+```
+
+It does not block the current gate merely because it would be desirable in a stronger future system.
+
+### Severity is not Authority
+
+A reviewer may correctly call something P1/Critical under an assumed model while MNFS classifies it as `THREAT_MODEL_EXPANSION` against current accepted authority.
+
+```text
+severity ≠ requirement authority
+```
+
+The Finding is not ignored; it is routed to the correct loop.
 
 ---
 
@@ -154,209 +180,228 @@ A blocking Correction should therefore trace to an accepted requirement/criterio
 
 Answers:
 
-> Has this Actor/process received authority to advance this workflow state?
+> Has this Actor/process been authorized to advance the current workflow state?
 
-Typical uses:
+Examples:
 
-- approve plan/design;
-- authorize implementation;
-- authorize bounded Spike execution;
-- approve integration/merge when required.
+- plan approval;
+- implementation authorization;
+- bounded Architecture Spike authorization;
+- integration/merge authorization where required.
 
-Default guarantees:
+Default properties:
 
 - explicit scope;
 - missing/malformed/stale authority fails closed;
-- exact binding to relevant source/contract where required;
+- relevant contract/source binding where required;
 - auditable state/Evidence;
 - trusted MNFS control-plane semantics.
 
-It does **not** automatically promise resistance to a malicious process able to rewrite/bypass that same trusted control plane.
+A Governance Gate does **not** by default promise resistance to a malicious process that can rewrite the control plane itself.
 
 ### Security Boundary
 
 Answers:
 
-> Even if an Actor/process is malicious or compromised, what operation is it technically prevented from performing?
+> Even if an Actor/process is malicious or compromised, what is it technically prevented from doing?
 
-Likely consumers include:
+Typical consumers:
 
 - production credentials;
-- destructive/privileged host operations;
-- infrastructure/deployment effects;
-- untrusted-code isolation;
+- privileged host mutation;
+- destructive infrastructure;
 - financial/external effects;
-- secret-bearing provider access.
+- secret-bearing model/provider access;
+- untrusted-code isolation;
+- production deployment.
 
-Sandboxing, brokered capabilities, privilege separation, workload identity or cryptographic authorization may be appropriate here, but only after a current threat model justifies them.
+Possible mechanisms include sandboxing, capability brokering, privilege separation, workload identity or cryptographic authorization **only when the current consumer/threat model justifies them**.
 
 Default classification:
 
 ```text
 workflow transition
-→ Governance Gate
+→ GOVERNANCE GATE
 
 adversarial credential/effect/isolation enforcement
-→ Security Boundary
+→ SECURITY BOUNDARY
 ```
 
-A review comment alone cannot promote the former into the latter.
+Review implication alone cannot promote the first into the second.
 
 ---
 
-## 6. Review lifecycle discipline
+## 6. Review discipline
 
-Final review should be rigorous but bounded.
+Final independent review uses an exact frozen head:
 
 ```text
 READY_FOR_REVIEW
 → freeze exact head
-→ complete independent review
-→ group/classify findings
-→ admit correction scope
-→ one coherent correction cycle
-→ deciding proofs + full verification
-→ new exact-head review when required
+→ complete review
+→ classify/group findings
+→ coherent correction cycle
+→ full verification
+→ fresh exact-head review when required
 ```
 
-Do not keep mutating the same head while its fresh review is in progress unless that review is intentionally abandoned.
+Do not keep pushing implementation commits while the same fresh review is active.
 
-This avoids repeated stale reviews and piecemeal correction churn.
+A blocking Correction should trace to at least one of:
 
-Documentation tests should protect contractual semantics—IDs, enums, schema, hashes, statuses, gates, required relations and intentionally normative markers—rather than make ordinary explanatory prose an accidental API.
+- accepted requirement/criterion;
+- accepted contract/design clause;
+- accepted threat-model statement;
+- admitted necessary derived requirement.
+
+Otherwise classify the Finding before expanding implementation scope.
 
 ---
 
-## 7. ARR-S0 disposition
+## 7. Documentation/test precision
 
-### 7.1 Current threat/trust boundary
+Documentation checks should protect stable semantics and machine contracts, especially:
 
-ARR-S0 is a read-only Architecture Spike under a trusted Operator + trusted MNFS governance/control-plane assumption.
+- IDs;
+- enums;
+- schemas;
+- hashes;
+- status/gates;
+- required relationships;
+- generated/source consistency;
+- deliberately normative markers.
 
-It must protect against current risks including:
+Ordinary explanatory wording should not become a byte-exact API unless the wording itself is intentionally contractual.
 
-- unauthorized/accidental workflow progression;
-- missing, malformed, stale or wrong-scope authority;
+---
+
+## 8. ARR-S0 disposition
+
+### Current boundary
+
+ARR-S0 is a read-only Architecture Spike harness under a trusted Operator + trusted MNFS governance/control-plane assumption.
+
+Current protection includes:
+
+- accidental/unauthorized workflow progression;
+- malformed/stale/wrong-scope authority;
 - source/contract mismatch;
-- host mutation outside contract;
-- arbitrary shell/inherited credential/proxy leakage;
+- unauthorized host mutation;
+- arbitrary shell or inherited credential/proxy environment;
 - unsafe Evidence paths/filesystems;
 - Evidence overwrite/tamper/integrity failure;
-- false host inference or narrative overriding mechanical Verdict;
-- stale source identity recorded as deciding Evidence.
+- false host inference;
+- process/model text overriding mechanical Verdict;
+- stale source identity becoming deciding Evidence.
 
-It does not currently promise protection against:
+ARR-S0 does not currently promise:
 
-- a malicious Actor that can rewrite and execute modified MNFS/S0 control-plane bytes;
-- cryptographic proof of the human Operator's identity/origin;
+- resistance to a malicious local Actor able to rewrite and execute the S0 control-plane implementation itself;
+- cryptographic proof of personal Operator origin;
 - non-repudiation;
-- compromised kernel/root.
+- resistance to compromised kernel/root.
 
-### 7.2 `GATE-S0-EXECUTE`
+### Execution authorization
 
-Keep it as an **exact-bound Governance Gate**.
+`GATE-S0-EXECUTE` remains required for `preflight` and `run` under the current accepted S0 direction.
 
-`preflight` and `run` remain separately unauthorized until that gate because both perform real host observation under the current S0 contract.
-
-Keep:
-
-- explicit bounded Operator authority through the control-plane channel;
-- plan/contract/source/verification binding required by the accepted contract;
-- fail-closed validation;
-- no raw authority propagation into probe subprocesses;
-- non-secret hash-bound authority projection in Evidence where useful.
-
-Do not describe the parser/binding step as cryptographic origin authentication.
-
-Do not add Ed25519, PKI, signer services, trust-root infrastructure or a generic signed-capability framework to S0.
-
-### 7.3 Current independent-review findings
-
-**Non-forgeable Operator authorization**
+It should be described as:
 
 ```text
-class: Threat-model expansion
-S0 disposition: not admitted
-future: defer until a named adversarial Security Boundary consumer requires it
+exact-bound governance authorization
 ```
 
-The reviewer concern remains recorded; it is not self-waived.
+not as cryptographic/non-forgeable authentication.
 
-**Final Git/source re-observation before durable Evidence**
+### Non-forgeability Finding
 
 ```text
-class: Existing-authority defect
-S0 disposition: correction required
+classification: THREAT_MODEL_EXPANSION
+action for S0: do not add required machinery
+future: DEFER until a named Security Boundary consumer exists
 ```
 
-S0 claims exact source identity. If the checkout changes after initial observation but before first durable run Evidence, the recorded identity can be stale. Re-observe/revalidate at the final pre-write boundary in the later approved correction plan.
+Therefore ARR-S0 does not justify:
 
-### 7.4 Existing hardening
+- Ed25519 keys;
+- PKI;
+- signer service;
+- trust-root framework;
+- generic signed capabilities.
 
-Do not remove working protection merely to reduce line count.
+### Final Git re-observation Finding
 
-Retain hardening that directly serves accepted S0 properties, including non-mutating Git observation, Linux-owned Evidence filesystem checks, bounded shell-free subprocesses, explicit subprocess environment, no-replace artifact publication, integrity verification, durable run/report recovery, provider-neutral host facts/classes and mechanical Verdict.
+The run records exact commit/tree as deciding Evidence. If source can change after initial preflight but before the first durable Evidence write, stale identity can be persisted.
 
-Simplification is not reverse gold-plating; removal also has churn and regression cost.
+```text
+classification: IMPLEMENTATION_DEFECT
+action: bounded Correction required
+```
 
----
+The correction is one final read-only Git source re-observation/revalidation at the pre-write boundary. Exact implementation remains separately gated.
 
-## 8. Future ARR Spikes
+### Existing useful hardening
 
-S1/S2/S2W/S3 plans/contracts should state their bounded trust/threat boundary using existing document structure—not a new domain entity or framework—including:
+Do not remove existing protection merely to make the diff smaller. Keep working machinery when it directly implements current requirements, including non-mutating Git observation, Linux-owned Evidence filesystems, bounded shell-free subprocesses, explicit environment, immutable publication, integrity verification, recovery/report and mechanical Verdict.
 
-- gate class;
-- allowed/forbidden effects;
-- adversaries/failures in scope;
-- explicit out-of-scope threats.
-
-Risk-proportionality can therefore increase rigor where warranted:
-
-- S1 executes an Agent Runtime and may need stronger process/cancellation/credential analysis than S0;
-- S2 evaluates the Execution Environment as an actual security boundary and therefore warrants adversarial isolation proof;
-- S3 validates composition of the selected boundaries.
-
-The rule is not “always simpler.” It is **complexity proportional to the real consumer and risk**.
+Simplification also carries churn/regression cost.
 
 ---
 
-## 9. Canonical change set if approved
+## 9. Application to later ARR Spikes
 
-Approval of this design authorizes preparation of a separate plan, not direct implementation.
+Future S0/S1/S2/S2W/S3 contracts/plans should state, using existing document structure rather than a new entity:
 
-That plan should make the smallest coherent changes:
+```text
+current trust assumptions
+in-scope adversaries/failures
+out-of-scope adversaries/failures
+gate class
+allowed effects
+forbidden effects
+```
 
-1. Development Governance: add Complexity Burden of Proof + Finding Admission;
-2. MCRM R3/R5/R6: require material complexity/finding admission before execution scope expands;
-3. Layered Execution Planning: add only the necessary proportionality/review clarification;
-4. ARR Spike Governance: require bounded threat/trust statement and Finding admission;
-5. ARR-S0 contract: replace cryptographic-style `authenticated` wording with exact-bound Governance Gate wording;
-6. ARR-S0 implementation: only the admitted final Git re-observation correction plus mechanically necessary tests/docs;
-7. no Ed25519/PKI/trust-root/signed-capability implementation;
-8. no unrelated refactor/removal of already-green hardening without demonstrated maintenance benefit.
+Risk proportionality means the amount of rigor can increase when the actual consumer/effect surface increases.
 
-No new Decision ID is created by this proposal itself.
+Examples:
 
----
+- S1 executes a real Agent Runtime, so process death/cancellation/credential concerns may be stronger than S0;
+- S2 is specifically an Execution Environment/security-boundary Spike, so adversarial isolation is a current consumer;
+- S3 inherits the strongest accepted boundary of the components it composes.
 
-## 10. Non-goals
-
-This design does not:
-
-- weaken independent review or Evidence integrity;
-- permit Workers to reinterpret architecture;
-- authorize silent threat-model changes;
-- authorize Task 12 / `GATE-S0-EXECUTE`;
-- authorize S1/S2/S2W/S3 execution;
-- authorize production Worker dispatch or merge/delivery;
-- define final production MNFS security architecture;
-- claim cryptographic authorization is never useful;
-- introduce a numeric complexity budget, new lifecycle or permanent domain entity.
+This rule prevents a low-risk host-fact probe from being reviewed as if it were already the final production sandbox while preserving strong security where it belongs.
 
 ---
 
-## 11. Proposed Decision
+## 10. Minimal canonical reconciliation if accepted
 
-If accepted:
+The subsequent separately authorized implementation plan should make only these coherent changes:
 
-> MNFS adopts risk-proportional complexity and explicit Finding admission as clarifications of D-009 through D-016. Planning completeness means freezing material correctness, authority, boundaries and proof without maximizing implementation ceremony. Material new mechanisms must name a current capability/failure/risk and explain why the simpler alternative is insufficient. Review findings are classified against accepted authority before becoming Correction scope; material derived requirements and threat-model expansions return to Decision/Replan. Governance Gates provide trusted workflow authority by default and become adversarial Security Boundaries only when an accepted threat model requires technical enforcement. For ARR-S0, cryptographic non-forgeability is not a current requirement and Ed25519/PKI/trust-root machinery is deferred; final pre-write Git source re-observation remains a required correctness correction. No real S0 or later Spike execution is authorized by this Decision.
+1. record this accepted Decision in `TRACKING-DECISIONS`;
+2. strengthen Development Governance with complexity burden + Finding admission;
+3. strengthen MCRM R3/R5/R6 at existing decision points;
+4. clarify the accepted Layered Planning design without adding a new layer;
+5. extend shared ARR Spike Governance with explicit threat/trust boundaries and Finding admission;
+6. align ARR-S0 terminology from authentication claims to Governance Gate semantics;
+7. implement only final Git source re-observation as the admitted S0 code correction;
+8. perform one frozen-head independent review cycle;
+9. stop before real S0 host execution.
+
+No automatic merge/delivery, S1/S2/S2W/S3 execution, production Worker dispatch or `GATE-S0-EXECUTE` is authorized by accepting this design.
+
+---
+
+## 11. Graduation
+
+This Replan design is ready for canonical acceptance when the Operator agrees that:
+
+- complexity has an explicit current-benefit burden of proof;
+- planning precision is preserved;
+- reviewer severity is separated from requirement authority;
+- Findings are classified before Correction;
+- Governance Gates and Security Boundaries are distinct;
+- later Spikes state their threat/trust scope;
+- S0 non-forgeability is classified as threat-model expansion rather than mandatory machinery;
+- final Git re-observation remains a real S0 defect to correct;
+- no new methodology/entity/security framework is introduced;
+- Task 12 remains separately unauthorized.

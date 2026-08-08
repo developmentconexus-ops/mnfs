@@ -15,7 +15,7 @@ Before changing anything, establish current authority:
 9. `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md`
 10. current task-specific ADR / Capability / Mission / Evidence / bounded design or plan when applicable.
 
-For architecture/planning/cross-cutting work, inspect the relevant canonical Blueprint source sections as needed. Do not load the full Product Blueprint for a narrow implementation task unless applicability or the Context Pack requires it.
+For architecture/planning/cross-cutting work, inspect relevant canonical Blueprint sections as needed. Do not load the full Product Blueprint for a narrow implementation task unless applicability or the Context Pack requires it.
 
 ## Governance depth
 
@@ -134,12 +134,15 @@ Current ARR state:
 ARR P1 reconciliation:                 ACCEPTED / INTEGRATED
 P1-F03 contract binding:               ACCEPTED / INTEGRATED
 CPR canonical reconciliation:          ACCEPTED / INTEGRATED — D-019
-ARR-S0 Task 11:                        REPLAN_REQUIRED / NOT CLOSED
-ARR-S0 admitted source correction:     BOUNDED next product correction
-ARR-S0 real host probe / Task 12:      PROHIBITED pending later CONTROLLED authority
+ARR-S0 deterministic harness:          Tasks 1–11 COMPLETE / REVIEW CLEAR
+ARR-S0 final source correction:        COMPLETE — IMPLEMENTATION_DEFECT corrected
+Non-forgeable/signed authority:        THREAT_MODEL_EXPANSION — not S0 correction scope
+ARR-S0 real host probe / Task 12:      PROHIBITED pending separate CONTROLLED authority
 Candidate execution/selection:         PROHIBITED pending deciding Evidence
 M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED
 ```
 
-The next product action is to prepare and approve the BOUNDED Execution Brief for the already-admitted ARR-S0 final source re-observation/terminology correction, then implement/review/verify it inside that envelope. Real Task 12 host observation remains a separate CONTROLLED operation.
+`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` remains proposed at 0.1.0; Task 11 completion does not accept that contract or authorize real host observation.
+
+The next governed ARR action is preparation/review of the separate CONTROLLED Task 12 operation, including the contract/authority/source/verification bindings required by the accepted S0 plan. Real host observation remains prohibited until explicit CONTROLLED approval.

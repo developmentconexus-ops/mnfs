@@ -5,7 +5,7 @@ document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 2.0.0
+version: 2.0.2
 owners:
   - developmentconexus-ops
 approvers:
@@ -24,6 +24,7 @@ related:
   - DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE
   - PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
+  - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
   - CAP-EXECUTION
   - TRACKING-DECISIONS
   - TRACKING-ARCHITECTURE-REALIZATION-REVIEW
@@ -59,7 +60,7 @@ Current durable authority includes:
 - `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.1.0;
 - `DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION` 1.0.0;
 - `DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE` 1.0.0;
-- the accepted ARR program and task-specific accepted plans/contracts where applicable.
+- accepted ARR program/task plans and accepted contracts where applicable.
 
 `CAP-EXECUTION` 0.1.0 and `MIS-002` revision 5 remain immutable authority/history for the versions they describe. D-015 prohibits implementing revision-5 M02.
 
@@ -87,13 +88,7 @@ For Discovery/Decision, existing authority is the current baseline rather than t
 
 ### Git
 
-Canonical human-readable durable product knowledge:
-
-- Product Blueprint and ADRs/Decisions;
-- Capability Specs and Roadmap sources;
-- development/execution governance;
-- accepted designs and plans that remain materially useful;
-- selected durable Evidence and acceptance records.
+Canonical durable product knowledge: Product Blueprint, ADRs/Decisions, Capability Specs, Roadmap sources, governance, accepted designs/plans that remain materially useful, and selected durable Evidence.
 
 ### `.mnfs/`
 
@@ -109,14 +104,7 @@ Logs, traces, command output and generated observations. They become deciding Ev
 
 ### GitHub
 
-Operational history:
-
-- commits/diffs;
-- PRs/reviews;
-- CI/workflow results;
-- merge identity and timestamps.
-
-Do not duplicate those facts into Markdown unless they carry durable decision value beyond Git history.
+Operational history: commits/diffs, PRs/reviews, CI/workflow results, merge identity and timestamps. Do not duplicate those facts into Markdown unless they carry durable decision value beyond Git history.
 
 ## 4. Canonical entrypoints
 
@@ -133,6 +121,7 @@ Do not duplicate those facts into Markdown unless they carry durable decision va
 | `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md` | FAST / BOUNDED / CONTROLLED execution-depth policy | accepted specification |
 | `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md` | `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM`; ARR sequence | accepted guidance by GATE-P0 |
 | `docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md` | ARR-S0 bounded design/execution plan | accepted guidance by GATE-P0 |
+| `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`; S0 host-fact contract | proposed contract / next CONTROLLED input |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated constitutional projection | generated projection |
 | `docs/roadmap.md` | generated capability/program sequence | generated projection |
 
@@ -167,25 +156,11 @@ ADR-0014 — isolated mutable workspace per Write Track
 ADR-0015 — property-based Execution Environments
 ```
 
-Current principles:
-
-```text
-Thin Sovereign Semantic Kernel
-Validation-first Planning
-replaceable Agent Runtime / Session non-authority
-isolated mutable workspace semantics
-property-based Execution Environment
-provider-neutral Git result identity
-independent Evidence / Gate acceptance
-capability-first sourcing
-fresh Recovery without transcript
-```
+Current principles include Thin Sovereign Semantic Kernel, Validation-first Planning, replaceable Agent Runtime / Session non-authority, isolated mutable workspace semantics, property-based Execution Environment, provider-neutral Git result identity, independent Evidence / Gate acceptance, capability-first sourcing and fresh Recovery without transcript.
 
 No concrete Agent Runtime, process sandbox, microVM or workspace substrate is selected by these authorities alone.
 
 ## 7. Risk-proportional execution governance
-
-D-020 operationalizes existing proportionality as:
 
 ```text
 FAST       local/reversible/architecture-preserving
@@ -212,44 +187,38 @@ ARR-S0 Host Capability Probe
 
 Named candidates remain candidates or historical/incumbent Evidence until a deciding Spike and selecting Decision.
 
-Historical closeout anchor retained for orientation:
+Durable orientation anchors:
 
 ```text
 ARR P1 A1-A4 + B1: ACCEPTED — GATE-R / D-017 / INTEGRATED
 P1-F03:             ACCEPTED — D-018 / INTEGRATED
 CPR reconciliation: ACCEPTED — D-019 / INTEGRATED
+ARR-S0 Task 11:     COMPLETE / REVIEW CLEAR
 ```
 
 ## 9. Current execution boundary
 
-ARR-S0 Task 11 remains `REPLAN_REQUIRED / NOT CLOSED` because one admitted correction remains.
+ARR-S0 Task 11 is `COMPLETE / REVIEW CLEAR`. The admitted final pre-write source-integrity defect is corrected: after run-root filesystem validation and before first durable Evidence, `runS0` re-observes source, requires the same clean commit/tree and revalidates exact-bound Governance authorization.
 
-Current finding disposition:
+Finding disposition remains:
 
 ```text
-final pre-write Git/source re-observation  → IMPLEMENTATION_DEFECT
-non-forgeable/signed Operator authority   → THREAT_MODEL_EXPANSION
+final pre-write Git/source re-observation  → IMPLEMENTATION_DEFECT / CORRECTED
+non-forgeable/signed Operator authority   → THREAT_MODEL_EXPANSION / not S0 scope
 ```
 
-The source re-observation correction is a `BOUNDED` candidate under D-020 but still requires its own bounded Operator approval envelope before implementation. Natural-language approval is sufficient when bound to the presented Brief.
+`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` remains proposed at 0.1.0. Task 11 completion neither accepts that contract nor grants `GATE-S0-EXECUTE` authority.
 
-ARR-S0 Task 12 real host observation is `CONTROLLED` and remains prohibited until separately authorized. Candidate execution/selection, revision-5 M02 production implementation and production Worker dispatch remain prohibited pending their later deciding authority/Evidence.
+ARR-S0 Task 12 real host observation is `CONTROLLED`, `NOT EXECUTED` and prohibited until separately authorized. Candidate execution/selection, revision-5 M02 production implementation and production Worker dispatch remain prohibited pending later deciding authority/Evidence.
 
 ## 10. Evidence proportionality
 
 Proof is criterion-driven. Supplemental hardening does not automatically become blocking when deciding correctness is already sufficiently evidenced; deferment must remain explicit and must not contradict accepted Authority.
 
-Normal FAST/BOUNDED TDD may observe RED locally and preserve final GREEN/CI durably. Separate RED commits/workflows are reserved for cases where the failure itself is deciding durable Evidence.
-
-Acceptance/integration records are reserved for material durable outcomes that Git history alone cannot explain well. Ordinary implementation history belongs to Git/GitHub/CI.
+Normal FAST/BOUNDED TDD may observe RED locally and preserve final GREEN/CI durably. Acceptance/integration records are reserved for durable material outcomes that Git history alone cannot explain well; ordinary implementation history belongs to Git/GitHub/CI.
 
 ## 11. Generated sources
 
-Generated projections include:
-
-- `docs/product/PRODUCT-BLUEPRINT.md`;
-- `docs/roadmap.md`;
-- CAP-EXECUTION coverage views;
-- generated plan/review surfaces.
+Generated projections include `docs/product/PRODUCT-BLUEPRINT.md`, `docs/roadmap.md`, CAP-EXECUTION coverage views and generated plan/review surfaces.
 
 Do not edit generated files directly. `docs/tooling-adoption.md` remains a reference projection, never an architectural winner-selection source.

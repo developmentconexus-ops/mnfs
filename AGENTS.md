@@ -126,7 +126,7 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
   MIS-002/M02 revision-5 execution path                  SUPERSEDED
 ```
 
-Current architecture/planning authority includes D-010 through D-020, ADR-0013 through ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality/Review Admission 1.0.0 and Risk-Proportional Execution Governance 1.0.0.
+Current architecture/planning authority includes D-010 through D-020, plus D-021, ADR-0013 through ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality/Review Admission 1.0.0 and Risk-Proportional Execution Governance 1.0.0.
 
 Current ARR state:
 
@@ -136,13 +136,14 @@ P1-F03 contract binding:               ACCEPTED / INTEGRATED
 CPR canonical reconciliation:          ACCEPTED / INTEGRATED — D-019
 ARR-S0 deterministic harness:          Tasks 1–11 COMPLETE / REVIEW CLEAR
 ARR-S0 final source correction:        COMPLETE — IMPLEMENTATION_DEFECT corrected
+ARR-S0 host capability contract:       ACCEPTED 1.0.0 — D-021
 Non-forgeable/signed authority:        THREAT_MODEL_EXPANSION — not S0 correction scope
-ARR-S0 real host probe / Task 12:      PROHIBITED pending separate CONTROLLED authority
+ARR-S0 real host probe / Task 12:      PROHIBITED pending separate CONTROLLED GATE-S0-EXECUTE
 Candidate execution/selection:         PROHIBITED pending deciding Evidence
 M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED
 ```
 
-`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` remains proposed at 0.1.0; Task 11 completion does not accept that contract or authorize real host observation.
+`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version 1.0.0 is accepted under D-021. Contract acceptance is not execution authority and does not permit `preflight` or `run`.
 
-The next governed ARR action is preparation/review of the separate CONTROLLED Task 12 operation, including the contract/authority/source/verification bindings required by the accepted S0 plan. Real host observation remains prohibited until explicit CONTROLLED approval.
+The next governed ARR action is to integrate the accepted contract, bind the resulting canonical `main` to a fresh successful deterministic verification, and present the separate exact `GATE-S0-EXECUTE` CONTROLLED authority. Real host observation remains prohibited until that gate is explicitly approved.

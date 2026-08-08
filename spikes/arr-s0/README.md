@@ -6,19 +6,19 @@ ARR-S0 records physical host facts and broad capability classes. It does not sel
 
 ## Current authority
 
-`GATE-S0-IMPLEMENT` authorizes construction and deterministic tests only. The human-readable host capability contract remains proposed at version `0.1.0`.
+`GATE-S0-IMPLEMENT` authorized construction and deterministic tests. `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version `1.0.0` is now accepted under D-021.
 
-**No new real host observation is authorized by `GATE-S0-IMPLEMENT`.** Both `preflight` and `run` require a separate `GATE-S0-EXECUTE` Operator authorization. `preflight` is read-only and lighter than `run`, but it still reads real repository, filesystem and host facts, so it is execution-gated too.
+**Contract acceptance is not real-host execution authority.** Both `preflight` and `run` still require a separate `GATE-S0-EXECUTE` Operator authorization. `preflight` is read-only and lighter than `run`, but it still reads real repository, filesystem and host facts, so it is execution-gated too.
 
 `GATE-S0-EXECUTE` must bind:
 
 - the accepted S0 plan Git blob;
-- an explicitly accepted ARR-S0 contract and its exact SHA-256;
-- the exact canonical commit SHA;
-- the exact successful deterministic verification workflow run;
+- the accepted ARR-S0 contract and its exact SHA-256;
+- the exact canonical commit SHA containing the accepted contract;
+- the exact successful deterministic verification workflow run for that commit;
 - scope `canonical-host-probe-only`.
 
-Contract acceptance is not execution authority. The exact runtime Operator token is supplied through the dedicated `MNFS_ARR_S0_EXECUTE_AUTHORIZATION` control-plane channel:
+The exact runtime Operator token is supplied through the dedicated `MNFS_ARR_S0_EXECUTE_AUTHORIZATION` control-plane channel:
 
 ```text
 MNFS_AUTHORIZE_ARR_S0_EXECUTE plan_blob=<accepted-plan-git-blob> contract_sha256=<exact-contract-sha256> base_sha=<exact-canonical-commit> verify_run=<exact-successful-workflow-run> scope=canonical-host-probe-only
@@ -76,4 +76,4 @@ The harness has no path that intentionally:
 - dispatches a production Worker;
 - implements the superseded revision-5 M02 path.
 
-The exact host capability semantics are defined in `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md`.
+The exact host capability semantics are defined in accepted `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` version 1.0.0.

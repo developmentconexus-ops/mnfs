@@ -4,8 +4,8 @@ title: ARR-S0 Host Capability Contract
 document_type: architecture_spike_contract
 form: reference
 authority: contract
-status: proposed
-version: 0.1.0
+status: accepted
+version: 1.0.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -31,7 +31,7 @@ This contract is provider-neutral. It records host facts, not named-substrate el
 
 The approved implementation plan is `PLAN-ARR-S0-HOST-CAPABILITY-PROBE` version `0.2.0`, accepted under `GATE-P0`. The deterministic harness may be built and reviewed under the exact `GATE-S0-IMPLEMENT` authorization, but **all new real host observation is PROHIBITED pending `GATE-S0-EXECUTE`**.
 
-This document remains `status: proposed`, version `0.1.0`, until an explicit Operator Decision accepts exact contract bytes. Contract acceptance alone is never execution authority. Both `preflight` and `run` require `GATE-S0-EXECUTE`; `preflight` is intentionally lighter than `run`, but it still observes real Git, filesystem and host facts and therefore is not executable under the implementation-only gate.
+`status: accepted` and version `1.0.0` mean that an explicit Operator Decision has accepted these exact contract bytes. Contract acceptance alone is never execution authority. Both `preflight` and `run` require `GATE-S0-EXECUTE`; `preflight` is intentionally lighter than `run`, but it still observes real Git, filesystem and host facts and therefore is not executable under the implementation-only gate.
 
 The exact runtime Operator gate token is supplied through the dedicated `MNFS_ARR_S0_EXECUTE_AUTHORIZATION` control-plane channel:
 

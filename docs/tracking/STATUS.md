@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 2.1.0
+version: 2.2.0
 owners:
   - developmentconexus-ops
 related:
@@ -48,7 +48,7 @@ Thin Sovereign Semantic Kernel
 + Capability-first Sourcing
 ```
 
-Current governance authority includes D-010..D-020, ADR-0013..ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality and Review Admission 1.0.0, and Risk-Proportional Execution Governance 1.0.0.
+Current governance authority includes D-010..D-020 plus D-021, ADR-0013..ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality and Review Admission 1.0.0, and Risk-Proportional Execution Governance 1.0.0.
 
 ## ARR state
 
@@ -59,22 +59,24 @@ CPR canonical reconciliation:         ACCEPTED / INTEGRATED — D-019
 ARR-S0 deterministic harness:         Tasks 1–11 COMPLETE / REVIEW CLEAR
 ARR-S0 Task 11:                       COMPLETE / REVIEW CLEAR
 Final source re-observation finding:  IMPLEMENTATION_DEFECT / CORRECTED
+ARR-S0 host capability contract:      ACCEPTED 1.0.0 — D-021
 Non-forgeable Operator authority:     THREAT_MODEL_EXPANSION / not S0 correction scope
 ARR-S0 Task 12 real host Evidence:    NOT EXECUTED / CONTROLLED / NOT AUTHORIZED
 ```
 
-Task 11 closeout means the bounded deterministic harness correction is implemented, fully verified and review-cleared. It does **not** accept the proposed S0 contract and does **not** authorize real host observation.
+D-021 accepts the exact ARR-S0 host-fact contract bytes as version 1.0.0. Contract acceptance is not `GATE-S0-EXECUTE`: neither `preflight` nor `run` is authorized by D-021 alone.
 
 No Agent Runtime, Execution Environment, workspace substrate or named candidate has been selected by current ARR Evidence.
 
 ## Immediate next action
 
-Prepare the separate `CONTROLLED` Task 12 operation. Before any real host observation, the operation must resolve the accepted S0-plan preconditions, including explicit contract acceptance/binding, exact canonical source identity, fresh deterministic verification and explicit CONTROLLED execution authority.
+Integrate the accepted 1.0.0 contract into canonical `main`, then bind that exact canonical commit to a fresh successful deterministic verification and prepare the separate exact `GATE-S0-EXECUTE` CONTROLLED authority.
 
-Task 12 remains a distinct operation because it creates deciding canonical host Evidence for later S1/S2 planning.
+Only that later gate may authorize Task 12 real host observation. Its binding must include the accepted S0 plan blob, accepted contract SHA-256, exact canonical commit, exact successful verification Evidence and scope `canonical-host-probe-only`.
 
 ## Still prohibited until later authority/Evidence
 
+- ARR-S0 `preflight` or `run` before explicit `GATE-S0-EXECUTE`;
 - ARR-S0 Task 12 real host observation before its CONTROLLED authority;
 - candidate installation/execution or substrate selection before its deciding Spike;
 - revision-5 M02 production implementation;
@@ -85,7 +87,7 @@ Task 12 remains a distinct operation because it creates deciding canonical host 
 
 ## Durable transition note
 
-The entry state for the now-completed Task 4 was intentionally preserved as a governance transition rather than an active gate:
+The entry state for the completed Task 4 remains historical context only:
 
 ```text
 historical entry — ARR-S0 Task 11: REPLAN_REQUIRED / NOT CLOSED
@@ -95,7 +97,7 @@ historical entry — Operator approval of that bounded envelope was required bef
 historical entry — ARR-S0 Task 4 implementation before its BOUNDED approval envelope was prohibited
 ```
 
-That entry state is superseded by the current `COMPLETE / REVIEW CLEAR` state above. Detailed PR heads, workflow IDs, merge SHAs and mechanical CI history remain in Git/GitHub.
+That entry state is superseded by the current `COMPLETE / REVIEW CLEAR` state. Detailed PR heads, workflow IDs, merge SHAs and mechanical CI history remain in Git/GitHub.
 
 ## Durable follow-up
 

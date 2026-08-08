@@ -1,23 +1,28 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { S0_CAPABILITY_IDS, S0_CLASS_IDS, S0_VERDICT_VALUES } from '../spikes/arr-s0/src/contract.mjs';
 
 const contractPath = 'docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md';
+const planPath = 'docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md';
 const readmePath = 'spikes/arr-s0/README.md';
 const mapPath = 'docs/DOCUMENTATION-MAP.md';
 const statusPath = 'docs/tracking/STATUS.md';
 const agentsPath = 'AGENTS.md';
 const arrPath = 'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md';
+const decisionsPath = 'docs/tracking/DECISIONS.md';
 const packagePath = 'package.json';
 
-const [contract, readme, documentationMap, status, agents, arrReview, packageText] = await Promise.all([
+const [contract, planBytes, readme, documentationMap, status, agents, arrReview, decisions, packageText] = await Promise.all([
   readFile(contractPath, 'utf8'),
+  readFile(planPath),
   readFile(readmePath, 'utf8'),
   readFile(mapPath, 'utf8'),
   readFile(statusPath, 'utf8'),
   readFile(agentsPath, 'utf8'),
   readFile(arrPath, 'utf8'),
+  readFile(decisionsPath, 'utf8'),
   readFile(packagePath, 'utf8'),
 ]);
 
@@ -33,8 +38,9 @@ function section(text, heading, nextHeading) {
   return text.slice(start, end);
 }
 
-assert.match(contract, /^status: proposed$/mu, 'S0 contract must remain proposed before Operator approval');
-assert.match(contract, /^version: 0\.1\.0$/mu, 'S0 contract draft version must remain 0.1.0 before approval');
+assert.match(contract, /^status: accepted$/mu, 'S0 contract must be accepted before Task 12 authority can be formed');
+assert.match(contract, /^version: 1\.0\.0$/mu, 'S0 accepted contract version must be 1.0.0');
+assert.match(contract, /explicit Operator Decision has accepted these exact contract bytes/iu, 'S0 contract must state exact-byte Operator acceptance');
 assert.match(contract, /GATE-S0-EXECUTE/u, 'S0 contract must name the separate real-host execution gate');
 assert.match(contract, /MNFS_ARR_S0_EXECUTE_AUTHORIZATION/u, 'S0 contract must name the dedicated runtime authority channel');
 assert.match(contract, /parsed and validated as an exact-bound Governance authorization/iu, 'S0 contract must describe exact-bound governance authorization');
@@ -46,6 +52,8 @@ assert.match(contract, /state[- ]root filesystem[^\n]*(?:allowlist|reviewed|stat
 assert.match(contract, /no-replace|hard-link|hard link/iu, 'S0 contract must document no-replace artifact publication');
 assert.doesNotMatch(contract, /token is authenticated|same authenticated|before authenticated/iu, 'S0 contract must not describe governance authorization as authenticated');
 
+assert.match(readme, /contract[^\n]*1\.0\.0[^\n]*accepted|accepted[^\n]*contract[^\n]*1\.0\.0/iu, 'README must expose accepted S0 contract 1.0.0');
+assert.match(readme, /Contract acceptance is not real-host execution authority/iu, 'README must keep contract acceptance distinct from execution');
 assert.match(readme, /parsed and validated as exact-bound Governance authorization/iu, 'README must use governance authorization terminology');
 assert.match(readme, /re-observes Git source identity once more/iu, 'README must document final pre-write source re-observation');
 assert.match(readme, /no-replace|hard-link|hard link/iu, 'README must document no-replace publication');
@@ -84,26 +92,55 @@ for (const command of [
 }
 
 assert.match(documentationMap, /DOC-ARR-S0-HOST-CAPABILITY-CONTRACT/u, 'Documentation Map must index the S0 contract');
-assert.match(documentationMap, /ARR-S0 Task 11:\s+COMPLETE \/ REVIEW CLEAR/u, 'Documentation Map must expose Task 11 closeout');
+assert.match(documentationMap, /ARR-S0 contract:\s+ACCEPTED 1\.0\.0 — D-021/u, 'Documentation Map must expose accepted S0 contract');
 assert.match(documentationMap, /Task 12 real host observation is `CONTROLLED`, `NOT EXECUTED` and prohibited/u, 'Documentation Map must keep Task 12 controlled');
 
 assert.match(status, /ARR-S0 deterministic harness:\s+Tasks 1–11 COMPLETE \/ REVIEW CLEAR/u, 'STATUS must expose reviewed S0 harness');
-assert.match(status, /ARR-S0 Task 11:\s+COMPLETE \/ REVIEW CLEAR/u, 'STATUS must close Task 11');
-assert.match(status, /Final source re-observation finding:\s+IMPLEMENTATION_DEFECT \/ CORRECTED/u, 'STATUS must record corrected implementation defect');
-assert.match(status, /Non-forgeable Operator authority:\s+THREAT_MODEL_EXPANSION/u, 'STATUS must preserve D-019 threat-model disposition');
+assert.match(status, /ARR-S0 host capability contract:\s+ACCEPTED 1\.0\.0 — D-021/u, 'STATUS must expose D-021 contract acceptance');
 assert.match(status, /ARR-S0 Task 12 real host Evidence:\s+NOT EXECUTED \/ CONTROLLED \/ NOT AUTHORIZED/u, 'STATUS must keep Task 12 unexecuted and unauthorized');
-assert.doesNotMatch(status, /## Immediate next action[\s\S]{0,500}Task 4/u, 'STATUS must not point back to completed Task 4');
+assert.match(status, /Contract acceptance is not `GATE-S0-EXECUTE`/u, 'STATUS must keep contract acceptance separate from execution authority');
 
-assert.match(agents, /ARR-S0 deterministic harness:\s+Tasks 1–11 COMPLETE \/ REVIEW CLEAR/u, 'AGENTS must orient Fresh Actors to Task 11 closeout');
-assert.match(agents, /ARR-S0 real host probe \/ Task 12:\s+PROHIBITED pending separate CONTROLLED authority/u, 'AGENTS must keep Task 12 behind separate CONTROLLED authority');
-assert.match(agents, /Risk-Proportional Execution Governance 1\.0\.0/u, 'AGENTS must include D-020 governance');
+assert.match(agents, /ARR-S0 host capability contract:\s+ACCEPTED 1\.0\.0 — D-021/u, 'AGENTS must orient Fresh Actors to accepted S0 contract');
+assert.match(agents, /ARR-S0 real host probe \/ Task 12:\s+PROHIBITED pending separate CONTROLLED GATE-S0-EXECUTE/u, 'AGENTS must keep Task 12 behind separate CONTROLLED authority');
+assert.match(agents, /D-010 through D-020, plus D-021/u, 'AGENTS must expose D-021 without losing prior decision range');
 
-assert.match(arrReview, /ARR-S0 Task 11\s+COMPLETE \/ REVIEW CLEAR/u, 'ARR review must close Task 11');
+assert.match(arrReview, /ARR-S0 contract 1\.0\.0\s+ACCEPTED — D-021/u, 'ARR review must expose D-021 contract acceptance');
 assert.match(arrReview, /ARR-S0 Task 12\s+CONTROLLED \/ NOT AUTHORIZED \/ NOT EXECUTED/u, 'ARR review must keep Task 12 controlled');
-assert.match(arrReview, /THREAT_MODEL_EXPANSION/u, 'ARR review must preserve non-forgeability disposition');
-assert.match(arrReview, /IMPLEMENTATION_DEFECT[^\n]*CORRECTED/u, 'ARR review must record corrected source-integrity finding');
+assert.match(arrReview, /D-021 does \*\*not\*\* authorize `preflight`, `run`, Task 12 host observation/u, 'ARR review must keep D-021 bounded to contract acceptance');
+
+const exactAcceptance = 'MNFS_ACCEPT_ARR_S0_CONTRACT version=1.0.0 contract_blob=d564359e5a366d9e17194dcd687b95f764bcf2f2 plan_blob=3e78445fcbcca360f612edefd025c6cb0f84f8e5 base_sha=3364757c4ac4e6ee6d4de3637435228d8a65eb8b scope=contract-acceptance-canonicalize-review-merge-no-host-observation';
+assert.ok(decisions.includes(exactAcceptance), 'D-021 must preserve the exact Operator contract-acceptance authority');
+assert.match(decisions, /\| D-021 \| 2026-08-08 \| Accept `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version 1\.0\.0/u, 'Decision register must contain D-021');
+
+const planGitBlob = createHash('sha1')
+  .update(`blob ${planBytes.length}\0`)
+  .update(planBytes)
+  .digest('hex');
+assert.equal(
+  planGitBlob,
+  '3e78445fcbcca360f612edefd025c6cb0f84f8e5',
+  'current S0 plan bytes must remain exactly the Git blob bound by D-021',
+);
+
+const contractBytes = Buffer.from(contract, 'utf8');
+const contractGitBlob = createHash('sha1')
+  .update(`blob ${contractBytes.length}\0`)
+  .update(contractBytes)
+  .digest('hex');
+assert.equal(
+  contractGitBlob,
+  'd564359e5a366d9e17194dcd687b95f764bcf2f2',
+  'current S0 contract bytes must remain exactly the Git blob accepted by D-021',
+);
+const contractSha256 = `sha256:${createHash('sha256').update(contractBytes).digest('hex')}`;
+assert.equal(
+  contractSha256,
+  'sha256:2891a1a2dda0dc1cfe146174839c988be7d76dc3c710cd4d15d1b247f0753f5d',
+  'current S0 contract bytes must remain exactly the SHA-256 accepted for the Task 12 gate binding',
+);
 
 const pkg = JSON.parse(packageText);
 assert.match(pkg.scripts.verify, /test:arr-s0/u, 'root verify must include ARR-S0 deterministic tests');
 
+console.log(`ARR-S0 accepted contract sha256: ${contractSha256}`);
 console.log('ARR-S0 contract consistency tests passed.');

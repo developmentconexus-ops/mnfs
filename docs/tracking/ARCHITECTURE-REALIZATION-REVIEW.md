@@ -44,6 +44,7 @@ P1-F03                                          ACCEPTED / INTEGRATED — D-018
 D-019 proportionality/review admission          ACCEPTED / INTEGRATED
 D-020 risk-proportional execution governance    ACCEPTED / INTEGRATED
 ARR-S0 Task 11                                  COMPLETE / REVIEW CLEAR
+ARR-S0 contract 1.0.0                           ACCEPTED — D-021
 ARR-S0 Task 12                                  CONTROLLED / NOT AUTHORIZED / NOT EXECUTED
 ```
 
@@ -113,17 +114,25 @@ Finding Admission is complete for the Task 11 review set:
 
 The correction preserves existing source-first preflight and run-root filesystem checks, then adds one final read-only source observation immediately before first durable Evidence. Drift, missing exact identity or dirty state fails closed before `state/created.json` and before collector execution.
 
-Execution authorization terminology now reflects the accepted threat model: parser-validated, exact-bound **Governance authorization** under trusted Operator + trusted MNFS control-plane assumptions. It is not represented as cryptographic authentication, personal-origin proof or non-repudiation. No PKI, Ed25519, signer/trust-root service or generic signed-capability subsystem was added.
+Execution authorization terminology reflects the accepted threat model: parser-validated, exact-bound **Governance authorization** under trusted Operator + trusted MNFS control-plane assumptions. It is not represented as cryptographic authentication, personal-origin proof or non-repudiation. No PKI, Ed25519, signer/trust-root service or generic signed-capability subsystem was added.
 
-Task 11 is therefore `COMPLETE / REVIEW CLEAR`. The proposed S0 host-capability contract remains 0.1.0 and is not accepted merely by completing Task 11.
+Task 11 is `COMPLETE / REVIEW CLEAR`.
+
+## D-021 — ARR-S0 contract acceptance
+
+The Operator explicitly accepted the exact `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` bytes as version 1.0.0 under D-021, bound to the accepted S0 plan blob and the canonical pre-acceptance base named by the Operator token.
+
+D-021 freezes the provider-neutral host facts, capability-class semantics, mechanical Verdict vocabulary, safety boundary, Evidence integrity rules and machine interface for the Task 12 operation. It authorizes canonicalization/review/merge of the accepted contract only.
+
+D-021 does **not** authorize `preflight`, `run`, Task 12 host observation, candidate execution/selection, substrate selection, S1/S2/S2W/S3, revision-5 M02 production work or production Worker dispatch.
 
 ## Current boundary
 
-Real ARR-S0 host observation remains prohibited. Task 12 is a separate `CONTROLLED` operation and requires explicit authority that protects its deciding canonical Evidence boundary.
+Real ARR-S0 host observation remains prohibited. Task 12 is a separate `CONTROLLED` operation and requires explicit `GATE-S0-EXECUTE` authority protecting its deciding canonical Evidence boundary.
 
-Before Task 12, the accepted plan requires resolving the operation's exact preconditions, including accepted contract bytes/hash, exact canonical source, successful deterministic verification and explicit execution authority.
+Before that gate can be formed, the accepted plan requires the exact accepted contract SHA-256, the exact canonical `main` commit containing D-021/contract 1.0.0, and a fresh successful deterministic verification on that exact commit.
 
-Task 12 does not authorize candidate installation/execution, substrate selection, S1/S2/S2W/S3, revision-5 M02 production work or production Worker dispatch.
+After those identities are frozen, the Operator may authorize only the bounded host-probe scope. Contract acceptance never implies execution authority.
 
 ## Durable P1 anchor
 
@@ -138,7 +147,7 @@ NEXT POSSIBLE GATE  GATE-CPR-S0-CORRECTION — NOT AUTHORIZED
 ARR-S0 Task 11      REPLAN_REQUIRED / NOT CLOSED
 ```
 
-D-020 replaced the mechanical exact-token ceremony for this bounded correction with the Operator-approved BOUNDED Execution Brief. That bounded correction is now complete; the snapshot above must not be used to reopen Task 4.
+D-020 replaced the mechanical exact-token ceremony for that bounded correction with the Operator-approved BOUNDED Execution Brief. That bounded correction is complete; the snapshot above must not be used to reopen Task 4.
 
 ## Current relationship to MIS-002/M02
 

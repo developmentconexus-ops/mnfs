@@ -31,7 +31,7 @@ Use the least-heavy sufficient profile. `CONTROLLED` requires a named current re
 
 A lane may remove accidental ceremony; it may never remove an applicable deciding obligation already frozen by higher Authority.
 
-Every Operator interruption must protect a named decision, risk, irreversible effect or acceptance. Mechanical SHA/hash propagation is not a human decision: the Lead/system resolves exact identities. Natural-language approval is sufficient for an unambiguous FAST/BOUNDED envelope. One approval may include conditional delivery when scope, architecture/threat model, proofs, review and target remain unchanged.
+Every Operator interruption must protect a named decision, risk, irreversible effect or acceptance. Mechanical SHA/hash propagation is not a human decision: the Lead/system resolves exact identities. Natural-language approval is sufficient for an unambiguous FAST/BOUNDED envelope. One approval may include conditional delivery only when that envelope explicitly includes delivery and scope, architecture/threat model, proofs, review and target remain unchanged.
 
 Escalate automatically:
 
@@ -69,26 +69,28 @@ Never expand scope silently.
 
 ### FAST
 
-Normally: intent → implementation → targeted proof → scope audit → final verify/CI → delivery when already authorized.
+Normally: intent → Finding Admission when finding-driven → implementation → targeted proof → scope audit → final verify/CI → delivery when already authorized.
 
-No separate Design, Plan, acceptance record, exact manual token or fresh Reviewer unless a material concern requires one.
+If a Finding is not trivially admissible inside existing Authority/scope, escalate before mutation. No separate Design, Plan, acceptance record, exact manual token or fresh Reviewer is required unless a material concern or higher-authority obligation requires one.
 
 ### BOUNDED
 
 Normally use one Execution Brief containing only what is material:
 
+- `profile: BOUNDED` and concise selection rationale;
 - outcome and relevant Authority;
 - scope/non-goals and known loci;
 - interfaces/write/resource/environment boundaries as applicable;
 - proof and review expectation;
+- approval scope and whether conditional delivery is included;
 - failure/escalation/Replan conditions;
-- delivery condition.
+- escalation outcome only if escalation occurs.
 
-Then: approval when needed → Writer/local proof → fresh review when material → Finding Admission → final CI → delivery if the envelope includes it.
+Then: approval when needed → Writer/local proof → fresh review when material → Finding Admission → final CI → delivery only if the approved envelope explicitly includes it.
 
 ### CONTROLLED
 
-Separate Design/Decision, Plan, exact authority, independent/adversarial validation, acceptance and delivery only when each checkpoint protects a distinct material boundary.
+Retain every applicable Design/Decision, Plan, exact authority, independent/adversarial validation, acceptance and delivery checkpoint when it protects a distinct material boundary. Omission/non-applicability requires the authority owning that boundary and durable rationale; CONTROLLED checkpoints are not optional merely to reduce ceremony.
 
 ## Git and documentation
 
@@ -140,4 +142,4 @@ M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED
 ```
 
-The next product action is the already-admitted bounded ARR-S0 final source re-observation/terminology correction, followed by fresh review and final CI. Real Task 12 host observation remains a separate CONTROLLED operation.
+The next product action is to prepare and approve the BOUNDED Execution Brief for the already-admitted ARR-S0 final source re-observation/terminology correction, then implement/review/verify it inside that envelope. Real Task 12 host observation remains a separate CONTROLLED operation.

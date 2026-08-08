@@ -528,4 +528,27 @@ try {
   await rm(spikeEvidenceTemp, { recursive: true, force: true });
 }
 
+const developmentGovernanceText = await readFile(
+  path.join(root, 'docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md'),
+  'utf8',
+);
+const layeredPlanningText = await readFile(
+  path.join(root, 'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md'),
+  'utf8',
+);
+for (const marker of [
+  'CONTRACT_VIOLATION',
+  'IMPLEMENTATION_DEFECT',
+  'DERIVED_REQUIREMENT',
+  'THREAT_MODEL_EXPANSION',
+  'FUTURE_HARDENING',
+]) {
+  assert.match(developmentGovernanceText, new RegExp(marker, 'u'), `Development Governance missing ${marker}`);
+}
+assert.match(developmentGovernanceText, /Governance Gate/u);
+assert.match(developmentGovernanceText, /Security Boundary/u);
+assert.match(developmentGovernanceText, /complexity.*burden|burden.*complexity/iu);
+assert.match(mcrmText, /Finding Admission/u, 'MCRM must classify Findings before Correction scope');
+assert.match(layeredPlanningText, /Planning completeness[^\n]*does not mean maximum detail, mechanism, ceremony or hypothetical future hardening/iu);
+
 console.log('Documentation tooling tests passed.');

@@ -261,7 +261,10 @@ for (const rel of canonicalFreshReadPath) {
   previousReadPathIndex = nextIndex;
 }
 assert.match(agentsText, /MIS-002\/M02[^\n]*SUPERSEDED/iu);
-assert.match(agentsText, /ARR-S0[^\n]*PROHIBITED/iu);
+assert.match(agentsText, /ARR-S0 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'AGENTS must expose accepted S0 real-host Evidence');
+assert.match(agentsText, /ARR-S1 planning:\s+NEXT \/ NOT EXECUTED/u, 'AGENTS must expose S1 planning as next');
+assert.match(agentsText, /ARR-S2 planning:\s+NEXT \/ NOT EXECUTED/u, 'AGENTS must expose S2 planning as next');
+assert.match(agentsText, /Candidate execution\/selection:\s+PROHIBITED/u, 'AGENTS must keep candidate execution and selection prohibited');
 assert.match(agentsText, /FAST[\s\S]*BOUNDED[\s\S]*CONTROLLED/u, 'AGENTS must expose risk-proportional execution profiles');
 assert.match(agentsText, /D-010 through D-020/u, 'AGENTS must orient fresh actors to current governance Decisions');
 
@@ -287,13 +290,12 @@ assert.match(toolingText, /Thin Sovereign Semantic Kernel/u);
 assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 
 assert.match(statusText, /Risk-Proportional Execution Governance 1\.0\.0/u, 'STATUS must expose D-020 governance');
-assert.match(statusText, /ARR-S0 Task 11:\s+REPLAN_REQUIRED \/ NOT CLOSED/u, 'STATUS must keep Task 11 open');
-assert.match(statusText, /Final source re-observation finding:\s+IMPLEMENTATION_DEFECT \/ admitted correction/u, 'STATUS must preserve admitted correction classification');
-assert.match(statusText, /Non-forgeable Operator authority:\s+THREAT_MODEL_EXPANSION/u, 'STATUS must preserve threat-model-expansion disposition');
-assert.match(statusText, /ARR-S0 Task 12 real host Evidence:\s+NOT EXECUTED/u, 'STATUS must keep Task 12 unexecuted');
-assert.match(statusText, /profile: BOUNDED/u, 'STATUS must classify the next S0 correction as BOUNDED');
-assert.match(statusText, /Operator approval of that bounded envelope/u, 'STATUS must preserve separate bounded approval before Task 4 implementation');
-assert.match(statusText, /ARR-S0 Task 4 implementation before its BOUNDED approval envelope/u, 'STATUS must keep Task 4 unauthorized until bounded approval');
+assert.match(statusText, /ARR-S0 Task 12 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'STATUS must expose accepted S0 real-host Evidence');
+assert.match(statusText, /ARR-S0 fresh report integrity:\s+PASS/u, 'STATUS must expose fresh S0 integrity');
+assert.match(statusText, /ARR-S1 planning:\s+NEXT \/ NOT EXECUTED/u, 'STATUS must advance to S1 planning');
+assert.match(statusText, /ARR-S2 planning:\s+NEXT \/ NOT EXECUTED/u, 'STATUS must advance to S2 planning');
+assert.match(statusText, /ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE/u, 'STATUS must name canonical S0 Evidence');
+assert.match(statusText, /microVM \/ KVM\s+BLOCKED_BY_HOST/u, 'STATUS must preserve KVM host-class result');
 assert.doesNotMatch(statusText, /GATE-CPR-CANONICAL — AUTHORIZED \/ IN PROGRESS/u, 'STATUS must not project completed CPR reconciliation as active');
 
 assert.match(p1AcceptanceText, /MNFS_ACCEPT_ARR_P1 program_blob=52033adcdfb7163f63606034b9912942b018f38e pr=24 head=02e99b25842562d111488d5c8c7008cb2635f3da findings=critical:0,important:0/u, 'P1 acceptance record must bind the exact Operator token');
@@ -309,10 +311,10 @@ assert.match(riskProportionalDesignText, /version: 1\.0\.0/u, 'risk-proportional
 assert.match(riskProportionalDesignText, /FAST[\s\S]*BOUNDED[\s\S]*CONTROLLED/u, 'risk-proportional design must define all execution profiles');
 assert.match(riskProportionalDesignText, /A lane may remove accidental ceremony; it may never remove an applicable deciding obligation/u, 'lane simplification must preserve higher-authority deciding obligations');
 assert.match(arrReviewText, /P1 \/ GATE-R[^\n]*ACCEPTED \/ INTEGRATED — D-017/u, 'ARR review must record integrated GATE-R');
-assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-CPR-S0-CORRECTION — NOT AUTHORIZED/u, 'ARR review must keep the S0 correction unauthorized until its own authority');
+assert.match(arrReviewText, /NEXT POSSIBLE GATE[^\n]*GATE-CPR-S0-CORRECTION — NOT AUTHORIZED/u, 'ARR review must preserve the explicitly historical pre-Task4 snapshot');
 assert.match(arrReviewText, /THREAT_MODEL_EXPANSION/u, 'ARR review must classify non-forgeability as a threat-model expansion');
 assert.match(arrReviewText, /IMPLEMENTATION_DEFECT/u, 'ARR review must classify final source re-observation as an implementation defect');
-assert.match(arrReviewText, /ARR-S0 Task 11[^\n]*REPLAN_REQUIRED[^\n]*NOT CLOSED/u, 'ARR review must keep Task 11 open');
+assert.match(arrReviewText, /ARR-S0 Task 11[^\n]*REPLAN_REQUIRED[^\n]*NOT CLOSED/u, 'ARR review must preserve the explicitly historical Task 11 snapshot');
 assert.match(documentationMapText, /ARR P1 A1-A4 \+ B1:[^\n]*ACCEPTED — GATE-R \/ D-017/u, 'Documentation Map must retain the durable P1 acceptance anchor');
 
 const schemaCandidate = structuredClone(traceability);

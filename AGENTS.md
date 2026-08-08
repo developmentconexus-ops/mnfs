@@ -11,7 +11,8 @@ Before changing anything, establish current authority:
 5. `docs/product/CAPABILITY-REALIZATION-METHOD.md`
 6. `docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md`
 7. `docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md`
-8. current task-specific ADR / Capability / Mission / Evidence / bounded design or plan when applicable.
+8. `docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md`
+9. current task-specific ADR / Capability / Mission / Evidence / bounded design or plan when applicable.
 
 For architecture/planning/cross-cutting work, also read `docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md` and the relevant canonical Blueprint source sections. Do not load the full Product Blueprint for a narrow implementation task unless applicability or the Context Pack requires it.
 

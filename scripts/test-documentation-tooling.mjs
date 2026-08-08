@@ -541,6 +541,46 @@ const layeredPlanningText = await readFile(
   path.join(root, 'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md'),
   'utf8',
 );
+const layeredPlanningMetadata = parseFrontmatter(
+  layeredPlanningText,
+  'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md',
+).metadata;
+assert.equal(layeredPlanningMetadata.version, '1.1.0', 'canonical execution-planning design must be version 1.1.0');
+assert.match(
+  agentsText,
+  /`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1\.1\.0/u,
+  'AGENTS must project the current execution-planning design version',
+);
+assert.doesNotMatch(
+  agentsText,
+  /`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1\.0\.0/u,
+  'AGENTS must not project the historical execution-planning design version as current',
+);
+assert.match(
+  arrReviewText,
+  /`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1\.1\.0 is accepted/u,
+  'ARR review must project the current execution-planning design version',
+);
+assert.doesNotMatch(
+  arrReviewText,
+  /`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1\.0\.0 is accepted/u,
+  'ARR review must not project the historical execution-planning design version as current',
+);
+assert.match(
+  statusText,
+  /\*\*Execution Planning Design:\*\* `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1\.1\.0 ACCEPTED \/ D-016/u,
+  'STATUS narrative must project the current execution-planning design version',
+);
+assert.match(
+  statusText,
+  /Execution Planning Design 1\.1\.0:\s+ACCEPTED — D-016/u,
+  'STATUS gate summary must project the current execution-planning design version',
+);
+assert.doesNotMatch(
+  statusText,
+  /Execution Planning Design 1\.0\.0:\s+ACCEPTED — D-016/u,
+  'STATUS must not project the historical execution-planning design version as current',
+);
 for (const marker of [
   'CONTRACT_VIOLATION',
   'IMPLEMENTATION_DEFECT',

@@ -108,7 +108,7 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
   MIS-002/M02 revision-5 execution path                  SUPERSEDED
 ```
 
-Accepted architecture/planning authority includes D-010 through D-019, ADR-0013 through ADR-0015, `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0 and the accepted complexity-proportionality/review-admission design.
+Accepted architecture/planning authority includes D-010 through D-019, ADR-0013 through ADR-0015, `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.1.0 and the accepted complexity-proportionality/review-admission design.
 
 `GATE-P0` accepted the Architecture Reconciliation / ARR master plan and ARR-S0 plan. ARR P1 / GATE-R was accepted by D-017 for Tasks `A1,A2,A3,A4,B1` plus P1-F01/P1-F02 and was integrated into `main` by PR #24 at `def9e5fe819f76950d61fba2cf5abcda1533c07f`.
 

@@ -56,7 +56,7 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 - **Approved Mission contract:** `MIS-002` revision 5, schema v2, `sha256:d82252504044cab40e00013dc30534654382887b7819d60a916d2a9a56db4cc3`; immutable historical/current authority until explicitly superseded, but D-015 prohibits implementing its M02 realization.
 - **Current governance method:** `DOC-MNFS-DEVELOPMENT-GOVERNANCE-METHOD` / D-010.
 - **Architecture Review decisions:** D-011 through D-015 APPROVED.
-- **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.0.0 ACCEPTED / D-016.
+- **Execution Planning Design:** `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.1.0 ACCEPTED / D-016.
 - **Complexity Proportionality and Review Admission:** `DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION` 1.0.0 ACCEPTED / D-019.
 - **Current phase:** `GATE-CPR-CANONICAL — AUTHORIZED / IN PROGRESS` under Issue #23 / PR #28; Tasks 1–3 only.
 - **Master program plan:** `PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM` 0.2.0 — ACCEPTED — GATE-P0 — blob `52033adcdfb7163f63606034b9912942b018f38e`.
@@ -200,7 +200,7 @@ The accepted GATE-P0 package approves plan authority only. P1/P1-F03 Evidence is
 ```text
 M01 implementation / closeout:                 ACCEPTED / CLOSED
 D1–D4 + Architecture Synthesis:                 APPROVED
-Execution Planning Design 1.0.0:                ACCEPTED — D-016
+Execution Planning Design 1.1.0:                ACCEPTED — D-016
 Complexity Proportionality Design 1.0.0:        ACCEPTED — D-019
 Complexity Reconciliation Plan 1.0.0:           ACCEPTED
 GATE-CPR-CANONICAL:                             AUTHORIZED — Tasks 1–3 only

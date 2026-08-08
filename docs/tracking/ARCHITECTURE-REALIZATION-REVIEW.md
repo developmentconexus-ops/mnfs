@@ -95,7 +95,7 @@ Accepted M01 semantics/Evidence remain reusable where provider-neutral: durable 
 
 ## Accepted Execution Planning Design — D-016
 
-`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.0.0 is accepted.
+`DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` version 1.1.0 is accepted.
 
 Canonical planning layers:
 

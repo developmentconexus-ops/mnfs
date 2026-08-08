@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 2.0.1
+version: 2.0.2
 owners:
   - developmentconexus-ops
 related:
@@ -106,12 +106,12 @@ Expected flow:
 
 ```text
 one bounded Execution Brief / current accepted correction scope
-→ Operator approval of that bounded envelope
+→ Operator approval of that bounded envelope, including delivery if desired
 → implementation with local targeted RED/GREEN
 → ARR-S0 regression/full verification
 → fresh review + Finding Admission
 → final CI
-→ merge when GREEN and still inside the approved envelope
+→ merge only when GREEN, no Finding requires escalation/Replan, scope stayed bounded, and the approved envelope explicitly includes delivery
 ```
 
 After that, ARR-S0 Task 12 remains a separate `CONTROLLED` operation because it produces deciding canonical host Evidence for later S1/S2 planning.

@@ -41,6 +41,7 @@ last_reviewed: 2026-08-08
 - Real toolchain workload is deterministic/offline after fixture staging.
 - Candidate subprocesses use exact argv, `shell:false`, explicit cwd/env, bounded output, timeout and complete descendant termination.
 - Security criterion failure cannot be offset by performance or convenience.
+- D-014 dependency admission is deciding: every selection-eligible envelope must carry candidate-specific **Upgrade Policy** and **Removal Conditions** Evidence before `SUCCESS` can support a selecting Decision.
 - No candidate-specific weakening after another candidate has run; material contract changes invalidate affected Evidence.
 
 ---
@@ -279,7 +280,7 @@ WORKSPACE_UNKNOWN
 
 ---
 
-### Task 11: Implement S2 authority, preflight, run/report and exact early stop
+### Task 11: Implement S2 authority, preflight, dependency-admission report and exact early stop
 
 **Files:**
 - Create: `spikes/arr-s2/src/execution-authority.mjs`
@@ -307,11 +308,53 @@ run --json
 report --run-id RUN_ID --json
 ```
 
+- Every finalized candidate report must carry candidate-specific:
+
+```text
+upgradePolicy:
+  pinningRule
+  upgradeTrigger
+  mandatoryConformanceRerun
+  rollbackRule
+
+removalConditions:
+  removeOrReplaceWhen
+  authorityOrSecurityTrigger
+  provenanceOrLicenseTrigger
+  maintenanceTrigger
+  replacementOrExitPath
+```
+
+The harness validates completeness and binds these values to the frozen candidate provenance; it does not invent one generic policy for all candidates.
+
 - [ ] **Step 1: RED-test zero candidate operations before exact authority validation**
 - [ ] **Step 2: RED-test execution order `SRT → NONO → SANDLOCK if eligible`**
 - [ ] **Step 3: RED-test excluded KVM/Docker candidates are impossible to launch from S2 CLI**
-- [ ] **Step 4: Implement final report with candidate verdicts, measurements and workspace sufficiency**
-- [ ] **Step 5: Add deterministic S2 suite to `npm run verify` and commit**
+- [ ] **Step 4: RED-test D-014 selection eligibility**
+
+Table-driven report tests must prove that an otherwise-PASS envelope is not selection-eligible and cannot yield selecting `SUCCESS` if any required Upgrade Policy/Removal Conditions field is missing or blank.
+
+Expected normalized result:
+
+```text
+candidate.selectionEligible = false
+selectionDecisionInput = BLOCKED
+```
+
+until all D-014 fields and every other required selection condition are complete.
+
+- [ ] **Step 5: Implement final report with candidate verdicts, measurements, workspace sufficiency, Upgrade Policy and Removal Conditions**
+
+The report must preserve candidate conformance separately from selection eligibility: a candidate can have security/workspace conformance observations while remaining ineligible for adoption because dependency admission is incomplete.
+
+- [ ] **Step 6: Run RED/GREEN for dependency-admission eligibility**
+
+```bash
+node --test spikes/arr-s2/tests/report.test.mjs
+npm run test:arr-s2
+```
+
+- [ ] **Step 7: Add deterministic S2 suite to `npm run verify` and commit**
 
 ---
 
@@ -330,6 +373,8 @@ Sandlock cannot run before ABI/seccomp eligibility proof
 native COW cannot self-certify result identity
 cleanup is bounded and fail-closed
 performance cannot override a security failure
+Upgrade Policy and Removal Conditions are concrete per selection-eligible envelope
+no selection-ready SUCCESS exists with incomplete D-014 dependency admission
 ```
 
 Zero unresolved admitted Critical/Important findings before `GATE-S2`.
@@ -355,13 +400,29 @@ GATE-S2 exact authority
 - [ ] **Step 2: Run the orchestrator once; do not manually rerun individual candidates after partial failure**
 - [ ] **Step 3: Reopen report in a fresh process and rehash all Evidence**
 - [ ] **Step 4: Verify canonical checkout unchanged/clean**
-- [ ] **Step 5: Run fresh `npm run verify`**
-- [ ] **Step 6: Promote normalized Evidence and perform independent Evidence review**
+- [ ] **Step 5: Verify selection eligibility before interpreting `SUCCESS`**
+
+A selecting S2 `SUCCESS` requires:
+
+```text
+all mandatory candidate runs finalized
+all eligible decision-changing conditional candidate runs finalized
+selected candidate required criteria PASS
+selected candidate selectionEligible=true
+selected candidate Upgrade Policy complete
+selected candidate Removal Conditions complete
+workspace sufficiency observation finalized
+```
+
+If the envelope conformance proof is otherwise sufficient but D-014 dependency-admission Evidence is missing/incomplete, terminate `BLOCKED`; do not create a selecting Decision from partial admission data.
+
+- [ ] **Step 6: Run fresh `npm run verify`**
+- [ ] **Step 7: Promote normalized Evidence and perform independent Evidence review**
 
 **Termination:**
 
-- `SUCCESS`: valid comparative Evidence supports one S2 selecting Decision and S2W applicability.
-- `BLOCKED`: mandatory proof cannot complete under current host/authority.
+- `SUCCESS`: valid comparative Evidence, complete D-014 Upgrade Policy/Removal Conditions Evidence and finalized S2W applicability support one S2 selecting Decision.
+- `BLOCKED`: mandatory proof or dependency-admission Evidence cannot complete under current host/authority.
 - `REJECT`: sandbox escape/fail-open/host mutation/evidence tamper/contract violation.
 - `REPLAN_REQUIRED`: candidate-independent contract cannot fairly answer the local-envelope decision.
 

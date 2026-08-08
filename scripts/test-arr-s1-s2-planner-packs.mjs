@@ -99,7 +99,7 @@ assert.match(s2Plan, /candidate-independent cgroup-v2 resource-governor prefligh
 assert.match(s2Plan, /No test may expect a write to parent `cgroup\.subtree_control`/iu, 'S2 plan must test non-remediation of parent cgroup configuration');
 assert.match(s2Plan, /no untrusted candidate payload starts before cgroup membership and exact limit read-back are proved/iu, 'S2 plan must fail closed before payload execution');
 assert.match(s2Plan, /resource-launcher\.mjs/iu, 'S2 plan must include the trusted launcher barrier');
-assert.match(s2Plan, /common resource governor failure prevents all SRT\/nono\/Sandlock payloads/iu, 'S2 orchestration must block every candidate if the common governor is unavailable');
+assert.match(s2Plan, /common governor failure prevents all SRT\/nono\/Sandlock payloads/iu, 'S2 orchestration must block every candidate if the common governor is unavailable');
 assert.match(s2Plan, /Do not change KVM permissions, sysctl, AppArmor, WSL settings, services, Docker state, `cgroup\.subtree_control`/u, 'S2 plan must prohibit host and cgroup-parent remediation');
 assert.match(s2Plan, /public Internet availability cannot decide the result/u, 'S2 network verdict must not depend on public Internet');
 assert.match(s2Plan, /Upgrade Policy/iu, 'S2 plan must produce candidate-specific Upgrade Policy evidence');

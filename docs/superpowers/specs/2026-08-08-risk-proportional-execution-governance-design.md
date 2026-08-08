@@ -22,85 +22,47 @@ last_reviewed: 2026-08-08
 
 # MNFS Risk-Proportional Execution and Governance Design
 
-## 1. Decision summary
+## 1. Decision
 
-MNFS must preserve correctness, security, independent proof and governed architecture while reducing process latency caused by applying high-ceremony controls to changes that do not carry high risk.
+MNFS keeps one development lifecycle and varies only the depth of its materialization.
 
-The governing principle is:
+> **Use the minimum governance depth that protects the current material risk. Every human interruption, artifact and checkpoint must name the decision, risk or effect it protects.**
 
-> **Use the minimum governance depth that protects the current material risk. Every human interruption, artifact and gate must justify what decision, risk or irreversible effect it protects.**
-
-Accepted MNFS authority already establishes that planning rigor is proportional to risk, planning completeness does not mean maximum ceremony, material complexity carries a current-benefit burden of proof, reviewer severity does not independently create requirement Authority, and Governance Gates are distinct from adversarial Security Boundaries. This design adds the explicit operational profiles `FAST / BOUNDED / CONTROLLED` to make that proportionality executable in daily work.
-
-This is a refinement of existing governance, not a second lifecycle, scoring system, FSM or policy engine.
-
-## 2. Problem being corrected
-
-Recent ARR/CPR work demonstrated strong technical rigor but also exposed process overhead with low information gain:
+Existing authority already requires proportional rigor, Finding Admission, proof-first execution and explicit escalation. This design operationalizes that authority as:
 
 ```text
-Design
-→ Design approval
-→ Plan
-→ Plan approval
-→ exact execution token
-→ RED commit/workflow
-→ GREEN commit/workflow
-→ acceptance token
-→ acceptance record
-→ administrative verification
-→ integration token
-→ merge
-→ integration closeout
+FAST       local, reversible, architecture-preserving
+BOUNDED    material work inside accepted boundaries — default
+CONTROLLED material architecture, threat, irreversibility or effect boundary
 ```
 
-That sequence is justified only when the individual checkpoints protect distinct material decisions or effects. Applying it by default creates avoidable lead time, duplicates information already present in Git/GitHub/CI and consumes Operator attention on mechanical state propagation.
+These are execution-depth profiles, not new lifecycle states, scores, schemas, FSMs or persisted domain entities.
 
-The correction is not to weaken invariants. It is to make governance depth risk-proportional.
+A lane may remove accidental ceremony; it may never remove an applicable deciding obligation already frozen by higher Authority.
 
-## 3. Three execution-depth profiles
+## 2. FAST
 
-`FAST`, `BOUNDED` and `CONTROLLED` are profiles of the existing MNFS lifecycle. They are not new lifecycle states or persistent domain entities.
-
-### 3.1 FAST
-
-Use when the change is local, reversible, architecture-preserving and has no material external/security effect.
-
-Typical examples:
-
-- isolated bug fix;
-- regression test;
-- documentation correction;
-- bounded tooling fix;
-- rename;
-- small refactor with unchanged contracts;
-- stale projection/status correction;
-- implementation detail already fully decided by accepted Authority.
+Use FAST when the change is clearly local, reversible and inside already-decided architecture and policy.
 
 Default flow:
 
 ```text
 intent
-→ bounded implementation
+→ Finding Admission when the work is finding-driven
+→ implementation
 → targeted proof
 → diff/scope audit
 → final verification/CI
 → delivery when already authorized
 ```
 
-FAST normally does not require a separate Design document, Plan document, acceptance record, exact manual token or independent Reviewer unless a material concern appears.
+If FAST is initiated by or discovers a review Finding, classify that Finding before mutation. Only an already-admissible `CONTRACT_VIOLATION` or `IMPLEMENTATION_DEFECT` that stays inside the FAST envelope may be corrected there. Material ambiguity, a new requirement, threat-model expansion or scope expansion escalates before mutation.
 
-### 3.2 BOUNDED
+FAST normally needs no separate Design, Plan, acceptance record, exact manual token or fresh Reviewer unless an applicable higher-authority obligation or discovered material concern requires one.
+
+## 3. BOUNDED
 
 BOUNDED is the default for material product/engineering work when architecture and threat boundaries are already accepted.
-
-Typical examples:
-
-- feature implementation inside accepted architecture;
-- endpoint/integration work;
-- material but localized refactor;
-- admitted `IMPLEMENTATION_DEFECT` correction that does not change architecture or threat model;
-- realization work whose capability/contract is already decided.
 
 Default flow:
 
@@ -108,178 +70,113 @@ Default flow:
 intent
 → one Execution Brief
 → one Operator approval when needed
-→ Writer implementation + local proof
+→ Writer + local proof
 → fresh review when material
 → Finding Admission
 → final CI
-→ delivery if the approval envelope already includes it
+→ delivery only if the approved envelope includes it
 ```
 
-A single Execution Brief may combine design and implementation planning when separation would not reduce material uncertainty.
-
-### 3.3 CONTROLLED
-
-Use when the change crosses a material architecture, security, risk, irreversibility or external-effect boundary.
-
-Examples include:
-
-- constitutional/product architecture change;
-- new threat model or Security Boundary;
-- credential authority;
-- privileged host mutation;
-- destructive infrastructure/database operation;
-- production deployment with material external effects;
-- irreversible migration;
-- substrate/runtime/environment selection from deciding Evidence;
-- high-stakes contract changes with broad consumers;
-- acceptance of material residual risk.
-
-CONTROLLED may retain separated Design/Decision, Plan, exact execution authority, independent validation, explicit acceptance and explicit delivery authorization when each protects a distinct material boundary.
-
-## 4. Lane selection
-
-The Lead selects the least-heavy profile that is sufficient for current risk.
-
-Selection considers, qualitatively rather than through a numeric score:
-
-- impact;
-- risk;
-- irreversibility;
-- architectural reach;
-- number and criticality of consumers;
-- external effect;
-- security/threat boundary;
-- evidence durability requirements.
-
-Default rules:
+One Execution Brief may combine design and implementation planning when separation would not reduce material uncertainty. It records only what is needed to execute and review the work:
 
 ```text
-clearly local + reversible + no material boundary → FAST
-material work inside accepted boundaries           → BOUNDED
-material boundary/risk/effect decision             → CONTROLLED
+profile: BOUNDED
+selection rationale
+outcome + relevant Authority
+scope / non-goals / known loci
+material interfaces and boundaries
+proof + review expectation
+approval scope + delivery authority
+escalation / Replan conditions
+escalation outcome, only if one occurs
+```
+
+No new Brief schema or persistent entity is required by this design.
+
+## 4. CONTROLLED
+
+Use CONTROLLED when work crosses a material architecture, threat, irreversibility, high-stakes contract or external-effect boundary.
+
+CONTROLLED **must retain every applicable checkpoint** when that checkpoint protects a distinct material boundary. Depending on applicability, these checkpoints include:
+
+```text
+Design / Decision
+Plan
+exact execution authority
+independent validation
+explicit acceptance
+explicit delivery authority
+```
+
+A checkpoint may be omitted only when the authority that owns that boundary records a durable rationale showing that it is not applicable or that accepted Evidence makes it redundant. CONTROLLED is not a permission to maximize ceremony; it is the profile in which distinct material boundaries remain distinctly governed.
+
+## 5. Selection and escalation
+
+The Lead selects the least-heavy sufficient profile using qualitative factors such as impact, reversibility, architectural reach, consumer criticality, effect surface and Evidence durability.
+
+```text
+clearly local + reversible              → FAST
+material inside accepted boundaries     → BOUNDED
+material boundary/risk/effect decision  → CONTROLLED
 ```
 
 When uncertain between FAST and BOUNDED, use BOUNDED. CONTROLLED requires a named current reason.
 
-A lane may remove accidental ceremony; it may never remove an applicable deciding obligation already frozen by higher Authority. Required correctness, architecture, threat/security boundary, proof method, independent validation, external-effect restriction or contract requirement remains binding regardless of lane.
+Lane selection is recorded only to the degree needed for reviewability:
 
-## 5. Automatic escalation
+- FAST: no new artifact merely to record `FAST`; any escalation is visible in the existing PR/Claim/handoff/work record;
+- BOUNDED: profile and rationale live in the Execution Brief;
+- CONTROLLED: classification/rationale live in the applicable Design/Decision authority.
 
-A lane never authorizes silent scope expansion.
+Automatic escalation:
 
 ```text
-FAST discovers material design/risk question
-→ STOP
-→ escalate to BOUNDED or CONTROLLED
-
-BOUNDED discovers architecture/threat/external-effect change
-→ STOP
-→ escalate to CONTROLLED
+FAST + material design/risk discovery        → STOP → BOUNDED or CONTROLLED
+BOUNDED + architecture/threat/effect change  → STOP → CONTROLLED
 ```
 
-Escalation preserves work/Evidence already valid under the narrower scope. It does not retroactively convert unauthorized work into authorized work.
+Escalation never retroactively authorizes work performed outside the prior envelope.
 
-## 6. Human interruption burden
+## 6. Human interruption and approval
 
-Every required Operator interruption must answer:
+Every Operator interruption must protect a named decision, risk, effect or acceptance. Mechanical synchronization alone is not enough reason to interrupt the Operator.
 
-> **What decision, risk, irreversible effect or acceptance does this human response protect?**
+For FAST/BOUNDED, the Lead/system resolves exact Git heads, hashes and current authority. Natural-language approval such as `Aprovado` is sufficient when it can be bound unambiguously to the presented envelope.
 
-Valid reasons include:
-
-- product choice;
-- architecture choice;
-- threat/risk acceptance;
-- destructive or externally consequential action;
-- production effect;
-- a trade-off that policy must not delegate to an Actor.
-
-Mechanical synchronization is not by itself sufficient reason. In FAST/BOUNDED, the Lead may resolve and bind exact Git heads, hashes, accepted authority and verification state without asking the Operator to copy machine-readable identifiers.
-
-Natural-language approval such as `Aprovado`, `Pode executar` or equivalent is sufficient when the Lead can unambiguously bind it to the presented bounded envelope.
-
-Exact manual tokens remain available for CONTROLLED operations where the explicit binding itself protects a material boundary.
-
-## 7. Conditional delivery authority
-
-For FAST and BOUNDED work, one approval may authorize implementation, review and delivery conditioned on all of the following remaining true:
+One approval may include conditional delivery when all of these remain true:
 
 ```text
-scope remains within the approved envelope
+scope stays inside the approved envelope
 architecture/threat model does not change
 required proof passes
-material review findings are admitted/cleared
-delivery target remains the approved target
-no new high-risk external effect appears
+material Findings are admitted/cleared
+no escalation or Replan is required
+the approved envelope explicitly includes delivery to the target
 ```
 
-Delivery authority must be unambiguous from the active work envelope. A request to inspect, analyze or discuss a change does not by itself authorize merge or delivery. When the Operator clearly asks to implement/finish the bounded work and delivery is part of the presented envelope, a second mechanical merge approval is unnecessary.
+A request to inspect, analyze or discuss does not imply delivery. If the delivery condition is not explicit, merge requires a separate approval.
 
-If any condition fails, delivery authority is suspended and the Lead escalates instead of improvising.
+Exact manual tokens remain available when their explicit binding itself protects a material CONTROLLED boundary; they are not the default operator interface.
 
-This removes the default need for separate implementation-acceptance-integration approvals when they protect no distinct decision.
+## 7. Proof and CI
 
-## 8. Proof and TDD proportionality
+Proof-first remains invariant. TDD applies when executable testing is the correct deciding proof.
 
-Proof-first remains invariant. Test-first is used when executable testing is the appropriate proof method.
-
-Observed RED is sufficient for normal FAST/BOUNDED TDD. A separate RED commit, push or failing GitHub workflow is required only when that failure is itself deciding/durable Evidence or materially improves reproducibility.
-
-Default implementation proof loop:
+Normal FAST/BOUNDED work may observe RED locally:
 
 ```text
 local targeted RED
 → minimum GREEN
-→ regression/verification
+→ regression/full verification
 → final commit/push
 → final CI
 ```
 
-This preserves TDD semantics while avoiding Git history and CI runs whose only purpose is ceremonial confirmation of a locally observable failure.
+A separate RED commit or failing remote workflow is required only when the failure itself is durable deciding Evidence or materially improves reproducibility.
 
-## 9. Review proportionality
+## 8. Review and Finding Admission
 
-### FAST
-
-Default proof surface:
-
-```text
-Writer self-check
-+ deterministic tests
-+ diff/scope audit
-+ final CI
-```
-
-A fresh Reviewer is optional unless the Lead identifies material uncertainty.
-
-### BOUNDED
-
-Default:
-
-```text
-Writer
-→ fresh Reviewer
-→ Finding Admission
-→ final CI
-```
-
-### CONTROLLED
-
-May require:
-
-```text
-Writer
-→ independent Reviewer
-→ adversarial/security review when applicable
-→ deciding Evidence validation
-→ explicit Operator acceptance
-```
-
-Implementer Claim remains distinct from acceptance; the amount of independent validation is what scales.
-
-## 10. Finding Admission remains unchanged
-
-The accepted taxonomy remains:
+Finding Admission remains:
 
 ```text
 CONTRACT_VIOLATION
@@ -289,98 +186,63 @@ THREAT_MODEL_EXPANSION
 FUTURE_HARDENING
 ```
 
-Classification need not create a new document. A concise review record is enough when it preserves the material disposition.
+Classification may be concise; it does not require a new document.
 
-Only admitted current-scope corrections may mutate the current implementation. Threat-model expansion and non-deciding hardening do not silently become implementation requirements.
-
-## 11. Documentation and Git as evidence
-
-Git/GitHub/CI should carry operational facts they already record reliably:
-
-- PR/head identity;
-- commits/diffs;
-- reviews;
-- CI result;
-- merge time and merge SHA.
-
-MNFS documents should preserve durable knowledge that Git history alone does not answer well:
-
-- why a material Decision was made;
-- which architecture/threat model is current;
-- what material risk was accepted;
-- which capability/contract is authoritative;
-- which deciding Evidence must remain discoverable beyond the PR.
-
-Acceptance/integration records are therefore reserved for durable material outcomes such as milestones, architecture decisions, threat/risk acceptance, substrate selection and high-stakes deciding Evidence. They are not the default for every implementation tranche or merge.
-
-## 12. Tracking projections
-
-`AGENTS.md`, `STATUS.md` and review/tracking sources should not manually duplicate detailed state already available from canonical sources or Git unless Fresh Actor orientation materially requires it.
-
-Preferred direction:
+Review depth scales with the profile:
 
 ```text
-canonical authority
-+ Git/GitHub operational state
-→ minimal projections/orientation
+FAST       deterministic proof + scope audit; fresh review when material
+BOUNDED    fresh review by default for material work + Finding Admission
+CONTROLLED independent validation and any additional review required by the accepted boundary
 ```
 
-Avoid building a generalized status-generation framework unless repeated real drift demonstrates a current consumer for it.
+For CONTROLLED, an applicable independent/adversarial/acceptance checkpoint is mandatory when it protects a distinct material boundary; waiver/non-applicability requires authority and durable rationale.
 
-## 13. Research proportionality
+Implementer Claim remains distinct from acceptance.
+
+## 9. Git and durable documentation
+
+Git/GitHub/CI carry mechanical operational history:
+
+```text
+commits / diffs / PR / review / CI / merge identity
+```
+
+MNFS documents preserve durable knowledge Git alone does not answer well:
+
+```text
+material Decisions
+current architecture or threat model
+accepted risk
+current capability / contract authority
+deciding Evidence that must survive the PR
+```
+
+Acceptance/integration records are reserved for durable material outcomes; they are not the default for every tranche or merge.
+
+`AGENTS.md` and `STATUS.md` should orient to current truth rather than duplicate historical hashes/workflows already available in GitHub.
+
+## 10. Research proportionality
 
 Research is required when its answer can materially change correctness, architecture, sourcing, security, compatibility or the execution envelope.
 
-Default:
-
 ```text
-FAST       → research only for material uncertainty
-BOUNDED    → research material alternatives/unstable external behavior
-CONTROLLED → strong research/falsification before authority freeze
+FAST       research only for material uncertainty
+BOUNDED    research material alternatives or unstable external behavior
+CONTROLLED strong research/falsification before authority freeze
 ```
 
-Do not research merely to satisfy process ceremony.
+Do not research merely to satisfy ceremony.
 
-## 14. Roles under the simplified method
+## 11. Immediate ARR-S0 application
 
-The preferred development loop remains:
+The admitted final pre-write Git/source re-observation remains an `IMPLEMENTATION_DEFECT` and is a `BOUNDED` candidate. D-019 still requires it to receive its own bounded execution authority; after D-020, one natural-language Operator approval of its Execution Brief is sufficient unless the envelope changes.
 
-```text
-Operator
-→ ChatGPT Lead / Planner
-→ Codex local Writer/Test Runner
-→ fresh Codex Reviewer when lane requires
-→ GitHub CI / durable operational evidence
-→ delivery
-```
+ARR-S0 Task 12 real host observation remains `CONTROLLED` because it produces deciding canonical Evidence used by later architecture work. Profile classification alone never grants execution authority.
 
-The Lead owns lane selection, Authority compilation, research, Finding Admission and escalation. The Writer does not make hidden architecture/security/scope decisions.
+## 12. Success and adoption
 
-## 15. Immediate application to ARR-S0
-
-Under this design:
-
-- the already-admitted ARR-S0 final source re-observation correction is expected to be `BOUNDED` because architecture/threat model/effects are already decided and the correction is narrow;
-- real ARR-S0 Task 12 host observation remains `CONTROLLED` because it produces deciding canonical Evidence used by later architecture selection;
-- neither classification grants execution authority before this design is integrated into canonical governance.
-
-## 16. Non-goals
-
-This design does not:
-
-- weaken security boundaries;
-- remove independent validation where material;
-- permit production/external effects by default;
-- create a numeric risk score;
-- create a parallel lifecycle;
-- remove R0–R8 correctness semantics;
-- allow a Writer to self-authorize scope expansion;
-- turn CI success into automatic product/architecture acceptance;
-- eliminate durable acceptance records where they carry durable material knowledge.
-
-## 17. Success criteria
-
-The revised method succeeds when a normal BOUNDED change can move through:
+The design succeeds when a normal BOUNDED change can use:
 
 ```text
 intent
@@ -388,32 +250,17 @@ intent
 → local implementation/proof
 → fresh review
 → final CI
-→ merge
+→ merge when delivery was authorized
 ```
 
-without losing:
+without losing Authority, material traceability, proof, required independence, escalation, security/threat boundaries or durable deciding Evidence.
 
-- accepted Authority;
-- material traceability;
-- proof;
-- independent review where needed;
-- Replan/escalation;
-- threat/security boundaries;
-- recovery requirements;
-- durable deciding Evidence.
+Adoption stays deliberately small:
 
-The method should reduce Operator interruptions and intent-to-merge lead time without increasing material defects, unauthorized scope expansion or change failure.
-
-## 18. Adoption strategy
-
-Adopt through the smallest coherent edits to existing authority:
-
-1. reconcile the lane model and human-interruption rule into Development Governance;
-2. operationalize risk-proportional governance depth in MCRM without changing R0–R8;
-3. allow risk-proportional Execution Briefs in Layered Planning without changing L0–L3;
-4. simplify `AGENTS.md` orientation enough to prevent ceremony-by-default;
-5. protect only stable normative markers with documentation tests;
-6. dogfood the revised BOUNDED lane on the admitted ARR-S0 correction;
-7. calibrate from observed lead time, Findings and rework rather than adding speculative machinery.
+1. make D-020 and this design part of the Fresh Actor authority chain;
+2. preserve MCRM R0–R8 and Layered Planning L0–L3 while applying proportional materialization through this specialization;
+3. simplify `AGENTS.md`, `STATUS.md`, `DOCUMENTATION-MAP.md` and documentation fitness functions so they protect stable semantics rather than transient workflow snapshots;
+4. dogfood BOUNDED on the admitted ARR-S0 correction;
+5. calibrate from observed lead time, Findings and rework before adding any further machinery.
 
 No separate implementation-plan document is required unless implementation review discovers a material decision not resolved by this design.

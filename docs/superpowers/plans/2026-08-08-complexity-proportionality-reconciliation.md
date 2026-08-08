@@ -52,7 +52,7 @@ The accepted principle is:
 
 The Operator approved this implementation plan on 2026-08-08 after review of proposed version `0.1.0` at Git blob `b5f4e0f622a0bd129c32db84ce23447651d0cc3f` and branch head `18b7d760ab0e971e5deb429a09c5d8a0738a9d13`, verified by workflow `31258687645` — SUCCESS.
 
-Approval of this plan authorizes no implementation by implication. `GATE-CPR-CANONICAL` remains separately required before Tasks 1–3.
+The plan is recorded with canonical guidance status `accepted` at version `1.0.0`. Approval authorizes no implementation by implication. `GATE-CPR-CANONICAL` remains separately required before Tasks 1–3.
 
 ## Global Constraints
 
@@ -714,7 +714,7 @@ The only production behavior change planned is one final read-only Git observati
 
 ## Approval and execution boundary
 
-Plan status is `approved` version `1.0.0` as of 2026-08-08. This approval does not authorize execution.
+Plan status is `accepted` version `1.0.0` as of 2026-08-08. This approval does not authorize execution.
 
 The next exact execution gate is:
 

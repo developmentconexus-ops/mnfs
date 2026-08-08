@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { S0_CAPABILITY_IDS, S0_CLASS_IDS, S0_VERDICT_VALUES } from '../spikes/arr-s0/src/contract.mjs';
 
 const contractPath = 'docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md';
+const planPath = 'docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md';
 const readmePath = 'spikes/arr-s0/README.md';
 const mapPath = 'docs/DOCUMENTATION-MAP.md';
 const statusPath = 'docs/tracking/STATUS.md';
@@ -13,8 +14,9 @@ const arrPath = 'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md';
 const decisionsPath = 'docs/tracking/DECISIONS.md';
 const packagePath = 'package.json';
 
-const [contract, readme, documentationMap, status, agents, arrReview, decisions, packageText] = await Promise.all([
+const [contract, planBytes, readme, documentationMap, status, agents, arrReview, decisions, packageText] = await Promise.all([
   readFile(contractPath, 'utf8'),
+  readFile(planPath),
   readFile(readmePath, 'utf8'),
   readFile(mapPath, 'utf8'),
   readFile(statusPath, 'utf8'),
@@ -109,6 +111,16 @@ assert.match(arrReview, /D-021 does \*\*not\*\* authorize `preflight`, `run`, Ta
 const exactAcceptance = 'MNFS_ACCEPT_ARR_S0_CONTRACT version=1.0.0 contract_blob=d564359e5a366d9e17194dcd687b95f764bcf2f2 plan_blob=3e78445fcbcca360f612edefd025c6cb0f84f8e5 base_sha=3364757c4ac4e6ee6d4de3637435228d8a65eb8b scope=contract-acceptance-canonicalize-review-merge-no-host-observation';
 assert.ok(decisions.includes(exactAcceptance), 'D-021 must preserve the exact Operator contract-acceptance authority');
 assert.match(decisions, /\| D-021 \| 2026-08-08 \| Accept `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version 1\.0\.0/u, 'Decision register must contain D-021');
+
+const planGitBlob = createHash('sha1')
+  .update(`blob ${planBytes.length}\0`)
+  .update(planBytes)
+  .digest('hex');
+assert.equal(
+  planGitBlob,
+  '3e78445fcbcca360f612edefd025c6cb0f84f8e5',
+  'current S0 plan bytes must remain exactly the Git blob bound by D-021',
+);
 
 const contractBytes = Buffer.from(contract, 'utf8');
 const contractGitBlob = createHash('sha1')

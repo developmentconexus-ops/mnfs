@@ -134,16 +134,16 @@ Current ARR state:
 ARR P1 reconciliation:                 ACCEPTED / INTEGRATED
 P1-F03 contract binding:               ACCEPTED / INTEGRATED
 CPR canonical reconciliation:          ACCEPTED / INTEGRATED — D-019
-ARR-S0 deterministic harness:          Tasks 1–11 COMPLETE / REVIEW CLEAR
-ARR-S0 final source correction:        COMPLETE — IMPLEMENTATION_DEFECT corrected
 ARR-S0 host capability contract:       ACCEPTED 1.0.0 — D-021
-Non-forgeable/signed authority:        THREAT_MODEL_EXPANSION — not S0 correction scope
-ARR-S0 real host probe / Task 12:      PROHIBITED pending separate CONTROLLED GATE-S0-EXECUTE
-Candidate execution/selection:         PROHIBITED pending deciding Evidence
+ARR-S0 real host Evidence:             ACCEPT_WITH_LIMITATIONS / COMPLETE
+ARR-S0 fresh report integrity:         PASS
+ARR-S1 planning:                       NEXT / NOT EXECUTED
+ARR-S2 planning:                       NEXT / NOT EXECUTED
+Candidate execution/selection:         PROHIBITED pending later deciding Evidence/gates
 M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED
 ```
 
-`DOC-ARR-S0-HOST-CAPABILITY-CONTRACT` version 1.0.0 is accepted under D-021. Contract acceptance is not execution authority and does not permit `preflight` or `run`.
+Canonical S0 Evidence is `docs/acceptance/2026-08-07-arr-s0-host-capability-probe.md` (`ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`). It records provider-neutral host facts only and grants no named-candidate selection or execution authority.
 
-The next governed ARR action is to integrate the accepted contract, bind the resulting canonical `main` to a fresh successful deterministic verification, and present the separate exact `GATE-S0-EXECUTE` CONTROLLED authority. Real host observation remains prohibited until that gate is explicitly approved.
+The next governed ARR action is to compile fresh S1 Agent Runtime and S2 Local Execution Envelope Planner Packs from current primary sources and the accepted S0 Evidence. Planning may proceed in parallel; candidate execution remains separately gated.

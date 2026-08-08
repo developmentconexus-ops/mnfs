@@ -262,8 +262,10 @@ for (const rel of canonicalFreshReadPath) {
 }
 assert.match(agentsText, /MIS-002\/M02[^\n]*SUPERSEDED/iu);
 assert.match(agentsText, /ARR-S0 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'AGENTS must expose accepted S0 real-host Evidence');
-assert.match(agentsText, /ARR-S1 planning:\s+NEXT \/ NOT EXECUTED/u, 'AGENTS must expose S1 planning as next');
-assert.match(agentsText, /ARR-S2 planning:\s+NEXT \/ NOT EXECUTED/u, 'AGENTS must expose S2 planning as next');
+assert.match(agentsText, /ARR-S1 contract:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED \/ NOT EXECUTABLE/u, 'AGENTS must expose proposed S1 contract without execution authority');
+assert.match(agentsText, /ARR-S1 implementation plan:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED/u, 'AGENTS must expose proposed S1 plan');
+assert.match(agentsText, /ARR-S2 contract:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED \/ NOT EXECUTABLE/u, 'AGENTS must expose proposed S2 contract without execution authority');
+assert.match(agentsText, /ARR-S2 implementation plan:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED/u, 'AGENTS must expose proposed S2 plan');
 assert.match(agentsText, /Candidate execution\/selection:\s+PROHIBITED/u, 'AGENTS must keep candidate execution and selection prohibited');
 assert.match(agentsText, /FAST[\s\S]*BOUNDED[\s\S]*CONTROLLED/u, 'AGENTS must expose risk-proportional execution profiles');
 assert.match(agentsText, /D-010 through D-020/u, 'AGENTS must orient fresh actors to current governance Decisions');
@@ -275,6 +277,10 @@ for (const id of [
   'DESIGN-LAYERED-AGENT-EXECUTION-PLANNING',
   'DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE',
   'PLAN-ARCHITECTURE-RECONCILIATION-ARR-PROGRAM',
+  'DOC-ARR-S1-AGENT-RUNTIME-CONTRACT',
+  'PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE',
+  'DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT',
+  'PLAN-ARR-S2-EXECUTION-ENVELOPE-CONFORMANCE',
 ]) {
   assert.ok(documentationMapText.includes(id), `Documentation Map missing ${id}`);
 }
@@ -292,8 +298,10 @@ assert.doesNotMatch(toolingText, /Pi[^\n]*`ADOPTED`/u);
 assert.match(statusText, /Risk-Proportional Execution Governance 1\.0\.0/u, 'STATUS must expose D-020 governance');
 assert.match(statusText, /ARR-S0 Task 12 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'STATUS must expose accepted S0 real-host Evidence');
 assert.match(statusText, /ARR-S0 fresh report integrity:\s+PASS/u, 'STATUS must expose fresh S0 integrity');
-assert.match(statusText, /ARR-S1 planning:\s+NEXT \/ NOT EXECUTED/u, 'STATUS must advance to S1 planning');
-assert.match(statusText, /ARR-S2 planning:\s+NEXT \/ NOT EXECUTED/u, 'STATUS must advance to S2 planning');
+assert.match(statusText, /ARR-S1 contract:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED \/ NOT EXECUTABLE/u, 'STATUS must project proposed S1 contract');
+assert.match(statusText, /ARR-S1 implementation plan:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED/u, 'STATUS must project proposed S1 plan');
+assert.match(statusText, /ARR-S2 contract:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED \/ NOT EXECUTABLE/u, 'STATUS must project proposed S2 contract');
+assert.match(statusText, /ARR-S2 implementation plan:\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED/u, 'STATUS must project proposed S2 plan');
 assert.match(statusText, /ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE/u, 'STATUS must name canonical S0 Evidence');
 assert.match(statusText, /microVM \/ KVM\s+BLOCKED_BY_HOST/u, 'STATUS must preserve KVM host-class result');
 assert.doesNotMatch(statusText, /GATE-CPR-CANONICAL — AUTHORIZED \/ IN PROGRESS/u, 'STATUS must not project completed CPR reconciliation as active');

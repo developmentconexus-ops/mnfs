@@ -551,4 +551,18 @@ assert.match(developmentGovernanceText, /complexity.*burden|burden.*complexity/i
 assert.match(mcrmText, /Finding Admission/u, 'MCRM must classify Findings before Correction scope');
 assert.match(layeredPlanningText, /Planning completeness[^\n]*does not mean maximum detail, mechanism, ceremony or hypothetical future hardening/iu);
 
+const spikeGovernanceText = await readFile(
+  path.join(root, 'docs/spikes/ARR-SPIKE-GOVERNANCE.md'),
+  'utf8',
+);
+assert.match(spikeGovernanceText, /threat\/trust boundary/iu, 'Spike governance must freeze the current threat/trust boundary');
+for (const marker of [
+  'Governance Gate',
+  'Security Boundary',
+  'THREAT_MODEL_EXPANSION',
+  'FUTURE_HARDENING',
+]) {
+  assert.match(spikeGovernanceText, new RegExp(marker, 'u'), `Spike governance missing ${marker}`);
+}
+
 console.log('Documentation tooling tests passed.');

@@ -108,6 +108,7 @@ export function startProcess(spec, { signal } = {}) {
   let termination = null;
   let forceTimer = null;
   let timeoutTimer = null;
+  let pendingClose = null;
   let removeAbortListener = () => {};
   let resolveResult;
 
@@ -116,7 +117,10 @@ export function startProcess(spec, { signal } = {}) {
   const finish = ({ exitCode = null, signal: receivedSignal = null, error = null } = {}) => {
     if (settled) return;
     settled = true;
-    if (forceTimer) clearTimeout(forceTimer);
+    if (forceTimer) {
+      clearTimeout(forceTimer);
+      forceTimer = null;
+    }
     if (timeoutTimer) clearTimeout(timeoutTimer);
     removeAbortListener();
 
@@ -169,14 +173,26 @@ export function startProcess(spec, { signal } = {}) {
     if (settled || termination) return false;
     termination = { kind, reason };
     terminateProcessGroup(child, 'SIGTERM');
-    forceTimer = setTimeout(() => terminateProcessGroup(child, 'SIGKILL'), spec.terminationGraceMs);
+    forceTimer = setTimeout(() => {
+      forceTimer = null;
+      terminateProcessGroup(child, 'SIGKILL');
+      if (pendingClose) finish(pendingClose);
+    }, spec.terminationGraceMs);
     return true;
   };
 
   child.stdout?.on('data', (chunk) => stdout.add(chunk));
   child.stderr?.on('data', (chunk) => stderr.add(chunk));
   child.once('error', (error) => finish({ error }));
-  child.once('close', (exitCode, receivedSignal) => finish({ exitCode, signal: receivedSignal }));
+  child.once('close', (exitCode, receivedSignal) => {
+    const closeObservation = { exitCode, signal: receivedSignal };
+    if (termination) {
+      pendingClose = closeObservation;
+      if (forceTimer === null) finish(closeObservation);
+      return;
+    }
+    finish(closeObservation);
+  });
 
   timeoutTimer = setTimeout(() => requestTermination('TIMED_OUT', `timeout after ${spec.timeoutMs}ms`), spec.timeoutMs);
   if (signal) {

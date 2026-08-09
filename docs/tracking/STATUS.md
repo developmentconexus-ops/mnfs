@@ -5,7 +5,7 @@ document_type: project_status
 form: reference
 authority: tracking
 status: current
-version: 2.4.0
+version: 2.5.0
 owners:
   - developmentconexus-ops
 related:
@@ -17,6 +17,7 @@ related:
   - DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION
   - DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE
   - ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE
+  - ACCEPTANCE-ARR-S1-S2-PACKS
   - DOC-ARR-S1-AGENT-RUNTIME-CONTRACT
   - PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE
   - DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT
@@ -53,7 +54,7 @@ Thin Sovereign Semantic Kernel
 + Capability-first Sourcing
 ```
 
-Current governance authority includes D-010..D-020 plus D-021, ADR-0013..ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality and Review Admission 1.0.0, and Risk-Proportional Execution Governance 1.0.0.
+Current governance authority includes D-010..D-022, ADR-0013..ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality and Review Admission 1.0.0, and Risk-Proportional Execution Governance 1.0.0.
 
 ## ARR state
 
@@ -65,10 +66,9 @@ ARR-S0 deterministic harness:         Tasks 1–11 COMPLETE / REVIEW CLEAR
 ARR-S0 host capability contract:      ACCEPTED 1.0.0 — D-021
 ARR-S0 Task 12 real host Evidence:    ACCEPT_WITH_LIMITATIONS / COMPLETE
 ARR-S0 fresh report integrity:        PASS
-ARR-S1 contract:                      PROPOSED 0.1.0 / REVIEW REQUIRED / NOT EXECUTABLE
-ARR-S1 implementation plan:           PROPOSED 0.1.0 / REVIEW REQUIRED
-ARR-S2 contract:                      PROPOSED 0.1.0 / REVIEW REQUIRED / NOT EXECUTABLE
-ARR-S2 implementation plan:           PROPOSED 0.1.0 / REVIEW REQUIRED
+ARR-S1 contract + plan:               ACCEPTED 0.1.0 / D-022 / exact bytes preserved
+ARR-S2 contract + plan:               ACCEPTED 0.1.0 / D-022 / exact bytes preserved
+Deterministic S1/S2 harness implementation: AUTHORIZED after acceptance integration
 ```
 
 Accepted ARR-S0 Evidence is `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`. It records provider-neutral host facts only and does not select a named runtime, process sandbox, microVM, container or workspace substrate.
@@ -86,9 +86,9 @@ Docker daemon observation    UNKNOWN
 
 The KVM result reflects the accepted S0 observation that `/dev/kvm` exists but read/write open failed with `EACCES`. No permission or host-configuration change is authorized by S0.
 
-## Proposed ARR-S1 realization pack
+## Accepted ARR-S1 realization pack
 
-`DOC-ARR-S1-AGENT-RUNTIME-CONTRACT` 0.1.0 and `PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE` 0.1.0 are proposed, not accepted authority.
+`DOC-ARR-S1-AGENT-RUNTIME-CONTRACT` 0.1.0 and `PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE` 0.1.0 are accepted exact bytes under D-022. Their frontmatter remains `status: proposed` to preserve the accepted Git blob identities; the acceptance record and D-022 are the authority projection.
 
 The proposed S1 approach is Pi-first while remaining candidate-independent in deciding criteria:
 
@@ -107,9 +107,9 @@ second ACP implementation
 
 Current frozen planning provenance includes Pi 0.84.1, Pi-ACP 0.0.33, ACP TypeScript SDK 1.3.0 and OpenCode 1.18.15. These identities must be revalidated immediately before real execution.
 
-## Proposed ARR-S2 realization pack
+## Accepted ARR-S2 realization pack
 
-`DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT` 0.1.0 and `PLAN-ARR-S2-EXECUTION-ENVELOPE-CONFORMANCE` 0.1.0 are proposed, not accepted authority.
+`DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT` 0.1.0 and `PLAN-ARR-S2-EXECUTION-ENVELOPE-CONFORMANCE` 0.1.0 are accepted exact bytes under D-022. Their frontmatter remains `status: proposed` to preserve the accepted Git blob identities; the acceptance record and D-022 are the authority projection.
 
 The proposed S2 comparison is intentionally limited to host-eligible decision-changing process envelopes:
 
@@ -126,13 +126,13 @@ Sandlock may run only if a candidate-specific preflight proves actual Landlock A
 
 ## Immediate next action
 
-Independently review the exact proposed S1/S2 contract and plan bytes, resolve admitted findings, run full repository verification and then request Operator acceptance of the exact reviewed packs.
+Integrate the D-022 acceptance record and projections after review and full repository verification, then implement the deterministic S1/S2 harness under the exact accepted plans. Real candidate operations remain separately gated.
 
-After exact pack acceptance, deterministic S1/S2 harness implementation may proceed under the accepted plans without candidate execution. Real provider/candidate operations remain later separate CONTROLLED gates (`GATE-S1` / `GATE-S2`).
+After acceptance integration, deterministic S1/S2 harness implementation may proceed under the accepted plans without candidate execution. Real provider/candidate operations remain later separate CONTROLLED gates (`GATE-S1` / `GATE-S2`).
 
 ## Still prohibited until later authority/Evidence
 
-- treating proposed S1/S2 contracts/plans as accepted authority;
+- changing the four accepted S1/S2 pack files merely to promote their frontmatter or alter their accepted blobs;
 - candidate acquisition/installation/execution before the corresponding accepted Spike contract/plan and exact execution gate;
 - provider/model calls for S1 deciding Evidence before `GATE-S1`;
 - runtime, execution-environment or workspace-substrate selection before deciding comparative Evidence;

@@ -1,3 +1,4 @@
+import { Readable, Writable } from 'node:stream';
 import { startProcess } from '../process-runner.mjs';
 import {
   normalizeAcpEvent,
@@ -5,6 +6,11 @@ import {
   normalizeAcpProcessObservation,
   normalizeAcpPromptResponse,
 } from './normalize.mjs';
+
+const ACP_METHODS = Object.freeze({
+  initialize: 'initialize',
+  sessionCancel: 'session/cancel',
+});
 
 function clone(value) {
   return structuredClone(value);
@@ -16,27 +22,73 @@ function freeze(value) {
   return Object.freeze(value);
 }
 
-function requireTransport(transport) {
-  if (!transport || typeof transport !== 'object' || typeof transport.onProcess !== 'function' || typeof transport.close !== 'function') {
-    throw new TypeError('ACP transport must expose onProcess and close');
+function requireClient(client) {
+  if (!client || typeof client !== 'object' || typeof client.connectWith !== 'function') {
+    throw new TypeError('ACP client must expose the public connectWith method');
   }
 }
 
-function protocolMethod(protocol, name) {
-  if (typeof protocol?.[name] !== 'function') throw new TypeError(`ACP protocol must expose ${name}`);
-  return protocol[name].bind(protocol);
+function requireStream(stream) {
+  if (!stream || typeof stream !== 'object' || !stream.writable || !stream.readable) {
+    throw new TypeError('ACP client requires the official writable/readable Stream pair');
+  }
+}
+
+function requireProcessBoundary(processBoundary) {
+  if (!processBoundary || typeof processBoundary !== 'object' || typeof processBoundary.onProcess !== 'function' || typeof processBoundary.close !== 'function') {
+    throw new TypeError('ACP process boundary must expose onProcess and close');
+  }
+}
+
+function requireClientContext(context) {
+  if (!context || typeof context !== 'object' || typeof context.request !== 'function' || typeof context.buildSession !== 'function' || typeof context.notify !== 'function') {
+    throw new TypeError('ACP connectWith callback must provide ClientContext request, buildSession and notify');
+  }
+}
+
+function processBoundaryFromExecution(execution) {
+  const listeners = new Set();
+  const queued = [];
+  let observed = null;
+  let closePromise = null;
+
+  execution.result.then((result) => {
+    if (result?.outcome === 'NORMAL_EXIT') return;
+    observed = result;
+    if (listeners.size === 0) queued.push(result);
+    else for (const listener of listeners) listener(result);
+  });
+
+  return {
+    onProcess(listener) {
+      listeners.add(listener);
+      if (observed) listener(observed);
+      while (queued.length > 0) listener(queued.shift());
+      return () => listeners.delete(listener);
+    },
+    async close() {
+      if (closePromise) return closePromise;
+      closePromise = (async () => {
+        if (typeof execution.cancel === 'function') execution.cancel('acp-client-close');
+        await execution.result;
+      })();
+      return closePromise;
+    },
+  };
 }
 
 export function createAcpClient({
-  transport,
-  protocol,
+  client,
+  stream,
+  processBoundary,
   clientInfo = { name: 'mnfs-arr-s1', version: '0.1.0' },
   clientCapabilities = {},
   maxTextBytes = 4096,
   maxEventBytes = 64 * 1024,
 } = {}) {
-  requireTransport(transport);
-  if (!protocol || typeof protocol !== 'object') throw new TypeError('ACP protocol is required');
+  requireClient(client);
+  requireStream(stream);
+  requireProcessBoundary(processBoundary);
 
   let initialized = false;
   let handshakeResult = null;
@@ -44,6 +96,9 @@ export function createAcpClient({
   let sessionId = null;
   let activeTurn = null;
   let closed = false;
+  let context = null;
+  let connectionPromise = null;
+  let resolveConnectionClose = null;
   let removeProcessListener = () => {};
 
   function turnObservation(turn) {
@@ -101,7 +156,39 @@ export function createAcpClient({
     }
   }
 
-  removeProcessListener = transport.onProcess(recordProcess) ?? (() => {});
+  removeProcessListener = processBoundary.onProcess(recordProcess) ?? (() => {});
+
+  async function connect() {
+    if (connectionPromise) return connectionPromise;
+    let resolveContext;
+    let rejectContext;
+    const contextReady = new Promise((resolve, reject) => {
+      resolveContext = resolve;
+      rejectContext = reject;
+    });
+    const connectionClosed = new Promise((resolve) => {
+      resolveConnectionClose = resolve;
+    });
+    connectionPromise = Promise.resolve()
+      .then(() => client.connectWith(stream, async (nextContext) => {
+        try {
+          requireClientContext(nextContext);
+          context = nextContext;
+          resolveContext(context);
+        } catch (error) {
+          rejectContext(error);
+          throw error;
+        }
+        await connectionClosed;
+        return undefined;
+      }))
+      .catch((error) => {
+        rejectContext(error);
+        throw error;
+      });
+    await contextReady;
+    return context;
+  }
 
   async function consumeUpdates(turn) {
     while (!turn.settledValue) {
@@ -143,7 +230,8 @@ export function createAcpClient({
   async function initialize() {
     if (closed) throw new Error('ACP client is shut down');
     if (initialized) return handshakeResult;
-    const response = await protocolMethod(protocol, 'initialize')({
+    const currentContext = await connect();
+    const response = await currentContext.request(ACP_METHODS.initialize, {
       protocolVersion: 1,
       clientInfo: clone(clientInfo),
       clientCapabilities: clone(clientCapabilities),
@@ -160,14 +248,13 @@ export function createAcpClient({
       throw new TypeError('ACP session/new does not accept env or inventory; use its cwd, directories and MCP fields');
     }
     if (typeof cwd !== 'string' || !cwd.startsWith('/')) throw new TypeError('ACP session cwd must be an absolute path');
-    const buildSession = protocolMethod(protocol, 'buildSession');
     const hasRequestFields = Array.isArray(additionalDirectories) || Array.isArray(mcpServers);
     const request = {
       cwd,
       ...(Array.isArray(additionalDirectories) ? { additionalDirectories: clone(additionalDirectories) } : {}),
       mcpServers: Array.isArray(mcpServers) ? clone(mcpServers) : [],
     };
-    const builder = buildSession(hasRequestFields ? request : cwd);
+    const builder = context.buildSession(hasRequestFields ? request : cwd);
     if (!builder || typeof builder.start !== 'function') throw new TypeError('ACP buildSession must return a SessionBuilder');
     activeSession = await builder.start();
     if (!activeSession || typeof activeSession !== 'object' || typeof activeSession.sessionId !== 'string' || activeSession.sessionId.length === 0) {
@@ -220,7 +307,7 @@ export function createAcpClient({
 
   async function cancel() {
     if (!activeTurn || activeTurn.settledValue) return activeTurn?.settledValue ?? null;
-    await protocolMethod(protocol, 'cancel')({ sessionId: activeTurn.sessionId });
+    await context.notify(ACP_METHODS.sessionCancel, { sessionId: activeTurn.sessionId });
     return activeTurn.settled;
   }
 
@@ -243,8 +330,14 @@ export function createAcpClient({
     } catch (cause) {
       error ??= cause;
     }
+    resolveConnectionClose?.();
     try {
-      await transport.close();
+      if (connectionPromise) await connectionPromise;
+    } catch (cause) {
+      error ??= cause;
+    }
+    try {
+      await processBoundary.close();
     } catch (cause) {
       error ??= cause;
     }
@@ -254,92 +347,27 @@ export function createAcpClient({
   return Object.freeze({ initialize, handshake, startSession, prompt, cancel, shutdown });
 }
 
-export function createAcpStdioTransport({ execution, maxLineBytes = 1024 * 1024 } = {}) {
-  if (!execution || typeof execution !== 'object' || !execution.stdout || typeof execution.result?.then !== 'function') {
-    throw new TypeError('ACP stdio transport requires a process-runner execution');
-  }
-  if (!Number.isSafeInteger(maxLineBytes) || maxLineBytes <= 0) throw new TypeError('ACP stdio maxLineBytes must be positive');
-  const messageListeners = new Set();
-  const processListeners = new Set();
-  const queuedMessages = [];
-  const queuedProcesses = [];
-  let buffer = '';
-  let closed = false;
-  let closePromise = null;
-
-  function deliver(listeners, queue, value) {
-    if (listeners.size === 0) queue.push(value);
-    else for (const listener of listeners) listener(value);
-  }
-
-  function parseLines(chunk) {
-    buffer += Buffer.from(chunk).toString('utf8');
-    if (Buffer.byteLength(buffer) > maxLineBytes && !buffer.includes('\n')) {
-      buffer = '';
-      deliver(messageListeners, queuedMessages, { method: 'transport/error', params: { reason: 'line-too-large' } });
-      return;
-    }
-    let newline;
-    while ((newline = buffer.indexOf('\n')) >= 0) {
-      const line = buffer.slice(0, newline).replace(/\r$/u, '');
-      buffer = buffer.slice(newline + 1);
-      if (line.length === 0) continue;
-      if (Buffer.byteLength(line) > maxLineBytes) {
-        deliver(messageListeners, queuedMessages, { method: 'transport/error', params: { reason: 'line-too-large' } });
-        continue;
-      }
-      try {
-        deliver(messageListeners, queuedMessages, JSON.parse(line));
-      } catch {
-        deliver(messageListeners, queuedMessages, { method: 'transport/error', params: { reason: 'invalid-json-line' } });
-      }
-    }
-  }
-
-  execution.stdout.on('data', parseLines);
-  execution.result.then((result) => {
-    if (result?.outcome !== 'NORMAL_EXIT') deliver(processListeners, queuedProcesses, result);
-  });
-
-  const transport = {
-    onMessage(listener) {
-      messageListeners.add(listener);
-      while (queuedMessages.length > 0) listener(queuedMessages.shift());
-      return () => messageListeners.delete(listener);
-    },
-    onProcess(listener) {
-      processListeners.add(listener);
-      while (queuedProcesses.length > 0) listener(queuedProcesses.shift());
-      return () => processListeners.delete(listener);
-    },
-    send(message) {
-      if (closed) throw new Error('ACP stdio transport is closed');
-      if (!execution.stdin || typeof execution.stdin.write !== 'function') throw new Error('ACP stdio transport has no protocol stdin');
-      execution.stdin.write(`${JSON.stringify(message)}\n`);
-    },
-    async close() {
-      if (closePromise) return closePromise;
-      closed = true;
-      closePromise = (async () => {
-        if (typeof execution.cancel === 'function') execution.cancel('acp-transport-close');
-        await execution.result;
-      })();
-      return closePromise;
-    },
-  };
-  return Object.freeze(transport);
-}
-
-export async function createAcpStdioClient({ processSpec, protocolFactory, ...options } = {}) {
+export async function createAcpStdioClient({
+  processSpec,
+  clientFactory,
+  ndJsonStream,
+  clientOptions = { name: 'mnfs-arr-s1' },
+  ...options
+} = {}) {
   if (!processSpec || typeof processSpec !== 'object' || !processSpec.env) throw new TypeError('ACP stdio processSpec must provide an explicit env');
-  if (typeof protocolFactory !== 'function') throw new TypeError('ACP stdio protocolFactory is required');
+  if (typeof clientFactory !== 'function') throw new TypeError('ACP clientFactory must be the public client function');
+  if (typeof ndJsonStream !== 'function') throw new TypeError('ACP ndJsonStream must be the official stream function');
   const execution = startProcess({ ...processSpec, stdinMode: 'protocol', protocolOwner: 'acp-client' });
-  const transport = createAcpStdioTransport({ execution });
+  const processBoundary = processBoundaryFromExecution(execution);
   try {
-    const protocol = await protocolFactory({ transport });
-    return createAcpClient({ ...options, transport, protocol });
+    const stream = ndJsonStream(
+      Writable.toWeb(execution.stdin),
+      Readable.toWeb(execution.stdout),
+    );
+    const client = clientFactory(clientOptions);
+    return createAcpClient({ ...options, client, stream, processBoundary });
   } catch (error) {
-    await transport.close();
+    await processBoundary.close();
     throw error;
   }
 }

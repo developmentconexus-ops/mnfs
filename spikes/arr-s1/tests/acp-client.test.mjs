@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict';
-import { PassThrough, Writable } from 'node:stream';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import {
   createAcpClient,
-  createAcpStdioTransport,
+  createAcpStdioClient,
 } from '../src/acp/client.mjs';
-import { startProcess } from '../src/process-runner.mjs';
 import {
   normalizeAcpEvent,
   normalizeAcpHandshake,
@@ -15,7 +14,14 @@ import {
 
 const CWD = '/tmp/mnfs-arr-s1-fixture';
 
-function fakeTransport() {
+function fakeStream() {
+  return {
+    writable: new WritableStream({ write() {} }),
+    readable: new ReadableStream({ start(controller) { controller.close(); } }),
+  };
+}
+
+function fakeProcessBoundary() {
   const processListeners = new Set();
   const calls = { closes: 0 };
   return {
@@ -64,26 +70,28 @@ function fakeActiveSession(calls) {
   return active;
 }
 
-function fakeProtocol(transport, { protocolVersion = 1 } = {}) {
+function fakeClientSurface({ protocolVersion = 1 } = {}) {
   const calls = {
-    initialize: [],
+    connectWith: [],
+    requests: [],
     builds: [],
     sessions: [],
+    notifications: [],
     prompts: [],
-    cancellations: [],
     disposes: 0,
   };
   const active = fakeActiveSession(calls);
-  return {
-    calls,
-    active,
-    async initialize(input) {
-      calls.initialize.push(input);
-      return {
-        protocolVersion,
-        agentCapabilities: { loadSession: true },
-        _meta: { protocolVersion: 999, agentCapabilities: { loadSession: false } },
-      };
+  const context = {
+    async request(method, params) {
+      calls.requests.push({ method, params });
+      if (method === 'initialize') {
+        return {
+          protocolVersion,
+          agentCapabilities: { loadSession: true },
+          _meta: { protocolVersion: 999, agentCapabilities: { loadSession: false } },
+        };
+      }
+      throw new Error(`unexpected request: ${method}`);
     },
     buildSession(cwd) {
       calls.builds.push(cwd);
@@ -94,47 +102,67 @@ function fakeProtocol(transport, { protocolVersion = 1 } = {}) {
         },
       };
     },
-    async cancel(input) {
-      calls.cancellations.push(input);
-      active.emit({
-        kind: 'stop',
-        response: { stopReason: 'cancelled' },
-        stopReason: 'cancelled',
-      });
+    async notify(method, params) {
+      calls.notifications.push({ method, params });
+      assert.equal(method, 'session/cancel');
+      active.emit({ kind: 'stop', response: { stopReason: 'cancelled' }, stopReason: 'cancelled' });
       active.resolvePrompt({ stopReason: 'cancelled' });
     },
   };
+  const client = {
+    connectWith(stream, operation) {
+      calls.connectWith.push(stream);
+      return operation(context);
+    },
+  };
+  return { client, context, active, calls };
 }
 
 async function readyClient(options = {}) {
-  const transport = options.transport ?? fakeTransport();
-  const protocol = options.protocol ?? fakeProtocol(transport, options);
-  const client = createAcpClient({ transport, protocol });
+  const processBoundary = options.processBoundary ?? fakeProcessBoundary();
+  const stream = options.stream ?? fakeStream();
+  const surface = options.surface ?? fakeClientSurface(options);
+  const client = createAcpClient({
+    client: surface.client,
+    stream,
+    processBoundary,
+  });
   await client.initialize();
   await client.startSession({ cwd: CWD });
-  return { client, transport, protocol };
+  return { client, stream, processBoundary, surface };
 }
 
-test('records ACP v1 handshake/capabilities and starts session through buildSession', async () => {
-  const { client, protocol } = await readyClient();
+test('uses the single official client/connectWith surface and ClientContext lifecycle', async () => {
+  const { client, stream, surface } = await readyClient();
 
-  assert.deepEqual(protocol.calls.initialize[0], {
-    protocolVersion: 1,
-    clientInfo: { name: 'mnfs-arr-s1', version: '0.1.0' },
-    clientCapabilities: {},
+  assert.equal(typeof surface.client.initialize, 'undefined');
+  assert.equal(typeof surface.client.buildSession, 'undefined');
+  assert.equal(typeof surface.client.cancel, 'undefined');
+  assert.equal(surface.calls.connectWith[0], stream);
+  assert.deepEqual(surface.calls.requests[0], {
+    method: 'initialize',
+    params: {
+      protocolVersion: 1,
+      clientInfo: { name: 'mnfs-arr-s1', version: '0.1.0' },
+      clientCapabilities: {},
+    },
   });
-  assert.deepEqual(protocol.calls.builds, [CWD]);
-  assert.deepEqual(protocol.calls.sessions, [{ cwd: CWD, mcpServers: [] }]);
+  assert.deepEqual(surface.calls.builds, [CWD]);
+  assert.deepEqual(surface.calls.sessions, [{ cwd: CWD, mcpServers: [] }]);
   assert.deepEqual(client.handshake(), {
     protocolVersion: 1,
     agentCapabilities: { loadSession: true },
   });
+  await client.shutdown();
 });
 
 test('rejects an ACP protocol-version mismatch before building a session', async () => {
-  const transport = fakeTransport();
-  const protocol = fakeProtocol(transport, { protocolVersion: 2 });
-  const client = createAcpClient({ transport, protocol });
+  const surface = fakeClientSurface({ protocolVersion: 2 });
+  const client = createAcpClient({
+    client: surface.client,
+    stream: fakeStream(),
+    processBoundary: fakeProcessBoundary(),
+  });
 
   await assert.rejects(
     () => client.initialize(),
@@ -177,12 +205,12 @@ test('normalizes an ActiveSession session_update without using vendor metadata',
   );
 });
 
-test('runs an ACP prompt through session updates and PromptResponse.stopReason', async () => {
-  const { client, protocol } = await readyClient();
+test('runs an ACP prompt through ActiveSession updates and PromptResponse.stopReason', async () => {
+  const { client, surface } = await readyClient();
   const turn = await client.prompt({ prompt: 'run the controlled fixture task' });
 
-  assert.equal(protocol.calls.prompts[0], 'run the controlled fixture task');
-  protocol.active.emit({
+  assert.equal(surface.calls.prompts[0], 'run the controlled fixture task');
+  surface.active.emit({
     kind: 'session_update',
     notification: {
       sessionId: 'session-1',
@@ -190,12 +218,8 @@ test('runs an ACP prompt through session updates and PromptResponse.stopReason',
     },
     update: { sessionUpdate: 'agent_message_chunk', content: { type: 'text', text: 'structured' } },
   });
-  protocol.active.emit({
-    kind: 'stop',
-    response: { stopReason: 'end_turn' },
-    stopReason: 'end_turn',
-  });
-  protocol.active.resolvePrompt({ stopReason: 'end_turn' });
+  surface.active.emit({ kind: 'stop', response: { stopReason: 'end_turn' }, stopReason: 'end_turn' });
+  surface.active.resolvePrompt({ stopReason: 'end_turn' });
 
   const settled = await turn.settled;
   assert.equal(settled.settled, true);
@@ -205,40 +229,76 @@ test('runs an ACP prompt through session updates and PromptResponse.stopReason',
   assert.equal('taskId' in settled, false);
   assert.equal(settled.events[0].type, 'assistant_output');
   assert.equal(settled.events[0].data.text, 'structured');
+  await client.shutdown();
 });
 
-test('cancels the active ACP prompt through session/cancel and waits for cancelled stopReason', async () => {
-  const { client, protocol } = await readyClient();
+test('notifies session/cancel through ClientContext and waits for cancelled stopReason', async () => {
+  const { client, surface } = await readyClient();
   const turn = await client.prompt({ prompt: 'wait for cancellation' });
 
   const settled = await client.cancel();
 
-  assert.deepEqual(protocol.calls.cancellations, [{ sessionId: 'session-1' }]);
+  assert.deepEqual(surface.calls.notifications, [{
+    method: 'session/cancel',
+    params: { sessionId: 'session-1' },
+  }]);
   assert.equal(settled.outcome, 'CANCELLED');
   assert.equal((await turn.settled).outcome, 'CANCELLED');
+  await client.shutdown();
 });
 
 test('classifies ACP process death as a handoff-required settled result without session authority', async () => {
-  const { client, transport } = await readyClient();
+  const { client, processBoundary } = await readyClient();
   const turn = await client.prompt({ prompt: 'die before finalization' });
 
-  transport.emitProcess({ status: 'SIGNALED', signal: 'SIGTERM', exitCode: null, outcome: 'SIGNAL_DEATH' });
+  processBoundary.emitProcess({ status: 'SIGNALED', signal: 'SIGTERM', exitCode: null, outcome: 'SIGNAL_DEATH' });
 
   const settled = await turn.settled;
   assert.equal(settled.outcome, 'PROCESS_DEATH');
   assert.equal(settled.handoffRequired, true);
   assert.equal(settled.runtimeSession, undefined);
   assert.equal(settled.authority, undefined);
+  await client.shutdown();
 });
 
-test('shuts down the active session and transport exactly once', async () => {
-  const { client, protocol, transport } = await readyClient();
+test('shuts down the active session and process boundary exactly once', async () => {
+  const { client, processBoundary, surface } = await readyClient();
 
   await client.shutdown();
   await client.shutdown();
 
-  assert.equal(protocol.calls.disposes, 1);
-  assert.equal(transport.calls.closes, 1);
+  assert.equal(surface.calls.disposes, 1);
+  assert.equal(processBoundary.calls.closes, 1);
+});
+
+test('passes Node process streams to the injected official ndJsonStream and client factory', async () => {
+  const streamCalls = [];
+  const surface = fakeClientSurface();
+  const client = await createAcpStdioClient({
+    processSpec: {
+      argv: [process.execPath, '-e', 'process.stdin.resume()'],
+      cwd: process.cwd(),
+      env: { PATH: '/usr/bin:/bin' },
+      timeoutMs: 1000,
+      terminationGraceMs: 100,
+      stdoutLimitBytes: 4096,
+      stderrLimitBytes: 4096,
+    },
+    clientFactory(options) {
+      assert.deepEqual(options, { name: 'mnfs-arr-s1' });
+      return surface.client;
+    },
+    ndJsonStream(output, input) {
+      streamCalls.push({ output, input });
+      assert.equal(typeof output.getWriter, 'function');
+      assert.equal(typeof input.getReader, 'function');
+      return { writable: output, readable: input };
+    },
+  });
+
+  await client.initialize();
+  assert.equal(streamCalls.length, 1);
+  await client.shutdown();
 });
 
 test('normalizes ACP PromptResponse stop reasons without invented result status', () => {
@@ -253,48 +313,10 @@ test('normalizes ACP PromptResponse stop reasons without invented result status'
   assert.throws(() => normalizeAcpPromptResponse({ status: 'COMPLETED' }), /stopReason/u);
 });
 
-test('stdio transport frames JSON messages and reports bounded process observations', async () => {
-  const stdout = new PassThrough();
-  const writes = [];
-  const stdin = new Writable({ write(chunk, _encoding, callback) { writes.push(chunk.toString()); callback(); } });
-  const execution = {
-    stdin,
-    stdout,
-    result: Promise.resolve({ status: 'EXITED', outcome: 'NORMAL_EXIT', exitCode: 0, signal: null }),
-    cancel() { return true; },
-  };
-  const transport = createAcpStdioTransport({ execution });
-  const messages = [];
-  transport.onMessage((message) => messages.push(message));
-  transport.send({ id: 1, method: 'initialize', params: { protocolVersion: 1 } });
-  stdout.write('{"id":1,"result":{"protocolVersion":1}}\n');
-  await new Promise((resolve) => setImmediate(resolve));
+test('source contains no invented task protocol or task identity requirement', () => {
+  const source = readFileSync(new URL('../src/acp/client.mjs', import.meta.url), 'utf8');
 
-  assert.deepEqual(messages, [{ id: 1, result: { protocolVersion: 1 } }]);
-  assert.deepEqual(writes, ['{"id":1,"method":"initialize","params":{"protocolVersion":1}}\n']);
-  await transport.close();
-});
-
-test('stdio transport reuses the process-runner stream for a bounded fake ACP process', async () => {
-  const execution = startProcess({
-    argv: [process.execPath, '-e', "process.stdin.resume(); process.stdin.on('end', () => { require('node:fs').writeSync(1, JSON.stringify({ method: 'session/update', params: { sessionId: 'session-1', update: { sessionUpdate: 'plan', entries: [] } } }) + '\\n'); })"],
-    cwd: process.cwd(),
-    env: { MNFS_FAKE_ACP: 'yes' },
-    timeoutMs: 1000,
-    terminationGraceMs: 100,
-    stdoutLimitBytes: 4096,
-    stderrLimitBytes: 4096,
-  });
-  const transport = createAcpStdioTransport({ execution });
-  const messages = [];
-  transport.onMessage((message) => messages.push(message));
-  await execution.result;
-
-  assert.deepEqual(messages, [{
-    method: 'session/update',
-    params: { sessionId: 'session-1', update: { sessionUpdate: 'plan', entries: [] } },
-  }]);
-  await transport.close();
+  assert.doesNotMatch(source, /task\/result|startTask|cancelTask|taskId/iu);
 });
 
 test('normalizes ACP handshake inputs with no vendor metadata dependency', () => {

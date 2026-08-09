@@ -13,6 +13,7 @@ const status = await readFile('docs/tracking/STATUS.md', 'utf8');
 const map = await readFile('docs/DOCUMENTATION-MAP.md', 'utf8');
 const agents = await readFile('AGENTS.md', 'utf8');
 const arr = await readFile('docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md', 'utf8');
+const operatorAcceptance = 'MNFS_ACCEPT_ARR_S1_S2_PACKS s1_contract_blob=f032f09fefd1a2a1d36e568f00732e8eedd8aa89 s1_plan_blob=277dffc521754a4370bfd94132dc9467589fdcf0 s2_contract_blob=47d50cefa46fa71652bbebfd0186be142d5a807e s2_plan_blob=1923a87f08a334f30275c767ba9d76cbad898ed3 base_sha=032620c35c95e932e6f5c5468c85273ddac25f38 verify_run=31286529184 scope=accept-canonicalize-s1-s2-packs-and-authorize-deterministic-harness-implementation-no-candidate-execution';
 
 function gitBlobSha(text) {
   const bytes = Buffer.from(text, 'utf8');
@@ -40,12 +41,9 @@ for (const [name, text, expectedSha] of [
 }
 
 assert.match(acceptance, /^id: ACCEPTANCE-ARR-S1-S2-PACKS$/mu, 'S1/S2 acceptance record must expose the canonical id');
-assert.match(acceptance, /MNFS_ACCEPT_ARR_S1_S2_PACKS[\s\S]{0,600}base_sha=032620c35c95e932e6f5c5468c85273ddac25f38[\s\S]{0,160}verify_run=31286529184/iu, 'acceptance record must preserve the exact Operator acceptance binding');
-assert.match(acceptance, /f032f09fefd1a2a1d36e568f00732e8eedd8aa89/iu, 'acceptance record must bind the accepted S1 contract blob');
-assert.match(acceptance, /277dffc521754a4370bfd94132dc9467589fdcf0/iu, 'acceptance record must bind the accepted S1 plan blob');
-assert.match(acceptance, /47d50cefa46fa71652bbebfd0186be142d5a807e/iu, 'acceptance record must bind the accepted S2 contract blob');
-assert.match(acceptance, /1923a87f08a334f30275c767ba9d76cbad898ed3/iu, 'acceptance record must bind the accepted S2 plan blob');
-assert.match(decisions, /\| D-022 \| 2026-08-08 \|[\s\S]{0,900}ACCEPTANCE-ARR-S1-S2-PACKS/iu, 'decision register must record D-022 for the exact accepted pack bytes');
+assert.ok(acceptance.includes(operatorAcceptance), 'acceptance record must preserve the exact Operator acceptance binding');
+const d022 = decisions.split('\n').find((line) => line.startsWith('| D-022 |'));
+assert.ok(d022?.includes(operatorAcceptance), 'D-022 must preserve the exact Operator acceptance binding');
 
 // S1: Pi-first ordering without Pi preselection.
 for (const marker of [

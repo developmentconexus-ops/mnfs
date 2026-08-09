@@ -51,6 +51,10 @@ assert.match(s1Contract, /candidateOrBoundary\.verdict == PASS[\s\S]{0,220}EVERY
 assert.match(s1Contract, /required `FAIL`, `BLOCKED` or `UNKNOWN` criterion has `S1_SELECTION_ELIGIBLE=false`/iu, 'S1 must make any non-PASS required criterion non-selectable');
 assert.match(s1Contract, /When runtime and integration boundary are distinct selection objects[\s\S]{0,180}both[\s\S]{0,120}`S1_SELECTION_ELIGIBLE`/iu, 'S1 must qualify runtime and boundary independently when distinct');
 assert.match(s1Contract, /Every\*\* `SELECT` output[\s\S]{0,180}`S1_SELECTION_ELIGIBLE=true`/iu, 'every S1 SELECT must depend on the authoritative predicate');
+assert.match(s1Contract, /`S1-C12` PASS requires a supported\/documented upstream public boundary/iu, 'S1-C12 PASS must require a supported/documented upstream public boundary');
+assert.match(s1Contract, /unsupported,\s*private\s+or\s+undocumented boundary/iu, 'S1-C12 must name unsupported, private and undocumented boundaries explicitly');
+assert.match(s1Contract, /`S1-C12\s*!=\s*PASS`\s+(?:and|therefore|then|→)\s*`S1_SELECTION_ELIGIBLE=false`/iu, 'S1-C12 non-PASS must explicitly imply ineligibility');
+assert.match(s1Contract, /No `SELECT` may point to a form whose boundary\s+(?:does not satisfy|fails)\s+`S1-C12`/iu, 'S1 SELECT must require a boundary that does not fail S1-C12');
 assert.match(s1Contract, /No candidate execution is authorized by this proposed contract/iu, 'proposed S1 contract must grant no execution authority');
 assert.match(s1Plan, /later exact `GATE-S1`/iu, 'S1 plan must keep real operations behind a later exact gate');
 assert.match(s1Plan, /OpenCode native ACP must be exercised and finalized under the same contract before final S1 selection[\s\S]{0,220}`BLOCKED`[\s\S]{0,100}`REPLAN_REQUIRED`/iu, 'S1 plan must require completed external challenger comparison or block/replan');

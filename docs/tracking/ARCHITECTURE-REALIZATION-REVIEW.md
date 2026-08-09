@@ -17,6 +17,7 @@ related:
   - DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION
   - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
   - ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE
+  - ACCEPTANCE-ARR-S1-S2-PACKS
   - DOC-ARR-S1-AGENT-RUNTIME-CONTRACT
   - PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE
   - DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT
@@ -51,8 +52,9 @@ D-020 risk-proportional execution governance    ACCEPTED / INTEGRATED
 ARR-S0 Task 11                                  COMPLETE / REVIEW CLEAR
 ARR-S0 contract 1.0.0                           ACCEPTED — D-021
 ARR-S0 Task 12                                  COMPLETE — ACCEPT_WITH_LIMITATIONS
-ARR-S1 contract + plan                          PROPOSED 0.1.0 / REVIEW REQUIRED
-ARR-S2 contract + plan                          PROPOSED 0.1.0 / REVIEW REQUIRED
+ARR-S1 contract + plan                          ACCEPTED 0.1.0 — D-022 / exact bytes preserved
+ARR-S2 contract + plan                          ACCEPTED 0.1.0 — D-022 / exact bytes preserved
+Deterministic S1/S2 harness                     AUTHORIZED after acceptance integration
 ```
 
 ## Accepted architecture
@@ -100,8 +102,8 @@ Fresh-Actor recovery cannot depend on transcript/session continuity. Proof-first
 
 ```text
 ARR-S0  Host Capability Probe                    COMPLETE — ACCEPT_WITH_LIMITATIONS
-ARR-S1  Agent Runtime Conformance                CONTRACT+PLAN PROPOSED 0.1.0
-ARR-S2  Local Execution Envelope Conformance     CONTRACT+PLAN PROPOSED 0.1.0
+ARR-S1  Agent Runtime Conformance                CONTRACT+PLAN ACCEPTED 0.1.0 — D-022
+ARR-S2  Local Execution Envelope Conformance     CONTRACT+PLAN ACCEPTED 0.1.0 — D-022
 ARR-S2W Workspace comparison — conditional only
 ARR-S3  Vertical Composition Proof
 → substrate selection Decision
@@ -157,9 +159,9 @@ The sole mechanical Verdict limitation is `HOST-DOCKER-DAEMON=UNKNOWN`, because 
 
 These are generic host facts. S0 does not declare any named Agent Runtime, process sandbox, microVM implementation, container runtime or workspace substrate accepted or rejected.
 
-## Proposed ARR-S1 Planner Pack
+## Accepted ARR-S1 Planner Pack
 
-`DOC-ARR-S1-AGENT-RUNTIME-CONTRACT` and `PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE` are proposed at version 0.1.0. They are not accepted authority and authorize no harness implementation or candidate execution by themselves.
+`DOC-ARR-S1-AGENT-RUNTIME-CONTRACT` and `PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE` are accepted exact bytes under D-022 at version 0.1.0. Their proposed frontmatter remains unchanged to preserve the accepted Git blob identities recorded in `ACCEPTANCE-ARR-S1-S2-PACKS`.
 
 The proposed investigation order is deliberately Pi-first while keeping the Validation Contract candidate-independent:
 
@@ -180,9 +182,9 @@ integration-boundary winner (concrete Pi adapter vs ACP)
 
 Frozen planning provenance includes Pi 0.84.1, Pi-ACP 0.0.33, ACP TypeScript SDK 1.3.0 and OpenCode 1.18.15. All are revalidated before any real execution.
 
-## Proposed ARR-S2 Planner Pack
+## Accepted ARR-S2 Planner Pack
 
-`DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT` and `PLAN-ARR-S2-EXECUTION-ENVELOPE-CONFORMANCE` are proposed at version 0.1.0. They are not accepted authority and authorize no harness implementation or candidate execution by themselves.
+`DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT` and `PLAN-ARR-S2-EXECUTION-ENVELOPE-CONFORMANCE` are accepted exact bytes under D-022 at version 0.1.0. Their proposed frontmatter remains unchanged to preserve the accepted Git blob identities recorded in `ACCEPTANCE-ARR-S1-S2-PACKS`.
 
 The proposed comparison is restricted to candidates that can still alter the decision under current S0 facts:
 
@@ -196,20 +198,26 @@ KVM-backed BoxLite/smolvm remain excluded because the accepted host class is `BL
 
 Sandlock is specifically decision-relevant because eligible native COW could eliminate a later separate workspace substrate and make ARR-S2W not applicable.
 
+## D-022 — ARR-S1/S2 planner-pack acceptance
+
+The Operator accepted the exact S1/S2 contract and plan bytes under D-022. The acceptance record binds the four Git blob identities, base `032620c35c95e932e6f5c5468c85273ddac25f38` and verification run `31286529184`.
+
+The accepted bundle authorizes deterministic S1/S2 harness implementation after the acceptance projection is integrated. It does not select a runtime or Execution Environment and does not authorize candidate installation/execution, provider/model calls, host remediation, S2W/S3, revision-5 M02 production work or production Worker dispatch.
+
 ## Current boundary
 
-ARR-S0 is complete. Fresh S1/S2 research and detailed planning have produced proposed contract/plan packs, but neither pack is accepted yet.
+ARR-S0 is complete. The exact S1/S2 contract/plan pack bytes are accepted under D-022, and deterministic S1/S2 harness implementation is authorized after acceptance integration.
 
 The next governed work is:
 
 ```text
-independent review of exact proposed S1/S2 bytes
-→ Finding Admission / bounded correction
-→ full repository verification
-→ explicit Operator acceptance of exact reviewed packs
+acceptance projection integration
+→ deterministic S1/S2 harness implementation under exact accepted bytes
+→ independent proof/review of the harness
+→ later exact GATE-S1 / GATE-S2 before real candidate operations
 ```
 
-Only after pack acceptance may deterministic S1/S2 harness implementation proceed under the accepted plans. Real provider/candidate operations remain later separate CONTROLLED gates (`GATE-S1` / `GATE-S2`).
+Real provider/candidate operations remain later separate CONTROLLED gates (`GATE-S1` / `GATE-S2`).
 
 Candidate installation/execution, runtime/environment selection, KVM/Docker/host remediation, S2W/S3 execution, revision-5 M02 production work and production Worker dispatch remain prohibited.
 

@@ -1,15 +1,24 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
 const s1Contract = await readFile('docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md', 'utf8');
 const s1Plan = await readFile('docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md', 'utf8');
 const s2Contract = await readFile('docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md', 'utf8');
 const s2Plan = await readFile('docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md', 'utf8');
+const acceptance = await readFile('docs/acceptance/2026-08-08-arr-s1-s2-pack-acceptance.md', 'utf8');
+const decisions = await readFile('docs/tracking/DECISIONS.md', 'utf8');
 const status = await readFile('docs/tracking/STATUS.md', 'utf8');
 const map = await readFile('docs/DOCUMENTATION-MAP.md', 'utf8');
 const agents = await readFile('AGENTS.md', 'utf8');
 const arr = await readFile('docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md', 'utf8');
+const operatorAcceptance = 'MNFS_ACCEPT_ARR_S1_S2_PACKS s1_contract_blob=f032f09fefd1a2a1d36e568f00732e8eedd8aa89 s1_plan_blob=277dffc521754a4370bfd94132dc9467589fdcf0 s2_contract_blob=47d50cefa46fa71652bbebfd0186be142d5a807e s2_plan_blob=1923a87f08a334f30275c767ba9d76cbad898ed3 base_sha=032620c35c95e932e6f5c5468c85273ddac25f38 verify_run=31286529184 scope=accept-canonicalize-s1-s2-packs-and-authorize-deterministic-harness-implementation-no-candidate-execution';
+
+function gitBlobSha(text) {
+  const bytes = Buffer.from(text, 'utf8');
+  return createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+}
 
 for (const [name, text, id] of [
   ['S1 contract', s1Contract, 'DOC-ARR-S1-AGENT-RUNTIME-CONTRACT'],
@@ -21,6 +30,20 @@ for (const [name, text, id] of [
   assert.match(text, /^status: proposed$/mu, `${name} must remain proposed before Operator acceptance`);
   assert.match(text, /^version: 0\.1\.0$/mu, `${name} proposed version must be 0.1.0`);
 }
+
+for (const [name, text, expectedSha] of [
+  ['S1 contract', s1Contract, 'f032f09fefd1a2a1d36e568f00732e8eedd8aa89'],
+  ['S1 plan', s1Plan, '277dffc521754a4370bfd94132dc9467589fdcf0'],
+  ['S2 contract', s2Contract, '47d50cefa46fa71652bbebfd0186be142d5a807e'],
+  ['S2 plan', s2Plan, '1923a87f08a334f30275c767ba9d76cbad898ed3'],
+]) {
+  assert.equal(gitBlobSha(text), expectedSha, `${name} must remain byte-identical to the accepted blob`);
+}
+
+assert.match(acceptance, /^id: ACCEPTANCE-ARR-S1-S2-PACKS$/mu, 'S1/S2 acceptance record must expose the canonical id');
+assert.ok(acceptance.includes(operatorAcceptance), 'acceptance record must preserve the exact Operator acceptance binding');
+const d022 = decisions.split('\n').find((line) => line.startsWith('| D-022 |'));
+assert.ok(d022?.includes(operatorAcceptance), 'D-022 must preserve the exact Operator acceptance binding');
 
 // S1: Pi-first ordering without Pi preselection.
 for (const marker of [
@@ -124,9 +147,14 @@ for (const [name, text] of [
   ['AGENTS', agents],
   ['ARR review', arr],
 ]) {
-  assert.match(text, /ARR-S1[\s\S]{0,180}PROPOSED 0\.1\.0/iu, `${name} must expose proposed S1 pack`);
-  assert.match(text, /ARR-S2[\s\S]{0,180}PROPOSED 0\.1\.0/iu, `${name} must expose proposed S2 pack`);
+  assert.match(text, /ARR-S1[\s\S]{0,220}ACCEPTED 0\.1\.0[\s\S]{0,180}D-022/iu, `${name} must expose accepted S1 pack authority`);
+  assert.match(text, /ARR-S2[\s\S]{0,220}ACCEPTED 0\.1\.0[\s\S]{0,180}D-022/iu, `${name} must expose accepted S2 pack authority`);
 }
+
+assert.match(agents, /deterministic S1\/S2 harness implementation:\s+AUTHORIZED/iu, 'AGENTS must authorize deterministic harness implementation after pack acceptance');
+assert.match(status, /deterministic S1\/S2 harness implementation:\s+AUTHORIZED/iu, 'STATUS must authorize deterministic harness implementation after pack acceptance');
+assert.match(map, /deterministic S1\/S2 harness implementation[\s\S]{0,160}authorized/iu, 'Documentation Map must expose the accepted implementation boundary');
+assert.match(arr, /deterministic S1\/S2 harness implementation[\s\S]{0,160}authorized/iu, 'ARR review must expose the accepted implementation boundary');
 
 assert.match(status, /## Still prohibited until later authority\/Evidence[\s\S]{0,700}candidate acquisition\/installation\/execution/iu, 'STATUS must keep candidate operations explicitly prohibited');
 assert.match(map, /Candidate installation\/execution[\s\S]{0,240}remain prohibited/iu, 'Documentation Map must keep candidate execution prohibited');

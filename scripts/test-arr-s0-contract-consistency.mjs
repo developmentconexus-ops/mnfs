@@ -117,19 +117,19 @@ assert.match(documentationMap, /DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT/u, 'Docum
 
 assert.match(status, /ARR-S0 Task 12 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'STATUS must expose accepted S0 real-host Evidence');
 assert.match(status, /ARR-S0 fresh report integrity:\s+PASS/u, 'STATUS must expose fresh integrity result');
-assert.match(status, /ARR-S1 contract:\s+PROPOSED 0\.1\.0/u, 'STATUS may advance downstream planning while preserving S0 closeout');
-assert.match(status, /ARR-S2 contract:\s+PROPOSED 0\.1\.0/u, 'STATUS may advance downstream planning while preserving S0 closeout');
+assert.match(status, /ARR-S1 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'STATUS must project accepted S1 authority while preserving S0 closeout');
+assert.match(status, /ARR-S2 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'STATUS must project accepted S2 authority while preserving S0 closeout');
 assert.match(status, /microVM \/ KVM\s+BLOCKED_BY_HOST/u, 'STATUS must preserve KVM class result');
 
 assert.match(agents, /ARR-S0 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'AGENTS must orient Fresh Actors to accepted S0 Evidence');
-assert.match(agents, /ARR-S1 contract:\s+PROPOSED 0\.1\.0/u, 'AGENTS must expose downstream proposed S1 pack without changing S0 truth');
-assert.match(agents, /ARR-S2 contract:\s+PROPOSED 0\.1\.0/u, 'AGENTS must expose downstream proposed S2 pack without changing S0 truth');
+assert.match(agents, /ARR-S1 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'AGENTS must expose accepted S1 authority without changing S0 truth');
+assert.match(agents, /ARR-S2 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'AGENTS must expose accepted S2 authority without changing S0 truth');
 assert.match(agents, /ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE/u, 'AGENTS must name canonical S0 Evidence');
 assert.match(agents, /Candidate execution\/selection:\s+PROHIBITED/u, 'AGENTS must preserve candidate non-execution after S0 closeout');
 
 assert.match(arrReview, /ARR-S0 Task 12\s+COMPLETE — ACCEPT_WITH_LIMITATIONS/u, 'ARR review must close Task 12');
-assert.match(arrReview, /ARR-S1 contract \+ plan\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED/u, 'ARR review may project the proposed S1 pack');
-assert.match(arrReview, /ARR-S2 contract \+ plan\s+PROPOSED 0\.1\.0 \/ REVIEW REQUIRED/u, 'ARR review may project the proposed S2 pack');
+assert.match(arrReview, /ARR-S1 contract \+ plan\s+ACCEPTED 0\.1\.0 — D-022/u, 'ARR review must project accepted S1 authority');
+assert.match(arrReview, /ARR-S2 contract \+ plan\s+ACCEPTED 0\.1\.0 — D-022/u, 'ARR review must project accepted S2 authority');
 assert.match(arrReview, /run id:\s+arr-s0-20260808t210139618z-ff3979/u, 'ARR review must preserve exact S0 run');
 
 const exactAcceptance = 'MNFS_ACCEPT_ARR_S0_CONTRACT version=1.0.0 contract_blob=d564359e5a366d9e17194dcd687b95f764bcf2f2 plan_blob=3e78445fcbcca360f612edefd025c6cb0f84f8e5 base_sha=3364757c4ac4e6ee6d4de3637435228d8a65eb8b scope=contract-acceptance-canonicalize-review-merge-no-host-observation';

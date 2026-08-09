@@ -126,7 +126,7 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
   MIS-002/M02 revision-5 execution path                  SUPERSEDED
 ```
 
-Current architecture/planning authority includes D-010 through D-020, plus D-021, ADR-0013 through ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality/Review Admission 1.0.0 and Risk-Proportional Execution Governance 1.0.0.
+Current architecture/planning authority includes D-010 through D-022, ADR-0013 through ADR-0015, Layered Agent Execution Planning 1.1.0, Complexity Proportionality/Review Admission 1.0.0 and Risk-Proportional Execution Governance 1.0.0.
 
 Current ARR state:
 
@@ -137,10 +137,9 @@ CPR canonical reconciliation:          ACCEPTED / INTEGRATED — D-019
 ARR-S0 host capability contract:       ACCEPTED 1.0.0 — D-021
 ARR-S0 real host Evidence:             ACCEPT_WITH_LIMITATIONS / COMPLETE
 ARR-S0 fresh report integrity:         PASS
-ARR-S1 contract:                       PROPOSED 0.1.0 / REVIEW REQUIRED / NOT EXECUTABLE
-ARR-S1 implementation plan:            PROPOSED 0.1.0 / REVIEW REQUIRED
-ARR-S2 contract:                       PROPOSED 0.1.0 / REVIEW REQUIRED / NOT EXECUTABLE
-ARR-S2 implementation plan:            PROPOSED 0.1.0 / REVIEW REQUIRED
+ARR-S1 contract + plan:                ACCEPTED 0.1.0 / D-022 / exact bytes preserved
+ARR-S2 contract + plan:                ACCEPTED 0.1.0 / D-022 / exact bytes preserved
+Deterministic S1/S2 harness implementation: AUTHORIZED after acceptance integration
 Candidate execution/selection:         PROHIBITED pending later deciding Evidence/gates
 M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED
@@ -148,8 +147,8 @@ Production Worker dispatch:            PROHIBITED
 
 Canonical S0 Evidence is `docs/acceptance/2026-08-07-arr-s0-host-capability-probe.md` (`ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`). It records provider-neutral host facts only and grants no named-candidate selection or execution authority.
 
-The proposed S1 pack is `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md` + `docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md`. It is Pi-first for investigation order, separates runtime choice from SDK/RPC/ACP boundary choice, and still requires the OpenCode native ACP external challenger before final S1 selection.
+The accepted S1 pack is `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md` + `docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md`, bound to D-022 and the exact accepted Git blobs recorded in `ACCEPTANCE-ARR-S1-S2-PACKS`. The files retain proposed 0.1.0 frontmatter to preserve those bytes. The pack is Pi-first for investigation order, separates runtime choice from SDK/RPC/ACP boundary choice, and still requires the OpenCode native ACP external challenger before final S1 selection.
 
-The proposed S2 pack is `docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md` + `docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md`. It compares SRT/nono and conditionally Sandlock; KVM microVM and Docker/container execution remain excluded under accepted S0 facts/current authority.
+The accepted S2 pack is `docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md` + `docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md`, bound to D-022 and the exact accepted Git blobs recorded in `ACCEPTANCE-ARR-S1-S2-PACKS`. The files retain proposed 0.1.0 frontmatter to preserve those bytes. It compares SRT/nono and conditionally Sandlock; KVM microVM and Docker/container execution remain excluded under accepted S0 facts/current authority.
 
-The next governed ARR action is independent review, Finding Admission/correction, full verification and exact Operator acceptance of the proposed S1/S2 packs. Proposed contract/plan presence grants no harness implementation or real candidate execution authority by itself.
+The next governed ARR action is integration of the D-022 acceptance projection and deterministic S1/S2 harness implementation under the exact accepted packs. Candidate execution/selection remains prohibited until later deciding Evidence and exact gates.

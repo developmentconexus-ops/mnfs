@@ -26,6 +26,7 @@ related:
   - PLAN-ARR-S0-HOST-CAPABILITY-PROBE
   - DOC-ARR-S0-HOST-CAPABILITY-CONTRACT
   - ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE
+  - ACCEPTANCE-ARR-S1-S2-PACKS
   - DOC-ARR-S1-AGENT-RUNTIME-CONTRACT
   - PLAN-ARR-S1-AGENT-RUNTIME-CONFORMANCE
   - DOC-ARR-S2-EXECUTION-ENVELOPE-CONTRACT
@@ -60,14 +61,14 @@ M2 — Secure One-Worker Vertical Slice                   OPPORTUNITY_REPLAN
 
 Current durable authority includes:
 
-- D-010 through D-020, plus D-021;
+- D-010 through D-022;
 - `ADR-0013`, `ADR-0014`, `ADR-0015`;
 - `DESIGN-LAYERED-AGENT-EXECUTION-PLANNING` 1.1.0;
 - `DESIGN-COMPLEXITY-PROPORTIONALITY-AND-REVIEW-ADMISSION` 1.0.0;
 - `DESIGN-RISK-PROPORTIONAL-EXECUTION-GOVERNANCE` 1.0.0;
 - accepted ARR program/task plans, accepted contracts and accepted deciding Evidence where applicable.
 
-The proposed S1/S2 contracts/plans are discoverable planning artifacts, not accepted execution authority.
+The exact S1/S2 contract/plan bytes are accepted under D-022 without mutating their proposed frontmatter; `ACCEPTANCE-ARR-S1-S2-PACKS` is the durable acceptance projection and authorizes deterministic harness implementation after integration.
 
 `CAP-EXECUTION` 0.1.0 and `MIS-002` revision 5 remain immutable authority/history for the versions they describe. D-015 prohibits implementing revision-5 M02.
 
@@ -130,10 +131,11 @@ Operational history: commits/diffs, PRs/reviews, CI/workflow results, merge iden
 | `docs/superpowers/plans/2026-08-07-arr-s0-host-capability-probe.md` | ARR-S0 bounded design/execution plan | accepted guidance by GATE-P0 |
 | `docs/spikes/ARR-S0-HOST-CAPABILITY-CONTRACT.md` | `DOC-ARR-S0-HOST-CAPABILITY-CONTRACT`; S0 host-fact contract 1.0.0 | accepted contract — D-021 |
 | `docs/acceptance/2026-08-07-arr-s0-host-capability-probe.md` | `ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`; accepted generic host facts and limitations | accepted deciding Evidence |
-| `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md` | Pi-first runtime + boundary conformance criteria | proposed contract 0.1.0 — not executable |
-| `docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md` | deterministic S1 harness + later controlled run sequence | proposed guidance 0.1.0 |
-| `docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md` | local process-envelope conformance criteria and host eligibility | proposed contract 0.1.0 — not executable |
-| `docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md` | deterministic S2 harness + later controlled run sequence | proposed guidance 0.1.0 |
+| `docs/acceptance/2026-08-08-arr-s1-s2-pack-acceptance.md` | `ACCEPTANCE-ARR-S1-S2-PACKS`; exact D-022 acceptance and non-authority boundary | accepted authority projection |
+| `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md` | Pi-first runtime + boundary conformance criteria | accepted exact bytes — D-022; proposed frontmatter preserved |
+| `docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md` | deterministic S1 harness + later controlled run sequence | accepted exact bytes — D-022 |
+| `docs/spikes/ARR-S2-EXECUTION-ENVELOPE-CONTRACT.md` | local process-envelope conformance criteria and host eligibility | accepted exact bytes — D-022; proposed frontmatter preserved |
+| `docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md` | deterministic S2 harness + later controlled run sequence | accepted exact bytes — D-022 |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated constitutional projection | generated projection |
 | `docs/roadmap.md` | generated capability/program sequence | generated projection |
 
@@ -190,8 +192,9 @@ Natural-language Operator approval may bind an unambiguous FAST/BOUNDED envelope
 
 ```text
 ARR-S0 Host Capability Probe                     ACCEPT_WITH_LIMITATIONS / COMPLETE
-→ ARR-S1 Agent Runtime Conformance              CONTRACT+PLAN PROPOSED 0.1.0 / NOT EXECUTABLE
-  + ARR-S2 Local Execution Envelope Conformance CONTRACT+PLAN PROPOSED 0.1.0 / NOT EXECUTABLE
+→ ARR-S1 Agent Runtime Conformance              CONTRACT+PLAN ACCEPTED 0.1.0 — D-022
+  + ARR-S2 Local Execution Envelope Conformance CONTRACT+PLAN ACCEPTED 0.1.0 — D-022
+→ deterministic S1/S2 harness implementation    AUTHORIZED after acceptance integration
 → ARR-S2W Workspace comparison only if S2 proves it is needed
 → ARR-S3 Vertical Composition Proof
 → substrate selection Decision
@@ -208,9 +211,10 @@ ARR P1 A1-A4 + B1: ACCEPTED — GATE-R / D-017 / INTEGRATED
 P1-F03:             ACCEPTED — D-018 / INTEGRATED
 CPR reconciliation: ACCEPTED — D-019 / INTEGRATED
 ARR-S0 contract:    ACCEPTED 1.0.0 — D-021
+ARR-S1/S2 packs:    ACCEPTED exact bytes — D-022
 ARR-S0 Evidence:    ACCEPT_WITH_LIMITATIONS / COMPLETE
-S1 planner pack:    PROPOSED 0.1.0 / REVIEW REQUIRED
-S2 planner pack:    PROPOSED 0.1.0 / REVIEW REQUIRED
+S1 planner pack:    ACCEPTED exact bytes 0.1.0 / D-022 / proposed frontmatter preserved
+S2 planner pack:    ACCEPTED exact bytes 0.1.0 / D-022 / proposed frontmatter preserved
 ```
 
 ## 9. Current execution boundary
@@ -229,9 +233,9 @@ CLASS-LOCAL-CONTAINER          REQUIRES_SETUP_DECISION
 
 The S0 limitation is `HOST-DOCKER-DAEMON=UNKNOWN` because Docker CLI is absent under the reviewed interface. KVM's generic class is blocked under the observed facts because `/dev/kvm` read/write open failed with `EACCES` even though the character device exists.
 
-The S1/S2 Planner Packs are proposed planning artifacts only. Their presence does not authorize deterministic harness implementation unless the plan is accepted, and does not authorize real candidate/provider operations under any circumstance without the later exact controlled gate.
+The S1/S2 Planner Packs are accepted exact planning bytes under D-022, while their proposed frontmatter is preserved for blob identity. Their acceptance authorizes deterministic harness implementation after integration, but does not authorize real candidate/provider operations under any circumstance without the later exact controlled gate.
 
-The next governed work is independent review of the proposed S1/S2 contract/plan bytes, Finding Admission/correction, full verification and explicit Operator acceptance of the exact reviewed packs.
+The next governed work is integration of the D-022 acceptance projection and deterministic S1/S2 harness implementation under the exact accepted pack bytes.
 
 Candidate installation/execution, substrate selection, KVM/Docker/host remediation, S2W/S3 execution, revision-5 M02 production implementation and production Worker dispatch remain prohibited.
 

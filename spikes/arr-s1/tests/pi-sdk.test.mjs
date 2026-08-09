@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import {
@@ -34,6 +35,10 @@ function fakePiSdk({ promptResult, promptError } = {}) {
     prompts: [],
     aborts: [],
     disposes: 0,
+    resourceLoaderOptions: [],
+    resourceReloads: 0,
+    settingsInMemory: 0,
+    sessionInMemory: [],
   };
   const listeners = new Set();
   let resolvePrompt;
@@ -65,6 +70,41 @@ function fakePiSdk({ promptResult, promptError } = {}) {
     },
   };
 
+  class FakeDefaultResourceLoader {
+    constructor(options) {
+      calls.resourceLoaderOptions.push(options);
+    }
+
+    async reload() {
+      calls.resourceReloads += 1;
+    }
+
+    getExtensions() { return { extensions: [], errors: [], runtime: {} }; }
+    getSkills() { return { skills: [], diagnostics: [] }; }
+    getPrompts() { return { prompts: [], diagnostics: [] }; }
+    getThemes() { return { themes: [], diagnostics: [] }; }
+    getAgentsFiles() { return { agentsFiles: [] }; }
+    getSystemPrompt() { return undefined; }
+    getSystemPromptSource() { return undefined; }
+    getAppendSystemPrompt() { return []; }
+    getAppendSystemPromptSources() { return []; }
+    extendResources() {}
+  }
+
+  class FakeSettingsManager {
+    static inMemory() {
+      calls.settingsInMemory += 1;
+      return { inMemory: true };
+    }
+  }
+
+  class FakeSessionManager {
+    static inMemory(cwd) {
+      calls.sessionInMemory.push(cwd);
+      return { cwd, inMemory: true };
+    }
+  }
+
   return {
     calls,
     session,
@@ -72,6 +112,9 @@ function fakePiSdk({ promptResult, promptError } = {}) {
       resolvePrompt?.(value);
     },
     sdk: {
+      DefaultResourceLoader: FakeDefaultResourceLoader,
+      SettingsManager: FakeSettingsManager,
+      SessionManager: FakeSessionManager,
       async createAgentSession(options) {
         calls.create.push(options);
         return {
@@ -127,6 +170,53 @@ test('uses only the frozen Pi createAgentSession options and keeps session ident
   });
   assert.equal(initialized.authority, undefined);
   assert.equal(initialized.recoveryState, undefined);
+});
+
+test('constructs controlled resources and an in-memory SessionManager when callers omit them', async () => {
+  const fake = fakePiSdk();
+  const adapter = createPiSdkAdapter({
+    sdk: fake.sdk,
+    cwd: CWD,
+    tools: [...TOOLS],
+    noTools: 'builtin',
+    customTools: CUSTOM_TOOLS,
+  });
+
+  await adapter.initialize();
+
+  assert.deepEqual(fake.calls.resourceLoaderOptions[0], {
+    cwd: CWD,
+    agentDir: CWD,
+    settingsManager: { inMemory: true },
+    noExtensions: true,
+    noSkills: true,
+    noPromptTemplates: true,
+    noThemes: true,
+    noContextFiles: true,
+  });
+  assert.equal(fake.calls.settingsInMemory, 1);
+  assert.deepEqual(fake.calls.sessionInMemory, [CWD]);
+  assert.equal(fake.calls.resourceReloads, 1);
+  assert.equal(fake.calls.create[0].resourceLoader instanceof fake.sdk.DefaultResourceLoader, true);
+  assert.deepEqual(fake.calls.create[0].sessionManager, { cwd: CWD, inMemory: true });
+});
+
+test('requires the injected resource and session surfaces to be explicit when SDK constructors are unavailable', async () => {
+  const fake = fakePiSdk();
+  const sdk = { createAgentSession: fake.sdk.createAgentSession };
+  const adapter = createPiSdkAdapter({ sdk, cwd: CWD, tools: [...TOOLS] });
+
+  await assert.rejects(
+    () => adapter.initialize(),
+    /public DefaultResourceLoader, SettingsManager and SessionManager APIs/u,
+  );
+});
+
+test('source scan keeps Pi Session observational and out of Recovery authority', () => {
+  const source = readFileSync(new URL('../src/adapters/pi-sdk.mjs', import.meta.url), 'utf8');
+
+  assert.doesNotMatch(source, /recovery|authority|claim|evidence|verdict/iu);
+  assert.doesNotMatch(source, /session(?:Id|Identity)[\s\S]{0,160}(?:recovery|authority)/iu);
 });
 
 test('rejects environment claims at the Pi SDK boundary', () => {

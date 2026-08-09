@@ -53,6 +53,76 @@ function requireStringArray(value, name) {
   }
 }
 
+function requireResourceLoaderSurface(resourceLoader) {
+  if (!resourceLoader || typeof resourceLoader !== 'object') {
+    throw new TypeError('Pi SDK resourceLoader must be an explicit public ResourceLoader');
+  }
+  for (const method of [
+    'getExtensions',
+    'getSkills',
+    'getPrompts',
+    'getThemes',
+    'getAgentsFiles',
+    'getSystemPrompt',
+    'getSystemPromptSource',
+    'getAppendSystemPrompt',
+    'getAppendSystemPromptSources',
+    'extendResources',
+    'reload',
+  ]) {
+    if (typeof resourceLoader[method] !== 'function') {
+      throw new TypeError(`Pi SDK resourceLoader must expose ${method}`);
+    }
+  }
+}
+
+function requireEmptyResourceCollection(resourceLoader, method, property, label) {
+  const result = resourceLoader[method]();
+  if (!Array.isArray(result?.[property])) {
+    throw new TypeError(`Pi SDK resourceLoader ${method} must return ${property}`);
+  }
+  if (result[property].length !== 0) {
+    throw new Error(`Pi SDK ambient ${label} discovery is not allowed`);
+  }
+}
+
+function assertControlledResourceLoader(resourceLoader) {
+  requireEmptyResourceCollection(resourceLoader, 'getExtensions', 'extensions', 'extensions');
+  requireEmptyResourceCollection(resourceLoader, 'getSkills', 'skills', 'skills');
+  requireEmptyResourceCollection(resourceLoader, 'getPrompts', 'prompts', 'prompts');
+  requireEmptyResourceCollection(resourceLoader, 'getThemes', 'themes', 'themes');
+  requireEmptyResourceCollection(resourceLoader, 'getAgentsFiles', 'agentsFiles', 'context');
+}
+
+function buildControlledResourceLoader(sdk, cwd) {
+  const ResourceLoader = sdk?.DefaultResourceLoader;
+  const SettingsManager = sdk?.SettingsManager;
+  if (typeof ResourceLoader !== 'function' || typeof SettingsManager?.inMemory !== 'function') {
+    throw new TypeError('Pi SDK requires public DefaultResourceLoader, SettingsManager and SessionManager APIs');
+  }
+  const settingsManager = SettingsManager.inMemory();
+  const resourceLoader = new ResourceLoader({
+    cwd,
+    agentDir: cwd,
+    settingsManager,
+    noExtensions: true,
+    noSkills: true,
+    noPromptTemplates: true,
+    noThemes: true,
+    noContextFiles: true,
+  });
+  requireResourceLoaderSurface(resourceLoader);
+  return resourceLoader;
+}
+
+function buildInMemorySessionManager(sdk, cwd) {
+  const SessionManager = sdk?.SessionManager;
+  if (typeof SessionManager?.inMemory !== 'function') {
+    throw new TypeError('Pi SDK requires public DefaultResourceLoader, SettingsManager and SessionManager APIs');
+  }
+  return SessionManager.inMemory(cwd);
+}
+
 function sessionFromFactoryResult(result) {
   if (result?.session && typeof result.session === 'object') return result.session;
   return result;
@@ -274,14 +344,14 @@ export function createPiSdkAdapter({
     }
   }
 
-  function sessionOptions() {
+  function sessionOptions(overrides = {}) {
     return {
       cwd,
       ...(tools !== undefined ? { tools: [...tools] } : {}),
       ...(noTools !== undefined ? { noTools } : {}),
       ...(customTools !== undefined ? { customTools } : {}),
-      ...(resourceLoader !== undefined ? { resourceLoader } : {}),
-      ...(sessionManager !== undefined ? { sessionManager } : {}),
+      resourceLoader: overrides.resourceLoader ?? resourceLoader,
+      sessionManager: overrides.sessionManager ?? sessionManager,
     };
   }
 
@@ -305,7 +375,15 @@ export function createPiSdkAdapter({
     if (closed) throw new Error('Pi SDK adapter is closed');
     if (initialized) return createReadyObservation();
     loadedSdk ??= await loadPiSdk();
-    const sessionResult = await factoryFor(loadedSdk)(sessionOptions());
+    const controlledResourceLoader = resourceLoader ?? buildControlledResourceLoader(loadedSdk, cwd);
+    const controlledSessionManager = sessionManager ?? buildInMemorySessionManager(loadedSdk, cwd);
+    requireResourceLoaderSurface(controlledResourceLoader);
+    await controlledResourceLoader.reload();
+    assertControlledResourceLoader(controlledResourceLoader);
+    const sessionResult = await factoryFor(loadedSdk)(sessionOptions({
+      resourceLoader: controlledResourceLoader,
+      sessionManager: controlledSessionManager,
+    }));
     session = sessionFromFactoryResult(sessionResult);
     if (!session || typeof session !== 'object') throw new TypeError('Pi SDK createAgentSession returned no session');
     subscribeToSession();

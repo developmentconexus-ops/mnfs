@@ -10,6 +10,12 @@ import { loadDocumentRegistry, parseFrontmatter, resolveDocumentReference, valid
 import { hashSecE1Bytes, validateSecE1 } from './sec-e1-policy.mjs';
 
 const root = process.cwd();
+const packageJson = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+assert.match(
+  packageJson.scripts.verify,
+  /npm run test:arr-s1/u,
+  'root verify must include deterministic ARR-S1 tests',
+);
 const registry = await loadDocumentRegistry(root);
 const traceability = JSON.parse(await readFile(path.join(root, 'docs/capabilities/CAP-EXECUTION/TRACEABILITY.json'), 'utf8'));
 const metadataSchema = JSON.parse(await readFile(path.join(root, 'schemas/document-metadata.schema.json'), 'utf8'));

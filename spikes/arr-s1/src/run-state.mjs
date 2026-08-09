@@ -10,6 +10,7 @@ const NEXT_PHASE = new Map([
   ['OBSERVED', 'FINALIZED'],
 ]);
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
+const VERDICTS = new Set(['PASS', 'FAIL', 'BLOCKED', 'REJECT']);
 
 function canonicalize(value) {
   if (Array.isArray(value)) return value.map(canonicalize);
@@ -54,8 +55,10 @@ export function validateRunState(state) {
   if (bindingValid && state.runKey !== sha256Json(state.binding)) errors.push('runKey is not bound to candidate shape and hashes');
   if (bindingValid && state.candidateShape !== state.binding.candidateShape) errors.push('candidateShape is not bound to run binding');
   if (!Array.isArray(state.observations)) errors.push('observations must be an array');
-  if (state.verdict !== null && !['PASS', 'FAIL', 'BLOCKED', 'REJECT'].includes(state.verdict)) {
-    errors.push('verdict is invalid');
+  if (state.phase === 'FINALIZED') {
+    if (!VERDICTS.has(state.verdict)) errors.push('FINALIZED state requires a derived verdict');
+  } else if (state.verdict !== null) {
+    errors.push('verdict must remain null before FINALIZED');
   }
   if (!Number.isSafeInteger(state.resumeCount) || state.resumeCount < 0) errors.push('resumeCount is invalid');
   if (state.interrupted !== null && (typeof state.interrupted !== 'object' || state.interrupted.reopenable !== true)) {

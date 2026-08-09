@@ -206,6 +206,8 @@ export function startProcess(spec, { signal } = {}) {
 
   return {
     pid: child.pid,
+    stdout: child.stdout,
+    stderr: child.stderr,
     stdin: stdinMode === 'protocol' ? child.stdin : null,
     result,
     cancel(reason = 'explicit cancellation') { return requestTermination('CANCELLED', reason); },

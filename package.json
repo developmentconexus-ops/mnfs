@@ -19,6 +19,7 @@
     "test:as02": "node scripts/run-as02-tests.mjs",
     "test:tc01": "node scripts/run-tc01-tests.mjs",
     "test:arr-s0": "node scripts/run-arr-s0-tests.mjs",
+    "test:arr-s1": "node --test spikes/arr-s1/tests/*.test.mjs",
     "as02": "node spikes/as-02/src/cli.mjs",
     "tc01": "node spikes/tc-01/src/cli.mjs",
     "arr-s0": "node spikes/arr-s0/bin/arr-s0.mjs",

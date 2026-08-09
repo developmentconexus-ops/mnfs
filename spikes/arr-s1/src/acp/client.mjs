@@ -77,6 +77,16 @@ function processBoundaryFromExecution(execution) {
   };
 }
 
+function waitForTurnOrTimeout(turn, timeoutMs) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve({ timedOut: true }), timeoutMs);
+    turn.settled.then((value) => {
+      clearTimeout(timer);
+      resolve({ timedOut: false, value });
+    });
+  });
+}
+
 export function createAcpClient({
   client,
   stream,
@@ -85,10 +95,14 @@ export function createAcpClient({
   clientCapabilities = {},
   maxTextBytes = 4096,
   maxEventBytes = 64 * 1024,
+  cancellationTimeoutMs = 5000,
 } = {}) {
   requireClient(client);
   requireStream(stream);
   requireProcessBoundary(processBoundary);
+  if (!Number.isSafeInteger(cancellationTimeoutMs) || cancellationTimeoutMs <= 0) {
+    throw new TypeError('ACP cancellationTimeoutMs must be a positive safe integer');
+  }
 
   let initialized = false;
   let handshakeResult = null;
@@ -115,6 +129,15 @@ export function createAcpClient({
         outcome: 'PROCESS_DEATH',
         result: null,
         handoffRequired: true,
+      };
+    } else if (raw?.outcome === 'CANCEL_TIMEOUT') {
+      normalized = {
+        settled: true,
+        status: 'CANCEL_TIMEOUT',
+        outcome: 'CANCEL_TIMEOUT',
+        result: null,
+        handoffRequired: true,
+        ...(raw.error ? { error: clone(raw.error) } : {}),
       };
     } else if (raw?.error) {
       normalized = {
@@ -307,8 +330,25 @@ export function createAcpClient({
 
   async function cancel() {
     if (!activeTurn || activeTurn.settledValue) return activeTurn?.settledValue ?? null;
-    await context.notify(ACP_METHODS.sessionCancel, { sessionId: activeTurn.sessionId });
-    return activeTurn.settled;
+    const turn = activeTurn;
+    await context.notify(ACP_METHODS.sessionCancel, { sessionId: turn.sessionId });
+    const outcome = await waitForTurnOrTimeout(turn, cancellationTimeoutMs);
+    if (!outcome.timedOut) return outcome.value;
+
+    resolveConnectionClose?.();
+    let closeError = null;
+    try {
+      await processBoundary.close();
+    } catch (error) {
+      closeError = { message: error?.message ?? String(error) };
+    }
+    if (!turn.settledValue) {
+      settleTurn(turn, {
+        outcome: 'CANCEL_TIMEOUT',
+        ...(closeError ? { error: closeError } : {}),
+      });
+    }
+    return turn.settled;
   }
 
   function handshake() {

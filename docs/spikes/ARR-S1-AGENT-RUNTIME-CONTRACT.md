@@ -133,7 +133,7 @@ Every executed runtime shape is evaluated against the same criteria. Values are 
 | `S1-C09` | process-death classification | abrupt runtime-process death is observable distinctly from successful completion |
 | `S1-C10` | fresh MNFS recovery | a fresh MNFS process can recover authoritative state without runtime Session/transcript resume |
 | `S1-C11` | structured result/event surface | required tool, assistant, error and lifecycle observations are machine-readable rather than scraped from human TUI text |
-| `S1-C12` | public/supported integration boundary | tested boundary is documented/supported upstream or explicitly accepted as an adapter risk |
+| `S1-C12` | public/supported integration boundary | tested boundary is a documented/supported upstream public boundary; an unsupported, private or undocumented boundary remains exploratory/reference Evidence and cannot satisfy this criterion |
 | `S1-C13` | exact provenance and license | executable/package/source identity and license are pinned in Evidence |
 | `S1-C14` | no authority inversion | runtime Session, internal plan, permission UX or completion cannot override MNFS Mission/Attempt/Claim/Gate authority |
 | `S1-C15` | machinery leverage | integration eliminates or avoids a named MNFS machinery class rather than merely adding another translation layer |
@@ -159,6 +159,8 @@ removalConditions:
 ```
 
 These are Evidence fields, not generic aspirational prose. Their values may differ by candidate but must be concrete enough for a later selecting Decision to enforce.
+
+`S1-C12` PASS requires a supported/documented upstream public boundary used by the selected form. An unsupported, private or undocumented boundary may remain recorded as exploratory/reference Evidence, but it yields `S1-C12 != PASS` and `S1_SELECTION_ELIGIBLE=false`. No `SELECT` may point to a form whose boundary does not satisfy `S1-C12`.
 
 ### S1 selection predicate
 

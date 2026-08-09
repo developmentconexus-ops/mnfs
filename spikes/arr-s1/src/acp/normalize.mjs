@@ -2,6 +2,29 @@ import { normalizeRuntimeEvent, normalizeProcessObservation } from '../runtime-e
 
 export const ACP_PROTOCOL_VERSION = 1;
 
+const STOP_REASONS = new Set([
+  'end_turn',
+  'max_tokens',
+  'max_turn_requests',
+  'refusal',
+  'cancelled',
+]);
+const SESSION_UPDATE_TYPES = new Set([
+  'user_message_chunk',
+  'agent_message_chunk',
+  'agent_thought_chunk',
+  'tool_call',
+  'tool_call_update',
+  'plan',
+  'plan_update',
+  'plan_removed',
+  'available_commands_update',
+  'current_mode_update',
+  'config_option_update',
+  'session_info_update',
+  'usage_update',
+]);
+
 function freeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) freeze(child);
@@ -28,27 +51,39 @@ export function normalizeAcpHandshake(input) {
   }
   return freeze({
     protocolVersion: ACP_PROTOCOL_VERSION,
-    agentCapabilities: structuredClone(value.agentCapabilities ?? value.serverCapabilities ?? {}),
+    agentCapabilities: structuredClone(capabilityObject(value.agentCapabilities)),
   });
 }
 
-function commonIdentifiers(params) {
-  return Object.fromEntries([
-    ['sessionId', params.sessionId],
-    ['taskId', params.taskId],
-  ].filter(([, value]) => typeof value === 'string' && value.length > 0));
-}
-
 function textFromContent(content) {
-  if (typeof content === 'string') return content;
   if (content && typeof content === 'object' && content.type === 'text' && typeof content.text === 'string') return content.text;
   throw new TypeError('ACP text update requires standard text content');
 }
 
-function standardUpdateToRuntime(params) {
-  const update = object(params.update, 'structured ACP event update is required');
+function notificationFrom(input) {
+  const value = object(input, 'structured ACP event is required');
+  if (value.kind === 'session_update') return object(value.notification, 'ACP session_update notification is required');
+  if (value.method === 'session/update') return object(value.params, 'ACP session/update params are required');
+  return value;
+}
+
+function commonIdentifiers(notification) {
+  return typeof notification.sessionId === 'string' && notification.sessionId.length > 0
+    ? { sessionId: notification.sessionId }
+    : {};
+}
+
+function withoutProtocolFields(update) {
+  const { sessionUpdate: _sessionUpdate, _meta: _meta, ...fields } = update;
+  return structuredClone(fields);
+}
+
+function standardUpdateToRuntime(notification) {
+  const update = object(notification.update, 'structured ACP event update is required');
   const kind = update.sessionUpdate;
-  const identifiers = commonIdentifiers(params);
+  if (!SESSION_UPDATE_TYPES.has(kind)) throw new TypeError(`unsupported ACP session update: ${kind ?? '<missing>'}`);
+  const identifiers = commonIdentifiers(notification);
+
   if (kind === 'agent_message_chunk' || kind === 'agent_thought_chunk') {
     return {
       type: 'assistant_output',
@@ -59,6 +94,12 @@ function standardUpdateToRuntime(params) {
       },
     };
   }
+  if (kind === 'user_message_chunk') {
+    return {
+      type: 'lifecycle',
+      data: { ...identifiers, state: 'USER_MESSAGE', text: textFromContent(update.content) },
+    };
+  }
   if (kind === 'tool_call') {
     if (typeof update.toolCallId !== 'string' || update.toolCallId.length === 0) throw new TypeError('ACP tool_call requires toolCallId');
     return {
@@ -67,6 +108,8 @@ function standardUpdateToRuntime(params) {
         ...identifiers,
         toolCallId: update.toolCallId,
         ...(typeof update.title === 'string' ? { title: update.title } : {}),
+        ...(typeof update.name === 'string' ? { name: update.name } : {}),
+        ...(typeof update.kind === 'string' ? { kind: update.kind } : {}),
         ...(typeof update.status === 'string' ? { status: update.status } : {}),
         ...(update.rawInput !== undefined ? { input: structuredClone(update.rawInput) } : {}),
       },
@@ -81,46 +124,44 @@ function standardUpdateToRuntime(params) {
         toolCallId: update.toolCallId,
         ...(typeof update.status === 'string' ? { status: update.status } : {}),
         ...(update.content !== undefined ? { content: structuredClone(update.content) } : {}),
+        ...(update.rawOutput !== undefined ? { result: structuredClone(update.rawOutput) } : {}),
       },
     };
   }
-  if (kind === 'plan') {
-    return { type: 'lifecycle', data: { ...identifiers, state: 'PLAN', entries: structuredClone(update.entries ?? []) } };
-  }
-  if (kind === 'turn_complete' || kind === 'task_complete') {
+  if (kind === 'plan' || kind === 'plan_update' || kind === 'plan_removed') {
     return {
       type: 'lifecycle',
-      data: {
-        ...identifiers,
-        state: 'FINAL',
-        ...(typeof update.stopReason === 'string' ? { stopReason: update.stopReason } : {}),
-      },
+      data: { ...identifiers, state: kind.toUpperCase(), ...withoutProtocolFields(update) },
     };
   }
-  throw new TypeError(`unsupported ACP session update: ${kind ?? '<missing>'}`);
+  return {
+    type: 'lifecycle',
+    data: { ...identifiers, state: kind.toUpperCase(), ...withoutProtocolFields(update) },
+  };
 }
 
 export function normalizeAcpEvent(input, { sequence, timestampMs = null, maxTextBytes = 4096, maxEventBytes = 64 * 1024 } = {}) {
-  const value = object(input, 'structured ACP event is required');
-  if (value.method !== 'session/update') throw new TypeError('structured ACP event method is unsupported');
-  const params = object(value.params, 'structured ACP event params are required');
-  const runtime = standardUpdateToRuntime(params);
-  return normalizeRuntimeEvent(runtime, { sequence, timestampMs, maxTextBytes, maxEventBytes });
+  return normalizeRuntimeEvent(standardUpdateToRuntime(notificationFrom(input)), {
+    sequence,
+    timestampMs,
+    maxTextBytes,
+    maxEventBytes,
+  });
 }
 
-export function normalizeAcpResult(input) {
-  const value = object(input, 'ACP task result must be a structured object');
-  const status = String(value.status ?? '').toUpperCase();
-  if (!['COMPLETED', 'FAILED', 'CANCELLED', 'CANCELED'].includes(status)) {
-    throw new TypeError(`unsupported ACP task result status: ${value.status ?? '<missing>'}`);
+export function normalizeAcpPromptResponse(input) {
+  const value = object(input, 'ACP PromptResponse must be a structured object');
+  if (!STOP_REASONS.has(value.stopReason)) {
+    throw new TypeError(`ACP PromptResponse requires a supported stopReason: ${value.stopReason ?? '<missing>'}`);
   }
-  if (status === 'CANCELLED' || status === 'CANCELED') {
-    return { settled: true, status: 'CANCELLED', outcome: 'CANCELLED', result: value.result ?? null };
-  }
-  if (status === 'FAILED') {
-    return { settled: true, status: 'FAILED', outcome: 'FAILED', result: value.result ?? null, error: value.error ?? null };
-  }
-  return { settled: true, status: 'COMPLETED', outcome: 'COMPLETED', result: value.result ?? null };
+  const cancelled = value.stopReason === 'cancelled';
+  return {
+    settled: true,
+    status: cancelled ? 'CANCELLED' : 'COMPLETED',
+    outcome: cancelled ? 'CANCELLED' : 'COMPLETED',
+    stopReason: value.stopReason,
+    result: structuredClone(value),
+  };
 }
 
 export function normalizeAcpProcessObservation(input, options = {}) {

@@ -10,31 +10,19 @@ import { startProcess } from '../src/process-runner.mjs';
 import {
   normalizeAcpEvent,
   normalizeAcpHandshake,
+  normalizeAcpPromptResponse,
 } from '../src/acp/normalize.mjs';
 
 const CWD = '/tmp/mnfs-arr-s1-fixture';
-const ENV = Object.freeze({ HOME: '/tmp/mnfs-arr-s1-home', PATH: '/usr/bin:/bin' });
-const INVENTORY = Object.freeze([
-  Object.freeze({ id: 'read_nonce_file', kind: 'resource' }),
-  Object.freeze({ id: 'edit_result_file', kind: 'tool' }),
-]);
 
 function fakeTransport() {
-  const messageListeners = new Set();
   const processListeners = new Set();
   const calls = { closes: 0 };
   return {
     calls,
-    onMessage(listener) {
-      messageListeners.add(listener);
-      return () => messageListeners.delete(listener);
-    },
     onProcess(listener) {
       processListeners.add(listener);
       return () => processListeners.delete(listener);
-    },
-    emitMessage(message) {
-      for (const listener of messageListeners) listener(message);
     },
     emitProcess(observation) {
       for (const listener of processListeners) listener(observation);
@@ -45,17 +33,50 @@ function fakeTransport() {
   };
 }
 
+function fakeActiveSession(calls) {
+  const queued = [];
+  const waiters = [];
+  let resolvePrompt;
+  const active = {
+    sessionId: 'session-1',
+    prompt(input) {
+      calls.prompts.push(input);
+      return new Promise((resolve) => {
+        resolvePrompt = resolve;
+      });
+    },
+    nextUpdate() {
+      if (queued.length > 0) return Promise.resolve(queued.shift());
+      return new Promise((resolve) => waiters.push(resolve));
+    },
+    dispose() {
+      calls.disposes += 1;
+    },
+    emit(message) {
+      const waiter = waiters.shift();
+      if (waiter) waiter(message);
+      else queued.push(message);
+    },
+    resolvePrompt(response) {
+      resolvePrompt?.(response);
+    },
+  };
+  return active;
+}
+
 function fakeProtocol(transport, { protocolVersion = 1 } = {}) {
   const calls = {
     initialize: [],
+    builds: [],
     sessions: [],
-    tasks: [],
+    prompts: [],
     cancellations: [],
-    shutdowns: 0,
+    disposes: 0,
   };
-  let nextTask = 1;
+  const active = fakeActiveSession(calls);
   return {
     calls,
+    active,
     async initialize(input) {
       calls.initialize.push(input);
       return {
@@ -64,24 +85,23 @@ function fakeProtocol(transport, { protocolVersion = 1 } = {}) {
         _meta: { protocolVersion: 999, agentCapabilities: { loadSession: false } },
       };
     },
-    async newSession(input) {
-      calls.sessions.push(input);
-      return { sessionId: 'session-1' };
+    buildSession(cwd) {
+      calls.builds.push(cwd);
+      return {
+        async start() {
+          calls.sessions.push({ cwd, mcpServers: [] });
+          return active;
+        },
+      };
     },
-    async startTask(input) {
-      const taskId = `task-${nextTask++}`;
-      calls.tasks.push({ ...input, taskId });
-      return { taskId };
-    },
-    async cancelTask(input) {
+    async cancel(input) {
       calls.cancellations.push(input);
-      transport.emitMessage({
-        method: 'task/result',
-        params: { taskId: input.taskId, status: 'CANCELLED', result: null, settled: true },
+      active.emit({
+        kind: 'stop',
+        response: { stopReason: 'cancelled' },
+        stopReason: 'cancelled',
       });
-    },
-    async shutdown() {
-      calls.shutdowns += 1;
+      active.resolvePrompt({ stopReason: 'cancelled' });
     },
   };
 }
@@ -91,11 +111,11 @@ async function readyClient(options = {}) {
   const protocol = options.protocol ?? fakeProtocol(transport, options);
   const client = createAcpClient({ transport, protocol });
   await client.initialize();
-  await client.startSession({ cwd: CWD, env: ENV, inventory: INVENTORY });
+  await client.startSession({ cwd: CWD });
   return { client, transport, protocol };
 }
 
-test('records ACP v1 handshake and capabilities while ignoring vendor metadata', async () => {
+test('records ACP v1 handshake/capabilities and starts session through buildSession', async () => {
   const { client, protocol } = await readyClient();
 
   assert.deepEqual(protocol.calls.initialize[0], {
@@ -103,13 +123,15 @@ test('records ACP v1 handshake and capabilities while ignoring vendor metadata',
     clientInfo: { name: 'mnfs-arr-s1', version: '0.1.0' },
     clientCapabilities: {},
   });
+  assert.deepEqual(protocol.calls.builds, [CWD]);
+  assert.deepEqual(protocol.calls.sessions, [{ cwd: CWD, mcpServers: [] }]);
   assert.deepEqual(client.handshake(), {
     protocolVersion: 1,
     agentCapabilities: { loadSession: true },
   });
 });
 
-test('rejects an ACP protocol-version mismatch before starting a session', async () => {
+test('rejects an ACP protocol-version mismatch before building a session', async () => {
   const transport = fakeTransport();
   const protocol = fakeProtocol(transport, { protocolVersion: 2 });
   const client = createAcpClient({ transport, protocol });
@@ -120,17 +142,17 @@ test('rejects an ACP protocol-version mismatch before starting a session', async
   );
 });
 
-test('normalizes standard ACP session updates without using vendor _meta for required fields', () => {
+test('normalizes an ActiveSession session_update without using vendor metadata', () => {
   const event = normalizeAcpEvent({
-    method: 'session/update',
-    params: {
+    kind: 'session_update',
+    notification: {
       sessionId: 'session-1',
-      taskId: 'task-1',
       update: {
         sessionUpdate: 'tool_call',
         toolCallId: 'call-1',
         title: 'read_nonce_file',
         status: 'in_progress',
+        rawInput: { path: 'fixture/nonce.txt' },
         _meta: { sessionUpdate: 'agent_message_chunk', text: 'untrusted' },
       },
     },
@@ -142,82 +164,93 @@ test('normalizes standard ACP session updates without using vendor _meta for req
     type: 'tool_call',
     data: {
       sessionId: 'session-1',
-      taskId: 'task-1',
       toolCallId: 'call-1',
       title: 'read_nonce_file',
       status: 'in_progress',
+      input: { path: 'fixture/nonce.txt' },
     },
     truncation: { event: false, textPaths: [] },
   });
   assert.throws(
-    () => normalizeAcpEvent({ method: 'session/update', params: { _meta: { sessionUpdate: 'tool_call' } } }, { sequence: 1 }),
-    /structured ACP event/u,
+    () => normalizeAcpEvent({ kind: 'session_update', notification: { sessionId: 'session-1' } }, { sequence: 1 }),
+    /structured ACP event update/u,
   );
 });
 
-test('runs a task through structured updates and an explicit settled result', async () => {
-  const { client, transport, protocol } = await readyClient();
-  const task = await client.startTask({ prompt: 'run the controlled fixture task' });
+test('runs an ACP prompt through session updates and PromptResponse.stopReason', async () => {
+  const { client, protocol } = await readyClient();
+  const turn = await client.prompt({ prompt: 'run the controlled fixture task' });
 
-  assert.equal(task.taskId, 'task-1');
-  assert.equal(protocol.calls.tasks[0].sessionId, 'session-1');
-  assert.equal(protocol.calls.tasks[0].prompt, 'run the controlled fixture task');
-  transport.emitMessage({
-    method: 'session/update',
-    params: {
+  assert.equal(protocol.calls.prompts[0], 'run the controlled fixture task');
+  protocol.active.emit({
+    kind: 'session_update',
+    notification: {
       sessionId: 'session-1',
-      taskId: 'task-1',
       update: { sessionUpdate: 'agent_message_chunk', content: { type: 'text', text: 'structured' } },
     },
+    update: { sessionUpdate: 'agent_message_chunk', content: { type: 'text', text: 'structured' } },
   });
-  transport.emitMessage({
-    method: 'task/result',
-    params: { taskId: 'task-1', status: 'COMPLETED', result: { changedPaths: ['result.txt'] }, settled: true },
+  protocol.active.emit({
+    kind: 'stop',
+    response: { stopReason: 'end_turn' },
+    stopReason: 'end_turn',
   });
+  protocol.active.resolvePrompt({ stopReason: 'end_turn' });
 
-  const settled = await task.settled;
+  const settled = await turn.settled;
   assert.equal(settled.settled, true);
   assert.equal(settled.outcome, 'COMPLETED');
-  assert.deepEqual(settled.result, { changedPaths: ['result.txt'] });
+  assert.deepEqual(settled.result, { stopReason: 'end_turn' });
+  assert.equal(settled.sessionId, 'session-1');
+  assert.equal('taskId' in settled, false);
   assert.equal(settled.events[0].type, 'assistant_output');
   assert.equal(settled.events[0].data.text, 'structured');
 });
 
-test('cancels a task through ACP and settles it as cancellation', async () => {
+test('cancels the active ACP prompt through session/cancel and waits for cancelled stopReason', async () => {
   const { client, protocol } = await readyClient();
-  const task = await client.startTask({ prompt: 'wait for cancellation' });
+  const turn = await client.prompt({ prompt: 'wait for cancellation' });
 
-  const settled = await client.cancelTask(task.taskId, 'operator-request');
+  const settled = await client.cancel();
 
-  assert.deepEqual(protocol.calls.cancellations, [{
-    sessionId: 'session-1',
-    taskId: 'task-1',
-    reason: 'operator-request',
-  }]);
+  assert.deepEqual(protocol.calls.cancellations, [{ sessionId: 'session-1' }]);
   assert.equal(settled.outcome, 'CANCELLED');
-  assert.equal((await task.settled).outcome, 'CANCELLED');
+  assert.equal((await turn.settled).outcome, 'CANCELLED');
 });
 
-test('classifies ACP process death as a handoff-required settled result', async () => {
+test('classifies ACP process death as a handoff-required settled result without session authority', async () => {
   const { client, transport } = await readyClient();
-  const task = await client.startTask({ prompt: 'die before finalization' });
+  const turn = await client.prompt({ prompt: 'die before finalization' });
 
   transport.emitProcess({ status: 'SIGNALED', signal: 'SIGTERM', exitCode: null, outcome: 'SIGNAL_DEATH' });
 
-  const settled = await task.settled;
+  const settled = await turn.settled;
   assert.equal(settled.outcome, 'PROCESS_DEATH');
   assert.equal(settled.handoffRequired, true);
   assert.equal(settled.runtimeSession, undefined);
+  assert.equal(settled.authority, undefined);
 });
 
-test('shuts down protocol and transport exactly once', async () => {
+test('shuts down the active session and transport exactly once', async () => {
   const { client, protocol, transport } = await readyClient();
 
   await client.shutdown();
   await client.shutdown();
 
-  assert.equal(protocol.calls.shutdowns, 1);
+  assert.equal(protocol.calls.disposes, 1);
   assert.equal(transport.calls.closes, 1);
+});
+
+test('normalizes ACP PromptResponse stop reasons without invented result status', () => {
+  assert.deepEqual(normalizeAcpPromptResponse({ stopReason: 'max_tokens' }), {
+    settled: true,
+    status: 'COMPLETED',
+    outcome: 'COMPLETED',
+    stopReason: 'max_tokens',
+    result: { stopReason: 'max_tokens' },
+  });
+  assert.deepEqual(normalizeAcpPromptResponse({ stopReason: 'cancelled' }).outcome, 'CANCELLED');
+  assert.throws(() => normalizeAcpPromptResponse({ status: 'COMPLETED' }), /stopReason/u);
 });
 
 test('stdio transport frames JSON messages and reports bounded process observations', async () => {
@@ -244,7 +277,7 @@ test('stdio transport frames JSON messages and reports bounded process observati
 
 test('stdio transport reuses the process-runner stream for a bounded fake ACP process', async () => {
   const execution = startProcess({
-    argv: [process.execPath, '-e', "process.stdin.resume(); process.stdin.on('end', () => { require('node:fs').writeSync(1, JSON.stringify({ method: 'session/update', params: { update: { sessionUpdate: 'plan', entries: [] } } }) + '\\n'); })"],
+    argv: [process.execPath, '-e', "process.stdin.resume(); process.stdin.on('end', () => { require('node:fs').writeSync(1, JSON.stringify({ method: 'session/update', params: { sessionId: 'session-1', update: { sessionUpdate: 'plan', entries: [] } } }) + '\\n'); })"],
     cwd: process.cwd(),
     env: { MNFS_FAKE_ACP: 'yes' },
     timeoutMs: 1000,
@@ -259,12 +292,12 @@ test('stdio transport reuses the process-runner stream for a bounded fake ACP pr
 
   assert.deepEqual(messages, [{
     method: 'session/update',
-    params: { update: { sessionUpdate: 'plan', entries: [] } },
+    params: { sessionId: 'session-1', update: { sessionUpdate: 'plan', entries: [] } },
   }]);
   await transport.close();
 });
 
-test('normalizes handshake inputs with no vendor metadata dependency', () => {
+test('normalizes ACP handshake inputs with no vendor metadata dependency', () => {
   assert.deepEqual(normalizeAcpHandshake({ protocolVersion: 1, agentCapabilities: { promptCapabilities: { image: false } }, _meta: { protocolVersion: 2 } }), {
     protocolVersion: 1,
     agentCapabilities: { promptCapabilities: { image: false } },

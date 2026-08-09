@@ -3,7 +3,7 @@ import {
   normalizeAcpEvent,
   normalizeAcpHandshake,
   normalizeAcpProcessObservation,
-  normalizeAcpResult,
+  normalizeAcpPromptResponse,
 } from './normalize.mjs';
 
 function clone(value) {
@@ -17,24 +17,14 @@ function freeze(value) {
 }
 
 function requireTransport(transport) {
-  if (!transport || typeof transport !== 'object' || typeof transport.onMessage !== 'function' || typeof transport.onProcess !== 'function' || typeof transport.close !== 'function') {
-    throw new TypeError('ACP transport must expose onMessage, onProcess and close');
+  if (!transport || typeof transport !== 'object' || typeof transport.onProcess !== 'function' || typeof transport.close !== 'function') {
+    throw new TypeError('ACP transport must expose onProcess and close');
   }
 }
 
-function protocolMethod(protocol, names, label) {
-  for (const name of names) {
-    if (typeof protocol?.[name] === 'function') return protocol[name].bind(protocol);
-  }
-  throw new TypeError(`ACP protocol must expose ${label}`);
-}
-
-function activeTaskFor(tasks, params = {}) {
-  if (typeof params.taskId === 'string' && tasks.has(params.taskId)) return tasks.get(params.taskId);
-  if (typeof params.sessionId === 'string') {
-    return [...tasks.values()].find((task) => task.sessionId === params.sessionId && !task.settledValue) ?? null;
-  }
-  return [...tasks.values()].find((task) => !task.settledValue) ?? null;
+function protocolMethod(protocol, name) {
+  if (typeof protocol?.[name] !== 'function') throw new TypeError(`ACP protocol must expose ${name}`);
+  return protocol[name].bind(protocol);
 }
 
 export function createAcpClient({
@@ -48,97 +38,112 @@ export function createAcpClient({
   requireTransport(transport);
   if (!protocol || typeof protocol !== 'object') throw new TypeError('ACP protocol is required');
 
-  const tasks = new Map();
   let initialized = false;
   let handshakeResult = null;
+  let activeSession = null;
   let sessionId = null;
+  let activeTurn = null;
   let closed = false;
-  let nextLocalTaskId = 1;
-  let removeMessageListener = () => {};
   let removeProcessListener = () => {};
 
-  function taskObservation(task) {
-    return freeze(task.events.map((event) => clone(event)));
+  function turnObservation(turn) {
+    return freeze(turn.events.map((event) => clone(event)));
   }
 
-  function settleTask(task, value) {
-    if (task.settledValue) return task.settledValue;
-    task.settledValue = freeze({
-      taskId: task.taskId,
-      sessionId: task.sessionId,
-      settled: true,
-      status: value.status,
-      outcome: value.outcome,
-      result: value.result ?? null,
-      ...(value.error ? { error: clone(value.error) } : {}),
-      handoffRequired: value.handoffRequired === true,
-      events: taskObservation(task),
-    });
-    task.resolve(task.settledValue);
-    return task.settledValue;
-  }
-
-  function recordMessage(message) {
-    if (!message || typeof message !== 'object' || Array.isArray(message)) return;
-    if (message.method === 'session/update') {
-      const params = message.params ?? {};
-      const task = activeTaskFor(tasks, params);
-      if (!task) return;
-      try {
-        task.sequence += 1;
-        const event = normalizeAcpEvent(message, {
-          sequence: task.sequence,
-          maxTextBytes,
-          maxEventBytes,
-        });
-        task.events.push(event);
-        const state = String(event.data?.state ?? '').toUpperCase();
-        if (state === 'CANCELLED' || state === 'CANCELED') settleTask(task, { status: 'CANCELLED', outcome: 'CANCELLED', result: null });
-      } catch (error) {
-        settleTask(task, { status: 'FAILED', outcome: 'FAILED', result: null, error: { message: error.message } });
-      }
-      return;
+  function settleTurn(turn, raw) {
+    if (turn.settledValue) return turn.settledValue;
+    let normalized;
+    if (raw?.outcome === 'PROCESS_DEATH') {
+      normalized = {
+        settled: true,
+        status: 'PROCESS_DEATH',
+        outcome: 'PROCESS_DEATH',
+        result: null,
+        handoffRequired: true,
+      };
+    } else if (raw?.error) {
+      normalized = {
+        settled: true,
+        status: 'FAILED',
+        outcome: 'FAILED',
+        result: null,
+        error: { message: raw.error.message ?? String(raw.error) },
+      };
+    } else {
+      normalized = normalizeAcpPromptResponse(raw);
     }
-    if (message.method === 'task/result') {
-      const task = activeTaskFor(tasks, message.params ?? {});
-      if (!task) return;
-      try {
-        settleTask(task, normalizeAcpResult(message.params));
-      } catch (error) {
-        settleTask(task, { status: 'FAILED', outcome: 'FAILED', result: null, error: { message: error.message } });
-      }
-    }
+    const settled = {
+      ...normalized,
+      sessionId: turn.sessionId,
+      events: turnObservation(turn),
+    };
+    if (normalized.handoffRequired === undefined) settled.handoffRequired = false;
+    turn.settledValue = freeze(settled);
+    turn.resolve(turn.settledValue);
+    return turn.settledValue;
   }
 
   function recordProcess(observation) {
-    const processTasks = [...tasks.values()].filter((task) => !task.settledValue);
-    for (const task of processTasks) {
-      task.sequence += 1;
-      try {
-        const event = normalizeAcpProcessObservation(observation, {
-          sequence: task.sequence,
-          maxTextBytes,
-          maxEventBytes,
-        });
-        task.events.push(event);
-      } catch (error) {
-        settleTask(task, { status: 'FAILED', outcome: 'FAILED', result: null, error: { message: error.message } });
-        continue;
-      }
-      if (observation?.outcome === 'SIGNAL_DEATH' || observation?.outcome === 'SPAWN_ERROR') {
-        settleTask(task, { status: 'PROCESS_DEATH', outcome: 'PROCESS_DEATH', result: null, handoffRequired: true });
-      }
+    if (!activeTurn || activeTurn.settledValue) return;
+    activeTurn.sequence += 1;
+    try {
+      activeTurn.events.push(normalizeAcpProcessObservation(observation, {
+        sequence: activeTurn.sequence,
+        maxTextBytes,
+        maxEventBytes,
+      }));
+    } catch (error) {
+      settleTurn(activeTurn, { error: { message: error?.message ?? String(error) } });
+      return;
+    }
+    if (observation?.outcome === 'SIGNAL_DEATH' || observation?.outcome === 'SPAWN_ERROR') {
+      settleTurn(activeTurn, { outcome: 'PROCESS_DEATH' });
     }
   }
 
-  removeMessageListener = transport.onMessage(recordMessage) ?? (() => {});
   removeProcessListener = transport.onProcess(recordProcess) ?? (() => {});
+
+  async function consumeUpdates(turn) {
+    while (!turn.settledValue) {
+      let message;
+      try {
+        message = await activeSession.nextUpdate();
+      } catch (error) {
+        if (!turn.settledValue) settleTurn(turn, { error: { message: error?.message ?? String(error) } });
+        return;
+      }
+      if (turn.settledValue) return;
+      if (message?.kind === 'session_update') {
+        try {
+          turn.sequence += 1;
+          turn.events.push(normalizeAcpEvent(message, {
+            sequence: turn.sequence,
+            maxTextBytes,
+            maxEventBytes,
+          }));
+        } catch (error) {
+          settleTurn(turn, { error: { message: error?.message ?? String(error) } });
+          return;
+        }
+        continue;
+      }
+      if (message?.kind === 'stop') {
+        try {
+          settleTurn(turn, message.response);
+        } catch (error) {
+          settleTurn(turn, { error: { message: error?.message ?? String(error) } });
+        }
+        return;
+      }
+      settleTurn(turn, { error: { message: 'ACP ActiveSession.nextUpdate returned an unsupported message' } });
+      return;
+    }
+  }
 
   async function initialize() {
     if (closed) throw new Error('ACP client is shut down');
     if (initialized) return handshakeResult;
-    const initializeProtocol = protocolMethod(protocol, ['initialize'], 'initialize');
-    const response = await initializeProtocol({
+    const response = await protocolMethod(protocol, 'initialize')({
       protocolVersion: 1,
       clientInfo: clone(clientInfo),
       clientCapabilities: clone(clientCapabilities),
@@ -148,30 +153,42 @@ export function createAcpClient({
     return handshakeResult;
   }
 
-  async function startSession({ cwd, env, inventory = [] } = {}) {
+  async function startSession({ cwd, env, inventory, additionalDirectories, mcpServers } = {}) {
     if (!initialized) throw new Error('ACP client must initialize before starting a session');
     if (closed) throw new Error('ACP client is shut down');
+    if (env !== undefined || inventory !== undefined) {
+      throw new TypeError('ACP session/new does not accept env or inventory; use its cwd, directories and MCP fields');
+    }
     if (typeof cwd !== 'string' || !cwd.startsWith('/')) throw new TypeError('ACP session cwd must be an absolute path');
-    if (!env || typeof env !== 'object' || Array.isArray(env)) throw new TypeError('ACP session env must be explicit');
-    const start = protocolMethod(protocol, ['newSession', 'sessionNew', 'startSession'], 'newSession/sessionNew/startSession');
-    const response = await start({ cwd, env: clone(env), inventory: clone(inventory) });
-    if (typeof response?.sessionId !== 'string' || response.sessionId.length === 0) throw new TypeError('ACP session response must contain sessionId');
-    sessionId = response.sessionId;
+    const buildSession = protocolMethod(protocol, 'buildSession');
+    const hasRequestFields = Array.isArray(additionalDirectories) || Array.isArray(mcpServers);
+    const request = {
+      cwd,
+      ...(Array.isArray(additionalDirectories) ? { additionalDirectories: clone(additionalDirectories) } : {}),
+      mcpServers: Array.isArray(mcpServers) ? clone(mcpServers) : [],
+    };
+    const builder = buildSession(hasRequestFields ? request : cwd);
+    if (!builder || typeof builder.start !== 'function') throw new TypeError('ACP buildSession must return a SessionBuilder');
+    activeSession = await builder.start();
+    if (!activeSession || typeof activeSession !== 'object' || typeof activeSession.sessionId !== 'string' || activeSession.sessionId.length === 0) {
+      throw new TypeError('ACP SessionBuilder.start must return an ActiveSession with sessionId');
+    }
+    if (typeof activeSession.prompt !== 'function' || typeof activeSession.nextUpdate !== 'function' || typeof activeSession.dispose !== 'function') {
+      throw new TypeError('ACP ActiveSession must expose prompt, nextUpdate and dispose');
+    }
+    sessionId = activeSession.sessionId;
     return freeze({ sessionId, observational: true });
   }
 
-  async function startTask({ prompt } = {}) {
-    if (!sessionId) throw new Error('ACP client must start a session before starting a task');
+  async function prompt({ prompt: text } = {}) {
+    if (!activeSession || !sessionId) throw new Error('ACP client must start a session before prompting');
     if (closed) throw new Error('ACP client is shut down');
-    if (typeof prompt !== 'string' || prompt.length === 0) throw new TypeError('ACP task prompt is required');
-    const start = protocolMethod(protocol, ['startTask', 'prompt', 'runTask'], 'startTask/prompt/runTask');
-    const response = await start({ sessionId, prompt });
-    const taskId = response?.taskId ?? response?.id ?? `task-local-${nextLocalTaskId++}`;
-    if (typeof taskId !== 'string' || taskId.length === 0) throw new TypeError('ACP task response must contain taskId');
+    if (activeTurn && !activeTurn.settledValue) throw new Error('ACP client already has an active prompt');
+    if (typeof text !== 'string' || text.length === 0) throw new TypeError('ACP prompt text is required');
+
     let resolve;
     const settled = new Promise((promiseResolve) => { resolve = promiseResolve; });
-    const task = {
-      taskId,
+    const turn = {
       sessionId,
       sequence: 0,
       events: [],
@@ -179,29 +196,32 @@ export function createAcpClient({
       settled,
       settledValue: null,
     };
-    tasks.set(taskId, task);
-    if (response?.settled && typeof response.settled.then === 'function') {
-      response.settled.then((value) => {
-        try { settleTask(task, normalizeAcpResult(value)); } catch (error) { settleTask(task, { status: 'FAILED', outcome: 'FAILED', result: null, error: { message: error.message } }); }
-      }).catch((error) => settleTask(task, { status: 'FAILED', outcome: 'FAILED', result: null, error: { message: error?.message ?? String(error) } }));
+    activeTurn = turn;
+
+    let responsePromise;
+    try {
+      responsePromise = activeSession.prompt(text);
+    } catch (error) {
+      settleTurn(turn, { error: { message: error?.message ?? String(error) } });
+      return Object.freeze({ sessionId, settled, cancel, observe: () => turnObservation(turn) });
     }
+    Promise.resolve(responsePromise)
+      .then((response) => settleTurn(turn, response))
+      .catch((error) => settleTurn(turn, { error: { message: error?.message ?? String(error) } }));
+    void consumeUpdates(turn);
+
     return Object.freeze({
-      taskId,
       sessionId,
       settled,
-      cancel: (reason = 'explicit cancellation') => cancelTask(taskId, reason),
-      observe: () => taskObservation(task),
+      cancel,
+      observe: () => turnObservation(turn),
     });
   }
 
-  async function cancelTask(taskId, reason = 'explicit cancellation') {
-    const task = tasks.get(taskId);
-    if (!task) throw new Error(`unknown ACP task: ${taskId}`);
-    if (task.settledValue) return task.settledValue;
-    const cancel = protocolMethod(protocol, ['cancelTask', 'cancel'], 'cancelTask/cancel');
-    await cancel({ sessionId: task.sessionId, taskId, reason });
-    if (!task.settledValue) settleTask(task, { status: 'CANCELLED', outcome: 'CANCELLED', result: null });
-    return task.settled;
+  async function cancel() {
+    if (!activeTurn || activeTurn.settledValue) return activeTurn?.settledValue ?? null;
+    await protocolMethod(protocol, 'cancel')({ sessionId: activeTurn.sessionId });
+    return activeTurn.settled;
   }
 
   function handshake() {
@@ -210,21 +230,28 @@ export function createAcpClient({
 
   async function shutdown() {
     if (closed) return;
-    closed = true;
-    for (const task of tasks.values()) {
-      if (!task.settledValue) settleTask(task, { status: 'SHUTDOWN', outcome: 'SHUTDOWN', result: null, handoffRequired: true });
+    let error;
+    try {
+      if (activeTurn && !activeTurn.settledValue) await cancel();
+    } catch (cause) {
+      error = cause;
     }
-    removeMessageListener();
+    closed = true;
     removeProcessListener();
     try {
-      const shutdownProtocol = protocol.shutdown ?? protocol.close;
-      if (typeof shutdownProtocol === 'function') await shutdownProtocol.call(protocol);
-    } finally {
-      await transport.close();
+      activeSession?.dispose();
+    } catch (cause) {
+      error ??= cause;
     }
+    try {
+      await transport.close();
+    } catch (cause) {
+      error ??= cause;
+    }
+    if (error) throw error;
   }
 
-  return Object.freeze({ initialize, handshake, startSession, startTask, cancelTask, shutdown });
+  return Object.freeze({ initialize, handshake, startSession, prompt, cancel, shutdown });
 }
 
 export function createAcpStdioTransport({ execution, maxLineBytes = 1024 * 1024 } = {}) {

@@ -60,7 +60,8 @@ test('loads the accepted contract identity and computes SHA-256 from exact bytes
       sha256: EXPECTED_CONTRACT_SHA256,
     },
   );
-  assert.deepEqual(identity, Object.freeze({ ...identity }));
+  assert.equal(Object.isFrozen(identity), true);
+  assert.equal(Object.isFrozen(S1_CONTRACT_IDENTITY), true);
   assert.equal(S1_CONTRACT_IDENTITY.gitBlob, 'f032f09fefd1a2a1d36e568f00732e8eedd8aa89');
 
   const bytes = await readFile(CONTRACT_URL);

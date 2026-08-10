@@ -93,6 +93,7 @@ export function createPiAcpAdapter({
   requireAbsolute(executable, 'entrypoint');
   requireAbsolute(cwd, 'cwd');
   const explicitEnv = requireExplicitEnvironment(env);
+  requireAbsolute(explicitEnv.PI_ACP_PI_COMMAND, 'PI_ACP_PI_COMMAND');
   if (typeof createClient !== 'function') throw new TypeError('Pi-ACP createClient must be a function');
 
   const processSpec = buildProcessSpec({
@@ -108,6 +109,10 @@ export function createPiAcpAdapter({
     provenance: PI_ACP_PROVENANCE,
     transport: 'ACP_STDIN_STDOUT',
     innerPi: clone(PI_ACP_PROVENANCE.innerPi),
+    projectedInnerPi: {
+      argv: [explicitEnv.PI_ACP_PI_COMMAND, '--mode', 'rpc', '--no-themes'],
+      environmentSource: 'EXACT_PI_ACP_PARENT_ENV',
+    },
     resourceBehavior: clone(PI_ACP_PROVENANCE.resourceBehavior),
     delegation: clone(PI_ACP_PROVENANCE.delegation),
     wireCompatibility: {

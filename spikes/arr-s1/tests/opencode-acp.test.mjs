@@ -31,6 +31,7 @@ const PROFILE = Object.freeze({
   xdgStateHome: `${PROFILE_ROOT}/xdg-state`,
   xdgCacheHome: `${PROFILE_ROOT}/xdg-cache`,
   xdgDataHome: ENV.XDG_DATA_HOME,
+  home: `${PROFILE_ROOT}/opencode-home`,
   config: PROFILE_CONFIG,
   configHash: `sha256:${createHash('sha256').update(PROFILE_BYTES).digest('hex')}`,
   configSizeBytes: PROFILE_BYTES.length,
@@ -48,7 +49,11 @@ function fakeCommonClient(calls) {
     },
     async startSession(input) {
       calls.startSession.push(input);
-      return { sessionId: 'opencode-observation', observational: true };
+      return {
+        sessionId: 'opencode-observation',
+        observational: true,
+        newSessionResponse: { configOptions: [{ id: 'model', currentValue: 'fixture/gpt-5' }] },
+      };
     },
     async prompt(input) {
       calls.prompt.push(input);
@@ -88,7 +93,10 @@ test('starts native OpenCode ACP with exact argv, cwd and explicit environment',
 
   await adapter.initialize();
 
-  assert.deepEqual(createCalls, [{
+  const observedCreateCall = { ...createCalls[0] };
+  assert.equal(typeof observedCreateCall.beforeSpawn, 'function');
+  delete observedCreateCall.beforeSpawn;
+  assert.deepEqual([observedCreateCall], [{
     processSpec: {
       argv: [EXECUTABLE, 'acp', '--cwd', CWD],
       cwd: CWD,
@@ -114,15 +122,15 @@ test('starts native OpenCode ACP with exact argv, cwd and explicit environment',
         OPENCODE_EXPERIMENTAL_LSP_TOOL: '0',
         OPENCODE_EXPERIMENTAL_PLAN_MODE: '0',
         OPENCODE_EXPERIMENTAL_CODE_MODE: '0',
-        HOME: PROFILE.runRoot,
+        HOME: PROFILE.home,
       },
       timeoutMs: 1400,
       terminationGraceMs: 200,
       stdoutLimitBytes: 4096,
       stderrLimitBytes: 2048,
     },
-    clientFactory: undefined,
-    ndJsonStream: undefined,
+      clientFactory: undefined,
+      ndJsonStream: undefined,
   }]);
   assert.equal(calls.initialize, 1);
   assert.deepEqual(adapter.processSpec.argv, [EXECUTABLE, 'acp', '--cwd', CWD]);
@@ -154,7 +162,10 @@ test('uses the common ACP lifecycle without TUI parsing or runtime authority', a
   await adapter.shutdown();
 
   assert.deepEqual(ready, { protocolVersion: 1, agentCapabilities: { prompt: true } });
-  assert.deepEqual(session, { sessionId: 'opencode-observation', observational: true });
+  assert.equal(session.sessionId, 'opencode-observation');
+  assert.deepEqual(session.actualModel, { providerID: 'fixture', modelID: 'gpt-5' });
+  assert.equal(session.modelFacingInventory.status, 'PASS');
+  assert.deepEqual(session.requestedModel, { providerID: 'fixture', modelID: 'gpt-5' });
   assert.equal(turn.settled instanceof Promise, true);
   assert.deepEqual(cancelled, { outcome: 'CANCELLED' });
   assert.deepEqual(calls.startSession, [{ cwd: CWD }]);

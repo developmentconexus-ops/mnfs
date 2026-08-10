@@ -98,25 +98,35 @@ function digest(value) {
   return `sha256:${createHash('sha256').update(JSON.stringify(value)).digest('hex')}`;
 }
 
-function effectiveAcpEnvironment(record, adapter) {
-  const expected = Object.fromEntries(Object.entries(record?.environment ?? {}).sort());
-  const observed = adapter?.processSpec?.env;
+export function deriveAcpEnvironmentBinding({ candidateShape, record, adapter, processObservation, expectedCwd } = {}) {
+  const observedEnv = adapter?.processSpec?.env;
+  const observedKeys = observedEnv ? Object.keys(observedEnv).sort() : null;
+  const runnerKeys = Array.isArray(processObservation?.envKeys) ? [...processObservation.envKeys].sort() : null;
   const observations = adapter?.observations ?? {};
-  const controlledKeys = [];
-  if (observations.profile?.source === 'MNFS_TRUSTED_ISOLATED_PROFILE') {
-    controlledKeys.push(
-      'OPENCODE_DISABLE_PROJECT_CONFIG',
-      'XDG_CONFIG_HOME', 'XDG_STATE_HOME', 'XDG_CACHE_HOME', 'XDG_DATA_HOME',
-      'OPENCODE_CONFIG_DIR', 'OPENCODE_CONFIG', 'OPENCODE_PURE',
-    );
-  }
+  const projection = observations.profile?.environmentProjection;
+  const nonOpenCodeExpected = Object.fromEntries(Object.entries(record?.environment ?? {}).sort());
   if (observations.innerPiControlSource === 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI') {
-    controlledKeys.push('PI_ACP_PI_COMMAND', 'MNFS_PI_ACP_EXECUTABLE');
+    for (const key of ['PI_ACP_PI_COMMAND', 'MNFS_PI_ACP_EXECUTABLE']) {
+      if (typeof observedEnv?.[key] === 'string') nonOpenCodeExpected[key] = observedEnv[key];
+    }
   }
-  for (const key of controlledKeys) {
-    if (typeof observed?.[key] === 'string') expected[key] = observed[key];
-  }
-  return expected;
+  const expectedEnv = candidateShape === 'OPENCODE-ACP' && projection?.source === 'MNFS_TRUSTED_OPENCODE_REVIEWED_PROCESS_ENVIRONMENT'
+    ? { digest: projection.envDigest, keys: projection.envKeys }
+    : {
+      digest: digest(nonOpenCodeExpected),
+      keys: Object.keys(nonOpenCodeExpected).sort(),
+    };
+  const envDigest = observedEnv ? digest(Object.fromEntries(Object.entries(observedEnv).sort())) : null;
+  return {
+    cwd: processObservation?.cwd ?? adapter?.processSpec?.cwd ?? null,
+    envDigest,
+    environmentMatchesRecord: processObservation?.cwd === expectedCwd
+      && typeof envDigest === 'string'
+      && envDigest === expectedEnv.digest
+      && JSON.stringify(observedKeys) === JSON.stringify([...expectedEnv.keys].sort())
+      && JSON.stringify(runnerKeys) === JSON.stringify(observedKeys),
+    source: 'MNFS_TRUSTED_PROCESS_RUNNER',
+  };
 }
 
 function hasExactInventory(value, fixture) {
@@ -134,8 +144,11 @@ function discoveryEmpty(value) {
 
 function opencodeInventoryProof(trusted, fixture) {
   const resolved = trusted?.modelFacingInventory;
+  const actual = trusted?.actualModel;
   return resolved?.source === 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER'
     && resolved.status === 'PASS'
+    && actual?.providerID === resolved.model?.providerID
+    && actual?.modelID === resolved.model?.modelID
     && hasExactInventory(resolved.logicalInventory, fixture)
     && hasExactInventory(trusted.inventory, fixture);
 }
@@ -392,7 +405,6 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
     const configDir = path.join(profileDir, 'config');
     const configPath = path.join(configDir, 'config.json');
     const config = {
-      model: 'fixture/gpt-5',
       tools: { '*': false, read: true, edit: true },
       plugin: [],
       mcp: {},
@@ -413,6 +425,7 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
       xdgStateHome: path.join(profileDir, 'xdg-state'),
       xdgCacheHome: path.join(profileDir, 'xdg-cache'),
       xdgDataHome,
+      home: path.join(profileDir, 'home'),
       config,
       configHash: `sha256:${createHash('sha256').update(configBytes).digest('hex')}`,
       configSizeBytes: configBytes.length,
@@ -848,7 +861,17 @@ async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context,
   };
 }
 
-function deriveAcpDiscovery({ candidateShape, rawMessages, adapter }) {
+function normalizeAvailableCommand(command) {
+  if (!command || typeof command !== 'object') return { name: '<invalid>' };
+  return {
+    ...(typeof command.name === 'string' ? { name: command.name } : { name: '<unnamed>' }),
+    ...(typeof command.description === 'string' ? { description: command.description } : {}),
+    ...(typeof command.source === 'string' ? { source: command.source } : {}),
+    ...(command.changesFixtureSurface === true ? { changesFixtureSurface: true } : {}),
+  };
+}
+
+export function deriveAcpDiscovery({ candidateShape, rawMessages, adapter }) {
   const discovered = {
     extensions: [],
     skills: [],
@@ -856,19 +879,36 @@ function deriveAcpDiscovery({ candidateShape, rawMessages, adapter }) {
     themes: [],
     agentsFiles: [],
   };
+  let commandAdvertisement = {
+    present: false,
+    source: 'ACP_AVAILABLE_COMMANDS_UPDATE',
+    availableCommands: [],
+    surfaceEffect: 'NONE',
+  };
   for (const message of rawMessages ?? []) {
     const update = message?.notification?.update ?? message?.update ?? {};
-    if (update.sessionUpdate === 'available_commands_update') discovered.prompts.push('available_commands_update');
+    if (update.sessionUpdate === 'available_commands_update') {
+      const availableCommands = (Array.isArray(update.availableCommands) ? update.availableCommands : []).map(normalizeAvailableCommand);
+      const changesFixtureSurface = availableCommands.some((command) => ['skill', 'prompt', 'resource', 'tool'].includes(command.source)
+        || command.changesFixtureSurface === true);
+      commandAdvertisement.present = true;
+      commandAdvertisement.availableCommands.push(...availableCommands);
+      if (changesFixtureSurface) commandAdvertisement.surfaceEffect = 'FIXED_LOGICAL_SURFACE_MUTATION';
+      if (changesFixtureSurface) discovered.prompts.push('hidden_command_surface');
+    }
     if (update.sessionUpdate === 'config_option_update') discovered.extensions.push('config_option_update');
   }
   const observations = adapter?.observations ?? {};
   const configSourcesControlled = candidateShape === 'OPENCODE-ACP'
     ? observations.profile?.configSources?.discoveryControlled === true
     : true;
-  const controlled = observations.discoveryControlled === true
+  const controlled = (observations.discoveryControlled === true
+    && commandAdvertisement.surfaceEffect !== 'FIXED_LOGICAL_SURFACE_MUTATION')
     || (candidateShape === 'PI-ACP' && observations.innerPiControlSource === 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI');
   return {
     ...discovered,
+    availableCommands: commandAdvertisement.availableCommands,
+    commandAdvertisement,
     controlled,
     configSourcesControlled,
     source: 'MNFS_TRUSTED_ACP_EVENT_AND_PROFILE_OBSERVATION',
@@ -902,24 +942,19 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
   const toolCalls = normal.fixtureCapabilities.logicalToolCalls({ rawEvents: normal.rawMessages });
   const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
   const observedProcess = normal.processObservation;
-  const observedEnv = normal.adapter?.processSpec?.env;
-  const expectedEnv = effectiveAcpEnvironment(record, normal.adapter);
-  const observedEnvKeys = Array.isArray(observedProcess?.envKeys) ? [...observedProcess.envKeys].sort() : null;
-  const expectedEnvKeys = Object.keys(expectedEnv).sort();
-  const trustedBoundary = {
-    cwd: observedProcess?.cwd ?? normal.adapter?.processSpec?.cwd ?? null,
-    envDigest: observedEnv ? digest(Object.fromEntries(Object.entries(observedEnv).sort())) : null,
-    environmentMatchesRecord: observedProcess?.cwd === fixture.workspacePath
-      && observedEnv
-      && digest(Object.fromEntries(Object.entries(observedEnv).sort())) === digest(expectedEnv)
-      && (observedEnvKeys === null || JSON.stringify(observedEnvKeys) === JSON.stringify(expectedEnvKeys)),
-    source: 'MNFS_TRUSTED_PROCESS_RUNNER',
-  };
+  const trustedBoundary = deriveAcpEnvironmentBinding({
+    candidateShape,
+    record,
+    adapter: normal.adapter,
+    processObservation: observedProcess,
+    expectedCwd: fixture.workspacePath,
+  });
   const recoveryState = await prepareRecoveryState({ candidateShape, context, normal, cancellation, death, protocol: 'ACP_V1' });
   const recovery = await runFreshRecovery({ fixture, toolCalls, context, candidateShape, recoveryState });
   const resolvedInventory = candidateShape === 'OPENCODE-ACP'
-    ? normal.adapter?.observations?.profile?.resolvedInventory
+    ? normal.session?.modelFacingInventory
     : null;
+  const actualModel = candidateShape === 'OPENCODE-ACP' ? normal.session?.actualModel : null;
   const execution = {
     ready: normal.ready,
     session: normal.session,
@@ -931,6 +966,7 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
       boundary: trustedBoundary,
       inventory: resolvedInventory?.logicalInventory ?? deriveAcpInventory(normal.rawMessages, fixture, toolCalls),
       modelFacingInventory: resolvedInventory,
+      actualModel,
       fixtureVerified: fixtureResult.ok,
       discovery: deriveAcpDiscovery({ candidateShape, rawMessages: normal.rawMessages, adapter: normal.adapter }),
       auth: deriveTrustedAuthProof({

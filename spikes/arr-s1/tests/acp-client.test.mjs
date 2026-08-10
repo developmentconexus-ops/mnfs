@@ -45,6 +45,9 @@ function fakeActiveSession(calls) {
   let resolvePrompt;
   const active = {
     sessionId: 'session-1',
+    newSessionResponse: {
+      configOptions: [{ id: 'model', currentValue: 'fixture/gpt-5' }],
+    },
     prompt(input) {
       calls.prompts.push(input);
       return new Promise((resolve) => {
@@ -168,6 +171,23 @@ test('rejects an ACP protocol-version mismatch before building a session', async
     () => client.initialize(),
     (error) => error?.code === 'ACP_PROTOCOL_VERSION_MISMATCH',
   );
+});
+
+test('preserves the public ActiveSession.newSessionResponse for actual model binding', async () => {
+  const surface = fakeClientSurface();
+  const client = createAcpClient({
+    client: surface.client,
+    stream: fakeStream(),
+    processBoundary: fakeProcessBoundary(),
+  });
+
+  await client.initialize();
+  const session = await client.startSession({ cwd: CWD });
+
+  assert.deepEqual(session.newSessionResponse, {
+    configOptions: [{ id: 'model', currentValue: 'fixture/gpt-5' }],
+  });
+  await client.shutdown();
 });
 
 test('normalizes an ActiveSession session_update without using vendor metadata', () => {

@@ -318,6 +318,9 @@ export function createAcpClient({
       sessionId,
       observational: true,
       ...(activeSession.authRequired === true ? { authRequired: true } : {}),
+      ...(activeSession.newSessionResponse !== undefined
+        ? { newSessionResponse: clone(activeSession.newSessionResponse) }
+        : {}),
     });
   }
 

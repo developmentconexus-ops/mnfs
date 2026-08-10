@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
+import { lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
@@ -346,7 +346,9 @@ function validateFrozenProfileConfig(config) {
   for (const key of Object.keys(config)) {
     if (!FROZEN_PROFILE_KEYS.has(key)) throw new TypeError(`OpenCode profile field ${key} is outside the trusted frozen subset`);
   }
-  if (typeof config.model !== 'string' || !config.model.includes('/')) throw new TypeError('OpenCode profile model must be provider/model');
+  if (config.model !== undefined && (typeof config.model !== 'string' || !config.model.includes('/'))) {
+    throw new TypeError('OpenCode profile model must be provider/model when configured');
+  }
   if (config.tools !== undefined && (!isRecord(config.tools) || Object.values(config.tools).some((value) => typeof value !== 'boolean'))) {
     throw new TypeError('OpenCode profile tools must be a boolean record');
   }
@@ -376,6 +378,46 @@ function requireEmptyDirectory(root, name) {
   if (readdirSync(root).length !== 0) {
     throw new Error(`OpenCode ${name} contains uncontrolled configuration entries`);
   }
+}
+
+function controlledHome(runRoot, requestedHome, { create = false } = {}) {
+  const home = requestedHome ?? path.join(runRoot, 'opencode-home');
+  requireAbsolute(home, 'profile.home');
+  if (home === runRoot || !pathOwnedBy(runRoot, home)) {
+    throw new TypeError('OpenCode profile.home must be a dedicated runRoot-owned directory');
+  }
+  if (create) {
+    try {
+      lstatSync(home);
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error;
+      mkdirSync(home, { recursive: true, mode: 0o700 });
+    }
+  }
+  requireOwnedDirectory(home, 'home');
+  const entries = readdirSync(home).sort();
+  const opencodePath = path.join(home, '.opencode');
+  let opencodeEntries = [];
+  if (entries.includes('.opencode')) {
+    requireOwnedDirectory(opencodePath, 'home/.opencode');
+    opencodeEntries = readdirSync(opencodePath).sort();
+    for (const entry of opencodeEntries) {
+      if (!['tool', 'tools'].includes(entry)) throw new Error('OpenCode HOME/.opencode contains uncontrolled discovery entries');
+      const directory = path.join(opencodePath, entry);
+      requireOwnedDirectory(directory, `home/.opencode/${entry}`);
+      if (readdirSync(directory).length > 0) throw new Error('OpenCode HOME custom tool discovery is not controlled');
+    }
+  }
+  return Object.freeze({
+    path: home,
+    directory: true,
+    symlink: false,
+    discoveryControlled: true,
+    entries,
+    opencodeEntries,
+    customToolFiles: [],
+    reason: 'dedicated HOME and HOME/.opencode tool directories are absent or reviewed empty',
+  });
 }
 
 function bindProfile(profile) {
@@ -421,12 +463,14 @@ function bindProfile(profile) {
     throw new Error('OpenCode profile input diverges from written config');
   }
   validateFrozenProfileConfig(config);
-  const modelSeparator = config.model.indexOf('/');
-  const model = Object.freeze({
-    providerID: config.model.slice(0, modelSeparator),
-    modelID: config.model.slice(modelSeparator + 1),
-  });
-  if (!model.providerID || !model.modelID) throw new TypeError('OpenCode profile model must contain provider and model IDs');
+  const model = config.model === undefined ? null : (() => {
+    const modelSeparator = config.model.indexOf('/');
+    return Object.freeze({
+      providerID: config.model.slice(0, modelSeparator),
+      modelID: config.model.slice(modelSeparator + 1),
+    });
+  })();
+  if (model && (!model.providerID || !model.modelID)) throw new TypeError('OpenCode profile model must contain provider and model IDs');
   const dataRoot = path.join(profile.xdgDataHome, 'opencode');
   const configSources = inspectOpenCodeConfigSources({
     dataRoot,
@@ -464,28 +508,11 @@ function requireExplicitEnvironment(env) {
   return { ...env };
 }
 
-function profileEnvironment(env, profile) {
-  const cleanEnv = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('OPENCODE_')
+export function projectOpenCodeEnvironment({ baseEnvironment, profile } = {}) {
+  const cleanEnv = Object.fromEntries(Object.entries(requireExplicitEnvironment(baseEnvironment)).filter(([key]) => !key.startsWith('OPENCODE_')
     && !['HOME', 'XDG_CONFIG_HOME', 'XDG_STATE_HOME', 'XDG_CACHE_HOME', 'XDG_DATA_HOME'].includes(key)));
-  if (profile === undefined) throw new TypeError('OpenCode ACP requires an explicit isolated profile');
-  for (const [key, value] of [
-    ['configDir', profile.configDir],
-    ['configPath', profile.configPath],
-    ['xdgConfigHome', profile.xdgConfigHome],
-    ['xdgStateHome', profile.xdgStateHome],
-    ['xdgCacheHome', profile.xdgCacheHome],
-    ['xdgDataHome', profile.xdgDataHome],
-  ]) {
-    requireAbsolute(value, `profile.${key}`);
-  }
-  requireAbsolute(profile.runRoot, 'profile.runRoot');
-  for (const [key, value] of [['configDir', profile.configDir], ['configPath', profile.configPath], ['xdgConfigHome', profile.xdgConfigHome], ['xdgStateHome', profile.xdgStateHome], ['xdgCacheHome', profile.xdgCacheHome]]) {
-    if (!pathOwnedBy(profile.runRoot, value)) throw new TypeError(`OpenCode ${key} must be runRoot-owned`);
-  }
-  const bound = bindProfile(profile);
+  const home = profile.home ?? path.join(profile.runRoot, 'opencode-home');
   return {
-    profile: bound,
-    env: {
     ...cleanEnv,
     OPENCODE_DISABLE_PROJECT_CONFIG: '1',
     XDG_CONFIG_HOME: profile.xdgConfigHome,
@@ -507,8 +534,34 @@ function profileEnvironment(env, profile) {
     OPENCODE_EXPERIMENTAL_LSP_TOOL: '0',
     OPENCODE_EXPERIMENTAL_PLAN_MODE: '0',
     OPENCODE_EXPERIMENTAL_CODE_MODE: '0',
-    ...(profile.runRoot ? { HOME: profile.runRoot } : {}),
-    },
+    HOME: home,
+  };
+}
+
+function profileEnvironment(env, profile) {
+  if (profile === undefined) throw new TypeError('OpenCode ACP requires an explicit isolated profile');
+  for (const [key, value] of [
+    ['configDir', profile.configDir],
+    ['configPath', profile.configPath],
+    ['xdgConfigHome', profile.xdgConfigHome],
+    ['xdgStateHome', profile.xdgStateHome],
+    ['xdgCacheHome', profile.xdgCacheHome],
+    ['xdgDataHome', profile.xdgDataHome],
+    ['home', profile.home ?? path.join(profile.runRoot, 'opencode-home')],
+  ]) {
+    requireAbsolute(value, `profile.${key}`);
+  }
+  requireAbsolute(profile.runRoot, 'profile.runRoot');
+  for (const [key, value] of [['configDir', profile.configDir], ['configPath', profile.configPath], ['xdgConfigHome', profile.xdgConfigHome], ['xdgStateHome', profile.xdgStateHome], ['xdgCacheHome', profile.xdgCacheHome]]) {
+    if (!pathOwnedBy(profile.runRoot, value)) throw new TypeError(`OpenCode ${key} must be runRoot-owned`);
+  }
+  const home = profile.home ?? path.join(profile.runRoot, 'opencode-home');
+  const homeDiscovery = controlledHome(profile.runRoot, home, { create: true });
+  const bound = bindProfile({ ...profile, home });
+  return {
+    profile: { ...bound, home },
+    homeDiscovery,
+    env: projectOpenCodeEnvironment({ baseEnvironment: env, profile: { ...profile, home } }),
   };
 }
 
@@ -575,6 +628,12 @@ function frozenModelTools({ model, flags }) {
 }
 
 function parseModelSelection(config, model) {
+  if (model !== undefined) {
+    if (!isRecord(model) || typeof model.providerID !== 'string' || typeof model.modelID !== 'string'
+      || !model.providerID || !model.modelID) return null;
+    return Object.freeze({ providerID: model.providerID, modelID: model.modelID });
+  }
+  if (typeof config.model !== 'string') return null;
   const selected = model ?? (() => {
     const separator = config.model.indexOf('/');
     return { providerID: config.model.slice(0, separator), modelID: config.model.slice(separator + 1) };
@@ -665,6 +724,18 @@ export function resolveOpenCodeModelFacingInventory({ config = {}, model, pure =
   });
 }
 
+function parseSessionModel(newSessionResponse) {
+  const option = newSessionResponse?.configOptions?.find((candidate) => candidate?.id === 'model');
+  const currentValue = option?.currentValue;
+  if (typeof currentValue !== 'string') return null;
+  const separator = currentValue.indexOf('/');
+  if (separator <= 0 || separator === currentValue.length - 1) return null;
+  return Object.freeze({
+    providerID: currentValue.slice(0, separator),
+    modelID: currentValue.slice(separator + 1),
+  });
+}
+
 function requireCommonClient(client) {
   if (!client || typeof client !== 'object') throw new TypeError('OpenCode ACP common ACP client is required');
   for (const method of ['initialize', 'handshake', 'startSession', 'prompt', 'cancel', 'shutdown']) {
@@ -739,24 +810,20 @@ export function createOpenCodeAcpAdapter({
         xdgStateHome: profile.xdgStateHome,
         xdgCacheHome: profile.xdgCacheHome,
         xdgDataHome: profile.xdgDataHome,
+        home: profileResult.profile.home,
+        homeDiscovery: profileResult.homeDiscovery,
         config: clone(profileResult.profile.config),
         configBinding: profileResult.profile.binding,
         authRoute: openCodeCredentialRouteEvidence(profile.xdgDataHome),
         authRouteInspection: profileResult.profile.authRouteInspection,
         configSources: profileResult.profile.configSources,
-        resolvedInventory: resolveOpenCodeModelFacingInventory({
-          config: profileResult.profile.config,
-          model: profileResult.profile.model,
-          pure: true,
-          flags: {
-            client: 'acp',
-            enableExa: false,
-            enableParallel: false,
-            enableQuestionTool: false,
-            experimentalLspTool: false,
-            experimentalPlanMode: false,
-          },
-        }),
+        requestedModel: profileResult.profile.model,
+        resolvedInventory: null,
+        environmentProjection: {
+          source: 'MNFS_TRUSTED_OPENCODE_REVIEWED_PROCESS_ENVIRONMENT',
+          envDigest: `sha256:${createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.entries(explicitEnv).sort()))).digest('hex')}`,
+          envKeys: Object.keys(explicitEnv).sort(),
+        },
         discovery: {
           ambientGlobal: 'EXCLUDED_BY_RUN_ROOT_XDG_CONFIG_HOME',
           project: 'EXCLUDED_BY_OPENCODE_DISABLE_PROJECT_CONFIG',
@@ -765,6 +832,7 @@ export function createOpenCodeAcpAdapter({
             ? 'DISABLED_BY_EXPLICIT_EMPTY_PLUGIN_LIST'
             : 'DISABLED_BY_FROZEN_OPENCODE_PURE',
           configSources: profileResult.profile.configSources,
+          home: profileResult.homeDiscovery,
         },
       },
     } : {}),
@@ -779,6 +847,11 @@ export function createOpenCodeAcpAdapter({
   let closed = false;
   let clientPromise = null;
 
+  const revalidateBeforeSpawn = async () => {
+    controlledHome(profileResult.profile.runRoot, profileResult.profile.home);
+    await beforeSpawn?.();
+  };
+
   async function initialize() {
     if (closed) throw new Error('OpenCode ACP adapter is closed');
     if (initialized) return commonClient.handshake();
@@ -789,7 +862,7 @@ export function createOpenCodeAcpAdapter({
         ndJsonStream,
         ...(clientCapabilities ? { clientCapabilities } : {}),
         ...(clientRequestHandlers ? { clientRequestHandlers } : {}),
-        ...(beforeSpawn ? { beforeSpawn } : {}),
+        beforeSpawn: revalidateBeforeSpawn,
       })).then((client) => {
         requireCommonClient(client);
         commonClient = client;
@@ -809,7 +882,27 @@ export function createOpenCodeAcpAdapter({
 
   async function startSession(input) {
     requireInitialized();
-    return commonClient.startSession(input);
+    const session = await commonClient.startSession(input);
+    const actualModel = parseSessionModel(session?.newSessionResponse);
+    const modelFacingInventory = resolveOpenCodeModelFacingInventory({
+      config: profileResult.profile.config,
+      model: actualModel,
+      pure: true,
+      flags: {
+        client: 'acp',
+        enableExa: false,
+        enableParallel: false,
+        enableQuestionTool: false,
+        experimentalLspTool: false,
+        experimentalPlanMode: false,
+      },
+    });
+    return Object.freeze({
+      ...session,
+      actualModel,
+      requestedModel: profileResult.profile.model,
+      modelFacingInventory,
+    });
   }
 
   async function authenticate(methodId) {

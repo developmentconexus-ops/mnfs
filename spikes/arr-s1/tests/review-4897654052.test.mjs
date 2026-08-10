@@ -210,7 +210,7 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
     });
     assert.equal(probe.code, 0, probe.stderr);
     assert.ok(probe.stdout, JSON.stringify(probe));
-    assert.deepEqual(probe.stdout.trim().split('\n'), ['1', root, path.join(root, 'xdg-config'), authorizedData]);
+    assert.deepEqual(probe.stdout.trim().split('\n'), ['1', path.join(root, 'opencode-home'), path.join(root, 'xdg-config'), authorizedData]);
     assert.equal(adapter.processSpec.env.OPENCODE_CONFIG_DIR, path.join(root, 'config-dir'));
     assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
     assert.equal(adapter.processSpec.env.OPENCODE_PERMISSION, undefined);

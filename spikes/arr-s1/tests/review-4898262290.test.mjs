@@ -352,8 +352,10 @@ test('OpenCode permission filtering and proof evaluation separate exposed invent
         modelFacingInventory: {
           status: 'PASS',
           source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
+          model: { providerID: 'fixture', modelID: 'gpt-5' },
           logicalInventory: fixture.inventory.map(({ id }) => id),
         },
+        actualModel: { providerID: 'fixture', modelID: 'gpt-5' },
       },
     },
   })['S1-C03'], true);

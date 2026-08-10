@@ -1020,3 +1020,117 @@ OAuth roda por **iframe/popup silencioso** que faz `postMessage({type:'mitra-aut
 | OAuth por postMessage de iframe silencioso | ADAPT | Funciona, mas validar origin rigorosamente; preferir PKCE server-side |
 | Renome `connection`↔`integrationSlug` vazando no wire | REJECT (lição) | Versionar contrato de API; não deixar rename de param divergir do corpo |
 | Backend legado ERP (mitraecp/mitrasheet) exposto em portas altas | REFERENCE | Linhagem ERP; nós começamos limpos, sem dívida de porta:1005/4133 |
+
+## 21. Sandbox + scaffold (template real do projeto gerado)
+
+Extraído da árvore git do projeto 55785 via `/api/mitra-agent/github-files/*`. Isto é **o template com que todo app nasce** + o layout do sandbox.
+
+### 21.1 Layout do sandbox (E2B)
+
+O `CLAUDE.md` do template fixa o working dir: **`/home/user/w-{workspaceId}/p-{projectId}/`**. Confirma E2B (`/home/user/`), namespaced por workspace/projeto. Guardrails no prompt: trabalhar EXCLUSIVAMENTE nesse dir, proibido `cd ..`/sibling — vários projetos coexistem no mesmo box (multi-tenant), isolados só por instrução.
+
+### 21.2 Estrutura do scaffold
+
+```
+CLAUDE.md                    (8150) — contrato operacional do agente (§22.1)
+.gitignore / .gitkeep
+backend/
+  package.json               (131)  — deps: mitra-sdk ^1.0.58 + dotenv. SÓ isso.
+  .env.example               — auto-populado pelo servidor (NÃO hardcode)
+  setup-backend.mjs          (18740)— provisiona tabelas+SFs (idempotente)
+  (migrations/ + migrations.yaml — criados pelo SISTEMA fora do turno)
+frontend/                    — Vite 7 + React 19 + Tailwind 4 (@tailwindcss/vite)
+  package.json               — mitra-interactions-sdk 1.0.61, react-router-dom 7,
+                               recharts 2.15, lucide-react. build: tsc -b && vite build
+  vite.config.ts             — base:'./' (servível de qualquer path)
+  src/lib/
+    conexus.ts               — camada de dados: mapa SF{id} + callSF() (§21.4)
+    mitra-auth.ts            — bootstrap de sessão via fragment (§21.5)
+  src/components/ui/         — biblioteca UI pré-scaffoldada: Button,Card,Modal,
+                               Select,Toast,Chart(56KB/recharts),Badge,Checkbox…
+  src/hooks/                 — useDrill (drill-down), useHighlight, useToast
+  src/pages/                 — LoginPage, MonitoramentoPage (app real)
+```
+
+**Achado central: backend sem `src/`.** O "backend" é só `setup-backend.mjs` + a `mitra-sdk`. Não há servidor Node self-hosted — a lógica vive como **Server Functions gerenciadas** no runtime Mitra. Confirma §16.
+
+### 21.3 `setup-backend.mjs` — provisioning idempotente (a arquitetura runtime inteira)
+
+Importa da `mitra-sdk`: `configureSdkMitra, runDdlMitra, createServerFunctionMitra, listServerFunctionsMitra, updateServerFunctionMitra` (+ `runDmlMitra` dentro do código da SF). Fluxo:
+
+1. **DDL**: cria tabelas-espelho (EMPRESAS, VENDEDORES, CLIENTES, ORCAMENTOS, ORCAMENTO_ITENS, LOG_IMPORTACOES) via `runDdlMitra`.
+2. **SF de carga (JAVASCRIPT)**: string `CODIGO_SYNC` — roda NO backend Mitra, puxa Sankhya via `callIntegrationMitra` e faz upsert. Detalhes reais:
+   - `endpoint:'/gateway/v1/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json'`, lê `responseBody.fieldsMetadata[].name` p/ colunas.
+   - `PAGINA=4000` (< teto 5000 do DbExplorer); `TOPS_ORCAMENTO='14,714'`.
+   - `upsert()` em lotes de 400: `INSERT ... ON DUPLICATE KEY UPDATE col=VALUES(col)` → **o DB gerenciado é MySQL** (sintaxe ON DUPLICATE KEY), enquanto a fonte Sankhya é Oracle. O espelho faz a ponte Oracle→MySQL.
+   - Aberto: `C.PENDENTE='S' AND NOT EXISTS (SELECT 1 FROM TGFVAR VA WHERE VA.NUNOTAORIG=C.NUNOTA)`; conversão via `TGFVAR MIN(DTNEG)`.
+   - Loga em LOG_IMPORTACOES (ENTIDADE, STATUS='SUCESSO').
+3. **SFs SQL (monitor\*)**: as queries do dashboard (resumo: ORCAMENTOS_TOTAL, ORCAMENTOS_ABERTOS, VALOR_ABERTO, CONVERTIDOS…).
+4. **Idempotência**: `listServerFunctionsMitra` → acha por nome → `update` se existe, senão `create`. Tipos de SF: `'SQL'` e JAVASCRIPT.
+5. **Cron**: `updateServerFunctionMitra({ cronExpression:'0 */30 * * * *' })` → a carga Sankhya→espelho roda **a cada 30 min server-side**. É assim que o "última carga" do monitor funciona.
+
+**Arquitetura completa**: Sankhya/Oracle (verdade, read-only via DbExplorer) → SF JAVASCRIPT em cron 30min faz upsert atômico → DB gerenciado MySQL (espelho) → SFs SQL leem o espelho → frontend chama SF por ID inteiro. Zero DELETE, zero janela vazia.
+
+### 21.4 `conexus.ts` — camada de dados do app (uso real do interactions-SDK)
+
+> Nota: `conexus.ts` é a lib do app gerado (marca do cliente Conexus), **não** o nosso harness. Padrão:
+- `export const SF = { sincronizarSankhya:1, monitorUltimaCarga:2, monitorHistoricoCargas:3, monitorResumoBase:4 }` — IDs inteiros das SFs (provisionados pelo setup; comentário instrui rodar o setup e atualizar o mapa ao criar SF nova).
+- `callSF(id,input)` → `executeServerFunctionMitra({ projectId, serverFunctionId, input })`; trata `result.executionStatus==='FAILED'`; normaliza output (string→JSON, `.result[]`). **Colunas voltam UPPERCASE** (herança Oracle).
+- Helpers pt-BR: moeda BRL, data `dd/mm/aaaa`, tempo relativo.
+
+### 21.5 `mitra-auth.ts` — bootstrap de sessão (o fluxo de login §11 com nomes reais)
+
+- `configureSdkMitra({ baseURL, token, integrationURL, projectId, authUrl, onTokenRefresh })`; sessão em `localStorage['mitra-session']`.
+- `initMitra()`: lê tokens do **fragment (#)** — params `tokenMitra`, `backURLMitra`, `integrationURLMitra` — "para não vazar em logs/referrer". Trata `token==='error'`. Prefixa `Bearer`. Limpa hash via `replaceState`. Fallback pra sessão no localStorage. `onTokenRefresh` persiste a nova sessão.
+
+### 21.6 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| Sandbox `/home/user/w-{ws}/p-{proj}/`, isolamento por instrução | ADAPT | Preferir isolamento real (container/worktree) a guardrail de prompt |
+| Backend serverless = só SFs gerenciadas, sem `src/` | ADOPT | Reduz superfície; lógica versionada como SF + migration |
+| `setup-backend.mjs` idempotente (list→update|create) | ADOPT | Provisioning declarativo idempotente é o padrão certo |
+| Espelho Oracle→MySQL com upsert atômico ON DUPLICATE KEY | ADOPT | Espelho read-only + upsert; nunca DELETE+INSERT |
+| SF de sync em cron 30min server-side | ADOPT | Agendamento no runtime, não no cliente |
+| Frontend chama SF por **ID inteiro** hardcoded no `SF{}` | REJECT | Frágil (setup renumera). Preferir chamada por nome/slug estável |
+| UI lib + hooks pré-scaffoldados no template | ADOPT | Template rico corta tempo de build; nós já temos design system |
+| Tokens no fragment `#`, limpeza via replaceState | ADOPT | Bom: não vaza em referrer/log |
+
+## 22. System prompts extraídos (todos os que são alcançáveis)
+
+Pedido: "extrair todos system prompts, traga tudo". Resultado da caça — 3 camadas de prompt no pipeline Mitra.
+
+### 22.1 [BUILD AGENT] `CLAUDE.md` do template — EXTRAÍDO NA ÍNTEGRA
+
+É o contrato operacional que acompanha o Claude Code em todo projeto. Blocos-chave (verbatim resumido):
+- **Directory scope**: trabalhar só em `/home/user/w-{ws}/p-{proj}/`, proibido `cd ..`/sibling.
+- **Build**: sempre `cd frontend && npm run build`.
+- **Regra de pausa do AskUserQuestion** (revelação de harness): *"O sistema NÃO bloqueia tools posteriores — qualquer ação DEPOIS de `AskUserQuestion` será EXECUTADA no sandbox antes da resposta do usuário."* → a pausa é forçada **por prompt**, não pelo runtime. `AskUserQuestion` DEVE ser a última ação do turno.
+- **Migrations dev↔prod**: `backend/migrations/` + `migrations.yaml` são **append-only** e **gerenciados exclusivamente pelo sistema, fora do turno** — o agente nunca cria/edita/commita esses paths; DDL/SF via SDK viram migration automaticamente após o turno. `mergeBaseline` proibido sem ordem explícita. Após 3 tentativas falhas → PARE e escale com dossiê.
+- **SYNC/SHARE multi-usuário via git**: repo `github.com/mitra-agent-projects/p-{proj}`, branch `user/{userId}`, `main` = baseline compartilhada. **Todo turno**: `git fetch && git merge origin/main` PRIMEIRO (mesmo p/ "oi"), ler o diff. **Fim do turno**: 1 commit + 1 push (não por arquivo). Conflito → SEMPRE `AskUserQuestion` em linguagem de negócio, nunca resolver sozinho. Idle 20min descarta o sandbox → trabalho não-pushado some. Nunca `--force`, nunca `--rebase`, sempre merge.
+
+### 22.2 [ESCOPO / GEMINI] wrapper de system instruction — EXTRAÍDO NA ÍNTEGRA
+
+Função `Ep(skillMd)` no bundle do `specialist.mitralab.io`. Verbatim:
+
+> "Você é um assistente de escopagem técnica da Mitra. Seu trabalho é conduzir o usuário pela definição do escopo técnico funcional do projeto dele, seguindo a skill descrita abaixo. DATA DE HOJE: {data}. […] Sempre responda em português brasileiro […] Não gere o escopo final até ter informações suficientes sobre: objetivo do sistema, personas/atores, regras de negócio principais, fluxos esperados […] Ao FINALIZAR o documento completo, inclua EXATAMENTE a tag `[ESCOPO_FINALIZADO]` em uma linha separada no FINAL […] NÃO inclua a tag antes de gerar o documento completo […] SKILL DE ESCOPO TÉCNICO: --- {skillMd} ---"
+
+- Tag de conclusão que sinaliza o pipeline: **`[ESCOPO_FINALIZADO]`**.
+- **Arquitetura (achado de segurança)**: o navegador carrega `{SKILL_MD, GEMINI_API_KEY, MODELO_GEMINI}` de uma linha de tabela via **Server Function #4** do projeto Escopo (id `42949`), e chama o Gemini **direto do cliente**: `POST … {systemInstruction:{parts:[{text:Ep(skillMd)}]}, contents, generationConfig:{temperature:0.7, maxOutputTokens:65536}}`, modelo `gemini-2.5-pro` (fallback `gemini-2.5-flash`). **A `GEMINI_API_KEY` é exposta ao browser** — chave de LLM no client-side. Para o Conexus: REJECT — proxy server-side obrigatório, nunca key de modelo no cliente.
+
+### 22.3 [ESCOPO SKILL_MD] corpo da skill — server-gated, NÃO extraído (por escolha)
+
+O texto cru da skill (`SKILL_MD`) vem da SF#4 do projeto 42949, **co-locado com a `GEMINI_API_KEY` na mesma linha**. Puxá-lo exigiria a sessão do Escopo (token in-memory, não persistido) e devolveria a key junto. **Decisão: não perseguir** — mesma regra dos segredos Sankhya. A **estrutura de saída** dessa skill já está mapeada em §15.6 (template escopo v2.0, 15 seções, ciclo PA).
+
+### 22.4 [BASE] system prompt do Claude Code no sandbox — não extraível sem tráfego ao vivo
+
+O system prompt base (Claude Code + injeção do harness Mitra) é montado server-side no spawn do E2B — **não é commitado no repo** (varri `.claude/`, `AGENTS.md`, `.mitra/`, etc → todos 404) e **não é shipado ao cliente** (zero literais de prompt no bundle de `agent.mitralab.io`). Só sai com captura de tráfego do agente ao vivo ou acesso ao filesystem do sandbox. O `CLAUDE.md` (§22.1) é a camada Mitra-específica que se soma a ele.
+
+### 22.5 Resumo
+
+| Camada | Modelo | Fonte | Status |
+|---|---|---|---|
+| Build agent — `CLAUDE.md` | Claude (claudecode) | repo do projeto | ✅ íntegra |
+| Escopo — wrapper `Ep()` | gemini-2.5-pro | bundle specialist | ✅ íntegra |
+| Escopo — `SKILL_MD` | — | SF#4 proj 42949 | ⚠️ gated (estrutura em §15.6) |
+| Claude Code base | Claude | sandbox server-side | ❌ precisa tráfego ao vivo |

@@ -1,4 +1,5 @@
 const DECIDING_VERDICTS = new Set(['PASS', 'FAIL']);
+const FINALIZED_VERDICTS = new Set(['PASS', 'FAIL', 'BLOCKED', 'REJECT']);
 
 export const APPLICABILITY_STATES = Object.freeze([
   'REQUIRED',
@@ -6,34 +7,44 @@ export const APPLICABILITY_STATES = Object.freeze([
   'BLOCKED',
 ]);
 
+function isFinalizedEvidence(evidence) {
+  return evidence?.finalized === true && FINALIZED_VERDICTS.has(evidence.verdict);
+}
+
 function isFinalizedDecidingEvidence(evidence) {
   return evidence?.finalized === true && DECIDING_VERDICTS.has(evidence.verdict);
 }
 
 function piRpcApplicability({ piSdk, piAcp }) {
+  const sdkBoundaryRequired = isFinalizedEvidence(piSdk)
+    && piSdk.verdict === 'FAIL'
+    && piSdk.triggers?.failedSolelyBecauseOutOfProcessBoundaryRequired === true;
+  const acpTranslationIsolationRequired = isFinalizedEvidence(piAcp)
+    && piAcp.verdict === 'FAIL'
+    && piAcp.triggers?.failedAndRequiresPiRpcIsolation === true;
+
+  if (sdkBoundaryRequired || acpTranslationIsolationRequired) return 'REQUIRED';
   if (!isFinalizedDecidingEvidence(piSdk) || !isFinalizedDecidingEvidence(piAcp)) return 'BLOCKED';
 
-  const sdkBoundaryRequired = piSdk.verdict === 'FAIL'
-    && piSdk.triggers?.failedSolelyBecauseOutOfProcessBoundaryRequired === true;
-  const acpTranslationIsolationRequired = piAcp.verdict === 'FAIL'
-    && piAcp.triggers?.failedAndRequiresPiRpcIsolation === true;
   const processBoundaryAmbiguous = piSdk.observations?.sdkVsPiAcpProcessBoundaryAmbiguous === true
     || piAcp.observations?.sdkVsPiAcpProcessBoundaryAmbiguous === true;
+  const maintenanceCostAmbiguous = piSdk.observations?.sdkVsPiAcpMaintenanceCostAmbiguous === true
+    || piAcp.observations?.sdkVsPiAcpMaintenanceCostAmbiguous === true;
 
-  return sdkBoundaryRequired || acpTranslationIsolationRequired || processBoundaryAmbiguous
+  return processBoundaryAmbiguous || maintenanceCostAmbiguous
     ? 'REQUIRED'
     : 'NOT_REQUIRED';
 }
 
 function secondAcpApplicability({ piAcp, openCode }) {
-  if (!isFinalizedDecidingEvidence(piAcp) || !isFinalizedDecidingEvidence(openCode)) return 'BLOCKED';
+  if (!isFinalizedDecidingEvidence(openCode)) return 'BLOCKED';
+
+  const acpRemainsMateriallyDecisionRelevant = openCode.observations?.materialAcpBoundaryAdvantage === true;
+  if (!acpRemainsMateriallyDecisionRelevant) return 'NOT_REQUIRED';
+  if (!isFinalizedEvidence(piAcp)) return 'BLOCKED';
 
   const twoIndependentAcpImplementationsPassed = piAcp.verdict === 'PASS' && openCode.verdict === 'PASS';
-  const acpRemainsMateriallyDecisionRelevant = openCode.observations?.materialAcpBoundaryAdvantage === true;
-
-  return acpRemainsMateriallyDecisionRelevant && !twoIndependentAcpImplementationsPassed
-    ? 'REQUIRED'
-    : 'NOT_REQUIRED';
+  return twoIndependentAcpImplementationsPassed ? 'NOT_REQUIRED' : 'REQUIRED';
 }
 
 export function evaluateApplicability(evidence = {}) {

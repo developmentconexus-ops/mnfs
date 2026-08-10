@@ -1134,3 +1134,65 @@ O system prompt base (Claude Code + injeção do harness Mitra) é montado serve
 | Escopo — wrapper `Ep()` | gemini-2.5-pro | bundle specialist | ✅ íntegra |
 | Escopo — `SKILL_MD` | — | SF#4 proj 42949 | ⚠️ gated (estrutura em §15.6) |
 | Claude Code base | Claude | sandbox server-side | ❌ precisa tráfego ao vivo |
+
+## 23. Configurações de projeto, tools/métodos, e integração projeto↔projeto
+
+Extraído dos chunks Nuxt de `agent.mitralab.io` (`server_function_store`, `integrations_store`, `CodeBuilderAIKeysPanel`, `AgentTaskContextModal`, `useAgentBackendBridge`, `connection_settings_store`). Responde: o que dá pra configurar por projeto, como tools/métodos entram no harness, e como um projeto grava na tabela de outro.
+
+### 23.1 Superfícies de configuração do projeto (5 planos)
+
+| Plano | Endpoint base | O que configura |
+|---|---|---|
+| **Modelo/Agente** (`ActivateAIModelsModal`, `CodeBuilderAIKeysPanel`) | `/api/mitra-agent/auth/{claude\|codex\|openai}`, `/api/mitra-agent/keys` | `agentType` (claudecode/codex/opencode), `target` de assinatura (claude/openai_oauth/codex), `provider`+`apiKey` (BYOK) |
+| **Integrações** (`integrations_store`) | `/integration`, `/integration/${id}`, `/integration/test`, `/integration/${id}/duplicate` | conectores REST/OAuth |
+| **Connections/DB** (`connection_settings_store`) | `/connection*`, `/jdbcConnectionConfig`, `/freeDB*` | DBs externos, tabelas gerenciadas, tunnel |
+| **Server Functions** (`server_function_store`) | `/serverFunction*` | lógica executável (ver 23.2) |
+| **Contexto de task** (`AgentTaskContextModal`) | `/mitraspace/userSpaces/v2` | tag de outros projetos como contexto (ver 23.4) |
+
+**BYOK providers** (imagens `/images/providers/`): claude-code, openai, anthropic, gemini, minimax, kimi, glm, qwen, openrouter. Confirma §18. É aqui que se "define método de utilização" (qual harness + qual credencial).
+
+### 23.2 Server Functions — tipos, execução, cron, público
+
+`server_function_store` expõe o CRUD + execução:
+- Endpoints: `POST /serverFunction`, `PATCH/GET /serverFunction/${id}`, `POST /serverFunction/${id}/execute`, `GET /serverFunction/${id}/executions`, `GET /serverFunction/execution/${id}`, `POST /serverFunction/execution/${id}/stop`.
+- **3 tipos** (com templates default):
+  - `JAVASCRIPT`: `export default async function handler(event) { … }`
+  - `SQL`: `SELECT * FROM tabela WHERE id = {{id}}` (parametrizado com `{{param}}`)
+  - `INTEGRATION`: `{ "url":"", "method":"GET", "headers":{}, "body":{} }` — chamada REST declarativa
+- **Cron**: campo `cronExpression` (ex: `0 */30 * * * *` no setup do Sales Radar).
+- **Tornar pública** (a chave da sua pergunta): `togglePublicExecution(id, bool)` → `PATCH /serverFunction/${id}/publicExecution` body `{ publicExecution: true }`. Liga a execução pública da SF → passa a ser chamável de fora do projeto via `/serverFunction/${id}/execute`.
+
+### 23.3 Integrações — conectores (o "criar chave de API")
+
+`integrations_store`: `createIntegration`, `updateIntegration`, `testConnection`, `testConnectionById`. Modelo do registro: `{ name, slug, type, authType, baseURL, method, username, password, token, secret }`.
+- **Blueprints prontos**: `sankhya`, `sankhya_url`, `gmail`, `google_calendar`, `hubspot`, e **`custom`** (REST arbitrário).
+- **authType** (é a "chave de API"): `bearer_token`, `basic_auth`, `api_key`, `custom`. O segredo vai em `token`/`secret`/`password`.
+- Runtime: `callIntegrationMitra({ connection: slug, method, endpoint, params, body })` resolve o slug → executa com a auth configurada (§16.2). No wire vira `integrationSlug` (§20.3).
+
+### 23.4 Contexto cross-projeto (como o agente "enxerga" outro projeto)
+
+`AgentTaskContextModal` carrega `GET /mitraspace/userSpaces/v2?getProjects=true&includeV2MitraVersion=true` e deixa você marcar **outros workspaces/projetos** como contexto da task. Cada tag: `{ id, label, type:'workspace'|'project', contextCategory:'admin'|'dev'|'business', accessType, workspaceId }`.
+- Categorias por `accessType`: **admin** (CREATOR/OWNER/ADMIN), **dev** (OWNER/CREATOR), **business** (demais). Isto dá ao build agent conhecimento do schema/regras de OUTRO projeto — mas é **contexto de build**, não escrita de dados em runtime.
+
+### 23.5 Resposta: projeto A grava na tabela do projeto B
+
+Dois caminhos, ambos suportados:
+
+**(a) Via Server Function pública + Integração (o que você viu):**
+1. No **projeto B**: cria SF (`JAVASCRIPT` ou `SQL`) que faz INSERT/UPSERT na tabela de B → `togglePublicExecution(true)`. Vira endpoint público `/serverFunction/{idB}/execute`.
+2. No **projeto A**: Configuração > Integração > nova integração `custom`, `authType: api_key`/`bearer_token`, `baseURL` = endpoint público da SF de B, `secret/token` = a chave.
+3. Em A, chama via `callIntegrationMitra({ connection:'slug-de-B', method:'POST', body:{…} })` ou uma SF tipo `INTEGRATION` com `{url, method, headers, body}`. → A grava na tabela de B pela API.
+
+**(b) Via Connection JDBC compartilhada:** se ambos apontam o mesmo `jdbcConnectionConfigId`, A escreve direto na tabela gerenciada (mesma origem de dados). Menos isolado — evitar salvo intenção explícita.
+
+### 23.6 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| SF pública via toggle `publicExecution` | ADAPT | Útil, mas exige authz forte no endpoint público (rate-limit, escopo, rotação de key) — não deixar SF pública sem auth |
+| Integração `custom` REST com authType bearer/basic/api_key | ADOPT | Conector genérico é o certo; nós já modelamos integração como classe/data-structure |
+| SF tipos JAVASCRIPT/SQL/INTEGRATION | ADOPT | Três tipos cobrem quase tudo; SQL parametrizado `{{}}` é limpo |
+| Projeto→projeto por SF pública + integração | ADAPT | Padrão de composição bom; preferir contrato/versionado e authz mútua a URL+key solta |
+| Contexto cross-projeto por categoria admin/dev/business | ADOPT | Escopar contexto por papel de acesso é o modelo certo p/ multi-projeto |
+| Connection JDBC compartilhada entre projetos | REJECT (default) | Quebra isolamento; só com intenção explícita |
+| Firebase web API key exposta no bundle do cliente | REFERENCE (lição) | Config Firebase é "pública" por design, mas evitar expor qualquer key de serviço no cliente |

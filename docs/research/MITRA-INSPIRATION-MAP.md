@@ -1196,3 +1196,52 @@ Dois caminhos, ambos suportados:
 | Contexto cross-projeto por categoria admin/dev/business | ADOPT | Escopar contexto por papel de acesso é o modelo certo p/ multi-projeto |
 | Connection JDBC compartilhada entre projetos | REJECT (default) | Quebra isolamento; só com intenção explícita |
 | Firebase web API key exposta no bundle do cliente | REFERENCE (lição) | Config Firebase é "pública" por design, mas evitar expor qualquer key de serviço no cliente |
+
+## 24. Publicar / tornar visível ao externo (deploy do app gerado)
+
+Extraído de `PublishAppButton.vue` (+ `useAppAddressVerify`, `custom_app_validator`). É como o app buildado sai do sandbox e vira site acessível.
+
+### 24.1 Dois tipos de publicação
+
+i18n `WHITE_LABEL.*`:
+- **`internal_publish`** — servido em subdomínio Mitra (host gerenciado, sem domínio próprio).
+- **`external_publish`** — domínio **custom / white-label** próprio do cliente.
+
+O usuário escolhe em `choose_publish_type`; estados `published_internal` / `published_external`; `unpublish` reverte.
+
+### 24.2 Três modos de visibilidade
+
+- **`PRIVATE`** — só o dono/colaboradores.
+- **`PUBLIC_WITH_LOGIN`** — URL pública, mas exige login Mitra (o fluxo de fragment do §21.5) para entrar.
+- **`PUBLIC`** — aberto, sem login.
+
+### 24.3 API de domínio custom (`external_publish`)
+
+Função `e1()`:
+```
+POST   /cb-domain            body {domain, workspaceId, projectId}   // createDomain
+GET    /cb-domain            query {workspaceId, projectId}          // getDomain
+GET    /cb-domain/verify     query {domain}  (retry:0)               // verifyDomain (DNS)
+DELETE /cb-domain            query {domain, workspaceId, projectId}  // deleteDomain
+```
+Fluxo: registra o domínio → aponta DNS (CNAME) → `verifyDomain` confere a propagação → publica externo nele.
+
+### 24.4 Deploy por snapshot + status de sincronização
+
+- **Publicar** = `POST /api/cb-publish-snapshot {workspaceId, projectId}` — **copia o output do build** para produção. Retorna `{copiedCount, matchedFormats}`. Há re-snapshot após `publish-done` (não-fatal se falhar).
+- **Status** = `GET /api/cb-publish-status?wsId&pId` → `{inSync, hasOutput, published, prodLastModifiedAt, version}`.
+- O botão calcula "há mudanças a publicar" por `!(inSync && hasOutput && published)` → estados `publish_changes` / `publish_changes_up_to_date`. Versionado (`version`, `prodLastModifiedAt`).
+
+### 24.5 Modelo mental
+
+Sandbox (dev, efêmero) → `npm run build` → **snapshot** copiado p/ prod → servido em subdomínio Mitra (interno) **ou** domínio custom verificado por DNS (externo) → gate de visibilidade PRIVATE / PUBLIC_WITH_LOGIN / PUBLIC. Deploy é **imutável por snapshot versionado**, não live-mount do sandbox.
+
+### 24.6 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| Deploy por snapshot versionado (não live-mount do sandbox) | ADOPT | Prod imutável e reproduzível; sandbox nunca serve tráfego real |
+| Status `inSync/hasOutput/published/version` → diff "publicar mudanças" | ADOPT | UX clara de "há mudanças não publicadas"; espelhar |
+| 3 modos de visibilidade (private/public_with_login/public) | ADOPT | Gate de auth por nível é o modelo certo |
+| Domínio custom com verify DNS (`/cb-domain/verify`) | ADAPT | Bom; garantir emissão de TLS automática + checagem de posse robusta |
+| Publish interno vs externo (white-label) | REFERENCE | Separar host gerenciado de domínio do cliente desde o início |

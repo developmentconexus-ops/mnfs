@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { S1_CRITERIA } from '../src/contract.mjs';
+import { S1_FROZEN_CANDIDATE_PROVENANCE } from '../src/preflight.mjs';
 import { buildS1Report, isSelectionEligible } from '../src/report.mjs';
 
 const POLICY_FIELDS = [
@@ -57,6 +58,9 @@ function candidate(overrides = {}) {
     verdict: 'PASS',
     criterionResults: passResults(),
     artifactRecords: artifactSet(),
+    supportedBoundaryEvidence: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'fixture' },
+    provenanceEvidence: { ...S1_FROZEN_CANDIDATE_PROVENANCE['PI-SDK'], stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }] },
+    dependencyAdmissionEvidence: { upgradePolicy: { ...POLICY }, removalConditions: { ...REMOVAL } },
     supportedBoundaryEvidenceRefs: ['supported-boundary'],
     provenanceEvidenceRefs: ['provenance'],
     dependencyAdmissionEvidenceRefs: ['dependency-admission'],
@@ -70,6 +74,9 @@ function candidate(overrides = {}) {
       verdict: 'PASS',
       criterionResults: passResults(),
       artifactRecords: artifactSet(),
+      supportedBoundaryEvidence: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'fixture' },
+      provenanceEvidence: { ...S1_FROZEN_CANDIDATE_PROVENANCE['PI-SDK'], stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }] },
+      dependencyAdmissionEvidence: { upgradePolicy: { ...POLICY }, removalConditions: { ...REMOVAL } },
       supportedBoundaryEvidenceRefs: ['supported-boundary'],
       provenanceEvidenceRefs: ['provenance'],
       dependencyAdmissionEvidenceRefs: ['dependency-admission'],

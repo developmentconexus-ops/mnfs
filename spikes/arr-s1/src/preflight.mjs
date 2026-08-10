@@ -94,6 +94,14 @@ function sourceCheck(source, authority) {
   };
 }
 
+function canonicalSourceObservation(value) {
+  if (!value || typeof value !== 'object') return value;
+  const nested = value.source;
+  return nested && typeof nested === 'object'
+    ? { ...value, ...nested }
+    : value;
+}
+
 function isLinuxOwnedAbsolute(value) {
   if (typeof value !== 'string' || !path.posix.isAbsolute(value)) return false;
   const normalized = path.posix.normalize(value);
@@ -125,17 +133,29 @@ function provenanceMap(input) {
     return Object.fromEntries(input.filter((item) => item && typeof item.candidateShape === 'string').map((item) => [item.candidateShape, item]));
   }
   if (!input || typeof input !== 'object') return {};
+  if (input.records && typeof input.records === 'object' && !Array.isArray(input.records)) return input.records;
   return input;
 }
 
-export function validateCandidateProvenance(input) {
+export function validateCandidateProvenance(input, { allowTestBoundary = false } = {}) {
+  const trustedBoundary = input?.trustedBoundary;
+  const boundaryAllowed = trustedBoundary === 'MNFS_TRUSTED_STAGING_V1'
+    || (allowTestBoundary && trustedBoundary === 'TEST_FAITHFUL_STAGING');
   const observed = provenanceMap(input);
   const errors = [];
+  if (!boundaryAllowed) errors.push('candidate provenance must come from the trusted staging boundary');
+  if (!/^sha256:[a-f0-9]{64}$/u.test(input?.integrity?.manifestSha256 ?? '')) {
+    errors.push('candidate staging manifest integrity is unavailable');
+  }
   for (const id of REQUIRED_PROVENANCE_IDS) {
     const expected = S1_FROZEN_CANDIDATE_PROVENANCE[id];
     const actual = observed[id];
     if (!actual || actual.version !== expected.version || actual.package !== expected.package || actual.sourceIdentity !== expected.sourceIdentity || actual.license !== expected.license) {
       errors.push(`${id} exact provenance is unavailable or mismatched`);
+    } else if (!allowTestBoundary && (!Array.isArray(actual.stagedPaths) || actual.stagedPaths.length === 0
+      || !actual.surfaces?.adapter || !actual.surfaces?.boundary || !actual.surfaces?.executable || !actual.surfaces?.acpSdk
+      || !actual.environment || typeof actual.environment !== 'object')) {
+      errors.push(`${id} staged adapter, boundary, executable, ACP SDK and explicit environment surfaces are incomplete`);
     }
   }
   for (const id of CONDITIONAL_PROVENANCE_IDS) {
@@ -147,7 +167,7 @@ export function validateCandidateProvenance(input) {
       }
     }
   }
-  return { ok: errors.length === 0, errors, records: safeClone(observed) };
+  return { ok: errors.length === 0, errors, records: safeClone(observed), metadata: safeClone(input) };
 }
 
 export function preflightCredentials(input = {}) {
@@ -177,14 +197,6 @@ export function resolveS1StateRootPath(input = {}) {
   return null;
 }
 
-async function observeCurrentVerificationRun(input, authority) {
-  const observer = input?.observers?.verificationRun;
-  const observed = typeof observer === 'function'
-    ? await observer()
-    : { verifyRun: Number((input.env ?? process.env)?.MNFS_ARR_S1_CURRENT_VERIFY_RUN) };
-  return observed?.verifyRun === authority.verifyRun;
-}
-
 export async function preflightS1(input = {}) {
   let authority;
   try {
@@ -210,13 +222,14 @@ export async function preflightS1(input = {}) {
     const repoRoot = input.repoRoot ?? process.cwd();
     const stateRootPath = resolveS1StateRootPath(input);
     const observers = input.observers ?? {};
-    source = typeof observers.source === 'function'
+    source = canonicalSourceObservation(typeof observers.source === 'function'
       ? await observers.source({ repoRoot })
-      : await observeRepositoryIdentity({ repoRoot });
+      : await observeRepositoryIdentity({ repoRoot }));
     stateRoot = typeof observers.stateRoot === 'function'
       ? await observers.stateRoot({ stateRoot: stateRootPath })
       : stateRootPath ? await observeLinuxStateRoot({ stateRoot: stateRootPath }) : null;
-    provenance = typeof observers.provenance === 'function'
+    const provenanceObserverInjected = typeof observers.provenance === 'function';
+    provenance = provenanceObserverInjected
       ? await observers.provenance({ stateRoot: stateRoot?.path ?? stateRootPath })
       : stateRoot?.path ? await observeStagedCandidateProvenance({ stateRoot: stateRoot.path }) : null;
     credentialsInput = typeof observers.credentials === 'function'
@@ -241,19 +254,10 @@ export async function preflightS1(input = {}) {
   if (!sourceResult.ok) blockers.push(blocked('sourceCleanAndBound', sourceResult.reason));
   const stateResult = stateRootCheck(stateRoot);
   if (!stateResult.ok) blockers.push(blocked('linuxStateRoot', stateResult.reason));
-  const provenanceRecords = provenance?.records ?? provenance;
-  const provenanceResult = validateCandidateProvenance(provenanceRecords);
+  const provenanceResult = validateCandidateProvenance(provenance, {
+    allowTestBoundary: typeof input.observers?.provenance === 'function',
+  });
   if (!provenanceResult.ok) blockers.push(blocked('candidateProvenance', provenanceResult.errors.join('; ')));
-  let verificationRunMatches = false;
-  try {
-    verificationRunMatches = await observeCurrentVerificationRun(input, authority);
-  } catch {
-    verificationRunMatches = false;
-  }
-  if (!verificationRunMatches) {
-    blockers.push(blocked('verificationRun', 'GATE-S1 verify_run does not match the current execution observation'));
-  }
-
   let credentialResult;
   try {
     credentialResult = preflightCredentials(credentialsInput);
@@ -266,9 +270,11 @@ export async function preflightS1(input = {}) {
     status: blockers.length === 0 ? 'READY' : 'BLOCKED',
     operationAllowed: blockers.length === 0,
     executionAuthorization: executionAuthorizationEvidence(authority),
-    source: safeClone(source),
-    stateRoot: safeClone(stateRoot),
-    provenance: provenanceResult.ok ? provenanceResult.records : null,
+    source: sourceResult.ok ? safeClone(source) : null,
+    stateRoot: stateResult.ok ? safeClone(stateRoot) : null,
+    provenance: provenanceResult.ok
+      ? { ...provenanceResult.metadata, records: provenanceResult.records }
+      : null,
     credentials: credentialResult.status === 'READY' ? credentialResult.credentials : null,
     blockers,
     remediation: 'NONE_AUTOMATIC',

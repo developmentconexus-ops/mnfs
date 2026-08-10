@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -8,9 +8,11 @@ import {
 } from './execution-authority.mjs';
 import { preflightS1, resolveS1StateRootPath } from './preflight.mjs';
 import { orchestrateS1 } from './run.mjs';
+import { createS1Fixture } from './fixture.mjs';
 import { sha256Bytes, verifyArtifactRecords, writeJsonArtifact } from './artifacts.mjs';
 
 const RUN_ID_PATTERN = /^arr-s1-[A-Za-z0-9][A-Za-z0-9._-]*$/u;
+const CLASS_VALUE_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/u;
 function invalid(message) {
   throw new TypeError(`invalid ARR-S1 CLI: ${message}`);
 }
@@ -29,11 +31,13 @@ export function parseCliArgs(argv) {
 
   let json = false;
   let runId = null;
+  let providerClass = null;
+  let authMethodClass = null;
   const seen = new Set();
   for (let index = 0; index < tokens.length; index += 1) {
     const token = tokens[index];
     if (!token.startsWith('--')) invalid(`unexpected positional argument ${token}`);
-    if (!['--json', '--run-id'].includes(token)) invalid(`unknown flag ${token}`);
+    if (!['--json', '--run-id', '--provider-class', '--auth-method-class'].includes(token)) invalid(`unknown flag ${token}`);
     if (seen.has(token)) invalid(`duplicate flag ${token}`);
     seen.add(token);
     if (token === '--json') {
@@ -42,6 +46,13 @@ export function parseCliArgs(argv) {
     }
     const value = tokens[index + 1];
     if (!value || value.startsWith('--')) invalid('missing value for --run-id');
+    if (token === '--provider-class' || token === '--auth-method-class') {
+      if (!CLASS_VALUE_PATTERN.test(value)) invalid('class-only provider/auth-method value is invalid');
+      if (token === '--provider-class') providerClass = value;
+      else authMethodClass = value;
+      index += 1;
+      continue;
+    }
     try {
       runId = requireRunId(value);
     } catch (error) {
@@ -53,7 +64,14 @@ export function parseCliArgs(argv) {
   if (!json) invalid('--json is required');
   if (command === 'report' && !runId) invalid('report requires --run-id');
   if (command !== 'report' && runId) invalid(`${command} does not accept --run-id`);
-  return { command, ...(runId ? { runId } : {}), json: true };
+  if (command === 'report' && (providerClass || authMethodClass)) invalid('report does not accept provider/auth-method classes');
+  return {
+    command,
+    ...(runId ? { runId } : {}),
+    ...(providerClass ? { providerClass } : {}),
+    ...(authMethodClass ? { authMethodClass } : {}),
+    json: true,
+  };
 }
 
 function writeJson(stdout, value) {
@@ -79,13 +97,28 @@ function runBinding(result, runId) {
   const fixtureHash = result?.fixture?.fixtureHash ?? result?.candidates?.find((candidate) => candidate?.fixtureHash)?.fixtureHash;
   if (!authorization || !/^sha256:[a-f0-9]{64}$/u.test(authorization.contractSha256 ?? '')
     || !/^[a-f0-9]{40}$/u.test(sourceTreeHash ?? '') || !/^sha256:[a-f0-9]{64}$/u.test(fixtureHash ?? '')) return null;
+  const sourceTreeBinding = sha256Bytes(Buffer.from(sourceTreeHash));
   return {
     runId,
     candidateShape: 'S1-RUN',
-    runKey: runKey(runId, sourceTreeHash, fixtureHash),
+    runKey: runKey(runId, sourceTreeBinding, fixtureHash),
     contractHash: authorization.contractSha256,
     fixtureHash,
+    sourceTreeHash: sourceTreeBinding,
   };
+}
+
+function sharedBinding(binding) {
+  return {
+    runId: binding?.runId,
+    contractHash: binding?.contractHash,
+    fixtureHash: binding?.fixtureHash,
+    sourceTreeHash: binding?.sourceTreeHash,
+  };
+}
+
+function sameSharedBinding(left, right) {
+  return JSON.stringify(sharedBinding(left)) === JSON.stringify(sharedBinding(right));
 }
 
 async function persistRun(result, stateRoot) {
@@ -95,7 +128,13 @@ async function persistRun(result, stateRoot) {
   const binding = runBinding(result, runId);
   if (!binding) throw new Error('ARR-S1 durable report requires verified source, fixture and contract bindings');
   const reportMeta = await writeJsonArtifact(root, 'report.json', report, { binding, kind: 'report' });
-  const candidateRecords = result?.candidates?.flatMap((candidate) => Array.isArray(candidate?.artifactRecords) ? candidate.artifactRecords : []) ?? [];
+  const candidateRecords = result?.candidates?.flatMap((candidate) => [
+    ...(Array.isArray(candidate?.artifactRecords) ? candidate.artifactRecords : []),
+    ...(Array.isArray(candidate?.boundary?.artifactRecords) ? candidate.boundary.artifactRecords : []),
+  ]) ?? [];
+  if (candidateRecords.some((record) => !sameSharedBinding(record?.binding, binding))) {
+    throw new Error('ARR-S1 candidate Evidence is not bound to the current contract, fixture, source and run');
+  }
   const records = [...candidateRecords, reportMeta];
   const manifestValue = { schemaVersion: 1, runId, records };
   const manifestMeta = await writeJsonArtifact(root, 'manifest.json', manifestValue, { binding, kind: 'manifest' });
@@ -142,6 +181,9 @@ export async function loadRun(runId, stateRoot) {
   const manifest = JSON.parse(await readFile(path.join(root, manifestRecord.path), 'utf8'));
   if (manifest.runId !== runId || !Array.isArray(manifest.records)) throw new Error('ARR-S1 manifest binding is invalid');
   if (manifest.records.some((record) => record?.binding?.runId !== runId)) throw new Error('ARR-S1 manifest contains an artifact from another run');
+  if (manifest.records.some((record) => !sameSharedBinding(record?.binding, reportRecord.binding))) {
+    throw new Error('ARR-S1 manifest contains an artifact from another contract, fixture or source tree');
+  }
   const recordIntegrity = await verifyArtifactRecords(root, manifest.records);
   if (!recordIntegrity.ok) throw new Error(`ARR-S1 report Evidence integrity failed: ${recordIntegrity.errors.join('; ')}`);
   const manifestReport = manifest.records.find((record) => record.id === reportRecord.id);
@@ -169,6 +211,13 @@ export async function executeCli(argv, options = {}) {
     ...(options.repoRoot ? { repoRoot: options.repoRoot } : {}),
     ...(stateRoot ? { stateRootPath: stateRoot } : {}),
   };
+  if (parsed.providerClass || parsed.authMethodClass) {
+    preflightInput.credentials = {
+      authorized: true,
+      ...(parsed.providerClass ? { providerClass: parsed.providerClass } : {}),
+      ...(parsed.authMethodClass ? { authMethodClass: parsed.authMethodClass } : {}),
+    };
+  }
 
   if (parsed.command === 'preflight') {
     const preflight = options.preflight ?? preflightS1;
@@ -182,14 +231,33 @@ export async function executeCli(argv, options = {}) {
     requireRunId(runId);
     try {
       const run = options.run ?? orchestrateS1;
-      const result = await run({
+      const runRoot = deriveS1RunRoot(stateRoot, runId);
+      if (!options.run) await mkdir(stateRoot, { recursive: true, mode: 0o700 });
+      const runInput = {
         ...(options.runInput ?? {}),
         runId,
         preflightInput,
+        executorOptions: {
+          ...(options.runInput?.executorOptions ?? {}),
+          runRoot,
+        },
+      };
+      if (!options.run && !runInput.fixture && !runInput.fixtureFactory) {
+        runInput.fixtureFactory = async () => {
+          await mkdir(runRoot, { recursive: true, mode: 0o700 });
+          return createS1Fixture({ parentDir: runRoot });
+        };
+      }
+      const result = await run({
+        ...runInput,
       });
-      const report = await persistRun(result, stateRoot);
-      writeJson(stdout, report);
-      return report?.status === 'REJECT' ? 3 : report?.status === 'SUCCESS' ? 0 : 2;
+      try {
+        const report = await persistRun(result, stateRoot);
+        writeJson(stdout, report);
+        return report?.status === 'REJECT' ? 3 : report?.status === 'SUCCESS' ? 0 : 2;
+      } finally {
+        if (!options.runInput?.fixture && result?.fixture?.dispose) await result.fixture.dispose();
+      }
     } catch (error) {
       const failure = {
         status: 'BLOCKED',

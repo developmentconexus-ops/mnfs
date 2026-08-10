@@ -46,6 +46,13 @@ function safeInput(overrides = {}) {
   const source = overrides.source ?? SOURCE;
   const stateRoot = overrides.stateRoot ?? STATE_ROOT;
   const provenance = overrides.provenance ?? acceptedProvenance();
+  const provenanceObservation = provenance?.records
+    ? provenance
+    : {
+      trustedBoundary: 'TEST_FAITHFUL_STAGING',
+      integrity: { manifestSha256: `sha256:${'a'.repeat(64)}` },
+      records: provenance,
+    };
   const credentials = overrides.credentials ?? CREDENTIALS;
   const { source: _source, stateRoot: _stateRoot, provenance: _provenance, credentials: _credentials, ...rest } = overrides;
   return {
@@ -54,7 +61,7 @@ function safeInput(overrides = {}) {
     observers: {
       source: () => source,
       stateRoot: () => stateRoot,
-      provenance: () => provenance,
+      provenance: () => provenanceObservation,
       verificationRun: () => ({ verifyRun: AUTHORITY.verifyRun }),
     },
     ...rest,

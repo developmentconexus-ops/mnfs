@@ -16,6 +16,7 @@ const BINDING = Object.freeze({
   candidateShape: 'PI-SDK',
   contractHash: `sha256:${'a'.repeat(64)}`,
   fixtureHash: `sha256:${'b'.repeat(64)}`,
+  sourceTreeHash: `sha256:${'c'.repeat(64)}`,
 });
 
 test('publishes private raw artifacts with exact hash-bound identity and no replacement', async () => {

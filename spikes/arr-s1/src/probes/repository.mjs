@@ -65,15 +65,17 @@ export async function observeRepositoryIdentity({ repoRoot, runCommand = default
   const tree = await runGit(runCommand, repoRoot, ['rev-parse', 'HEAD^{tree}']);
   const treeSha = text(tree);
   if (tree?.exitCode !== 0 || !SHA_PATTERN.test(treeSha)) {
-    return { source: { commitSha }, clean: false, statusText: '', observation: { state: 'UNKNOWN' } };
+    return { commitSha, source: { commitSha }, clean: false, statusText: '', observation: { state: 'UNKNOWN' } };
   }
 
   const status = await runGit(runCommand, repoRoot, ['status', '--porcelain=v1', '--untracked-files=normal']);
   if (status?.exitCode !== 0) {
-    return { source: { commitSha, treeSha }, clean: false, statusText: '', observation: { state: 'UNKNOWN' } };
+    return { commitSha, treeSha, source: { commitSha, treeSha }, clean: false, statusText: '', observation: { state: 'UNKNOWN' } };
   }
   const statusText = Buffer.from(status.stdout ?? '').toString('utf8');
   return {
+    commitSha,
+    treeSha,
     source: { commitSha, treeSha },
     clean: statusText.length === 0,
     statusText,

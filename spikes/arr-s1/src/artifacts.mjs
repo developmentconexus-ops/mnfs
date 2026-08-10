@@ -53,7 +53,7 @@ function requireBinding(binding) {
   if (!binding || typeof binding !== 'object') throw new TypeError('S1 artifact binding is required');
   if (typeof binding.runId !== 'string' || binding.runId.length === 0) throw new TypeError('S1 artifact binding runId is required');
   if (typeof binding.candidateShape !== 'string' || binding.candidateShape.length === 0) throw new TypeError('S1 artifact binding candidateShape is required');
-  for (const key of ['runKey', 'contractHash', 'fixtureHash']) {
+  for (const key of ['runKey', 'contractHash', 'fixtureHash', 'sourceTreeHash']) {
     if (!HASH_PATTERN.test(binding[key] ?? '')) throw new TypeError(`S1 artifact binding ${key} is invalid`);
   }
 }

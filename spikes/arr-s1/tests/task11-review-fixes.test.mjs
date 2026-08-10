@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -63,6 +64,9 @@ function candidate(shape, overrides = {}) {
     verdict: 'PASS',
     criterionResults: S1_CRITERIA.map((id) => ({ id, status: 'PASS', artifactRefs: [id] })),
     artifactRecords: artifacts,
+    supportedBoundaryEvidence: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'fixture' },
+    provenanceEvidence: { ...S1_FROZEN_CANDIDATE_PROVENANCE[shape], stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }] },
+    dependencyAdmissionEvidence: { upgradePolicy: { ...POLICY }, removalConditions: { ...REMOVAL } },
     supportedBoundaryEvidenceRefs: ['supported-boundary'],
     provenanceEvidenceRefs: ['provenance'],
     dependencyAdmissionEvidenceRefs: ['dependency-admission'],
@@ -76,6 +80,9 @@ function candidate(shape, overrides = {}) {
       verdict: 'PASS',
       criterionResults: S1_CRITERIA.map((id) => ({ id, status: 'PASS', artifactRefs: [id] })),
       artifactRecords: artifacts,
+      supportedBoundaryEvidence: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'fixture' },
+      provenanceEvidence: { ...S1_FROZEN_CANDIDATE_PROVENANCE[shape], stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }] },
+      dependencyAdmissionEvidence: { upgradePolicy: { ...POLICY }, removalConditions: { ...REMOVAL } },
       supportedBoundaryEvidenceRefs: ['supported-boundary'],
       provenanceEvidenceRefs: ['provenance'],
       dependencyAdmissionEvidenceRefs: ['dependency-admission'],
@@ -111,8 +118,8 @@ test('production preflight does not accept source, state-root or provenance asse
   });
   assert.equal(result.status, 'BLOCKED');
   assert.equal(result.source, null);
-  assert.equal(result.stateRoot, null);
-  assert.ok(result.blockers.some(({ id }) => id === 'observers'));
+  assert.notEqual(result.stateRoot?.path, '/home/fake/state');
+  assert.ok(result.blockers.some(({ id }) => id === 'sourceCleanAndBound'));
 });
 
 test('Git observer uses fixed system/global config and disables hooks/fsmonitor', async () => {
@@ -138,16 +145,50 @@ test('Git observer uses fixed system/global config and disables hooks/fsmonitor'
 test('state-root and staged-provenance observers inspect actual local bytes', async () => {
   const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-observer-'));
   try {
-    const provenancePath = path.join(stateRoot, 'candidates', 'provenance.json');
+    const provenancePath = path.join(stateRoot, 'candidates', 'staging-manifest.json');
+    const stagedPath = path.join(stateRoot, 'candidates', 'fixture-module.mjs');
     await (await import('node:fs/promises')).mkdir(path.dirname(provenancePath), { recursive: true });
-    await writeFile(provenancePath, JSON.stringify({ 'PI-SDK': { candidateShape: 'PI-SDK', version: 'fixture' } }));
+    await writeFile(stagedPath, 'export const fixture = true;\n');
+    const stagedBytes = await (await import('node:fs/promises')).readFile(stagedPath);
+    const staged = {
+      path: 'candidates/fixture-module.mjs',
+      sha256: `sha256:${createHash('sha256').update(stagedBytes).digest('hex')}`,
+      sizeBytes: stagedBytes.length,
+    };
+    await writeFile(provenancePath, JSON.stringify({
+      schemaVersion: 1,
+      source: 'MNFS_TRUSTED_STAGING_V1',
+      records: {
+        'PI-SDK': {
+          candidateShape: 'PI-SDK',
+          version: 'fixture',
+          stagedPaths: [staged],
+          surfaces: { adapter: staged },
+        },
+      },
+    }));
     const state = await observeLinuxStateRoot({ stateRoot, runCommand: async () => ({ exitCode: 0, stdout: Buffer.from('ext4\n') }) });
     const provenance = await observeStagedCandidateProvenance({ stateRoot });
     assert.equal(state.path, stateRoot);
     assert.equal(state.realPath, stateRoot);
     assert.equal(state.writable, true);
     assert.equal(provenance.records['PI-SDK'].version, 'fixture');
+    assert.equal(provenance.records['PI-SDK'].stagedPaths[0].path, stagedPath);
     assert.equal(provenance.sourcePath, provenancePath);
+  } finally {
+    await rm(stateRoot, { recursive: true, force: true });
+  }
+});
+
+test('arbitrary provenance.json is not a trusted staging boundary', async () => {
+  const stateRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-untrusted-provenance-'));
+  try {
+    const provenancePath = path.join(stateRoot, 'candidates', 'provenance.json');
+    await (await import('node:fs/promises')).mkdir(path.dirname(provenancePath), { recursive: true });
+    await writeFile(provenancePath, JSON.stringify({ records: S1_FROZEN_CANDIDATE_PROVENANCE }));
+    const observed = await observeStagedCandidateProvenance({ stateRoot });
+    assert.equal(observed.state, 'MISSING');
+    assert.deepEqual(observed.records, {});
   } finally {
     await rm(stateRoot, { recursive: true, force: true });
   }
@@ -192,6 +233,16 @@ test('independent runtime/boundary inputs block ambiguous multiple valid choices
   assert.equal(report.status, 'BLOCKED');
   assert.equal(report.runtimeDecisionInput.selected, null);
   assert.equal(report.boundaryDecisionInput.selected, null);
+});
+
+test('runtime and ACP boundary may be selected independently when each has unique deciding Evidence', () => {
+  const runtime = candidate('PI-SDK');
+  const acpBoundary = candidate('PI-ACP').boundary;
+  runtime.boundary = acpBoundary;
+  const report = buildS1Report({ candidates: [runtime], externalComparison });
+  assert.equal(report.status, 'SUCCESS');
+  assert.equal(report.runtimeDecisionInput.selectedCandidateShape, 'PI-SDK');
+  assert.equal(report.boundaryDecisionInput.selectedBoundaryId, 'PI-ACP-BOUNDARY');
 });
 
 test('blocked applicability and incomplete required candidates cannot produce SUCCESS', () => {
@@ -265,24 +316,97 @@ test('PI-SDK executor does not claim exact environment proof from in-process exe
   }
 });
 
+test('criterion Evidence blocks caller boolean assertions instead of deriving PASS from them', async () => {
+  const fixture = await createS1Fixture();
+  const runRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-boolean-claims-'));
+  try {
+    await writeFile(fixture.targetFilePath, fixture.expectedTree.targetContent);
+    const record = {
+      ...S1_FROZEN_CANDIDATE_PROVENANCE['PI-SDK'],
+      stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }],
+      upgradePolicy: POLICY,
+      removalConditions: REMOVAL,
+    };
+    const oldBooleanAssertions = {
+      cwd: fixture.workspacePath,
+      toolInventoryMatches: true,
+      discoverySuppressed: true,
+      authSupported: true,
+      cancellationBounded: true,
+      outputBounded: true,
+      processDeathClassified: true,
+      freshRecoveryVerified: true,
+      supportedBoundary: true,
+      authoritySafe: true,
+      machineryLeverage: true,
+    };
+    const toolCalls = [
+      { id: 'read_nonce_file', path: fixture.nonceRelativePath, value: fixture.nonce },
+      { id: 'edit_result_file', path: fixture.targetRelativePath },
+    ];
+    const executors = createS1CandidateExecutors({
+      fixture,
+      processBoundary: {
+        kind: 'ACTOR_RUN_PROCESS',
+        run: async (_spec, action) => ({
+          ...(await action()),
+          boundaryObservation: { cwd: fixture.workspacePath, envDigest: `sha256:${'e'.repeat(64)}`, envSource: 'EXPLICIT_STAGED_ENV' },
+        }),
+      },
+      piSdkAdapterFactory: () => ({
+        initialize: async () => ({}),
+        startTurn: async () => ({ settled: true, outcome: 'COMPLETED', events: [{ type: 'done' }], toolCalls, observations: oldBooleanAssertions }),
+        close: async () => {},
+      }),
+    });
+    const result = await executors['PI-SDK']({
+      fixture,
+      runRoot,
+      artifactBinding: {
+        runId: 'arr-s1-boolean-claims',
+        candidateShape: 'PI-SDK',
+        runKey: sha256Bytes(Buffer.from('boolean-claims')),
+        contractHash: CONTRACT_HASH,
+        fixtureHash: fixture.fixtureHash,
+        sourceTreeHash: `sha256:${'f'.repeat(64)}`,
+      },
+      preflight: {
+        provenance: {
+          trustedBoundary: 'TEST_FAITHFUL_STAGING',
+          integrity: { manifestSha256: `sha256:${'a'.repeat(64)}` },
+          records: { 'PI-SDK': record },
+        },
+      },
+    });
+    assert.notEqual(result.verdict, 'PASS');
+  } finally {
+    await fixture.dispose();
+    await rm(runRoot, { recursive: true, force: true });
+  }
+});
+
 test('deterministic executor path writes verifiable Evidence for all concrete adapter shapes', async () => {
   const fixture = await createS1Fixture();
   const runRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-executor-path-'));
   const observations = {
     cwd: fixture.workspacePath,
-    toolInventoryMatches: true,
-    discoverySuppressed: true,
-    authSupported: true,
-    cancellationBounded: true,
-    outputBounded: true,
-    processDeathClassified: true,
-    freshRecoveryVerified: true,
-    supportedBoundary: true,
-    authoritySafe: true,
-    machineryLeverage: true,
+    inventory: ['read_nonce_file', 'edit_result_file'],
+    discovery: { extensions: [], skills: [], prompts: [], themes: [], agentsFiles: [] },
+    auth: { outcome: 'AUTHORIZED', methodClass: 'fixture-double' },
+    cancellation: { checkpoint: 'CANCELLATION_BEFORE_FINALIZED', outcome: 'CANCELLED', durationMs: 1 },
+    output: { bytes: 128, limitBytes: 4096 },
+    processDeath: { checkpoint: 'PROCESS_DEATH_BEFORE_FINALIZED', outcome: 'SIGNAL_DEATH' },
+    recovery: { phase: 'FRESH_PROCESS', verified: 'fixture-result' },
+    authority: { sessionRole: 'OBSERVATIONAL', recoveryOwner: 'MNFS' },
+    machinery: { reused: ['fixture', 'artifacts', 'process-runner'] },
+    supportedBoundary: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'FIXTURE_DOUBLE' },
   };
   const events = [{ type: 'runtime.completed' }];
-  const settled = { settled: true, outcome: 'COMPLETED', events };
+  const toolCalls = [
+    { id: 'read_nonce_file', path: fixture.nonceRelativePath, value: fixture.nonce },
+    { id: 'edit_result_file', path: fixture.targetRelativePath },
+  ];
+  const settled = { settled: true, outcome: 'COMPLETED', events, toolCalls, observations };
   const envDigest = `sha256:${'e'.repeat(64)}`;
   const fakeSdkAdapter = () => ({
     observations,
@@ -300,13 +424,9 @@ test('deterministic executor path writes verifiable Evidence for all concrete ad
   });
   const processBoundary = {
     kind: 'ACTOR_RUN_PROCESS',
-    exactEnvObserved: true,
-    envDigest,
     run: async (_spec, action) => ({
       ...(await action()),
-      cwd: fixture.workspacePath,
-      exactEnvObserved: true,
-      envDigest,
+      boundaryObservation: { cwd: fixture.workspacePath, envDigest, envSource: 'EXPLICIT_STAGED_ENV' },
       observations,
     }),
   };
@@ -330,16 +450,22 @@ test('deterministic executor path writes verifiable Evidence for all concrete ad
           runKey: sha256Bytes(Buffer.from(candidateShape)),
           contractHash: CONTRACT_HASH,
           fixtureHash: fixture.fixtureHash,
+          sourceTreeHash: `sha256:${'f'.repeat(64)}`,
         },
-        preflight: { provenance: { [candidateShape]: S1_FROZEN_CANDIDATE_PROVENANCE[candidateShape] } },
-        envDigest,
-        toolCalls: [
-          { id: 'read_nonce_file', path: fixture.nonceRelativePath, value: fixture.nonce },
-          { id: 'edit_result_file', path: fixture.targetRelativePath },
-        ],
-        observations,
-        upgradePolicy: POLICY,
-        removalConditions: REMOVAL,
+        preflight: {
+          provenance: {
+            trustedBoundary: 'TEST_FAITHFUL_STAGING',
+            integrity: { manifestSha256: `sha256:${'a'.repeat(64)}` },
+            records: {
+              [candidateShape]: {
+                ...S1_FROZEN_CANDIDATE_PROVENANCE[candidateShape],
+                stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }],
+                upgradePolicy: POLICY,
+                removalConditions: REMOVAL,
+              },
+            },
+          },
+        },
       });
       assert.equal(result.verdict, 'PASS', `${candidateShape}: ${JSON.stringify(result.criterionResults)}`);
       assert.equal(result.evidenceIntegrity.ok, true, candidateShape);

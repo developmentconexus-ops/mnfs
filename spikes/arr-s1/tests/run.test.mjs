@@ -4,6 +4,7 @@ import test from 'node:test';
 import { S1_CRITERIA } from '../src/contract.mjs';
 import { orchestrateS1 } from '../src/run.mjs';
 import { parseCliArgs } from '../src/cli.mjs';
+import { S1_FROZEN_CANDIDATE_PROVENANCE } from '../src/preflight.mjs';
 
 const COMPLETE_POLICY = Object.freeze({
   pinningRule: 'pin frozen candidate identity and package version',
@@ -34,6 +35,9 @@ function candidate(shape, verdict = 'PASS', overrides = {}) {
     verdict,
     criterionResults,
     artifactRecords,
+    supportedBoundaryEvidence: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'fixture' },
+    provenanceEvidence: { ...S1_FROZEN_CANDIDATE_PROVENANCE[shape], stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }] },
+    dependencyAdmissionEvidence: { upgradePolicy: { ...COMPLETE_POLICY }, removalConditions: { ...COMPLETE_REMOVAL } },
     supportedBoundaryEvidenceRefs: [`${shape}-supported-boundary`],
     provenanceEvidenceRefs: [`${shape}-provenance`],
     dependencyAdmissionEvidenceRefs: [`${shape}-dependency-admission`],
@@ -47,6 +51,9 @@ function candidate(shape, verdict = 'PASS', overrides = {}) {
       verdict,
       criterionResults,
       artifactRecords,
+      supportedBoundaryEvidence: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'fixture' },
+      provenanceEvidence: { ...S1_FROZEN_CANDIDATE_PROVENANCE[shape], stagedPaths: [{ path: '/staged/module.mjs', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 }] },
+      dependencyAdmissionEvidence: { upgradePolicy: { ...COMPLETE_POLICY }, removalConditions: { ...COMPLETE_REMOVAL } },
       supportedBoundaryEvidenceRefs: [`${shape}-supported-boundary`],
       provenanceEvidenceRefs: [`${shape}-provenance`],
       dependencyAdmissionEvidenceRefs: [`${shape}-dependency-admission`],
@@ -167,6 +174,12 @@ test('OpenCode BLOCKED cannot produce selection-ready SUCCESS and no real execut
 test('CLI freezes the three JSON machine forms and rejects mutating or ambiguous commands', () => {
   assert.deepEqual(parseCliArgs(['preflight', '--json']), { command: 'preflight', json: true });
   assert.deepEqual(parseCliArgs(['run', '--json']), { command: 'run', json: true });
+  assert.deepEqual(parseCliArgs(['run', '--json', '--provider-class', 'fixture', '--auth-method-class', 'local-double']), {
+    command: 'run',
+    providerClass: 'fixture',
+    authMethodClass: 'local-double',
+    json: true,
+  });
   assert.deepEqual(parseCliArgs(['report', '--run-id', 'arr-s1-test-order', '--json']), {
     command: 'report',
     runId: 'arr-s1-test-order',
@@ -180,6 +193,7 @@ test('CLI freezes the three JSON machine forms and rejects mutating or ambiguous
     ['report', '--json'],
     ['report', '--run-id', '../escape', '--json'],
     ['install', '--json'],
+    ['report', '--run-id', 'arr-s1-test', '--json', '--provider-class', 'fixture'],
   ]) {
     assert.throws(() => parseCliArgs(argv), /invalid ARR-S1 CLI/u, argv.join(' '));
   }

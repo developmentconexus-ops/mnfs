@@ -1,4 +1,5 @@
 import { evaluateApplicability } from './applicability.mjs';
+import { sha256Bytes } from './artifacts.mjs';
 import { S1_CANDIDATE_VERDICTS } from './contract.mjs';
 import { preflightS1 } from './preflight.mjs';
 import { buildS1Report } from './report.mjs';
@@ -49,9 +50,19 @@ async function executeShape({ candidateShape, executors, context, executedCandid
   if (typeof executor !== 'function') return blockedRecord(candidateShape, 'no injected executor is available in the deterministic harness');
   executedCandidateShapes.push(candidateShape);
   try {
+    const artifactBinding = context.artifactBindingBase
+      ? {
+        ...context.artifactBindingBase,
+        candidateShape,
+        runKey: sha256Bytes(Buffer.from(JSON.stringify({
+          baseRunKey: context.artifactBindingBase.runKey,
+          candidateShape,
+        }))),
+      }
+      : context.artifactBinding;
     return normalizeCandidateResult(
       candidateShape,
-      await executor({ ...context, candidateShape, deterministic: true }),
+      await executor({ ...context, candidateShape, artifactBinding, deterministic: true }),
     );
   } catch (error) {
     return {
@@ -92,13 +103,13 @@ export async function orchestrateS1({
   preflightInput = {},
   executors = null,
   fixture = null,
+  fixtureFactory = null,
   executorOptions = {},
   choosePassingPiShape,
   applicabilityEvaluator = evaluateApplicability,
   reportBuilder = buildS1Report,
 } = {}) {
   const preflightResult = await preflight(preflightInput);
-  const activeExecutors = executors ?? (fixture ? createS1CandidateExecutors({ fixture, ...executorOptions }) : {});
   const executedCandidateShapes = [];
   const candidates = [];
   const phases = {
@@ -110,7 +121,7 @@ export async function orchestrateS1({
   };
 
   if (preflightResult?.status !== 'READY' && preflightResult?.ok !== true) {
-    const report = failClosedReport(reportBuilder({ runId, candidates, preflight: preflightResult, applicability: null, externalComparison: null }));
+    const report = failClosedReport(reportBuilder({ runId, candidates, preflight: preflightResult, source: preflightResult?.source ?? null, applicability: null, externalComparison: null }));
     return {
       runId: runId ?? null,
       status: 'BLOCKED',
@@ -125,11 +136,32 @@ export async function orchestrateS1({
     };
   }
 
+  let activeFixture = fixture;
+  if (!activeFixture && typeof fixtureFactory === 'function') {
+    activeFixture = await fixtureFactory({ runId: runId ?? null, preflight: clone(preflightResult) });
+  }
+  const sourceTreeHash = /^[a-f0-9]{40}$/u.test(preflightResult?.source?.treeSha ?? '')
+    ? sha256Bytes(Buffer.from(preflightResult.source.treeSha)) : null;
+  const baseBinding = executorOptions.artifactBindingBase ?? (
+    sourceTreeHash && /^sha256:[a-f0-9]{64}$/u.test(activeFixture?.fixtureHash ?? '')
+      && /^sha256:[a-f0-9]{64}$/u.test(preflightResult?.executionAuthorization?.contractSha256 ?? '')
+      ? {
+        runId: runId ?? null,
+        candidateShape: 'S1-RUN',
+        runKey: sha256Bytes(Buffer.from(JSON.stringify({ runId: runId ?? null, sourceTreeHash, fixtureHash: activeFixture.fixtureHash }))),
+        contractHash: preflightResult.executionAuthorization.contractSha256,
+        fixtureHash: activeFixture.fixtureHash,
+        sourceTreeHash,
+      }
+      : null
+  );
+  const activeExecutors = executors ?? (activeFixture ? createS1CandidateExecutors({ fixture: activeFixture, ...executorOptions }) : {});
   const context = {
     runId: runId ?? null,
     preflight: clone(preflightResult),
     priorCandidates: [],
-    fixture,
+    fixture: activeFixture,
+    artifactBindingBase: baseBinding,
     ...executorOptions,
   };
   phases.piQualification = 'RUNNING';
@@ -176,7 +208,8 @@ export async function orchestrateS1({
     runId,
     candidates,
     preflight: preflightResult,
-    fixture,
+    source: preflightResult.source,
+    fixture: activeFixture,
     applicability,
     externalComparison: openCode,
   }));
@@ -186,7 +219,7 @@ export async function orchestrateS1({
     termination: report.status,
     phases,
     preflight: preflightResult,
-    fixture,
+    fixture: activeFixture,
     candidates,
     applicability,
     executedCandidateShapes,

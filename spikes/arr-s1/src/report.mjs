@@ -1,4 +1,5 @@
 import { S1_CRITERIA } from './contract.mjs';
+import { S1_FROZEN_CANDIDATE_PROVENANCE } from './preflight.mjs';
 
 const FINAL_EXTERNAL_VERDICTS = new Set(['PASS', 'FAIL']);
 const REJECT_VERDICTS = new Set(['REJECT']);
@@ -79,6 +80,24 @@ export function isSelectionEligible(candidateOrBoundary) {
   if (!refsExist(candidateOrBoundary.supportedBoundaryEvidenceRefs, artifactRecordsMap(candidateOrBoundary), 'supported-boundary')) return false;
   if (!refsExist(candidateOrBoundary.provenanceEvidenceRefs, artifactRecordsMap(candidateOrBoundary), 'provenance')) return false;
   if (!refsExist(candidateOrBoundary.dependencyAdmissionEvidenceRefs, artifactRecordsMap(candidateOrBoundary), 'dependency-admission')) return false;
+  if (!candidateOrBoundary.supportedBoundaryEvidence
+    || typeof candidateOrBoundary.supportedBoundaryEvidence !== 'object'
+    || !nonBlank(candidateOrBoundary.supportedBoundaryEvidence.kind)
+    || !nonBlank(candidateOrBoundary.supportedBoundaryEvidence.observation)) return false;
+  if (!candidateOrBoundary.provenanceEvidence
+    || !S1_FROZEN_CANDIDATE_PROVENANCE[candidateOrBoundary.candidateShape]
+    || candidateOrBoundary.provenanceEvidence.candidateShape !== candidateOrBoundary.candidateShape
+    || candidateOrBoundary.provenanceEvidence.version !== S1_FROZEN_CANDIDATE_PROVENANCE[candidateOrBoundary.candidateShape].version
+    || candidateOrBoundary.provenanceEvidence.package !== S1_FROZEN_CANDIDATE_PROVENANCE[candidateOrBoundary.candidateShape].package
+    || candidateOrBoundary.provenanceEvidence.sourceIdentity !== S1_FROZEN_CANDIDATE_PROVENANCE[candidateOrBoundary.candidateShape].sourceIdentity
+    || candidateOrBoundary.provenanceEvidence.license !== S1_FROZEN_CANDIDATE_PROVENANCE[candidateOrBoundary.candidateShape].license
+    || !nonBlank(candidateOrBoundary.provenanceEvidence.version)
+    || !nonBlank(candidateOrBoundary.provenanceEvidence.package)
+    || !nonBlank(candidateOrBoundary.provenanceEvidence.sourceIdentity)
+    || !nonBlank(candidateOrBoundary.provenanceEvidence.license)) return false;
+  if (!candidateOrBoundary.dependencyAdmissionEvidence
+    || !policyComplete(candidateOrBoundary.dependencyAdmissionEvidence.upgradePolicy, POLICY_FIELDS)
+    || !policyComplete(candidateOrBoundary.dependencyAdmissionEvidence.removalConditions, REMOVAL_FIELDS)) return false;
   if (!policyComplete(candidateOrBoundary.upgradePolicy, POLICY_FIELDS)) return false;
   if (!policyComplete(candidateOrBoundary.removalConditions, REMOVAL_FIELDS)) return false;
   return true;
@@ -132,7 +151,7 @@ function reportStatus({ candidates, externalComparison, applicability }) {
   const selectedRuntime = candidates.filter((candidate) => isSelectionEligible(candidate));
   const selectedBoundary = candidates.filter((candidate) => isSelectionEligible(boundaryRecord(candidate)));
   if (selectedRuntime.length !== 1 || selectedBoundary.length !== 1) return 'BLOCKED';
-  return selectedRuntime[0] === selectedBoundary[0] ? 'SUCCESS' : 'BLOCKED';
+  return 'SUCCESS';
 }
 
 export function buildS1Report({
@@ -149,16 +168,15 @@ export function buildS1Report({
   const boundaryCandidates = records.map((candidate) => decisionInput(candidate, 'boundary'));
   const eligibleRuntimeIndexes = runtimeCandidates.map((candidate, index) => candidate.selectionEligible ? index : -1).filter((index) => index >= 0);
   const eligibleBoundaryIndexes = boundaryCandidates.map((candidate, index) => candidate.selectionEligible ? index : -1).filter((index) => index >= 0);
-  const selectedIndex = eligibleRuntimeIndexes.length === 1
-    && eligibleBoundaryIndexes.length === 1
-    && eligibleRuntimeIndexes[0] === eligibleBoundaryIndexes[0]
-    ? eligibleRuntimeIndexes[0] : -1;
-  const selectedRuntime = selectedIndex >= 0 ? runtimeCandidates[selectedIndex] : null;
-  const selectedBoundary = selectedIndex >= 0 ? boundaryCandidates[selectedIndex] : null;
+  const selectedRuntimeIndex = eligibleRuntimeIndexes.length === 1 ? eligibleRuntimeIndexes[0] : -1;
+  const selectedBoundaryIndex = eligibleBoundaryIndexes.length === 1 ? eligibleBoundaryIndexes[0] : -1;
+  const selectedRuntime = selectedRuntimeIndex >= 0 ? runtimeCandidates[selectedRuntimeIndex] : null;
+  const selectedBoundary = selectedBoundaryIndex >= 0 ? boundaryCandidates[selectedBoundaryIndex] : null;
   const status = reportStatus({ candidates: records, externalComparison, applicability });
-  const selectedEvidenceIntegrity = selectedIndex >= 0
-    && evidenceIntegrityValid(records[selectedIndex]?.evidenceIntegrity)
-    && evidenceIntegrityValid(boundaryRecord(records[selectedIndex])?.evidenceIntegrity);
+  const selectedEvidenceIntegrity = selectedRuntimeIndex >= 0
+    && selectedBoundaryIndex >= 0
+    && evidenceIntegrityValid(records[selectedRuntimeIndex]?.evidenceIntegrity)
+    && evidenceIntegrityValid(boundaryRecord(records[selectedBoundaryIndex])?.evidenceIntegrity);
   const aggregateEvidenceIntegrity = evidenceIntegrity === null
     ? selectedEvidenceIntegrity
     : evidenceIntegrityValid(evidenceIntegrity);

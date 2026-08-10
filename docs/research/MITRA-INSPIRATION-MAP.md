@@ -675,3 +675,110 @@ Padrões dignos de ADOPT direto:
 - **Fases com dependência explícita** (F0 Discovery → F1 cargas+monitoramento → F2 score → F3 UI → F4 IA → F5 gestor → F6 piloto+recalibração) e uma **ordem inegociável justificada**: monitoramento antes do produto ("carga que falha em silêncio = decisões comerciais sobre dado de confiabilidade desconhecida").
 - **Recalibração obrigatória embutida** (RM-02: piloto + recalibrar score em 60 dias contra conversão real) — o produto nasce com loop de validação, não como entrega estática.
 - Fora de Escopo nomeia o que **não** é: sem ML no score (determinístico+explicável; IA só no texto), sem escrita no ERP, sem envio automático ao cliente final.
+
+## 16. Framework de abstração completo (modelo de dados dos SDKs, verbatim dos d.ts)
+
+Extraído integral dos `.d.ts` publicados (unpkg, `mitra-sdk` + `mitra-interactions-sdk`). Este é o **meta-modelo da plataforma** — a resposta a "como eles abstraem tudo como classe/estrutura".
+
+### 16.1 Tunnel = Cloudflare Tunnel (confirmado na fonte)
+
+Hipótese do Operador validada: TI conecta banco on-prem **sem VPN**. Modelo:
+
+```ts
+interface CloudflareTunnel {
+  id; workspaceId; tunnelName; alias;
+  cfTunnelId: string;          // tunnel Cloudflare real
+  tunnelToken: string;         // token que a TI roda no conector (cloudflared)
+  status; lastErrorMsg;
+  dhStatusLastCheck/LastError/LastSuccess;  // telemetria de saúde
+  routes?: CloudflareTunnelRoute[];
+}
+interface CloudflareTunnelRoute {
+  subdomain; alias; hostname;   // hostname público gerado (DNS record)
+  internalDbUrl: string;        // IP/host interno do banco
+  internalDbPort: number;
+  dnsRecordId;
+  routeStatus; processStatus;   // status separados: rota DNS × processo conector
+  // + timestamps de health por rota e por processo
+}
+```
+
+**Fluxo operacional** (o que a TI do cliente faz): `createTunnelMitra({alias})` → plataforma devolve `tunnelToken` → TI executa o conector (cloudflared) com o token na rede interna → `addTunnelRouteMitra({tunnelId, alias, internalDbUrl, internalDbPort})` → nasce `hostname` público → `createJdbcConnectionMitra({host: hostname, port, database, user, password})`. Só tráfego de **saída** no cliente; nenhuma porta aberta; health-check por tunnel e por rota. 15 funções de ciclo de vida (activate/deactivate/stop/sync status/CRUD rotas).
+
+### 16.2 Integração REST — blueprint como classe, instância como conexão
+
+```ts
+// A "classe": template versionado no catálogo
+interface ConnectorTemplateResponse {
+  id; name; logo; authStrategy;
+  fieldsSchema: { fields: {key; label; type:'text'|'password'; required; placeholder?; default?}[] };
+  authenticationConfig;   // fluxo de token (ex.: DYNAMIC_TOKEN — caso Sankhya OAuth)
+  authorizationConfig;    // como injetar credencial na request
+  docUrl; testEndpoint;   // validação embutida
+  custom; active;
+}
+// Injeção de credencial: union fechada
+type AuthorizationConfig =
+  | { type:'header'; config:{name;value}[] }
+  | { type:'basic';  config:{username;password} }
+  | { type:'cookie'; config:{name;value} }
+  | { type:'query';  config:{name;value} };
+// A "instância"
+interface IntegrationResponse { id; projectId; name; slug; blueprintId; blueprintType;
+  authType; credentials; status; lastCheckedAt; }
+// O runtime (única porta de chamada)
+callIntegrationMitra({ connection: slug, method, endpoint?, params?, body? })
+  → { statusCode, body }
+```
+
+`fieldsSchema` gera o formulário de credencial dinamicamente (por isso o agente soube que `sankhya_oauth` exige `x_token`+`client_id`+`client_secret`); `testEndpoint` dá o teste de conexão padrão; `custom:true` permite blueprint próprio sem template.
+
+### 16.3 Camadas de dados externas — 4 níveis de abstração
+
+| Camada | Estrutura | Função |
+|---|---|---|
+| 1. Rede | `CloudflareTunnel`+`Route` | banco on-prem alcançável sem VPN |
+| 2. Conexão | `JdbcConnection {name,type,host,port,database,user,password}` | credencial de banco nomeada, `isOnline` |
+| 3a. Dado virtual | `OnlineTable {jdbcId, name, sqlQuery, columns[]}` | view sobre o banco externo, consultada ao vivo |
+| 3b. Dado materializado | `DataLoader {jdbcId, query, tableName, runWhenCreate, input}` → `executionLog {timestamp,rowCount,duration,fileSize,status}` | ETL: query externa → tabela local, com log de execução por carga |
+| 4. API REST | blueprint+integration+`callIntegration` | qualquer SaaS/gateway (caso Sankhya) |
+
+**Agendamento embutido**: `ServerFunction` tem `cronExpression`+`cronInputJson` — SF é também job agendado; e SF aceita `jdbcId` → roda SQL **direto no banco externo**. A dupla DataLoader+SF-cron é exatamente a "Importação Periódica" do escopo v2.0 (§15.6) — a plataforma já tem as primitivas.
+
+### 16.4 Meta-modelo do projeto (o "mundo" que o agente enxerga)
+
+`getProjectContextMitra()` devolve o inventário completo em 1 chamada — o world-model do agente:
+
+```ts
+{ project: {id, name, instructions},        // instruções injetáveis (metodologia)
+  inventory: {
+    jdbcs[]; tables[{name, columns[{name,type,isPk,nullable}]}];
+    onlineTables[]; dbActions{}; serverFunctions[]; dataLoaders[];
+    variables[{key,value}]; sourceFiles } }
+```
+
+RBAC como grade `Profile × recurso`: `{users, selectTables, dmlTables, actions, screens, serverFunctions, color, homeScreenId}` — leitura e escrita separadas por tabela, telas e SFs permitidas por perfil. Usuários tipados `dev|business` (`manageUserAccessMitra {action: INVITE|REMOVE|CHANGE_TYPE}`).
+
+Convenção de envelope uniforme: toda resposta é `{status, result, paramsApplied?}`; erros e logs padronizados em SF (`{executionId, executionStatus, output, logs, error, durationMs}`).
+
+### 16.5 Agente embutível como estrutura de dados
+
+`AgentTaskSession` (interactions-sdk) é a superfície completa para embutir o builder em qualquer UI:
+
+- Estado: `'opening'|'idle'|'uploading'|'streaming'|'cancelled'|'error'|'closed'`
+- Fila editável: `QueuedItem {id,text,seq,status:'pending'|'sending',injected?}` + `editQueueItem/removeQueueItem/clearQueue`
+- Eventos tipados: `historyLoaded, turnStart, delta {kind:'text'|'tool'}, tool {tool,input,content}, turnEnd, taskCreated, cancelled, error, queueChange, statusChange`
+- `send(prompt, {agentType?, modelId?, files?})` — **modelo selecionável por mensagem**
+
+### 16.6 Classificação
+
+| Padrão | Classificação | Nota |
+|---|---|---|
+| Tunnel gerenciado (Cloudflare) com token p/ TI + rotas host:porta | ADOPT | Onboarding on-prem sem VPN; health por rota; nossa versão pode usar cloudflared ou rathole/frp |
+| Blueprint de conector com `fieldsSchema` dinâmico + `testEndpoint` | ADOPT | Catálogo versionado de conectores; form de credencial gerado do schema |
+| Union fechada de `AuthorizationConfig` (header/basic/cookie/query) + `DYNAMIC_TOKEN` | ADOPT | Cobre 95% dos SaaS; token-refresh server-side |
+| 4 camadas de dado externo (rede→conexão→virtual/materializado→REST) | ADOPT | Separação limpa; DataLoader com executionLog é o esqueleto do nosso pipeline de carga |
+| SF com cron embutido | ADOPT | Job scheduling sem serviço separado |
+| `getProjectContext` como world-model de 1 chamada | ADOPT (forte) | Contexto do agente barato e completo; espelha nosso Context Pack |
+| RBAC grade perfil×recurso com select/dml separados | ADOPT | Base do nosso authority model de dados |
+| `AgentTaskSession` com fila editável e eventos tipados | REFERENCE | Blueprint do nosso protocolo de sessão de agente embutido |

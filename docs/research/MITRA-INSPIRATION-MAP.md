@@ -5,7 +5,7 @@ document_type: research_map
 form: explanation
 authority: research_historical
 status: draft
-version: 0.8.0
+version: 0.9.0
 owners:
   - developmentconexus-ops
 source_of_truth_for:
@@ -2213,3 +2213,455 @@ O isolamento *"não tem modo desligado"*. Para dois projetos conversarem: algué
 | Runtime do app publicado | **FECHADA** (§32) |
 | Payload real do `preview` de promote | Aberta (só i18n) |
 | Promote cria banco novo? | **Aberta e explicitamente contraditória** (§33.3) — único conflito de fontes não resolvido do mapa |
+
+---
+
+# 34. Dissecação de um projeto real de ponta a ponta — "Analisador de Orçamentos" (w 146638 / p 55833)
+
+> **Fonte primária desta seção**: o código-fonte real de um projeto entregue e validado, lido
+> integralmente via `GET /api/mitra-agent/github-files/146638/55833/content?path=…`.
+> Nenhuma inferência: tudo aqui é citação do repositório.
+>
+> Esta é a seção que responde à pergunta de fundo do projeto Conexus:
+> **"o padrão da Mitra é workflow, skill, ou código gerado por LLM?"**
+> Resposta curta: **é código gerado por LLM, disciplinado por um `CLAUDE.md` de plataforma e por um
+> SDK de build-time.** Não há workflow engine. Não há orquestrador de agentes. O "padrão" é uma
+> convenção de arquivo + um SDK + um protocolo de turno.
+
+## 34.1 O achado central: `mitra-sdk` vs `mitra-interactions-sdk`
+
+São **dois SDKs distintos**, e a distinção é a espinha dorsal de toda a arquitetura Mitra:
+
+| SDK | Onde roda | Quem chama | O que pode fazer |
+|---|---|---|---|
+| **`mitra-sdk`** | Sandbox E2B (build time) e dentro de SFs `JAVASCRIPT` (runtime) | O **agente**, via `node script.mjs` | `runDdlMitra`, `runDmlMitra`, `runQueryMitra`, `createServerFunctionMitra`, `updateServerFunctionMitra`, `listServerFunctionsMitra`, `executeServerFunctionMitra` |
+| **`mitra-interactions-sdk`** | Browser do usuário final (runtime) | O **app React publicado** | `executeServerFunctionMitra`, `executeDbAction`, `getAgentTaskMitra`, `manageAgentCredentialMitra` |
+
+O `mitra-sdk` é o **privilegiado**: tem DDL e DML arbitrários. O `mitra-interactions-sdk` é o
+**restrito**: só executa artefatos previamente registrados, por id numérico. Essa assimetria é o
+modelo de segurança inteiro da plataforma — **o poder mora no build, não no runtime**.
+
+Configuração do SDK de build (idêntica nos 3 scripts do projeto):
+
+```js
+configureSdkMitra({
+  baseURL:         process.env.MITRA_BASE_URL,
+  token:           process.env.MITRA_TOKEN,
+  integrationURL:  process.env.MITRA_BASE_URL_INTEGRATIONS,
+});
+const projectId = parseInt(process.env.MITRA_PROJECT_ID);
+```
+
+→ O sandbox recebe `.env` com `MITRA_TOKEN` + `MITRA_PROJECT_ID`. **O agente nunca vê a senha do
+banco**: fala com o banco pela API autenticada da plataforma. Isso é o que torna "o agente tem DDL"
+aceitável — o escopo é o projeto, garantido do lado do servidor.
+
+**Conexus**: **ADOPT integral.** Dois SDKs, dois níveis de privilégio, fronteira no `projectId`
+derivado do token. É a decisão de arquitetura mais reaproveitável do mapa inteiro.
+
+## 34.2 Anatomia real do repositório
+
+```
+backend/
+  setup-backend.mjs     19.616  DDL (8 tabelas) + 9 SFs INTEGRATION + 3 SFs JAVASCRIPT
+  add-analytics.mjs     19.628  28 SFs SQL analíticas (aditivo, não toca no de cima)
+  importar.mjs           2.923  orquestrador de carga inicial (backfill por período)
+  testar-sfs.mjs         3.181  suíte de fumaça: 31 chamadas reais de SF
+frontend/src/lib/
+  sf-ids.ts                988  GERADO — mapa nome→id numérico
+  api.ts                 4.255  callSF / callSFOne / runSF + formatadores pt-BR
+  mitra-auth.ts          2.287
+CLAUDE.md                7.924  gerado pela plataforma (protocolo de turno)
+integracao-sankhya.md    6.122  descobertas da fase de discovery
+featuresearquitetura.md  6.611  o quê e por quê
+ux.md / design.md        3.322 / 4.427
+tasks.md                 4.637  o razão de execução
+uploads/spec-…md        10.098  o prompt original do usuário, anexado
+```
+
+**Leitura**: o backend inteiro do projeto são **4 scripts Node**. Não existe "servidor". Existe um
+programa que **provisiona** o servidor da plataforma e depois é descartado (mas fica versionado).
+
+## 34.3 O padrão de provisionamento idempotente (o coração da coisa)
+
+Todo script de backend segue exatamente esta forma:
+
+```js
+const existentes = await listServerFunctionsMitra({ projectId });
+const mapa = {};
+for (const sf of (existentes?.result ?? existentes ?? [])) mapa[sf.name] = sf.id;
+
+const ids = {};
+for (const def of TODAS) {
+  if (mapa[def.name]) {                       // já existe → UPDATE
+    await updateServerFunctionMitra({ projectId, serverFunctionId: mapa[def.name],
+                                      code: def.code, description: def.description });
+    ids[def.name] = mapa[def.name];
+  } else {                                    // não existe → CREATE
+    const r = await createServerFunctionMitra({ projectId, ...def });
+    ids[def.name] = r?.result?.serverFunctionId ?? r?.result?.id ?? r?.id;
+  }
+}
+```
+
+Três propriedades que valem ouro:
+
+1. **Idempotência por `name`.** O nome é a chave lógica; o id numérico é detalhe de implementação.
+   Rodar o script 10 vezes dá o mesmo resultado. Resolve o problema do §27 ("SFs não são
+   versionadas") — **o script é a versão**.
+2. **DDL idempotente**: todo `CREATE TABLE IF NOT EXISTS`. O agente nunca faz `DROP`.
+3. **Aditividade declarada**: `add-analytics.mjs` abre com
+   `"ADITIVO: cria/atualiza apenas Server Functions SQL … NAO executa DDL, NAO toca em dados, NAO
+   altera as SFs de importacao (sk_* / imp_*)"`. O agente **escreveu um contrato para si mesmo**
+   no topo do arquivo, e o segundo script honra o primeiro.
+
+### O elo perdido: `sf-ids.ts` é um artefato de build
+
+Aqui está a peça que faltava para entender como um frontend legível conversa com uma API de ids
+numéricos:
+
+```js
+writeFileSync('../frontend/src/lib/sf-ids.ts',
+  '// GERADO POR backend/setup-backend.mjs — nao editar a mao\n' +
+  'export const SF = ' + JSON.stringify(ids, null, 2) + ' as const;\n');
+```
+
+E o segundo script **faz merge, não sobrescreve**:
+
+```js
+let anteriores = {};
+try { const txt = readFileSync(alvo,'utf8');
+      anteriores = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}')+1)); } catch {}
+const todos = { ...anteriores, ...ids };
+```
+
+Resultado versionado (40 SFs):
+
+```ts
+export const SF = { "sk_vendedores": 2, /* … */ "imp_incremental": 12,
+                    "dash_kpis": 13, /* … */ "int_cobertura": 40 } as const;
+```
+
+O comentário do agente explica *por que* o hack existe:
+`"IDs ficam versionados para o frontend consumir (o SDK desta versao nao expoe variaveis)"`.
+
+> **Isto é uma limitação da Mitra que o agente contornou com codegen.** O `missao-playground`
+> (§31.6) dá a mesma ordem por outro caminho: *"mapa construído do registry de SFs, NUNCA IDs
+> hardcoded"*.
+>
+> **Conexus — REJECT o sintoma, ADOPT o remédio errado como aviso:** artefatos devem ser
+> endereçáveis por **nome estável**, não por id auto-incremento. Se a API expusesse
+> `callFunction('dash_kpis')`, `sf-ids.ts` não existiria. **Chave natural desde o dia 1.**
+
+## 34.4 Os três tipos de Server Function têm **três sintaxes de parâmetro diferentes**
+
+Esta é a inconsistência mais cara da plataforma, e só ficou visível com o código na mão:
+
+| Tipo | Binding | Exemplo real |
+|---|---|---|
+| `INTEGRATION` | `event.x` **dentro de string SQL**, substituído textualmente | `OFFSET TO_NUMBER('event.offset') ROWS` |
+| `JAVASCRIPT` | `event.x` como **variável global JS** | `const dtIni = event.dtIni ?? '2024-01-01'` |
+| `SQL` | `{{x}}` mustache, **sempre entre aspas** | `AND ('{{vendedor}}'='' OR o.CODVEND='{{vendedor}}')` |
+
+Nenhum dos três é *bind parameter* de verdade. **Todos são interpolação de string.**
+
+### Consequência 1 — o padrão de parâmetro opcional
+
+Como não há bind, "filtro opcional" vira um idioma:
+
+```sql
+AND ('{{vendedor}}'='' OR o.CODVEND='{{vendedor}}')
+```
+
+Uma única SF serve filtrada e não-filtrada. O frontend sempre manda todas as chaves, vazias quando
+não aplicáveis (ver `VAZIO = { vendedor:'', cliente:'', faixa:'', mes:'' }` em `testar-sfs.mjs`).
+
+### Consequência 2 — injeção é mitigada por convenção, não pelo motor
+
+O agente reconheceu o risco e escreveu a mitigação **no cabeçalho do arquivo**:
+
+```
+ *   - Filtros por CODIGO (numerico), nunca por nome — evita quebra com apostrofo
+```
+
+E no frontend, uma segunda barreira:
+
+```ts
+/** Remove caracteres que quebrariam a string SQL da Server Function. */
+export const limpar = (v: string) => String(v ?? '').replace(/['"\\%;]/g, '').trim();
+```
+
+> **Conexus — REJECT frontal.** Interpolação de string em SQL, com sanitização por regex no
+> **cliente**, é vulnerabilidade por design: quem chamar a SF fora do app (o SDK é público, o id é
+> numérico e sequencial) pula o `limpar()` inteiro.
+> **Conexus usa bind parameters reais.** Parâmetro opcional se resolve com `(:vendedor IS NULL OR
+> col = :vendedor)`, que é o mesmo idioma **sem** a superfície de ataque.
+
+## 34.5 SFs `INTEGRATION` são HTTP declarativo, não código
+
+```js
+const intSF = (name, sql, description) => ({
+  name, type: 'INTEGRATION', description,
+  code: JSON.stringify({
+    connection: 'sankhya',
+    method: 'POST',
+    endpoint: '/gateway/v1/mge/service.sbr?serviceName=DbExplorerSP.executeQuery&outputType=json',
+    body: { serviceName: 'DbExplorerSP.executeQuery', requestBody: { sql } },
+  }),
+});
+```
+
+O `code` de uma SF `INTEGRATION` é **um JSON**, não um script: `{connection, method, endpoint,
+body}`. `connection: 'sankhya'` referencia a credencial registrada no projeto — **a credencial
+nunca aparece no código nem no repositório**. Todo o `event.x` do corpo é interpolado pelo servidor.
+
+**Conexus — ADOPT.** Conector declarativo + referência simbólica à credencial é a forma certa. É o
+que permite o repositório ser público-safe.
+
+## 34.6 SFs `JAVASCRIPT`: o agente escreve um runtime dentro de uma string
+
+`imp_dimensoes`, `imp_periodo` e `imp_incremental` são geradas por **template literal**, todas
+prefixadas por um bloco `JS_HELPERS` compartilhado. Dentro da SF, `require('mitra-sdk')` está
+disponível — é assim que uma SF chama outra SF e roda DML.
+
+**Helper de paginação** (contorna o teto de 5.000 linhas do DbExplorer do Sankhya):
+
+```js
+async function fetchAll(sfId, baseInput) {
+  const todas = []; let offset = 0;
+  for (;;) {
+    const rows = await fetchPage(sfId, Object.assign({}, baseInput, { offset, limite: PAGE }));
+    todas.push.apply(todas, rows);
+    if (rows.length < PAGE) break;
+    offset += PAGE;
+    if (offset > 400000) throw new Error('Paginacao excedeu o teto de seguranca');
+  }
+  return todas;
+}
+```
+
+**Upsert em lote** — comentado `"nunca linha a linha"`, chunks de 400:
+
+```js
+await sdk.runDmlMitra({ projectId,
+  sql: 'INSERT INTO ' + tabela + ' (' + colunas.join(',') + ') VALUES ' + values +
+       ' ON DUPLICATE KEY UPDATE ' + sets });
+```
+
+**Cursor incremental auto-derivado** — sem estado externo:
+
+```js
+// Cursor derivado dos proprios dados: auto-corrige e dispensa estado externo.
+// Recuo de 1h cobre transacoes em voo no momento da ultima sync.
+const qr = await sdk.runQueryMitra({ projectId, sql:'SELECT MAX(DTALTER) AS M FROM ORCAMENTOS' });
+// … d.setUTCHours(d.getUTCHours() - 1);
+```
+
+**Toda importação é instrumentada**: `etapas.{entidade}_ms`, `etapas.{entidade}` (contagem), e um
+`log()` final que grava em `LOG_IMPORTACOES` com `ETAPAS_JSON`, `DURACAO_MS`, `PARAMETROS` e o erro
+truncado em 900 chars. O `try/catch` registra sucesso **e** falha antes de re-lançar.
+
+**Detalhe de robustez que denuncia experiência real:**
+
+```js
+// placeholders para CODVEND=0 / CODPARC=0 (existem no Sankhya) — evita quebra de FK
+INSERT INTO VENDEDORES VALUES (0,'SEM VENDEDOR','-','N') ON DUPLICATE KEY UPDATE …
+```
+
+**Conexus — ADOPT o padrão, REJECT o veículo.** Paginação-até-esgotar com teto de segurança, upsert
+em chunk, cursor derivado do dado e log estruturado por etapa são exatamente o que queremos. Mas
+gerar isso como **string dentro de template literal** é frágil — a própria Mitra documenta a
+armadilha em §31.6 (*"`\s` vira `s`; regexes precisam de `\\s` NO ARQUIVO"*). Em Conexus, código
+de job é **arquivo de verdade**, não string.
+
+## 34.7 A camada analítica: composição por fragmento SQL
+
+`add-analytics.mjs` não escreve 28 queries — escreve **constantes e as compõe**:
+
+```js
+const DIAS_PARADO = `DATEDIFF(CURDATE(), o.DTALTER)`;
+const FAIXA = `CASE WHEN ${DIAS_PARADO} <= 3 THEN 'Janela de ouro' … END`;
+const FATOR = `CASE WHEN ${DIAS_PARADO} <= 3 THEN 1.00 WHEN … <= 7 THEN 0.45
+                    WHEN … <= 30 THEN 0.20 ELSE 0.05 END`;
+const PENDENTE = `o.PENDENTE='S' AND o.TEM_DERIVADO='N'`;
+const BASE = `FROM ORCAMENTOS o JOIN VENDEDORES v ON … JOIN CLIENTES cl ON … WHERE ${PENDENTE}`;
+const fVend = `AND ('{{vendedor}}'='' OR o.CODVEND='{{vendedor}}')`;
+```
+
+Uma SF vira uma linha de composição:
+
+```js
+sql('dash_por_vendedor', `
+SELECT v.APELIDO AS name, o.CODVEND AS code, COUNT(*) AS QTD,
+       ROUND(SUM(o.VLRNOTA),2) AS value, ROUND(AVG(${DIAS_PARADO}),0) AS PARADO_MEDIO
+${BASE} ${fCli} ${fFaixa} ${fMes}
+GROUP BY v.APELIDO, o.CODVEND ORDER BY value DESC`, '…'),
+```
+
+**A regra de ouro do cross-filter**, declarada no cabeçalho e visível na composição acima:
+
+```
+ *   - Cross-filter: a SF de X nunca recebe o proprio {{x}}
+```
+
+`dash_por_vendedor` recebe `fCli`, `fFaixa`, `fMes` — **mas não `fVend`**. É por isso que clicar num
+vendedor filtra os outros gráficos sem apagar o próprio. Regra de uma linha que resolve um problema
+de BI inteiro.
+
+**Contrato de nomes de coluna**: `name` / `value` / `code` em toda SF de gráfico → um componente
+`Chart.tsx` genérico consome qualquer uma sem adaptador, e `code` carrega a chave para o drill.
+
+**Conexus — ADOPT integral.** Fragmentos SQL nomeados + regra "X não filtra X" + contrato
+`name/value/code`. É barato, testável, e é o que dá coerência semântica ao dashboard inteiro.
+
+## 34.8 A borda frontend: um adaptador de 3 funções
+
+`api.ts` inteiro cabe em três funções + formatadores. O interessante é o **normalizador defensivo**:
+
+```ts
+function extractOutput(res: any): any {
+  let output = res?.result?.output;
+  if (typeof output === 'string') { try { output = JSON.parse(output); } catch {} }
+  if (output && typeof output === 'object' && Array.isArray(output.result)) return output.result;
+  return output;
+}
+```
+
+→ **A API da Mitra devolve o mesmo dado em três formas diferentes**: string JSON, `{result:[…]}`, ou
+objeto direto. O agente descobriu isso na prática e blindou num único ponto. Erro vem por
+`res.result.executionStatus === 'FAILED'` + `res.result.error` — **HTTP 200 com falha no corpo**.
+
+`callSF` → linhas · `callSFOne` → primeira linha (KPIs) · `runSF` → output bruto (jobs).
+
+Detalhe revelador de banco:
+
+```ts
+/** O banco não aceita acentos nesse rótulo; a interface exibe acentuado. */
+export const rotuloFaixa = (nome: string) => (nome === 'Reativacao' ? 'Reativação' : nome);
+```
+
+→ Encoding do MySQL do projeto não fecha com acento em literal SQL. O agente **não escondeu**:
+armazenou sem acento e traduziu na borda de apresentação, com o porquê no comentário.
+
+**Conexus — REJECT o problema (UTF-8 fim a fim, não negociável), ADOPT a disciplina**: quando a
+plataforma tem um defeito, isolar num único ponto de borda e **comentar a razão**.
+
+## 34.9 A suíte de testes — e o que ela prova sobre o protocolo
+
+`testar-sfs.mjs` (3.181 bytes) lê o `sf-ids.ts` gerado, roda **31 chamadas reais** e encadeia
+estado — pega um `NUNOTA` de uma consulta e injeta nas seguintes:
+
+```js
+const params = JSON.parse(JSON.stringify(input).replace('{NUNOTA}', String(nunota ?? 0)));
+```
+
+Cobre caso base **e** caso filtrado para cada SF crítica
+(`['dash_kpis', VAZIO]` + `['dash_kpis (filtro vendedor)', {…, vendedor:'1128'}]`), conta `falhas`
+e sai com código de erro.
+
+> **É a única forma de teste possível nesta plataforma.** Não há ambiente de teste (§27/§33): o
+> banco de DEV *é* o banco. Então o "teste" é **smoke test contra produção**, e a única razão de ser
+> seguro é que as 28 SFs analíticas são `SELECT`.
+>
+> **Conexus — este é o gap mais claro para nos diferenciarmos.** Ambiente efêmero + fixtures +
+> asserção de valor (não só "não explodiu"). Aqui a Mitra tem um teto real.
+
+## 34.10 O ciclo de trabalho reconstruído (o que o usuário perguntou)
+
+Cruzando `tasks.md` (o razão), `CLAUDE.md` (o protocolo) e os artefatos:
+
+```
+Fase 1  DISCOVERY      → agente consulta o ERP e escreve integracao-sankhya.md
+                          (descobre: CODTIPOPER IN (14,714); TGFTOP.ORCAMENTO='S' está errado;
+                           VLRCUS não é custo em 94,8% dos itens)
+Fase 2  ARQUITETURA    → decide importação vs. tempo real, com justificativa escrita
+Fase 3  ALINHAMENTO    → confirma definições canônicas com o usuário
+Fase 4  CHECKPOINT     → contrato aprovado ANTES de escrever código
+Fase 5  PLANEJAMENTO   → featuresearquitetura.md → ux.md → design.md
+Fase 6  IMPLEMENTAÇÃO  → setup-backend.mjs → importar.mjs → add-analytics.mjs → telas
+Fase 7  TESTE          → testar-sfs.mjs (31 SFs) + smoke headless em 8 cenários
+Fase 8  REVISÃO        → confronto item a item contra o prompt original (uploads/spec-…md)
+```
+
+Sobreposto a isso, o protocolo de turno do `CLAUDE.md` (§ anterior):
+`SYNC → BACKEND → FRONTEND → BUILD → SHARE`, **todo turno, inclusive para "oi"**.
+
+### O que produz a qualidade — veredito
+
+Não é workflow engine. Não é agent framework. São **quatro coisas empilhadas**:
+
+| # | Mecanismo | Onde vive | Força |
+|---|---|---|---|
+| 1 | Protocolo de turno rígido | `CLAUDE.md` gerado pela plataforma | **Alta** — é regra, não sugestão |
+| 2 | Documentos de planejamento como artefato versionado | `*.md` no repo | **Alta** — decisão fica auditável e o agente relê |
+| 3 | SDK de build-time privilegiado | `mitra-sdk` | **Alta** — dá poder real sem dar a senha |
+| 4 | Scaffold byte-idêntico | UI kit (`Chart.tsx`, `useDrill.ts`, `LoginPage.tsx`) | **Média** — garante o piso visual, não o teto |
+
+O item 2 é o que mais surpreende: **o agente escreve documentos que depois usa como contexto**.
+`add-analytics.mjs` abre com `"Definicoes canonicas (ver integracao-sankhya.md)"`, e
+`featuresearquitetura.md` abre com `"Base: integracao-sankhya.md"`. É **memória externalizada em
+arquivo versionado** — barata e eficaz.
+
+## 34.11 Honestidade do agente — o traço mais copiável
+
+O projeto **declara o que não conseguiu fazer**, em tabela, com encaminhamento:
+
+| # | Limitação | Impacto | Encaminhamento |
+|---|---|---|---|
+| 1 | `VLRCUS` não é custo — 91.856 de 96.936 itens (94,8%) idênticos ao `VLRUNIT` | Margem não é calculável | **Margem fora da Fase 1** |
+| 2 | Não há vínculo usuário Mitra ↔ `CODVEND` | Tela do vendedor usa seletor | Mapear por e-mail quando houver de-para |
+| 3 | `TGFPRO.MARGLUCRO` média 3,6 | Parece markup, não percentual | Validar na Fase 2 |
+| 4 | Sem rotina de expiração de orçamento | 37 orçamentos 90d+ vivos | Pendência aberta |
+
+E o §8 fecha: `"Fase 2 (fora deste escopo) … Depende de resolver a limitação #1."`
+
+O agente **cancelou uma feature pedida** (margem) porque o dado não sustenta, disse o número que
+prova, e não entregou um gráfico bonito com dado errado.
+
+> **Conexus — ADOPT como requisito de produto, não como virtude.** O deliverable deve **exigir**
+> um bloco "Limitações conhecidas" com evidência numérica, e critérios de aceite verificáveis
+> (`"Pendentes na tela = 187 / R$ 6.283.878 (bate com o Sankhya)"`), não subjetivos.
+
+## 34.12 Por que a aba "Código" aparece vazia — diagnóstico fechado
+
+Confirmado por leitura do bundle (`useCodeBuilder.2qVY5YjV.js`) e por chamada direta à API:
+
+1. **A aba Código lê o GitHub, não o sandbox.**
+   `GET /api/mitra-agent/github-files/{ws}/{proj}` → só enxerga o que já foi **pushado** pelo SHARE.
+   Trabalho feito no turno atual e ainda não compartilhado **não aparece**.
+2. **Todo erro vira lista vazia**, indistinguível de "projeto sem código":
+   ```js
+   catch (a) { console.error("Failed to load files:", a);
+               o.value = a.message || "Failed to load files"; $.value = [] }
+   ```
+   Sessão expirada, 403 ou repo indisponível renderizam a mesma tela em branco.
+3. **O painel de Git está morto neste deploy.** `/api/e2b-git/{ws}/{proj}/log`, `/metadata` e
+   `/branches` retornam **o shell HTML do SPA, não JSON** — rota Nitro ausente. Por isso branch,
+   histórico e troca de branch não funcionam pela UI. *(Verificado nesta sessão, ws 146638/p 55833.)*
+4. **O código de 55833 está íntegro e legível** — todos os arquivos desta seção foram lidos pela
+   API. **Não é perda de dados; é falha de superfície.**
+
+**Contorno imediato**: `https://agent.mitralab.io/api/mitra-agent/github-files/146638/55833`
+(logado) devolve a árvore, e `…/content?path=backend/setup-backend.mjs` devolve o arquivo.
+
+**Conexus — REFERENCE (lição negativa).** Nunca colapsar erro em estado vazio. `vazio`, `carregando`
+e `falhou` são três estados distintos na UI, sempre.
+
+## 34.13 Placar de decisões desta seção
+
+| Achado | Decisão Conexus |
+|---|---|
+| Dois SDKs (build privilegiado / runtime restrito) | **ADOPT** — arquitetura central |
+| Provisionamento idempotente por `name` em script versionado | **ADOPT** |
+| Conector `INTEGRATION` declarativo com credencial simbólica | **ADOPT** |
+| Fragmentos SQL nomeados + "X nunca filtra X" + contrato `name/value/code` | **ADOPT** |
+| Paginação com teto, upsert em chunk, cursor derivado, log por etapa | **ADOPT** |
+| Doc de planejamento como memória versionada que o agente relê | **ADOPT** |
+| "Limitações conhecidas" + critérios de aceite numéricos obrigatórios | **ADOPT** |
+| Três sintaxes de parâmetro (`event.x` textual / `event.x` global / `{{x}}`) | **REJECT** — uma só |
+| Interpolação de string em SQL + sanitização por regex no cliente | **REJECT** — bind params |
+| Ids numéricos sequenciais → `sf-ids.ts` gerado | **REJECT** — chave natural por nome |
+| Código de job como string em template literal | **REJECT** — arquivo real |
+| Smoke test contra o banco de produção (não há ambiente de teste) | **REJECT** — efêmero + fixtures |
+| Erro colapsado em estado vazio na UI | **REJECT** — 3 estados |
+| Scaffold/UI kit byte-idêntico versionado | **ADAPT** — bom piso, precisa de escape hatch |

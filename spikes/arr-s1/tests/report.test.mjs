@@ -34,7 +34,20 @@ const REMOVAL = Object.freeze({
 });
 
 function passResults(overrides = {}) {
-  return S1_CRITERIA.map((id) => ({ id, status: overrides[id] ?? 'PASS' }));
+  return S1_CRITERIA.map((id) => ({ id, status: overrides[id] ?? 'PASS', artifactRefs: [`${id}-evidence`] }));
+}
+
+function artifact(id) {
+  return { id, path: `evidence/${id}.json`, sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 };
+}
+
+function artifactSet() {
+  return [
+    ...S1_CRITERIA.map((id) => artifact(`${id}-evidence`)),
+    artifact('supported-boundary'),
+    artifact('provenance'),
+    artifact('dependency-admission'),
+  ];
 }
 
 function candidate(overrides = {}) {
@@ -43,6 +56,10 @@ function candidate(overrides = {}) {
     finalized: true,
     verdict: 'PASS',
     criterionResults: passResults(),
+    artifactRecords: artifactSet(),
+    supportedBoundaryEvidenceRefs: ['supported-boundary'],
+    provenanceEvidenceRefs: ['provenance'],
+    dependencyAdmissionEvidenceRefs: ['dependency-admission'],
     evidenceIntegrity: { valid: true },
     upgradePolicy: { ...POLICY },
     removalConditions: { ...REMOVAL },
@@ -52,6 +69,10 @@ function candidate(overrides = {}) {
       finalized: true,
       verdict: 'PASS',
       criterionResults: passResults(),
+      artifactRecords: artifactSet(),
+      supportedBoundaryEvidenceRefs: ['supported-boundary'],
+      provenanceEvidenceRefs: ['provenance'],
+      dependencyAdmissionEvidenceRefs: ['dependency-admission'],
       evidenceIntegrity: { valid: true },
       upgradePolicy: { ...POLICY },
       removalConditions: { ...REMOVAL },
@@ -125,4 +146,3 @@ test('selection eligibility is pure and never invents candidate-specific policy 
   assert.equal(isSelectionEligible(candidate({ removalConditions: undefined })), false);
   assert.equal(isSelectionEligible(candidate({ evidenceIntegrity: undefined })), false);
 });
-

@@ -21,11 +21,22 @@ const COMPLETE_REMOVAL = Object.freeze({
 });
 
 function candidate(shape, verdict = 'PASS', overrides = {}) {
+  const artifactRecords = [
+    ...S1_CRITERIA.map((id) => ({ id: `${shape}-${id}`, path: `evidence/${shape}-${id}.json`, sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1 })),
+    { id: `${shape}-supported-boundary`, path: `evidence/${shape}-supported-boundary.json`, sha256: `sha256:${'b'.repeat(64)}`, sizeBytes: 1 },
+    { id: `${shape}-provenance`, path: `evidence/${shape}-provenance.json`, sha256: `sha256:${'c'.repeat(64)}`, sizeBytes: 1 },
+    { id: `${shape}-dependency-admission`, path: `evidence/${shape}-dependency-admission.json`, sha256: `sha256:${'d'.repeat(64)}`, sizeBytes: 1 },
+  ];
+  const criterionResults = S1_CRITERIA.map((id) => ({ id, status: 'PASS', artifactRefs: [`${shape}-${id}`] }));
   return {
     candidateShape: shape,
     finalized: true,
     verdict,
-    criterionResults: S1_CRITERIA.map((id) => ({ id, status: 'PASS' })),
+    criterionResults,
+    artifactRecords,
+    supportedBoundaryEvidenceRefs: [`${shape}-supported-boundary`],
+    provenanceEvidenceRefs: [`${shape}-provenance`],
+    dependencyAdmissionEvidenceRefs: [`${shape}-dependency-admission`],
     evidenceIntegrity: { valid: true },
     upgradePolicy: { ...COMPLETE_POLICY },
     removalConditions: { ...COMPLETE_REMOVAL },
@@ -34,7 +45,11 @@ function candidate(shape, verdict = 'PASS', overrides = {}) {
       candidateShape: shape,
       finalized: true,
       verdict,
-      criterionResults: S1_CRITERIA.map((id) => ({ id, status: 'PASS' })),
+      criterionResults,
+      artifactRecords,
+      supportedBoundaryEvidenceRefs: [`${shape}-supported-boundary`],
+      provenanceEvidenceRefs: [`${shape}-provenance`],
+      dependencyAdmissionEvidenceRefs: [`${shape}-dependency-admission`],
       evidenceIntegrity: { valid: true },
       upgradePolicy: { ...COMPLETE_POLICY },
       removalConditions: { ...COMPLETE_REMOVAL },
@@ -68,7 +83,9 @@ test('orchestrates Pi SDK, Pi-ACP, Pi passing shape anchor, then finalized OpenC
     preflight: async () => readyPreflight(),
     choosePassingPiShape: ({ passingShapes }) => passingShapes.includes('PI-ACP') ? 'PI-ACP' : null,
     executors: {
-      'PI-SDK': executor(calls, 'PI-SDK'),
+      'PI-SDK': executor(calls, 'PI-SDK', 'FAIL', {
+        criterionResults: S1_CRITERIA.map((id, index) => ({ id, status: index === 0 ? 'FAIL' : 'PASS' })),
+      }),
       'PI-ACP': executor(calls, 'PI-ACP'),
       'OPENCODE-ACP': executor(calls, 'OPENCODE-ACP', 'FAIL', {
         criterionResults: S1_CRITERIA.map((id, index) => ({ id, status: index === 0 ? 'FAIL' : 'PASS' })),

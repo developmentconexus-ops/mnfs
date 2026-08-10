@@ -7,6 +7,22 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
+export const FIXED_GIT_ENV = Object.freeze({
+  PATH: '/usr/bin:/bin',
+  LANG: 'C',
+  LC_ALL: 'C',
+  GIT_OPTIONAL_LOCKS: '0',
+  GIT_TERMINAL_PROMPT: '0',
+  GIT_CONFIG_NOSYSTEM: '1',
+  GIT_CONFIG_GLOBAL: '/dev/null',
+  GIT_CONFIG_SYSTEM: '/dev/null',
+  GIT_CONFIG_COUNT: '2',
+  GIT_CONFIG_KEY_0: 'core.fsmonitor',
+  GIT_CONFIG_VALUE_0: 'false',
+  GIT_CONFIG_KEY_1: 'core.hooksPath',
+  GIT_CONFIG_VALUE_1: '/dev/null',
+});
+
 function freeze(value) {
   if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
   for (const child of Object.values(value)) freeze(child);
@@ -24,7 +40,13 @@ function sha256(value) {
 }
 
 async function git(workspacePath, args, options = {}) {
-  const result = await execFileAsync('git', ['-C', workspacePath, ...args], { maxBuffer: 1024 * 1024, ...options });
+  const { env: _ignoredEnv, ...safeOptions } = options;
+  const result = await execFileAsync('/usr/bin/git', ['-C', workspacePath, ...args], {
+    ...safeOptions,
+    maxBuffer: 1024 * 1024,
+    shell: false,
+    env: { ...FIXED_GIT_ENV },
+  });
   return result.stdout.trim();
 }
 
@@ -70,6 +92,7 @@ export async function createS1Fixture({ parentDir = tmpdir() } = {}) {
     const fixture = {
       fixtureId: `ARR-S1-FIXTURE-${nonce.slice(0, 12)}`,
       fixtureHash,
+      gitEnvironment: { ...FIXED_GIT_ENV },
       rootPath: root,
       workspacePath,
       nonce,

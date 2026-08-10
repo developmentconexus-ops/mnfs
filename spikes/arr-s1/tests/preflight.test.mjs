@@ -12,14 +12,14 @@ import {
 
 const PLAN_BLOB = '277dffc521754a4370bfd94132dc9467589fdcf0';
 const CONTRACT_HASH = 'sha256:bd34f566bec1c3fc32b8ab1617dac88f997ab9a91cbc6b83e42eb27dcbf9736a';
-const BASE_SHA = '032620c35c95e932e6f5c5468c85273ddac25f38';
-const TOKEN = `MNFS_AUTHORIZE_ARR_S1_EXECUTE plan_blob=${PLAN_BLOB} contract_sha256=${CONTRACT_HASH} base_sha=${BASE_SHA} verify_run=31286529184 scope=pi-first-runtime-conformance`;
+const BASE_SHA = 'a'.repeat(40);
+const TOKEN = `MNFS_AUTHORIZE_ARR_S1_EXECUTE plan_blob=${PLAN_BLOB} contract_sha256=${CONTRACT_HASH} base_sha=${BASE_SHA} verify_run=987654321 scope=pi-first-runtime-conformance`;
 const AUTHORITY = parseExecutionAuthorizationToken(TOKEN);
 
 const SOURCE = Object.freeze({
   clean: true,
   commitSha: BASE_SHA,
-  treeSha: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  treeSha: 'a'.repeat(40),
   platform: 'linux',
 });
 
@@ -43,13 +43,21 @@ function acceptedProvenance() {
 }
 
 function safeInput(overrides = {}) {
+  const source = overrides.source ?? SOURCE;
+  const stateRoot = overrides.stateRoot ?? STATE_ROOT;
+  const provenance = overrides.provenance ?? acceptedProvenance();
+  const credentials = overrides.credentials ?? CREDENTIALS;
+  const { source: _source, stateRoot: _stateRoot, provenance: _provenance, credentials: _credentials, ...rest } = overrides;
   return {
     executionAuthorization: AUTHORITY,
-    source: SOURCE,
-    stateRoot: STATE_ROOT,
-    provenance: acceptedProvenance(),
-    credentials: CREDENTIALS,
-    ...overrides,
+    credentials,
+    observers: {
+      source: () => source,
+      stateRoot: () => stateRoot,
+      provenance: () => provenance,
+      verificationRun: () => ({ verifyRun: AUTHORITY.verifyRun }),
+    },
+    ...rest,
   };
 }
 

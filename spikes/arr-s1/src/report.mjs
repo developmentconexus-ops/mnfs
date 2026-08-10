@@ -2,6 +2,9 @@ import { S1_CRITERIA } from './contract.mjs';
 
 const FINAL_EXTERNAL_VERDICTS = new Set(['PASS', 'FAIL']);
 const REJECT_VERDICTS = new Set(['REJECT']);
+const FINAL_VERDICTS = new Set(['PASS', 'FAIL', 'BLOCKED', 'REJECT']);
+const APPLICABILITY_STATES = new Set(['REQUIRED', 'NOT_REQUIRED', 'BLOCKED']);
+const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const POLICY_FIELDS = Object.freeze([
   'pinningRule',
   'upgradeTrigger',
@@ -15,6 +18,7 @@ const REMOVAL_FIELDS = Object.freeze([
   'maintenanceTrigger',
   'replacementOrExitPath',
 ]);
+const CONDITIONAL_CANDIDATE_SHAPES = Object.freeze({ piRpc: 'PI-RPC', secondAcp: 'SECOND-ACP' });
 
 function clone(value) {
   return value === undefined ? undefined : structuredClone(value);
@@ -32,18 +36,49 @@ function evidenceIntegrityValid(value) {
   return value === true || value?.valid === true || value?.ok === true;
 }
 
-function criterionResultsPass(value) {
+function artifactRecordsMap(candidate) {
+  if (!Array.isArray(candidate?.artifactRecords)) return null;
+  const records = new Map();
+  for (const record of candidate.artifactRecords) {
+    if (!record || typeof record.id !== 'string' || records.has(record.id)
+      || typeof record.path !== 'string' || !HASH_PATTERN.test(record.sha256 ?? '')
+      || !Number.isSafeInteger(record.sizeBytes) || record.sizeBytes < 0) return null;
+    records.set(record.id, record);
+  }
+  return records;
+}
+
+function refsExist(refs, records, pathToken = null) {
+  return Array.isArray(refs) && refs.length > 0 && refs.every((ref) => {
+    const record = typeof ref === 'string' ? records?.get(ref) : null;
+    return Boolean(record && (pathToken === null || record.path.includes(pathToken)));
+  });
+}
+
+function criterionResultsPass(value, candidate) {
   if (!Array.isArray(value)) return false;
-  const byId = new Map(value.map((result) => [result?.id, result?.status]));
-  return S1_CRITERIA.every((id) => byId.get(id) === 'PASS');
+  const records = artifactRecordsMap(candidate);
+  if (!records || value.length !== S1_CRITERIA.length) return false;
+  const byId = new Map();
+  for (const result of value) {
+    if (!result || typeof result.id !== 'string' || byId.has(result.id)) return false;
+    byId.set(result.id, result);
+  }
+  return S1_CRITERIA.every((id) => {
+    const result = byId.get(id);
+    return result?.status === 'PASS' && refsExist(result.artifactRefs, records);
+  });
 }
 
 export function isSelectionEligible(candidateOrBoundary) {
   if (!candidateOrBoundary || typeof candidateOrBoundary !== 'object') return false;
   if (candidateOrBoundary.finalized !== true || candidateOrBoundary.verdict !== 'PASS') return false;
   if (!nonBlank(candidateOrBoundary.candidateShape)) return false;
-  if (!criterionResultsPass(candidateOrBoundary.criterionResults)) return false;
+  if (!criterionResultsPass(candidateOrBoundary.criterionResults, candidateOrBoundary)) return false;
   if (!evidenceIntegrityValid(candidateOrBoundary.evidenceIntegrity)) return false;
+  if (!refsExist(candidateOrBoundary.supportedBoundaryEvidenceRefs, artifactRecordsMap(candidateOrBoundary), 'supported-boundary')) return false;
+  if (!refsExist(candidateOrBoundary.provenanceEvidenceRefs, artifactRecordsMap(candidateOrBoundary), 'provenance')) return false;
+  if (!refsExist(candidateOrBoundary.dependencyAdmissionEvidenceRefs, artifactRecordsMap(candidateOrBoundary), 'dependency-admission')) return false;
   if (!policyComplete(candidateOrBoundary.upgradePolicy, POLICY_FIELDS)) return false;
   if (!policyComplete(candidateOrBoundary.removalConditions, REMOVAL_FIELDS)) return false;
   return true;
@@ -78,11 +113,26 @@ function externalComparisonFinalized(externalComparison) {
     && FINAL_EXTERNAL_VERDICTS.has(externalComparison.verdict);
 }
 
-function reportStatus({ candidates, externalComparison }) {
+function requiredCandidatesFinalized(candidates, applicability) {
+  if (!applicability) return true;
+  return Object.entries(CONDITIONAL_CANDIDATE_SHAPES).every(([key, candidateShape]) => {
+    if (applicability[key] !== 'REQUIRED') return true;
+    const candidate = candidates.find((record) => record?.candidateShape === candidateShape);
+    return candidate?.finalized === true && (candidate.verdict === 'PASS' || candidate.verdict === 'FAIL');
+  });
+}
+
+function reportStatus({ candidates, externalComparison, applicability }) {
   if (candidates.some((candidate) => REJECT_VERDICTS.has(candidate?.verdict) || REJECT_VERDICTS.has(candidate?.boundary?.verdict))) return 'REJECT';
+  if (candidates.some((candidate) => candidate?.verdict !== null && candidate?.verdict !== undefined && !FINAL_VERDICTS.has(candidate.verdict))) return 'BLOCKED';
+  if (candidates.some((candidate) => candidate?.finalized !== true)) return 'BLOCKED';
+  if (applicability && Object.values(applicability).some((state) => !APPLICABILITY_STATES.has(state) || state === 'BLOCKED')) return 'BLOCKED';
+  if (!requiredCandidatesFinalized(candidates, applicability)) return 'BLOCKED';
   if (!externalComparisonFinalized(externalComparison)) return 'BLOCKED';
-  const selected = candidates.find((candidate) => isSelectionEligible(candidate) && isSelectionEligible(boundaryRecord(candidate)));
-  return selected ? 'SUCCESS' : 'BLOCKED';
+  const selectedRuntime = candidates.filter((candidate) => isSelectionEligible(candidate));
+  const selectedBoundary = candidates.filter((candidate) => isSelectionEligible(boundaryRecord(candidate)));
+  if (selectedRuntime.length !== 1 || selectedBoundary.length !== 1) return 'BLOCKED';
+  return selectedRuntime[0] === selectedBoundary[0] ? 'SUCCESS' : 'BLOCKED';
 }
 
 export function buildS1Report({
@@ -97,10 +147,15 @@ export function buildS1Report({
   const records = Array.isArray(candidates) ? candidates : [];
   const runtimeCandidates = records.map((candidate) => decisionInput(candidate, 'runtime'));
   const boundaryCandidates = records.map((candidate) => decisionInput(candidate, 'boundary'));
-  const selectedIndex = records.findIndex((candidate, index) => runtimeCandidates[index].selectionEligible && boundaryCandidates[index].selectionEligible);
+  const eligibleRuntimeIndexes = runtimeCandidates.map((candidate, index) => candidate.selectionEligible ? index : -1).filter((index) => index >= 0);
+  const eligibleBoundaryIndexes = boundaryCandidates.map((candidate, index) => candidate.selectionEligible ? index : -1).filter((index) => index >= 0);
+  const selectedIndex = eligibleRuntimeIndexes.length === 1
+    && eligibleBoundaryIndexes.length === 1
+    && eligibleRuntimeIndexes[0] === eligibleBoundaryIndexes[0]
+    ? eligibleRuntimeIndexes[0] : -1;
   const selectedRuntime = selectedIndex >= 0 ? runtimeCandidates[selectedIndex] : null;
   const selectedBoundary = selectedIndex >= 0 ? boundaryCandidates[selectedIndex] : null;
-  const status = reportStatus({ candidates: records, externalComparison });
+  const status = reportStatus({ candidates: records, externalComparison, applicability });
   const selectedEvidenceIntegrity = selectedIndex >= 0
     && evidenceIntegrityValid(records[selectedIndex]?.evidenceIntegrity)
     && evidenceIntegrityValid(boundaryRecord(records[selectedIndex])?.evidenceIntegrity);
@@ -109,13 +164,13 @@ export function buildS1Report({
     : evidenceIntegrityValid(evidenceIntegrity);
 
   const runtimeDecisionInput = {
-    selectionEligible: Boolean(selectedRuntime && selectedBoundary && aggregateEvidenceIntegrity && externalComparisonFinalized(externalComparison)),
+    selectionEligible: Boolean(selectedRuntime && selectedBoundary && aggregateEvidenceIntegrity && externalComparisonFinalized(externalComparison) && status === 'SUCCESS'),
     selectedCandidateShape: selectedRuntime?.candidateShape ?? null,
     selected: selectedRuntime,
     candidates: runtimeCandidates,
   };
   const boundaryDecisionInput = {
-    selectionEligible: Boolean(selectedRuntime && selectedBoundary && aggregateEvidenceIntegrity && externalComparisonFinalized(externalComparison)),
+    selectionEligible: Boolean(selectedRuntime && selectedBoundary && aggregateEvidenceIntegrity && externalComparisonFinalized(externalComparison) && status === 'SUCCESS'),
     selectedBoundaryId: selectedBoundary?.boundaryId ?? null,
     selected: selectedBoundary,
     candidates: boundaryCandidates,

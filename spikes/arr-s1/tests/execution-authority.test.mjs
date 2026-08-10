@@ -11,8 +11,8 @@ import {
 
 const PLAN_BLOB = '277dffc521754a4370bfd94132dc9467589fdcf0';
 const CONTRACT_HASH = 'sha256:bd34f566bec1c3fc32b8ab1617dac88f997ab9a91cbc6b83e42eb27dcbf9736a';
-const BASE_SHA = '032620c35c95e932e6f5c5468c85273ddac25f38';
-const VERIFY_RUN = '31286529184';
+const BASE_SHA = 'a'.repeat(40);
+const VERIFY_RUN = '987654321';
 const SCOPE = 'pi-first-runtime-conformance';
 const TOKEN = `MNFS_AUTHORIZE_ARR_S1_EXECUTE plan_blob=${PLAN_BLOB} contract_sha256=${CONTRACT_HASH} base_sha=${BASE_SHA} verify_run=${VERIFY_RUN} scope=${SCOPE}`;
 
@@ -38,11 +38,10 @@ test('rejects malformed, broadened, stale or reordered S1 authority', () => {
     TOKEN.replace('MNFS_AUTHORIZE_ARR_S1_EXECUTE', 'MNFS_AUTHORIZE_ARR_S1_IMPLEMENT'),
     TOKEN.replace(PLAN_BLOB, 'a'.repeat(40)),
     TOKEN.replace(CONTRACT_HASH, `sha256:${'a'.repeat(64)}`),
-    TOKEN.replace(BASE_SHA, 'a'.repeat(40)),
     TOKEN.replace(`verify_run=${VERIFY_RUN}`, 'verify_run=0'),
     TOKEN.replace(SCOPE, 'scope=broader'),
     TOKEN.replace(' plan_blob=', '  plan_blob='),
-    TOKEN.replace(' base_sha=', ' verify_run=31286529184 base_sha='),
+    TOKEN.replace(' base_sha=', ` verify_run=${VERIFY_RUN} base_sha=`),
     `${TOKEN} extra=true`,
     `${TOKEN}\n`,
   ]) {
@@ -71,4 +70,3 @@ test('does not expose a harness token minting function and emits safe authority 
   assert.equal(Object.hasOwn(evidence, 'secret'), false);
   assert.equal(Object.hasOwn(evidence, 'scope'), true);
 });
-

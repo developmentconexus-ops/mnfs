@@ -2,8 +2,10 @@ import { evaluateApplicability } from './applicability.mjs';
 import { S1_CANDIDATE_VERDICTS } from './contract.mjs';
 import { preflightS1 } from './preflight.mjs';
 import { buildS1Report } from './report.mjs';
+import { createS1CandidateExecutors } from './executors.mjs';
 
 const CONDITIONAL_SHAPES = Object.freeze({ piRpc: 'PI-RPC', secondAcp: 'SECOND-ACP' });
+const FINAL_VERDICTS = new Set(['PASS', 'FAIL', 'BLOCKED', 'REJECT', 'SUCCESS']);
 
 function clone(value) {
   return value === undefined ? undefined : structuredClone(value);
@@ -49,7 +51,7 @@ async function executeShape({ candidateShape, executors, context, executedCandid
   try {
     return normalizeCandidateResult(
       candidateShape,
-      await executor({ ...context, candidateShape, deterministic: true, executeCandidates: false }),
+      await executor({ ...context, candidateShape, deterministic: true }),
     );
   } catch (error) {
     return {
@@ -64,11 +66,20 @@ function isPassing(record) {
 }
 
 function selectPassingPiShape({ passingShapes, chooser }) {
-  if (typeof chooser === 'function') {
-    const chosen = chooser({ passingShapes: [...passingShapes] });
-    return passingShapes.includes(chosen) ? chosen : null;
-  }
-  return passingShapes[0] ?? null;
+  if (passingShapes.length !== 1) return null;
+  if (typeof chooser !== 'function') return passingShapes[0];
+  const chosen = chooser({ passingShapes: [...passingShapes] });
+  return chosen === passingShapes[0] ? chosen : null;
+}
+
+function failClosedReport(report) {
+  if (report && FINAL_VERDICTS.has(report.status)) return report;
+  return {
+    ...(report && typeof report === 'object' ? report : {}),
+    status: 'BLOCKED',
+    termination: 'BLOCKED',
+    blockers: [...(Array.isArray(report?.blockers) ? report.blockers : []), 'final report verdict is outside PASS|FAIL|BLOCKED|REJECT'],
+  };
 }
 
 function byShape(records) {
@@ -79,12 +90,15 @@ export async function orchestrateS1({
   runId,
   preflight = preflightS1,
   preflightInput = {},
-  executors = {},
+  executors = null,
+  fixture = null,
+  executorOptions = {},
   choosePassingPiShape,
   applicabilityEvaluator = evaluateApplicability,
   reportBuilder = buildS1Report,
 } = {}) {
   const preflightResult = await preflight(preflightInput);
+  const activeExecutors = executors ?? (fixture ? createS1CandidateExecutors({ fixture, ...executorOptions }) : {});
   const executedCandidateShapes = [];
   const candidates = [];
   const phases = {
@@ -96,13 +110,14 @@ export async function orchestrateS1({
   };
 
   if (preflightResult?.status !== 'READY' && preflightResult?.ok !== true) {
-    const report = reportBuilder({ runId, candidates, preflight: preflightResult, applicability: null, externalComparison: null });
+    const report = failClosedReport(reportBuilder({ runId, candidates, preflight: preflightResult, applicability: null, externalComparison: null }));
     return {
       runId: runId ?? null,
       status: 'BLOCKED',
       termination: 'BLOCKED',
       phases,
       preflight: preflightResult,
+      fixture,
       candidates,
       applicability: null,
       executedCandidateShapes,
@@ -110,10 +125,16 @@ export async function orchestrateS1({
     };
   }
 
-  const context = { runId: runId ?? null, preflight: clone(preflightResult), priorCandidates: [] };
+  const context = {
+    runId: runId ?? null,
+    preflight: clone(preflightResult),
+    priorCandidates: [],
+    fixture,
+    ...executorOptions,
+  };
   phases.piQualification = 'RUNNING';
   for (const candidateShape of ['PI-SDK', 'PI-ACP']) {
-    const result = await executeShape({ candidateShape, executors, context: { ...context, priorCandidates: clone(candidates) }, executedCandidateShapes });
+    const result = await executeShape({ candidateShape, executors: activeExecutors, context: { ...context, priorCandidates: clone(candidates) }, executedCandidateShapes });
     candidates.push(result);
   }
   phases.piQualification = 'FINALIZED';
@@ -124,7 +145,7 @@ export async function orchestrateS1({
   phases.externalComparison = 'RUNNING';
   const openCode = await executeShape({
     candidateShape: 'OPENCODE-ACP',
-    executors,
+    executors: activeExecutors,
     context: { ...context, priorCandidates: clone(candidates), piQualificationAnchor: phases.piQualificationAnchor },
     executedCandidateShapes,
   });
@@ -143,7 +164,7 @@ export async function orchestrateS1({
       phases.conditionals = 'RUNNING';
       candidates.push(await executeShape({
         candidateShape,
-        executors,
+        executors: activeExecutors,
         context: { ...context, priorCandidates: clone(candidates), applicability: clone(applicability) },
         executedCandidateShapes,
       }));
@@ -151,19 +172,21 @@ export async function orchestrateS1({
   }
   if (phases.conditionals === 'RUNNING') phases.conditionals = 'FINALIZED';
 
-  const report = reportBuilder({
+  const report = failClosedReport(reportBuilder({
     runId,
     candidates,
     preflight: preflightResult,
+    fixture,
     applicability,
     externalComparison: openCode,
-  });
+  }));
   return {
     runId: runId ?? null,
     status: report.status,
     termination: report.status,
     phases,
     preflight: preflightResult,
+    fixture,
     candidates,
     applicability,
     executedCandidateShapes,

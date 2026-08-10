@@ -10,8 +10,6 @@ export const S1_EXECUTION_AUTHORITY_BINDING = Object.freeze({
   gate: 'GATE-S1-EXECUTE',
   planBlob: '277dffc521754a4370bfd94132dc9467589fdcf0',
   contractSha256: 'sha256:bd34f566bec1c3fc32b8ab1617dac88f997ab9a91cbc6b83e42eb27dcbf9736a',
-  baseSha: '032620c35c95e932e6f5c5468c85273ddac25f38',
-  verifyRun: 31286529184,
   scope: 'pi-first-runtime-conformance',
 });
 
@@ -79,7 +77,11 @@ export function requireValidatedExecutionAuthorization(authority, expected = {})
   if (authority.gate !== 'GATE-S1-EXECUTE') {
     throw new TypeError('ARR-S1 execution authorization gate must be GATE-S1-EXECUTE');
   }
-  if (!PLAN_BLOB_PATTERN.test(authority.planBlob) || !CONTRACT_HASH_PATTERN.test(authority.contractSha256) || !COMMIT_PATTERN.test(authority.baseSha)) {
+  if (!PLAN_BLOB_PATTERN.test(authority.planBlob)
+    || !CONTRACT_HASH_PATTERN.test(authority.contractSha256)
+    || !COMMIT_PATTERN.test(authority.baseSha)
+    || !Number.isSafeInteger(authority.verifyRun)
+    || authority.verifyRun <= 0) {
     throw new TypeError('ARR-S1 execution authorization contains invalid bound identity');
   }
   checkExpected(authority, S1_EXECUTION_AUTHORITY_BINDING);
@@ -103,4 +105,3 @@ export function executionAuthorizationEvidence(authority) {
 }
 
 export const executionAuthorityEvidence = executionAuthorizationEvidence;
-

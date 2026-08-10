@@ -4,6 +4,9 @@ import {
   executionAuthorizationEvidence,
   requireValidatedExecutionAuthorization,
 } from './execution-authority.mjs';
+import { observeRepositoryIdentity } from './probes/repository.mjs';
+import { observeLinuxStateRoot } from './probes/state-root.mjs';
+import { observeStagedCandidateProvenance } from './probes/candidate-provenance.mjs';
 
 const REQUIRED_PROVENANCE_IDS = Object.freeze(['PI-SDK', 'PI-RPC', 'PI-ACP', 'OPENCODE-ACP', 'ACP-SDK']);
 const CONDITIONAL_PROVENANCE_IDS = Object.freeze(['SECOND-ACP']);
@@ -79,19 +82,12 @@ function containsSensitiveKey(value, seen = new Set()) {
   return false;
 }
 
-function observeValue(input, key) {
-  const observer = input?.observers?.[key];
-  if (typeof observer === 'function') return observer();
-  return input?.[key];
-}
-
 function sourceCheck(source, authority) {
-  const sourceCommit = source?.commitSha ?? source?.baseSha;
-  const clean = source?.clean ?? source?.checkoutClean;
+  const sourceCommit = source?.commitSha;
+  const clean = source?.clean;
   const ok = clean === true
     && sourceCommit === authority.baseSha
-    && typeof source?.treeSha === 'string'
-    && source.treeSha.length > 0;
+    && /^[a-f0-9]{40}$/u.test(source?.treeSha ?? '');
   return {
     ok,
     reason: ok ? null : 'source must be clean, Linux-observed and bound to the authorized base commit with an exact tree identity',
@@ -169,6 +165,26 @@ export function preflightCredentials(input = {}) {
   };
 }
 
+export function resolveS1StateRootPath(input = {}) {
+  const configured = typeof input.stateRootPath === 'string'
+    ? input.stateRootPath
+    : typeof input.stateRoot === 'string' ? input.stateRoot : null;
+  if (configured) return configured;
+  const env = input.env ?? process.env;
+  const xdg = env?.XDG_STATE_HOME;
+  if (typeof xdg === 'string' && path.posix.isAbsolute(xdg)) return path.posix.join(path.posix.normalize(xdg), 'mnfs');
+  if (typeof env?.HOME === 'string' && path.posix.isAbsolute(env.HOME)) return path.posix.join(path.posix.normalize(env.HOME), '.local', 'state', 'mnfs');
+  return null;
+}
+
+async function observeCurrentVerificationRun(input, authority) {
+  const observer = input?.observers?.verificationRun;
+  const observed = typeof observer === 'function'
+    ? await observer()
+    : { verifyRun: Number((input.env ?? process.env)?.MNFS_ARR_S1_CURRENT_VERIFY_RUN) };
+  return observed?.verifyRun === authority.verifyRun;
+}
+
 export async function preflightS1(input = {}) {
   let authority;
   try {
@@ -191,10 +207,21 @@ export async function preflightS1(input = {}) {
   let provenance;
   let credentialsInput;
   try {
-    source = await observeValue(input, 'source');
-    stateRoot = await observeValue(input, 'stateRoot');
-    provenance = (await observeValue(input, 'provenance')) ?? (await observeValue(input, 'candidateProvenance'));
-    credentialsInput = await observeValue(input, 'credentials');
+    const repoRoot = input.repoRoot ?? process.cwd();
+    const stateRootPath = resolveS1StateRootPath(input);
+    const observers = input.observers ?? {};
+    source = typeof observers.source === 'function'
+      ? await observers.source({ repoRoot })
+      : await observeRepositoryIdentity({ repoRoot });
+    stateRoot = typeof observers.stateRoot === 'function'
+      ? await observers.stateRoot({ stateRoot: stateRootPath })
+      : stateRootPath ? await observeLinuxStateRoot({ stateRoot: stateRootPath }) : null;
+    provenance = typeof observers.provenance === 'function'
+      ? await observers.provenance({ stateRoot: stateRoot?.path ?? stateRootPath })
+      : stateRoot?.path ? await observeStagedCandidateProvenance({ stateRoot: stateRoot.path }) : null;
+    credentialsInput = typeof observers.credentials === 'function'
+      ? await observers.credentials()
+      : input.credentials;
   } catch {
     return {
       status: 'BLOCKED',
@@ -214,8 +241,18 @@ export async function preflightS1(input = {}) {
   if (!sourceResult.ok) blockers.push(blocked('sourceCleanAndBound', sourceResult.reason));
   const stateResult = stateRootCheck(stateRoot);
   if (!stateResult.ok) blockers.push(blocked('linuxStateRoot', stateResult.reason));
-  const provenanceResult = validateCandidateProvenance(provenance);
+  const provenanceRecords = provenance?.records ?? provenance;
+  const provenanceResult = validateCandidateProvenance(provenanceRecords);
   if (!provenanceResult.ok) blockers.push(blocked('candidateProvenance', provenanceResult.errors.join('; ')));
+  let verificationRunMatches = false;
+  try {
+    verificationRunMatches = await observeCurrentVerificationRun(input, authority);
+  } catch {
+    verificationRunMatches = false;
+  }
+  if (!verificationRunMatches) {
+    blockers.push(blocked('verificationRun', 'GATE-S1 verify_run does not match the current execution observation'));
+  }
 
   let credentialResult;
   try {

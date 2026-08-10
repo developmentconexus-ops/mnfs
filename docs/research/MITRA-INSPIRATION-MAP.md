@@ -1245,3 +1245,73 @@ Sandbox (dev, efêmero) → `npm run build` → **snapshot** copiado p/ prod →
 | 3 modos de visibilidade (private/public_with_login/public) | ADOPT | Gate de auth por nível é o modelo certo |
 | Domínio custom com verify DNS (`/cb-domain/verify`) | ADAPT | Bom; garantir emissão de TLS automática + checagem de posse robusta |
 | Publish interno vs externo (white-label) | REFERENCE | Separar host gerenciado de domínio do cliente desde o início |
+
+## 25. Formulário de conexão de banco — precisão total (túnel, rota, JDBC, dataset)
+
+Extraído de `connection_settings_store`, `ConnectionEdit`, e os blocos i18n do entry. É o formulário exato de "Configuração > Banco/Conexão".
+
+### 25.1 Túnel Cloudflare (nível 1 — o canal on-prem)
+
+Formulário "Criar Túnel" (labels verbatim):
+| Campo | Label PT | Placeholder | Notas |
+|---|---|---|---|
+| `tunnel_name` | Nome do Túnel | `ex: meu-tunnel` | nome lógico |
+| status | — | — | enum: **Ativo / Inativo / Offline / Degraded / Error** |
+| `process_status` / `route_status` | Process Status / Route Status | — | saúde separada do processo e da rota |
+| token | Tunnel Token | (View/Copy) | *"Use this token to configure the Cloudflare Tunnel connector"* — é o token do `cloudflared` que a TI instala on-prem |
+
+Ações: criar túnel, excluir (remove túnel + rotas), ver/copiar token. Mensagens: "Tunnel created successfully", "Tunnel and routes removed successfully".
+
+### 25.2 Rota do túnel (nível 2 — cada banco/serviço exposto)
+
+"Add Route" / "Edit Route" — uma rota mapeia um recurso interno:
+| Campo | Label | Placeholder | Mapeia p/ (§16.1) |
+|---|---|---|---|
+| `alias` | Alias | `ex: minha-rota` | `CloudflareTunnelRoute.alias` |
+| `internal_db_url` | URL Interna do Banco | `ex: 192.168.1.100` | `internalDbUrl` |
+| `port` | Porta | `ex: 3306` | `internalDbPort` |
+| `hostname` | Hostname | `ex: app.exemplo.com` | `hostname` (subdomínio público gerado) |
+| `service` | Service | `ex: http://localhost:8080` | serviço HTTP genérico |
+| `path` | Path | `ex: / ou /api` | rota HTTP |
+
+**Achado**: o túnel expõe **HTTP genérico** (hostname+service+path), não só banco. É reverse-tunnel de propósito geral — DB é um caso. TI preenche IP+porta internos; zero VPN; egress-only (§16.1 confirmado).
+
+### 25.3 JDBC Connection Config (nível 3 — a conexão de banco em si)
+
+CRUD (`connection_settings_store` / entry):
+```
+POST   /jdbcConnectionConfig          body {config}   // criar
+PUT    /jdbcConnectionConfig          body {config}   // atualizar
+GET    /jdbcConnectionConfig          params          // listar
+DELETE /jdbcConnectionConfig/${id}    params          // excluir
+```
+Drivers suportados (do bundle da SDK, §16.6b): **ORACLE, MYSQL, SQLSERVER, POSTGRESQL**. Campo `jdbcConnectionConfigId` é a chave que amarra dataset/records/SF à conexão (aparece em `/interactions/records/${table}?jdbcConnectionConfigId=`, §20.3). Oracle usa `service` (SERVICE_NAME).
+
+### 25.4 Connection / Dataset (nível 4 — camada BI sobre a conexão)
+
+`ConnectionEdit` é a modelagem de dados (não a conexão crua):
+- `POST /connection/types` e `/connection/types/${id}` — cria dataset a partir de um tipo.
+- **Tipo `CSV`**: upload de arquivo via `FormData` (`metadata.connectionType==="CSV"` → `append("file", Blob)`).
+- Endpoints da camada: `/connection`, `/connection/${id}`, `/connection/verifyColumns/${id}`, `/connection/allFiles`, `/connection/execute/${id}`, `/connection/execution/${id}`, `/connection/log/{filters,variables}/${id}`, `/treeReader/testConnection?id=`, `/dimension?jdbcConnectionConfigId=`, `/mergeDimension/databaseView`, `/dmlAction?databaseDml=true`.
+- **freeDB** (tabelas gerenciadas — o MySQL do espelho, §21.3): `/freeDBDDLTable`, `/freeDBDDLColumn`, `/freeDBTableMetadata`, `/freeDBTableContent/${table}` — DDL e leitura de conteúdo das tabelas internas via API (metadados: colunas com tipo `date`/`numeric`/`text`, FK, dimensão, cubo, calendário).
+
+### 25.5 Hierarquia mental (4 níveis)
+
+```
+Túnel Cloudflare (canal on-prem, 1 token cloudflared)
+  └─ Rota (alias → IP:porta interno OU service HTTP)
+       └─ JDBC Connection Config (driver ORACLE/MYSQL/SQLSERVER/POSTGRESQL, id)
+            └─ Connection/Dataset (dimensão, cubo, CSV, freeDB DDL) → consumido por SF/records
+```
+
+### 25.6 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| Túnel = reverse-tunnel HTTP genérico (não só DB) | REFERENCE | Nosso canal on-prem pode ser genérico igual; DB é um caso |
+| Token cloudflared visível/copiável na UI p/ a TI instalar | ADOPT | Fluxo TI-self-service certo; garantir escopo mínimo do token |
+| 4 níveis túnel→rota→jdbc→dataset | ADAPT | Boa separação; talvez fundir rota+jdbc p/ menos fricção |
+| `jdbcConnectionConfigId` amarra tudo (records/SF/dataset) | ADOPT | Chave única de conexão propagada é o modelo certo |
+| freeDB DDL/conteúdo via API REST | ADOPT | Tabelas gerenciadas manipuláveis por API é essencial p/ o agente |
+| CSV como connection type (upload FormData) | ADOPT | Importar CSV como fonte é feature barata e útil |
+| Status ricos (Ativo/Offline/Degraded/Error, process×route) | ADOPT | Observabilidade de conexão granular; espelhar |

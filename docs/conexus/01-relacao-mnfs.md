@@ -1,6 +1,6 @@
 # Tópico 0 — Relação Conexus × MNFS
 
-**Status: RECOMENDAÇÃO — aguarda ratificação do operador.**
+**Status: DECIDIDO — ratificado pelo operador em 2026-08-10 ([C-000](DECISOES.md)).**
 Evidência: auditoria completa do código em 2026-08-10 (varredura de `src/`, `tests/`, `bin/`,
 `.mnfs/`, ADRs, blueprint).
 
@@ -70,4 +70,4 @@ Consequências práticas se ratificado:
 
 ## Decisão
 
-_(pendente — operador)_
+Ratificada como recomendado — registrada como [C-000](DECISOES.md).

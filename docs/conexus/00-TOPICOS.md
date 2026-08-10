@@ -7,8 +7,8 @@
 
 | # | Tópico | Pergunta central | Profundidade | Status |
 |---|---|---|---|---|
-| 0 | [Relação Conexus × MNFS](01-relacao-mnfs.md) | O que do MNFS sobrevive? | funda | **EM DECISÃO** |
-| 1 | Visão e escopo do produto | O que É / para quem / caso 1 / o que NÃO é | funda | pendente |
+| 0 | [Relação Conexus × MNFS](01-relacao-mnfs.md) | O que do MNFS sobrevive? | funda | **DECIDIDO — C-000** |
+| 1 | Visão e escopo do produto | O que É / para quem / caso 1 / o que NÃO é | funda | **em curso** |
 | 2 | Requisitos: piso + teto | ADOPTs (piso) + 6 OWNs (teto) viram requisitos | funda | pendente |
 | 3 | Runtime do agente (harness) | Claude Agent SDK × Claude Code headless × Pi | funda | pendente |
 | 4 | Sandbox de execução | E2B × local × alternativa | funda | pendente |

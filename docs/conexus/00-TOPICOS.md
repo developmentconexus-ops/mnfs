@@ -8,9 +8,9 @@
 | # | Tópico | Pergunta central | Profundidade | Status |
 |---|---|---|---|---|
 | 0 | [Relação Conexus × MNFS](01-relacao-mnfs.md) | O que do MNFS sobrevive? | funda | **DECIDIDO — C-000** |
-| 1 | Visão e escopo do produto | O que É / para quem / caso 1 / o que NÃO é | funda | **em curso** |
-| 2 | Requisitos: piso + teto | ADOPTs (piso) + 6 OWNs (teto) viram requisitos | funda | pendente |
-| 3 | Runtime do agente (harness) | Claude Agent SDK × Claude Code headless × Pi | funda | pendente |
+| 1 | [Visão e escopo do produto](02-visao-escopo.md) | O que É / para quem / caso 1 / o que NÃO é | funda | **RASCUNHO em revisão** |
+| 2 | Requisitos: piso + teto | ADOPTs (piso) + pilares P1–P3 + C1–C4 viram requisitos | funda | pendente |
+| 3 | Runtime do agente (harness) | Claude Agent SDK × Claude Code/ACP × Pi × **Mastra** (orquestração) | funda | pendente |
 | 4 | Sandbox de execução | E2B × local × alternativa | funda | pendente |
 | 5 | Registro de artefatos + 2 SDKs | SF/dataLoader/dbAction com slug + bind params | funda | pendente |
 | 6 | Camada de dados | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | pendente |
@@ -22,6 +22,7 @@
 | 12 | Runtime publicado | Auth/RBAC, embed, storage | rasa → aprofunda no build | pendente |
 | 13 | Observabilidade mínima | Log de turno, custo, status — e só | rasa | pendente |
 | 14 | Segurança proporcional | Credencial server-side, bind params, tenancy — o mínimo profissional | média | pendente |
+| 15 | Cérebro da empresa | Camada semântica por grupo de projetos: schema+regras+processos, discovery assistido, retroalimentação | funda | pendente |
 
 Evidência-base: [referência Mitra](../reference/mitra/00-OVERVIEW.md) ·
 [DECISION-REGISTER](../reference/mitra/DECISION-REGISTER.md) ·

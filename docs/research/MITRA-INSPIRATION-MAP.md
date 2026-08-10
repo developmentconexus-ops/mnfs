@@ -782,3 +782,47 @@ Convenção de envelope uniforme: toda resposta é `{status, result, paramsAppli
 | `getProjectContext` como world-model de 1 chamada | ADOPT (forte) | Contexto do agente barato e completo; espelha nosso Context Pack |
 | RBAC grade perfil×recurso com select/dml separados | ADOPT | Base do nosso authority model de dados |
 | `AgentTaskSession` com fila editável e eventos tipados | REFERENCE | Blueprint do nosso protocolo de sessão de agente embutido |
+
+### 16.7 De onde vem o conhecimento de domínio do ERP (avaliado)
+
+Pergunta do Operador: *"como ele sabe e mapeia tudo do Sankhya? Tem um especialista, documentação?"* Resposta: **não há especialista nem doc de ERP embutidos**. Três camadas:
+
+1. **Blueprint = só mecânica.** `sankhya_oauth` carrega `fieldsSchema` (3 campos), `testEndpoint`, `docUrl`. Zero semântica de negócio.
+2. **O "especialista" é o pré-treino do LLM.** Sankhya tem documentação pública massiva (developer.sankhya.com.br): OAuth client credentials, gateway `service.sbr?serviceName=`, dicionário TGFCAB/TGFITE/TGFPRO/TGFPAR — e publica até **`llms.txt`** (índice de docs para LLMs). Prova decisiva: `DbExplorerSP.executeQuery` **não consta na doc oficial** — é serviço semi-interno difundido em fóruns/GitHub da comunidade — e o agente o usou mesmo assim. Conhecimento veio do corpus, não da plataforma.
+3. **Discovery corrige o prior.** O agente assumiu o padrão público (`NUNOTAORIG`), sondou a base real, constatou ausência e achou o mecanismo verdadeiro (`TGFVAR`, `AD_*`). Prior dá direção; introspecção dá verdade.
+
+**Fórmula**: conector genérico (mecânica) + prior do modelo (domínio) + loop de verificação (base específica).
+
+**Para Conexus**: não construir bases de conhecimento por ERP antecipadamente — o prior cobre sistemas grandes. Mas o prior degrada com a obscuridade do sistema; para nicho, ativar o "perfil de ERP" (§15.4): pacote versionado de convenções + docs do vendor (aproveitar a adoção crescente de `llms.txt` pelos vendors) injetado como contexto quando o Discovery detectar prior fraco (muitas correções seguidas).
+
+## 17. "Sistema de missão" do Mitra — governança mínima viável (comparativo com MNFS)
+
+Pergunta do Operador: nosso sistema de missão é muito complexo/extenso ("talvez até demais") — como o Mitra faz essa parte? Resposta com base nos 3 experimentos: **o Mitra quase não tem sistema de missão** — e entrega qualidade mesmo assim.
+
+### 17.1 Os 4 mecanismos observados
+
+1. **Missão = 1 task de chat com checklist-template fixo.** Os dois builds (criação e migração) usaram a MESMA lista de 13 itens: Planejar → UX → Design → Backend → Frontend → Testes → Validar features/UX/design/usuários/permissões → **Revisão final contra o prompt original**. Não é plano sob medida; é template de disciplina nas instruções, materializado via TodoWrite.
+2. **Estado de longo prazo em documentos versionados, não em processo.** `escopo-*.md` (status no cabeçalho = gate; fases F0–F6 com dependências; PAs bloqueantes/residuais) + `discovery-*.md` (evidência). O gate é o campo `status` do doc; o tracking é o ciclo de vida dos PAs; o ledger é o git (SYNC/SHARE).
+3. **Zero hierarquia de agentes.** Um agente, tasks sequenciais, sem orquestrador nem validador frio. Validação = 5 itens de auto-validação do checklist + revisão final contra o prompt.
+4. **Única máquina de fases separada é o Escopo** (2 estágios, sentinela `[ESCOPO_FINALIZADO]`).
+
+### 17.2 Comparativo
+
+| Dimensão | MNFS | Mitra |
+|---|---|---|
+| Plano | Mission→Milestone→Feature, planner packs | Checklist fixo por task |
+| Gates | P6/P7, validadores frios, contracts | Campo `status` do doc de escopo |
+| Rastreio | Ledgers, evidence packs | PAs com ID no doc + git history |
+| Validação | Agentes QA dedicados | Auto-validação no checklist |
+| Horizonte longo | Sistema de missão | Documentos versionados como estado |
+
+### 17.3 Leitura e classificação
+
+O Mitra comprime disciplina em **template** (checklist invariante + protocolo no doc) em vez de processo externo. Funciona porque cada task tem horizonte curto; o horizonte longo mora nos docs. Qualidade observada: achou e corrigiu os próprios bugs, travou em decisão de negócio — com ~5% da maquinaria do MNFS.
+
+| Padrão | Classificação | Tratamento |
+|---|---|---|
+| Checklist-template invariante com validações embutidas | ADOPT | Para o agente embutido do produto Conexus; barato e auditável |
+| Doc-como-contrato com status-gate e PA lifecycle | ADOPT | Substitui maquinaria pesada para trabalho de produto |
+| Auto-validação (sem revisor frio) | ADAPT | Suficiente para app CRUD; manter revisor frio para mudanças de risco (dados, permissões, produção) |
+| MNFS-grade completo | manter | Para construir a plataforma em si; não exportar para o produto |

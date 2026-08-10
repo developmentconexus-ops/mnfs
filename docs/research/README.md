@@ -28,3 +28,11 @@ Research reports are evidence, not adopted policy. Normative outcomes are promot
 - [Documentation governance](MNFS-RESEARCH-DOCUMENTATION-GOVERNANCE-v1.md)
 - [Legacy MNFS Harness map](LEGACY-MNFS-HARNESS-MAP.md)
 - [FirstMate inspiration map](FIRSTMATE-INSPIRATION-MAP.md)
+- [Mitra inspiration map](MITRA-INSPIRATION-MAP.md)
+
+## Consultation references
+
+Derived, navigable references built from the evidence above. The map stays the frozen evidence chain; these reorganize it for consultation with C4 diagrams and per-theme decisions.
+
+- [Mitra reference (index)](../reference/mitra/00-OVERVIEW.md) — arc42-reduced + C4 + 8 thematic docs, each with Mermaid diagrams and a Conexus decision table
+- [Mitra decision register](../reference/mitra/DECISION-REGISTER.md) — every OWN/ADOPT/ADAPT/SPIKE/REFERENCE/DEFER/REJECT verdict with evidence back-links

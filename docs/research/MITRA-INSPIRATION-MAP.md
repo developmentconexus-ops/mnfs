@@ -839,3 +839,96 @@ O Mitra comprime disciplina em **template** (checklist invariante + protocolo no
 | Doc-como-contrato com status-gate e PA lifecycle | ADOPT | Substitui maquinaria pesada para trabalho de produto |
 | Auto-validação (sem revisor frio) | ADAPT | Suficiente para app CRUD; manter revisor frio para mudanças de risco (dados, permissões, produção) |
 | MNFS-grade completo | manter | Para construir a plataforma em si; não exportar para o produto |
+
+## 18. Harness plugável — BYOK / BYOS / multi-agente (achado tardio, alto impacto)
+
+Cluster de tipos do interactions-sdk não visto antes. Revela que o builder do Mitra **não é fixo em Claude Code** — é um harness plugável de credencial, modelo e runtime de agente. Explica o "**Sub**" em "Claude Opus 5 High Sub" = assinatura Claude conectada via OAuth.
+
+### 18.1 Três eixos de plugabilidade (verbatim dos tipos)
+
+```ts
+// Runtime do agente (a CLI que roda no sandbox)
+type AgentType = 'claudecode' | 'codex' | 'opencode-cli' | 'opencode-sdk';
+// Credencial por assinatura (BYOS — traga sua conta)
+type AgentSubscriptionTarget = 'claude' | 'openai_oauth' | 'codex';
+type ConnectableSubscriptionTarget = 'claude' | 'codex';
+// Credencial por API key (BYOK — 8 provedores)
+type AgentApiKeyTarget = 'anthropic'|'openai'|'gemini'|'kimi'|'minimax'|'glm'|'qwen'|'openrouter';
+type CredentialAccessType = 'subscription' | 'api_key';
+type AuthMethod = 'api_key' | 'paste_code' | 'device';
+```
+
+O usuário do Mitra pode: (a) **conectar a própria assinatura** Claude Max/Pro ou ChatGPT/Codex via OAuth; (b) **colar API key** de 8 provedores (Anthropic, OpenAI, Gemini, Kimi, MiniMax, GLM, Qwen, OpenRouter); (c) escolher o **runtime** (Claude Code, Codex CLI, OpenCode). O modelo é selecionável por mensagem (`SendOptions.modelId`).
+
+### 18.2 Máquina de credencial (`manageAgentCredentialMitra`)
+
+Uma função, 3 overloads, ação-máquina:
+
+```ts
+type CredentialAction = 'auth'|'connect'|'status'|'remove'|'list'|'list_models'
+  |'list_providers'|'validate'|'save'|'oauth_start'|'oauth_exchange'
+  |'device_start'|'device_poll'|'device_cancel';
+```
+
+- **OAuth assinatura Claude**: `{action:'auth', target:'claude'}` → `AuthClaudeResult {authUrl, state}` (abre browser) → `{action:'connect', target:'claude', code, state}` → `ConnectAgentSubscriptionResult {success, account:{email, orgName}, expiresAt}`.
+- **Device flow Codex**: `{action:'auth', target:'codex'}` → `AuthCodexResult {userCode, verificationUrl, pollId}` → poll `device_poll`.
+- **Provider list p/ UI**: `list_providers` → `AgentProviderListItem {name, type, connected, account, maskedKey, expiresAt}` (é o seletor de modelo que vimos); `list_models` → grupos `AgentModelGroup {type: 'subscription'|'api_key', models[]}`.
+- Credencial roda sobre websocket `/sdk-ws` (visto no `useAgentWebSocket` do bundle).
+
+### 18.3 Task do agente amarrada à credencial
+
+```ts
+interface GetAgentTaskCreateOptions { create:true; projectId?; agentType?:AgentType;
+  modelId?:string; name?:string; connectionId?:string; }
+```
+
+`connectionId` liga a task a uma credencial específica → multiusuário com contas próprias. `manageAgentChatMitra` faz list/rename/delete de chats (histórico por projeto).
+
+### 18.4 Por que isso importa para Conexus
+
+Este é o achado mais estratégico do estudo. O Mitra provou um **harness agnóstico**: mesma plataforma roda Claude Code OU Codex OU OpenCode, sobre assinatura do usuário OU API key de 8 provedores. Implicações:
+
+- **Economia**: cliente traz a própria assinatura Claude Max → custo de inferência sai do provedor da plataforma. Modelo de negócio diferente do "revende tokens".
+- **Portabilidade de modelo**: não acopla ao Anthropic; troca de provedor é configuração.
+- **Risco de qualidade**: a metodologia (§17) tem que ser robusta a modelo variável — o que funciona no Opus pode degradar no Qwen. O template+checklist viram ainda mais críticos.
+
+| Padrão | Classificação | Tratamento Conexus |
+|---|---|---|
+| Runtime de agente plugável (claudecode/codex/opencode) | ADAPT | Forte, mas começar com 1 runtime sólido; abstrair a interface de sessão desde já (`AgentTaskSession` §16.5) |
+| BYOS via OAuth (Claude/Codex) | ADOPT | Muda a economia; conectar assinatura do cliente com token-refresh server-side |
+| BYOK 8 provedores + seletor de modelo por mensagem | ADOPT | Roteamento de modelo por tarefa/custo; catálogo `list_providers`/`list_models` |
+| Credencial sobre `/sdk-ws` com máquina OAuth/device completa | REFERENCE | Blueprint do nosso fluxo de conexão de credencial de agente |
+| `connectionId` amarrando task↔credencial | ADOPT | Multiusuário com conta/quota própria por sessão de agente |
+
+## 19. Balanço de cobertura (honesto) — o que está mapeado e o que falta
+
+Auditoria contra a lista exaustiva de exports (mitra-sdk 70 fns, interactions-sdk 56 fns + ~110 tipos).
+
+**Mapeado com profundidade (fato+evidência):**
+- Harness = Claude Code/E2B; pipeline 2 modelos (Escopo Gemini → build Claude) §2–4, §13
+- Superfície completa dos 2 SDKs: assinaturas + modelo de dados verbatim §11–12, §16
+- Integração externa: blueprint, `callIntegration`, auth union, teste §16.2
+- Databases via Tunnel Cloudflare (Oracle/MySQL/SQLServer/Postgres), fluxo IP+porta §16.6b
+- Sankhya ponta a ponta ao vivo: `DbExplorerSP.executeQuery`, TGFCAB/TGFVAR/AD_, multiempresa §15
+- 4 camadas de dado, SF-cron, `getProjectContext` world-model, RBAC §16.3–16.4
+- Origem do conhecimento de ERP (prior do LLM + discovery) §16.7
+- Sistema de missão mínimo vs MNFS §17
+- Harness plugável BYOK/BYOS/multi-agente §18
+- Escopo real (5 perguntas → doc 15 seções, metodologia) §13–14, §15.6
+- Anti-patterns de segurança (chave Gemini no browser) §13.5
+
+**Mapeado parcial (assinatura conhecida, comportamento não observado ao vivo):**
+- `manageAgentCredential` OAuth/device — tipos completos, fluxo não exercido (não vou conectar credencial real)
+- `AgentTaskSession` embutível — interface completa, não instanciado fora do builder
+- Deploy S3 / `getGitConfig` / SYNC-SHARE — visto nos logs do build, protocolo `migrations.yaml` interno não extraído
+- `dbActions` — presente no world-model, semântica exata não isolada
+- Voice agent do Escopo (gemini-flash) — mencionado, não investigado
+
+**Não investigado (fronteira atual):**
+- Wire protocol do `/sdk-ws` (frames websocket reais)
+- Superfície REST do backend (`baseURL` endpoints crus por trás do SDK)
+- Internals do sandbox E2B / system prompt da harness (só o CLAUDE.md do projeto, não o do agente)
+- Estrutura do scaffold/template frontend (arquivos base herdados)
+- Planos/preços/limites (`burstLimit` visto = 5000; resto não)
+
+Conclusão honesta: **funcionamento do produto e framework de abstração — cobertos**. O que resta é infraestrutura interna (wire protocols, sandbox, scaffold) que exige ou tráfego ao vivo ou acesso ao repo-template — extraível se o Operador quiser descer a esse nível.

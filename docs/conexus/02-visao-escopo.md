@@ -1,6 +1,6 @@
 # Tópico 1 — Visão e escopo do produto
 
-**Status: RASCUNHO — aguarda revisão do operador.**
+**Status: DECIDIDO — ratificado pelo operador em 2026-08-10 ([C-001](DECISOES.md)).**
 Insumos: decisões do operador (2026-08-10), 3 pilares de melhoria ditados pelo operador,
 referência Mitra completa, acervo MNFS.
 
@@ -96,4 +96,6 @@ para comparação direta.
 
 ## Decisão
 
-_(pendente — operador ratifica visão; pilares P1–P3 + C1–C4 viram requisitos no tópico 2)_
+Ratificada ([C-001](DECISOES.md)). Pilares P1–P3 + C1–C4 viram requisitos no tópico 2.
+Nota do operador na ratificação: Mastra visto como encaixe natural para C1 (central de agentes
+com ação); checklist vivo de tarefas na UI (padrão Mitra) avaliado no tópico 13.

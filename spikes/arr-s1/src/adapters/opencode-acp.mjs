@@ -70,6 +70,8 @@ export function createOpenCodeAcpAdapter({
   stderrLimitBytes,
   clientFactory,
   ndJsonStream,
+  clientCapabilities,
+  clientRequestHandlers,
   beforeSpawn,
   createClient = createAcpStdioClient,
 } = {}) {
@@ -107,6 +109,8 @@ export function createOpenCodeAcpAdapter({
         processSpec: clone(processSpec),
         clientFactory,
         ndJsonStream,
+        ...(clientCapabilities ? { clientCapabilities } : {}),
+        ...(clientRequestHandlers ? { clientRequestHandlers } : {}),
         ...(beforeSpawn ? { beforeSpawn } : {}),
       })).then((client) => {
         requireCommonClient(client);

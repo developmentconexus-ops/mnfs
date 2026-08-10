@@ -417,11 +417,13 @@ test('injected doubles cannot write PASS Evidence without trusted process observ
   });
   const fakeAcpAdapter = () => ({
     observations,
-    supportsFixtureTools: true,
     processSpec: { cwd: fixture.workspacePath, env: { MNFS_FIXTURE: '1' } },
     initialize: async () => ({ status: 'READY' }),
     startSession: async () => ({ sessionId: 'fixture-session' }),
     prompt: async () => ({ settled: Promise.resolve(settled), events }),
+    cancel: async () => ({ outcome: 'CANCELLED' }),
+    forceKill: () => true,
+    processObservation: async () => ({ outcome: 'SIGNAL_DEATH', output: { stdout: { bytesSeen: 0, limitBytes: 1 }, stderr: { bytesSeen: 0, limitBytes: 1 } } }),
     shutdown: async () => {},
   });
   const processBoundary = {
@@ -473,7 +475,7 @@ test('injected doubles cannot write PASS Evidence without trusted process observ
       if (result.evidenceIntegrity.ok) {
         assert.equal(result.criterionResults.length, S1_CRITERIA.length, candidateShape);
         assert.ok(result.criterionResults.some(({ status }) => status !== 'PASS'), candidateShape);
-        assert.equal(result.artifactRecords.length, S1_CRITERIA.length + 3, candidateShape);
+        assert.equal(result.artifactRecords.length, S1_CRITERIA.length + 3 + 2, candidateShape);
       }
     }
   } finally {

@@ -125,6 +125,10 @@ export function createAcpClient({
     return freeze(turn.events.map((event) => clone(event)));
   }
 
+  function turnRawObservation(turn) {
+    return freeze(turn.rawMessages.map((message) => clone(message)));
+  }
+
   function settleTurn(turn, raw) {
     if (turn.settledValue) return turn.settledValue;
     let normalized;
@@ -230,6 +234,7 @@ export function createAcpClient({
       }
       if (turn.settledValue) return;
       if (message?.kind === 'session_update') {
+        turn.rawMessages.push(clone(message));
         try {
           turn.sequence += 1;
           turn.events.push(normalizeAcpEvent(message, {
@@ -308,6 +313,7 @@ export function createAcpClient({
       sessionId,
       sequence: 0,
       events: [],
+      rawMessages: [],
       resolve,
       settled,
       settledValue: null,
@@ -319,7 +325,7 @@ export function createAcpClient({
       responsePromise = activeSession.prompt(text);
     } catch (error) {
       settleTurn(turn, { error: { message: error?.message ?? String(error) } });
-      return Object.freeze({ sessionId, settled, cancel, observe: () => turnObservation(turn) });
+      return Object.freeze({ sessionId, settled, cancel, observe: () => turnObservation(turn), observeRaw: () => turnRawObservation(turn) });
     }
     Promise.resolve(responsePromise)
       .then((response) => settleTurn(turn, response))
@@ -331,6 +337,7 @@ export function createAcpClient({
       settled,
       cancel,
       observe: () => turnObservation(turn),
+      observeRaw: () => turnRawObservation(turn),
     });
   }
 
@@ -406,6 +413,7 @@ export async function createAcpStdioClient({
   clientFactory,
   ndJsonStream,
   clientOptions = { name: 'mnfs-arr-s1' },
+  clientRequestHandlers = {},
   beforeSpawn,
   ...options
 } = {}) {
@@ -421,7 +429,15 @@ export async function createAcpStdioClient({
       Writable.toWeb(execution.stdin),
       Readable.toWeb(execution.stdout),
     );
-    const client = clientFactory(clientOptions);
+    let client = clientFactory(clientOptions);
+    const handlers = Object.entries(clientRequestHandlers ?? {});
+    if (handlers.length > 0 && typeof client?.onRequest !== 'function') {
+      throw new TypeError('ACP client must expose onRequest for requested v1 client capabilities');
+    }
+    for (const [method, handler] of handlers) {
+      if (typeof handler !== 'function') throw new TypeError(`ACP client request handler for ${method} must be a function`);
+      client = client.onRequest(method, async (request) => handler(request?.params ?? request));
+    }
     return createAcpClient({ ...options, client, stream, processBoundary });
   } catch (error) {
     await processBoundary.close();

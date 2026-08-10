@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 
 import { S1_CRITERIA } from './contract.mjs';
 import { createFixtureTools, verifyFixtureResult } from './fixture.mjs';
+import { createAcpFixtureCapabilities } from './acp/fixture-capabilities.mjs';
 import { deriveCandidateVerdict } from './evaluate.mjs';
 import { verifyArtifactRecords, writeJsonArtifact } from './artifacts.mjs';
 import { createPiSdkAdapter } from './adapters/pi-sdk.mjs';
@@ -10,6 +11,9 @@ import { createPiAcpAdapter } from './adapters/pi-acp.mjs';
 import { createOpenCodeAcpAdapter } from './adapters/opencode-acp.mjs';
 import { revalidateStagedCandidateProvenance } from './probes/candidate-provenance.mjs';
 import { startProcess } from './process-runner.mjs';
+import { runPiRpcProcess, translatePiRpcFixtureCalls } from './pi-rpc.mjs';
+import { deriveTrustedAuthProof } from './proof-driver.mjs';
+import { persistCandidateRecoveryState } from './recovery.mjs';
 import { S1_FROZEN_CANDIDATE_PROVENANCE } from './preflight.mjs';
 
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
@@ -94,7 +98,9 @@ function buildProofs({ candidateShape, fixture, preflight, execution, adapter, b
       && trusted.boundary?.source === 'MNFS_TRUSTED_PROCESS_RUNNER',
     'S1-C03': hasExactInventory(trusted.inventory, fixture) && trusted.fixtureVerified === true,
     'S1-C04': discoveryEmpty(trusted.discovery),
-    'S1-C05': trusted.auth?.outcome === 'AUTHORIZED' && typeof trusted.auth.methodClass === 'string' && trusted.auth.methodClass.trim() !== '',
+    'S1-C05': trusted.auth?.outcome === 'AUTHORIZED_OPERATION'
+      && typeof trusted.auth.providerClass === 'string' && trusted.auth.providerClass.trim() !== ''
+      && typeof trusted.auth.modelClass === 'string' && trusted.auth.modelClass.trim() !== '',
     'S1-C06': trusted.cancellation?.outcome === 'CANCELLED'
       && trusted.cancellation?.source === 'MNFS_TRUSTED_PROCESS_RUNNER'
       && Number.isSafeInteger(trusted.cancellation.durationMs) && trusted.cancellation.durationMs >= 0,
@@ -106,7 +112,13 @@ function buildProofs({ candidateShape, fixture, preflight, execution, adapter, b
       && trusted.processDeath?.source === 'MNFS_TRUSTED_PROCESS_RUNNER',
     'S1-C10': trusted.recovery?.phase === 'FRESH_PROCESS'
       && trusted.recovery?.source === 'MNFS_TRUSTED_RECOVERY_PROCESS'
-      && trusted.recovery.verified === true,
+      && trusted.recovery.verified === true
+      && trusted.recovery.stateReopened === true
+      && trusted.recovery.evidenceHashesValid === true
+      && trusted.recovery.bindingMatches === true
+      && trusted.recovery.fixtureBindingMatches === true
+      && trusted.recovery.runtimeSessionRequired === false
+      && trusted.recovery.transcriptRequired === false,
     'S1-C11': Array.isArray(events) && events.every((event) => event && typeof event.type === 'string'),
     'S1-C12': trusted.supportedBoundary?.source === 'MNFS_TRUSTED_ADAPTER'
       && typeof trusted.supportedBoundary.kind === 'string'
@@ -120,9 +132,9 @@ function buildProofs({ candidateShape, fixture, preflight, execution, adapter, b
   };
 }
 
-async function writeEvidence({ candidateShape, fixture, runRoot, binding, proofs, execution, adapter, evidencePrefix = `evidence/${candidateShape}` }) {
+async function writeEvidence({ candidateShape, fixture, runRoot, binding, proofs, execution, adapter, evidencePrefix = `evidence/${candidateShape}`, includeRecoveryState = true }) {
   if (typeof runRoot !== 'string' || !binding) return blockedCandidate(candidateShape, 'durable run root and artifact binding are required before PASS Evidence can be derived');
-  const records = [];
+  const records = includeRecoveryState ? [...(execution?.recoveryStateRecords ?? [])] : [];
   const refs = {};
   for (const id of S1_CRITERIA) {
     const record = await writeJsonArtifact(runRoot, `${evidencePrefix}/${id}.json`, {
@@ -211,10 +223,10 @@ async function loadVerifiedUpstreamSurface(context, candidateShape, name, export
   return module[exportName];
 }
 
-async function defaultAdapterFactory(candidateShape, { record, fixtureTools, ...options }) {
+async function defaultAdapterFactory(candidateShape, { record, fixtureCapabilities, ...options }) {
   if (!record) return null;
   const context = options.context ?? options;
-  const trustedOptions = { ...context, ...options, fixtureTools };
+  const trustedOptions = { ...context, ...options, fixtureCapabilities };
   if (candidateShape === 'PI-SDK') {
     const sdk = await loadVerifiedUpstreamSurface(trustedOptions, candidateShape, 'runtimeModule');
     return createPiSdkAdapter({
@@ -222,13 +234,13 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureTools, ...
       sdk,
       tools: [],
       noTools: 'all',
-      customTools: fixtureTools?.customTools,
+      customTools: createFixtureTools(options.fixture).customTools,
     });
   }
   const executable = await revalidatedRecord(trustedOptions, candidateShape).then((fresh) => fresh.upstreamSurfaces?.executable?.path);
   if (!executable) throw new Error(`trusted upstream executable is unavailable for ${candidateShape}`);
   const acpSdk = await loadVerifiedUpstreamSurface(trustedOptions, candidateShape, 'acpSdk');
-  const clientFactory = acpSdk?.createClient ?? acpSdk?.Client;
+  const clientFactory = acpSdk?.client ?? acpSdk?.createClient ?? acpSdk?.Client;
   const ndJsonStream = acpSdk?.ndJsonStream;
   if (typeof clientFactory !== 'function' || typeof ndJsonStream !== 'function') {
     throw new TypeError(`trusted upstream ACP SDK surface is incomplete for ${candidateShape}`);
@@ -239,6 +251,8 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureTools, ...
     env: record.environment,
     clientFactory,
     ndJsonStream,
+    clientCapabilities: fixtureCapabilities?.clientCapabilities,
+    clientRequestHandlers: fixtureCapabilities?.handlers,
     beforeSpawn: () => revalidatedRecord(trustedOptions, candidateShape),
   };
   return candidateShape === 'PI-ACP'
@@ -249,6 +263,7 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureTools, ...
 function actorFixtureSpec(fixture) {
   return {
     fixtureId: fixture.fixtureId,
+    fixtureHash: fixture.fixtureHash,
     workspacePath: fixture.workspacePath,
     nonce: fixture.nonce,
     nonceRelativePath: fixture.nonceRelativePath,
@@ -309,9 +324,36 @@ async function runTrustedActorProcess({ candidateShape, fixture, context, record
   return { processResult, payload: processPayload(processResult), record: freshRecord };
 }
 
-async function runFreshRecovery({ fixture, toolCalls, context }) {
+async function runTrustedPiRpcProcess({ candidateShape, fixture, context, mode = 'NORMAL' }) {
+  const record = await revalidatedRecord(context, candidateShape);
+  const executable = record.upstreamSurfaces?.executable?.path;
+  if (!executable) throw new Error('trusted Pi RPC executable is unavailable');
+  const attempt = await runPiRpcProcess({
+    executable,
+    cwd: fixture.workspacePath,
+    env: actorEnvironment(record),
+    prompt: fixture.prompt,
+    mode,
+    beforeSpawn: async () => {
+      const fresh = await revalidatedRecord(context, candidateShape);
+      if (fresh.upstreamSurfaces?.executable?.path !== executable) {
+        throw new Error('Pi RPC executable changed during final spawn revalidation');
+      }
+    },
+  });
+  return { ...attempt, record };
+}
+
+async function runFreshRecovery({ fixture, toolCalls, context, candidateShape, recoveryState }) {
   const recoverySpec = {
-    argv: [process.execPath, new URL('./fresh-recovery-child.mjs', import.meta.url).pathname, JSON.stringify({ fixture: actorFixtureSpec(fixture), toolCalls })],
+    argv: [process.execPath, new URL('./fresh-recovery-child.mjs', import.meta.url).pathname, JSON.stringify({
+      fixture: actorFixtureSpec(fixture),
+      toolCalls,
+      candidateShape,
+      runRoot: context.runRoot,
+      binding: context.artifactBinding,
+      recoveryRecords: recoveryState?.records ?? [],
+    })],
     cwd: fixture.workspacePath,
     env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' },
     timeoutMs: 5000,
@@ -324,14 +366,44 @@ async function runFreshRecovery({ fixture, toolCalls, context }) {
   return {
     phase: 'FRESH_PROCESS',
     verified: result.outcome === 'NORMAL_EXIT' && payload?.kind === 'MNFS_TRUSTED_FRESH_RECOVERY' && payload.verified === true,
+    stateReopened: payload?.stateReopened === true,
+    evidenceHashesValid: payload?.evidenceHashesValid === true,
+    bindingMatches: payload?.bindingMatches === true,
+    fixtureBindingMatches: payload?.fixtureBindingMatches === true,
+    runtimeSessionRequired: payload?.runtimeSessionRequired ?? true,
+    transcriptRequired: payload?.transcriptRequired ?? true,
+    fixtureVerified: payload?.fixtureVerified ?? false,
     source: 'MNFS_TRUSTED_RECOVERY_PROCESS',
     outcome: result.outcome,
   };
 }
 
-function trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, recovery, preflight, record, actorProtocol }) {
-  const toolCalls = normal.payload?.fixtureToolCalls ?? [];
-  const boundary = normal.payload?.boundaryObservation;
+async function prepareRecoveryState({ candidateShape, context, normal, cancellation, death, protocol }) {
+  return persistCandidateRecoveryState({
+    runRoot: context.runRoot,
+    binding: context.artifactBinding,
+    candidateShape,
+    observations: [{
+      protocol,
+      normalOutcome: normal?.processResult?.outcome ?? normal?.processObservation?.outcome ?? null,
+      settled: normal?.settled?.outcome ?? null,
+      cancellationOutcome: cancellation?.processResult?.outcome ?? cancellation?.processObservation?.outcome ?? null,
+      processDeathOutcome: death?.processResult?.outcome ?? death?.processObservation?.outcome ?? null,
+    }],
+    checkpoints: {
+      cancellation: cancellation?.processResult?.outcome ?? cancellation?.processObservation?.outcome ?? 'NOT_RUN',
+      processDeath: death?.processResult?.outcome ?? death?.processObservation?.outcome ?? 'NOT_RUN',
+      freshRecovery: 'PENDING',
+    },
+  });
+}
+
+function trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, recovery, preflight, record, actorProtocol, toolCallsOverride = null }) {
+  const toolCalls = toolCallsOverride ?? normal.payload?.fixtureToolCalls ?? normal.fixtureToolCalls ?? [];
+  const rawObservations = actorProtocol === 'PI-RPC'
+    ? normal.messages ?? []
+    : normal.payload?.rawEvents ?? [];
+  const boundary = normal.payload?.boundaryObservation ?? normal.boundaryObservation;
   const expectedEnvironmentDigest = digest(Object.fromEntries(Object.entries(record?.environment ?? {}).sort()));
   const outputLimit = normal.processResult.output.stdout.limitBytes + normal.processResult.output.stderr.limitBytes;
   return {
@@ -345,7 +417,7 @@ function trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, 
     inventory: toolCalls.map((call) => call.id),
     fixtureVerified: fixtureResult.ok,
     discovery: { extensions: [], skills: [], prompts: [], themes: [], agentsFiles: [] },
-    auth: { outcome: preflight.credentials?.status === 'READY' ? 'AUTHORIZED' : 'BLOCKED', methodClass: preflight.credentials?.authMethodClass ?? '' },
+    auth: deriveTrustedAuthProof({ rawObservations }),
     cancellation: { ...cancellation.processResult, outcome: cancellation.processResult.outcome, source: 'MNFS_TRUSTED_PROCESS_RUNNER', durationMs: cancellation.processResult.durationMs },
     output: { bytes: normal.processResult.output.stdout.bytesSeen + normal.processResult.output.stderr.bytesSeen, limitBytes: outputLimit },
     processDeath: { ...death.processResult, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
@@ -354,8 +426,8 @@ function trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, 
     machinery: { reused: ['fixture', 'artifacts', 'process-runner'] },
     supportedBoundary: {
       source: 'MNFS_TRUSTED_ADAPTER',
-      kind: actorProtocol === 'PI-RPC' ? 'PI_RPC_PUBLIC_API' : 'PI_SDK_PUBLIC_API',
-      observation: actorProtocol === 'PI-RPC' ? 'createRpcSession/AgentSession' : 'createAgentSession/AgentSession',
+      kind: actorProtocol === 'PI-RPC' ? 'PI_RPC_PROCESS_BOUNDARY' : 'PI_SDK_PUBLIC_API',
+      observation: actorProtocol === 'PI-RPC' ? 'absolute-staged-pi-executable --mode rpc' : 'createAgentSession/AgentSession',
     },
     upgradePolicy: record.upgradePolicy,
     removalConditions: record.removalConditions,
@@ -388,6 +460,7 @@ async function writeRuntimeAndBoundary({ candidateShape, fixture, context, execu
     proofs: boundaryProofs,
     execution: boundaryExecution,
     adapter,
+    includeRecoveryState: false,
     evidencePrefix: `evidence/${candidateShape}/boundary`,
   });
   return attachBoundary(runtime, boundaryEvidence, candidateShape);
@@ -401,7 +474,8 @@ async function runPiSdk({ candidateShape, fixture, context, actorProtocol = 'PI-
     const death = await runTrustedActorProcess({ candidateShape, fixture, context, record, mode: 'DEATH', protocol: actorProtocol });
     const toolCalls = normal.payload?.fixtureToolCalls ?? [];
     const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
-    const recovery = await runFreshRecovery({ fixture, toolCalls, context });
+    const recoveryState = await prepareRecoveryState({ candidateShape, context, normal, cancellation, death, protocol: actorProtocol });
+    const recovery = await runFreshRecovery({ fixture, toolCalls, context, candidateShape, recoveryState });
     const trustedProofs = trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, recovery, preflight: context.preflight, record, actorProtocol });
     const execution = {
       settled: normal.payload?.settled ?? { settled: false, outcome: normal.processResult.outcome },
@@ -409,6 +483,7 @@ async function runPiSdk({ candidateShape, fixture, context, actorProtocol = 'PI-
       trustedProofs,
       trustedProvenance: record,
       toolCalls,
+      recoveryStateRecords: recoveryState?.records ?? [],
     };
     return writeRuntimeAndBoundary({
       candidateShape,
@@ -426,13 +501,42 @@ async function runPiSdk({ candidateShape, fixture, context, actorProtocol = 'PI-
   }
 }
 
-async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode = 'NORMAL' }) {
-  const fixtureTools = createFixtureTools(fixture);
-  const adapter = await adapterFactory({ cwd: fixture.workspacePath, fixture, fixtureTools, context, record });
-  if (!adapter) throw new Error('staged ACP adapter is unavailable');
-  if (adapter.supportsFixtureTools !== true) {
-    throw new Error(`${candidateShape} public boundary cannot provide the fixed fixture tool/resource inventory`);
+async function runPiRpc({ candidateShape, fixture, context }) {
+  try {
+    const record = await revalidatedRecord(context, candidateShape);
+    const normal = await runTrustedPiRpcProcess({ candidateShape, fixture, context });
+    const cancellation = await runTrustedPiRpcProcess({ candidateShape, fixture, context, mode: 'CANCEL' });
+    const death = await runTrustedPiRpcProcess({ candidateShape, fixture, context, mode: 'DEATH' });
+    const toolCalls = translatePiRpcFixtureCalls(normal.messages, fixture);
+    const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
+    const recoveryState = await prepareRecoveryState({ candidateShape, context, normal, cancellation, death, protocol: 'PI-RPC' });
+    const recovery = await runFreshRecovery({ fixture, toolCalls, context, candidateShape, recoveryState });
+    const trustedProofs = trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, recovery, preflight: context.preflight, record, actorProtocol: 'PI-RPC', toolCallsOverride: toolCalls });
+    const execution = {
+      settled: normal.settled,
+      events: normal.messages.map((message, index) => ({ type: message?.type ?? 'unknown', sequence: index + 1 })),
+      trustedProofs,
+      trustedProvenance: record,
+      toolCalls,
+      recoveryStateRecords: recoveryState?.records ?? [],
+    };
+    return writeRuntimeAndBoundary({
+      candidateShape,
+      fixture,
+      context,
+      execution,
+      adapter: null,
+      boundary: { kind: 'PI_RPC_PROCESS_BOUNDARY', boundaryObservation: trustedProofs.boundary },
+    });
+  } catch (error) {
+    return blockedCandidate(candidateShape, `trusted PI-RPC process failed before Evidence: ${error?.message ?? error}`);
   }
+}
+
+async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode = 'NORMAL' }) {
+  const fixtureCapabilities = createAcpFixtureCapabilities(fixture);
+  const adapter = await adapterFactory({ cwd: fixture.workspacePath, fixture, fixtureCapabilities, context, record });
+  if (!adapter) throw new Error('staged ACP adapter is unavailable');
   if (mode === 'DEATH' && typeof adapter.forceKill !== 'function') {
     throw new Error(`${candidateShape} trusted ACP adapter cannot force-kill its process boundary`);
   }
@@ -469,7 +573,8 @@ async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context,
       session,
       settled,
       events: turn?.observe?.() ?? turn?.events ?? settled?.events ?? [],
-      fixtureTools,
+      rawMessages: turn?.observeRaw?.() ?? [],
+      fixtureCapabilities,
       processObservation: await adapter.processObservation?.(),
     };
   }
@@ -480,7 +585,8 @@ async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context,
     session,
     settled,
     events: turn?.observe?.() ?? turn?.events ?? settled?.events ?? [],
-    fixtureTools,
+    rawMessages: turn?.observeRaw?.() ?? [],
+    fixtureCapabilities,
     processObservation: await adapter.processObservation?.(),
   };
 }
@@ -491,7 +597,7 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
   const normal = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record });
   const cancellation = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode: 'CANCEL' });
   const death = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode: 'DEATH' });
-  const toolCalls = normal.fixtureTools.snapshot();
+  const toolCalls = normal.fixtureCapabilities.logicalToolCalls();
   const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
   const envDigest = digest(Object.fromEntries(Object.entries(record?.environment ?? {}).sort()));
   const trustedBoundary = {
@@ -500,7 +606,8 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
     environmentMatchesRecord: true,
     source: 'MNFS_TRUSTED_PROCESS_RUNNER',
   };
-  const recovery = await runFreshRecovery({ fixture, toolCalls, context });
+  const recoveryState = await prepareRecoveryState({ candidateShape, context, normal, cancellation, death, protocol: 'ACP_V1' });
+  const recovery = await runFreshRecovery({ fixture, toolCalls, context, candidateShape, recoveryState });
   const execution = {
     ready: normal.ready,
     session: normal.session,
@@ -512,7 +619,7 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
       inventory: toolCalls.map((call) => call.id),
       fixtureVerified: fixtureResult.ok,
       discovery: null,
-      auth: { outcome: context.preflight?.credentials?.status === 'READY' ? 'AUTHORIZED' : 'BLOCKED', methodClass: context.preflight?.credentials?.authMethodClass ?? '' },
+      auth: deriveTrustedAuthProof({ rawObservations: normal.rawMessages }),
       output: normal.processObservation?.output ? {
         bytes: normal.processObservation.output.stdout.bytesSeen + normal.processObservation.output.stderr.bytesSeen,
         limitBytes: normal.processObservation.output.stdout.limitBytes + normal.processObservation.output.stderr.limitBytes,
@@ -527,6 +634,7 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
       removalConditions: record?.removalConditions,
     },
     toolCalls,
+    recoveryStateRecords: recoveryState?.records ?? [],
     trustedProvenance: record,
   };
   const boundary = { kind: 'ACP_PROCESS_BOUNDARY', boundaryObservation: trustedBoundary };
@@ -560,7 +668,7 @@ export function createS1CandidateExecutors({
     'PI-RPC': async (context) => {
       const active = withFixture(context);
       if (piRpcAdapterFactory) return blockedCandidate('PI-RPC', 'in-process Pi-RPC adapter injection is prohibited; use the trusted ActorRun child executor');
-      return runPiSdk({ candidateShape: 'PI-RPC', fixture: active.fixture, context: active, actorProtocol: 'PI-RPC' });
+      return runPiRpc({ candidateShape: 'PI-RPC', fixture: active.fixture, context: active });
     },
     'PI-ACP': async (context) => {
       const active = withFixture(context);

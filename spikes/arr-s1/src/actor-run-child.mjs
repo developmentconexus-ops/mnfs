@@ -34,15 +34,8 @@ async function main() {
     throw new Error('trusted ActorRun candidate module is not the revalidated upstream surface');
   }
   const sdk = await import(input.candidateModule);
-  const sessionFactory = input.protocol === 'PI-RPC' ? sdk.createRpcSession : sdk.createAgentSession;
-  if (typeof sessionFactory !== 'function') {
-    throw new TypeError(`trusted ${input.protocol ?? 'PI-SDK'} candidate does not expose its supported session API`);
-  }
-  const runtimeSdk = input.protocol === 'PI-RPC'
-    ? { ...sdk, createAgentSession: sessionFactory }
-    : sdk;
   const adapter = createPiSdkAdapter({
-    sdk: runtimeSdk,
+    sdk,
     cwd: fixture.workspacePath,
     tools: [],
     noTools: 'all',
@@ -56,6 +49,7 @@ async function main() {
     candidateShape: input.candidateShape,
     settled,
     events: adapter.observe(),
+    rawEvents: adapter.observeRaw?.() ?? [],
     fixtureToolCalls: tools.snapshot(),
     boundaryObservation: {
       cwd: trustedCwd,

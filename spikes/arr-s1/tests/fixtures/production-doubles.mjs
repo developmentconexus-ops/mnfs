@@ -38,11 +38,11 @@ class SessionManager {
   constructor(cwd) { this.cwd = cwd; }
 }
 
-function createSession({ cwd, customTools = [], rpc = false }) {
+function createSession({ cwd, customTools = [] }) {
   const subscribers = new Set();
   let disposed = false;
   let aborted = false;
-  const sessionId = `${rpc ? 'rpc' : 'sdk'}-fixture-${cwd}`;
+  const sessionId = `sdk-fixture-${cwd}`;
   const emit = (event) => {
     for (const subscriber of subscribers) subscriber(event);
   };
@@ -75,6 +75,16 @@ function createSession({ cwd, customTools = [], rpc = false }) {
       const nonce = nonceResult?.content?.[0]?.text;
       const editResult = await edit.execute('fixture-edit', { path: 'result.txt', nonce });
       emit({ type: 'tool_execution_end', toolCallId: 'fixture-edit', toolName: 'edit_result_file', result: editResult, isError: false });
+      emit({
+        type: 'message_end',
+        message: {
+          role: 'assistant',
+          provider: 'fixture-provider',
+          model: 'fixture-model',
+          authMethodClass: 'local-double',
+          stopReason: process.env.MNFS_FIXTURE_AUTH_OUTCOME === 'failure' ? 'error' : 'stop',
+        },
+      });
       emit({ type: 'turn_end', message: { role: 'assistant' } });
       emit({ type: 'agent_end', willRetry: false });
       return { status: 'COMPLETED', outcome: 'COMPLETED' };
@@ -91,10 +101,6 @@ function createSession({ cwd, customTools = [], rpc = false }) {
 
 export function createAgentSession(options) {
   return createSession(options);
-}
-
-export function createRpcSession(options) {
-  return createSession({ ...options, rpc: true });
 }
 
 export { DefaultResourceLoader, SettingsManager, SessionManager };

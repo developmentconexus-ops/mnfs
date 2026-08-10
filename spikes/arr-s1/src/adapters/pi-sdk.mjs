@@ -298,6 +298,7 @@ export function createPiSdkAdapter({
   let activeTurn = null;
   let eventSequence = 0;
   let events = [];
+  let rawEvents = [];
 
   function snapshotEvents() {
     return events.map((event) => clone(event));
@@ -321,6 +322,7 @@ export function createPiSdkAdapter({
   }
 
   function recordEvent(input) {
+    rawEvents.push(clone(input));
     try {
       const event = normalizePiEvent(input, {
         sequence: ++eventSequence,
@@ -445,6 +447,10 @@ export function createPiSdkAdapter({
     return freeze(snapshotEvents());
   }
 
+  function observeRaw() {
+    return freeze(rawEvents.map((event) => clone(event)));
+  }
+
   async function close() {
     if (closed) return;
     if (activeTurn && !activeTurn.settledValue) await cancel();
@@ -454,5 +460,5 @@ export function createPiSdkAdapter({
     session.dispose();
   }
 
-  return Object.freeze({ initialize, startTurn, observe, cancel, close });
+  return Object.freeze({ initialize, startTurn, observe, observeRaw, cancel, close });
 }

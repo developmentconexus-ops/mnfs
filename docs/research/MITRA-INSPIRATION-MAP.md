@@ -5,7 +5,7 @@ document_type: research_map
 form: explanation
 authority: research_historical
 status: draft
-version: 0.7.0
+version: 0.8.0
 owners:
   - developmentconexus-ops
 source_of_truth_for:
@@ -1753,3 +1753,463 @@ Conclusão: a "camada inteligente" da Mitra é **um agente de desenvolvimento em
 | Ausência de agentes customizados (prompt/tools/persona) | **OWN** | Lacuna clara da Mitra. É onde o Conexus pode diferenciar de verdade |
 | Ausência de IA no SDK de backend | **OWN** | Agente de domínio server-side é território livre |
 | Agente embutido = agente de dev (edita código no sandbox) | REJECT (como modelo p/ usuário final) | Dar agente que edita código ao usuário final do app é risco, não feature |
+
+---
+
+## 31. O framework agêntico real da Mitra — MCP, contexto injetado e Playground
+
+> **Fonte primária desta seção**: material oficial da própria Mitra, não engenharia reversa.
+> (a) artigo *"Criando agentes de IA no seu projeto: IA compartilhada e Playground"* (ajudamitra.prod.mitralab.io, atualizado 23/07/2026);
+> (b) artigo *"Como criar um contexto específico para o seu projeto (arquivo .md)"* (27/07/2026);
+> (c) anexo `Missão construir o Playground — BI.txt` publicado no feed da comunidade em 15/07/2026
+> (`mitra-multitenant-prod.s3.amazonaws.com/tenant_51210/ai-files/public/MissoconstruiroPlaygroundBI-mrv1nkrma2co3b.txt`, 7.604 bytes).
+> Este é o documento mais denso que a Mitra publicou sobre a própria stack agêntica — escrito pela equipe, para desenvolvedores.
+
+### 31.1 A correção que esta seção impõe ao §30
+
+O §30 concluiu: *"não existe builder de agente customizado — sem API de system prompt, tools ou persona"*.
+Isso está **parcialmente errado** e precisa ser corrigido com precisão:
+
+| Afirmação do §30 | Veredito | O que é de fato |
+|---|---|---|
+| "Sem API de system prompt" | **ERRADO** | Existem **dois campos de contexto persistente concatenados a todo acionamento** (31.4) |
+| "Sem controle de tools" | **ERRADO** | Existe **Perfil de IA** limitando tabelas e server functions que a IA pode usar (31.3) |
+| "Sem persona" | Parcialmente certo | Não há objeto "agente" nomeado; a persona vive dentro dos campos de contexto |
+| "Sem multi-agente / sub-agentes" | **Confirmado** | Nada no material oficial nem nos 367 chunks |
+| "mitra-sdk (backend) tem zero IA" | **Confirmado** | Segue válido |
+
+A conclusão estratégica do §30 (OWN — o builder de agentes é o diferencial do Conexus) **continua válida**, mas por um motivo mais estreito: a Mitra tem os *primitivos* (credencial compartilhada, RBAC de tools, contexto persistente, sessão embarcável), e **não tem** a *abstração* — não existe entidade "Agente" com identidade, versão, conjunto de tools declarado e ciclo de vida próprio. O agente da Mitra é uma convenção montada à mão dentro de um app.
+
+### 31.2 A descoberta central: `mcp__mitra-business__executeServerFunction`
+
+Do anexo da missão, na definição do contexto a injetar:
+
+> *"Contratos EXATOS com serverFunctionId numérico e nome da chave de input, via `mcp__mitra-business__executeServerFunction`."*
+
+Isto revela a peça que faltava em todo o mapa: **como o Claude Code dentro do sandbox toca o projeto**.
+A Mitra expõe ao agente um **MCP server chamado `mitra-business`**, cuja tool `executeServerFunction` é o mesmo endpoint REST que o app publicado usa (`POST /interactions/executeServerFunction`, §32.3). Ou seja:
+
+```
+Claude Code (sandbox E2B)
+   └─ MCP server "mitra-business"
+        └─ tool executeServerFunction({serverFunctionId, input})
+             └─ mesma SF que o frontend chama
+                  └─ MySQL do projeto
+```
+
+Consequências arquiteturais:
+
+- **A superfície de ação do agente É o registry de server functions.** Não há tool "rodar SQL" genérica exposta ao agente de negócio — quem quer que o agente consulte o banco precisa **criar uma SF que faz isso** (no Playground: `consulta_livre`). Toda capacidade do agente é uma SF que alguém escreveu.
+- **Tool = função de negócio versionada no projeto**, não plugin externo. Adicionar capacidade = criar SF. Remover = tirar do Perfil.
+- O nome `mitra-business` sugere que existem outros MCP servers (`mitra-dev`?) — **não confirmado**; nenhum outro nome aparece no material.
+- O prompt também menciona que, sem contexto injetado, o agente gasta minutos em `getProjects` / `ToolSearch` — logo o agente **também tem tools de descoberta de plataforma**, e `ToolSearch` indica **carregamento diferido de schemas de tool** (mesma técnica do harness da Anthropic). Forte indício de que o MCP server publica muitas tools e o agente busca sob demanda.
+
+**Classificação**
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Tools do agente = server functions do projeto via MCP | **ADOPT** | Melhor decisão de design da Mitra inteira. Capacidade do agente vira artefato versionado, revisável e permissionável — não config solta |
+| Um MCP server por domínio (`mitra-business`) | **ADOPT** | Namespace limpo, isolamento por domínio |
+| `ToolSearch` / schemas sob demanda | **ADAPT** | Necessário quando o registry cresce; nós ainda não precisamos, mas o formato do nome deve já prever |
+| Não existir tool de SQL direto para o agente de negócio | **ADOPT** | Guarda-corpo certo: SQL passa por SF auditável (ver `consulta_livre`, 31.6) |
+
+### 31.3 Perfil de IA — o RBAC das tools
+
+Do artigo oficial, seção *"Segurança corporativa: perfis, tabelas e server functions"*. Cada Perfil (em **IA para usuários finais**) define três coisas:
+
+| Eixo | O que limita |
+|---|---|
+| **Membros** | quem pertence ao perfil |
+| **Tabelas que a IA pode utilizar em consultas** | o que a IA pode **ler** |
+| **Server Functions** | o que a IA pode **executar** |
+
+Citação: *"a IA nunca acessa dados ou ações fora do que foi permitido"*.
+
+Isto conecta diretamente ao §29.3 (Profiles do app publicado, 5 eixos de permissão): **é o mesmo sistema de Perfis**, com dois dos eixos (select tables, server functions) reaproveitados para governar a IA. A Mitra não construiu um RBAC separado para o agente — **estendeu o RBAC do app**.
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| RBAC da IA reusa o RBAC do app (mesmos Perfis) | **ADOPT** | Uma fonte de verdade de permissão. Duas seria bug garantido |
+| Permissão de tool por grupo de usuário, não por agente | **ADAPT** | Certo para IA compartilhada; nosso modelo precisa de permissão **por agente ∩ por usuário** (o agente não deve poder tudo que o usuário pode) |
+
+### 31.4 Contexto persistente — o "system prompt" da Mitra
+
+Dois campos, dois públicos, **ambos concatenados a cada prompt** (citação: *"instruções que são aplicadas em todo acionamento dela, concatenadas a cada prompt"*):
+
+| Campo | Onde fica | Governa |
+|---|---|---|
+| **Diretrizes para a IA** | seção *IA para usuários finais* | a IA compartilhada que atende o usuário final |
+| **Considerações Adicionais** | Configurações → aba **IA** → *Configurações de IA para Desenvolvedores* | a IA de desenvolvimento (o Claude Code do code-builder) |
+
+Uso recomendado pela própria Mitra: *"regras do negócio, glossário e o tom das respostas"*.
+
+E a fórmula que eles publicam para montar um agente:
+
+> *"É com esse conjunto — IA conectada + perfil + contexto — que você monta, por exemplo, o agente do playground do projeto."*
+
+**Essa é a definição de agente na Mitra**: `credencial + perfil (tools) + contexto`. Três campos, nenhum objeto.
+
+### 31.5 `CLAUDE.md` / `AGENTS.md` — a "skill" do projeto (e o furo)
+
+Do artigo do arquivo `.md`:
+
+- Arquivo na **raiz do projeto**, nomes reconhecidos: **`CLAUDE.md` ou `AGENTS.md`**.
+- Conteúdo: convenções, regras de negócio, decisões técnicas, restrições, padrões de nomenclatura.
+- Precedência declarada: *"ele tem prioridade sobre as orientações genéricas"*.
+- Anti-padrões que a própria Mitra lista: nunca segredos/tokens (o arquivo é versionado); nada que muda com o uso (contagens, listas); não duplicar o que dá para ler no código.
+
+**O furo, admitido no artigo**: criar o arquivo **não garante leitura**.
+
+> *"Criar uma pasta ou um arquivo .md solto no projeto não garante, sozinho, que a IA vá lê-lo em toda sessão. Para que a leitura seja garantida e automática (…) é preciso apontar essa instrução em (…) Configurações de IA para Desenvolvedores."*
+
+Ou seja: o mecanismo de contexto de projeto depende de **uma instrução em linguagem natural, num campo de texto, pedindo para ler um arquivo**. Não é carregamento determinístico — é um pedido ao modelo.
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Contexto de projeto como arquivo versionado no repo | **ADOPT** | Já é o nosso modelo; confirma a convenção `CLAUDE.md`/`AGENTS.md` |
+| Precedência do arquivo sobre regra genérica | **ADOPT** | Hierarquia explícita evita conflito silencioso |
+| Lista de anti-padrões (segredo, dado volátil, duplicação) | **ADOPT** | Vale virar lint/checklist |
+| **Leitura garantida só por instrução em campo de texto** | **REJECT** | Carregamento de contexto tem que ser determinístico no harness, não um pedido ao modelo. Se o arquivo existe no path convencionado, ele entra — ponto |
+| Contexto único por projeto (sem escopo por agente/tarefa) | **OWN** | Nosso modelo precisa de contexto em camadas: plataforma → projeto → agente → tarefa |
+
+### 31.6 O Playground, dissecado — a receita completa de um agente
+
+O anexo da missão é um documento de engenharia completo. Vale destrinchar porque é **a única evidência existente de como a Mitra acha que um agente de produto deve ser construído**.
+
+**Produto**: seção no portal onde cada usuário cria N *estudos*. Estudo = **canvas HTML** (a análise) + **chat com agente analista**, lado a lado (`grid 1fr 400px`). Usuário pergunta → agente investiga o banco via SQL → **narra o raciocínio em tempo real** → ao final desenha a tela HTML no canvas e **renomeia o estudo**. Tudo persistente e compartilhável por link público.
+
+**(a) Ciclo de sessão** — API confirmada:
+
+```js
+getAgentTaskMitra({ create: true, agentType: 'claudecode', modelId })   // nova sessão
+getAgentTaskMitra({ taskId })                                          // reabre — reconecta inclusive stream ATIVA
+// modelId ex.: 'subscription:anthropic:claude-fable-5:medium'
+```
+
+**Formato do `modelId` decodificado** (fecha lacuna do §28):
+`{origem}:{provider}:{modelo}:{esforço}` — `subscription` (assinatura OAuth) vs. chave de API, e um **nível de reasoning effort** (`medium`) no fim. Confirma que a Mitra expõe controle de esforço por turno.
+
+**(b) Eventos do stream** (fecha o protocolo do §26.7 pelo lado do SDK):
+
+| Evento | Payload | Nota operacional da própria Mitra |
+|---|---|---|
+| `taskCreated` | `{task}` | *"SALVE task.id imediatamente"* |
+| `turnStart` | — | |
+| `delta` | `{delta, kind}` | *"use SÓ `kind==='text'`"* — existem outros kinds (thinking?) que o SDK entrega e não devem ir para a UI |
+| `tool` | `{tool, input}` | **`input` chega TRUNCADO** |
+| `turnEnd` | `{content}` | |
+| `error`, `statusChange` | — | |
+
+Métodos: `send()`, `cancel()`, `loadHistory()`.
+
+**(c) Três armadilhas que a Mitra documenta contra si mesma** — as mais reveladoras:
+
+1. **WS agêntico só aceita sessão de usuário logado.** Token de integração → `"conexão fechada"`. (String confirmada no bundle do app publicado: `"Agent Chat: conexão fechada"`.) Logo **não existe agente headless/server-to-server** — todo agente precisa de um humano logado por trás. Limitação dura.
+2. **`input` do evento `tool` chega truncado.** Instrução literal: *"NUNCA use JSON.parse nele — extraia campos por regex tolerante"*, com a regex sugerida `'"campo"\s:\s"((?:[^"\\]|\\.){1,400})'`. Um protocolo que exige regex tolerante no consumidor é um protocolo quebrado.
+3. **`loadHistory()` devolve tool calls como TEXTO CRU** no formato `mcp__...{json}` — o app precisa detectá-los por regex (`/^(mcp_[\w-]+_)?[\w-]+\s*\{"/`) e converter em segmento de tool, *"JAMAIS renderize como fala"*. O histórico persistido **perde a tipagem** dos eventos.
+
+**(d) Contexto injetado na 1ª mensagem — "a alma da velocidade"**
+
+Citação: *"Sem isso o agente gasta minutos explorando (getProjects/ToolSearch/etc.)"*. O que se injeta no prepend do primeiro `send()`:
+
+1. **Contratos exatos** — `serverFunctionId` numérico + nome da chave de input, por tool.
+2. **Schema inline** — tabelas-núcleo com colunas; demais só nomes.
+3. **Convenções** — formato de datas, enums.
+4. **Design tokens** — cores hex, fonte, radius, padrões de KPI/tabela/SVG, *"a tela gerada deve sair no design system, não genérica"*.
+5. **Regras de comportamento** — narrar tudo em pt-BR em tempo real; investigar fundo antes de concluir; a tela é o "grande final" (salvar HTML uma única vez, self-contained, SVG inline com valores reais, zero placeholder); sempre renomear o estudo; fechar com conclusão de 2-3 frases.
+
+Nas mensagens seguintes, um **sufixo curto** relembra `playgroundId` + as regras críticas.
+
+> Leitura crítica: isto é **system prompt montado à mão pelo app, a cada thread**. Não há mecanismo de plataforma para isso. Cada app que quiser um agente reimplementa a mesma injeção — e o custo de esquecer um pedaço é "o agente gasta minutos explorando".
+
+**(e) Fundação backend do agente** (o que precisa existir no projeto):
+
+| SF | Papel | Guardas |
+|---|---|---|
+| `consulta_livre` | SELECT livre para o agente | só SELECT; **1 statement** (rejeita `;`); blocklist DML/DDL; **LIMIT 200 forçado** |
+| `schema_resumo` | `INFORMATION_SCHEMA`: tabela + `GROUP_CONCAT(colunas)` | — |
+| `playground_salvar_html {playgroundId, html}` | grava a análise, versionando a anterior | — |
+| `playground_renomear {id, nome}` | agente renomeia o próprio estudo | — |
+| criar/listar/get/excluir(soft)/salvar_conversa/set_task/compartilhar/publico/versoes/restaurar | CRUD do estudo | `compartilhar` gera token hex; `publico` resolve por token |
+
+Tabelas: `PLAYGROUND (ID, USUARIO, NOME, HTML MEDIUMTEXT, TASK_ID, SHARE_TOKEN, CONVERSA MEDIUMTEXT, timestamps)` + `PLAYGROUND_VERSAO`.
+
+O campo `titulo` de `consulta_livre` merece nota: é **obrigatório em toda chamada e a SF o descarta** — existe só para a UI exibir ao vivo *"o que o agente está investigando"* em linguagem humana. Padrão elegante: **parâmetro de narração embutido no contrato da tool**, forçando o modelo a verbalizar intenção antes de agir.
+
+**(f) UX de agente — o modelo de SEGMENTOS** (onde a Mitra diz que mora a qualidade percebida):
+
+- Turno = lista ordenada de `{t:'md', c}` | `{t:'tool', label, n?, det?, t0?}` — a tool aparece **entre** as falas, no ponto exato. Ao chegar `tool`, **descarregar o buffer de texto pendente antes** de inserir o passo, *"senão a ordem mente"*.
+- **Chamadas repetidas da mesma tool não empilham**: fundem no mesmo passo com contador **×N** (animação pop a cada incremento), `det` trocando com fade. Justificativa: *"sem isso, 6 consultas seguidas parecem travamento"*.
+- Cronômetro no passo ativo a partir de ~3s.
+- Streaming suave: *"chunks são GRANDES"* — bufferizar e drenar `max(2, len/14)` chars a cada 24ms.
+- Label da tool resolvido pelo `serverFunctionId` extraído do input, via **registry de SFs — nunca IDs hardcoded**; desconhecidas caem para nome limpo (strip `mcp__*__`).
+
+**(g) Persistência e F5**: `taskCreated` → salva `TASK_ID`; persiste **conversa rica** (JSON das ~60 últimas msgs com segmentos; tool guarda só o label) a cada `turnEnd` e a cada msg do usuário. No **mount** (não só no 1º send) reconecta a sessão e carrega: 1º a conversa rica, fallback `loadHistory()`.
+
+**(h) Canvas**: `iframe sandbox="" + srcDoc`, `key` para re-render com fade, "chrome" de janela com status vivo, recarga ao ver o tool de `salvar_html`/`renomear` (delay ~2,5s) e no `turnEnd`.
+
+**(i) Critérios de aceite** que a Mitra define para o agente estar bom:
+
+- Suíte dos guardas de `consulta_livre` (SELECT ok, minúsculo ok, UPDATE bloqueado, multi-statement bloqueado, LIMIT aplicado).
+- **Primeira consulta do agente em < 15s** — *"se explorar antes, o contexto está incompleto"*. Métrica objetiva de qualidade do contexto injetado.
+- Título humano trocando a cada consulta; ×N pulsando em repetições.
+- F5 no meio E depois do turno → conversa idêntica, sem linhas `mcp__` cruas.
+- Tela final nos design tokens; estudo renomeado sozinho ao final.
+
+**Classificação do Playground**
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| **Generative UI**: agente termina desenhando HTML self-contained em canvas versionado | **ADOPT** | O melhor padrão de produto do Mitra inteiro. Resposta navegável > texto solto |
+| Parâmetro de narração (`titulo`) obrigatório no contrato da tool | **ADOPT** | Trivial de implementar, ganho enorme de percepção e de auditoria |
+| Modelo de **segmentos** ordenados (md ∕ tool intercalados) + fusão ×N | **ADOPT** | É a diferença entre "parece travado" e "parece pensando" |
+| "Primeira consulta em <15s" como métrica de contexto | **ADOPT** | Métrica objetiva para qualidade de contexto — vamos usar |
+| Persistir conversa rica própria em vez de confiar no histórico da plataforma | **ADAPT** | Sintoma de plataforma fraca; no Conexus o histórico tipado é responsabilidade do harness |
+| `input` de tool truncado exigindo regex tolerante | **REJECT** | Protocolo tem que entregar o input íntegro. Se é grande, referenciar por id |
+| `loadHistory()` devolvendo tool call como texto cru | **REJECT** | Histórico deve ser tipado na origem |
+| **WS agêntico exige usuário logado — sem agente headless** | **REJECT** | Mata cron/webhook/evento. Nosso agente precisa rodar por evento, com identidade de serviço |
+| System prompt remontado à mão por app, a cada thread | **OWN** | Exatamente a abstração faltante: agente como objeto de 1ª classe (contexto + tools + modelo + política, versionado) |
+
+---
+
+## 32. O ecossistema Mitra por fora — apps publicados em produção, runtime e canais
+
+> Evidência: os próprios produtos da Mitra são apps Mitra publicados. Três alvos analisados por HTTP direto e sessão autenticada do usuário:
+> **Comunidade** (`comunidade.prod.mitralab.io`, w/18470 p/51210), **Ajuda** (`ajudamitra.prod.mitralab.io`, w/146429 p/53676), **Tutorial Claude** (`tutorialclaud.prod.mitralab.io`).
+> Isto é *dogfooding* total — e nos deu o runtime de produção sem precisar publicar nada.
+
+### 32.1 Anatomia de um app publicado
+
+O HTML de um app publicado é uma SPA **React + Vite** (`<div id="root">`, `/assets/index-<hash>.js`), **não Nuxt** — Nuxt é só o studio (`agent.mitralab.io`). Duas coisas são injetadas no `<head>` no momento do publish:
+
+```html
+<script>window.__mitraEnv={
+  "apiBaseURL":"https://api2.mitrasheet.com:4133",
+  "agentWsUrl":"wss://mitra-agent-websocket-production.up.railway.app/sdk-ws"
+};</script>
+```
+
+- **`window.__mitraEnv` é o mecanismo de configuração de runtime** do `mitra-interactions-sdk` no app publicado. Fora dele, passa-se por `configureSdkMitra({agentWsUrl})`.
+- Confirma o §26: o WS agêntico é **Railway** (`mitra-agent-websocket-production.up.railway.app/sdk-ws`) — daí o reconnect proativo aos 12min.
+- Observado em runtime: o app da comunidade chama de fato `https://newmitra.mitrasheet.com:8080/interactions/...` — ou seja, **o `apiBaseURL` injetado não é necessariamente o host efetivo**; há resolução/override por tenant.
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Config de runtime injetada no HTML no publish (`__mitraEnv`) | **ADOPT** | Simples, sem rebuild por ambiente, e o app publicado fica auto-contido |
+| Studio (Nuxt) e app publicado (React/Vite) como stacks distintas | REFERENCE | Decisão deles; nada a copiar, mas explica por que o SDK do runtime é separado |
+
+### 32.2 Storage de arquivos por tenant
+
+Arquivos públicos ficam em S3 com layout previsível:
+
+```
+mitra-multitenant-prod.s3.amazonaws.com/tenant_{projectId}/ai-files/public/{nomeSanitizado}-{sufixoUnico}.{ext}
+```
+
+Exemplo real: `tenant_51210/ai-files/public/MissoconstruiroPlaygroundBI-mrv1nkrma2co3b.txt`.
+
+Três leituras: (1) **tenant = projectId** — coerente com "um banco por projeto" (§33); (2) a pasta chama-se **`ai-files`**, indicando que o caminho de upload nasceu do fluxo de IA e virou o storage geral; (3) o sufixo é um **id tipo ULID/nanoid** anexado ao nome sanitizado — evita colisão e enumeração trivial, mas **`/public/` é publicamente legível sem assinatura**.
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Prefixo por tenant no bucket + sufixo único no nome | **ADOPT** | Padrão sólido de multi-tenant em object storage |
+| `/public/` legível sem URL assinada | **ADAPT** | Aceitável para anexo de post; perigoso como default. No Conexus: privado por padrão, público é opt-in explícito |
+
+### 32.3 O contrato de runtime do app publicado
+
+Endpoints observados no bundle do app de Ajuda (superfície completa do `mitra-interactions-sdk` em produção):
+
+```
+POST /interactions/executeServerFunction        POST /interactions/executeServerFunctionAsync
+POST /interactions/stopServerFunctionExecution  POST /interactions/executeDataLoader
+POST /interactions/executeDbAction              POST /interactions/runAction
+GET  /interactions/integrations                 POST /interactions/integrations/call
+GET/POST /interactions/{get,set,list}Variable(s)
+POST /interactions/uploadFilePublic             POST /interactions/uploadFileLoadable
+POST /interactions/setFileStatus
+GET  /interactions/profiles{,/users,/screens,/actions,/selectTables,/dmlTables,/serverFunctions}
+GET/POST/PATCH /interactions/records/{table}    /interactions/records/{table}/{id}    /interactions/records/{table}/batch
+```
+
+**Fecha a lacuna do §19.1 — `dbActions`.** Assinatura exata, extraída do bundle:
+
+```js
+async executeDbAction(b){
+  const v = { projectId: i(b.projectId), dbActionId: b.dbActionId };
+  if (b.input !== undefined) v.input = b.input;
+  return g("POST","/interactions/executeDbAction",{ body: v });
+}
+```
+
+`dbAction` é, portanto, **uma operação de banco pré-registrada, invocada por id numérico com input opcional** — exatamente a mesma forma de `executeDataLoader({projectId, dataLoaderId, input})`. Três primitivos irmãos, três registries: **server function** (lógica), **data loader** (ingestão), **db action** (operação de dados). Nenhum aceita SQL do cliente.
+
+**Envelope de resposta** (capturado ao vivo na comunidade):
+
+```jsonc
+// req:  {"projectId":51210,"serverFunctionId":13,"input":{"categoriaId":"","busca":"","limit":20,"offset":0}}
+// resp:
+{ "status":"success",
+  "result":{ "executionId":"ba753764-…", "executionStatus":"COMPLETED",
+             "output":{ "rowCount":2, "rows":[ { "ID":12, "TITULO":"…", "CORPO":"…" } ] } } }
+```
+
+Header de escopo: **`X-TenantID`** em toda chamada.
+
+Observação forte: **o app da comunidade não usa `/records` em nenhuma tela** — todo o feed, fórum, categorias e agenda saem de `executeServerFunction` com ids numéricos (`11`, `13`, `8`, `47`, `190`). Confirma em produção o padrão do §22: **backend serverless = só SFs gerenciadas**, e o `/records` genérico é conveniência de CRUD, não o caminho principal.
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Três registries irmãos (SF ∕ dataLoader ∕ dbAction), todos por id + input | **ADOPT** | Nenhum SQL vindo do cliente; toda operação é artefato nomeado e permissionável |
+| Envelope `{executionId, executionStatus, output:{rowCount, rows}}` | **ADOPT** | `executionId` dá rastro de auditoria de graça; `executionStatus` abre caminho pro modo assíncrono |
+| `executeServerFunctionAsync` + `stopServerFunctionExecution` | **ADOPT** | Cancelamento de execução longa é requisito, não luxo |
+| **`serverFunctionId` numérico no cliente** | **REJECT** | Acopla o frontend a ids de banco; qualquer promote/duplicação vira remapeamento manual. O próprio prompt do Playground avisa: *"NUNCA IDs hardcoded"*. Usar slug estável |
+| `X-TenantID` explícito por request | ADAPT | Bom para trace; não pode ser a **única** fronteira de tenancy |
+
+### 32.4 O widget de chat embarcável — protocolo completo
+
+O site de Ajuda embarca o agente com um script inline autoral (comentários em pt-BR, escrito pelo próprio time). Contrato completo:
+
+- **Iframe**: `https://agent.mitralab.io/chat-embed/{workspaceId}/{projectId}` (ex.: `/chat-embed/146429/53676`), `z-index: 2147483647`, `allow="clipboard-write"`.
+- **Protocolo `postMessage`** (JSON string, prefixo `mitra-chat:`):
+
+| Mensagem | Direção | Função |
+|---|---|---|
+| `mitra-chat:init` `{token}` | host → iframe | autentica a sessão |
+| `mitra-chat:loaded` | iframe → host | iframe pronto; host reenvia o `init` |
+| `mitra-chat:ready` | iframe → host | pode abrir |
+| `mitra-chat:open` / `close` | host → iframe | comando |
+| `mitra-chat:opened` / `closed` | iframe → host | confirmação; host então mostra/esconde |
+- **API global** `window.__mitraChat = { init(token), open(), close(), get isOpen, get isReady }`.
+- **Three-mode layout** por razão largura-do-chat/viewport: `push` (app encolhe, `width: calc(100vw - min(480px,100vw))`), `overlay` (por cima), `full` (100vw). Limiares `PUSH_RATIO=0.4`, `FULL_RATIO=0.75`.
+- **White-label**: `?wl=` da URL persistido em `localStorage.mitra_wl` e repassado ao iframe.
+- Troca de token derruba e recria o iframe (`if(token && token!==tk && f){ f.remove() … }`).
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Handshake `loaded → init → ready → opened` | **ADOPT** | Resolve a corrida clássica de iframe sem `setTimeout` |
+| Confirmação de estado pelo iframe antes do host mostrar | **ADOPT** | Sem flash de painel vazio |
+| Modo push/overlay/full por razão, não por breakpoint fixo | **ADOPT** | Responsivo de verdade, e são 3 constantes |
+| Token repassado por `postMessage` com `targetOrigin:"*"` | **REJECT** | Vaza token para qualquer frame que escute. Tem que ser origem explícita |
+| Embed distribuído como script inline copiável | ADAPT | Ótimo para adoção; nós devemos versionar como loader hospedado |
+
+### 32.5 Canais de conteúdo (contexto de produto)
+
+| Canal | URL | O que é |
+|---|---|---|
+| Comunidade | `comunidade.prod.mitralab.io` | App Mitra (p/51210). Rotas: `/feed`, `/forum`, `/imersoes`, `/agenda`, `/videos`, `/certificados`, `/ranking`, `/pontos`, `/conquistas`, `/pesquisas`, `/robo`, `/gestao-imersoes`, `/analytics`. Gamificação completa (pontos, ranking, conquistas, certificados) |
+| Ajuda | `ajudamitra.prod.mitralab.io/publico` | Base de conhecimento oficial, **13 artigos**, tags Mitra/Sankhya/Técnico/Usuário. Lançada 23/07/2026 |
+| Tutorial Claude | `tutorialclaud.prod.mitralab.io` | Passo a passo de conexão da assinatura Claude |
+| Store | dentro do studio | Templates gratuitos do time (HCM, FP&A). Lançada 22/07/2026 |
+
+Sinais de roadmap extraídos do feed (baixa confiança, mas úteis): o post de 09/07/2026 posiciona **MCP como a camada de integração** que a Mitra pretende ocupar (*"expor dados via server functions e disponibilizá-los via MCP para que agentes operem com contexto real de negócio"*) e cita **A2A** como protocolo agente↔agente. Multi-agente aparece como *tese de mercado no blog*, **não** como recurso do produto — nada nos 367 chunks, nada no SDK, nada na documentação oficial.
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Dogfooding total (comunidade, ajuda, tutorial = apps da própria plataforma) | **ADOPT** | Prova de capacidade e loop de feedback real. Vale como política |
+| Publicar o prompt de construção do produto-exemplo como anexo | **ADOPT** | Melhor peça de developer relations que eles têm |
+| Gamificação/comunidade como parte do produto | DEFER | Fora do escopo do Conexus agora |
+| MCP como estratégia de integração declarada | REFERENCE | Confirma que a aposta em MCP é direcional, não experimento |
+
+---
+
+## 33. Banco de dados interno — veredito de cobertura e as correções da fonte oficial
+
+> Responde diretamente à pergunta: *"mapeou a database interna, como usa as tabelas, lógica?"*
+> Fonte: artigo oficial **"A base de dados do seu projeto: como ela nasce e por que cada projeto é isolado"** (05/08/2026, 16 min de leitura) + evidência de runtime das seções anteriores.
+
+**Veredito honesto**: estava mapeado em ~70%. O que existia (§16.3-16.4 camadas de dado, §21.3 espelho Oracle→MySQL, §22 migrations, §25.4 endpoints freeDB, §29.3 permissão por tabela) estava **correto mas incompleto**, e havia **dois erros de modelo** que só a fonte oficial expôs. Agora está fechado.
+
+### 33.1 Como o banco nasce e como é preenchido
+
+- **Todo projeto nasce com um MySQL próprio.** Não há etapa de provisionar. *"No momento em que um projeto é criado, ele já vem com um banco de dados MySQL próprio."* Nele ficam tabelas, dados, **server functions** e configurações do projeto.
+- **Três pontos de partida**: do zero (descrição em linguagem natural → estrutura de tabelas gerada), a partir de **template da Store**, ou **duplicando projeto** (leva dados, telas, funções, variáveis, integrações e configurações).
+- **Você não desenha o banco.** *"não é necessário entregar um modelo de dados pronto, nem escrever SQL"* — descreve-se o processo e a estrutura é derivada. A conversa técnica não some, muda de momento: de *"quais tabelas"* para *"como o processo funciona"*.
+- **Quatro formas de popular**, coexistindo: cadastro pelas telas; **CSV pelo próprio usuário na tela**; importação periódica agendada de outro sistema (§21.3); **consulta em tempo real na origem** (nada armazenado).
+
+### 33.2 Isolamento — o modelo preciso
+
+| Camada | Isolamento |
+|---|---|
+| Banco | **schema MySQL independente por projeto** |
+| Execução | backend + servidor de integrações + banco em **container Docker dedicado por projeto** |
+| Credenciais de integrações externas (tokens, chaves, senhas de API) | **servidor apartado**, dedicado a integrações — **não ficam no banco do projeto** |
+| Credenciais de conexão com bancos externos | **criptografadas dentro do próprio banco** do projeto |
+
+A Mitra faz questão de delimitar o que isso **não** é: *"banco isolado por projeto em container dedicado, não servidor físico exclusivo por projeto"*. Isolamento de infraestrutura maior (instância exclusiva, buckets dedicados, on-premise) existe **contratado à parte**.
+
+Hierarquia e a pegadinha de segurança:
+
+```
+Workspace (agrupa projetos, define quem cria/exclui, controla acesso global)
+  ├── Projeto A → banco próprio, usuários próprios
+  ├── Projeto B → banco próprio, usuários próprios
+  └── Projeto C → banco próprio, usuários próprios
+```
+
+> *"quem é Owner ou Administrador do Workspace entra em todos os projetos daquele workspace, sempre como desenvolvedor (…) Se dois conjuntos de dados não podem ter nenhum administrador em comum, eles não devem estar no mesmo workspace."*
+
+Dois papéis por projeto: **dev** (constrói; acessa banco, conexões, importações, integrações) e **business** (usa o app publicado; **não** acessa banco, integrações nem estrutura).
+
+### 33.3 As duas correções que a fonte oficial impõe ao mapa
+
+**(1) `/tenant_{projectId}/` no S3 e "um banco por projeto" fecham o mesmo modelo.** O tenant da Mitra **é o projeto**, não o workspace. Isso valida o §32.2 e explica por que `jdbcConnectionConfigId` (§25) precisa ser propagado explicitamente: dentro de um projeto pode haver múltiplas conexões, mas nunca cruzamento entre projetos.
+
+**(2) O §27 está incorreto sobre o escopo do promote DEV→PROD.** O §27 descreveu PROD como *"ambiente de produção separado, com banco e migrations próprios"*. A documentação oficial diz o oposto, e é explícita:
+
+> *"Quando um projeto tem ambientes separados de desenvolvimento e produção, essa separação vale para o frontend — as telas. **O banco de dados e as Server Functions são os mesmos nos dois.**"*
+> *"executar uma função de servidor que grava ou apaga dados afeta a base real, mesmo estando 'no ambiente de desenvolvimento'. **Não existe base de teste separada por padrão.**"*
+
+Como reconciliar honestamente, sem escolher a versão conveniente:
+
+- O §27 foi derivado do bundle `LabSidebar` (`promoteFirstTime` → `{prodProjectId, tag}`, `step_apply` = *"Apply PROD migrations"*), que é o pipeline **novo, de projetos code-builder**, e de fato cria um **projeto PROD linkado** — e projeto novo implica banco novo, pelo modelo de 33.2.
+- O artigo (05/08/2026) descreve a plataforma **na visão geral / trilha no-code legada**, onde "publicar" é publicar telas.
+- **Portanto convivem dois modelos de publicação** — o §24 (publish = snapshot de telas, banco compartilhado) e o §27 (promote = projeto PROD forkado, banco próprio) — e o artigo descreve o primeiro. Marcar o §27 como *válido apenas para a trilha code-builder/promote*.
+- **Não verificado por evidência direta**: se o promote realmente cria schema novo e roda as migrations num banco vazio. É o único ponto do mapa que permanece inferido dos dois lados. Para fechar seria preciso rodar um promote real e comparar dados entre DEV e PROD.
+
+**(3) Banco e SFs não são versionados — só o frontend é.**
+
+> *"O banco de dados e as Server Functions não são versionados. Alterações em tabelas, em dados e em funções de servidor passam a valer imediatamente, para todos os usuários."*
+
+Isto **contextualiza** (não contradiz) o §22: `backend/migrations/` + `migrations.yaml` **registram** a história de DDL/SF de forma append-only, mas **não são um gate de deploy** — a mudança já valeu no instante em que a SDK executou o DDL. A migration é **log de auditoria e insumo de promote**, não trava de publicação. Isso reinterpreta o achado que eu chamei de "o mais forte da Mitra" no §3.3: a interceptação é excelente como *registro*, mas não protege produção.
+
+### 33.4 Respostas diretas (tabela oficial, reproduzida)
+
+| Pergunta | Resposta |
+|---|---|
+| Um projeto pode consultar a tabela de outro? | Não |
+| Dois clientes em projetos diferentes compartilham base? | Não |
+| Usuário do Projeto A enxerga dados do Projeto B? | Não, salvo autorização também no B |
+| Erro de consulta num projeto afeta outro? | Não — bancos e containers separados |
+| Existe base de teste separada da de produção? | **Não** — banco e SFs são os mesmos; a separação dev/prod vale para as telas |
+| Admin do workspace enxerga todos os projetos? | **Sim**, como desenvolvedor |
+
+### 33.5 Integração entre projetos — confirmação do §16.5
+
+O isolamento *"não tem modo desligado"*. Para dois projetos conversarem: alguém com permissão no **projeto de origem** gera uma **chave de API** e entrega a quem configura o projeto consumidor. Acesso *"não é automático nem implícito"*. Confirma o caminho (a) do §16.5 e reforça que a via (b) — compartilhar `jdbcConnectionConfigId` — é exceção, não padrão.
+
+### 33.6 Classificação
+
+| Achado | Classificação | Motivo |
+|---|---|---|
+| Um banco (schema MySQL) + container Docker por projeto, provisionado no create | **ADOPT** | Isolamento por padrão, sem etapa manual. É a fundação certa |
+| Credenciais de integração em **servidor apartado**, fora do banco do projeto | **ADOPT** | Separação de domínio de segredo — vale copiar exatamente |
+| Credencial de banco externo criptografada no próprio banco | ADAPT | Aceitável, mas inconsistente com a regra acima. Preferimos um único cofre |
+| Schema derivado de descrição em linguagem natural | ADAPT | Excelente para começar; precisa de revisão humana antes de virar produção |
+| Duplicação de projeto levando **dados** junto | **ADAPT** | Prático e perigoso: duplicar para outro cliente carregando dados do primeiro é vazamento por descuido. Duplicar deve perguntar sobre dados, com default "não" |
+| **Sem ambiente de teste de dados por padrão** | **REJECT** | O maior risco operacional da plataforma: SF destrutiva rodada "em dev" apaga produção |
+| **Banco e SFs não versionados; mudança vale na hora** | **REJECT** | Incompatível com operação séria. Migration tem que ser gate, não só log |
+| Owner/Admin de workspace entra em todo projeto como dev | **REJECT** | Privilégio implícito não-revogável quebra qualquer segregação. Precisa ser explícito e auditável |
+| Isolamento sem "modo desligado"; cruzar projetos exige chave de API emitida na origem | **ADOPT** | Compartilhamento explícito, unidirecional e revogável |
+| `dbAction` / `dataLoader` / `serverFunction` como três registries por id | **ADOPT** | Fecha a lacuna do §19.1 — ver §32.3 |
+
+### 33.7 Estado do mapa após esta rodada
+
+| Lacuna listada no §19.1 | Estado agora |
+|---|---|
+| `dbActions` — semântica exata | **FECHADA** (§32.3 — assinatura do bundle de produção) |
+| Protocolo interno de `migrations.yaml` | **Parcial → contextualizada** (§33.3: é log de auditoria, não gate; formato interno segue não extraído) |
+| Framework agêntico / criação de agentes | **FECHADA** (§31 — fonte oficial) |
+| System prompt / skills do agente | **FECHADA** (§31.4, §31.5 — corrige o §30) |
+| Runtime do app publicado | **FECHADA** (§32) |
+| Payload real do `preview` de promote | Aberta (só i18n) |
+| Promote cria banco novo? | **Aberta e explicitamente contraditória** (§33.3) — único conflito de fontes não resolvido do mapa |

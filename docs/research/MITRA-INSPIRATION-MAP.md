@@ -660,3 +660,18 @@ O agente materializou o trabalho em dois documentos **na raiz do repo** (`discov
 - Regra escrita no próprio doc: "**Credenciais do banco jamais são solicitadas ou trafegadas por chat**" — o agente codificou a lição do incidente.
 
 **Contraste central do pipeline (achado mais importante do estudo)**: o Escopo (Gemini) **inventa** valores para fechar spec rápido; o build agent (Claude) **verifica contra o dado real e trava** nas decisões de negócio. O pipeline Mitra funciona porque o segundo estágio audita o primeiro. Para Conexus: ADOPT — spec assertiva no estágio 1 + Discovery com veto no estágio 2; a spec só vira contrato depois de validada contra a fonte real.
+
+### 15.6 Escopo v2.0 completo — template de metodologia (capturado integral)
+
+Esqueleto do `escopo-sales-radar.md` v2.0 (15 seções) — serve de **template canônico de spec** para Conexus:
+
+1. Capa+metadados (status: `Aguardando Discovery Técnico`) · 2. Atores · 3. Pré-condições · 4. Glossário · 5. Regras de Negócio (RN-01..08, cada uma com exemplo numérico) · 6. Arquitetura de Dados e Integração (protocolo §15.5) · 7. Fluxo Principal (9 passos) · 8. Fluxos Alternativos/Exceções · 9. Escopo de Telas (tela×persona×conteúdo) · 10. Critérios de Aceite (15) · 11. **Fora de Escopo explícito** · 12. **Riscos e Mitigação** (RM-01..06) · 13. **Pontos em Aberto** (resolvidos × residuais × bloqueantes) · 14. **Sequência de Implementação** (F0–F6) · 15. **Aprovação** (sign-off de 3 papéis, incl. responsável técnico do ERP).
+
+Padrões dignos de ADOPT direto:
+
+- **PA como moeda de rastreabilidade**: cada ponto em aberto tem ID; o Discovery move PAs de "bloqueante" → "resolvido" com a resolução técnica anotada (ex.: PA-01 → `CODTIPOPER IN (14,714)` + `PENDENTE='S'` sem vínculo em `TGFVAR`). Classe "residual — não bloqueia" com **impacto declarado se não resolvido**.
+- **Assunções carimbadas**: PA-02 "**assumido** incremental 30 min + full refresh 3h" — decidiu, mas marcou como assunção reversível ("mudança de configuração, não de arquitetura").
+- **Degradação graciosa como regra de spec**: EX-02 "falha de IA não bloqueia o produto" (score+explicabilidade continuam; NBA indisponível); PA-18 → P3 desligado com P1+P2 renormalizados até alinhamento; CA-14/CA-15 amarram isso em critério de aceite.
+- **Fases com dependência explícita** (F0 Discovery → F1 cargas+monitoramento → F2 score → F3 UI → F4 IA → F5 gestor → F6 piloto+recalibração) e uma **ordem inegociável justificada**: monitoramento antes do produto ("carga que falha em silêncio = decisões comerciais sobre dado de confiabilidade desconhecida").
+- **Recalibração obrigatória embutida** (RM-02: piloto + recalibrar score em 60 dias contra conversão real) — o produto nasce com loop de validação, não como entrega estática.
+- Fora de Escopo nomeia o que **não** é: sem ML no score (determinístico+explicável; IA só no texto), sem escrita no ERP, sem envio automático ao cliente final.

@@ -5,7 +5,7 @@ document_type: research_map
 form: explanation
 authority: research_historical
 status: draft
-version: 0.6.0
+version: 0.7.0
 owners:
   - developmentconexus-ops
 source_of_truth_for:
@@ -1591,3 +1591,165 @@ Endpoints: `/api/mitra-agent/keys`, `/keys/validate`, `/models/${provider}`, `/c
 | Claude OAuth gated por domínio de email | ADOPT | Controle de quem pode usar assinatura corporativa |
 | Catálogo de chaves > catálogo de modelos | REFERENCE | Providers dinâmicos evitam hardcode de modelo |
 | Histórico de task via REST paginável | ADOPT | Sessão longa exige histórico server-side |
+
+## 29. Login e RBAC do app publicado (o que acontece quando o usuário externo acessa)
+
+Nível de evidência: **OBSERVADO** — `mitra-interactions-sdk/dist/index.d.ts` (52KB, 56 funções) verbatim.
+
+Complementa §24 (que mapeou a publicação) com **o que roda no app publicado quando alguém acessa**.
+
+### 29.1 Quatro métodos de login, todos via a página de auth da Mitra
+
+```ts
+loginMitra(method: 'email' | 'google' | 'microsoft' | 'mitra', options?: LoginOptions): Promise<LoginResponse>
+loginWithEmailMitra(options?) / loginWithGoogleMitra(options?) / loginWithMicrosoftMitra(options?)
+```
+
+`LoginOptions`: `{ authUrl, projectId, mode: 'popup' | 'redirect', returnTo, create }` — `create:true` abre cadastro em vez de login; `mode:'redirect'` volta para `returnTo` com token nos query params.
+
+`LoginResponse`: `{ token /* JWT já com prefixo Bearer */, baseURL, integrationURL }`. As três funções **auto-configuram o SDK** após sucesso — o app não precisa chamar `configureSdkMitra` de novo.
+
+A página de auth é hospedada pela Mitra (`https://coder.mitralab.io/sdk-auth/`, `https://validacao.mitralab.io/sdk-auth/`), não pelo app. Ou seja: **o app publicado nunca vê a senha** — o fluxo acontece em origem separada, via popup ou redirect.
+
+### 29.2 Cadastro próprio com verificação por código
+
+```ts
+emailSignupMitra({authUrl, projectId, name, email, password}): Promise<void>
+emailVerifyCodeMitra({...}): Promise<LoginResponse>   // código de 6 dígitos; loga automático
+emailResendCodeMitra({...}): Promise<void>
+emailLoginMitra({...}): Promise<LoginResponse>        // via iframe silencioso
+refreshTokenSilently(authUrl, projectId): Promise<LoginResponse>  // iframe invisível; dedupe de refresh concorrente
+```
+
+Isto é um **sistema de contas completo por projeto**: o app externo pode ter self-signup com verificação de e-mail, sem o operador convidar ninguém. O refresh silencioso via iframe invisível mantém a sessão viva sem re-login.
+
+### 29.3 RBAC por Profile — permissões granulares por objeto
+
+11 funções de perfil. Um Profile é um papel do app publicado:
+
+```ts
+createProfileMitra({projectId, name, color, homeScreenId})   // homeScreenId = tela inicial do papel
+setProfileUsersMitra({profileId, userIds: number[]})
+setProfileScreensMitra({profileId, screenIds: number[]})
+setProfileActionsMitra({profileId, actionIds: number[]})
+setProfileServerFunctionsMitra({profileId, serverFunctionIds: number[]})
+setProfileSelectTablesMitra({profileId, jdbcConnectionConfigId?, tables: ProfileTableRef[]})  // leitura
+setProfileDmlTablesMitra({profileId, jdbcConnectionConfigId?, tables: ProfileTableRef[]})     // escrita
+listProfilesMitra / getProfileDetailsMitra / updateProfileMitra / deleteProfileMitra
+```
+
+Cinco eixos de permissão independentes: **telas, ações, Server Functions, tabelas de leitura, tabelas de escrita** — leitura e escrita separadas, e ambas escopadas por `jdbcConnectionConfigId` (amarra ao §25.3). `homeScreenId` por perfil dá landing page diferente por papel.
+
+O ponto forte: essas permissões são **configuráveis via SDK**, ou seja, o app pode administrar seus próprios papéis em runtime — e o agente de build pode provisioná-los por código.
+
+### 29.4 Como isso se conecta a §24
+
+A visibilidade do §24 (`PRIVATE` / `PUBLIC_WITH_LOGIN` / `PUBLIC`) é o portão de entrada; o Profile é o que decide o que a pessoa vê **depois** de entrar. `PUBLIC_WITH_LOGIN` + self-signup + Profile default é a combinação que produz um app externo com contas próprias. Foi exatamente o que a sessão monitorada exercitou ao tratar `INT_USER` e allowlist (§26.9).
+
+### 29.5 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| Página de auth em origem separada (app nunca vê senha) | **ADOPT** | Reduz superfície de credencial no app gerado; correto por construção |
+| Login popup **e** redirect com `returnTo` | ADOPT | Cobre embed e standalone |
+| Self-signup com código de 6 dígitos por projeto | ADOPT | App externo com contas próprias sem convite manual |
+| Refresh silencioso por iframe invisível, com dedupe | ADAPT | Funciona; iframe tende a quebrar com política de cookies 3rd-party — preferir refresh token |
+| RBAC em 5 eixos, leitura ≠ escrita, escopado por conexão | **ADOPT** | Melhor granularidade que a maioria dos low-code; espelhar |
+| `homeScreenId` por perfil | ADOPT | Landing por papel é detalhe barato de alto valor |
+| Permissões administráveis via SDK em runtime | **ADOPT** | Permite o agente provisionar RBAC por código |
+
+## 30. Agentes dentro do projeto — o que existe de fato (e o que não existe)
+
+Nível de evidência: **OBSERVADO** — `.d.ts` verbatim do interactions-sdk; varredura dos 367 chunks e dos 70 exports do `mitra-sdk`.
+
+**Resposta curta e honesta:** dá para **embutir o agente da Mitra dentro do app publicado**, com sessão, streaming, fila e histórico — mas **não existe construtor de agentes customizados**. Não há API para definir system prompt, persona, conjunto de tools próprio ou orquestração multi-agente. O agente que você embute é o mesmo agente de desenvolvimento (Claude Code / Codex / OpenCode), operando no sandbox do projeto.
+
+### 30.1 O que existe: `AgentTaskSession` embutível
+
+```ts
+getAgentTaskMitra({create: true, projectId?, agentType?, modelId?, name?, connectionId?}): AgentTaskSession
+getAgentTaskMitra({taskId}): AgentTaskSession   // abre existente; mesma taskId → MESMA instância (cache)
+
+interface AgentTaskSession {
+  readonly taskId: string | null;
+  readonly task: AgentChat | null;
+  readonly isNew: boolean;
+  readonly status: AgentTaskStatus;
+  readonly history: ReadonlyArray<AgentMessage>;
+  readonly content: string;
+  readonly queue: ReadonlyArray<QueuedItem>;
+  loadHistory(options?: {limit?: number}): Promise<AgentMessage[]>;
+  send(prompt: string, options?: SendOptions): void;
+  cancel(): Promise<void>;
+  editQueueItem(itemId: string, newText: string): boolean;
+  removeQueueItem(itemId: string): boolean;
+  clearQueue(): void;
+  close(): void;
+  on<E>(event: E, handler): () => void;
+}
+```
+
+Eventos: `historyLoaded`, `turnStart`, `delta` (`{delta, kind:'text'|'tool'}`), `tool` (`{tool, input, content, timestamp}`), `turnEnd` (`{content}`), `taskCreated`, `error`, `queueChange`, `statusChange`.
+
+`SendOptions`: `{agentType?, modelId?, files?: File[]}` — anexos são detectados, subidos e montados pela própria SDK durante o `send`.
+
+A **fila é editável pelo consumidor** (`editQueueItem` / `removeQueueItem` / `clearQueue`) — é a contraparte cliente do steering por arquivo do §26.2.
+
+### 30.2 A peça que torna isso viável para usuário final: `connectionId`
+
+Comentário verbatim do `.d.ts` (issue #756):
+
+> *"Connection do projeto a usar. Quando passado, a credencial e o sandbox da task usam a connection do projeto em vez das suas pessoais; o chat/histórico continua seu. Requer que o dono do projeto a tenha configurado."*
+
+Isso resolve o problema óbvio: sem `connectionId`, cada usuário do app precisaria da própria chave de IA. Com ele, **o dono do projeto banca a credencial e o sandbox**, e cada usuário mantém chat e histórico próprios. É o que permite entregar "camada inteligente" a usuários externos.
+
+### 30.3 Seleção de modelo em runtime
+
+`modelId` aceita, por turno ou por sessão: `'openai/gpt-5.5:medium'`, `'glm/glm-5.1'`, `'subscription:anthropic:claude-opus-4-7'`. O backend deriva `agentType`/`provider`/`model` a partir da string. Valores vêm de `manageAgentCredentialMitra({action:'list_models'})`.
+
+`agentType`: `'claudecode' | 'codex' | 'opencode-cli' | 'opencode-sdk'` — confirma §26.6 no contrato público do SDK.
+
+### 30.4 Credenciais: uma função, 14 verbos
+
+```ts
+manageAgentCredentialMitra({action, ...})
+// baixo nível (RPC no backend): status | remove | list | list_models | list_providers | validate | save
+//                               oauth_start | oauth_exchange | device_start | device_poll | device_cancel
+// alto nível (orquestrado no browser): auth | connect
+```
+
+Targets de subscription: `'claude' | 'openai_oauth' | 'codex'`. Targets de API key (8): `'anthropic' | 'openai' | 'gemini' | 'kimi' | 'minimax' | 'glm' | 'qwen' | 'openrouter'` — confirma §28.3 e fecha a lacuna: os providers extras do painel são de fato suportados pelo backend.
+
+`auth` retorna o que a UI deve mostrar, sem efeito colateral de janela (claude → `{authUrl, state}`; codex → `{userCode, verificationUrl, ...}`); `connect` encadeia tudo e abre popup. Boa separação: o app controla UI, popup e timing.
+
+### 30.5 Gestão de chats
+
+```ts
+manageAgentChatMitra({action:'list'})    → AgentChat[]
+manageAgentChatMitra({action:'rename'})  → RenameAgentChatResult
+manageAgentChatMitra({action:'delete'})  → DeleteAgentChatResult
+```
+
+`AgentChat`: `{id, name, agentType?, provider?, createdAt, updatedAt}`.
+
+### 30.6 O que NÃO existe (verificado, não presumido)
+
+- **Nenhuma API de definição de agente.** Zero funções do tipo `createAgent`, `agentConfig`, `toolDefinition`, `systemPrompt` nos 70 exports do `mitra-sdk` nem nos 56 do interactions-sdk. Os hits de `functionCalling`/`toolConfig` no bundle são do **SDK do Google GenAI embutido** para o Lila/Escopo, não uma superfície da Mitra.
+- **Nenhuma tool customizada.** Não há como registrar uma função do app como tool do agente.
+- **Nenhuma orquestração multi-agente.** O `coordinator` do §28.1 é o único indício de camada acima da task, e não tem UI.
+- **`mitra-sdk` (backend) não tem IA nenhuma.** 70 funções, zero de inferência. Um app Mitra não chama LLM do backend pelo SDK oficial — se quiser, usa Server Function tipo INTEGRATION apontando para a API do provider (§23), pagando e gerindo a chave por fora.
+
+Conclusão: a "camada inteligente" da Mitra é **um agente de desenvolvimento embutível**, não um framework de agentes de negócio. Para um app com agente de domínio (persona, tools do negócio, RAG), o caminho na Mitra hoje é Server Function INTEGRATION contra o provider + lógica própria — sem apoio de framework.
+
+### 30.7 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| `AgentTaskSession` embutível com streaming/fila/histórico | **ADOPT** | Contrato de sessão bem desenhado; copiar a forma |
+| Fila editável pelo cliente (`editQueueItem`/`remove`/`clear`) | **ADOPT** | Steering com UX de verdade; melhor que só "cancelar" |
+| `connectionId` — credencial/sandbox do projeto, histórico do usuário | **ADOPT** | Resolve o custo de IA por usuário final. Peça-chave |
+| `modelId` por turno, string única derivada no backend | ADOPT | Simples e flexível |
+| `auth` (sem efeito colateral) separado de `connect` (orquestrado) | **ADOPT** | Deixa o app dono da UI; padrão de API maduro |
+| Ausência de agentes customizados (prompt/tools/persona) | **OWN** | Lacuna clara da Mitra. É onde o Conexus pode diferenciar de verdade |
+| Ausência de IA no SDK de backend | **OWN** | Agente de domínio server-side é território livre |
+| Agente embutido = agente de dev (edita código no sandbox) | REJECT (como modelo p/ usuário final) | Dar agente que edita código ao usuário final do app é risco, não feature |

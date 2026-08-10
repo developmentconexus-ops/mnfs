@@ -783,6 +783,19 @@ Convenção de envelope uniforme: toda resposta é `{status, result, paramsAppli
 | RBAC grade perfil×recurso com select/dml separados | ADOPT | Base do nosso authority model de dados |
 | `AgentTaskSession` com fila editável e eventos tipados | REFERENCE | Blueprint do nosso protocolo de sessão de agente embutido |
 
+### 16.6b Databases externos via Cloudflare Tunnel — evidência de UI (bundle do app)
+
+Validação do achado do Operador (conectar qualquer banco on-prem via túnel, sem VPN). Extraído do bundle `entry.Hp59YscR.js` (6,9 MB, agent.mitralab.io):
+
+- **Tela "Cloudflare Tunnels"** nas configurações do workspace: *"Manage Cloudflare tunnels and routes to securely expose internal services. A workspace can have multiple tunnels, each with multiple associated routes."*
+- **Form da rota é exatamente IP+porta do banco interno**: placeholder do host `"ex: 192.168.1.100"`, placeholder da porta `"ex: 3306"`. TI preenche IP interno + porta → plataforma gera hostname público → JDBC aponta pro hostname.
+- **Drivers JDBC confirmados no código**: `dataBaseDriverType ∈ {ORACLE, MYSQL, SQLSERVER}` (+ `PostgreSQL` no exemplo do README do SDK). Templates "Base de Conhecimento (ORACLE/MySQL/SQLSERVER)" como projetos prontos.
+- **Multi-tenant por driver**: endpoint `/multiTenant/tenantConfig?dataBaseDriverType=` — a config de tenant da plataforma é parametrizada pelo tipo de banco; `partnerUsesOracleDB` como getter de licença (parceiros/integradores têm driver associado).
+- **Catálogo de credenciais na mesma tela** (i18n do painel de conexões): Gmail (access token / Google Client ID+Secret), Google Calendar, HubSpot (API Key), **SAP (url + client_id + client_secret)**, **Supabase (Project URL + Service Role Key)**, campo `Test Endpoint` ("ex: /health ou /api/status") — a materialização visual do `fieldsSchema` dos blueprints (§16.2).
+- Fluxo completo documentado no README do SDK: `createTunnel → addTunnelRoute(internalDbUrl, internalDbPort) → activateTunnel` ("**inicia processos cloudflared**") → `syncTunnelStatus`. O `activate` sobe processo bridge no lado da plataforma (por isso `processStatus` por rota, separado do `routeStatus` DNS).
+
+Classificação: ADOPT — onboarding de banco on-prem vira formulário de 2 campos (IP+porta) para a TI do cliente, com health-check por rota. É o menor atrito possível para o caso "conectar Oracle do ERP sem VPN".
+
 ### 16.7 De onde vem o conhecimento de domínio do ERP (avaliado)
 
 Pergunta do Operador: *"como ele sabe e mapeia tudo do Sankhya? Tem um especialista, documentação?"* Resposta: **não há especialista nem doc de ERP embutidos**. Três camadas:

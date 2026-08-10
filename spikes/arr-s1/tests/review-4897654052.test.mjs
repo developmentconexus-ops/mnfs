@@ -158,10 +158,11 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
     await writeFile(path.join(hostile, '.opencode', 'opencode.json'), '{"tools":{"hostile_home":true},"plugin":["hostile-plugin"]}\n');
     await writeFile(path.join(hostile, 'project', 'opencode.json'), '{"tools":{"hostile_project":true}}\n');
     const profileConfig = {
+      model: 'fixture/gpt-5',
       tools: { '*': false, read: true, edit: true },
       permission: { '*': 'deny', read: 'allow', edit: 'allow' },
       plugin: [],
-      mcp: [],
+      mcp: {},
     };
     const profileBytes = Buffer.from(`${JSON.stringify(profileConfig)}\n`);
     await (await import('node:fs/promises')).mkdir(path.join(root, 'config-dir'), { recursive: true });
@@ -178,7 +179,6 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
       configHash: `sha256:${createHash('sha256').update(profileBytes).digest('hex')}`,
       configSizeBytes: profileBytes.length,
       configMode: '0600',
-      modelEditFamily: 'edit',
     };
     const adapter = createOpenCodeAcpAdapter({
       executable: process.execPath,
@@ -214,12 +214,13 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
     assert.equal(adapter.processSpec.env.OPENCODE_CONFIG_DIR, path.join(root, 'config-dir'));
     assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
     assert.equal(adapter.processSpec.env.OPENCODE_PERMISSION, undefined);
-    assert.throws(() => createOpenCodeAcpAdapter({
+    const ignoredUntrustedHint = createOpenCodeAcpAdapter({
       executable: process.execPath,
       cwd: CWD,
       env: BASE_ENV,
       profile: { ...profile, authRoute: { kind: 'REMOTE_CONFIG' } },
-    }), /fail-closed|remote|auth route/u);
+    });
+    assert.equal(ignoredUntrustedHint.observations.discoveryControlled, true);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -229,22 +230,24 @@ test('OpenCode C03 derives resolved model-facing inventory, not only observed To
   const fixture = { inventory: [{ id: 'read_nonce_file' }, { id: 'edit_result_file' }] };
   const { resolveOpenCodeModelFacingInventory } = await import('../src/adapters/opencode-acp.mjs');
   const base = resolveOpenCodeModelFacingInventory({
-    config: { tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] },
-    modelEditFamily: 'edit',
+    config: { model: 'fixture/gpt-5', tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: {} },
+    model: { providerID: 'fixture', modelID: 'gpt-5' },
+    pure: true,
   });
   assert.deepEqual(base.logicalInventory, ['edit_result_file', 'read_nonce_file']);
-  assert.deepEqual(base.modelFacingTools, ['edit', 'read']);
+  assert.deepEqual(base.modelFacingTools, ['apply_patch', 'read']);
   const extra = resolveOpenCodeModelFacingInventory({
-    config: { tools: { '*': false, read: true, edit: true, lint: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow', lint: 'allow' }, plugin: ['hostile-plugin'], mcp: ['hostile-mcp'] },
-    modelEditFamily: 'edit',
+    config: { model: 'fixture/gpt-5', tools: { '*': false, read: true, edit: true, lint: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow', lint: 'allow' }, plugin: ['hostile-plugin'], mcp: { hostile: { type: 'local', command: ['hostile-mcp'] } } },
+    model: { providerID: 'fixture', modelID: 'gpt-5' },
+    pure: false,
   });
-  assert.deepEqual(extra.logicalInventory, ['edit_result_file', 'lint', 'mcp:hostile-mcp', 'plugin:hostile-plugin', 'read_nonce_file']);
+  assert.equal(extra.status, 'BLOCKED');
   assert.equal(buildProofs({
     fixture,
     execution: { trustedProofs: { inventory: extra.logicalInventory, fixtureVerified: true } },
   })['S1-C03'], false);
-  assert.deepEqual(extra.pluginTools, ['plugin:hostile-plugin']);
-  assert.deepEqual(extra.mcpTools, ['mcp:hostile-mcp']);
+  assert.deepEqual(extra.configuredPluginSpecs, ['hostile-plugin']);
+  assert.deepEqual(extra.configuredMcpServers, ['hostile']);
 });
 
 test('Pi SDK C15 records avoidance of TUI scraping through structured AgentSession evidence', async () => {

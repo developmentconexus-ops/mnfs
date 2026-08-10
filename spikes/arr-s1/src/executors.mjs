@@ -128,7 +128,16 @@ function hasExactInventory(value, fixture) {
 function discoveryEmpty(value) {
   return value && typeof value === 'object'
     && value.controlled === true
+    && value.configSourcesControlled === true
     && ['extensions', 'skills', 'prompts', 'themes', 'agentsFiles'].every((key) => Array.isArray(value[key]) && value[key].length === 0);
+}
+
+function opencodeInventoryProof(trusted, fixture) {
+  const resolved = trusted?.modelFacingInventory;
+  return resolved?.source === 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER'
+    && resolved.status === 'PASS'
+    && hasExactInventory(resolved.logicalInventory, fixture)
+    && hasExactInventory(trusted.inventory, fixture);
 }
 
 export function deriveMachineryProof(value) {
@@ -173,7 +182,9 @@ export function buildProofs({ candidateShape, fixture, preflight, execution, ada
       && HASH_PATTERN.test(trusted.boundary?.envDigest ?? '')
       && trusted.boundary?.environmentMatchesRecord === true
       && trusted.boundary?.source === 'MNFS_TRUSTED_PROCESS_RUNNER',
-    'S1-C03': hasExactInventory(trusted.inventory, fixture) && trusted.fixtureVerified === true,
+    'S1-C03': (candidateShape === 'OPENCODE-ACP'
+      ? opencodeInventoryProof(trusted, fixture)
+      : hasExactInventory(trusted.inventory, fixture)) && trusted.fixtureVerified === true,
     'S1-C04': discoveryEmpty(trusted.discovery),
     'S1-C05': trusted.auth?.outcome === 'AUTHORIZED_OPERATION'
       && ((trusted.auth.operation === 'PROVIDER_MODEL_COMPLETED'
@@ -381,9 +392,10 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
     const configDir = path.join(profileDir, 'config');
     const configPath = path.join(configDir, 'config.json');
     const config = {
+      model: 'fixture/gpt-5',
       tools: { '*': false, read: true, edit: true },
       plugin: [],
-      mcp: [],
+      mcp: {},
       permission: { '*': 'deny', read: 'allow', edit: 'allow' },
     };
     await mkdir(configDir, { recursive: true });
@@ -405,7 +417,6 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
       configHash: `sha256:${createHash('sha256').update(configBytes).digest('hex')}`,
       configSizeBytes: configBytes.length,
       configMode: '0600',
-      modelEditFamily: 'edit',
     };
   }
   return candidateShape === 'PI-ACP'
@@ -851,11 +862,15 @@ function deriveAcpDiscovery({ candidateShape, rawMessages, adapter }) {
     if (update.sessionUpdate === 'config_option_update') discovered.extensions.push('config_option_update');
   }
   const observations = adapter?.observations ?? {};
+  const configSourcesControlled = candidateShape === 'OPENCODE-ACP'
+    ? observations.profile?.configSources?.discoveryControlled === true
+    : true;
   const controlled = observations.discoveryControlled === true
     || (candidateShape === 'PI-ACP' && observations.innerPiControlSource === 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI');
   return {
     ...discovered,
     controlled,
+    configSourcesControlled,
     source: 'MNFS_TRUSTED_ACP_EVENT_AND_PROFILE_OBSERVATION',
     ...(controlled ? {} : { controlFailureCause: observations.discoveryReason ?? 'trusted discovery suppression evidence is unavailable' }),
   };

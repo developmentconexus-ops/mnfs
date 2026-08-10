@@ -6,8 +6,12 @@ import { tmpdir } from 'node:os';
 import test from 'node:test';
 
 import { createPiSdkAdapter } from '../src/adapters/pi-sdk.mjs';
-import { createOpenCodeAcpAdapter, resolveOpenCodeModelFacingInventory } from '../src/adapters/opencode-acp.mjs';
-import { safeProvenanceEvidence } from '../src/executors.mjs';
+import {
+  createOpenCodeAcpAdapter,
+  inspectOpenCodeConfigSources,
+  resolveOpenCodeModelFacingInventory,
+} from '../src/adapters/opencode-acp.mjs';
+import { buildProofs, safeProvenanceEvidence } from '../src/executors.mjs';
 import { requireCredentialRouteBinding } from '../src/credential-routes.mjs';
 import { S1_FROZEN_CANDIDATE_PROVENANCE, preflightS1 } from '../src/preflight.mjs';
 import { parseExecutionAuthorizationToken } from '../src/execution-authority.mjs';
@@ -160,10 +164,11 @@ test('credential Evidence removes process environment values and retains only au
 
 function profileConfig() {
   return {
+    model: 'fixture/gpt-5',
     tools: { '*': false, read: true, edit: true },
     permission: { '*': 'deny', read: 'allow', edit: 'allow' },
     plugin: [],
-    mcp: [],
+    mcp: {},
   };
 }
 
@@ -185,7 +190,6 @@ async function writeProfile(root, config = profileConfig()) {
     configHash: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
     configSizeBytes: bytes.length,
     configMode: '0600',
-    modelEditFamily: 'edit',
   };
 }
 
@@ -193,62 +197,190 @@ function opencodeEnv() {
   return { PATH: '/usr/bin:/bin', HOME: '/tmp/hostile-home', XDG_DATA_HOME: DATA_ROUTE };
 }
 
-test('OpenCode auth-route metadata is non-secret and remote/account-managed discovery fails closed', async () => {
+test('OpenCode normal OAuth/API auth is structural metadata, not automatic remote config', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-review-opencode-auth-'));
   try {
-    const profile = await writeProfile(root);
-    await mkdir(profile.xdgDataHome, { recursive: true });
-    await writeFile(path.join(profile.xdgDataHome, 'auth.json'), '{"token":"must-not-be-recorded","wellknown":"remote"}\n', { mode: 0o600 });
-    const adapter = createOpenCodeAcpAdapter({
-      executable: '/state/candidates/opencode/bin/opencode',
-      cwd: '/tmp/mnfs-arr-s1-review-fixture',
-      env: opencodeEnv(),
-      profile,
+    const dataRoot = path.join(root, 'data', 'opencode');
+    await mkdir(dataRoot, { recursive: true });
+    await writeFile(path.join(dataRoot, 'auth.json'), JSON.stringify({
+      fixture: { type: 'api', key: 'secret-value-must-not-persist' },
+      oauth: { type: 'oauth', refresh: 'refresh-secret', access: 'access-secret', expires: 1 },
+    }), { mode: 0o600 });
+    const inspection = inspectOpenCodeConfigSources({
+      dataRoot,
+      managedConfigDir: path.join(root, 'managed'),
+      databasePath: path.join(root, 'missing.db'),
     });
 
-    assert.equal(adapter.observations.discoveryControlled, false);
-    assert.notEqual(adapter.observations.profile.authRouteInspection.remoteConfigStatus, 'CONTROLLED');
-    assert.doesNotMatch(JSON.stringify(adapter.observations), /must-not-be-recorded|token/u);
+    assert.equal(inspection.auth.remoteConfigStatus, 'CONTROLLED');
+    assert.deepEqual(inspection.auth.kinds, ['api', 'oauth']);
+    assert.equal(inspection.account.discoveryStatus, 'CONTROLLED_BY_DATABASE_ROUTE');
+    assert.equal(inspection.managed.present, false);
+    assert.doesNotMatch(JSON.stringify(inspection), /secret-value|refresh-secret|access-secret|token/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
 
-test('OpenCode inventory validates the exact written profile and fails closed on plugin/mcp or input divergence', async () => {
+test('OpenCode well-known auth, active organization and managed config cannot silently pass C04', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-review-opencode-profile-'));
   try {
-    const hostile = await writeProfile(root, { ...profileConfig(), plugin: ['hostile-plugin'] });
+    const dataRoot = path.join(root, 'data', 'opencode');
+    const managedDir = path.join(root, 'managed');
+    const databasePath = path.join(root, 'opencode.db');
+    await mkdir(dataRoot, { recursive: true });
+    await mkdir(managedDir, { recursive: true });
+    await writeFile(path.join(dataRoot, 'auth.json'), JSON.stringify({
+      'https://remote.example': { type: 'wellknown', key: 'remote-key', token: 'remote-secret' },
+    }), { mode: 0o600 });
+    await writeFile(path.join(managedDir, 'opencode.json'), '{"tools":{"hostile":true}}\n', { mode: 0o600 });
+
+    const sqlite = await import('node:sqlite');
+    const db = new sqlite.DatabaseSync(databasePath);
+    db.exec('CREATE TABLE account (id TEXT PRIMARY KEY, email TEXT NOT NULL, url TEXT NOT NULL, access_token TEXT NOT NULL, refresh_token TEXT NOT NULL, token_expiry INTEGER)');
+    db.exec('CREATE TABLE account_state (id INTEGER PRIMARY KEY, active_account_id TEXT, active_org_id TEXT)');
+    db.prepare('INSERT INTO account VALUES (?, ?, ?, ?, ?, ?)').run('account-1', 'redacted@example.invalid', 'https://account.example', 'access-secret', 'refresh-secret', 1);
+    db.prepare('INSERT INTO account_state VALUES (?, ?, ?)').run(1, 'account-1', 'org-1');
+    db.close();
+
+    const inspection = inspectOpenCodeConfigSources({ dataRoot, managedConfigDir: managedDir, databasePath });
+    assert.equal(inspection.auth.remoteConfigStatus, 'REMOTE_CAPABLE');
+    assert.equal(inspection.account.activeAccountPresent, true);
+    assert.equal(inspection.account.activeOrgPresent, true);
+    assert.equal(inspection.account.discoveryStatus, 'REMOTE_CAPABLE');
+    assert.equal(inspection.managed.present, true);
+    assert.equal(inspection.discoveryControlled, false);
+    assert.doesNotMatch(JSON.stringify(inspection), /remote-secret|access-secret|refresh-secret/u);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('OpenCode profile binds the frozen map-shaped MCP schema and exact bytes', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-review-opencode-profile-'));
+  try {
+    const invalidMcp = await writeProfile(root, { ...profileConfig(), mcp: [] });
     assert.throws(() => createOpenCodeAcpAdapter({
       executable: '/state/candidates/opencode/bin/opencode',
       cwd: '/tmp/mnfs-arr-s1-review-fixture',
       env: opencodeEnv(),
-      profile: hostile,
-    }), /plugin|mcp|empty|profile/u);
+      profile: invalidMcp,
+    }), /mcp.*(record|map|object)|profile/u);
 
     const exact = await writeProfile(root, profileConfig());
     assert.throws(() => createOpenCodeAcpAdapter({
       executable: '/state/candidates/opencode/bin/opencode',
       cwd: '/tmp/mnfs-arr-s1-review-fixture',
       env: opencodeEnv(),
-      profile: { ...exact, config: { ...profileConfig(), mcp: ['divergent-input'] } },
+      profile: { ...exact, config: { ...profileConfig(), mcp: { divergent: { enabled: true } } } },
     }), /profile|config|diverg/u);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
 
-test('OpenCode resolved inventory accounts for each frozen model edit family', () => {
-  for (const modelEditFamily of ['edit', 'write', 'apply_patch']) {
-    const inventory = resolveOpenCodeModelFacingInventory({
-      config: {
-        tools: { '*': false, read: true, [modelEditFamily]: true },
-        permission: { '*': 'deny', read: 'allow', [modelEditFamily]: 'allow' },
-        plugin: [],
-        mcp: [],
+test('OpenCode inventory follows frozen provider/model ToolRegistry and request filtering semantics', () => {
+  const config = profileConfig();
+  const gpt = resolveOpenCodeModelFacingInventory({ config, model: { providerID: 'fixture', modelID: 'gpt-5' }, pure: true });
+  assert.equal(gpt.status, 'PASS');
+  assert.deepEqual(gpt.modelFacingTools, ['apply_patch', 'read']);
+  assert.deepEqual(gpt.logicalInventory, ['edit_result_file', 'read_nonce_file']);
+
+  const nonGpt = resolveOpenCodeModelFacingInventory({
+    config: { ...config, model: 'fixture/fixture-model' },
+    model: { providerID: 'fixture', modelID: 'fixture-model' },
+    pure: true,
+  });
+  assert.equal(nonGpt.status, 'FAIL');
+  assert.deepEqual(nonGpt.modelFacingTools, ['edit', 'read', 'write']);
+  assert.deepEqual(nonGpt.logicalInventory, ['edit_result_file', 'model_edit:write', 'read_nonce_file']);
+});
+
+test('OpenCode extra plugin/MCP sources are not erased and unresolved runtime discovery cannot PASS C03', () => {
+  const plugin = resolveOpenCodeModelFacingInventory({
+    config: { ...profileConfig(), plugin: ['hostile-plugin'] },
+    model: { providerID: 'fixture', modelID: 'gpt-5' },
+    pure: false,
+  });
+  assert.equal(plugin.status, 'BLOCKED');
+  assert.match(plugin.reason, /plugin/u);
+
+  const mcp = resolveOpenCodeModelFacingInventory({
+    config: { ...profileConfig(), mcp: { hostile: { type: 'local', command: ['hostile-mcp'] } } },
+    model: { providerID: 'fixture', modelID: 'gpt-5' },
+    pure: true,
+  });
+  assert.equal(mcp.status, 'BLOCKED');
+  assert.match(mcp.reason, /MCP|discovery/u);
+});
+
+test('OpenCode permission filtering and proof evaluation separate exposed inventory from observed ToolCalls', () => {
+  const denied = resolveOpenCodeModelFacingInventory({
+    config: {
+      ...profileConfig(),
+      permission: { '*': 'deny', read: 'allow', edit: 'deny' },
+    },
+    model: { providerID: 'fixture', modelID: 'gpt-5' },
+    pure: true,
+  });
+  assert.deepEqual(denied.modelFacingTools, ['read']);
+  assert.equal(denied.status, 'FAIL');
+
+  const fixture = { inventory: [{ id: 'read_nonce_file' }, { id: 'edit_result_file' }] };
+  const observedOnly = buildProofs({
+    candidateShape: 'OPENCODE-ACP',
+    fixture,
+    execution: {
+      trustedProofs: {
+        inventory: fixture.inventory.map(({ id }) => id),
+        fixtureVerified: true,
+        modelFacingInventory: {
+          status: 'BLOCKED',
+          source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
+        },
       },
-      modelEditFamily,
-    });
-    assert.equal(inventory.modelFacingEditTool, true);
-    assert.deepEqual(inventory.logicalInventory, ['edit_result_file', 'read_nonce_file']);
-  }
+    },
+  });
+  assert.equal(observedOnly['S1-C03'], false);
+  assert.equal(buildProofs({
+    candidateShape: 'OPENCODE-ACP',
+    fixture,
+    execution: {
+      trustedProofs: {
+        inventory: fixture.inventory.map(({ id }) => id),
+        fixtureVerified: true,
+        modelFacingInventory: {
+          status: 'PASS',
+          source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
+          logicalInventory: fixture.inventory.map(({ id }) => id),
+        },
+      },
+    },
+  })['S1-C03'], true);
+
+  const discoveryNotBound = buildProofs({
+    candidateShape: 'OPENCODE-ACP',
+    fixture,
+    execution: {
+      trustedProofs: {
+        inventory: fixture.inventory.map(({ id }) => id),
+        fixtureVerified: true,
+        modelFacingInventory: {
+          status: 'PASS',
+          source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
+          logicalInventory: fixture.inventory.map(({ id }) => id),
+        },
+        discovery: {
+          controlled: true,
+          configSourcesControlled: false,
+          extensions: [],
+          skills: [],
+          prompts: [],
+          themes: [],
+          agentsFiles: [],
+        },
+      },
+    },
+  });
+  assert.equal(discoveryNotBound['S1-C04'], false);
 });

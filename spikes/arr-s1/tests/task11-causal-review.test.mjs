@@ -204,7 +204,7 @@ test('OpenCode ACP receives an explicit isolated profile and config surface', ()
   const root = mkdtempSync(`${tmpdir()}/mnfs-arr-s1-causal-opencode-`);
   const configDir = `${root}/config`;
   const configPath = `${configDir}/config.json`;
-  const config = { tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] };
+  const config = { model: 'fixture/gpt-5', tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: {} };
   const bytes = Buffer.from(`${JSON.stringify(config)}\n`);
   mkdirSync(configDir, { recursive: true });
   writeFileSync(configPath, bytes, { mode: 0o600 });
@@ -225,7 +225,6 @@ test('OpenCode ACP receives an explicit isolated profile and config surface', ()
         configHash: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
         configSizeBytes: bytes.length,
         configMode: '0600',
-        modelEditFamily: 'edit',
       },
     });
 
@@ -234,7 +233,7 @@ test('OpenCode ACP receives an explicit isolated profile and config surface', ()
     assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
     assert.equal(adapter.observations.profile.source, 'MNFS_TRUSTED_ISOLATED_PROFILE');
     assert.equal(adapter.observations.discoveryControlled, true);
-    assert.match(adapter.observations.discoveryReason, /auth route|global|project/u);
+    assert.match(adapter.observations.discoveryReason, /bounded|auth|global|project/u);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

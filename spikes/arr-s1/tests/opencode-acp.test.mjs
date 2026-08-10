@@ -16,7 +16,7 @@ const ENV = Object.freeze({
   XDG_DATA_HOME: '/tmp/mnfs-arr-s1-opencode-data',
   MNFS_FIXTURE: 'task-7',
 });
-const PROFILE_CONFIG = Object.freeze({ tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] });
+const PROFILE_CONFIG = Object.freeze({ model: 'fixture/gpt-5', tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: {} });
 const PROFILE_ROOT = '/tmp/mnfs-arr-s1-opencode-test-profile';
 const PROFILE_CONFIG_DIR = `${PROFILE_ROOT}/config`;
 const PROFILE_CONFIG_PATH = `${PROFILE_CONFIG_DIR}/config.json`;
@@ -35,7 +35,6 @@ const PROFILE = Object.freeze({
   configHash: `sha256:${createHash('sha256').update(PROFILE_BYTES).digest('hex')}`,
   configSizeBytes: PROFILE_BYTES.length,
   configMode: '0600',
-  modelEditFamily: 'edit',
 });
 
 function fakeCommonClient(calls) {
@@ -103,6 +102,18 @@ test('starts native OpenCode ACP with exact argv, cwd and explicit environment',
         OPENCODE_CONFIG_DIR: PROFILE.configDir,
         OPENCODE_CONFIG: PROFILE.configPath,
         OPENCODE_PURE: '1',
+        OPENCODE_DISABLE_DEFAULT_PLUGINS: '1',
+        OPENCODE_DB: ':memory:',
+        OPENCODE_CLIENT: 'acp',
+        OPENCODE_EXPERIMENTAL: '0',
+        OPENCODE_ENABLE_EXA: '0',
+        OPENCODE_EXPERIMENTAL_EXA: '0',
+        OPENCODE_ENABLE_PARALLEL: '0',
+        OPENCODE_EXPERIMENTAL_PARALLEL: '0',
+        OPENCODE_ENABLE_QUESTION_TOOL: '0',
+        OPENCODE_EXPERIMENTAL_LSP_TOOL: '0',
+        OPENCODE_EXPERIMENTAL_PLAN_MODE: '0',
+        OPENCODE_EXPERIMENTAL_CODE_MODE: '0',
         HOME: PROFILE.runRoot,
       },
       timeoutMs: 1400,

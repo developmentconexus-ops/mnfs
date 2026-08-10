@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import path from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 
 import { createAcpStdioClient } from '../acp/client.mjs';
 import { requireOpenCodeDataRoute, openCodeCredentialRouteEvidence } from '../credential-routes.mjs';
@@ -41,43 +42,321 @@ function containsCredentialKey(value, seen = new Set()) {
   return false;
 }
 
-function inspectAuthRouteMetadata(root) {
-  const route = requireOpenCodeDataRoute(root);
-  let entries;
+const AUTH_FILE = 'auth.json';
+const FROZEN_PERMISSION_ACTIONS = new Set(['ask', 'allow', 'deny']);
+const FROZEN_PROFILE_KEYS = new Set(['model', 'tools', 'permission', 'plugin', 'mcp']);
+const FIXED_LOGICAL_INVENTORY = Object.freeze(['edit_result_file', 'read_nonce_file']);
+
+// These are deliberately a small, concrete projection of the accepted frozen
+// source, not a second OpenCode implementation. The source loci are:
+//   core/src/v1/config/config.ts + config/migrate.ts  (mcp Record, tools -> edit permission)
+//   opencode/src/auth/index.ts + config/config.ts     (auth/well-known/account/managed sources)
+//   opencode/src/tool/registry.ts                    (built-ins and gpt/apply_patch selection)
+//   opencode/src/permission/index.ts + session/llm/request.ts (deny and request filtering)
+// at release commit 325529761beb79a004de6d86e48b8db69cf4eba3.
+
+function isRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function frozenManagedConfigDir() {
+  if (process.platform === 'linux') return '/etc/opencode';
+  if (process.platform === 'darwin') return '/Library/Application Support/opencode';
+  if (process.platform === 'win32') return path.join(process.env.ProgramData || 'C:\\ProgramData', 'opencode');
+  return '/etc/opencode';
+}
+
+function authKind(value) {
+  if (!isRecord(value) || typeof value.type !== 'string') return null;
+  if (value.type === 'oauth'
+    && typeof value.refresh === 'string'
+    && typeof value.access === 'string'
+    && Number.isSafeInteger(value.expires)
+    && value.expires >= 0) return 'oauth';
+  if (value.type === 'api' && typeof value.key === 'string') return 'api';
+  if (value.type === 'wellknown'
+    && typeof value.key === 'string'
+    && typeof value.token === 'string') return 'wellknown';
+  return null;
+}
+
+function inspectAuthStorage(dataRoot) {
+  const authPath = path.join(dataRoot, AUTH_FILE);
+  let stats;
   try {
-    entries = readdirSync(route, { withFileTypes: true }).map((entry) => {
-      const entryPath = `${route}/${entry.name}`;
-      const stats = lstatSync(entryPath);
-      return {
-        name: entry.name,
-        type: entry.isDirectory() ? 'directory' : entry.isFile() ? 'file' : 'other',
-        sizeBytes: stats.size,
-        mode: `0${(stats.mode & 0o777).toString(8).padStart(3, '0')}`,
-      };
-    }).sort((left, right) => left.name.localeCompare(right.name));
+    stats = lstatSync(authPath);
   } catch (error) {
-    if (error?.code !== 'ENOENT') throw error;
+    if (error?.code === 'ENOENT') {
+      return Object.freeze({
+        path: authPath,
+        present: false,
+        kinds: [],
+        ignoredInvalidEntries: 0,
+        remoteConfigStatus: 'CONTROLLED',
+        discoveryControlled: true,
+        reason: 'frozen Auth.all has no auth storage to load',
+      });
+    }
     return Object.freeze({
-      root: route,
-      exists: false,
-      entries: [],
-      remoteConfigStatus: 'NOT_OBSERVED',
-      discoveryControlled: true,
-      reason: 'authorized auth route is absent; no remote metadata was observed',
+      path: authPath,
+      present: true,
+      kinds: [],
+      ignoredInvalidEntries: 0,
+      remoteConfigStatus: 'UNCONTROLLED',
+      discoveryControlled: false,
+      reason: 'auth storage metadata could not be inspected',
     });
   }
-  const remoteEntry = entries.find(({ name }) => name === 'auth.json'
-    || /well[-_]?known|remote|account|organization|org|config/iu.test(name));
+  if (!stats.isFile() || realpathSync(authPath) !== authPath) {
+    return Object.freeze({
+      path: authPath,
+      present: true,
+      kinds: [],
+      ignoredInvalidEntries: 0,
+      remoteConfigStatus: 'UNCONTROLLED',
+      discoveryControlled: false,
+      reason: 'frozen Auth.all reads auth.json, but its route is not a regular file',
+    });
+  }
+
+  let raw;
+  try {
+    raw = JSON.parse(readFileSync(authPath, 'utf8'));
+  } catch {
+    // Auth.all catches a JSON read/decode failure and falls back to an empty record.
+    return Object.freeze({
+      path: authPath,
+      present: true,
+      kinds: [],
+      ignoredInvalidEntries: 0,
+      remoteConfigStatus: 'CONTROLLED',
+      discoveryControlled: true,
+      reason: 'frozen Auth.all ignores malformed auth storage',
+    });
+  }
+
+  const kinds = [];
+  let ignoredInvalidEntries = 0;
+  for (const value of Object.values(isRecord(raw) ? raw : {})) {
+    const kind = authKind(value);
+    if (kind) kinds.push(kind);
+    else ignoredInvalidEntries += 1;
+  }
+  kinds.sort();
+  const remote = kinds.includes('wellknown');
   return Object.freeze({
-    root: route,
-    exists: true,
-    entries,
-    remoteConfigStatus: remoteEntry ? 'PRESENT_UNINSPECTED' : 'NOT_OBSERVED',
-    discoveryControlled: !remoteEntry,
-    reason: remoteEntry
-      ? 'authorized auth route contains auth/remote metadata whose configuration effect was not neutralized'
-      : 'authorized auth route contains no known auth/remote metadata',
+    path: authPath,
+    present: true,
+    kinds,
+    ignoredInvalidEntries,
+    remoteConfigStatus: remote ? 'REMOTE_CAPABLE' : 'CONTROLLED',
+    discoveryControlled: !remote,
+    reason: remote
+      ? 'frozen config loading fetches well-known remote configuration for a wellknown auth entry'
+      : 'frozen config loading does not fetch well-known configuration for OAuth/API auth entries',
   });
+}
+
+function inspectAccountStorage(databasePath, databaseMode = 'FILE') {
+  const base = {
+    databasePath,
+    databaseMode,
+    present: false,
+    activeAccountPresent: false,
+    activeOrgPresent: false,
+  };
+  if (databaseMode === 'MEMORY') {
+    return Object.freeze({
+      ...base,
+      discoveryStatus: 'CONTROLLED_BY_DATABASE_ROUTE',
+      discoveryControlled: true,
+      reason: 'frozen Database.path is forced to the upstream-supported :memory: route',
+    });
+  }
+  if (databasePath === ':memory:') {
+    return Object.freeze({
+      ...base,
+      discoveryStatus: 'CONTROLLED_BY_DATABASE_ROUTE',
+      discoveryControlled: true,
+      reason: 'frozen Database.path is the upstream-supported :memory: route',
+    });
+  }
+
+  let stats;
+  try {
+    stats = lstatSync(databasePath);
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return Object.freeze({
+        ...base,
+        discoveryStatus: 'CONTROLLED_BY_DATABASE_ROUTE',
+        discoveryControlled: true,
+        reason: 'frozen AccountRepo has no database file to load',
+      });
+    }
+    return Object.freeze({
+      ...base,
+      present: true,
+      discoveryStatus: 'UNCONTROLLED',
+      discoveryControlled: false,
+      reason: 'account database metadata could not be inspected',
+    });
+  }
+  if (!stats.isFile() || realpathSync(databasePath) !== databasePath) {
+    return Object.freeze({
+      ...base,
+      present: true,
+      discoveryStatus: 'UNCONTROLLED',
+      discoveryControlled: false,
+      reason: 'account database route is not a regular file',
+    });
+  }
+
+  let db;
+  try {
+    db = new DatabaseSync(databasePath, { readOnly: true });
+    const tables = new Set(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((row) => row.name));
+    if (!tables.has('account_state') || !tables.has('account')) {
+      return Object.freeze({
+        ...base,
+        present: true,
+        discoveryStatus: 'CONTROLLED_BY_DATABASE_ROUTE',
+        discoveryControlled: true,
+        reason: 'frozen AccountRepo has no usable account state tables',
+      });
+    }
+    const state = db.prepare('SELECT active_account_id, active_org_id FROM account_state WHERE id = 1').get();
+    const account = state?.active_account_id
+      ? db.prepare('SELECT id FROM account WHERE id = ?').get(state.active_account_id)
+      : undefined;
+    const activeAccountPresent = Boolean(account);
+    const activeOrgPresent = activeAccountPresent && typeof state?.active_org_id === 'string' && state.active_org_id.length > 0;
+    return Object.freeze({
+      ...base,
+      present: true,
+      activeAccountPresent,
+      activeOrgPresent,
+      discoveryStatus: activeOrgPresent ? 'REMOTE_CAPABLE' : 'CONTROLLED_BY_DATABASE_ROUTE',
+      discoveryControlled: !activeOrgPresent,
+      reason: activeOrgPresent
+        ? 'frozen Config.loadActiveOrgConfig fetches account configuration for an active organization'
+        : 'frozen AccountRepo has no active organization capable of loading account configuration',
+    });
+  } catch {
+    return Object.freeze({
+      ...base,
+      present: true,
+      discoveryStatus: 'UNCONTROLLED',
+      discoveryControlled: false,
+      reason: 'account database is not a readable frozen OpenCode database',
+    });
+  } finally {
+    db?.close();
+  }
+}
+
+function inspectManagedConfig(managedConfigDir) {
+  const files = [];
+  try {
+    const dirStats = lstatSync(managedConfigDir);
+    if (!dirStats.isDirectory()) throw new Error('managed config path is not a directory');
+    for (const name of ['opencode.json', 'opencode.jsonc']) {
+      try {
+        const stats = lstatSync(path.join(managedConfigDir, name));
+        files.push({ name, type: stats.isFile() ? 'file' : stats.isDirectory() ? 'directory' : 'other' });
+      } catch (error) {
+        if (error?.code !== 'ENOENT') throw error;
+      }
+    }
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return Object.freeze({ path: managedConfigDir, present: false, files: [], discoveryControlled: true, reason: 'frozen managed directory is absent' });
+    }
+    return Object.freeze({ path: managedConfigDir, present: true, files: [], discoveryControlled: false, reason: 'frozen managed directory metadata could not be inspected' });
+  }
+  const present = files.length > 0;
+  return Object.freeze({
+    path: managedConfigDir,
+    present,
+    files,
+    discoveryControlled: !present,
+    reason: present
+      ? 'frozen config loading merges managed opencode.json/opencode.jsonc after account configuration'
+      : 'frozen managed directory contains no configuration file read by OpenCode',
+  });
+}
+
+export function inspectOpenCodeConfigSources({ dataRoot, managedConfigDir = frozenManagedConfigDir(), databasePath, databaseMode = 'FILE' } = {}) {
+  requireAbsolute(dataRoot, 'dataRoot');
+  requireAbsolute(managedConfigDir, 'managedConfigDir');
+  const resolvedDatabasePath = databasePath ?? path.join(dataRoot, 'opencode.db');
+  const auth = inspectAuthStorage(dataRoot);
+  const account = inspectAccountStorage(resolvedDatabasePath, databaseMode);
+  const managed = inspectManagedConfig(managedConfigDir);
+  const discoveryControlled = auth.discoveryControlled && account.discoveryControlled && managed.discoveryControlled;
+  return Object.freeze({
+    auth,
+    account,
+    managed,
+    discoveryControlled,
+    reason: discoveryControlled
+      ? 'frozen auth, account and managed configuration sources are bounded'
+      : [auth, account, managed].filter((item) => !item.discoveryControlled).map((item) => item.reason).join('; '),
+  });
+}
+
+function validatePermissionConfig(value) {
+  if (typeof value === 'string') {
+    if (!FROZEN_PERMISSION_ACTIONS.has(value)) throw new TypeError('OpenCode profile permission action is invalid');
+    return;
+  }
+  if (!isRecord(value)) throw new TypeError('OpenCode profile permission must be a frozen permission record');
+  for (const rule of Object.values(value)) {
+    if (typeof rule === 'string') {
+      if (!FROZEN_PERMISSION_ACTIONS.has(rule)) throw new TypeError('OpenCode profile permission action is invalid');
+      continue;
+    }
+    if (!isRecord(rule) || Object.values(rule).some((action) => !FROZEN_PERMISSION_ACTIONS.has(action))) {
+      throw new TypeError('OpenCode profile permission pattern is invalid');
+    }
+  }
+}
+
+function validateMcpConfig(value) {
+  if (!isRecord(value)) throw new TypeError('OpenCode profile MCP must be a frozen record/map, not an array');
+  for (const server of Object.values(value)) {
+    if (!isRecord(server)) throw new TypeError('OpenCode profile MCP server must be a record');
+    if (server.enabled !== undefined && typeof server.enabled !== 'boolean') throw new TypeError('OpenCode profile MCP enabled must be boolean');
+    if (server.type === undefined) {
+      if (Object.keys(server).some((key) => key !== 'enabled')) throw new TypeError('OpenCode profile MCP server shape is invalid');
+      continue;
+    }
+    if (server.type === 'local' && (!Array.isArray(server.command) || server.command.some((item) => typeof item !== 'string'))) {
+      throw new TypeError('OpenCode profile local MCP command shape is invalid');
+    }
+    if (server.type === 'remote' && typeof server.url !== 'string') throw new TypeError('OpenCode profile remote MCP URL is invalid');
+    if (!['local', 'remote'].includes(server.type)) throw new TypeError('OpenCode profile MCP type is invalid');
+  }
+}
+
+function validateFrozenProfileConfig(config) {
+  if (!isRecord(config)) throw new TypeError('OpenCode profile config must be a frozen record');
+  for (const key of Object.keys(config)) {
+    if (!FROZEN_PROFILE_KEYS.has(key)) throw new TypeError(`OpenCode profile field ${key} is outside the trusted frozen subset`);
+  }
+  if (typeof config.model !== 'string' || !config.model.includes('/')) throw new TypeError('OpenCode profile model must be provider/model');
+  if (config.tools !== undefined && (!isRecord(config.tools) || Object.values(config.tools).some((value) => typeof value !== 'boolean'))) {
+    throw new TypeError('OpenCode profile tools must be a boolean record');
+  }
+  if (config.permission !== undefined) validatePermissionConfig(config.permission);
+  if (!Array.isArray(config.plugin)) throw new TypeError('OpenCode profile plugin must be an array');
+  for (const plugin of config.plugin) {
+    if (typeof plugin === 'string') continue;
+    if (!Array.isArray(plugin) || typeof plugin[0] !== 'string') throw new TypeError('OpenCode profile plugin spec is invalid');
+  }
+  validateMcpConfig(config.mcp);
 }
 
 function requireOwnedDirectory(root, name) {
@@ -141,21 +420,31 @@ function bindProfile(profile) {
   if (JSON.stringify(canonical(config)) !== JSON.stringify(canonical(profile.config))) {
     throw new Error('OpenCode profile input diverges from written config');
   }
-  if (!Array.isArray(config.plugin) || config.plugin.length !== 0) {
-    throw new Error('OpenCode profile plugin list must be exactly empty');
-  }
-  if (!Array.isArray(config.mcp) || config.mcp.length !== 0) {
-    throw new Error('OpenCode profile MCP list must be exactly empty');
-  }
+  validateFrozenProfileConfig(config);
+  const modelSeparator = config.model.indexOf('/');
+  const model = Object.freeze({
+    providerID: config.model.slice(0, modelSeparator),
+    modelID: config.model.slice(modelSeparator + 1),
+  });
+  if (!model.providerID || !model.modelID) throw new TypeError('OpenCode profile model must contain provider and model IDs');
+  const dataRoot = path.join(profile.xdgDataHome, 'opencode');
+  const configSources = inspectOpenCodeConfigSources({
+    dataRoot,
+    managedConfigDir: frozenManagedConfigDir(),
+    databasePath: path.join(dataRoot, 'opencode.db'),
+    databaseMode: 'MEMORY',
+  });
   return Object.freeze({
     config: clone(config),
+    model,
     binding: Object.freeze({
       path: profile.configPath,
       hash,
       sizeBytes: bytes.length,
       mode: '0600',
     }),
-    authRouteInspection: inspectAuthRouteMetadata(profile.xdgDataHome),
+    authRouteInspection: configSources.auth,
+    configSources,
   });
 }
 
@@ -176,12 +465,8 @@ function requireExplicitEnvironment(env) {
 }
 
 function profileEnvironment(env, profile) {
-  const cleanEnv = Object.fromEntries(Object.entries(env).filter(([key]) => ![
-    'OPENCODE_AUTH_CONTENT',
-    'OPENCODE_CONFIG_CONTENT',
-    'OPENCODE_PERMISSION',
-    'OPENCODE_TEST_HOME',
-  ].includes(key)));
+  const cleanEnv = Object.fromEntries(Object.entries(env).filter(([key]) => !key.startsWith('OPENCODE_')
+    && !['HOME', 'XDG_CONFIG_HOME', 'XDG_STATE_HOME', 'XDG_CACHE_HOME', 'XDG_DATA_HOME'].includes(key)));
   if (profile === undefined) throw new TypeError('OpenCode ACP requires an explicit isolated profile');
   for (const [key, value] of [
     ['configDir', profile.configDir],
@@ -197,9 +482,6 @@ function profileEnvironment(env, profile) {
   for (const [key, value] of [['configDir', profile.configDir], ['configPath', profile.configPath], ['xdgConfigHome', profile.xdgConfigHome], ['xdgStateHome', profile.xdgStateHome], ['xdgCacheHome', profile.xdgCacheHome]]) {
     if (!pathOwnedBy(profile.runRoot, value)) throw new TypeError(`OpenCode ${key} must be runRoot-owned`);
   }
-  if (profile.authRoute?.kind === 'REMOTE_CONFIG' || profile.authRoute?.remote === true) {
-    throw new Error('OpenCode auth route is remote/well-known; fail-closed without recording secrets');
-  }
   const bound = bindProfile(profile);
   return {
     profile: bound,
@@ -213,49 +495,173 @@ function profileEnvironment(env, profile) {
     OPENCODE_CONFIG_DIR: profile.configDir,
     OPENCODE_CONFIG: profile.configPath,
     OPENCODE_PURE: '1',
+    OPENCODE_DISABLE_DEFAULT_PLUGINS: '1',
+    OPENCODE_DB: ':memory:',
+    OPENCODE_CLIENT: 'acp',
+    OPENCODE_EXPERIMENTAL: '0',
+    OPENCODE_ENABLE_EXA: '0',
+    OPENCODE_EXPERIMENTAL_EXA: '0',
+    OPENCODE_ENABLE_PARALLEL: '0',
+    OPENCODE_EXPERIMENTAL_PARALLEL: '0',
+    OPENCODE_ENABLE_QUESTION_TOOL: '0',
+    OPENCODE_EXPERIMENTAL_LSP_TOOL: '0',
+    OPENCODE_EXPERIMENTAL_PLAN_MODE: '0',
+    OPENCODE_EXPERIMENTAL_CODE_MODE: '0',
     ...(profile.runRoot ? { HOME: profile.runRoot } : {}),
     },
   };
 }
 
-function configuredToolNames(value, prefix) {
-  if (Array.isArray(value)) {
-    return value.map((entry) => {
-      const name = typeof entry === 'string' ? entry : entry?.name;
-      return typeof name === 'string' && name.length > 0 ? `${prefix}:${name}` : `${prefix}:UNNAMED`;
-    });
-  }
-  if (value && typeof value === 'object') return Object.keys(value).map((name) => `${prefix}:${name}`);
-  return [];
+function wildcardMatch(value, pattern) {
+  if (pattern === '*') return true;
+  const escaped = String(pattern).replace(/[.+^${}()|[\]\\]/gu, '\\$&').replaceAll('*', '.*');
+  return new RegExp(`^${escaped}$`, 'u').test(value);
 }
 
-export function resolveOpenCodeModelFacingInventory({ config = {}, modelEditFamily = 'edit' } = {}) {
-  if (!['edit', 'write', 'apply_patch'].includes(modelEditFamily)) {
-    throw new TypeError('OpenCode model edit family must be edit, write or apply_patch');
+function frozenPermissionRules(config) {
+  const rules = [];
+  for (const [name, enabled] of Object.entries(config.tools ?? {})) {
+    rules.push({ permission: name === 'write' || name === 'patch' ? 'edit' : name, pattern: '*', action: enabled ? 'allow' : 'deny' });
   }
-  const tools = config?.tools && typeof config.tools === 'object' ? config.tools : {};
-  const permission = config?.permission && typeof config.permission === 'object' ? config.permission : {};
-  const modelFacingTools = Object.keys(tools)
-    .filter((name) => name !== '*' && tools[name] === true && permission[name] !== 'deny' && permission[name] !== false)
-    .filter((name) => permission['*'] !== 'deny' || permission[name] === 'allow')
-    .sort();
-  const pluginTools = configuredToolNames(config?.plugin, 'plugin').sort();
-  const mcpTools = configuredToolNames(config?.mcp, 'mcp').sort();
-  const resolvedTools = [...new Set([...modelFacingTools, ...pluginTools, ...mcpTools])].sort();
-  const editFamilies = new Set(['edit', 'write', 'apply_patch']);
-  const logicalInventory = resolvedTools.map((name) => {
+  const permission = config.permission ?? {};
+  if (typeof permission === 'string') {
+    rules.push({ permission: '*', pattern: '*', action: permission });
+  } else {
+    for (const [name, rule] of Object.entries(permission)) {
+      if (typeof rule === 'string') {
+        rules.push({ permission: name, pattern: '*', action: rule });
+      } else {
+        for (const [pattern, action] of Object.entries(rule)) rules.push({ permission: name, pattern, action });
+      }
+    }
+  }
+  return rules;
+}
+
+function frozenPermissionName(tool) {
+  if (['edit', 'write', 'apply_patch'].includes(tool)) return 'edit';
+  if (['list_mcp_resources', 'list_mcp_resource_templates', 'read_mcp_resource'].includes(tool)) return 'read';
+  return tool;
+}
+
+function frozenToolDisabled(tool, rules) {
+  const permission = frozenPermissionName(tool);
+  const rule = [...rules].reverse().find((candidate) => wildcardMatch(permission, candidate.permission));
+  return rule?.pattern === '*' && rule.action === 'deny';
+}
+
+function frozenModelTools({ model, flags }) {
+  const usePatch = model.modelID.includes('gpt-')
+    && !model.modelID.includes('oss')
+    && !model.modelID.includes('gpt-4');
+  const tools = [
+    'invalid',
+    ...(flags.client === 'app' || flags.client === 'cli' || flags.client === 'desktop' || flags.enableQuestionTool ? ['question'] : []),
+    'bash',
+    'read',
+    'glob',
+    'grep',
+    ...(usePatch ? [] : ['edit', 'write']),
+    'task',
+    'webfetch',
+    'todowrite',
+    ...(flags.providerID === 'opencode' || flags.enableExa || flags.enableParallel ? ['websearch'] : []),
+    'skill',
+    ...(usePatch ? ['apply_patch'] : []),
+    ...(flags.experimentalLspTool ? ['lsp'] : []),
+    ...(flags.experimentalPlanMode && flags.client === 'cli' ? ['plan'] : []),
+  ];
+  return [...new Set(tools)];
+}
+
+function parseModelSelection(config, model) {
+  const selected = model ?? (() => {
+    const separator = config.model.indexOf('/');
+    return { providerID: config.model.slice(0, separator), modelID: config.model.slice(separator + 1) };
+  })();
+  if (!isRecord(selected) || typeof selected.providerID !== 'string' || typeof selected.modelID !== 'string'
+    || !selected.providerID || !selected.modelID) return null;
+  const expected = `${selected.providerID}/${selected.modelID}`;
+  if (expected !== config.model) return null;
+  return Object.freeze({ providerID: selected.providerID, modelID: selected.modelID });
+}
+
+function activeMcpServers(config) {
+  return Object.entries(config.mcp).filter(([, server]) => server.type && server.enabled !== false).map(([name]) => name).sort();
+}
+
+export function resolveOpenCodeModelFacingInventory({ config = {}, model, pure = false, flags = {} } = {}) {
+  validateFrozenProfileConfig(config);
+  const selectedModel = parseModelSelection(config, model);
+  if (!selectedModel) {
+    return Object.freeze({
+      status: 'BLOCKED',
+      reason: 'frozen OpenCode ToolRegistry requires the exact provider/model selection used by the run',
+      configuredPluginSpecs: config.plugin.map((entry) => typeof entry === 'string' ? entry : entry[0]),
+      configuredMcpServers: Object.keys(config.mcp).sort(),
+      source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
+    });
+  }
+  const runtimeFlags = {
+    client: 'acp',
+    enableExa: false,
+    enableParallel: false,
+    enableQuestionTool: false,
+    experimentalLspTool: false,
+    experimentalPlanMode: false,
+    ...flags,
+    providerID: selectedModel.providerID,
+  };
+  const configuredPluginSpecs = config.plugin.map((entry) => typeof entry === 'string' ? entry : entry[0]).sort();
+  const configuredMcpServers = Object.keys(config.mcp).sort();
+  const activeServers = activeMcpServers(config);
+  if (configuredPluginSpecs.length > 0 && !pure) {
+    return Object.freeze({
+      status: 'BLOCKED',
+      reason: 'frozen plugin registry tool IDs require loading the configured external plugin; no plugin was loaded by this deterministic harness',
+      configuredPluginSpecs,
+      configuredMcpServers,
+      source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
+    });
+  }
+  if (activeServers.length > 0) {
+    return Object.freeze({
+      status: 'BLOCKED',
+      reason: 'frozen MCP registry tool IDs require observing tools/list from the configured MCP server',
+      configuredPluginSpecs,
+      configuredMcpServers,
+      activeMcpServers: activeServers,
+      source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
+    });
+  }
+
+  const rules = frozenPermissionRules(config);
+  const modelTools = frozenModelTools({ model: selectedModel, flags: runtimeFlags });
+  const modelFacingTools = modelTools.filter((tool) => !frozenToolDisabled(tool, rules)).sort();
+  const editFamily = selectedModel.modelID.includes('gpt-')
+    && !selectedModel.modelID.includes('oss')
+    && !selectedModel.modelID.includes('gpt-4')
+    ? 'apply_patch'
+    : 'edit';
+  const logicalInventory = modelFacingTools.map((name) => {
     if (name === 'read') return 'read_nonce_file';
-    if (editFamilies.has(name)) return name === modelEditFamily ? 'edit_result_file' : `model_edit:${name}`;
+    if (name === editFamily) return 'edit_result_file';
+    if (['edit', 'write', 'apply_patch'].includes(name)) return `model_edit:${name}`;
     return name;
   }).sort();
+  const matchesFixture = JSON.stringify(logicalInventory) === JSON.stringify([...FIXED_LOGICAL_INVENTORY].sort());
   return Object.freeze({
-    modelEditFamily,
-    modelFacingEditTool: resolvedTools.includes(modelEditFamily),
-    modelFacingTools: resolvedTools,
+    status: matchesFixture ? 'PASS' : 'FAIL',
+    model: selectedModel,
+    modelEditFamily: editFamily,
+    modelFacingEditTool: modelFacingTools.includes(editFamily),
+    modelFacingTools,
     logicalInventory,
-    pluginTools,
-    mcpTools,
-    source: 'MNFS_TRUSTED_OPENCODE_ISOLATED_PROFILE_PERMISSION_FILTER',
+    configuredPluginSpecs,
+    configuredMcpServers,
+    pluginTools: pure ? [] : configuredPluginSpecs,
+    mcpTools: [],
+    source: 'MNFS_TRUSTED_OPENCODE_FROZEN_V1_18_15_TOOLREGISTRY_AND_REQUEST_FILTER',
   });
 }
 
@@ -337,20 +743,34 @@ export function createOpenCodeAcpAdapter({
         configBinding: profileResult.profile.binding,
         authRoute: openCodeCredentialRouteEvidence(profile.xdgDataHome),
         authRouteInspection: profileResult.profile.authRouteInspection,
-        resolvedInventory: resolveOpenCodeModelFacingInventory({ config: profileResult.profile.config, modelEditFamily: profile.modelEditFamily ?? 'edit' }),
+        configSources: profileResult.profile.configSources,
+        resolvedInventory: resolveOpenCodeModelFacingInventory({
+          config: profileResult.profile.config,
+          model: profileResult.profile.model,
+          pure: true,
+          flags: {
+            client: 'acp',
+            enableExa: false,
+            enableParallel: false,
+            enableQuestionTool: false,
+            experimentalLspTool: false,
+            experimentalPlanMode: false,
+          },
+        }),
         discovery: {
           ambientGlobal: 'EXCLUDED_BY_RUN_ROOT_XDG_CONFIG_HOME',
           project: 'EXCLUDED_BY_OPENCODE_DISABLE_PROJECT_CONFIG',
           custom: 'EXCLUDED_BY_OPENCODE_CONFIG_DIR_AND_EXPLICIT_PROFILE',
           plugins: profileResult.profile.config.plugin.length === 0
             ? 'DISABLED_BY_EXPLICIT_EMPTY_PLUGIN_LIST'
-            : 'BLOCKED_BY_NON_EMPTY_PLUGIN_LIST',
+            : 'DISABLED_BY_FROZEN_OPENCODE_PURE',
+          configSources: profileResult.profile.configSources,
         },
       },
     } : {}),
-    discoveryControlled: Boolean(profile) && profileResult.profile.authRouteInspection.discoveryControlled,
+    discoveryControlled: Boolean(profile) && profileResult.profile.configSources.discoveryControlled,
     discoveryReason: profile
-      ? profileResult.profile.authRouteInspection.reason
+      ? profileResult.profile.configSources.reason
       : 'trusted isolated OpenCode profile is unavailable',
   });
 

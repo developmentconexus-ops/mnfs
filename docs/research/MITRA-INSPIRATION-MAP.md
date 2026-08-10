@@ -5,7 +5,7 @@ document_type: research_map
 form: explanation
 authority: research_historical
 status: draft
-version: 0.5.0
+version: 0.6.0
 owners:
   - developmentconexus-ops
 source_of_truth_for:
@@ -939,7 +939,8 @@ Auditoria contra a lista exaustiva de exports (mitra-sdk 70 fns, interactions-sd
 |---|---|---|
 | `SKILL_MD` do Escopo (metodologia completa) | **Bloqueado por decisão** | Fica na SF#4 do projeto 42949, co-localizada com a `GEMINI_API_KEY`. Buscá-la exporia o segredo. Metodologia inferida do output em §13/§15.6 |
 | System prompt base do Claude Code CLI | **Inalcançável daqui** | Roda dentro do sandbox; não trafega pelo frontend |
-| `coordinator_*` (login Claude do coordenador) | **Não investigado** | Achado novo em §26.7. Sugere orquestrador separado das tasks — vale um passe |
+| `coordinator_*` (login Claude do coordenador) | **Fechado** em §28.1 | Protocolo existe (escopo workspace); **nenhuma UI o chama** nos 367 chunks. Capacidade server-side sem frontend |
+| Ciclo DEV→PROD, releases, CHANGELOG | **Fechado** em §27 | Era o buraco real — maior que o coordinator |
 | Planos, preços, limites, cotas | Não investigado | Só `burstLimit = 5000` |
 | `manageAgentCredential` OAuth/device ao vivo | **Não exercido por decisão** | Exigiria conectar credencial real |
 | `AgentTaskSession` embutível | Assinatura conhecida | Não instanciado fora do builder |
@@ -1442,3 +1443,140 @@ Registro de honestidade: relatos anteriores neste mapa disseram que o Sales Rada
 - "Curva de sobrevivência e taxa real de conversão"
 
 E seguiu para implementação: Server Functions publicadas, matriz de segurança revalidada, feature "ver como" (impersonation de vendedor) com trava de autorização, `ux.md`, builds limpos, commits na `main`. O documento de escopo do topo é o artefato inicial; os pesos foram depois confrontados com dados reais. **O padrão §14 não se aplica a esta sessão.**
+
+## 27. Promote DEV→PROD e sistema de releases (o achado maior — §24 estava incompleto)
+
+Nível de evidência: **OBSERVADO** — composable `sa()` em `LabSidebar.zayUnn7U.js` (69KB) + bloco i18n `PROMOTE` completo do entry.
+
+O §24 mapeou só o *publish* (snapshot para link público). Faltava a camada de cima: **promoção para produção com projeto PROD separado, versionamento semver e releases no GitHub**. Isto é o ciclo de vida real do app.
+
+### 27.1 Modelo mental: DEV e PROD são dois projetos ligados
+
+Texto literal da UI: *"Create a production version of \"{name}\". This action creates a linked PROD project and ships the first release (v0.1.0)."*
+
+`promoteFirstTime` retorna `{prodProjectId, tag}` — o backend **forka um projeto novo**. A lista de projetos ganha filtros `Dev` / `Production` e o par aparece como `DEV → PROD`. Há atalhos "Open production project" / "Open development project".
+
+Isto é diferente de tudo em §24: publish = link público de um snapshot; promote = **ambiente de produção separado, com banco e migrations próprios**.
+
+### 27.2 API completa
+
+Auth de todas: query `?userId=` + header `x-user-jwt`.
+
+| Função | Verbo + rota | Retorno / efeito |
+|---|---|---|
+| `previewPromote` | `GET /api/mitra-agent/promote/${ws}/${proj}/preview` | delta a promover; em erro traz `errorCode` |
+| `promoteFirstTime` | `POST /api/mitra-agent/promote/${ws}/${proj}` | `{prodProjectId, tag}` — cria PROD + v0.1.0 |
+| `updateProd` | `POST /api/mitra-agent/promote/${ws}/${proj}/update` | `{tag}` — nova versão no PROD existente |
+| `saveRelease` | `POST /api/mitra-agent/release-tag/${ws}/${proj}` | cria git tag em DEV, **sem promover** |
+| `pollStatus` | `GET /api/mitra-agent/promote/${ws}/${proj}/status` | `{state, steps[], error, prodProjectId, releaseTag}` |
+| `cancelPromote` | `POST /api/mitra-agent/promote/${ws}/${proj}/cancel` | — |
+| `unpublishProd` | `POST /api/mitra-agent/promote/${ws}/${proj}/unpublish` | tira de produção, mantém histórico |
+| `deleteRelease` | `DELETE /api/mitra-agent/release/${ws}/${proj}/${tag}` | remove bundle + GitHub Release |
+| `getReleaseFile` | `GET /api/mitra-agent/github-files/${ws}/${proj}/release-content?version=` | conteúdo de arquivo numa versão |
+| — | `GET .../release-tree`, `.../releases` | árvore e lista de versões |
+
+`state` ∈ `idle | running | success | error`.
+
+### 27.3 As 12 etapas do promote (nomes literais)
+
+Agrupadas em blocos na UI:
+
+| # | Step | Label | Bloco |
+|---|---|---|---|
+| 1 | `step_preview` | Compute delta | Preparing production |
+| 2 | `step_fork` | **Create Production project** | Preparing production |
+| 3 | `step_env` | Materialize `.env.production` | Preparing production |
+| 4 | `step_baseline` | Initialize baseline | Preparing production |
+| 5 | `step_build` | Build frontend | Publishing application |
+| 6 | `step_tarball` | Pack bundle | Publishing application |
+| 7 | `step_sync_prod_repo` | **Sync code DEV→PROD** | Publishing application |
+| 8 | `step_apply` | **Apply PROD migrations** | Applying database changes |
+| 9 | `step_deploy` | Deploy to S3 | Publishing application |
+| 10 | `step_changelog` | Update CHANGELOG | Recording version |
+| 11 | `step_github_release` | Publish GitHub Release | Recording version |
+| 12 | `step_tag` | Create git tag | Recording version |
+
+Blocos adicionais: `block_legacy` ("Updating internal publication" — ponte para o publish do §24), `block_save`, `block_save_changelog`.
+
+### 27.4 Regras de negócio observadas (as partes difíceis)
+
+- **Migrations são forward-only.** Literal: *"Migrations already applied in PROD are NOT reverted (forward-only)"*. Apagar uma release remove bundle e GitHub Release, mas **não desfaz o banco**.
+- **Dry run acontece dentro do promote**, não antes: *"{n} pending migrations — the dry run runs during promote"*.
+- **O agente conserta falha de promote.** Em erro, a UI mostra "Failed at step \"{step}\"" com botão **"Resolve with the agent"** / "Resolve now". O gate diz *"There are pending items — the agent can resolve them"*. Ou seja: falha de deploy vira tarefa do agente, com o step nomeado como contexto.
+- **Não cancelável na prática**: apesar do endpoint `/cancel`, a UI diz *"Please wait for completion. This process cannot be cancelled."*
+- **Save Release ≠ Promote**: *"Creates a git tag in DEV as a snapshot. Does not promote to production."* Permite acumular versões e promover uma antiga depois ("Promote this version").
+- **Promover versão arbitrária**: escolhe-se entre "IN EDITING" (`Current project (create new version)` — inclui mudanças não salvas) e "SAVED RELEASES".
+- **Unpublish** derruba o link público imediatamente, mas mantém o histórico para republicar.
+- Preview mostra: `Pending migrations`, `Commits since last version`, `Next version`.
+- Release detail traz: changelog, commit SHA, "Released by", migrations da versão, lista de commits, link "View on GitHub".
+
+### 27.5 Achado lateral: `TEMPLATE_LOCK`
+
+No mesmo bloco i18n: projetos criados de template oficial carregam badge "Official template" / "Customized", com aviso *"Using the Agent will unlink the project from the template"* e "New version available" + botão Update. Existe um `POST /api/mitra-agent/proxy/agentAiShortcut/mergeMitraPackageBaseline` que faz o merge do baseline do pacote Mitra — é como templates recebem atualização upstream enquanto não foram "destravados" pelo agente.
+
+### 27.6 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| PROD como projeto forkado e ligado ao DEV | **ADOPT** | Isolamento real de ambiente; melhor que flag de "modo prod" |
+| 12 steps nomeados e observáveis no status | **ADOPT** | Deploy legível passo a passo é requisito, não luxo |
+| Falha de deploy vira tarefa do agente ("Resolve with the agent") | **ADOPT** | Fecha o loop agente↔operação. Padrão forte pro Conexus |
+| Migrations forward-only, sem rollback | ADAPT | Correto por default, mas precisa de plano de compensação explícito |
+| Dry run só dentro do promote | **REJECT** | Descobrir migration quebrada no meio do deploy é tarde; validar antes |
+| Save Release desacoplado de Promote | ADOPT | Separar "marcar versão" de "publicar versão" é o certo |
+| Promote de release arbitrária (rollback via promote de tag antiga) | ADOPT | Rollback de código sem rollback de schema — coerente com forward-only |
+| GitHub Release + CHANGELOG automáticos | ADOPT | Histórico auditável de graça |
+| Endpoint `/cancel` que a UI diz não poder cancelar | REJECT | Contrato inconsistente; ou cancela ou não expõe |
+| `mergeMitraPackageBaseline` p/ atualizar template upstream | REFERENCE | Resolve "template evoluiu depois que o cliente forkou" |
+
+## 28. Coordinator, chaves BYOK e login OAuth no sandbox
+
+### 28.1 Coordinator: existe no protocolo, não existe na UI
+
+Varredura dos **367 chunks**: `coordinator` aparece em **um único arquivo** (`useAgentWebSocket`), nas três funções que o emitem — e **nenhum componente as importa**.
+
+```js
+sendCoordinatorClaudeLoginStart(workspaceId)    → {type:"coordinator_claude_login_start",    payload:{workspaceId}, taskId:""}
+sendCoordinatorClaudeLoginCallback(ws, url)     → {type:"coordinator_claude_login_callback", payload:{workspaceId, callbackUrl}, taskId:""}
+sendCoordinatorClaudeLoginCancel(workspaceId)   → {type:"coordinator_claude_login_cancel",   payload:{workspaceId}, taskId:""}
+```
+
+Diferença de escopo é o que importa: o login normal é por **task** (`batchGroupId` + `userIds[]`), o do coordinator é por **workspace**. Sugere um processo de agente de nível de workspace — orquestrador acima das tasks — cuja credencial é provisionada separadamente. **Conclusão factual: capacidade server-side com UI ausente** (feature em construção, removida, ou acionada por rota interna). Não há evidência de comportamento; não afirmo que existe orquestração multi-task, só que o protocolo a prevê.
+
+### 28.2 Login Claude roda como terminal dentro do sandbox
+
+Componente `ClaudeLoginTerminal`, props `{batchGroupId, userIds}`. Fluxo por WS, sem REST:
+
+1. emite `claude_login_start {batchGroupId, userIds}`
+2. recebe `claude_login_data` — payload traz `automaticUrl`, aberto em nova aba
+3. usuário cola o código de callback → `claude_login_callback {callbackUrl}`
+4. recebe `claude_login_complete {success}` ou `claude_login_error {error}`
+5. timeout de **30s** esperando resposta do servidor
+
+`batchGroupId` + `userIds[]` = provisionamento de credencial **em lote para vários usuários** de uma vez.
+
+### 28.3 Painel de chaves: escopo e providers
+
+`scope.kind` ∈ **`user` | `connection`** — chave pessoal ou chave amarrada a uma conexão.
+
+Dois modos de auth: **OAuth** (`claude-oauth` / `openai-oauth`) e **API key** por provider. Providers com logo no painel: `anthropic`, `openai`, `gemini`, `minimax`, `kimi`, `glm`, `qwen`, `openrouter` — **minimax, kimi e qwen não aparecem no `OPENCODE_MODELS`** do §26.5, logo o catálogo de chaves é mais largo que o de modelos selecionáveis (provavelmente via `isDynamicProvider`/`fetchModels`, que busca modelos do provider em runtime).
+
+Claude OAuth é **gated por domínio**: `isClaudeOAuthAllowed` vem de `loadEnabledDomains` (há um `manageProviderDomainsModal`). Modelos marcados `isFree` são auto-habilitados ao validar a chave.
+
+Endpoints: `/api/mitra-agent/keys`, `/keys/validate`, `/models/${provider}`, `/connections`, `/connections/models`, `/connections/registry`, `/connections/auth/{claude,openai}`, `/auth/{claude,codex,openai}`.
+
+### 28.4 Persistência do histórico de task
+
+`GET /api/mitra-agent/tasks/` e `GET /api/mitra-agent/tasks/${taskId}/messages` — é daqui que vêm as 322 mensagens medidas em §26.1. Histórico é server-side e recarregável, não estado efêmero de socket.
+
+### 28.5 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| Credencial de agente com escopo workspace (coordinator) | **SPIKE** | Se vamos ter orquestrador, ele precisa de identidade própria — desenhar antes |
+| Login OAuth em lote (`batchGroupId` + `userIds[]`) | ADOPT | Onboarding de time sem N logins manuais |
+| OAuth conduzido por WS com terminal no sandbox | ADAPT | Funciona, mas colar código manualmente é fricção |
+| `scope: user \| connection` para chaves | **ADOPT** | Separar chave pessoal de chave de integração é correto |
+| Claude OAuth gated por domínio de email | ADOPT | Controle de quem pode usar assinatura corporativa |
+| Catálogo de chaves > catálogo de modelos | REFERENCE | Providers dinâmicos evitam hardcode de modelo |
+| Histórico de task via REST paginável | ADOPT | Sessão longa exige histórico server-side |

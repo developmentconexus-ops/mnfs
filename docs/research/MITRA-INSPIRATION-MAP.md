@@ -1315,3 +1315,113 @@ Túnel Cloudflare (canal on-prem, 1 token cloudflared)
 | freeDB DDL/conteúdo via API REST | ADOPT | Tabelas gerenciadas manipuláveis por API é essencial p/ o agente |
 | CSV como connection type (upload FormData) | ADOPT | Importar CSV como fonte é feature barata e útil |
 | Status ricos (Ativo/Offline/Degraded/Error, process×route) | ADOPT | Observabilidade de conexão granular; espelhar |
+
+## 26. Sessão, contexto, compactação e catálogo de modelos (evidência de runtime)
+
+Nível de evidência: **OBSERVADO** — estado Pinia lido ao vivo do runtime (`WsMessageStore`, `MitraTaskStore`) + `useAgentWebSocket.VPzUV7t7.js` (65KB) + varredura do bundle inteiro (6.9MB entry, 367 chunks).
+
+### 26.1 Uma task = uma sessão contínua
+
+Medido na task real `gPB3o6wYEZI1nfY8MNYW` (projeto Sales Radar):
+
+| Métrica | Valor medido |
+|---|---|
+| Mensagens na sessão | **322** (93 `text`, 227 `tool_activity`, 1 `build_status`, 1 `turn_end`) |
+| Duração | **133 min** contínuos, mesmo `taskId` |
+| Ferramentas usadas | Bash 135, Edit 51, Write 22, Read 14, ToolSearch 3, WebFetch 2 |
+
+Não existe conceito de "nova sessão" dentro da task: `taskId` **é** o identificador da sessão. Um novo chat = `task_create` = nova sessão de agente. `sendMidSessionInput` marca `midSession:true` no payload — input entregue no meio de um turno em andamento, sem reiniciar sessão.
+
+### 26.2 Steering por arquivo de fila (achado importante)
+
+Mensagem enviada durante um turno **não interrompe** o CLI. Vai para uma fila em arquivo no sandbox, que o agente lê no início de cada turno junto com o SYNC do git. Comando real observado:
+
+```bash
+git fetch origin 2>&1 | tail -3; git merge origin/main --no-edit 2>&1 | tail -10; echo "---QUEUE---"; cat /tmp/mitra-queue-*.jsonl 2>/dev/null
+```
+
+Protocolo WS correspondente: `message_queued` → `message_injected`. Isso explica por que o CLAUDE.md manda fazer SYNC todo turno — é o mesmo comando que drena a fila.
+
+### 26.3 Janela de contexto: NÃO é 1M, e Mitra não a gerencia
+
+Varredura do bundle completo (6.9MB + chunks do agente):
+
+| Termo | Ocorrências | Veredito |
+|---|---|---|
+| `contextWindow` / `context_window` | **0** | — |
+| `1000000` / `200000` / `tokenLimit` | **0** | — |
+| `compact` | 7 | **todos falsos positivos** (ícones `mdiViewCompact`, prop `compact` do antd, `compactDisplay` do Intl) |
+| `summar` | **0** | — |
+| `contextLimitHint` | 1 | pertence ao **Lila** (builder de telas legado): "desative o contexto das demais telas" — limite de *telas*, não de tokens |
+
+Nas 322 mensagens da sessão real: `compact`/`summar`/`context left`/`previous conversation` = **0 ocorrências**.
+
+**Conclusão factual:** a janela de contexto é a nativa do modelo escolhido. Mitra **não implementou** gestão de contexto, indicador de uso, botão de compactar, nem sumarização própria. Se há compactação, é a auto-compact nativa do Claude Code CLI rodando dentro do sandbox — invisível e não instrumentada pelo frontend.
+
+### 26.4 Prompt caching é o que sustenta a sessão longa
+
+`taskUsage` (cumulativo por sessão, escrito no `stream_end`):
+
+| Task | inputTokens | cacheRead | cacheCreation | output | costUSD | authMode |
+|---|---|---|---|---|---|---|
+| `gPB3o6w…` | 729 | **11.709.402** | 42.855 | 33.193 | 11,55 | — |
+| `Uposjo…` | 12.738 | **17.904.042** | 267.008 | 112.587 | 8,71 | `subscription` |
+| `moo7tH…` | 6.388 | 1.896.790 | 222.105 | 16.935 | 2,28 | — |
+
+Razão cacheRead:input ≈ **16.000:1**. `turn_end` traz custo por turno (`{turnDurationMs, toolCount, commitHash, costUSD:1.60}`) — logo `taskUsage` é o acumulado da sessão. `authMode: "subscription"` = assinatura OAuth, não API key.
+
+### 26.5 Catálogo de modelos (`OPENCODE_MODELS`) — 4 providers
+
+Cada modelo tem flags `subscriptionOnly` (só via OAuth) ou `apiKeyOnly` (só via BYOK), `isDefault`, `enabledByDefault`, `disabled`.
+
+- **anthropic** — Opus 5 (`:low/:medium/:high/:xhigh` + base), Fable 5 (mesmos tiers), Sonnet 5 (mesmos tiers), Opus 4.8, Opus 4.7, Opus 4.6, Sonnet 4.6. Default subscription: **Opus 5 High**; default API key: **Opus 5**.
+- **openai** — GPT-5.6 Sol / Terra / Luna (cada um `:low`→`:max`), GPT-5.5 (`:low`→`:xhigh`, default `:medium`), GPT-5.5 Pro (`disabled`), GPT-5.4.
+- **glm** — GLM 5.1 (default).
+- **openrouter** — espelha Claude Opus 4.7/4.6, Sonnet 4.6, GPT-5.6 ×3, GPT-5.5, GPT-5.4, GLM 5.1.
+
+O sufixo `:low|medium|high|xhigh|max` é **reasoning effort** exposto como se fosse modelo distinto.
+
+### 26.6 Correção ao §20: OpenCode existe
+
+O mapa anterior afirmava "sem OpenCode no runtime". **Errado.** `useAgentWebSocket` tem `Ot(e) => e==="opencode-cli" || e==="opencode-sdk"`. Resolução de modelo por agentType:
+
+```js
+claudecode → {provider:"anthropic", model: selecionado ?? "anthropic/claude-opus-4-8"}
+codex      → {provider:"openai",    model: selecionado ?? "openai/gpt-5.4"}
+opencode-cli | opencode-sdk → {provider: entry.providerId, model: entry.id}
+```
+
+Confirmado que a task real roda `agentType: "claudecode"`.
+
+### 26.7 Protocolo WebSocket completo
+
+**Enviados:** `user_input`, `approval_response`, `user_question_response`, `task_cancel`, `task_create`, `build_project`, `conflict_resolution`, `revert_commit`, `git_log_request`, `ping`, `claude_login_{start,callback,cancel}`, `coordinator_claude_login_{start,callback,cancel}`.
+
+**Recebidos:** `connected`, `message`, `task_update`, `streaming_state`, `turn_started`, `stream_delta`, `stream_tool_activity`, `stream_tool_activity_update`, `stream_end`, `approval_request`, `user_question_request`, `auth_required`, `build_status`, `preview_ready`, `message_status`, `message_queued`, `message_injected`, `sandbox_status`, `server_restarting`, `attachment_progress`, `attachment_ready`, `error`.
+
+Notas: existe um **coordinator** com login Claude próprio (separado do login por task). `streaming_state` reidrata stream em andamento após reconexão. O WS faz **reconexão proativa aos 12 min** — comentário literal no código: `"Proactive reconnect at 12min (Railway limit prevention)"` — confirma backend hospedado em Railway.
+
+### 26.8 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| taskId = sessão contínua (sem limite artificial de turnos) | ADOPT | Sessão longa por unidade de trabalho é o modelo certo |
+| Steering por fila em arquivo + drenagem no SYNC | **ADOPT** | Elegante: zero interrupção do CLI, agente decide quando ler |
+| Zero gestão/telemetria de contexto na UI | **REJECT** | Falha real: usuário não vê quanto contexto resta nem quando compactou |
+| Delegar compactação ao CLI nativo | ADAPT | Aceitável como base, mas expor estado ao usuário |
+| Telemetria de custo/token por turno **e** por sessão | ADOPT | `turn_end.costUSD` + `taskUsage` acumulado é o mínimo |
+| Reasoning effort como sufixo de modelo (`:high`) | ADOPT | Simplifica UI; um seletor só |
+| `subscriptionOnly` × `apiKeyOnly` no catálogo | ADOPT | Modela corretamente OAuth vs BYOK por modelo |
+| Reconexão proativa 12min por limite de PaaS | REFERENCE | Sintoma de Railway; evitar essa restrição na escolha de infra |
+| Múltiplos agentType (claudecode/codex/opencode) | ADAPT | Abstração de harness existe; validar custo de manter N backends |
+
+### 26.9 Correção de leitura anterior sobre o projeto monitorado
+
+Registro de honestidade: relatos anteriores neste mapa disseram que o Sales Radar estava "parado em escopo v2.0, com números inventados pelo Escopo/Gemini". Isso veio de ler apenas o topo do chat (mensagem mais antiga). O estado real da sessão mostra o oposto — o Claude Code **executou Data Discovery contra o Sankhya real**:
+
+- "Discovery: TIPMOV e TOPs da base Sankhya"
+- "Discovery: status, vínculo e colunas dos orçamentos"
+- "Analisar janela real de conversão e os 2801 fechados"
+- "Curva de sobrevivência e taxa real de conversão"
+
+E seguiu para implementação: Server Functions publicadas, matriz de segurança revalidada, feature "ver como" (impersonation de vendedor) com trava de autorização, `ux.md`, builds limpos, commits na `main`. O documento de escopo do topo é o artefato inicial; os pesos foram depois confrontados com dados reais. **O padrão §14 não se aplica a esta sessão.**

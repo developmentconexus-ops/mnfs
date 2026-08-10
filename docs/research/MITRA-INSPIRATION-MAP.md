@@ -1444,6 +1444,17 @@ Registro de honestidade: relatos anteriores neste mapa disseram que o Sales Rada
 
 E seguiu para implementação: Server Functions publicadas, matriz de segurança revalidada, feature "ver como" (impersonation de vendedor) com trava de autorização, `ux.md`, builds limpos, commits na `main`. O documento de escopo do topo é o artefato inicial; os pesos foram depois confrontados com dados reais. **O padrão §14 não se aplica a esta sessão.**
 
+**Amostra de qualidade do turno final** (observada 2026-08-10 20:44, agente ocioso aguardando decisão do operador). Quatro comportamentos que valem como padrão:
+
+1. **RBAC validado por matriz executada contra a base real**, não por asserção. O agente publicou as contagens dos cinco caminhos de autorização — vendedora normal, vendedora tentando forjar persona de outro (ignorado), gestor, gestor filtrando, técnico sem persona (zero registros) — provando a trava em vez de afirmá-la.
+2. **Dados sujos do ERP reportados como bloqueio nomeado**: quatro cadastros de vendedor quebrados no Sankhya (domínio errado, e-mail ausente, e-mail duplicado de outro usuário) com o impacto quantificado — orçamentos que ficam sem dono na tela.
+3. **Limite de conhecimento declarado**: avisou que um usuário só passa a existir em `INT_USER` no primeiro login, antecipando o modo de falha em vez de deixar o operador descobrir.
+4. **Encerrou com pergunta e parou** (F4 ou F5), coerente com a regra do CLAUDE.md de `AskUserQuestion` como última ação (§22).
+
+Também confirmou de forma incidental que o `git push` no sandbox é **intermitente** — o agente relatou falha em turno anterior e sucesso depois, sem perda. Reforça a leitura de §21 sobre fragilidade do SYNC/SHARE.
+
+Classificação: matriz de autorização executada contra dados reais como artefato de entrega — **ADOPT** para o Conexus. É a diferença entre "implementei RBAC" e "aqui estão os números que provam que a trava segura".
+
 ## 27. Promote DEV→PROD e sistema de releases (o achado maior — §24 estava incompleto)
 
 Nível de evidência: **OBSERVADO** — composable `sa()` em `LabSidebar.zayUnn7U.js` (69KB) + bloco i18n `PROMOTE` completo do entry.

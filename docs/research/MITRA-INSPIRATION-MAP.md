@@ -932,3 +932,91 @@ Auditoria contra a lista exaustiva de exports (mitra-sdk 70 fns, interactions-sd
 - Planos/preços/limites (`burstLimit` visto = 5000; resto não)
 
 Conclusão honesta: **funcionamento do produto e framework de abstração — cobertos**. O que resta é infraestrutura interna (wire protocols, sandbox, scaffold) que exige ou tráfego ao vivo ou acesso ao repo-template — extraível se o Operador quiser descer a esse nível.
+
+## 20. Lógica interna dos SDKs (JS real, não d.ts) — REST + wire do websocket
+
+Extraído dos bundles publicados `dist/index.mjs` de ambos os SDKs (fetch cross-origin do unpkg). Isto é o **como funciona por dentro**.
+
+### 20.1 Resposta direta: Pi? OpenCode? — NÃO
+
+Grep exaustivo no código executável dos dois SDKs: **zero** ocorrência de `pi`, `poolside`, `opencode`, `anthropic`, `generativelanguage`, `wss`. O default de runtime é literal:
+
+```js
+const agentType = options?.agentType ?? this._agentType ?? "claudecode";
+```
+
+Codex existe como caminho alternativo (`device_start` → `userCode`/`pollId`). OpenCode aparece só como *valor de tipo* no d.ts (§18), não no runtime. **Conclusão: Mitra roda Claude Code por padrão; não usa Pi nem OpenCode em produção.**
+
+### 20.2 Topologia de backend (descoberta no código)
+
+Dois frontends, dois backends de auth:
+
+```js
+{ "https://coder.mitralab.io/sdk-auth/":  "https://api0.mitraecp.com:1005",
+  "https://agent.mitralab.io/sdk-auth/":  "https://api2.mitrasheet.com:4133" }
+```
+
+Os domínios de backend — **`mitraecp.com`** (Mitra ECP) e **`mitrasheet.com`** (MitraSheet) — revelam a linhagem: o produto nasceu de um ERP/planilha (MitraSheet/MitraECP). Explica o DNA fortemente voltado a integração ERP. Base da API resolvida via `window.__mitraEnv.apiBaseURL` (injetado por build-proxy) ou `authApiURL` nas options.
+
+### 20.3 Superfície REST real
+
+**Dev SDK (`mitra-sdk`)** — tudo sob prefixo `/agentAiShortcut/`:
+```
+GET  /agentAiShortcut/listWorkspaces
+POST /agentAiShortcut/createProject
+POST /agentAiShortcut/serverFunction/togglePublicExecution
+GET  /agentAiShortcut/cloudflare/${id}/tunnel-status
+... runQuery/runDdl/etc via POST com body {projectId, sql}
+```
+Chamada: `${config.baseURL}${endpoint}` + `Authorization: formatToken(token)`.
+
+**Runtime SDK (`mitra-interactions-sdk`)** — prefixo `/interactions/` + tenant-scoped:
+```
+POST /interactions/executeDataLoader
+POST /interactions/executeDbAction
+POST /interactions/setFileStatus
+GET  /interactions/records/${tableName}         (page,size,jdbcConnectionConfigId,...filters)
+GET  /interactions/records/${tableName}/${id}
+GET  /refreshedToken/${projectId}               (token refresh silencioso)
+```
+
+**Achado que explica o bug ao vivo**: `callIntegrationMitra` mapeia no wire `{ integrationSlug: options.connection }`. A API pública renomeou o param para `connection`, mas o corpo HTTP ainda usa `integrationSlug`. Foi exatamente a confusão que o agente teve no experimento Sankhya ("O campo correto é connection, não integrationSlug") — resíduo de versão da renomeação.
+
+### 20.4 Wire do websocket do agente (frames reais)
+
+Conexão: `new WebSocket(getWsUrl())`, url de `config.agentWsUrl` ou `window.__mitraEnv.agentWsUrl`, com timeout de abertura.
+
+**Cliente→servidor**: `socket.send(JSON.stringify({ type, requestId, payload, taskId? }))`
+
+**Servidor→cliente** (`onmessage → routeMessage`), tipos de frame decodificados:
+| Frame `type` | Efeito |
+|---|---|
+| `task_update` (`payload.action='created'`) | nasce a task; emite `taskCreated` |
+| `stream_delta` (`payload.subtype='thinking'` → `kind:'tool'`, senão `text`) | append no conteúdo; emite `delta` |
+| `stream_tool_activity` | emite `tool {tool, input}` |
+| `turn_started` | emite `turnStart` |
+| `error` | emite `error` |
+
+O SDK traduz frames de baixo nível (`stream_delta`/`stream_tool_activity`) nos eventos públicos tipados de `AgentTaskSession` (§16.5). A sessão instancia com `{kind:'new', projectId, agentType, modelId}` ou `{kind:'existing', taskId}`.
+
+### 20.5 Fluxo de credencial de agente (OAuth via postMessage)
+
+```js
+var AUTH_READY_TYPE = "mitra-auth-ready";
+var AUTH_CREDENTIALS_TYPE = "mitra-auth-credentials";
+function openSilentAuthIframe(authUrl, projectId, credentials){ ... }
+```
+
+OAuth roda por **iframe/popup silencioso** que faz `postMessage({type:'mitra-auth-credentials', ...creds}, origin)` de volta ao app — o mesmo padrão do login por fragmento (§11). Credenciais de assinatura (`manageAgentCredential`) usam `rpc(options)` sobre o transport (websocket/http), ações `auth/connect/device_poll` (§18.2).
+
+### 20.6 Classificação
+
+| Achado | Classificação | Nota Conexus |
+|---|---|---|
+| Runtime default `claudecode`, sem Pi/OpenCode | REFERENCE | Confirma: harness = Claude Code; nossa escolha de base está alinhada |
+| REST em 2 camadas: `/agentAiShortcut` (dev) × `/interactions` (runtime) | ADOPT | Separar plano de controle (build) do plano de dados (runtime do app) |
+| `records/${table}` genérico com filtros/paginação server-side | ADOPT | CRUD tabular genérico é a espinha do runtime; nós já caminhamos p/ isso |
+| Wire ws com `stream_delta`/`stream_tool_activity` → eventos tipados | REFERENCE | Blueprint do nosso protocolo de streaming de agente |
+| OAuth por postMessage de iframe silencioso | ADAPT | Funciona, mas validar origin rigorosamente; preferir PKCE server-side |
+| Renome `connection`↔`integrationSlug` vazando no wire | REJECT (lição) | Versionar contrato de API; não deixar rename de param divergir do corpo |
+| Backend legado ERP (mitraecp/mitrasheet) exposto em portas altas | REFERENCE | Linhagem ERP; nós começamos limpos, sem dívida de porta:1005/4133 |

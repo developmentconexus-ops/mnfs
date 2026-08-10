@@ -5,7 +5,7 @@ import {
   requireValidatedExecutionAuthorization,
 } from './execution-authority.mjs';
 import { observeRepositoryIdentity } from './probes/repository.mjs';
-import { observeLinuxStateRoot } from './probes/state-root.mjs';
+import { isReviewedFilesystem, observeLinuxStateRoot } from './probes/state-root.mjs';
 import { observeStagedCandidateProvenance } from './probes/candidate-provenance.mjs';
 
 const REQUIRED_PROVENANCE_IDS = Object.freeze(['PI-SDK', 'PI-RPC', 'PI-ACP', 'OPENCODE-ACP', 'ACP-SDK']);
@@ -113,8 +113,9 @@ function stateRootCheck(stateRoot) {
   const realPath = stateRoot?.realPath ?? rootPath;
   const filesystem = stateRoot?.filesystem ?? stateRoot?.filesystemType;
   const filesystemReviewed = stateRoot?.filesystemSupported === true
-    || stateRoot?.state === 'SUPPORTED'
-    || (typeof filesystem === 'string' && filesystem.trim() !== '' && filesystem !== 'unknown');
+    && typeof filesystem === 'string'
+    && filesystem.trim() !== ''
+    && isReviewedFilesystem(filesystem);
   const ok = (stateRoot?.platform ?? stateRoot?.hostPlatform) === 'linux'
     && isLinuxOwnedAbsolute(rootPath)
     && isLinuxOwnedAbsolute(realPath)

@@ -47,7 +47,10 @@ exec ${process.execPath} ${runtime} "$@"
         },
       });
       assert.equal(revalidated, true);
-      assert.deepEqual(attempt.processResult.argv, [executable, '--mode', 'rpc']);
+      assert.deepEqual(attempt.processResult.argv, [
+        executable, '--mode', 'rpc', '--tools', 'read,edit', '--no-extensions', '--no-skills',
+        '--no-prompt-templates', '--no-themes', '--no-context-files',
+      ]);
       assert.equal(attempt.settled.protocol, 'PI_RPC_JSONL');
       assert.equal(attempt.settled.responseAccepted, true);
       assert.deepEqual(translatePiRpcFixtureCalls(attempt.messages, {
@@ -238,7 +241,7 @@ exec ${process.execPath} ${runtime} "$@"
         clientRequestHandlers: capabilities.handlers,
       });
       await common.initialize();
-      assert.deepEqual([...registered.keys()].sort(), ['fs/read_text_file', 'fs/write_text_file']);
+      assert.deepEqual([...registered.keys()].sort(), ['fs/read_text_file', 'fs/write_text_file', 'session/request_permission']);
       assert.deepEqual(initializeCalls[0].params.clientCapabilities, capabilities.clientCapabilities);
       assert.equal('terminal' in initializeCalls[0].params.clientCapabilities, false);
       await common.shutdown();

@@ -9,6 +9,7 @@ import {
 
 const ACP_METHODS = Object.freeze({
   initialize: 'initialize',
+  authenticate: 'authenticate',
   sessionCancel: 'session/cancel',
 });
 
@@ -164,6 +165,21 @@ export function createAcpClient({
       ...normalized,
       sessionId: turn.sessionId,
       events: turnObservation(turn),
+      temporal: {
+        turnActive: clone(turn.temporal.turnActive),
+        control: clone(turn.temporal.control),
+        settlement: {
+          observed: true,
+          bounded: true,
+          atMs: Date.now(),
+          outcome: normalized.outcome,
+        },
+        sequence: [
+          'turn-active',
+          ...(turn.temporal.control.requested ? ['control-requested'] : []),
+          'bounded-settlement',
+        ],
+      },
     };
     if (normalized.handoffRequired === undefined) settled.handoffRequired = false;
     turn.settledValue = freeze(settled);
@@ -298,7 +314,11 @@ export function createAcpClient({
       throw new TypeError('ACP ActiveSession must expose prompt, nextUpdate and dispose');
     }
     sessionId = activeSession.sessionId;
-    return freeze({ sessionId, observational: true });
+    return freeze({
+      sessionId,
+      observational: true,
+      ...(activeSession.authRequired === true ? { authRequired: true } : {}),
+    });
   }
 
   async function prompt({ prompt: text } = {}) {
@@ -317,6 +337,10 @@ export function createAcpClient({
       resolve,
       settled,
       settledValue: null,
+      temporal: {
+        turnActive: { observed: true, atMs: Date.now() },
+        control: { requested: false, kind: null, turnActive: false },
+      },
     };
     activeTurn = turn;
 
@@ -338,12 +362,30 @@ export function createAcpClient({
       cancel,
       observe: () => turnObservation(turn),
       observeRaw: () => turnRawObservation(turn),
+      observeTemporal: () => freeze(clone(turn.temporalResult ?? {
+        turnActive: clone(turn.temporal.turnActive),
+        control: clone(turn.temporal.control),
+        settlement: turn.settledValue?.temporal?.settlement ?? null,
+        sequence: turn.settledValue?.temporal?.sequence ?? ['turn-active'],
+      })),
     });
+  }
+
+  function requestControl(turn, kind) {
+    if (!turn || turn.settledValue) return false;
+    turn.temporal.control = {
+      requested: true,
+      kind,
+      turnActive: true,
+      requestedAtMs: Date.now(),
+    };
+    return true;
   }
 
   async function cancel() {
     if (!activeTurn || activeTurn.settledValue) return activeTurn?.settledValue ?? null;
     const turn = activeTurn;
+    requestControl(turn, 'CANCEL');
     await context.notify(ACP_METHODS.sessionCancel, { sessionId: turn.sessionId });
     const outcome = await waitForTurnOrTimeout(turn, cancellationTimeoutMs);
     if (!outcome.timedOut) return outcome.value;
@@ -362,6 +404,19 @@ export function createAcpClient({
       });
     }
     return turn.settled;
+  }
+
+  async function authenticate(methodId) {
+    if (!initialized) throw new Error('ACP client must initialize before authentication');
+    if (closed) throw new Error('ACP client is shut down');
+    if (typeof methodId !== 'string' || methodId.length === 0) throw new TypeError('ACP authentication method id is required');
+    const supported = handshakeResult?.authMethods?.some((method) => method.id === methodId);
+    if (!supported) throw new Error(`ACP authentication method is not advertised: ${methodId}`);
+    const response = await context.request(ACP_METHODS.authenticate, { methodId });
+    return freeze({
+      methodId,
+      succeeded: response?.success !== false && response?.authenticated !== false && response?.authRequired !== true,
+    });
   }
 
   function handshake() {
@@ -402,10 +457,16 @@ export function createAcpClient({
   }
 
   function forceKill(reason = 'acp forced process death') {
-    return processBoundary.forceKill?.(reason) ?? false;
+    const turn = activeTurn;
+    if (!turn || turn.settledValue) return { requested: false, temporal: null };
+    requestControl(turn, 'FORCED_DEATH');
+    return {
+      requested: processBoundary.forceKill?.(reason) ?? false,
+      temporal: clone(turn.temporal),
+    };
   }
 
-  return Object.freeze({ initialize, handshake, startSession, prompt, cancel, shutdown, processObservation, forceKill });
+  return Object.freeze({ initialize, handshake, authenticate, startSession, prompt, cancel, shutdown, processObservation, forceKill });
 }
 
 export async function createAcpStdioClient({

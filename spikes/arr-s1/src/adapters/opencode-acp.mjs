@@ -32,6 +32,24 @@ function requireExplicitEnvironment(env) {
   return { ...env };
 }
 
+function profileEnvironment(env, profile) {
+  if (profile === undefined) return { ...env };
+  if (!profile || typeof profile !== 'object') throw new TypeError('OpenCode ACP profile must be a structured object');
+  for (const [key, value] of [['configDir', profile.configDir], ['configPath', profile.configPath]]) {
+    requireAbsolute(value, `profile.${key}`);
+  }
+  if (typeof profile.configContent !== 'string' || profile.configContent.length === 0) {
+    throw new TypeError('OpenCode ACP profile.configContent must be non-empty JSON text');
+  }
+  return {
+    ...env,
+    OPENCODE_CONFIG_DIR: profile.configDir,
+    OPENCODE_CONFIG: profile.configPath,
+    OPENCODE_CONFIG_CONTENT: profile.configContent,
+    OPENCODE_PURE: '1',
+  };
+}
+
 function requireCommonClient(client) {
   if (!client || typeof client !== 'object') throw new TypeError('OpenCode ACP common ACP client is required');
   for (const method of ['initialize', 'handshake', 'startSession', 'prompt', 'cancel', 'shutdown']) {
@@ -72,12 +90,13 @@ export function createOpenCodeAcpAdapter({
   ndJsonStream,
   clientCapabilities,
   clientRequestHandlers,
+  profile,
   beforeSpawn,
   createClient = createAcpStdioClient,
 } = {}) {
   requireAbsolute(executable, 'executable');
   requireAbsolute(cwd, 'cwd');
-  const explicitEnv = requireExplicitEnvironment(env);
+  const explicitEnv = profileEnvironment(requireExplicitEnvironment(env), profile);
   if (typeof createClient !== 'function') throw new TypeError('OpenCode ACP createClient must be a function');
 
   const processSpec = buildProcessSpec({
@@ -94,6 +113,21 @@ export function createOpenCodeAcpAdapter({
     transport: 'ACP_STDIN_STDOUT',
     capabilities: { status: 'EVIDENCE_ONLY' },
     permissions: { status: 'EVIDENCE_ONLY' },
+    ...(profile ? {
+      profile: {
+        source: 'MNFS_TRUSTED_ISOLATED_PROFILE',
+        configDir: profile.configDir,
+        configPath: profile.configPath,
+        discovery: {
+          ambientGlobal: 'NOT_PROVEN_BY_PROFILE',
+          project: 'NOT_PROVEN_BY_PROFILE',
+          custom: 'NOT_PROVEN_BY_PROFILE',
+          plugins: 'DISABLED_BY_PUBLIC_PURE_MODE',
+        },
+      },
+    } : {}),
+    discoveryControlled: false,
+    discoveryReason: 'OpenCode public profile/config surface does not by itself prove global, project or custom discovery exclusion',
   });
 
   let commonClient = null;
@@ -134,6 +168,14 @@ export function createOpenCodeAcpAdapter({
     return commonClient.startSession(input);
   }
 
+  async function authenticate(methodId) {
+    requireInitialized();
+    if (typeof commonClient.authenticate !== 'function') {
+      throw new Error('OpenCode ACP client does not expose the public authenticate surface');
+    }
+    return commonClient.authenticate(methodId);
+  }
+
   async function prompt(input) {
     requireInitialized();
     return commonClient.prompt(input);
@@ -165,6 +207,7 @@ export function createOpenCodeAcpAdapter({
   return Object.freeze({
     initialize,
     handshake,
+    authenticate,
     startSession,
     prompt,
     cancel,

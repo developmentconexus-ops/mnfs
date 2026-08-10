@@ -116,6 +116,9 @@ export function createPiAcpAdapter({
       argv: [explicitEnv.PI_ACP_PI_COMMAND, '--mode', 'rpc', '--no-themes'],
       environmentSource: 'EXACT_PI_ACP_PARENT_ENV',
     },
+    innerPiControlSource: explicitEnv.MNFS_PI_ACP_EXECUTABLE
+      ? 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI'
+      : 'CANDIDATE_SUPPLIED_PI_COMMAND',
     resourceBehavior: clone(PI_ACP_PROVENANCE.resourceBehavior),
     delegation: clone(PI_ACP_PROVENANCE.delegation),
     wireCompatibility: {
@@ -163,6 +166,14 @@ export function createPiAcpAdapter({
     return commonClient.startSession(input);
   }
 
+  async function authenticate(methodId) {
+    requireInitialized();
+    if (typeof commonClient.authenticate !== 'function') {
+      throw new Error('Pi-ACP ACP client does not expose the public authenticate surface');
+    }
+    return commonClient.authenticate(methodId);
+  }
+
   async function prompt(input) {
     requireInitialized();
     return commonClient.prompt(input);
@@ -194,6 +205,7 @@ export function createPiAcpAdapter({
   return Object.freeze({
     initialize,
     handshake,
+    authenticate,
     startSession,
     prompt,
     cancel,

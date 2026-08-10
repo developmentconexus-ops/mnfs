@@ -92,6 +92,15 @@ function assertControlledResourceLoader(resourceLoader) {
   requireEmptyResourceCollection(resourceLoader, 'getPrompts', 'prompts', 'prompts');
   requireEmptyResourceCollection(resourceLoader, 'getThemes', 'themes', 'themes');
   requireEmptyResourceCollection(resourceLoader, 'getAgentsFiles', 'agentsFiles', 'context');
+  return {
+    controlled: true,
+    extensions: clone(resourceLoader.getExtensions().extensions),
+    skills: clone(resourceLoader.getSkills().skills),
+    prompts: clone(resourceLoader.getPrompts().prompts),
+    themes: clone(resourceLoader.getThemes().themes),
+    agentsFiles: clone(resourceLoader.getAgentsFiles().agentsFiles),
+    source: 'MNFS_TRUSTED_PI_RESOURCE_LOADER_OBSERVATION',
+  };
 }
 
 function buildControlledResourceLoader(sdk, cwd) {
@@ -299,6 +308,7 @@ export function createPiSdkAdapter({
   let eventSequence = 0;
   let events = [];
   let rawEvents = [];
+  let discovery = null;
 
   function snapshotEvents() {
     return events.map((event) => clone(event));
@@ -313,6 +323,7 @@ export function createPiSdkAdapter({
       outcome: cancelled ? 'CANCELLED' : raw.outcome ?? 'COMPLETED',
       result: raw.result ?? null,
       runtimeSession: sessionIdentity(session),
+      discovery: clone(discovery),
       events: snapshotEvents(),
     };
     if (raw.error) settled.error = clone(raw.error);
@@ -381,7 +392,7 @@ export function createPiSdkAdapter({
     const controlledSessionManager = sessionManager ?? buildInMemorySessionManager(loadedSdk, cwd);
     requireResourceLoaderSurface(controlledResourceLoader);
     await controlledResourceLoader.reload();
-    assertControlledResourceLoader(controlledResourceLoader);
+    discovery = assertControlledResourceLoader(controlledResourceLoader);
     const sessionResult = await factoryFor(loadedSdk)(sessionOptions({
       resourceLoader: controlledResourceLoader,
       sessionManager: controlledSessionManager,
@@ -451,6 +462,10 @@ export function createPiSdkAdapter({
     return freeze(rawEvents.map((event) => clone(event)));
   }
 
+  function observeDiscovery() {
+    return freeze(clone(discovery));
+  }
+
   async function close() {
     if (closed) return;
     if (activeTurn && !activeTurn.settledValue) await cancel();
@@ -460,5 +475,5 @@ export function createPiSdkAdapter({
     session.dispose();
   }
 
-  return Object.freeze({ initialize, startTurn, observe, observeRaw, cancel, close });
+  return Object.freeze({ initialize, startTurn, observe, observeRaw, observeDiscovery, cancel, close });
 }

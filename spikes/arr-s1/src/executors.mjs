@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { S1_CRITERIA } from './contract.mjs';
@@ -11,7 +12,7 @@ import { createPiAcpAdapter } from './adapters/pi-acp.mjs';
 import { createOpenCodeAcpAdapter } from './adapters/opencode-acp.mjs';
 import { revalidateStagedCandidateProvenance } from './probes/candidate-provenance.mjs';
 import { startProcess } from './process-runner.mjs';
-import { runPiRpcProcess, translatePiRpcFixtureCalls } from './pi-rpc.mjs';
+import { derivePiRpcObservations, runPiRpcProcess, translatePiRpcFixtureCalls } from './pi-rpc.mjs';
 import { deriveTrustedAuthProof } from './proof-driver.mjs';
 import { persistCandidateRecoveryState } from './recovery.mjs';
 import { S1_FROZEN_CANDIDATE_PROVENANCE } from './preflight.mjs';
@@ -75,6 +76,23 @@ function digest(value) {
   return `sha256:${createHash('sha256').update(JSON.stringify(value)).digest('hex')}`;
 }
 
+function effectiveAcpEnvironment(record, adapter) {
+  const expected = Object.fromEntries(Object.entries(record?.environment ?? {}).sort());
+  const observed = adapter?.processSpec?.env;
+  const observations = adapter?.observations ?? {};
+  const controlledKeys = [];
+  if (observations.profile?.source === 'MNFS_TRUSTED_ISOLATED_PROFILE') {
+    controlledKeys.push('OPENCODE_CONFIG_DIR', 'OPENCODE_CONFIG', 'OPENCODE_CONFIG_CONTENT', 'OPENCODE_PURE');
+  }
+  if (observations.innerPiControlSource === 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI') {
+    controlledKeys.push('PI_ACP_PI_COMMAND', 'MNFS_PI_ACP_EXECUTABLE');
+  }
+  for (const key of controlledKeys) {
+    if (typeof observed?.[key] === 'string') expected[key] = observed[key];
+  }
+  return expected;
+}
+
 function hasExactInventory(value, fixture) {
   const expected = fixture?.inventory?.map((item) => item.id).sort();
   return Array.isArray(value) && Array.isArray(expected)
@@ -83,10 +101,43 @@ function hasExactInventory(value, fixture) {
 
 function discoveryEmpty(value) {
   return value && typeof value === 'object'
+    && value.controlled === true
     && ['extensions', 'skills', 'prompts', 'themes', 'agentsFiles'].every((key) => Array.isArray(value[key]) && value[key].length === 0);
 }
 
-function buildProofs({ candidateShape, fixture, preflight, execution, adapter, boundary }) {
+export function deriveMachineryProof(value) {
+  const namedInput = Array.isArray(value?.namedMnfsMachineryEliminatedOrAvoided)
+    ? value.namedMnfsMachineryEliminatedOrAvoided
+    : [value?.namedMnfsMachineryEliminatedOrAvoided];
+  const named = namedInput.filter((item) => typeof item === 'string' && item.trim() !== '');
+  const causalMechanism = typeof value?.causalMechanism === 'string' && value.causalMechanism.trim() !== ''
+    ? value.causalMechanism.trim() : null;
+  const supportingInput = Array.isArray(value?.supportingEvidence)
+    ? value.supportingEvidence : [value?.supportingEvidence];
+  const supportingEvidence = supportingInput.filter((item) => item && typeof item === 'object');
+  return {
+    pass: named.length > 0 && causalMechanism !== null && supportingEvidence.length > 0,
+    namedMnfsMachineryEliminatedOrAvoided: named,
+    causalMechanism,
+    supportingEvidence,
+  };
+}
+
+function temporalControlPass(value, kind, outcomes) {
+  const temporal = value?.temporal;
+  return temporal?.turnActive?.observed === true
+    && temporal.control?.requested === true
+    && temporal.control?.kind === kind
+    && temporal.control?.turnActive === true
+    && temporal.settlement?.observed === true
+    && temporal.settlement?.bounded === true
+    && Array.isArray(temporal.sequence)
+    && temporal.sequence.indexOf('turn-active') < temporal.sequence.indexOf('control-requested')
+    && temporal.sequence.includes('bounded-settlement')
+    && outcomes.includes(value?.outcome);
+}
+
+export function buildProofs({ candidateShape, fixture, preflight, execution, adapter, boundary }) {
   const trusted = execution?.trustedProofs ?? {};
   const events = execution?.events ?? [];
   const settled = execution?.settled ?? null;
@@ -99,16 +150,19 @@ function buildProofs({ candidateShape, fixture, preflight, execution, adapter, b
     'S1-C03': hasExactInventory(trusted.inventory, fixture) && trusted.fixtureVerified === true,
     'S1-C04': discoveryEmpty(trusted.discovery),
     'S1-C05': trusted.auth?.outcome === 'AUTHORIZED_OPERATION'
-      && typeof trusted.auth.providerClass === 'string' && trusted.auth.providerClass.trim() !== ''
-      && typeof trusted.auth.modelClass === 'string' && trusted.auth.modelClass.trim() !== '',
-    'S1-C06': trusted.cancellation?.outcome === 'CANCELLED'
-      && trusted.cancellation?.source === 'MNFS_TRUSTED_PROCESS_RUNNER'
-      && Number.isSafeInteger(trusted.cancellation.durationMs) && trusted.cancellation.durationMs >= 0,
+      && ((trusted.auth.operation === 'PROVIDER_MODEL_COMPLETED'
+        && typeof trusted.auth.providerClass === 'string' && trusted.auth.providerClass.trim() !== ''
+        && typeof trusted.auth.modelClass === 'string' && trusted.auth.modelClass.trim() !== '')
+        || (trusted.auth.operation === 'ACP_AUTHENTICATED_SESSION_PROMPT_COMPLETED'
+          && typeof trusted.auth.methodId === 'string' && trusted.auth.methodId.trim() !== ''
+          && typeof trusted.auth.sessionId === 'string' && trusted.auth.sessionId.trim() !== '')),
+    'S1-C06': temporalControlPass(trusted.cancellation, 'CANCEL', ['CANCELLED'])
+      && trusted.cancellation?.source === 'MNFS_TRUSTED_PROCESS_RUNNER',
     'S1-C07': Array.isArray(events) && events.length > 0
       && Number.isSafeInteger(trusted.output?.bytes) && Number.isSafeInteger(trusted.output?.limitBytes)
       && trusted.output.bytes <= trusted.output.limitBytes,
     'S1-C08': settled?.settled === true && ['COMPLETED', 'FAILED', 'CANCELLED'].includes(settled.outcome),
-    'S1-C09': trusted.processDeath?.outcome === 'SIGNAL_DEATH'
+    'S1-C09': temporalControlPass(trusted.processDeath, 'FORCED_DEATH', ['SIGNAL_DEATH'])
       && trusted.processDeath?.source === 'MNFS_TRUSTED_PROCESS_RUNNER',
     'S1-C10': trusted.recovery?.phase === 'FRESH_PROCESS'
       && trusted.recovery?.source === 'MNFS_TRUSTED_RECOVERY_PROCESS'
@@ -125,8 +179,7 @@ function buildProofs({ candidateShape, fixture, preflight, execution, adapter, b
       && typeof trusted.supportedBoundary.observation === 'string',
     'S1-C13': exactProvenance(candidateShape, preflight, execution),
     'S1-C14': trusted.authority?.sessionRole === 'OBSERVATIONAL' && trusted.authority.recoveryOwner === 'MNFS',
-    'S1-C15': Array.isArray(trusted.machinery?.reused)
-      && ['fixture', 'artifacts', 'process-runner'].every((name) => trusted.machinery.reused.includes(name)),
+    'S1-C15': deriveMachineryProof(trusted.machinery).pass,
     'S1-C16': policyComplete(trusted.upgradePolicy, POLICY_FIELDS)
       && policyComplete(trusted.removalConditions, REMOVAL_FIELDS),
   };
@@ -144,6 +197,7 @@ async function writeEvidence({ candidateShape, fixture, runRoot, binding, proofs
       observed: proofs[id],
       trustedProofs: clone(execution?.trustedProofs ?? null),
       normalizedEvents: clone(execution?.events ?? null),
+      rawEvents: clone(execution?.rawEvents ?? null),
     }, { binding, kind: 'criterion-evidence' });
     records.push(record);
     refs[id] = record.id;
@@ -158,6 +212,14 @@ async function writeEvidence({ candidateShape, fixture, runRoot, binding, proofs
     const record = await writeJsonArtifact(runRoot, `${evidencePrefix}/${name}.json`, value, { binding, kind: 'dependency-evidence' });
     records.push(record);
     specializedRefs[field] = [record.id];
+  }
+  if (Array.isArray(execution?.permissions) && execution.permissions.length > 0) {
+    const record = await writeJsonArtifact(runRoot, `${evidencePrefix}/permissions.json`, {
+      authority: 'MNFS_PERMISSION_UI_NON_AUTHORITY',
+      requests: clone(execution.permissions),
+    }, { binding, kind: 'permission-evidence' });
+    records.push(record);
+    specializedRefs.permissionEvidenceRefs = [record.id];
   }
   const integrity = await verifyArtifactRecords(runRoot, records, binding);
   const criterionResults = S1_CRITERIA.map((id) => ({ id, status: proofStatus(proofs[id]), artifactRefs: [refs[id]] }));
@@ -255,6 +317,28 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
     clientRequestHandlers: fixtureCapabilities?.handlers,
     beforeSpawn: () => revalidatedRecord(trustedOptions, candidateShape),
   };
+  if (candidateShape === 'PI-ACP') {
+    const innerPi = record.upstreamSurfaces?.innerPiExecutable?.path ?? record.upstreamSurfaces?.piExecutable?.path;
+    if (innerPi) {
+      adapterOptions.env = {
+        ...record.environment,
+        PI_ACP_PI_COMMAND: new URL('./pi-acp-wrapper.mjs', import.meta.url).pathname,
+        MNFS_PI_ACP_EXECUTABLE: innerPi,
+      };
+    }
+  }
+  if (candidateShape === 'OPENCODE-ACP' && typeof trustedOptions.runRoot === 'string' && path.isAbsolute(trustedOptions.runRoot)) {
+    const profileDir = path.join(trustedOptions.runRoot, 'opencode-profile');
+    adapterOptions.profile = {
+      configDir: profileDir,
+      configPath: path.join(profileDir, 'config.json'),
+      configContent: JSON.stringify({
+        tools: { '*': false, read: true, edit: true },
+        plugin: [],
+        permission: { '*': 'deny', read: 'allow', edit: 'allow' },
+      }),
+    };
+  }
   return candidateShape === 'PI-ACP'
     ? createPiAcpAdapter(adapterOptions)
     : createOpenCodeAcpAdapter(adapterOptions);
@@ -306,6 +390,24 @@ async function runTrustedActorProcess({ candidateShape, fixture, context, record
     protocolOwner: 'trusted-actor-run',
   };
   const execution = startProcess(spec);
+  let outputBuffer = '';
+  let activeObserved = false;
+  let activeAtMs = null;
+  let settledAtMs = null;
+  execution.stdout.on('data', (chunk) => {
+    outputBuffer += Buffer.from(chunk).toString('utf8');
+    for (const line of outputBuffer.split('\n').slice(0, -1)) {
+      try {
+        const message = JSON.parse(line);
+        if (message?.kind === 'MNFS_TRUSTED_TURN_ACTIVE') {
+          activeObserved = true;
+          activeAtMs = message.atMs ?? Date.now();
+        }
+        if (message?.kind === 'MNFS_TRUSTED_TURN_SETTLED') settledAtMs = message.atMs ?? Date.now();
+      } catch { /* bounded candidate output is non-authoritative */ }
+    }
+    outputBuffer = outputBuffer.split('\n').at(-1) ?? '';
+  });
   execution.stdin.write(JSON.stringify({
     candidateShape,
     protocol,
@@ -317,11 +419,27 @@ async function runTrustedActorProcess({ candidateShape, fixture, context, record
   }));
   execution.stdin.end();
   let controlTimer = null;
-  if (mode === 'CANCEL') controlTimer = setTimeout(() => execution.cancel('S1-C06 trusted cancellation checkpoint'), 25);
-  if (mode === 'DEATH') controlTimer = setTimeout(() => execution.forceKill('S1-C09 trusted forced process death checkpoint'), 25);
+  let control = { requested: false, kind: null, turnActive: false };
+  if (mode === 'CANCEL') controlTimer = setTimeout(() => {
+    if (!activeObserved || settledAtMs !== null) return;
+    control = { requested: true, kind: 'CANCEL', turnActive: true, requestedAtMs: Date.now() };
+    execution.cancel('S1-C06 trusted cancellation checkpoint');
+  }, 25);
+  if (mode === 'DEATH') controlTimer = setTimeout(() => {
+    if (!activeObserved || settledAtMs !== null) return;
+    control = { requested: true, kind: 'FORCED_DEATH', turnActive: true, requestedAtMs: Date.now() };
+    execution.forceKill('S1-C09 trusted forced process death checkpoint');
+  }, 25);
   const processResult = await execution.result;
   if (controlTimer) clearTimeout(controlTimer);
-  return { processResult, payload: processPayload(processResult), record: freshRecord };
+  const payload = processPayload(processResult);
+  const temporal = {
+    turnActive: { observed: activeObserved, atMs: activeAtMs },
+    control,
+    settlement: { observed: settledAtMs !== null || processResult.termination?.settled === true, bounded: processResult.termination?.settled === true, atMs: settledAtMs ?? Date.now(), outcome: processResult.outcome },
+    sequence: ['turn-active', ...(control.requested ? ['control-requested'] : []), ...(processResult.termination?.settled === true ? ['bounded-settlement'] : [])],
+  };
+  return { processResult, payload, temporal, record: freshRecord };
 }
 
 async function runTrustedPiRpcProcess({ candidateShape, fixture, context, mode = 'NORMAL' }) {
@@ -416,14 +534,23 @@ function trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, 
     },
     inventory: toolCalls.map((call) => call.id),
     fixtureVerified: fixtureResult.ok,
-    discovery: { extensions: [], skills: [], prompts: [], themes: [], agentsFiles: [] },
+    discovery: actorProtocol === 'PI-RPC'
+      ? normal.observations
+      : (normal.payload?.discovery ?? { controlled: false, extensions: [], skills: [], prompts: [], themes: [], agentsFiles: [] }),
     auth: deriveTrustedAuthProof({ rawObservations }),
-    cancellation: { ...cancellation.processResult, outcome: cancellation.processResult.outcome, source: 'MNFS_TRUSTED_PROCESS_RUNNER', durationMs: cancellation.processResult.durationMs },
+    cancellation: { ...cancellation.processResult, outcome: cancellation.processResult.outcome, temporal: cancellation.temporal, source: 'MNFS_TRUSTED_PROCESS_RUNNER', durationMs: cancellation.processResult.durationMs },
     output: { bytes: normal.processResult.output.stdout.bytesSeen + normal.processResult.output.stderr.bytesSeen, limitBytes: outputLimit },
-    processDeath: { ...death.processResult, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
+    processDeath: { ...death.processResult, temporal: death.temporal, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
     recovery,
     authority: { sessionRole: 'OBSERVATIONAL', recoveryOwner: 'MNFS' },
-    machinery: { reused: ['fixture', 'artifacts', 'process-runner'] },
+    machinery: {
+      reused: ['fixture', 'artifacts', 'process-runner'],
+      namedMnfsMachineryEliminatedOrAvoided: [actorProtocol === 'PI-RPC' ? 'MNFS_TUI_SCRAPING' : 'MNFS_RUNTIME_SESSION_ADAPTER'],
+      causalMechanism: actorProtocol === 'PI-RPC'
+        ? 'the public Pi RPC JSONL boundary exposes structured lifecycle/tool events'
+        : 'the public Pi SDK AgentSession boundary supplies structured events without a TUI adapter',
+      supportingEvidence: [{ source: 'trusted process argv and normalized runtime observations', protocol: actorProtocol }],
+    },
     supportedBoundary: {
       source: 'MNFS_TRUSTED_ADAPTER',
       kind: actorProtocol === 'PI-RPC' ? 'PI_RPC_PROCESS_BOUNDARY' : 'PI_SDK_PUBLIC_API',
@@ -541,54 +668,116 @@ async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context,
     throw new Error(`${candidateShape} trusted ACP adapter cannot force-kill its process boundary`);
   }
   const ready = await adapter.initialize();
+  const advertisedAuthMethods = Array.isArray(ready?.authMethods) ? ready.authMethods : [];
+  const authMethod = advertisedAuthMethods.find((method) => typeof (method?.id ?? method?.methodId) === 'string') ?? null;
+  let authentication = null;
+  if (authMethod && typeof adapter.authenticate === 'function') {
+    authentication = await adapter.authenticate(authMethod.id ?? authMethod.methodId);
+  }
   const session = await adapter.startSession({ cwd: fixture.workspacePath });
   const turn = await adapter.prompt({ prompt: fixture.prompt });
   const settledPromise = turn?.settled ? turn.settled : Promise.resolve(turn);
-  let controlStarted = false;
   let controlTimer = null;
-  let controlPromise = Promise.resolve(null);
+  let controlResult = null;
+  const controlDelayMs = Number.isSafeInteger(context?.controlDelayMs) ? context.controlDelayMs : 25;
   if (mode !== 'NORMAL') {
     const control = mode === 'CANCEL'
       ? () => adapter.cancel('S1-C06 trusted ACP cancellation checkpoint')
       : () => adapter.forceKill('S1-C09 trusted ACP forced process death checkpoint');
-    controlPromise = new Promise((resolve) => {
-      const trigger = async () => {
-        controlStarted = true;
-        try { resolve(await control()); } catch (error) { resolve({ error: String(error?.message ?? error) }); }
-      };
-      controlTimer = setTimeout(trigger, 25);
-    });
-    const settled = await settledPromise;
-    if (!controlStarted) {
+    let resolveControl;
+    const controlPromise = new Promise((resolve) => { resolveControl = resolve; });
+    controlTimer = setTimeout(async () => {
+      try { controlResult = await control(); } catch (error) { controlResult = { error: String(error?.message ?? error) }; }
+      resolveControl(controlResult);
+    }, controlDelayMs);
+    const first = await Promise.race([
+      settledPromise.then((value) => ({ kind: 'SETTLED_FIRST', value })),
+      controlPromise.then((value) => ({ kind: 'CONTROL_REQUESTED', value })),
+    ]);
+    let settled;
+    if (first.kind === 'SETTLED_FIRST') {
       clearTimeout(controlTimer);
       controlTimer = null;
-      controlStarted = true;
-      try { await control(); } catch {}
+      settled = first.value;
     } else {
-      await controlPromise;
+      settled = await Promise.race([
+        settledPromise,
+        new Promise((resolve) => setTimeout(() => resolve({ settled: false, outcome: 'CONTROL_TIMEOUT', handoffRequired: true }), context?.cancellationTimeoutMs ?? 5000)),
+      ]);
     }
     try { await adapter.shutdown(); } catch {}
     return {
       ready,
+      authentication,
+      authMethod,
       session,
       settled,
       events: turn?.observe?.() ?? turn?.events ?? settled?.events ?? [],
       rawMessages: turn?.observeRaw?.() ?? [],
       fixtureCapabilities,
+      adapter,
+      temporal: turn?.observeTemporal?.() ?? settled?.temporal ?? null,
+      controlResult,
       processObservation: await adapter.processObservation?.(),
     };
   }
   const settled = await settledPromise;
+  const temporal = turn?.observeTemporal?.() ?? settled?.temporal ?? null;
   try { await adapter.shutdown(); } catch {}
   return {
     ready,
+    authentication,
+    authMethod,
     session,
     settled,
     events: turn?.observe?.() ?? turn?.events ?? settled?.events ?? [],
     rawMessages: turn?.observeRaw?.() ?? [],
     fixtureCapabilities,
+    adapter,
+    temporal,
     processObservation: await adapter.processObservation?.(),
   };
+}
+
+function deriveAcpDiscovery({ candidateShape, rawMessages, adapter }) {
+  const discovered = {
+    extensions: [],
+    skills: [],
+    prompts: [],
+    themes: [],
+    agentsFiles: [],
+  };
+  for (const message of rawMessages ?? []) {
+    const update = message?.notification?.update ?? message?.update ?? {};
+    if (update.sessionUpdate === 'available_commands_update') discovered.prompts.push('available_commands_update');
+    if (update.sessionUpdate === 'config_option_update') discovered.extensions.push('config_option_update');
+  }
+  const observations = adapter?.observations ?? {};
+  const controlled = observations.discoveryControlled === true
+    || (candidateShape === 'PI-ACP' && observations.innerPiControlSource === 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI');
+  return {
+    ...discovered,
+    controlled,
+    source: 'MNFS_TRUSTED_ACP_EVENT_AND_PROFILE_OBSERVATION',
+    ...(controlled ? {} : { controlFailureCause: observations.discoveryReason ?? 'trusted discovery suppression evidence is unavailable' }),
+  };
+}
+
+function deriveAcpInventory(rawMessages, fixture, fallbackCalls) {
+  const inventory = [];
+  for (const message of rawMessages ?? []) {
+    const update = message?.notification?.update ?? message?.update ?? {};
+    if (update.sessionUpdate !== 'tool_call') continue;
+    const input = update.rawInput ?? {};
+    const pathValue = input.path ?? input.filePath ?? input.file_path ?? update.locations?.find((location) => typeof location?.path === 'string')?.path;
+    const absoluteNonce = `${fixture.workspacePath}/${fixture.nonceRelativePath}`;
+    const absoluteTarget = `${fixture.workspacePath}/${fixture.targetRelativePath}`;
+    const name = String(update.title ?? update.name ?? update.kind ?? 'unknown');
+    if (/read/u.test(name) && [fixture.nonceRelativePath, absoluteNonce].includes(pathValue)) inventory.push('read_nonce_file');
+    else if (/edit|write/u.test(name) && [fixture.targetRelativePath, absoluteTarget].includes(pathValue)) inventory.push('edit_result_file');
+    else inventory.push(name);
+  }
+  return inventory.length > 0 ? inventory : fallbackCalls.map((call) => call.id);
 }
 
 async function runAcpInternal({ candidateShape, fixture, adapterFactory, context }) {
@@ -597,13 +786,20 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
   const normal = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record });
   const cancellation = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode: 'CANCEL' });
   const death = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode: 'DEATH' });
-  const toolCalls = normal.fixtureCapabilities.logicalToolCalls();
+  const toolCalls = normal.fixtureCapabilities.logicalToolCalls({ rawEvents: normal.rawMessages });
   const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
-  const envDigest = digest(Object.fromEntries(Object.entries(record?.environment ?? {}).sort()));
+  const observedProcess = normal.processObservation;
+  const observedEnv = normal.adapter?.processSpec?.env;
+  const expectedEnv = effectiveAcpEnvironment(record, normal.adapter);
+  const observedEnvKeys = Array.isArray(observedProcess?.envKeys) ? [...observedProcess.envKeys].sort() : null;
+  const expectedEnvKeys = Object.keys(expectedEnv).sort();
   const trustedBoundary = {
-    cwd: fixture.workspacePath,
-    envDigest,
-    environmentMatchesRecord: true,
+    cwd: observedProcess?.cwd ?? normal.adapter?.processSpec?.cwd ?? null,
+    envDigest: observedEnv ? digest(Object.fromEntries(Object.entries(observedEnv).sort())) : null,
+    environmentMatchesRecord: observedProcess?.cwd === fixture.workspacePath
+      && observedEnv
+      && digest(Object.fromEntries(Object.entries(observedEnv).sort())) === digest(expectedEnv)
+      && (observedEnvKeys === null || JSON.stringify(observedEnvKeys) === JSON.stringify(expectedEnvKeys)),
     source: 'MNFS_TRUSTED_PROCESS_RUNNER',
   };
   const recoveryState = await prepareRecoveryState({ candidateShape, context, normal, cancellation, death, protocol: 'ACP_V1' });
@@ -613,27 +809,41 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
     session: normal.session,
     settled: normal.settled,
     events: normal.events,
+    rawEvents: normal.rawMessages,
     trustedProofs: {
       cwd: fixture.workspacePath,
       boundary: trustedBoundary,
-      inventory: toolCalls.map((call) => call.id),
+      inventory: deriveAcpInventory(normal.rawMessages, fixture, toolCalls),
       fixtureVerified: fixtureResult.ok,
-      discovery: null,
-      auth: deriveTrustedAuthProof({ rawObservations: normal.rawMessages }),
+      discovery: deriveAcpDiscovery({ candidateShape, rawMessages: normal.rawMessages, adapter: normal.adapter }),
+      auth: deriveTrustedAuthProof({
+        candidateShape,
+        handshake: normal.ready,
+        authentication: normal.authentication,
+        session: normal.session,
+        settled: normal.settled,
+        rawObservations: normal.rawMessages,
+      }),
       output: normal.processObservation?.output ? {
         bytes: normal.processObservation.output.stdout.bytesSeen + normal.processObservation.output.stderr.bytesSeen,
         limitBytes: normal.processObservation.output.stdout.limitBytes + normal.processObservation.output.stderr.limitBytes,
       } : null,
-      processDeath: { ...death.processObservation, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
-      cancellation: { ...cancellation.processObservation, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
+      processDeath: { ...death.processObservation, temporal: death.temporal, outcome: death.processObservation?.outcome ?? death.settled?.outcome, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
+      cancellation: { ...cancellation.processObservation, temporal: cancellation.temporal, outcome: cancellation.settled?.outcome ?? cancellation.processObservation?.outcome, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
       recovery,
       authority: { sessionRole: 'OBSERVATIONAL', recoveryOwner: 'MNFS' },
-      machinery: { reused: ['fixture', 'artifacts', 'process-runner'] },
+      machinery: {
+        reused: ['fixture', 'artifacts', 'process-runner'],
+        namedMnfsMachineryEliminatedOrAvoided: ['MNFS_VENDOR_SPECIFIC_WIRE_PARSER'],
+        causalMechanism: 'the stable ACP public boundary is normalized by one trusted common client',
+        supportingEvidence: [{ source: 'trusted ACP handshake, session and ToolCall observations', candidateShape }],
+      },
       supportedBoundary: { source: 'MNFS_TRUSTED_ADAPTER', kind: `${candidateShape}_PUBLIC_API`, observation: 'official candidate boundary' },
       upgradePolicy: record?.upgradePolicy,
       removalConditions: record?.removalConditions,
     },
     toolCalls,
+    permissions: normal.fixtureCapabilities.permissionEvidence(),
     recoveryStateRecords: recoveryState?.records ?? [],
     trustedProvenance: record,
   };

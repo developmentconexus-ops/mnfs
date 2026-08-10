@@ -41,13 +41,16 @@ async function main() {
     noTools: 'all',
     customTools: tools.customTools,
   });
-  await adapter.initialize();
+  const ready = await adapter.initialize();
+  process.stdout.write(`${JSON.stringify({ kind: 'MNFS_TRUSTED_TURN_ACTIVE', candidateShape: input.candidateShape, atMs: Date.now() })}\n`);
   const settled = await adapter.startTurn(fixture.prompt);
   await adapter.close();
+  process.stdout.write(`${JSON.stringify({ kind: 'MNFS_TRUSTED_TURN_SETTLED', candidateShape: input.candidateShape, atMs: Date.now(), outcome: settled?.outcome ?? null })}\n`);
   process.stdout.write(`${JSON.stringify({
     kind: 'MNFS_TRUSTED_ACTOR_RESULT',
     candidateShape: input.candidateShape,
     settled,
+    discovery: ready?.discovery ?? adapter.observeDiscovery?.() ?? null,
     events: adapter.observe(),
     rawEvents: adapter.observeRaw?.() ?? [],
     fixtureToolCalls: tools.snapshot(),

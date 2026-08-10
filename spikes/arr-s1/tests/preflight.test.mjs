@@ -29,7 +29,8 @@ const STATE_ROOT = Object.freeze({
   platform: 'linux',
   isDirectory: true,
   writable: true,
-  filesystem: 'ext4',
+  filesystem: 'ext2/ext3',
+  filesystemSupported: true,
 });
 
 const CREDENTIALS = Object.freeze({

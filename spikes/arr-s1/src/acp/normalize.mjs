@@ -49,9 +49,20 @@ export function normalizeAcpHandshake(input) {
     error.observedVersion = value.protocolVersion ?? null;
     throw error;
   }
+  const authMethods = value.authMethods === undefined
+    ? []
+    : Array.isArray(value.authMethods)
+      ? value.authMethods.map((method) => {
+        const item = object(method, 'ACP auth method must be a structured object');
+        const id = item.id ?? item.methodId;
+        if (typeof id !== 'string' || id.length === 0) throw new TypeError('ACP auth method requires an id');
+        return structuredClone({ ...item, id });
+      })
+      : (() => { throw new TypeError('ACP handshake authMethods must be an array'); })();
   return freeze({
     protocolVersion: ACP_PROTOCOL_VERSION,
     agentCapabilities: structuredClone(capabilityObject(value.agentCapabilities)),
+    ...(value.authMethods !== undefined ? { authMethods } : {}),
   });
 }
 

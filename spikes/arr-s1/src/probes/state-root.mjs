@@ -7,6 +7,10 @@ const execFileAsync = promisify(execFile);
 const REVIEWED_FILESYSTEMS = new Set(['ext2/ext3', 'xfs', 'btrfs', 'overlayfs', 'tmpfs']);
 const FIXED_ENV = Object.freeze({ PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' });
 
+export function isReviewedFilesystem(value) {
+  return typeof value === 'string' && REVIEWED_FILESYSTEMS.has(value.trim().toLowerCase());
+}
+
 function absoluteLinuxPath(value) {
   if (typeof value !== 'string' || !path.posix.isAbsolute(value)) return false;
   const normalized = path.posix.normalize(value);
@@ -43,7 +47,7 @@ export async function observeLinuxStateRoot({ stateRoot, runCommand = defaultRun
     outputLimitBytes: 4096,
   });
   const filesystem = Buffer.from(fsResult?.stdout ?? '').toString('utf8').trim().toLowerCase();
-  const filesystemSupported = fsResult?.exitCode === 0 && REVIEWED_FILESYSTEMS.has(filesystem);
+  const filesystemSupported = fsResult?.exitCode === 0 && isReviewedFilesystem(filesystem);
   return {
     path: normalized,
     realPath,

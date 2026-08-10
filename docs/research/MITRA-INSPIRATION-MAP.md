@@ -637,3 +637,26 @@ Insight central: a "integração Sankhya" não é conhecimento embutido de ERP �
 | Reconhecimento de convenções do ERP (TGFCAB/TOP, AD_, multiempresa) | REFERENCE | Encapsular como "perfil de ERP" plugável (Sankhya, depois outros) — conhecimento de domínio versionado, não hardcoded no agente |
 | Credencial de produção colada no chat; 1 token → 6 empresas | REJECT / trava | Canal de credencial dedicado; escopo de credencial por empresa; seleção explícita de ambiente |
 | Gateway prod vs sandbox distintos (401 no sandbox) | ADOPT | Separação de ambiente no gateway; default para não-produção |
+
+### 15.5 Artefatos versionados do Discovery (extraídos do repo do projeto)
+
+O agente materializou o trabalho em dois documentos **na raiz do repo** (`discovery-sankhya.md`, `escopo-sales-radar.md`) — spec e evidência são artefatos versionados, não só texto de chat.
+
+**`discovery-sankhya.md`** — fatos técnicos completos:
+
+- **Mecanismo de query**: serviço nativo Sankhya **`DbExplorerSP.executeQuery` via `/gateway/v1/mge/service.sbr`**; limite **5.000 linhas/consulta** (`burstLimit`) → paginação via SQL.
+- Schema da conexão: `METALPRD` (Metal Nobre Ferragens Finas Ltda); demais 5 schemas flagados para confirmação de escopo (PA-19).
+- **Vínculo de conversão real**: `TGFCAB.NUNOTAORIG` inexistente; conversão rastreada por **`TGFVAR`** (`NUNOTAORIG`→`NUNOTA`), populada (5.171 conversões/12m mapeadas por tipo de destino).
+- Cursor incremental viável: `DTALTER` sem nulos. Vendedor↔usuário via `TGFVEN.EMAIL`.
+- **Dado contradisse a premissa do escopo**: 67% dos orçamentos abertos (73% do valor, R$ 4,45 mi) têm +10 dias — aplicar o P2 especificado inverteria o propósito do produto. O agente **não recalibrou sozinho**: registrou como decisão de negócio (PA-16) e **bloqueou a implementação** ("Aguardando Discovery Técnico"). Contabilidade explícita: 7 PAs bloqueantes / 5 resolvidos.
+- Seção de segurança auto-gerada: recomenda **rotacionar Client Secret/X-Token** por terem sido transmitidos via chat.
+
+**`escopo-sales-radar.md` v2.0** — o build agent **reescreveu** o escopo do specialist (10→15 seções): adicionou RN-06 Explicabilidade Obrigatória, RN-07 Transparência de Origem, RN-08 Imutabilidade do ERP, seção de Riscos, Sequência de Implementação, Aprovação — e assina "**Assistente Conexus**" (veste a marca do produto do usuário). Destaques da seção 6 (protocolo de integração):
+
+- Marcador **`[DECISÃO DO CLIENTE]`**: decisões que o time técnico está proibido de assumir (ex.: modelo de consumo Online × Importação Periódica × Misto, com tabela de prós/contras e recomendação justificada).
+- **Staging obrigatório**: `IMP_<entidade>` truncada por execução + upsert atômico (`INSERT … ON DUPLICATE KEY UPDATE`); **proibido** `DELETE + INSERT` (janela de dados vazios).
+- Incremental diurno via cursor + **full refresh noturno**; batching parametrizado pelo `burstLimit`.
+- **Monitoramento como entrega obrigatória**: log de importações, tela de cargas, alerta por e-mail em falha, indicador "última atualização" em toda tela. Justificativa: carga que falha em silêncio é o pior modo de falha.
+- Regra escrita no próprio doc: "**Credenciais do banco jamais são solicitadas ou trafegadas por chat**" — o agente codificou a lição do incidente.
+
+**Contraste central do pipeline (achado mais importante do estudo)**: o Escopo (Gemini) **inventa** valores para fechar spec rápido; o build agent (Claude) **verifica contra o dado real e trava** nas decisões de negócio. O pipeline Mitra funciona porque o segundo estágio audita o primeiro. Para Conexus: ADOPT — spec assertiva no estágio 1 + Discovery com veto no estágio 2; a spec só vira contrato depois de validada contra a fonte real.

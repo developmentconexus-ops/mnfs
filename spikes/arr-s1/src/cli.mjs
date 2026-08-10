@@ -212,10 +212,13 @@ export async function executeCli(argv, options = {}) {
     ...(stateRoot ? { stateRootPath: stateRoot } : {}),
   };
   if (parsed.providerClass || parsed.authMethodClass) {
+    const credentialEnv = options.env ?? process.env;
     preflightInput.credentials = {
       authorized: true,
       ...(parsed.providerClass ? { providerClass: parsed.providerClass } : {}),
       ...(parsed.authMethodClass ? { authMethodClass: parsed.authMethodClass } : {}),
+      ...(credentialEnv.PI_CODING_AGENT_DIR ? { piCodingAgentDir: credentialEnv.PI_CODING_AGENT_DIR } : {}),
+      ...(credentialEnv.XDG_DATA_HOME ? { xdgDataHome: credentialEnv.XDG_DATA_HOME } : {}),
     };
   }
 

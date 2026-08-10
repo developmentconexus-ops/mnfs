@@ -179,11 +179,12 @@ test('Pi ACP exposes the trusted wrapper configuration while preserving Pi ACP s
   const adapter = createPiAcpAdapter({
     executable: '/state/candidates/pi-acp/bin/pi-acp',
     cwd: CWD,
-    env: { PATH: '/usr/bin:/bin', PI_ACP_PI_COMMAND: '/state/mnfs/pi-acp-wrapper.mjs', MNFS_PI_ACP_EXECUTABLE: '/state/candidates/pi/bin/pi' },
+    env: { PATH: '/usr/bin:/bin', PI_ACP_PI_COMMAND: '/state/runs/pi-acp/.mnfs-pi-acp-launcher', PI_CODING_AGENT_DIR: '/state/runs/pi-credentials', MNFS_PI_ACP_EXECUTABLE: '/state/candidates/pi/bin/pi' },
+    launcherBinding: { runRoot: '/state/runs/pi-acp', path: '/state/runs/pi-acp/.mnfs-pi-acp-launcher', sha256: `sha256:${'a'.repeat(64)}`, sizeBytes: 1, mode: '0700', role: 'MNFS_TRUSTED_LAUNCHER' },
   });
 
   assert.deepEqual(adapter.observations.projectedInnerPi.argv, [
-    '/state/mnfs/pi-acp-wrapper.mjs', '--mode', 'rpc', '--no-themes',
+    '/state/runs/pi-acp/.mnfs-pi-acp-launcher', '--mode', 'rpc', '--no-themes',
   ]);
   assert.equal(adapter.observations.innerPiControlSource, 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI');
 });
@@ -202,17 +203,23 @@ test('OpenCode ACP receives an explicit isolated profile and config surface', ()
     cwd: CWD,
     env: { PATH: '/usr/bin:/bin' },
     profile: {
-      configDir: '/state/runs/opencode-config',
-      configPath: '/state/runs/opencode-config/config.json',
-      configContent: '{"tools":{"read":true,"edit":true},"plugin":[]}',
+      runRoot: '/state/runs/opencode',
+      configDir: '/state/runs/opencode/config',
+      configPath: '/state/runs/opencode/config/config.json',
+      xdgConfigHome: '/state/runs/opencode/xdg-config',
+      xdgStateHome: '/state/runs/opencode/xdg-state',
+      xdgCacheHome: '/state/runs/opencode/xdg-cache',
+      xdgDataHome: '/state/runs/opencode/auth-data',
+      config: { tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] },
+      modelEditFamily: 'edit',
     },
   });
 
-  assert.equal(adapter.processSpec.env.OPENCODE_CONFIG_DIR, '/state/runs/opencode-config');
-  assert.equal(adapter.processSpec.env.OPENCODE_CONFIG, '/state/runs/opencode-config/config.json');
+  assert.equal(adapter.processSpec.env.OPENCODE_CONFIG_DIR, '/state/runs/opencode/config');
+  assert.equal(adapter.processSpec.env.OPENCODE_CONFIG, '/state/runs/opencode/config/config.json');
   assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
   assert.equal(adapter.observations.profile.source, 'MNFS_TRUSTED_ISOLATED_PROFILE');
-  assert.equal(adapter.observations.discoveryControlled, false);
+  assert.equal(adapter.observations.discoveryControlled, true);
   assert.match(adapter.observations.discoveryReason, /global|project/u);
 });
 
@@ -261,7 +268,7 @@ test('Pi RPC controls and temporal evidence are derived from actual argv/events'
   const attempt = await runPiRpcProcess({
     executable: runtime,
     cwd: '/tmp',
-    env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' },
+    env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C', PI_CODING_AGENT_DIR: '/tmp/mnfs-arr-s1-pi-credentials' },
     prompt: 'fixture',
     mode: 'CANCEL',
   });

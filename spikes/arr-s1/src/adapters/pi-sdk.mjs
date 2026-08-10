@@ -1,4 +1,5 @@
 import { normalizeRuntimeEvent } from '../runtime-events.mjs';
+import { requirePiCredentialRoute, piCredentialRouteEvidence } from '../credential-routes.mjs';
 
 const PI_SDK_PACKAGE = '@earendil-works/pi-coding-agent';
 const EVENT_LIMITS = Object.freeze({
@@ -103,7 +104,7 @@ function assertControlledResourceLoader(resourceLoader) {
   };
 }
 
-function buildControlledResourceLoader(sdk, cwd) {
+function buildControlledResourceLoader(sdk, cwd, piCodingAgentDir) {
   const ResourceLoader = sdk?.DefaultResourceLoader;
   const SettingsManager = sdk?.SettingsManager;
   if (typeof ResourceLoader !== 'function' || typeof SettingsManager?.inMemory !== 'function') {
@@ -112,7 +113,7 @@ function buildControlledResourceLoader(sdk, cwd) {
   const settingsManager = SettingsManager.inMemory();
   const resourceLoader = new ResourceLoader({
     cwd,
-    agentDir: cwd,
+    agentDir: piCodingAgentDir,
     settingsManager,
     noExtensions: true,
     noSkills: true,
@@ -274,6 +275,7 @@ export async function loadPiSdk() {
 export function createPiSdkAdapter({
   sdk = null,
   cwd,
+  piCodingAgentDir,
   env,
   inventory,
   tools,
@@ -283,6 +285,7 @@ export function createPiSdkAdapter({
   sessionManager,
 } = {}) {
   requireAbsolute(cwd, 'cwd');
+  const credentialDir = requirePiCredentialRoute(piCodingAgentDir);
   if (env !== undefined) throw new TypeError('Pi SDK adapter does not control environment; use the process boundary');
   if (inventory !== undefined) throw new TypeError('Pi SDK adapter uses tools/resourceLoader surfaces, not an inventory option');
   if (tools !== undefined) requireStringArray(tools, 'tools');
@@ -388,7 +391,7 @@ export function createPiSdkAdapter({
     if (closed) throw new Error('Pi SDK adapter is closed');
     if (initialized) return createReadyObservation();
     loadedSdk ??= await loadPiSdk();
-    const controlledResourceLoader = resourceLoader ?? buildControlledResourceLoader(loadedSdk, cwd);
+    const controlledResourceLoader = resourceLoader ?? buildControlledResourceLoader(loadedSdk, cwd, credentialDir);
     const controlledSessionManager = sessionManager ?? buildInMemorySessionManager(loadedSdk, cwd);
     requireResourceLoaderSurface(controlledResourceLoader);
     await controlledResourceLoader.reload();
@@ -466,6 +469,10 @@ export function createPiSdkAdapter({
     return freeze(clone(discovery));
   }
 
+  function observeCredentialRoute() {
+    return piCredentialRouteEvidence(credentialDir);
+  }
+
   async function close() {
     if (closed) return;
     if (activeTurn && !activeTurn.settledValue) await cancel();
@@ -475,5 +482,5 @@ export function createPiSdkAdapter({
     session.dispose();
   }
 
-  return Object.freeze({ initialize, startTurn, observe, observeRaw, observeDiscovery, cancel, close });
+  return Object.freeze({ initialize, startTurn, observe, observeRaw, observeDiscovery, observeCredentialRoute, cancel, close });
 }

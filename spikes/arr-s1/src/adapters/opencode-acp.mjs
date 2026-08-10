@@ -1,4 +1,5 @@
 import { createAcpStdioClient } from '../acp/client.mjs';
+import { requireOpenCodeDataRoute, openCodeCredentialRouteEvidence } from '../credential-routes.mjs';
 
 function clone(value) {
   return structuredClone(value);
@@ -14,6 +15,10 @@ function requireAbsolute(value, name) {
   if (typeof value !== 'string' || value.length === 0 || !value.startsWith('/')) {
     throw new TypeError(`OpenCode ACP ${name} must be an absolute path`);
   }
+}
+
+function pathOwnedBy(root, value) {
+  return value === root || value.startsWith(`${root}/`);
 }
 
 function requireExplicitEnvironment(env) {
@@ -33,21 +38,67 @@ function requireExplicitEnvironment(env) {
 }
 
 function profileEnvironment(env, profile) {
-  if (profile === undefined) return { ...env };
+  const cleanEnv = Object.fromEntries(Object.entries(env).filter(([key]) => !['OPENCODE_AUTH_CONTENT', 'OPENCODE_CONFIG_CONTENT'].includes(key)));
+  if (profile === undefined) throw new TypeError('OpenCode ACP requires an explicit isolated profile');
   if (!profile || typeof profile !== 'object') throw new TypeError('OpenCode ACP profile must be a structured object');
-  for (const [key, value] of [['configDir', profile.configDir], ['configPath', profile.configPath]]) {
+  for (const [key, value] of [
+    ['configDir', profile.configDir],
+    ['configPath', profile.configPath],
+    ['xdgConfigHome', profile.xdgConfigHome],
+    ['xdgStateHome', profile.xdgStateHome],
+    ['xdgCacheHome', profile.xdgCacheHome],
+    ['xdgDataHome', profile.xdgDataHome],
+  ]) {
     requireAbsolute(value, `profile.${key}`);
   }
-  if (typeof profile.configContent !== 'string' || profile.configContent.length === 0) {
-    throw new TypeError('OpenCode ACP profile.configContent must be non-empty JSON text');
+  if (profile.runRoot !== undefined) {
+    requireAbsolute(profile.runRoot, 'profile.runRoot');
+    for (const [key, value] of [['configDir', profile.configDir], ['configPath', profile.configPath], ['xdgConfigHome', profile.xdgConfigHome], ['xdgStateHome', profile.xdgStateHome], ['xdgCacheHome', profile.xdgCacheHome]]) {
+      if (!pathOwnedBy(profile.runRoot, value)) throw new TypeError(`OpenCode ${key} must be runRoot-owned`);
+    }
+  }
+  if (profile.authRoute?.kind === 'REMOTE_CONFIG' || profile.authRoute?.remote === true) {
+    throw new Error('OpenCode auth route is remote/well-known; fail-closed without recording secrets');
   }
   return {
-    ...env,
+    ...cleanEnv,
+    OPENCODE_DISABLE_PROJECT_CONFIG: '1',
+    XDG_CONFIG_HOME: profile.xdgConfigHome,
+    XDG_STATE_HOME: profile.xdgStateHome,
+    XDG_CACHE_HOME: profile.xdgCacheHome,
+    XDG_DATA_HOME: profile.xdgDataHome,
     OPENCODE_CONFIG_DIR: profile.configDir,
     OPENCODE_CONFIG: profile.configPath,
-    OPENCODE_CONFIG_CONTENT: profile.configContent,
     OPENCODE_PURE: '1',
   };
+}
+
+export function resolveOpenCodeModelFacingInventory({ config = {}, modelEditFamily = 'edit' } = {}) {
+  if (!['edit', 'write', 'apply_patch'].includes(modelEditFamily)) {
+    throw new TypeError('OpenCode model edit family must be edit, write or apply_patch');
+  }
+  const tools = config?.tools && typeof config.tools === 'object' ? config.tools : {};
+  const permission = config?.permission && typeof config.permission === 'object' ? config.permission : {};
+  const modelFacingTools = Object.keys(tools)
+    .filter((name) => name !== '*' && tools[name] === true && permission[name] !== 'deny' && permission[name] !== false)
+    .filter((name) => permission['*'] !== 'deny' || permission[name] === 'allow')
+    .sort();
+  const pluginTools = [];
+  const mcpTools = [];
+  const resolvedTools = [...new Set([...modelFacingTools, ...pluginTools, ...mcpTools])].sort();
+  const logicalInventory = resolvedTools.map((name) => {
+    if (name === 'read') return 'read_nonce_file';
+    if (['edit', 'write', 'apply_patch'].includes(name)) return 'edit_result_file';
+    return name;
+  }).sort();
+  return Object.freeze({
+    modelEditFamily,
+    modelFacingTools: resolvedTools,
+    logicalInventory,
+    pluginTools,
+    mcpTools,
+    source: 'MNFS_TRUSTED_OPENCODE_ISOLATED_PROFILE_PERMISSION_FILTER',
+  });
 }
 
 function requireCommonClient(client) {
@@ -116,18 +167,26 @@ export function createOpenCodeAcpAdapter({
     ...(profile ? {
       profile: {
         source: 'MNFS_TRUSTED_ISOLATED_PROFILE',
+        runRoot: profile.runRoot,
         configDir: profile.configDir,
         configPath: profile.configPath,
+        xdgConfigHome: profile.xdgConfigHome,
+        xdgStateHome: profile.xdgStateHome,
+        xdgCacheHome: profile.xdgCacheHome,
+        xdgDataHome: profile.xdgDataHome,
+        config: clone(profile.config ?? {}),
+        authRoute: openCodeCredentialRouteEvidence(profile.xdgDataHome),
+        resolvedInventory: resolveOpenCodeModelFacingInventory({ config: profile.config, modelEditFamily: profile.modelEditFamily ?? 'edit' }),
         discovery: {
-          ambientGlobal: 'NOT_PROVEN_BY_PROFILE',
-          project: 'NOT_PROVEN_BY_PROFILE',
-          custom: 'NOT_PROVEN_BY_PROFILE',
-          plugins: 'DISABLED_BY_PUBLIC_PURE_MODE',
+          ambientGlobal: 'EXCLUDED_BY_RUN_ROOT_XDG_CONFIG_HOME',
+          project: 'EXCLUDED_BY_OPENCODE_DISABLE_PROJECT_CONFIG',
+          custom: 'EXCLUDED_BY_OPENCODE_CONFIG_DIR_AND_EXPLICIT_PROFILE',
+          plugins: 'DISABLED_BY_EXPLICIT_EMPTY_PLUGIN_LIST',
         },
       },
     } : {}),
-    discoveryControlled: false,
-    discoveryReason: 'OpenCode public profile/config surface does not by itself prove global, project or custom discovery exclusion',
+    discoveryControlled: Boolean(profile),
+    discoveryReason: profile ? 'trusted runRoot-owned XDG/config profile controls global, project and plugin sources' : 'trusted isolated OpenCode profile is unavailable',
   });
 
   let commonClient = null;

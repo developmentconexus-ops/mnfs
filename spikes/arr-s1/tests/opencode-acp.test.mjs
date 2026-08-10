@@ -12,7 +12,19 @@ const CWD = '/tmp/mnfs-arr-s1-fixture';
 const ENV = Object.freeze({
   PATH: '/usr/bin:/bin',
   HOME: '/tmp/mnfs-arr-s1-home',
+  XDG_DATA_HOME: '/tmp/mnfs-arr-s1-opencode-data',
   MNFS_FIXTURE: 'task-7',
+});
+const PROFILE = Object.freeze({
+  runRoot: '/tmp/mnfs-arr-s1-opencode-run',
+  configDir: '/tmp/mnfs-arr-s1-opencode-run/config',
+  configPath: '/tmp/mnfs-arr-s1-opencode-run/config/config.json',
+  xdgConfigHome: '/tmp/mnfs-arr-s1-opencode-run/xdg-config',
+  xdgStateHome: '/tmp/mnfs-arr-s1-opencode-run/xdg-state',
+  xdgCacheHome: '/tmp/mnfs-arr-s1-opencode-run/xdg-cache',
+  xdgDataHome: ENV.XDG_DATA_HOME,
+  config: { tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] },
+  modelEditFamily: 'edit',
 });
 
 function fakeCommonClient(calls) {
@@ -53,6 +65,7 @@ test('starts native OpenCode ACP with exact argv, cwd and explicit environment',
     executable: EXECUTABLE,
     cwd: CWD,
     env: ENV,
+    profile: PROFILE,
     timeoutMs: 1400,
     terminationGraceMs: 200,
     stdoutLimitBytes: 4096,
@@ -69,7 +82,17 @@ test('starts native OpenCode ACP with exact argv, cwd and explicit environment',
     processSpec: {
       argv: [EXECUTABLE, 'acp', '--cwd', CWD],
       cwd: CWD,
-      env: { ...ENV },
+      env: {
+        ...ENV,
+        OPENCODE_DISABLE_PROJECT_CONFIG: '1',
+        XDG_CONFIG_HOME: PROFILE.xdgConfigHome,
+        XDG_STATE_HOME: PROFILE.xdgStateHome,
+        XDG_CACHE_HOME: PROFILE.xdgCacheHome,
+        XDG_DATA_HOME: PROFILE.xdgDataHome,
+        OPENCODE_CONFIG_DIR: PROFILE.configDir,
+        OPENCODE_CONFIG: PROFILE.configPath,
+        OPENCODE_PURE: '1',
+      },
       timeoutMs: 1400,
       terminationGraceMs: 200,
       stdoutLimitBytes: 4096,
@@ -83,7 +106,7 @@ test('starts native OpenCode ACP with exact argv, cwd and explicit environment',
 });
 
 test('records capabilities and permissions as Evidence-only observations', () => {
-  const adapter = createOpenCodeAcpAdapter({ executable: EXECUTABLE, cwd: CWD, env: ENV });
+  const adapter = createOpenCodeAcpAdapter({ executable: EXECUTABLE, cwd: CWD, env: ENV, profile: PROFILE });
 
   assert.deepEqual(adapter.observations.capabilities, { status: 'EVIDENCE_ONLY' });
   assert.deepEqual(adapter.observations.permissions, { status: 'EVIDENCE_ONLY' });
@@ -97,6 +120,7 @@ test('uses the common ACP lifecycle without TUI parsing or runtime authority', a
     executable: EXECUTABLE,
     cwd: CWD,
     env: ENV,
+    profile: PROFILE,
     createClient: () => fakeCommonClient(calls),
   });
 
@@ -134,5 +158,9 @@ test('freezes OpenCode provenance and rejects ambient environment or relative ex
   assert.throws(
     () => createOpenCodeAcpAdapter({ executable: EXECUTABLE, cwd: CWD }),
     /explicit env/u,
+  );
+  assert.throws(
+    () => createOpenCodeAcpAdapter({ executable: EXECUTABLE, cwd: CWD, env: ENV }),
+    /isolated profile/u,
   );
 });

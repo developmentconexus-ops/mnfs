@@ -7,6 +7,11 @@ import {
 import { observeRepositoryIdentity } from './probes/repository.mjs';
 import { isReviewedFilesystem, observeLinuxStateRoot } from './probes/state-root.mjs';
 import { observeStagedCandidateProvenance } from './probes/candidate-provenance.mjs';
+import {
+  openCodeCredentialRouteEvidence,
+  piCredentialRouteEvidence,
+  providerEnvironmentClassEvidence,
+} from './credential-routes.mjs';
 
 const REQUIRED_PROVENANCE_IDS = Object.freeze(['PI-SDK', 'PI-RPC', 'PI-ACP', 'OPENCODE-ACP', 'ACP-SDK']);
 const CONDITIONAL_PROVENANCE_IDS = Object.freeze(['SECOND-ACP']);
@@ -181,9 +186,22 @@ export function preflightCredentials(input = {}) {
   if (input.authorized !== true || typeof provider !== 'string' || provider.trim() === '' || typeof authMethodClass !== 'string' || authMethodClass.trim() === '') {
     return { status: 'BLOCKED', reason: 'provider/auth-method class authorization prerequisite is unavailable' };
   }
+  let piRoute;
+  let openCodeRoute;
+  try {
+    piRoute = piCredentialRouteEvidence(input.piCodingAgentDir ?? input.routes?.piCodingAgentDir);
+    openCodeRoute = openCodeCredentialRouteEvidence(input.xdgDataHome ?? input.routes?.xdgDataHome);
+  } catch {
+    return { status: 'BLOCKED', reason: 'explicit Pi and OpenCode credential routes are unavailable' };
+  }
   return {
     status: 'READY',
-    credentials: { provider: provider.trim(), authMethodClass: authMethodClass.trim() },
+    credentials: {
+      provider: provider.trim(),
+      authMethodClass: authMethodClass.trim(),
+      routes: { pi: piRoute, openCode: openCodeRoute },
+      providerEnvironment: providerEnvironmentClassEvidence(input.providerEnvironment ?? []),
+    },
   };
 }
 

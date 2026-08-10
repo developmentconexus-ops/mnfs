@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -10,6 +11,7 @@ import { verifyArtifactRecords, writeJsonArtifact } from './artifacts.mjs';
 import { createPiSdkAdapter } from './adapters/pi-sdk.mjs';
 import { createPiAcpAdapter } from './adapters/pi-acp.mjs';
 import { createOpenCodeAcpAdapter } from './adapters/opencode-acp.mjs';
+import { createTrustedPiAcpLauncher, revalidateTrustedPiAcpLauncher } from './pi-acp-launcher.mjs';
 import { revalidateStagedCandidateProvenance } from './probes/candidate-provenance.mjs';
 import { startProcess } from './process-runner.mjs';
 import { derivePiRpcObservations, runPiRpcProcess, translatePiRpcFixtureCalls } from './pi-rpc.mjs';
@@ -82,7 +84,11 @@ function effectiveAcpEnvironment(record, adapter) {
   const observations = adapter?.observations ?? {};
   const controlledKeys = [];
   if (observations.profile?.source === 'MNFS_TRUSTED_ISOLATED_PROFILE') {
-    controlledKeys.push('OPENCODE_CONFIG_DIR', 'OPENCODE_CONFIG', 'OPENCODE_CONFIG_CONTENT', 'OPENCODE_PURE');
+    controlledKeys.push(
+      'OPENCODE_DISABLE_PROJECT_CONFIG',
+      'XDG_CONFIG_HOME', 'XDG_STATE_HOME', 'XDG_CACHE_HOME', 'XDG_DATA_HOME',
+      'OPENCODE_CONFIG_DIR', 'OPENCODE_CONFIG', 'OPENCODE_PURE',
+    );
   }
   if (observations.innerPiControlSource === 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI') {
     controlledKeys.push('PI_ACP_PI_COMMAND', 'MNFS_PI_ACP_EXECUTABLE');
@@ -198,6 +204,7 @@ async function writeEvidence({ candidateShape, fixture, runRoot, binding, proofs
       trustedProofs: clone(execution?.trustedProofs ?? null),
       normalizedEvents: clone(execution?.events ?? null),
       rawEvents: clone(execution?.rawEvents ?? null),
+      toolCalls: clone(execution?.toolCalls ?? execution?.toolCallsEvidence ?? null),
     }, { binding, kind: 'criterion-evidence' });
     records.push(record);
     refs[id] = record.id;
@@ -294,6 +301,7 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
     return createPiSdkAdapter({
       ...trustedOptions,
       sdk,
+      piCodingAgentDir: record.environment?.PI_CODING_AGENT_DIR,
       tools: [],
       noTools: 'all',
       customTools: createFixtureTools(options.fixture).customTools,
@@ -319,24 +327,49 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
   };
   if (candidateShape === 'PI-ACP') {
     const innerPi = record.upstreamSurfaces?.innerPiExecutable?.path ?? record.upstreamSurfaces?.piExecutable?.path;
-    if (innerPi) {
-      adapterOptions.env = {
-        ...record.environment,
-        PI_ACP_PI_COMMAND: new URL('./pi-acp-wrapper.mjs', import.meta.url).pathname,
-        MNFS_PI_ACP_EXECUTABLE: innerPi,
-      };
-    }
+    if (!innerPi) throw new Error('Pi-ACP trusted staging does not provide an inner Pi executable');
+    const launcherBinding = await createTrustedPiAcpLauncher({
+      runRoot: trustedOptions.runRoot,
+      wrapperPath: new URL('./pi-acp-wrapper.mjs', import.meta.url).pathname,
+    });
+    adapterOptions.env = {
+      ...record.environment,
+      PI_ACP_PI_COMMAND: launcherBinding.path,
+      MNFS_PI_ACP_EXECUTABLE: innerPi,
+    };
+    adapterOptions.launcherBinding = launcherBinding;
+    const priorBeforeSpawn = adapterOptions.beforeSpawn;
+    adapterOptions.beforeSpawn = async () => {
+      await revalidateTrustedPiAcpLauncher(launcherBinding);
+      await priorBeforeSpawn();
+    };
   }
   if (candidateShape === 'OPENCODE-ACP' && typeof trustedOptions.runRoot === 'string' && path.isAbsolute(trustedOptions.runRoot)) {
     const profileDir = path.join(trustedOptions.runRoot, 'opencode-profile');
+    const configDir = path.join(profileDir, 'config');
+    const configPath = path.join(configDir, 'config.json');
+    const config = {
+      tools: { '*': false, read: true, edit: true },
+      plugin: [],
+      mcp: [],
+      permission: { '*': 'deny', read: 'allow', edit: 'allow' },
+    };
+    await mkdir(configDir, { recursive: true });
+    await writeFile(configPath, `${JSON.stringify(config)}\n`, { mode: 0o600 });
+    const xdgDataHome = record.environment?.XDG_DATA_HOME;
+    if (typeof xdgDataHome !== 'string' || !path.isAbsolute(xdgDataHome)) {
+      throw new Error('OpenCode trusted staging does not provide an explicit authorized XDG_DATA_HOME auth route');
+    }
     adapterOptions.profile = {
-      configDir: profileDir,
-      configPath: path.join(profileDir, 'config.json'),
-      configContent: JSON.stringify({
-        tools: { '*': false, read: true, edit: true },
-        plugin: [],
-        permission: { '*': 'deny', read: 'allow', edit: 'allow' },
-      }),
+      runRoot: trustedOptions.runRoot,
+      configDir,
+      configPath,
+      xdgConfigHome: path.join(profileDir, 'xdg-config'),
+      xdgStateHome: path.join(profileDir, 'xdg-state'),
+      xdgCacheHome: path.join(profileDir, 'xdg-cache'),
+      xdgDataHome,
+      config,
+      modelEditFamily: 'edit',
     };
   }
   return candidateShape === 'PI-ACP'
@@ -370,6 +403,9 @@ function actorEnvironment(record) {
   const env = record?.environment;
   if (!env || typeof env !== 'object' || Array.isArray(env)) {
     throw new Error('trusted ActorRun requires an explicit candidate environment projection');
+  }
+  if (typeof env.PI_CODING_AGENT_DIR !== 'string' || !env.PI_CODING_AGENT_DIR.startsWith('/')) {
+    throw new Error('trusted ActorRun requires an explicit absolute PI_CODING_AGENT_DIR route');
   }
   return Object.fromEntries(Object.entries(env).sort());
 }
@@ -545,11 +581,17 @@ function trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, 
     authority: { sessionRole: 'OBSERVATIONAL', recoveryOwner: 'MNFS' },
     machinery: {
       reused: ['fixture', 'artifacts', 'process-runner'],
-      namedMnfsMachineryEliminatedOrAvoided: [actorProtocol === 'PI-RPC' ? 'MNFS_TUI_SCRAPING' : 'MNFS_RUNTIME_SESSION_ADAPTER'],
+      namedMnfsMachineryEliminatedOrAvoided: ['MNFS_TUI_HUMAN_OUTPUT_SCRAPING'],
       causalMechanism: actorProtocol === 'PI-RPC'
-        ? 'the public Pi RPC JSONL boundary exposes structured lifecycle/tool events'
-        : 'the public Pi SDK AgentSession boundary supplies structured events without a TUI adapter',
-      supportingEvidence: [{ source: 'trusted process argv and normalized runtime observations', protocol: actorProtocol }],
+        ? 'the public Pi RPC JSONL boundary exposes structured lifecycle/tool events without a TUI adapter'
+        : 'the public Pi SDK AgentSession boundary supplies structured events without a TUI/human-output scraper',
+      supportingEvidence: [{
+        source: actorProtocol === 'PI-RPC' ? 'MNFS_TRUSTED_PI_RPC_JSONL' : 'MNFS_TRUSTED_PI_AGENT_SESSION',
+        protocol: actorProtocol,
+        structuredEvents: true,
+        humanOutputScraping: false,
+        observedEventCount: actorProtocol === 'PI-RPC' ? (normal.messages?.length ?? 0) : (normal.payload?.events?.length ?? 0),
+      }],
     },
     supportedBoundary: {
       source: 'MNFS_TRUSTED_ADAPTER',
@@ -804,6 +846,9 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
   };
   const recoveryState = await prepareRecoveryState({ candidateShape, context, normal, cancellation, death, protocol: 'ACP_V1' });
   const recovery = await runFreshRecovery({ fixture, toolCalls, context, candidateShape, recoveryState });
+  const resolvedInventory = candidateShape === 'OPENCODE-ACP'
+    ? normal.adapter?.observations?.profile?.resolvedInventory
+    : null;
   const execution = {
     ready: normal.ready,
     session: normal.session,
@@ -813,7 +858,8 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
     trustedProofs: {
       cwd: fixture.workspacePath,
       boundary: trustedBoundary,
-      inventory: deriveAcpInventory(normal.rawMessages, fixture, toolCalls),
+      inventory: resolvedInventory?.logicalInventory ?? deriveAcpInventory(normal.rawMessages, fixture, toolCalls),
+      modelFacingInventory: resolvedInventory,
       fixtureVerified: fixtureResult.ok,
       discovery: deriveAcpDiscovery({ candidateShape, rawMessages: normal.rawMessages, adapter: normal.adapter }),
       auth: deriveTrustedAuthProof({

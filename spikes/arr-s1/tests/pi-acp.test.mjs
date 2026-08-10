@@ -10,8 +10,17 @@ const ENTRYPOINT = '/state/candidates/pi-acp/bin/pi-acp';
 const CWD = '/tmp/mnfs-arr-s1-fixture';
 const ENV = Object.freeze({
   PATH: '/usr/bin:/bin',
-  PI_ACP_PI_COMMAND: '/state/candidates/pi/bin/pi',
+  PI_ACP_PI_COMMAND: '/state/runs/pi-acp/.mnfs-pi-acp-launcher',
+  PI_CODING_AGENT_DIR: '/state/runs/pi-credentials',
   MNFS_FIXTURE: 'task-6',
+});
+const LAUNCHER_BINDING = Object.freeze({
+  runRoot: '/state/runs/pi-acp',
+  path: ENV.PI_ACP_PI_COMMAND,
+  sha256: `sha256:${'a'.repeat(64)}`,
+  sizeBytes: 1,
+  mode: '0700',
+  role: 'MNFS_TRUSTED_LAUNCHER',
 });
 
 function fakeCommonClient(calls) {
@@ -47,6 +56,7 @@ test('records Pi-ACP limitations without inventing filesystem or terminal delega
     executable: ENTRYPOINT,
     cwd: CWD,
     env: ENV,
+    launcherBinding: LAUNCHER_BINDING,
     createClient: () => fakeCommonClient({
       initialize: 0,
       handshake: 0,
@@ -85,6 +95,7 @@ test('projects an explicit stdio process boundary and preserves PI_ACP_PI_COMMAN
     executable: ENTRYPOINT,
     cwd: CWD,
     env: ENV,
+    launcherBinding: LAUNCHER_BINDING,
     timeoutMs: 1200,
     terminationGraceMs: 150,
     stdoutLimitBytes: 4096,
@@ -97,19 +108,19 @@ test('projects an explicit stdio process boundary and preserves PI_ACP_PI_COMMAN
 
   await adapter.initialize();
 
-  assert.deepEqual(createCalls, [{
-    processSpec: {
-      argv: [ENTRYPOINT],
-      cwd: CWD,
-      env: { ...ENV },
-      timeoutMs: 1200,
-      terminationGraceMs: 150,
-      stdoutLimitBytes: 4096,
-      stderrLimitBytes: 2048,
-    },
-    clientFactory: undefined,
-    ndJsonStream: undefined,
-  }]);
+  assert.equal(createCalls.length, 1);
+  assert.deepEqual(createCalls[0].processSpec, {
+    argv: [ENTRYPOINT],
+    cwd: CWD,
+    env: { ...ENV },
+    timeoutMs: 1200,
+    terminationGraceMs: 150,
+    stdoutLimitBytes: 4096,
+    stderrLimitBytes: 2048,
+  });
+  assert.equal(createCalls[0].clientFactory, undefined);
+  assert.equal(createCalls[0].ndJsonStream, undefined);
+  assert.equal(typeof createCalls[0].beforeSpawn, 'function');
   assert.equal('PI_ACP_DISABLE_EXTENSIONS' in createCalls[0].processSpec.env, false);
   assert.equal('PI_ACP_DISABLE_PROMPT_TEMPLATES' in createCalls[0].processSpec.env, false);
   assert.equal('delegation' in createCalls[0].processSpec, false);
@@ -129,6 +140,7 @@ test('uses only the common ACP client lifecycle and keeps runtime session observ
     executable: ENTRYPOINT,
     cwd: CWD,
     env: ENV,
+    launcherBinding: LAUNCHER_BINDING,
     createClient: () => fakeCommonClient(calls),
   });
 

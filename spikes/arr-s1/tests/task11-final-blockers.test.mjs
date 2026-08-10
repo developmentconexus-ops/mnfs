@@ -40,7 +40,7 @@ exec ${process.execPath} ${runtime} "$@"
       const attempt = await runPiRpcProcess({
         executable,
         cwd: root,
-        env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C', RPC_INPUT_LOG: path.join(root, 'rpc-input.log') },
+        env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C', PI_CODING_AGENT_DIR: path.join(root, 'pi-credentials'), RPC_INPUT_LOG: path.join(root, 'rpc-input.log') },
         prompt: 'fixture prompt',
         beforeSpawn: async () => {
           revalidated = (await readFile(executable)).length > 0;

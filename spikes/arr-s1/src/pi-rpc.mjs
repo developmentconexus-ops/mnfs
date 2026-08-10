@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { startProcess } from './process-runner.mjs';
+import { requirePiCredentialRoute, piCredentialRouteEvidence } from './credential-routes.mjs';
 
 export const PI_RPC_CONTROL_ARGS = Object.freeze([
   '--tools', 'read,edit',
@@ -99,18 +100,40 @@ export function translatePiRpcFixtureCalls(messages, fixture) {
   return calls;
 }
 
-function settledObservation(messages, mode) {
+export function classifyPiRpcLifecycle(messages, { mode = 'NORMAL', control = {}, boundedSettlement = false } = {}) {
   const response = [...messages].reverse().find((message) => message?.type === 'response' && message?.command === 'prompt');
   const settledEvent = [...messages].reverse().find((message) => message?.type === 'agent_settled');
   const agentEnd = [...messages].reverse().find((message) => message?.type === 'agent_end');
   const completed = Boolean(settledEvent || (agentEnd && agentEnd.willRetry === false));
-  const cancelled = mode === 'CANCEL' && messages.some((message) => message?.type === 'response' && message?.command === 'abort' && message.success === true);
+  const abortIndex = messages.findIndex((message) => message?.type === 'response' && message?.command === 'abort' && message.success === true);
+  const abortSucceeded = abortIndex >= 0;
+  const postControlSettlement = control.requested === true
+    && abortSucceeded
+    && messages.slice(abortIndex + 1).some((message) => message?.type === 'agent_end' || message?.type === 'agent_settled');
+  const cancelled = mode === 'CANCEL'
+    && control.requested === true
+    && control.turnActive === true
+    && abortSucceeded
+    && postControlSettlement
+    && boundedSettlement;
+  const rawLifecycle = {
+    outcome: completed ? 'COMPLETED' : 'FAILED',
+    completed,
+    settledEvent: settledEvent?.type ?? agentEnd?.type ?? null,
+  };
   return {
     settled: completed || cancelled,
-    outcome: completed ? 'COMPLETED' : cancelled ? 'CANCELLED' : 'FAILED',
+    outcome: cancelled ? 'CANCELLED' : completed ? 'COMPLETED' : 'FAILED',
     protocol: 'PI_RPC_JSONL',
     responseAccepted: response?.success === true,
     settledEvent: settledEvent?.type ?? agentEnd?.type ?? null,
+    rawLifecycle,
+    cancellation: {
+      abortRequestedWhileActive: control.requested === true && control.turnActive === true,
+      abortSucceeded,
+      postControlSettlement,
+      boundedPostControlSettlement: boundedSettlement && postControlSettlement,
+    },
   };
 }
 
@@ -144,6 +167,7 @@ export function derivePiRpcObservations(messages, argv) {
  */
 export async function runPiRpcProcess({ executable, cwd, env, prompt, mode = 'NORMAL', beforeSpawn } = {}) {
   if (typeof executable !== 'string' || !executable.startsWith('/')) throw new TypeError('Pi RPC executable must be absolute');
+  const credentialDir = requirePiCredentialRoute(env?.PI_CODING_AGENT_DIR);
   await beforeSpawn?.();
   const execution = startProcess({
     argv: [executable, '--mode', 'rpc', ...PI_RPC_CONTROL_ARGS],
@@ -218,10 +242,15 @@ export async function runPiRpcProcess({ executable, cwd, env, prompt, mode = 'NO
     },
     sequence: ['turn-active', ...(control.requested ? ['control-requested'] : []), ...(processResult.termination?.settled === true ? ['bounded-settlement'] : [])],
   };
+  const settled = classifyPiRpcLifecycle(messages, {
+    mode,
+    control,
+    boundedSettlement: processResult.termination?.settled === true,
+  });
   return {
     processResult,
     messages,
-    settled: settledObservation(messages, mode),
+    settled,
     temporal,
     observations: derivePiRpcObservations(messages, processResult.argv),
     fixtureToolCalls: [],
@@ -232,6 +261,7 @@ export async function runPiRpcProcess({ executable, cwd, env, prompt, mode = 'NO
       source: 'MNFS_TRUSTED_PROCESS_RUNNER',
       argv: [executable, '--mode', 'rpc'],
       protocol: 'PI_RPC_JSONL',
+      credentialRoute: piCredentialRouteEvidence(credentialDir),
     },
   };
 }

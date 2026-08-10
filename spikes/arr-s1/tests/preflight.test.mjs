@@ -37,6 +37,9 @@ const CREDENTIALS = Object.freeze({
   authorized: true,
   provider: 'provider-class-fixture',
   authMethodClass: 'operator-supported-login',
+  piCodingAgentDir: '/tmp/mnfs-arr-s1-pi-credentials',
+  xdgDataHome: '/tmp/mnfs-arr-s1-opencode-data',
+  providerEnvironment: [{ name: 'FIXTURE_PROVIDER_ENV', class: 'TEST_DOUBLE' }],
 });
 
 function acceptedProvenance() {
@@ -80,6 +83,21 @@ test('preflight is READY only for exact authority, clean source, safe Linux stat
   assert.deepEqual(result.credentials, {
     provider: 'provider-class-fixture',
     authMethodClass: 'operator-supported-login',
+    routes: {
+      pi: {
+        variable: 'PI_CODING_AGENT_DIR',
+        path: '/tmp/mnfs-arr-s1-pi-credentials',
+        class: 'PERSISTED_AGENT_AUTH_DIRECTORY',
+        valueRecorded: false,
+      },
+      openCode: {
+        variable: 'XDG_DATA_HOME',
+        path: '/tmp/mnfs-arr-s1-opencode-data',
+        class: 'PERSISTED_OPENCODE_AUTH_DATA_DIRECTORY',
+        valueRecorded: false,
+      },
+    },
+    providerEnvironment: [{ name: 'FIXTURE_PROVIDER_ENV', class: 'TEST_DOUBLE', valueRecorded: false }],
   });
   assert.equal(Object.hasOwn(result.credentials, 'token'), false);
   assert.equal(Object.hasOwn(result.credentials, 'apiKey'), false);
@@ -147,6 +165,21 @@ test('credential preflight records provider and auth-method class only and block
     credentials: {
       provider: 'provider-class-fixture',
       authMethodClass: 'operator-supported-login',
+      routes: {
+        pi: {
+          variable: 'PI_CODING_AGENT_DIR',
+          path: '/tmp/mnfs-arr-s1-pi-credentials',
+          class: 'PERSISTED_AGENT_AUTH_DIRECTORY',
+          valueRecorded: false,
+        },
+        openCode: {
+          variable: 'XDG_DATA_HOME',
+          path: '/tmp/mnfs-arr-s1-opencode-data',
+          class: 'PERSISTED_OPENCODE_AUTH_DATA_DIRECTORY',
+          valueRecorded: false,
+        },
+      },
+      providerEnvironment: [{ name: 'FIXTURE_PROVIDER_ENV', class: 'TEST_DOUBLE', valueRecorded: false }],
     },
   });
 

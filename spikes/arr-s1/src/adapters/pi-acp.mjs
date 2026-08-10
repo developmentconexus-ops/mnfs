@@ -1,4 +1,6 @@
 import { createAcpStdioClient } from '../acp/client.mjs';
+import { requirePiCredentialRoute, piCredentialRouteEvidence } from '../credential-routes.mjs';
+import { revalidateTrustedPiAcpLauncher } from '../pi-acp-launcher.mjs';
 
 const PROTOCOL_COMPATIBILITY_PENDING = 'PENDING_REAL_GATE_S1';
 
@@ -91,12 +93,26 @@ export function createPiAcpAdapter({
   clientCapabilities,
   clientRequestHandlers,
   beforeSpawn,
+  launcherBinding,
   createClient = createAcpStdioClient,
 } = {}) {
   requireAbsolute(executable, 'entrypoint');
   requireAbsolute(cwd, 'cwd');
   const explicitEnv = requireExplicitEnvironment(env);
   requireAbsolute(explicitEnv.PI_ACP_PI_COMMAND, 'PI_ACP_PI_COMMAND');
+  if (explicitEnv.PI_ACP_PI_COMMAND.endsWith('.mjs')) {
+    throw new TypeError('Pi-ACP PI_ACP_PI_COMMAND must point to a trusted executable launcher, not a 100644 .mjs helper');
+  }
+  const piCredentialDir = requirePiCredentialRoute(explicitEnv.PI_CODING_AGENT_DIR);
+  if (!launcherBinding || typeof launcherBinding !== 'object') {
+    throw new TypeError('Pi-ACP requires a hash-bound trusted executable launcher');
+  }
+  if (launcherBinding.role !== 'MNFS_TRUSTED_LAUNCHER' || launcherBinding.mode !== '0700') {
+    throw new TypeError('Pi-ACP launcher must be an executable 0700 MNFS trusted launcher');
+  }
+  if (launcherBinding.path !== explicitEnv.PI_ACP_PI_COMMAND) {
+    throw new TypeError('Pi-ACP launcher binding must match PI_ACP_PI_COMMAND');
+  }
   if (typeof createClient !== 'function') throw new TypeError('Pi-ACP createClient must be a function');
 
   const processSpec = buildProcessSpec({
@@ -116,6 +132,17 @@ export function createPiAcpAdapter({
       argv: [explicitEnv.PI_ACP_PI_COMMAND, '--mode', 'rpc', '--no-themes'],
       environmentSource: 'EXACT_PI_ACP_PARENT_ENV',
     },
+    launcher: {
+      runRoot: launcherBinding.runRoot,
+      path: launcherBinding.path,
+      nodePath: launcherBinding.nodePath,
+      wrapperPath: launcherBinding.wrapperPath,
+      sha256: launcherBinding.sha256,
+      sizeBytes: launcherBinding.sizeBytes,
+      mode: launcherBinding.mode,
+      role: launcherBinding.role,
+    },
+    credentialRoute: piCredentialRouteEvidence(piCredentialDir),
     innerPiControlSource: explicitEnv.MNFS_PI_ACP_EXECUTABLE
       ? 'MNFS_TRUSTED_WRAPPER_REVALIDATES_PI'
       : 'CANDIDATE_SUPPLIED_PI_COMMAND',
@@ -143,7 +170,10 @@ export function createPiAcpAdapter({
         ndJsonStream,
         ...(clientCapabilities ? { clientCapabilities } : {}),
         ...(clientRequestHandlers ? { clientRequestHandlers } : {}),
-        ...(beforeSpawn ? { beforeSpawn } : {}),
+        beforeSpawn: async () => {
+          await revalidateTrustedPiAcpLauncher(launcherBinding);
+          await beforeSpawn?.();
+        },
       })).then((client) => {
         requireCommonClient(client);
         commonClient = client;

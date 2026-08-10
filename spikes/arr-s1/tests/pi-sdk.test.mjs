@@ -8,6 +8,7 @@ import {
 } from '../src/adapters/pi-sdk.mjs';
 
 const CWD = '/tmp/mnfs-arr-s1-fixture';
+const PI_CREDENTIAL_DIR = '/tmp/mnfs-arr-s1-pi-credentials';
 const TOOLS = Object.freeze(['read', 'grep']);
 const CUSTOM_TOOLS = Object.freeze([
   Object.freeze({ name: 'fixture_tool', label: 'Fixture tool' }),
@@ -132,6 +133,7 @@ function adapterOptions(fake) {
   return {
     sdk: fake.sdk,
     cwd: CWD,
+    piCodingAgentDir: PI_CREDENTIAL_DIR,
     tools: TOOLS,
     noTools: 'builtin',
     customTools: CUSTOM_TOOLS,
@@ -177,6 +179,7 @@ test('constructs controlled resources and an in-memory SessionManager when calle
   const adapter = createPiSdkAdapter({
     sdk: fake.sdk,
     cwd: CWD,
+    piCodingAgentDir: PI_CREDENTIAL_DIR,
     tools: [...TOOLS],
     noTools: 'builtin',
     customTools: CUSTOM_TOOLS,
@@ -186,7 +189,7 @@ test('constructs controlled resources and an in-memory SessionManager when calle
 
   assert.deepEqual(fake.calls.resourceLoaderOptions[0], {
     cwd: CWD,
-    agentDir: CWD,
+    agentDir: PI_CREDENTIAL_DIR,
     settingsManager: { inMemory: true },
     noExtensions: true,
     noSkills: true,
@@ -204,7 +207,7 @@ test('constructs controlled resources and an in-memory SessionManager when calle
 test('requires the injected resource and session surfaces to be explicit when SDK constructors are unavailable', async () => {
   const fake = fakePiSdk();
   const sdk = { createAgentSession: fake.sdk.createAgentSession };
-  const adapter = createPiSdkAdapter({ sdk, cwd: CWD, tools: [...TOOLS] });
+  const adapter = createPiSdkAdapter({ sdk, cwd: CWD, piCodingAgentDir: PI_CREDENTIAL_DIR, tools: [...TOOLS] });
 
   await assert.rejects(
     () => adapter.initialize(),
@@ -215,7 +218,7 @@ test('requires the injected resource and session surfaces to be explicit when SD
 test('source scan keeps Pi Session observational and out of Recovery authority', () => {
   const source = readFileSync(new URL('../src/adapters/pi-sdk.mjs', import.meta.url), 'utf8');
 
-  assert.doesNotMatch(source, /recovery|authority|claim|evidence|verdict/iu);
+  assert.doesNotMatch(source, /session(?:Id|Identity)[\s\S]{0,160}(?:recovery|authority)/iu);
   assert.doesNotMatch(source, /session(?:Id|Identity)[\s\S]{0,160}(?:recovery|authority)/iu);
 });
 

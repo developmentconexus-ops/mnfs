@@ -76,7 +76,13 @@ test('CLI production composition runs the raw Pi double in a trusted child and b
         stagingMode: 'TEST_DOUBLE',
         stagedPaths: [stagedFile],
         upstreamSurfaces: { runtimeModule: stagedFile },
-        environment: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' },
+        environment: {
+          PATH: '/usr/bin:/bin',
+          LANG: 'C',
+          LC_ALL: 'C',
+          PI_CODING_AGENT_DIR: path.join(base, 'pi-credentials'),
+          XDG_DATA_HOME: path.join(base, 'opencode-data'),
+        },
         upgradePolicy: POLICY,
         removalConditions: REMOVAL,
       };
@@ -94,6 +100,8 @@ test('CLI production composition runs the raw Pi double in a trusted child and b
       ...process.env,
       HOME: base,
       XDG_STATE_HOME: base,
+      PI_CODING_AGENT_DIR: path.join(base, 'pi-credentials'),
+      XDG_DATA_HOME: path.join(base, 'opencode-data'),
       MNFS_ARR_S1_EXECUTE_AUTHORIZATION: token,
     };
     const run = await runCliProcess([cliPath, 'run', '--json', '--provider-class', 'fixture', '--auth-method-class', 'local-double'], fixture.workspacePath, env);

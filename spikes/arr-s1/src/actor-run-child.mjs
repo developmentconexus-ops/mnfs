@@ -37,6 +37,7 @@ async function main() {
   const adapter = createPiSdkAdapter({
     sdk,
     cwd: fixture.workspacePath,
+    piCodingAgentDir: process.env.PI_CODING_AGENT_DIR,
     tools: [],
     noTools: 'all',
     customTools: tools.customTools,

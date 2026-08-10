@@ -5,7 +5,7 @@ document_type: research_map
 form: explanation
 authority: research_historical
 status: draft
-version: 0.4.0
+version: 0.5.0
 owners:
   - developmentconexus-ops
 source_of_truth_for:
@@ -924,14 +924,31 @@ Auditoria contra a lista exaustiva de exports (mitra-sdk 70 fns, interactions-sd
 - `dbActions` — presente no world-model, semântica exata não isolada
 - Voice agent do Escopo (gemini-flash) — mencionado, não investigado
 
-**Não investigado (fronteira atual):**
-- Wire protocol do `/sdk-ws` (frames websocket reais)
-- Superfície REST do backend (`baseURL` endpoints crus por trás do SDK)
-- Internals do sandbox E2B / system prompt da harness (só o CLAUDE.md do projeto, não o do agente)
-- Estrutura do scaffold/template frontend (arquivos base herdados)
-- Planos/preços/limites (`burstLimit` visto = 5000; resto não)
+**Não investigado (fronteira à época do §19):**
+- ~~Wire protocol do `/sdk-ws`~~ → **fechado** em §20 e §26.7 (frames completos)
+- ~~Superfície REST do backend~~ → **fechado** em §20, §23, §24, §25
+- ~~Internals do sandbox E2B / scaffold~~ → **fechado** em §21
+- ~~System prompt da harness~~ → **parcial** em §22 (CLAUDE.md e wrapper do Escopo extraídos; prompt base do CLI não trafega pelo frontend)
+- Planos/preços/limites (`burstLimit` visto = 5000; resto não) — **ainda aberto**
 
-Conclusão honesta: **funcionamento do produto e framework de abstração — cobertos**. O que resta é infraestrutura interna (wire protocols, sandbox, scaffold) que exige ou tráfego ao vivo ou acesso ao repo-template — extraível se o Operador quiser descer a esse nível.
+### 19.1 Estado da cobertura após §20–26 (revisão 2026-08-10)
+
+**Fronteira atual — o que continua fora, e por quê:**
+
+| Item | Status | Motivo |
+|---|---|---|
+| `SKILL_MD` do Escopo (metodologia completa) | **Bloqueado por decisão** | Fica na SF#4 do projeto 42949, co-localizada com a `GEMINI_API_KEY`. Buscá-la exporia o segredo. Metodologia inferida do output em §13/§15.6 |
+| System prompt base do Claude Code CLI | **Inalcançável daqui** | Roda dentro do sandbox; não trafega pelo frontend |
+| `coordinator_*` (login Claude do coordenador) | **Não investigado** | Achado novo em §26.7. Sugere orquestrador separado das tasks — vale um passe |
+| Planos, preços, limites, cotas | Não investigado | Só `burstLimit = 5000` |
+| `manageAgentCredential` OAuth/device ao vivo | **Não exercido por decisão** | Exigiria conectar credencial real |
+| `AgentTaskSession` embutível | Assinatura conhecida | Não instanciado fora do builder |
+| `dbActions` — semântica exata | Assinatura conhecida | Presente no world-model, comportamento não isolado |
+| Protocolo interno de `migrations.yaml` | Parcial | Regra append-only conhecida; formato interno não extraído |
+| Voice agent do Escopo (gemini-flash) | Não investigado | Mencionado, baixa prioridade |
+| `opencode-cli` / `opencode-sdk` ao vivo | Superfície conhecida | Existe no dispatch (§26.6); nunca observado executando |
+
+**Conclusão honesta (revisada):** produto, harness, framework de abstração, ciclo de desenvolvimento, sessão/contexto, publicação e conexões de dados estão **cobertos com evidência direta**. O que resta é (a) dois segredos que decidi não perseguir, (b) o prompt base do CLI que é estruturalmente inalcançável de fora do sandbox, e (c) uma cauda de itens de baixo valor para o Conexus — exceto o **coordinator**, que é o único candidato real a um próximo passe.
 
 ## 20. Lógica interna dos SDKs (JS real, não d.ts) — REST + wire do websocket
 

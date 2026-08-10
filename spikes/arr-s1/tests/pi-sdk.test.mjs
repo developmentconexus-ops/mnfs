@@ -151,6 +151,7 @@ test('uses only the frozen Pi createAgentSession options and keeps session ident
 
   assert.deepEqual(fake.calls.create[0], {
     cwd: CWD,
+    agentDir: PI_CREDENTIAL_DIR,
     tools: [...TOOLS],
     noTools: 'builtin',
     customTools: CUSTOM_TOOLS,

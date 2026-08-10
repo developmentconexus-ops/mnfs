@@ -11,6 +11,7 @@ import {
   openCodeCredentialRouteEvidence,
   piCredentialRouteEvidence,
   providerEnvironmentClassEvidence,
+  requireCredentialRouteBinding,
 } from './credential-routes.mjs';
 
 const REQUIRED_PROVENANCE_IDS = Object.freeze(['PI-SDK', 'PI-RPC', 'PI-ACP', 'OPENCODE-ACP', 'ACP-SDK']);
@@ -285,6 +286,21 @@ export async function preflightS1(input = {}) {
     credentialResult = { status: 'BLOCKED', reason: 'raw credential material is not accepted by deterministic preflight' };
   }
   if (credentialResult.status !== 'READY') blockers.push(blocked('credentials', credentialResult.reason));
+  if (credentialResult.status === 'READY' && provenanceResult.ok) {
+    for (const candidateShape of ['PI-SDK', 'PI-RPC', 'PI-ACP', 'OPENCODE-ACP']) {
+      try {
+        const environment = provenanceResult.records?.[candidateShape]?.environment;
+        requireCredentialRouteBinding({
+          candidateShape,
+          authorizedRoutes: credentialResult.credentials.routes,
+          stagedEnvironment: environment,
+          processEnvironment: environment,
+        });
+      } catch {
+        blockers.push(blocked('credentialRoutes', `${candidateShape} credential route is not equal across authorized route and staged environment`));
+      }
+    }
+  }
 
   return {
     status: blockers.length === 0 ? 'READY' : 'BLOCKED',

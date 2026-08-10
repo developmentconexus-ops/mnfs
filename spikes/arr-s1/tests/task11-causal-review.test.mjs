@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import test from 'node:test';
 
 import { createAcpClient } from '../src/acp/client.mjs';
@@ -198,29 +201,43 @@ test('trusted Pi-ACP wrapper rejects a conflicting tool allowlist', async () => 
 });
 
 test('OpenCode ACP receives an explicit isolated profile and config surface', () => {
-  const adapter = createOpenCodeAcpAdapter({
-    executable: '/state/candidates/opencode/bin/opencode',
-    cwd: CWD,
-    env: { PATH: '/usr/bin:/bin' },
-    profile: {
-      runRoot: '/state/runs/opencode',
-      configDir: '/state/runs/opencode/config',
-      configPath: '/state/runs/opencode/config/config.json',
-      xdgConfigHome: '/state/runs/opencode/xdg-config',
-      xdgStateHome: '/state/runs/opencode/xdg-state',
-      xdgCacheHome: '/state/runs/opencode/xdg-cache',
-      xdgDataHome: '/state/runs/opencode/auth-data',
-      config: { tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] },
-      modelEditFamily: 'edit',
-    },
-  });
+  const root = mkdtempSync(`${tmpdir()}/mnfs-arr-s1-causal-opencode-`);
+  const configDir = `${root}/config`;
+  const configPath = `${configDir}/config.json`;
+  const config = { tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] };
+  const bytes = Buffer.from(`${JSON.stringify(config)}\n`);
+  mkdirSync(configDir, { recursive: true });
+  writeFileSync(configPath, bytes, { mode: 0o600 });
+  try {
+    const adapter = createOpenCodeAcpAdapter({
+      executable: '/state/candidates/opencode/bin/opencode',
+      cwd: CWD,
+      env: { PATH: '/usr/bin:/bin' },
+      profile: {
+        runRoot: root,
+        configDir,
+        configPath,
+        xdgConfigHome: `${root}/xdg-config`,
+        xdgStateHome: `${root}/xdg-state`,
+        xdgCacheHome: `${root}/xdg-cache`,
+        xdgDataHome: `${root}/auth-data`,
+        config,
+        configHash: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
+        configSizeBytes: bytes.length,
+        configMode: '0600',
+        modelEditFamily: 'edit',
+      },
+    });
 
-  assert.equal(adapter.processSpec.env.OPENCODE_CONFIG_DIR, '/state/runs/opencode/config');
-  assert.equal(adapter.processSpec.env.OPENCODE_CONFIG, '/state/runs/opencode/config/config.json');
-  assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
-  assert.equal(adapter.observations.profile.source, 'MNFS_TRUSTED_ISOLATED_PROFILE');
-  assert.equal(adapter.observations.discoveryControlled, true);
-  assert.match(adapter.observations.discoveryReason, /global|project/u);
+    assert.equal(adapter.processSpec.env.OPENCODE_CONFIG_DIR, configDir);
+    assert.equal(adapter.processSpec.env.OPENCODE_CONFIG, configPath);
+    assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
+    assert.equal(adapter.observations.profile.source, 'MNFS_TRUSTED_ISOLATED_PROFILE');
+    assert.equal(adapter.observations.discoveryControlled, true);
+    assert.match(adapter.observations.discoveryReason, /auth route|global|project/u);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('state-root preflight blocks an unreviewed filesystem even when the name is present', async () => {

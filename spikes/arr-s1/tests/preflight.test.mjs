@@ -43,7 +43,17 @@ const CREDENTIALS = Object.freeze({
 });
 
 function acceptedProvenance() {
-  return structuredClone(S1_FROZEN_CANDIDATE_PROVENANCE);
+  const records = structuredClone(S1_FROZEN_CANDIDATE_PROVENANCE);
+  for (const record of Object.values(records)) {
+    record.environment = {
+      PATH: '/usr/bin:/bin',
+      LANG: 'C',
+      LC_ALL: 'C',
+      PI_CODING_AGENT_DIR: CREDENTIALS.piCodingAgentDir,
+      XDG_DATA_HOME: CREDENTIALS.xdgDataHome,
+    };
+  }
+  return records;
 }
 
 function safeInput(overrides = {}) {

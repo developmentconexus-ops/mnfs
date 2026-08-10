@@ -42,3 +42,44 @@ export function providerEnvironmentClassEvidence(entries = []) {
     return Object.freeze({ name: entry.name, class: entry.class, valueRecorded: false });
   }));
 }
+
+function routeForCandidate(candidateShape, authorizedRoutes) {
+  if (candidateShape === 'PI-SDK' || candidateShape === 'PI-RPC' || candidateShape === 'PI-ACP') {
+    return {
+      variable: 'PI_CODING_AGENT_DIR',
+      evidence: authorizedRoutes?.pi,
+      require: requirePiCredentialRoute,
+    };
+  }
+  if (candidateShape === 'OPENCODE-ACP') {
+    return {
+      variable: 'XDG_DATA_HOME',
+      evidence: authorizedRoutes?.openCode,
+      require: requireOpenCodeDataRoute,
+    };
+  }
+  return null;
+}
+
+export function requireCredentialRouteBinding({
+  candidateShape,
+  authorizedRoutes,
+  stagedEnvironment,
+  processEnvironment,
+} = {}) {
+  const route = routeForCandidate(candidateShape, authorizedRoutes);
+  if (!route) throw new Error(`credential route binding is unavailable for ${candidateShape ?? '<missing>'}`);
+  const authorized = route.require(route.evidence?.path);
+  const staged = route.require(stagedEnvironment?.[route.variable]);
+  const process = route.require(processEnvironment?.[route.variable]);
+  if (authorized !== staged || authorized !== process) {
+    throw new Error(`credential route binding mismatch for ${candidateShape}`);
+  }
+  return Object.freeze({
+    candidateShape,
+    variable: route.variable,
+    path: authorized,
+    class: route.evidence?.class,
+    valueRecorded: false,
+  });
+}

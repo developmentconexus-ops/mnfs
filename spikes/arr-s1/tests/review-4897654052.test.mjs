@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
@@ -151,6 +152,34 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
   const authorizedData = path.join(root, 'authorized-data');
   try {
     await (await import('node:fs/promises')).mkdir(path.join(hostile, 'project'), { recursive: true });
+    await (await import('node:fs/promises')).mkdir(path.join(hostile, 'global-config', 'opencode'), { recursive: true });
+    await (await import('node:fs/promises')).mkdir(path.join(hostile, '.opencode'), { recursive: true });
+    await writeFile(path.join(hostile, 'global-config', 'opencode', 'opencode.json'), '{"tools":{"hostile_global":true}}\n');
+    await writeFile(path.join(hostile, '.opencode', 'opencode.json'), '{"tools":{"hostile_home":true},"plugin":["hostile-plugin"]}\n');
+    await writeFile(path.join(hostile, 'project', 'opencode.json'), '{"tools":{"hostile_project":true}}\n');
+    const profileConfig = {
+      tools: { '*': false, read: true, edit: true },
+      permission: { '*': 'deny', read: 'allow', edit: 'allow' },
+      plugin: [],
+      mcp: [],
+    };
+    const profileBytes = Buffer.from(`${JSON.stringify(profileConfig)}\n`);
+    await (await import('node:fs/promises')).mkdir(path.join(root, 'config-dir'), { recursive: true });
+    await writeFile(path.join(root, 'config-dir', 'config.json'), profileBytes, { mode: 0o600 });
+    const profile = {
+      runRoot: root,
+      configDir: path.join(root, 'config-dir'),
+      configPath: path.join(root, 'config-dir', 'config.json'),
+      xdgConfigHome: path.join(root, 'xdg-config'),
+      xdgStateHome: path.join(root, 'xdg-state'),
+      xdgCacheHome: path.join(root, 'xdg-cache'),
+      xdgDataHome: authorizedData,
+      config: profileConfig,
+      configHash: `sha256:${createHash('sha256').update(profileBytes).digest('hex')}`,
+      configSizeBytes: profileBytes.length,
+      configMode: '0600',
+      modelEditFamily: 'edit',
+    };
     const adapter = createOpenCodeAcpAdapter({
       executable: process.execPath,
       cwd: path.join(hostile, 'project'),
@@ -162,22 +191,7 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
         XDG_CACHE_HOME: path.join(hostile, 'global-cache'),
         OPENCODE_CONFIG_CONTENT: '{"tools":{"hostile":true}}',
       },
-      profile: {
-        runRoot: root,
-        configDir: path.join(root, 'config-dir'),
-        configPath: path.join(root, 'config-dir', 'config.json'),
-        xdgConfigHome: path.join(root, 'xdg-config'),
-        xdgStateHome: path.join(root, 'xdg-state'),
-        xdgCacheHome: path.join(root, 'xdg-cache'),
-        xdgDataHome: authorizedData,
-        config: {
-          tools: { '*': false, read: true, edit: true },
-          permission: { '*': 'deny', read: 'allow', edit: 'allow' },
-          plugin: [],
-          mcp: [],
-        },
-        modelEditFamily: 'edit',
-      },
+      profile,
     });
     assert.equal(adapter.processSpec.env.OPENCODE_DISABLE_PROJECT_CONFIG, '1');
     assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
@@ -188,7 +202,7 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
     assert.equal('OPENCODE_CONFIG_CONTENT' in adapter.processSpec.env, false);
     assert.equal('OPENCODE_AUTH_CONTENT' in adapter.processSpec.env, false);
 
-    const probe = await spawnCapture('/bin/sh', ['-c', 'printf "%s\\n%s\\n%s\\n" "$OPENCODE_DISABLE_PROJECT_CONFIG" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME"'], {
+    const probe = await spawnCapture('/bin/sh', ['-c', 'printf "%s\\n%s\\n%s\\n%s\\n" "$OPENCODE_DISABLE_PROJECT_CONFIG" "$HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME"'], {
       cwd: adapter.processSpec.cwd,
       env: adapter.processSpec.env,
       shell: false,
@@ -196,12 +210,15 @@ test('OpenCode isolation overrides hostile project/global/plugin surfaces and ke
     });
     assert.equal(probe.code, 0, probe.stderr);
     assert.ok(probe.stdout, JSON.stringify(probe));
-    assert.deepEqual(probe.stdout.trim().split('\n'), ['1', path.join(root, 'xdg-config'), authorizedData]);
+    assert.deepEqual(probe.stdout.trim().split('\n'), ['1', root, path.join(root, 'xdg-config'), authorizedData]);
+    assert.equal(adapter.processSpec.env.OPENCODE_CONFIG_DIR, path.join(root, 'config-dir'));
+    assert.equal(adapter.processSpec.env.OPENCODE_PURE, '1');
+    assert.equal(adapter.processSpec.env.OPENCODE_PERMISSION, undefined);
     assert.throws(() => createOpenCodeAcpAdapter({
       executable: process.execPath,
       cwd: CWD,
       env: BASE_ENV,
-      profile: { ...adapter.observations.profile, authRoute: { kind: 'REMOTE_CONFIG' } },
+      profile: { ...profile, authRoute: { kind: 'REMOTE_CONFIG' } },
     }), /fail-closed|remote|auth route/u);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -221,13 +238,13 @@ test('OpenCode C03 derives resolved model-facing inventory, not only observed To
     config: { tools: { '*': false, read: true, edit: true, lint: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow', lint: 'allow' }, plugin: ['hostile-plugin'], mcp: ['hostile-mcp'] },
     modelEditFamily: 'edit',
   });
-  assert.deepEqual(extra.logicalInventory, ['edit_result_file', 'lint', 'read_nonce_file']);
+  assert.deepEqual(extra.logicalInventory, ['edit_result_file', 'lint', 'mcp:hostile-mcp', 'plugin:hostile-plugin', 'read_nonce_file']);
   assert.equal(buildProofs({
     fixture,
     execution: { trustedProofs: { inventory: extra.logicalInventory, fixtureVerified: true } },
   })['S1-C03'], false);
-  assert.deepEqual(extra.pluginTools, []);
-  assert.deepEqual(extra.mcpTools, []);
+  assert.deepEqual(extra.pluginTools, ['plugin:hostile-plugin']);
+  assert.deepEqual(extra.mcpTools, ['mcp:hostile-mcp']);
 });
 
 test('Pi SDK C15 records avoidance of TUI scraping through structured AgentSession evidence', async () => {

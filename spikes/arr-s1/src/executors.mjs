@@ -18,11 +18,31 @@ import { derivePiRpcObservations, runPiRpcProcess, translatePiRpcFixtureCalls } 
 import { deriveTrustedAuthProof } from './proof-driver.mjs';
 import { persistCandidateRecoveryState } from './recovery.mjs';
 import { S1_FROZEN_CANDIDATE_PROVENANCE } from './preflight.mjs';
+import { requireCredentialRouteBinding } from './credential-routes.mjs';
 
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 
 function clone(value) {
   return value === undefined ? undefined : structuredClone(value);
+}
+
+export function safeProvenanceEvidence(record, preflight) {
+  if (!record || typeof record !== 'object') return null;
+  const safeRecord = clone(record);
+  delete safeRecord.environment;
+  delete safeRecord.env;
+  delete safeRecord.providerEnvironment;
+  delete safeRecord.credentials;
+  delete safeRecord.auth;
+  const routes = preflight?.credentials?.routes ?? {};
+  return {
+    ...safeRecord,
+    credentialRoutes: {
+      ...(routes.pi ? { pi: clone(routes.pi) } : {}),
+      ...(routes.openCode ? { openCode: clone(routes.openCode) } : {}),
+      providerEnvironment: clone(preflight?.credentials?.providerEnvironment ?? []),
+    },
+  };
 }
 
 function policyComplete(value, fields) {
@@ -298,13 +318,14 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
   const trustedOptions = { ...context, ...options, fixtureCapabilities };
   if (candidateShape === 'PI-SDK') {
     const sdk = await loadVerifiedUpstreamSurface(trustedOptions, candidateShape, 'runtimeModule');
+    const fixtureTools = createFixtureTools(options.fixture);
     return createPiSdkAdapter({
       ...trustedOptions,
       sdk,
       piCodingAgentDir: record.environment?.PI_CODING_AGENT_DIR,
-      tools: [],
+      tools: fixtureTools.customTools.map(({ name }) => name),
       noTools: 'all',
-      customTools: createFixtureTools(options.fixture).customTools,
+      customTools: fixtureTools.customTools,
     });
   }
   const executable = await revalidatedRecord(trustedOptions, candidateShape).then((fresh) => fresh.upstreamSurfaces?.executable?.path);
@@ -325,6 +346,17 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
     clientRequestHandlers: fixtureCapabilities?.handlers,
     beforeSpawn: () => revalidatedRecord(trustedOptions, candidateShape),
   };
+  const priorBeforeSpawn = adapterOptions.beforeSpawn;
+  adapterOptions.beforeSpawn = async () => {
+    const fresh = await priorBeforeSpawn();
+    requireCredentialRouteBinding({
+      candidateShape,
+      authorizedRoutes: trustedOptions.preflight?.credentials?.routes,
+      stagedEnvironment: fresh.environment,
+      processEnvironment: adapterOptions.env,
+    });
+    return fresh;
+  };
   if (candidateShape === 'PI-ACP') {
     const innerPi = record.upstreamSurfaces?.innerPiExecutable?.path ?? record.upstreamSurfaces?.piExecutable?.path;
     if (!innerPi) throw new Error('Pi-ACP trusted staging does not provide an inner Pi executable');
@@ -338,10 +370,10 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
       MNFS_PI_ACP_EXECUTABLE: innerPi,
     };
     adapterOptions.launcherBinding = launcherBinding;
-    const priorBeforeSpawn = adapterOptions.beforeSpawn;
+    const launcherBeforeSpawn = adapterOptions.beforeSpawn;
     adapterOptions.beforeSpawn = async () => {
       await revalidateTrustedPiAcpLauncher(launcherBinding);
-      await priorBeforeSpawn();
+      await launcherBeforeSpawn();
     };
   }
   if (candidateShape === 'OPENCODE-ACP' && typeof trustedOptions.runRoot === 'string' && path.isAbsolute(trustedOptions.runRoot)) {
@@ -355,7 +387,8 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
       permission: { '*': 'deny', read: 'allow', edit: 'allow' },
     };
     await mkdir(configDir, { recursive: true });
-    await writeFile(configPath, `${JSON.stringify(config)}\n`, { mode: 0o600 });
+    const configBytes = Buffer.from(`${JSON.stringify(config)}\n`);
+    await writeFile(configPath, configBytes, { mode: 0o600 });
     const xdgDataHome = record.environment?.XDG_DATA_HOME;
     if (typeof xdgDataHome !== 'string' || !path.isAbsolute(xdgDataHome)) {
       throw new Error('OpenCode trusted staging does not provide an explicit authorized XDG_DATA_HOME auth route');
@@ -369,6 +402,9 @@ async function defaultAdapterFactory(candidateShape, { record, fixtureCapabiliti
       xdgCacheHome: path.join(profileDir, 'xdg-cache'),
       xdgDataHome,
       config,
+      configHash: `sha256:${createHash('sha256').update(configBytes).digest('hex')}`,
+      configSizeBytes: configBytes.length,
+      configMode: '0600',
       modelEditFamily: 'edit',
     };
   }
@@ -399,7 +435,7 @@ function processPayload(result) {
   try { return JSON.parse(lines.at(-1)); } catch { return null; }
 }
 
-function actorEnvironment(record) {
+function actorEnvironment(record, candidateShape, preflight) {
   const env = record?.environment;
   if (!env || typeof env !== 'object' || Array.isArray(env)) {
     throw new Error('trusted ActorRun requires an explicit candidate environment projection');
@@ -407,7 +443,14 @@ function actorEnvironment(record) {
   if (typeof env.PI_CODING_AGENT_DIR !== 'string' || !env.PI_CODING_AGENT_DIR.startsWith('/')) {
     throw new Error('trusted ActorRun requires an explicit absolute PI_CODING_AGENT_DIR route');
   }
-  return Object.fromEntries(Object.entries(env).sort());
+  const processEnvironment = Object.fromEntries(Object.entries(env).sort());
+  requireCredentialRouteBinding({
+    candidateShape,
+    authorizedRoutes: preflight?.credentials?.routes,
+    stagedEnvironment: env,
+    processEnvironment,
+  });
+  return processEnvironment;
 }
 
 async function runTrustedActorProcess({ candidateShape, fixture, context, record, mode = 'NORMAL', protocol = 'PI-SDK' }) {
@@ -417,7 +460,7 @@ async function runTrustedActorProcess({ candidateShape, fixture, context, record
   const spec = {
     argv: [process.execPath, new URL('./actor-run-child.mjs', import.meta.url).pathname],
     cwd: fixture.workspacePath,
-    env: actorEnvironment(freshRecord),
+    env: actorEnvironment(freshRecord, candidateShape, context.preflight),
     timeoutMs: 5000,
     terminationGraceMs: 100,
     stdoutLimitBytes: 256 * 1024,
@@ -482,10 +525,11 @@ async function runTrustedPiRpcProcess({ candidateShape, fixture, context, mode =
   const record = await revalidatedRecord(context, candidateShape);
   const executable = record.upstreamSurfaces?.executable?.path;
   if (!executable) throw new Error('trusted Pi RPC executable is unavailable');
+  const processEnvironment = actorEnvironment(record, candidateShape, context.preflight);
   const attempt = await runPiRpcProcess({
     executable,
     cwd: fixture.workspacePath,
-    env: actorEnvironment(record),
+    env: processEnvironment,
     prompt: fixture.prompt,
     mode,
     beforeSpawn: async () => {
@@ -493,6 +537,12 @@ async function runTrustedPiRpcProcess({ candidateShape, fixture, context, mode =
       if (fresh.upstreamSurfaces?.executable?.path !== executable) {
         throw new Error('Pi RPC executable changed during final spawn revalidation');
       }
+      requireCredentialRouteBinding({
+        candidateShape,
+        authorizedRoutes: context.preflight?.credentials?.routes,
+        stagedEnvironment: fresh.environment,
+        processEnvironment,
+      });
     },
   });
   return { ...attempt, record };
@@ -650,7 +700,7 @@ async function runPiSdk({ candidateShape, fixture, context, actorProtocol = 'PI-
       settled: normal.payload?.settled ?? { settled: false, outcome: normal.processResult.outcome },
       events: normal.payload?.events ?? [],
       trustedProofs,
-      trustedProvenance: record,
+      trustedProvenance: safeProvenanceEvidence(record, context.preflight),
       toolCalls,
       recoveryStateRecords: recoveryState?.records ?? [],
     };
@@ -685,7 +735,7 @@ async function runPiRpc({ candidateShape, fixture, context }) {
       settled: normal.settled,
       events: normal.messages.map((message, index) => ({ type: message?.type ?? 'unknown', sequence: index + 1 })),
       trustedProofs,
-      trustedProvenance: record,
+      trustedProvenance: safeProvenanceEvidence(record, context.preflight),
       toolCalls,
       recoveryStateRecords: recoveryState?.records ?? [],
     };
@@ -706,6 +756,12 @@ async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context,
   const fixtureCapabilities = createAcpFixtureCapabilities(fixture);
   const adapter = await adapterFactory({ cwd: fixture.workspacePath, fixture, fixtureCapabilities, context, record });
   if (!adapter) throw new Error('staged ACP adapter is unavailable');
+  requireCredentialRouteBinding({
+    candidateShape,
+    authorizedRoutes: context?.preflight?.credentials?.routes,
+    stagedEnvironment: record?.environment,
+    processEnvironment: adapter.processSpec?.env,
+  });
   if (mode === 'DEATH' && typeof adapter.forceKill !== 'function') {
     throw new Error(`${candidateShape} trusted ACP adapter cannot force-kill its process boundary`);
   }
@@ -891,7 +947,7 @@ async function runAcpInternal({ candidateShape, fixture, adapterFactory, context
     toolCalls,
     permissions: normal.fixtureCapabilities.permissionEvidence(),
     recoveryStateRecords: recoveryState?.records ?? [],
-    trustedProvenance: record,
+    trustedProvenance: safeProvenanceEvidence(record, context.preflight),
   };
   const boundary = { kind: 'ACP_PROCESS_BOUNDARY', boundaryObservation: trustedBoundary };
   return writeRuntimeAndBoundary({ candidateShape, fixture, context, execution, adapter: null, boundary });

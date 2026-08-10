@@ -38,7 +38,7 @@ async function main() {
     sdk,
     cwd: fixture.workspacePath,
     piCodingAgentDir: process.env.PI_CODING_AGENT_DIR,
-    tools: [],
+    tools: tools.customTools.map(({ name }) => name),
     noTools: 'all',
     customTools: tools.customTools,
   });

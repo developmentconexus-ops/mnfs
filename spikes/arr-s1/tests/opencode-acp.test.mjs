@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import test from 'node:test';
 
 import {
@@ -15,15 +16,25 @@ const ENV = Object.freeze({
   XDG_DATA_HOME: '/tmp/mnfs-arr-s1-opencode-data',
   MNFS_FIXTURE: 'task-7',
 });
+const PROFILE_CONFIG = Object.freeze({ tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] });
+const PROFILE_ROOT = '/tmp/mnfs-arr-s1-opencode-test-profile';
+const PROFILE_CONFIG_DIR = `${PROFILE_ROOT}/config`;
+const PROFILE_CONFIG_PATH = `${PROFILE_CONFIG_DIR}/config.json`;
+const PROFILE_BYTES = Buffer.from(`${JSON.stringify(PROFILE_CONFIG)}\n`);
+mkdirSync(PROFILE_CONFIG_DIR, { recursive: true });
+writeFileSync(PROFILE_CONFIG_PATH, PROFILE_BYTES, { mode: 0o600 });
 const PROFILE = Object.freeze({
-  runRoot: '/tmp/mnfs-arr-s1-opencode-run',
-  configDir: '/tmp/mnfs-arr-s1-opencode-run/config',
-  configPath: '/tmp/mnfs-arr-s1-opencode-run/config/config.json',
-  xdgConfigHome: '/tmp/mnfs-arr-s1-opencode-run/xdg-config',
-  xdgStateHome: '/tmp/mnfs-arr-s1-opencode-run/xdg-state',
-  xdgCacheHome: '/tmp/mnfs-arr-s1-opencode-run/xdg-cache',
+  runRoot: PROFILE_ROOT,
+  configDir: PROFILE_CONFIG_DIR,
+  configPath: PROFILE_CONFIG_PATH,
+  xdgConfigHome: `${PROFILE_ROOT}/xdg-config`,
+  xdgStateHome: `${PROFILE_ROOT}/xdg-state`,
+  xdgCacheHome: `${PROFILE_ROOT}/xdg-cache`,
   xdgDataHome: ENV.XDG_DATA_HOME,
-  config: { tools: { '*': false, read: true, edit: true }, permission: { '*': 'deny', read: 'allow', edit: 'allow' }, plugin: [], mcp: [] },
+  config: PROFILE_CONFIG,
+  configHash: `sha256:${createHash('sha256').update(PROFILE_BYTES).digest('hex')}`,
+  configSizeBytes: PROFILE_BYTES.length,
+  configMode: '0600',
   modelEditFamily: 'edit',
 });
 
@@ -92,6 +103,7 @@ test('starts native OpenCode ACP with exact argv, cwd and explicit environment',
         OPENCODE_CONFIG_DIR: PROFILE.configDir,
         OPENCODE_CONFIG: PROFILE.configPath,
         OPENCODE_PURE: '1',
+        HOME: PROFILE.runRoot,
       },
       timeoutMs: 1400,
       terminationGraceMs: 200,

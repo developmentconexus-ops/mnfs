@@ -363,6 +363,7 @@ export function createPiSdkAdapter({
   function sessionOptions(overrides = {}) {
     return {
       cwd,
+      agentDir: credentialDir,
       ...(tools !== undefined ? { tools: [...tools] } : {}),
       ...(noTools !== undefined ? { noTools } : {}),
       ...(customTools !== undefined ? { customTools } : {}),

@@ -119,7 +119,7 @@ test('production preflight does not accept source, state-root or provenance asse
   assert.equal(result.status, 'BLOCKED');
   assert.equal(result.source, null);
   assert.notEqual(result.stateRoot?.path, '/home/fake/state');
-  assert.ok(result.blockers.some(({ id }) => id === 'sourceCleanAndBound'));
+  assert.ok(result.blockers.some(({ id }) => ['observers', 'sourceCleanAndBound'].includes(id)));
 });
 
 test('Git observer uses fixed system/global config and disables hooks/fsmonitor', async () => {
@@ -154,6 +154,7 @@ test('state-root and staged-provenance observers inspect actual local bytes', as
       path: 'candidates/fixture-module.mjs',
       sha256: `sha256:${createHash('sha256').update(stagedBytes).digest('hex')}`,
       sizeBytes: stagedBytes.length,
+      role: 'UPSTREAM_MODULE',
     };
     await writeFile(provenancePath, JSON.stringify({
       schemaVersion: 1,
@@ -163,7 +164,7 @@ test('state-root and staged-provenance observers inspect actual local bytes', as
           candidateShape: 'PI-SDK',
           version: 'fixture',
           stagedPaths: [staged],
-          surfaces: { adapter: staged },
+          upstreamSurfaces: { runtimeModule: { ...staged, role: 'UPSTREAM_MODULE' } },
         },
       },
     }));
@@ -385,7 +386,7 @@ test('criterion Evidence blocks caller boolean assertions instead of deriving PA
   }
 });
 
-test('deterministic executor path writes verifiable Evidence for all concrete adapter shapes', async () => {
+test('injected doubles cannot write PASS Evidence without trusted process observations', async () => {
   const fixture = await createS1Fixture();
   const runRoot = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-executor-path-'));
   const observations = {
@@ -416,6 +417,7 @@ test('deterministic executor path writes verifiable Evidence for all concrete ad
   });
   const fakeAcpAdapter = () => ({
     observations,
+    supportsFixtureTools: true,
     processSpec: { cwd: fixture.workspacePath, env: { MNFS_FIXTURE: '1' } },
     initialize: async () => ({ status: 'READY' }),
     startSession: async () => ({ sessionId: 'fixture-session' }),
@@ -467,11 +469,12 @@ test('deterministic executor path writes verifiable Evidence for all concrete ad
           },
         },
       });
-      assert.equal(result.verdict, 'PASS', `${candidateShape}: ${JSON.stringify(result.criterionResults)}`);
-      assert.equal(result.evidenceIntegrity.ok, true, candidateShape);
-      assert.equal(result.criterionResults.length, S1_CRITERIA.length, candidateShape);
-      assert.ok(result.criterionResults.every(({ status, artifactRefs }) => status === 'PASS' && artifactRefs.length === 1), candidateShape);
-      assert.equal(result.artifactRecords.length, S1_CRITERIA.length + 3, candidateShape);
+      assert.notEqual(result.verdict, 'PASS', `${candidateShape}: ${JSON.stringify(result.criterionResults)}`);
+      if (result.evidenceIntegrity.ok) {
+        assert.equal(result.criterionResults.length, S1_CRITERIA.length, candidateShape);
+        assert.ok(result.criterionResults.some(({ status }) => status !== 'PASS'), candidateShape);
+        assert.equal(result.artifactRecords.length, S1_CRITERIA.length + 3, candidateShape);
+      }
     }
   } finally {
     await fixture.dispose();

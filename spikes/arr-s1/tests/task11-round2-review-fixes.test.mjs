@@ -37,16 +37,22 @@ async function gitHead(repoRoot) {
 
 function runCliProcess(argv, cwd, env) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, argv, { cwd, env, stdio: 'ignore' });
+    const child = spawn(process.execPath, argv, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
+    const stdout = [];
+    const stderr = [];
+    child.stdout.on('data', (chunk) => stdout.push(chunk));
+    child.stderr.on('data', (chunk) => stderr.push(chunk));
     child.once('error', reject);
     child.once('close', (exitCode, signal) => resolve({
       outcome: signal ? 'SIGNAL_DEATH' : 'NORMAL_EXIT',
       exitCode,
+      stdout: Buffer.concat(stdout).toString('utf8'),
+      stderr: Buffer.concat(stderr).toString('utf8'),
     }));
   });
 }
 
-test('CLI production composition runs faithful staged doubles and fresh report verifies shared bindings', async () => {
+test('CLI production composition runs the raw Pi double in a trusted child and blocks unavailable ACP surfaces', async () => {
   const fixture = await createS1Fixture();
   const base = await mkdtemp(path.join(tmpdir(), 'mnfs-arr-s1-round2-cli-'));
   const stateRoot = path.join(base, 'mnfs');
@@ -58,30 +64,18 @@ test('CLI production composition runs faithful staged doubles and fresh report v
     const bytes = await readFile(stagedDouble);
     const stagedFile = {
       path: 'candidates/production-doubles.mjs',
-      role: 'adapter-module',
+      role: 'UPSTREAM_MODULE',
       sha256: sha256Bytes(bytes),
       sizeBytes: bytes.length,
     };
     const records = {};
     for (const [candidateShape, frozen] of Object.entries(S1_FROZEN_CANDIDATE_PROVENANCE)) {
       if (candidateShape === 'SECOND-ACP') continue;
-      const adapterExport = {
-        'PI-SDK': 'createPiSdkAdapter',
-        'PI-ACP': 'createPiAcpAdapter',
-        'OPENCODE-ACP': 'createOpenCodeAcpAdapter',
-        'PI-RPC': 'createPiSdkAdapter',
-        'ACP-SDK': 'createOpenCodeAcpAdapter',
-      }[candidateShape];
       records[candidateShape] = {
         ...frozen,
         stagingMode: 'TEST_DOUBLE',
         stagedPaths: [stagedFile],
-        surfaces: {
-          adapter: { ...stagedFile, export: adapterExport },
-          boundary: { ...stagedFile, export: 'createActorRunProcess' },
-          executable: { ...stagedFile, role: 'executable' },
-          acpSdk: { ...stagedFile, role: 'acp-sdk' },
-        },
+        upstreamSurfaces: { runtimeModule: stagedFile },
         environment: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' },
         upgradePolicy: POLICY,
         removalConditions: REMOVAL,
@@ -104,7 +98,7 @@ test('CLI production composition runs faithful staged doubles and fresh report v
     };
     const run = await runCliProcess([cliPath, 'run', '--json', '--provider-class', 'fixture', '--auth-method-class', 'local-double'], fixture.workspacePath, env);
     assert.equal(run.outcome, 'NORMAL_EXIT');
-    assert.equal(run.exitCode, 0);
+    assert.equal(run.exitCode, 2, JSON.stringify(run));
     const runEntries = (await readdir(path.join(stateRoot, 'spikes', 'arr-s1'), { withFileTypes: true }))
       .filter((entry) => entry.isDirectory() && /^arr-s1-/u.test(entry.name));
     assert.equal(runEntries.length, 1);
@@ -112,13 +106,14 @@ test('CLI production composition runs faithful staged doubles and fresh report v
 
     const fresh = await runCliProcess([cliPath, 'report', '--run-id', runId, '--json'], fixture.workspacePath, env);
     assert.equal(fresh.outcome, 'NORMAL_EXIT');
-    assert.equal(fresh.exitCode, 0);
+    assert.equal(fresh.exitCode, 2);
 
     const runRoot = path.join(stateRoot, 'spikes', 'arr-s1', runId);
     const manifest = JSON.parse(await readFile(path.join(runRoot, 'manifest.json'), 'utf8'));
+    const report = JSON.parse(await readFile(path.join(runRoot, 'report.json'), 'utf8'));
     const reportRecord = manifest.records.find((record) => record.path === 'report.json');
     const candidateRecords = manifest.records.filter((record) => record.binding?.candidateShape && record.binding.candidateShape !== 'S1-RUN');
-    assert.ok(candidateRecords.length > 0);
+    assert.ok(candidateRecords.length > 0, JSON.stringify({ run, report, manifest }));
     for (const record of candidateRecords) {
       assert.equal(record.binding.runId, reportRecord.binding.runId);
       assert.equal(record.binding.contractHash, reportRecord.binding.contractHash);

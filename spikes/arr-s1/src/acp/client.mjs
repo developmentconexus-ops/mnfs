@@ -74,6 +74,12 @@ function processBoundaryFromExecution(execution) {
       })();
       return closePromise;
     },
+    async result() {
+      return execution.result;
+    },
+    forceKill(reason = 'acp forced process death') {
+      return execution.forceKill?.(reason) ?? false;
+    },
   };
 }
 
@@ -384,7 +390,15 @@ export function createAcpClient({
     if (error) throw error;
   }
 
-  return Object.freeze({ initialize, handshake, startSession, prompt, cancel, shutdown });
+  async function processObservation() {
+    return processBoundary.result?.() ?? null;
+  }
+
+  function forceKill(reason = 'acp forced process death') {
+    return processBoundary.forceKill?.(reason) ?? false;
+  }
+
+  return Object.freeze({ initialize, handshake, startSession, prompt, cancel, shutdown, processObservation, forceKill });
 }
 
 export async function createAcpStdioClient({
@@ -392,11 +406,14 @@ export async function createAcpStdioClient({
   clientFactory,
   ndJsonStream,
   clientOptions = { name: 'mnfs-arr-s1' },
+  beforeSpawn,
   ...options
 } = {}) {
   if (!processSpec || typeof processSpec !== 'object' || !processSpec.env) throw new TypeError('ACP stdio processSpec must provide an explicit env');
   if (typeof clientFactory !== 'function') throw new TypeError('ACP clientFactory must be the public client function');
   if (typeof ndJsonStream !== 'function') throw new TypeError('ACP ndJsonStream must be the official stream function');
+  if (beforeSpawn !== undefined && typeof beforeSpawn !== 'function') throw new TypeError('ACP beforeSpawn must be a function');
+  await beforeSpawn?.();
   const execution = startProcess({ ...processSpec, stdinMode: 'protocol', protocolOwner: 'acp-client' });
   const processBoundary = processBoundaryFromExecution(execution);
   try {

@@ -70,6 +70,7 @@ export function createOpenCodeAcpAdapter({
   stderrLimitBytes,
   clientFactory,
   ndJsonStream,
+  beforeSpawn,
   createClient = createAcpStdioClient,
 } = {}) {
   requireAbsolute(executable, 'executable');
@@ -106,6 +107,7 @@ export function createOpenCodeAcpAdapter({
         processSpec: clone(processSpec),
         clientFactory,
         ndJsonStream,
+        ...(beforeSpawn ? { beforeSpawn } : {}),
       })).then((client) => {
         requireCommonClient(client);
         commonClient = client;
@@ -148,6 +150,14 @@ export function createOpenCodeAcpAdapter({
     if (commonClient) await commonClient.shutdown();
   }
 
+  async function processObservation() {
+    return commonClient?.processObservation?.() ?? null;
+  }
+
+  function forceKill(reason) {
+    return commonClient?.forceKill?.(reason) ?? false;
+  }
+
   return Object.freeze({
     initialize,
     handshake,
@@ -155,6 +165,8 @@ export function createOpenCodeAcpAdapter({
     prompt,
     cancel,
     shutdown,
+    processObservation,
+    forceKill,
     observations,
     processSpec: clone(processSpec),
   });

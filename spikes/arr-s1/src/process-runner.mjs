@@ -107,6 +107,7 @@ export function startProcess(spec, { signal } = {}) {
   let settled = false;
   let termination = null;
   let forceTimer = null;
+  let forcePollTimer = null;
   let timeoutTimer = null;
   let pendingClose = null;
   let removeAbortListener = () => {};
@@ -120,6 +121,10 @@ export function startProcess(spec, { signal } = {}) {
     if (forceTimer) {
       clearTimeout(forceTimer);
       forceTimer = null;
+    }
+    if (forcePollTimer) {
+      clearTimeout(forcePollTimer);
+      forcePollTimer = null;
     }
     if (timeoutTimer) clearTimeout(timeoutTimer);
     removeAbortListener();
@@ -169,14 +174,24 @@ export function startProcess(spec, { signal } = {}) {
     });
   };
 
-  const requestTermination = (kind, reason) => {
+  const requestTermination = (kind, reason, force = false) => {
     if (settled || termination) return false;
     termination = { kind, reason };
-    terminateProcessGroup(child, 'SIGTERM');
+    terminateProcessGroup(child, force ? 'SIGKILL' : 'SIGTERM');
+    if (force) return true;
     forceTimer = setTimeout(() => {
       forceTimer = null;
-      terminateProcessGroup(child, 'SIGKILL');
-      if (pendingClose) finish(pendingClose);
+      const forcedAt = Date.now();
+      const enforceDeath = () => {
+        terminateProcessGroup(child, 'SIGKILL');
+        if (pendingClose && Date.now() - forcedAt >= 50) {
+          forcePollTimer = null;
+          finish(pendingClose);
+          return;
+        }
+        forcePollTimer = setTimeout(enforceDeath, 10);
+      };
+      enforceDeath();
     }, spec.terminationGraceMs);
     return true;
   };
@@ -211,6 +226,7 @@ export function startProcess(spec, { signal } = {}) {
     stdin: stdinMode === 'protocol' ? child.stdin : null,
     result,
     cancel(reason = 'explicit cancellation') { return requestTermination('CANCELLED', reason); },
+    forceKill(reason = 'forced process death') { return requestTermination('FORCED_DEATH', reason, true); },
   };
 }
 

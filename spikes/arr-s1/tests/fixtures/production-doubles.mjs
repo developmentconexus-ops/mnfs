@@ -1,90 +1,100 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
 
-function digest(value) {
-  return `sha256:${createHash('sha256').update(JSON.stringify(value)).digest('hex')}`;
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-function rawObservation(cwd) {
+function emptyResources() {
   return {
-    cwd,
-    inventory: ['read_nonce_file', 'edit_result_file'],
-    discovery: { extensions: [], skills: [], prompts: [], themes: [], agentsFiles: [] },
-    auth: { outcome: 'AUTHORIZED', methodClass: 'fixture-double' },
-    cancellation: { checkpoint: 'CANCELLATION_BEFORE_FINALIZED', outcome: 'CANCELLED', durationMs: 1 },
-    output: { bytes: 128, limitBytes: 4096 },
-    processDeath: { checkpoint: 'PROCESS_DEATH_BEFORE_FINALIZED', outcome: 'SIGNAL_DEATH' },
-    recovery: { phase: 'FRESH_PROCESS', verified: 'fixture-result' },
-    authority: { sessionRole: 'OBSERVATIONAL', recoveryOwner: 'MNFS' },
-    machinery: { reused: ['fixture', 'artifacts', 'process-runner'] },
-    supportedBoundary: { kind: 'PUBLIC_ADAPTER_SURFACE', observation: 'FIXTURE_DOUBLE' },
+    extensions: [],
+    skills: [],
+    prompts: [],
+    themes: [],
+    agentsFiles: [],
   };
 }
 
-async function executeFixture(fixture) {
-  const nonce = (await readFile(fixture.nonceFilePath, 'utf8')).trim().slice('NONCE='.length);
-  await writeFile(fixture.targetFilePath, `RESULT=${nonce}\n`);
-  return {
-    toolCalls: [
-      { id: 'read_nonce_file', path: fixture.nonceRelativePath, value: nonce },
-      { id: 'edit_result_file', path: fixture.targetRelativePath },
-    ],
-    events: [
-      { type: 'tool_call', tool: 'read_nonce_file' },
-      { type: 'tool_call', tool: 'edit_result_file' },
-      { type: 'turn_complete' },
-    ],
-    observations: rawObservation(fixture.workspacePath),
-  };
+class DefaultResourceLoader {
+  constructor() {}
+  getExtensions() { return emptyResources(); }
+  getSkills() { return emptyResources(); }
+  getPrompts() { return emptyResources(); }
+  getThemes() { return emptyResources(); }
+  getAgentsFiles() { return emptyResources(); }
+  getSystemPrompt() { return ''; }
+  getSystemPromptSource() { return null; }
+  getAppendSystemPrompt() { return ''; }
+  getAppendSystemPromptSources() { return []; }
+  extendResources() {}
+  async reload() {}
 }
 
-function adapter(fixture, kind, { executable, env } = {}) {
+class SettingsManager {
+  static inMemory() { return new SettingsManager(); }
+}
+
+class SessionManager {
+  static inMemory(cwd) { return new SessionManager(cwd); }
+  constructor(cwd) { this.cwd = cwd; }
+}
+
+function createSession({ cwd, customTools = [], rpc = false }) {
+  const subscribers = new Set();
+  let disposed = false;
+  let aborted = false;
+  const sessionId = `${rpc ? 'rpc' : 'sdk'}-fixture-${cwd}`;
+  const emit = (event) => {
+    for (const subscriber of subscribers) subscriber(event);
+  };
+  const tool = (name) => customTools.find((item) => item?.name === name);
+
   return {
-    observations: rawObservation(fixture.workspacePath),
-    processSpec: { argv: executable ? [executable] : null, cwd: fixture.workspacePath, env: { ...(env ?? { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' }) } },
-    async initialize() { return { outcome: 'READY', kind }; },
-    async startTurn() {
-      const execution = await executeFixture(fixture);
-      return { settled: true, outcome: 'COMPLETED', ...execution };
+    sessionId,
+    subscribe(callback) {
+      subscribers.add(callback);
+      return () => subscribers.delete(callback);
     },
-    async startSession() { return { sessionId: `${kind}-fixture` }; },
     async prompt() {
-      const execution = await executeFixture(fixture);
-      return { settled: Promise.resolve({ settled: true, outcome: 'COMPLETED', ...execution }), ...execution };
+      if (disposed) throw new Error('fixture runtime session is disposed');
+      await wait(100);
+      if (aborted) {
+        emit({ type: 'agent_end', willRetry: false });
+        return { status: 'CANCELLED', outcome: 'CANCELLED' };
+      }
+      const read = tool('read_nonce_file');
+      const edit = tool('edit_result_file');
+      if (typeof read?.execute !== 'function' || typeof edit?.execute !== 'function') {
+        throw new Error('fixture runtime requires the supported custom tool API');
+      }
+      emit({ type: 'agent_start' });
+      emit({ type: 'turn_start' });
+      emit({ type: 'tool_execution_start', toolCallId: 'fixture-read', toolName: 'read_nonce_file', args: { path: 'fixture/nonce.txt' } });
+      const nonceResult = await read.execute('fixture-read', { path: 'fixture/nonce.txt' });
+      emit({ type: 'tool_execution_end', toolCallId: 'fixture-read', toolName: 'read_nonce_file', result: nonceResult, isError: false });
+      emit({ type: 'tool_execution_start', toolCallId: 'fixture-edit', toolName: 'edit_result_file', args: { path: 'result.txt' } });
+      const nonce = nonceResult?.content?.[0]?.text;
+      const editResult = await edit.execute('fixture-edit', { path: 'result.txt', nonce });
+      emit({ type: 'tool_execution_end', toolCallId: 'fixture-edit', toolName: 'edit_result_file', result: editResult, isError: false });
+      emit({ type: 'turn_end', message: { role: 'assistant' } });
+      emit({ type: 'agent_end', willRetry: false });
+      return { status: 'COMPLETED', outcome: 'COMPLETED' };
     },
-    async close() {},
-    async shutdown() {},
-  };
-}
-
-export function createPiSdkAdapter(options) {
-  return adapter(options.fixture, 'PI-SDK', options);
-}
-
-export function createPiAcpAdapter(options) {
-  return adapter(options.fixture, 'PI-ACP', options);
-}
-
-export function createOpenCodeAcpAdapter(options) {
-  return adapter(options.fixture, 'OPENCODE-ACP', options);
-}
-
-export function createActorRunProcess({ cwd, env }) {
-  return {
-    kind: 'ACTOR_RUN_PROCESS',
-    async run(spec, action) {
-      const observedEnv = spec.env ?? env;
-      const observation = {
-        cwd: spec.cwd ?? cwd,
-        envDigest: digest(Object.fromEntries(Object.entries(observedEnv).sort())),
-        envSource: 'EXPLICIT_STAGED_ENV',
-      };
-      const result = await action();
-      return {
-        ...result,
-        boundaryObservation: observation,
-        observations: { ...result.observations, ...observation },
-      };
+    async abort() {
+      aborted = true;
+    },
+    dispose() {
+      disposed = true;
+      subscribers.clear();
     },
   };
 }
+
+export function createAgentSession(options) {
+  return createSession(options);
+}
+
+export function createRpcSession(options) {
+  return createSession({ ...options, rpc: true });
+}
+
+export { DefaultResourceLoader, SettingsManager, SessionManager };

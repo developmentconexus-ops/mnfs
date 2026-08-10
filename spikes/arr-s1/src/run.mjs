@@ -194,6 +194,11 @@ export async function orchestrateS1({
   for (const [key, candidateShape] of Object.entries(CONDITIONAL_SHAPES)) {
     if (applicability[key] === 'REQUIRED') {
       phases.conditionals = 'RUNNING';
+      if (candidateShape === 'SECOND-ACP'
+        && (typeof activeExecutors[candidateShape] !== 'function' || !preflightResult?.provenance?.records?.[candidateShape])) {
+        candidates.push(blockedRecord(candidateShape, 'SECOND-ACP is required but no trusted staged candidate/executor is available before execution'));
+        continue;
+      }
       candidates.push(await executeShape({
         candidateShape,
         executors: activeExecutors,

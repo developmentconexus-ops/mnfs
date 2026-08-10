@@ -88,6 +88,7 @@ export function createPiAcpAdapter({
   stderrLimitBytes,
   clientFactory,
   ndJsonStream,
+  beforeSpawn,
   createClient = createAcpStdioClient,
 } = {}) {
   requireAbsolute(executable, 'entrypoint');
@@ -135,6 +136,7 @@ export function createPiAcpAdapter({
         processSpec: clone(processSpec),
         clientFactory,
         ndJsonStream,
+        ...(beforeSpawn ? { beforeSpawn } : {}),
       })).then((client) => {
         requireCommonClient(client);
         commonClient = client;
@@ -177,6 +179,14 @@ export function createPiAcpAdapter({
     if (commonClient) await commonClient.shutdown();
   }
 
+  async function processObservation() {
+    return commonClient?.processObservation?.() ?? null;
+  }
+
+  function forceKill(reason) {
+    return commonClient?.forceKill?.(reason) ?? false;
+  }
+
   return Object.freeze({
     initialize,
     handshake,
@@ -184,6 +194,8 @@ export function createPiAcpAdapter({
     prompt,
     cancel,
     shutdown,
+    processObservation,
+    forceKill,
     observations,
     processSpec: clone(processSpec),
   });

@@ -126,13 +126,56 @@ export async function createS1Fixture({ parentDir = tmpdir() } = {}) {
   }
 }
 
-export async function verifyFixtureResult(fixture, { toolCalls = [] } = {}) {
+export function createFixtureTools(fixture) {
+  if (!fixture || typeof fixture !== 'object') throw new TypeError('fixture is required');
+  const calls = [];
+  const readNonce = async (input = {}) => {
+    if (input.path !== undefined && input.path !== fixture.nonceRelativePath) throw new Error('fixture nonce resource path is invalid');
+    const value = (await readFile(fixture.nonceFilePath, 'utf8')).trim().slice('NONCE='.length);
+    calls.push({ id: 'read_nonce_file', path: fixture.nonceRelativePath, value });
+    return { content: [{ type: 'text', text: value }] };
+  };
+  const editResult = async (input = {}) => {
+    if (input.path !== undefined && input.path !== fixture.targetRelativePath) throw new Error('fixture result tool path is invalid');
+    const nonce = input.nonce ?? calls.findLast((call) => call.id === 'read_nonce_file')?.value;
+    if (nonce !== fixture.nonce) throw new Error('fixture result edit requires the observed nonce');
+    await writeFile(fixture.targetFilePath, `RESULT=${nonce}\n`);
+    calls.push({ id: 'edit_result_file', path: fixture.targetRelativePath });
+    return { content: [{ type: 'text', text: 'edited' }] };
+  };
+  const customTools = Object.freeze([
+    Object.freeze({
+      name: 'read_nonce_file',
+      label: 'Read fixture nonce',
+      description: 'Read the nonce from the fixed fixture resource.',
+      parameters: { type: 'object', properties: { path: { type: 'string' } }, required: [] },
+      execute: async (_toolCallId, input) => readNonce(input),
+    }),
+    Object.freeze({
+      name: 'edit_result_file',
+      label: 'Edit fixture result',
+      description: 'Replace the pending fixture result with the observed nonce.',
+      parameters: { type: 'object', properties: { path: { type: 'string' }, nonce: { type: 'string' } }, required: [] },
+      execute: async (_toolCallId, input) => editResult(input),
+    }),
+  ]);
+  return Object.freeze({
+    calls,
+    customTools,
+    async read_nonce_file(input) { return readNonce(input); },
+    async edit_result_file(input) { return editResult(input); },
+    snapshot() { return calls.map((call) => ({ ...call })); },
+  });
+}
+
+export async function verifyFixtureResult(fixture, { toolCalls = [], fixtureTools = null } = {}) {
+  const observedCalls = fixtureTools?.snapshot?.() ?? toolCalls;
   const errors = [];
-  const readCalls = toolCalls.filter((call) => call?.id === 'read_nonce_file' && call.path === fixture.nonceRelativePath);
+  const readCalls = observedCalls.filter((call) => call?.id === 'read_nonce_file' && call.path === fixture.nonceRelativePath);
   if (readCalls.length !== 1 || readCalls[0].value !== fixture.nonce) {
     errors.push('a real nonce read_nonce_file observation is required');
   }
-  const editCalls = toolCalls.filter((call) => call?.id === 'edit_result_file' && call.path === fixture.targetRelativePath);
+  const editCalls = observedCalls.filter((call) => call?.id === 'edit_result_file' && call.path === fixture.targetRelativePath);
   if (editCalls.length !== 1) errors.push('exactly one deterministic edit_result_file operation is required');
 
   let changedPaths = [];

@@ -4,6 +4,7 @@ import path from 'node:path';
 
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const SENSITIVE_KEY = /token|secret|credential|password|cookie|authorization|api[_-]?key/iu;
+const UPSTREAM_ROLE = /^UPSTREAM_[A-Z0-9_]+$/u;
 
 function sha256(bytes) {
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
@@ -68,20 +69,29 @@ async function verifyRecord(stateRoot, record) {
     throw new TypeError('staged provenance candidate record is malformed');
   }
   rejectSecretKeys(record);
+  if (record.surfaces !== undefined) {
+    throw new TypeError(`candidate staging surfaces must be upstreamSurfaces only for ${record.candidateShape}`);
+  }
   if (!Array.isArray(record.stagedPaths) || record.stagedPaths.length === 0) {
     throw new TypeError(`staged provenance has no staged paths for ${record.candidateShape}`);
   }
   const stagedPaths = await Promise.all(record.stagedPaths.map((descriptor) => readVerifiedFile(stateRoot, descriptor)));
+  if (stagedPaths.some((descriptor) => !UPSTREAM_ROLE.test(descriptor.role ?? ''))) {
+    throw new TypeError(`candidate staging contains a non-upstream surface for ${record.candidateShape}`);
+  }
   const byRelativePath = new Map(record.stagedPaths.map((descriptor, index) => [descriptor.path, stagedPaths[index]]));
-  const surfaces = {};
-  for (const [name, descriptor] of Object.entries(record.surfaces ?? {})) {
+  const upstreamSurfaces = {};
+  for (const [name, descriptor] of Object.entries(record.upstreamSurfaces ?? {})) {
     const verified = byRelativePath.get(descriptor?.path);
     if (!verified || descriptor.sha256 !== verified.sha256 || descriptor.sizeBytes !== verified.sizeBytes) {
-      throw new TypeError(`staged provenance surface ${name} is not bound to staged bytes for ${record.candidateShape}`);
+      throw new TypeError(`staged upstream surface ${name} is not bound to staged bytes for ${record.candidateShape}`);
     }
-    surfaces[name] = { ...descriptor, ...verified };
+    if (!UPSTREAM_ROLE.test(descriptor.role ?? verified.role ?? '')) {
+      throw new TypeError(`staged upstream surface ${name} has a non-upstream role for ${record.candidateShape}`);
+    }
+    upstreamSurfaces[name] = { ...descriptor, ...verified };
   }
-  return { ...record, stagedPaths, surfaces };
+  return { ...record, stagedPaths, upstreamSurfaces };
 }
 
 export async function observeStagedCandidateProvenance({ stateRoot } = {}) {
@@ -113,4 +123,14 @@ export async function observeStagedCandidateProvenance({ stateRoot } = {}) {
     if (error?.code === 'ENOENT') return { sourcePath, records: {}, state: 'MISSING' };
     throw error;
   }
+}
+
+export async function revalidateStagedCandidateProvenance({ stateRoot, candidateShape, expectedManifestSha256 } = {}) {
+  const observed = await observeStagedCandidateProvenance({ stateRoot });
+  if (expectedManifestSha256 && observed.integrity?.manifestSha256 !== expectedManifestSha256) {
+    throw new Error(`candidate staging manifest changed before use for ${candidateShape}`);
+  }
+  const record = observed.records?.[candidateShape];
+  if (!record) throw new Error(`candidate staging record is unavailable before use for ${candidateShape}`);
+  return { ...observed, record };
 }

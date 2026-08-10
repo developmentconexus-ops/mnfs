@@ -2,12 +2,14 @@ import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
 import { S1_CRITERIA } from './contract.mjs';
-import { verifyFixtureResult } from './fixture.mjs';
+import { createFixtureTools, verifyFixtureResult } from './fixture.mjs';
 import { deriveCandidateVerdict } from './evaluate.mjs';
 import { verifyArtifactRecords, writeJsonArtifact } from './artifacts.mjs';
 import { createPiSdkAdapter } from './adapters/pi-sdk.mjs';
 import { createPiAcpAdapter } from './adapters/pi-acp.mjs';
 import { createOpenCodeAcpAdapter } from './adapters/opencode-acp.mjs';
+import { revalidateStagedCandidateProvenance } from './probes/candidate-provenance.mjs';
+import { startProcess } from './process-runner.mjs';
 import { S1_FROZEN_CANDIDATE_PROVENANCE } from './preflight.mjs';
 
 const HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
@@ -41,7 +43,7 @@ function proofStatus(value) {
 }
 
 function exactProvenance(shape, preflight, execution) {
-  const record = expectedProvenance(shape, preflight);
+  const record = execution?.trustedProvenance ?? expectedProvenance(shape, preflight);
   const expected = S1_FROZEN_CANDIDATE_PROVENANCE[shape];
   return Boolean(expected && record?.candidateShape === shape
     && record.version === expected.version
@@ -52,7 +54,9 @@ function exactProvenance(shape, preflight, execution) {
     && record.stagedPaths.length > 0
     && record.stagedPaths.every((file) => typeof file?.path === 'string'
       && HASH_PATTERN.test(file.sha256 ?? '')
-      && Number.isSafeInteger(file.sizeBytes) && file.sizeBytes >= 0));
+      && Number.isSafeInteger(file.sizeBytes) && file.sizeBytes >= 0
+      && typeof file.role === 'string' && file.role.startsWith('UPSTREAM_'))
+    && !record.surfaces);
 }
 
 function expectedProvenance(shape, preflight) {
@@ -78,54 +82,41 @@ function discoveryEmpty(value) {
     && ['extensions', 'skills', 'prompts', 'themes', 'agentsFiles'].every((key) => Array.isArray(value[key]) && value[key].length === 0);
 }
 
-function explicitBoundaryObservation(boundary) {
-  return boundary?.boundaryObservation
-    ?? (boundary?.observations?.cwd && boundary?.observations?.envDigest
-      ? { cwd: boundary.observations.cwd, envDigest: boundary.observations.envDigest, envSource: boundary.observations.envSource }
-      : null);
-}
-
 function buildProofs({ candidateShape, fixture, preflight, execution, adapter, boundary }) {
-  const observations = execution?.observations ?? {};
-  const adapterObservations = adapter?.observations ?? {};
+  const trusted = execution?.trustedProofs ?? {};
   const events = execution?.events ?? [];
   const settled = execution?.settled ?? null;
-  const auth = observations.auth;
-  const cancellation = observations.cancellation;
-  const output = observations.output ?? execution?.output;
-  const processDeath = observations.processDeath;
-  const recovery = observations.recovery;
-  const authority = observations.authority;
-  const machinery = observations.machinery;
-  const supportedBoundary = observations.supportedBoundary ?? adapterObservations.supportedBoundary;
-  const observedBoundary = explicitBoundaryObservation(boundary);
   return {
-    'S1-C01': observations.cwd === fixture?.workspacePath,
-    'S1-C02': typeof boundary?.kind === 'string' && observedBoundary?.cwd === fixture?.workspacePath
-      && HASH_PATTERN.test(observedBoundary.envDigest ?? '')
-      && ['EXPLICIT_STAGED_ENV', 'STAGED_PROVENANCE_ENV'].includes(observedBoundary.envSource),
-    'S1-C03': hasExactInventory(observations.inventory, fixture) && observations.fixtureVerified === true,
-    'S1-C04': discoveryEmpty(observations.discovery),
-    'S1-C05': auth?.outcome === 'AUTHORIZED' && typeof auth.methodClass === 'string' && auth.methodClass.trim() !== '',
-    'S1-C06': cancellation?.checkpoint === 'CANCELLATION_BEFORE_FINALIZED'
-      && cancellation.outcome === 'CANCELLED' && Number.isSafeInteger(cancellation.durationMs) && cancellation.durationMs >= 0,
+    'S1-C01': trusted.cwd === fixture?.workspacePath,
+    'S1-C02': trusted.boundary?.cwd === fixture?.workspacePath
+      && HASH_PATTERN.test(trusted.boundary?.envDigest ?? '')
+      && trusted.boundary?.environmentMatchesRecord === true
+      && trusted.boundary?.source === 'MNFS_TRUSTED_PROCESS_RUNNER',
+    'S1-C03': hasExactInventory(trusted.inventory, fixture) && trusted.fixtureVerified === true,
+    'S1-C04': discoveryEmpty(trusted.discovery),
+    'S1-C05': trusted.auth?.outcome === 'AUTHORIZED' && typeof trusted.auth.methodClass === 'string' && trusted.auth.methodClass.trim() !== '',
+    'S1-C06': trusted.cancellation?.outcome === 'CANCELLED'
+      && trusted.cancellation?.source === 'MNFS_TRUSTED_PROCESS_RUNNER'
+      && Number.isSafeInteger(trusted.cancellation.durationMs) && trusted.cancellation.durationMs >= 0,
     'S1-C07': Array.isArray(events) && events.length > 0
-      && Number.isSafeInteger(output?.bytes) && Number.isSafeInteger(output?.limitBytes)
-      && output.bytes <= output.limitBytes,
+      && Number.isSafeInteger(trusted.output?.bytes) && Number.isSafeInteger(trusted.output?.limitBytes)
+      && trusted.output.bytes <= trusted.output.limitBytes,
     'S1-C08': settled?.settled === true && ['COMPLETED', 'FAILED', 'CANCELLED'].includes(settled.outcome),
-    'S1-C09': processDeath?.checkpoint === 'PROCESS_DEATH_BEFORE_FINALIZED'
-      && ['SIGNAL_DEATH', 'PROCESS_DEATH', 'TIMEOUT', 'CANCELLED'].includes(processDeath.outcome),
-    'S1-C10': recovery?.phase === 'FRESH_PROCESS' && typeof recovery.verified === 'string' && recovery.verified.trim() !== '',
+    'S1-C09': trusted.processDeath?.outcome === 'SIGNAL_DEATH'
+      && trusted.processDeath?.source === 'MNFS_TRUSTED_PROCESS_RUNNER',
+    'S1-C10': trusted.recovery?.phase === 'FRESH_PROCESS'
+      && trusted.recovery?.source === 'MNFS_TRUSTED_RECOVERY_PROCESS'
+      && trusted.recovery.verified === true,
     'S1-C11': Array.isArray(events) && events.every((event) => event && typeof event.type === 'string'),
-    'S1-C12': supportedBoundary && typeof supportedBoundary === 'object'
-      && typeof supportedBoundary.kind === 'string' && supportedBoundary.kind.trim() !== ''
-      && typeof supportedBoundary.observation === 'string' && supportedBoundary.observation.trim() !== '',
+    'S1-C12': trusted.supportedBoundary?.source === 'MNFS_TRUSTED_ADAPTER'
+      && typeof trusted.supportedBoundary.kind === 'string'
+      && typeof trusted.supportedBoundary.observation === 'string',
     'S1-C13': exactProvenance(candidateShape, preflight, execution),
-    'S1-C14': authority?.sessionRole === 'OBSERVATIONAL' && authority.recoveryOwner === 'MNFS',
-    'S1-C15': Array.isArray(machinery?.reused)
-      && ['fixture', 'artifacts', 'process-runner'].every((name) => machinery.reused.includes(name)),
-    'S1-C16': policyComplete(expectedProvenance(candidateShape, preflight)?.upgradePolicy, POLICY_FIELDS)
-      && policyComplete(expectedProvenance(candidateShape, preflight)?.removalConditions, REMOVAL_FIELDS),
+    'S1-C14': trusted.authority?.sessionRole === 'OBSERVATIONAL' && trusted.authority.recoveryOwner === 'MNFS',
+    'S1-C15': Array.isArray(trusted.machinery?.reused)
+      && ['fixture', 'artifacts', 'process-runner'].every((name) => trusted.machinery.reused.includes(name)),
+    'S1-C16': policyComplete(trusted.upgradePolicy, POLICY_FIELDS)
+      && policyComplete(trusted.removalConditions, REMOVAL_FIELDS),
   };
 }
 
@@ -139,17 +130,16 @@ async function writeEvidence({ candidateShape, fixture, runRoot, binding, proofs
       fixtureId: fixture?.fixtureId ?? null,
       criterionId: id,
       observed: proofs[id],
-      observations: clone(execution?.observations ?? null),
-      execution: clone(execution?.evidence ?? null),
-      adapter: clone(adapter?.observations ?? null),
+      trustedProofs: clone(execution?.trustedProofs ?? null),
+      normalizedEvents: clone(execution?.events ?? null),
     }, { binding, kind: 'criterion-evidence' });
     records.push(record);
     refs[id] = record.id;
   }
   const specialized = [
-    ['supportedBoundaryEvidenceRefs', 'supported-boundary', { supportedBoundary: clone(execution?.observations?.supportedBoundary ?? adapter?.observations?.supportedBoundary ?? null), adapter: clone(adapter?.observations ?? null) }],
-    ['provenanceEvidenceRefs', 'provenance', { provenance: clone(execution?.provenance ?? null) }],
-    ['dependencyAdmissionEvidenceRefs', 'dependency-admission', { upgradePolicy: clone(execution?.provenance?.upgradePolicy), removalConditions: clone(execution?.provenance?.removalConditions) }],
+    ['supportedBoundaryEvidenceRefs', 'supported-boundary', { supportedBoundary: clone(execution?.trustedProofs?.supportedBoundary ?? null) }],
+    ['provenanceEvidenceRefs', 'provenance', { provenance: clone(execution?.trustedProvenance ?? null) }],
+    ['dependencyAdmissionEvidenceRefs', 'dependency-admission', { upgradePolicy: clone(execution?.trustedProofs?.upgradePolicy), removalConditions: clone(execution?.trustedProofs?.removalConditions) }],
   ];
   const specializedRefs = {};
   for (const [field, name, value] of specialized) {
@@ -175,8 +165,9 @@ async function writeEvidence({ candidateShape, fixture, runRoot, binding, proofs
     finalized: true,
     verdict: derived.verdict,
     verdictReasons: derived.reasons,
-    upgradePolicy: clone(execution?.provenance?.upgradePolicy),
-    removalConditions: clone(execution?.provenance?.removalConditions),
+    upgradePolicy: clone(execution?.trustedProofs?.upgradePolicy),
+    removalConditions: clone(execution?.trustedProofs?.removalConditions),
+    evidenceSource: 'MNFS_TRUSTED_PROOF_ENGINE',
   };
 }
 
@@ -196,67 +187,178 @@ function provenanceFor(context, candidateShape) {
   return expectedProvenance(candidateShape, context?.preflight);
 }
 
-async function loadStagedSurface(record, name) {
-  const descriptor = record?.surfaces?.[name];
-  if (!descriptor?.path) return null;
-  const module = await import(pathToFileURL(descriptor.path).href);
-  if (!descriptor.export) return module;
-  if (typeof module[descriptor.export] !== 'function') throw new TypeError(`staged ${name} surface export is unavailable`);
-  return module[descriptor.export];
+async function revalidatedRecord(context, candidateShape) {
+  const stateRoot = context?.preflight?.stateRoot?.path;
+  const manifestSha256 = context?.preflight?.provenance?.integrity?.manifestSha256;
+  if (!stateRoot || !HASH_PATTERN.test(manifestSha256 ?? '')) {
+    throw new Error(`trusted staging state is unavailable before using ${candidateShape}`);
+  }
+  const observed = await revalidateStagedCandidateProvenance({
+    stateRoot,
+    candidateShape,
+    expectedManifestSha256: manifestSha256,
+  });
+  return observed.record;
 }
 
-async function defaultAdapterFactory(candidateShape, { record, ...options }) {
+async function loadVerifiedUpstreamSurface(context, candidateShape, name, exportName = null) {
+  const record = await revalidatedRecord(context, candidateShape);
+  const descriptor = record.upstreamSurfaces?.[name];
+  if (!descriptor?.path) throw new Error(`trusted upstream ${name} surface is unavailable for ${candidateShape}`);
+  const module = await import(`${pathToFileURL(descriptor.path).href}?sha256=${descriptor.sha256.slice(7)}`);
+  if (!exportName) return module;
+  if (typeof module[exportName] !== 'function') throw new TypeError(`staged upstream ${name} export is unavailable`);
+  return module[exportName];
+}
+
+async function defaultAdapterFactory(candidateShape, { record, fixtureTools, ...options }) {
   if (!record) return null;
-  const stagedAdapter = await loadStagedSurface(record, 'adapter');
-  const stagedOptions = {
-    ...options,
-    candidateShape,
-    record,
-    executable: record.surfaces?.executable?.path,
-    env: record.environment,
-    stagedSurfaces: record.surfaces,
-  };
-  if (candidateShape !== 'PI-SDK') stagedOptions.acpSdkSurface = await loadStagedSurface(record, 'acpSdk');
-  if (typeof stagedAdapter === 'function' && record.surfaces?.adapter?.export) {
-    return stagedAdapter(stagedOptions);
-  }
+  const context = options.context ?? options;
+  const trustedOptions = { ...context, ...options, fixtureTools };
   if (candidateShape === 'PI-SDK') {
-    return createPiSdkAdapter({ ...options, sdk: stagedAdapter });
+    const sdk = await loadVerifiedUpstreamSurface(trustedOptions, candidateShape, 'runtimeModule');
+    return createPiSdkAdapter({
+      ...trustedOptions,
+      sdk,
+      tools: [],
+      noTools: 'all',
+      customTools: fixtureTools?.customTools,
+    });
+  }
+  const executable = await revalidatedRecord(trustedOptions, candidateShape).then((fresh) => fresh.upstreamSurfaces?.executable?.path);
+  if (!executable) throw new Error(`trusted upstream executable is unavailable for ${candidateShape}`);
+  const acpSdk = await loadVerifiedUpstreamSurface(trustedOptions, candidateShape, 'acpSdk');
+  const clientFactory = acpSdk?.createClient ?? acpSdk?.Client;
+  const ndJsonStream = acpSdk?.ndJsonStream;
+  if (typeof clientFactory !== 'function' || typeof ndJsonStream !== 'function') {
+    throw new TypeError(`trusted upstream ACP SDK surface is incomplete for ${candidateShape}`);
   }
   const adapterOptions = {
-    ...options,
-    executable: record.surfaces?.executable?.path,
+    ...trustedOptions,
+    executable,
     env: record.environment,
+    clientFactory,
+    ndJsonStream,
+    beforeSpawn: () => revalidatedRecord(trustedOptions, candidateShape),
   };
-  const acpSdk = await loadStagedSurface(record, 'acpSdk');
-  if (typeof acpSdk === 'object' && acpSdk) {
-    adapterOptions.clientFactory = acpSdk.createClient ?? acpSdk.Client ?? adapterOptions.clientFactory;
-    adapterOptions.ndJsonStream = acpSdk.ndJsonStream ?? adapterOptions.ndJsonStream;
-  }
   return candidateShape === 'PI-ACP'
     ? createPiAcpAdapter(adapterOptions)
     : createOpenCodeAcpAdapter(adapterOptions);
 }
 
-async function resolveProcessBoundary(candidateShape, context, record, supplied, adapter = null) {
-  const explicit = supplied ?? context?.processBoundary;
-  if (explicit) return typeof explicit === 'function'
-    ? explicit({ candidateShape, cwd: context.fixture.workspacePath, env: record?.environment ?? {} })
-    : explicit;
-  if (record?.surfaces?.boundary?.export) {
-    const factory = await loadStagedSurface(record, 'boundary');
-    return factory({ candidateShape, cwd: context.fixture.workspacePath, env: record.environment, executable: record.surfaces?.executable?.path, stagedSurfaces: record.surfaces, fixture: context.fixture, context, record });
-  }
-  if (!adapter?.processSpec?.env) return null;
-  const env = Object.fromEntries(Object.entries(adapter.processSpec.env).sort());
+function actorFixtureSpec(fixture) {
   return {
-    kind: 'ACP_PROCESS_BOUNDARY',
-    boundaryObservation: {
-      cwd: adapter.processSpec.cwd,
-      envDigest: digest(env),
-      envSource: 'STAGED_PROVENANCE_ENV',
-      argv: Array.isArray(adapter.processSpec.argv) ? [...adapter.processSpec.argv] : null,
+    fixtureId: fixture.fixtureId,
+    workspacePath: fixture.workspacePath,
+    nonce: fixture.nonce,
+    nonceRelativePath: fixture.nonceRelativePath,
+    nonceFilePath: fixture.nonceFilePath,
+    targetRelativePath: fixture.targetRelativePath,
+    targetFilePath: fixture.targetFilePath,
+    prompt: fixture.prompt,
+    inventory: fixture.inventory,
+    expectedTree: fixture.expectedTree,
+  };
+}
+
+function processPayload(result) {
+  const lines = result.stdout.toString('utf8').trim().split('\n').filter(Boolean);
+  if (lines.length === 0) return null;
+  try { return JSON.parse(lines.at(-1)); } catch { return null; }
+}
+
+function actorEnvironment(record) {
+  const env = record?.environment;
+  if (!env || typeof env !== 'object' || Array.isArray(env)) {
+    throw new Error('trusted ActorRun requires an explicit candidate environment projection');
+  }
+  return Object.fromEntries(Object.entries(env).sort());
+}
+
+async function runTrustedActorProcess({ candidateShape, fixture, context, record, mode = 'NORMAL', protocol = 'PI-SDK' }) {
+  const freshRecord = await revalidatedRecord(context, candidateShape);
+  const runtimeModule = freshRecord.upstreamSurfaces?.runtimeModule;
+  if (!runtimeModule?.path) throw new Error(`trusted upstream runtime module is unavailable for ${candidateShape}`);
+  const spec = {
+    argv: [process.execPath, new URL('./actor-run-child.mjs', import.meta.url).pathname],
+    cwd: fixture.workspacePath,
+    env: actorEnvironment(freshRecord),
+    timeoutMs: 5000,
+    terminationGraceMs: 100,
+    stdoutLimitBytes: 256 * 1024,
+    stderrLimitBytes: 256 * 1024,
+    stdinMode: 'protocol',
+    protocolOwner: 'trusted-actor-run',
+  };
+  const execution = startProcess(spec);
+  execution.stdin.write(JSON.stringify({
+    candidateShape,
+    protocol,
+    candidateModule: runtimeModule.path,
+    stateRoot: context.preflight.stateRoot.path,
+    expectedManifestSha256: context.preflight.provenance.integrity.manifestSha256,
+    mode,
+    fixture: actorFixtureSpec(fixture),
+  }));
+  execution.stdin.end();
+  let controlTimer = null;
+  if (mode === 'CANCEL') controlTimer = setTimeout(() => execution.cancel('S1-C06 trusted cancellation checkpoint'), 25);
+  if (mode === 'DEATH') controlTimer = setTimeout(() => execution.forceKill('S1-C09 trusted forced process death checkpoint'), 25);
+  const processResult = await execution.result;
+  if (controlTimer) clearTimeout(controlTimer);
+  return { processResult, payload: processPayload(processResult), record: freshRecord };
+}
+
+async function runFreshRecovery({ fixture, toolCalls, context }) {
+  const recoverySpec = {
+    argv: [process.execPath, new URL('./fresh-recovery-child.mjs', import.meta.url).pathname, JSON.stringify({ fixture: actorFixtureSpec(fixture), toolCalls })],
+    cwd: fixture.workspacePath,
+    env: { PATH: '/usr/bin:/bin', LANG: 'C', LC_ALL: 'C' },
+    timeoutMs: 5000,
+    terminationGraceMs: 100,
+    stdoutLimitBytes: 64 * 1024,
+    stderrLimitBytes: 64 * 1024,
+  };
+  const result = await startProcess(recoverySpec).result;
+  const payload = processPayload(result);
+  return {
+    phase: 'FRESH_PROCESS',
+    verified: result.outcome === 'NORMAL_EXIT' && payload?.kind === 'MNFS_TRUSTED_FRESH_RECOVERY' && payload.verified === true,
+    source: 'MNFS_TRUSTED_RECOVERY_PROCESS',
+    outcome: result.outcome,
+  };
+}
+
+function trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, recovery, preflight, record, actorProtocol }) {
+  const toolCalls = normal.payload?.fixtureToolCalls ?? [];
+  const boundary = normal.payload?.boundaryObservation;
+  const expectedEnvironmentDigest = digest(Object.fromEntries(Object.entries(record?.environment ?? {}).sort()));
+  const outputLimit = normal.processResult.output.stdout.limitBytes + normal.processResult.output.stderr.limitBytes;
+  return {
+    cwd: boundary?.cwd,
+    boundary: {
+      cwd: boundary?.cwd,
+      envDigest: boundary?.envDigest,
+      environmentMatchesRecord: boundary?.envDigest === expectedEnvironmentDigest,
+      source: 'MNFS_TRUSTED_PROCESS_RUNNER',
     },
+    inventory: toolCalls.map((call) => call.id),
+    fixtureVerified: fixtureResult.ok,
+    discovery: { extensions: [], skills: [], prompts: [], themes: [], agentsFiles: [] },
+    auth: { outcome: preflight.credentials?.status === 'READY' ? 'AUTHORIZED' : 'BLOCKED', methodClass: preflight.credentials?.authMethodClass ?? '' },
+    cancellation: { ...cancellation.processResult, outcome: cancellation.processResult.outcome, source: 'MNFS_TRUSTED_PROCESS_RUNNER', durationMs: cancellation.processResult.durationMs },
+    output: { bytes: normal.processResult.output.stdout.bytesSeen + normal.processResult.output.stderr.bytesSeen, limitBytes: outputLimit },
+    processDeath: { ...death.processResult, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
+    recovery,
+    authority: { sessionRole: 'OBSERVATIONAL', recoveryOwner: 'MNFS' },
+    machinery: { reused: ['fixture', 'artifacts', 'process-runner'] },
+    supportedBoundary: {
+      source: 'MNFS_TRUSTED_ADAPTER',
+      kind: actorProtocol === 'PI-RPC' ? 'PI_RPC_PUBLIC_API' : 'PI_SDK_PUBLIC_API',
+      observation: actorProtocol === 'PI-RPC' ? 'createRpcSession/AgentSession' : 'createAgentSession/AgentSession',
+    },
+    upgradePolicy: record.upgradePolicy,
+    removalConditions: record.removalConditions,
   };
 }
 
@@ -291,96 +393,187 @@ async function writeRuntimeAndBoundary({ candidateShape, fixture, context, execu
   return attachBoundary(runtime, boundaryEvidence, candidateShape);
 }
 
-async function runPiSdk({ candidateShape, fixture, adapterFactory, processBoundary, context }) {
-  if (processBoundary?.kind !== 'ACTOR_RUN_PROCESS' || typeof processBoundary.run !== 'function') {
-    return blockedCandidate(candidateShape, 'PI-SDK C02 requires an exact-env ActorRun/process boundary; in-process execution is insufficient');
-  }
-  if (typeof adapterFactory !== 'function') return blockedCandidate(candidateShape, 'PI-SDK adapter is unavailable');
-  let adapter;
-  let settled;
-  const record = provenanceFor(context, candidateShape);
-  const boundary = await processBoundary.run({ candidateShape, cwd: fixture.workspacePath, env: record?.environment ?? {} }, async () => {
-    adapter = await adapterFactory({ cwd: fixture.workspacePath, fixture, context, record });
-    if (!adapter) throw new Error('staged PI-SDK adapter is unavailable');
-    await adapter.initialize();
-    settled = await adapter.startTurn(fixture.prompt);
-    await adapter.close();
-    return {
-      settled,
-      events: settled?.events ?? adapter.observe?.() ?? [],
-      toolCalls: settled?.toolCalls ?? [],
-      observations: settled?.observations ?? {},
+async function runPiSdk({ candidateShape, fixture, context, actorProtocol = 'PI-SDK' }) {
+  try {
+    const record = await revalidatedRecord(context, candidateShape);
+    const normal = await runTrustedActorProcess({ candidateShape, fixture, context, record, protocol: actorProtocol });
+    const cancellation = await runTrustedActorProcess({ candidateShape, fixture, context, record, mode: 'CANCEL', protocol: actorProtocol });
+    const death = await runTrustedActorProcess({ candidateShape, fixture, context, record, mode: 'DEATH', protocol: actorProtocol });
+    const toolCalls = normal.payload?.fixtureToolCalls ?? [];
+    const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
+    const recovery = await runFreshRecovery({ fixture, toolCalls, context });
+    const trustedProofs = trustedPiProofs({ fixture, fixtureResult, normal, cancellation, death, recovery, preflight: context.preflight, record, actorProtocol });
+    const execution = {
+      settled: normal.payload?.settled ?? { settled: false, outcome: normal.processResult.outcome },
+      events: normal.payload?.events ?? [],
+      trustedProofs,
+      trustedProvenance: record,
+      toolCalls,
     };
-  });
-  const toolCalls = boundary?.toolCalls ?? settled?.toolCalls ?? [];
-  const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
-  const execution = {
-    ...(boundary?.execution ?? {}),
-    settled: boundary?.settled ?? settled,
-    events: boundary?.events ?? settled?.events ?? [],
-    observations: { ...(boundary?.observations ?? {}), ...(settled?.observations ?? {}), fixtureVerified: fixtureResult.ok },
-    toolCalls,
-    provenance: record,
-  };
-  return writeRuntimeAndBoundary({
-    candidateShape,
-    fixture,
-    context,
-    execution,
-    adapter,
-    boundary: { ...boundary, kind: boundary.kind ?? processBoundary.kind },
-  });
+    return writeRuntimeAndBoundary({
+      candidateShape,
+      fixture,
+      context,
+      execution,
+      adapter: null,
+      boundary: {
+        kind: 'ACTOR_RUN_PROCESS',
+        boundaryObservation: trustedProofs.boundary,
+      },
+    });
+  } catch (error) {
+    return blockedCandidate(candidateShape, `trusted ${actorProtocol} ActorRun failed before Evidence: ${error?.message ?? error}`);
+  }
 }
 
-async function runAcp({ candidateShape, fixture, adapterFactory, processBoundary, context }) {
-  if (typeof adapterFactory !== 'function') return blockedCandidate(candidateShape, 'ACP adapter is unavailable');
-  const record = provenanceFor(context, candidateShape);
-  const adapter = await adapterFactory({ cwd: fixture.workspacePath, fixture, context, record });
-  if (!adapter) return blockedCandidate(candidateShape, 'staged ACP adapter is unavailable');
+async function runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode = 'NORMAL' }) {
+  const fixtureTools = createFixtureTools(fixture);
+  const adapter = await adapterFactory({ cwd: fixture.workspacePath, fixture, fixtureTools, context, record });
+  if (!adapter) throw new Error('staged ACP adapter is unavailable');
+  if (adapter.supportsFixtureTools !== true) {
+    throw new Error(`${candidateShape} public boundary cannot provide the fixed fixture tool/resource inventory`);
+  }
+  if (mode === 'DEATH' && typeof adapter.forceKill !== 'function') {
+    throw new Error(`${candidateShape} trusted ACP adapter cannot force-kill its process boundary`);
+  }
   const ready = await adapter.initialize();
   const session = await adapter.startSession({ cwd: fixture.workspacePath });
   const turn = await adapter.prompt({ prompt: fixture.prompt });
-  const settled = turn?.settled ? await turn.settled : turn;
-  await adapter.shutdown();
-  const toolCalls = turn?.toolCalls ?? settled?.toolCalls ?? [];
-  const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
-  const execution = {
+  const settledPromise = turn?.settled ? turn.settled : Promise.resolve(turn);
+  let controlStarted = false;
+  let controlTimer = null;
+  let controlPromise = Promise.resolve(null);
+  if (mode !== 'NORMAL') {
+    const control = mode === 'CANCEL'
+      ? () => adapter.cancel('S1-C06 trusted ACP cancellation checkpoint')
+      : () => adapter.forceKill('S1-C09 trusted ACP forced process death checkpoint');
+    controlPromise = new Promise((resolve) => {
+      const trigger = async () => {
+        controlStarted = true;
+        try { resolve(await control()); } catch (error) { resolve({ error: String(error?.message ?? error) }); }
+      };
+      controlTimer = setTimeout(trigger, 25);
+    });
+    const settled = await settledPromise;
+    if (!controlStarted) {
+      clearTimeout(controlTimer);
+      controlTimer = null;
+      controlStarted = true;
+      try { await control(); } catch {}
+    } else {
+      await controlPromise;
+    }
+    try { await adapter.shutdown(); } catch {}
+    return {
+      ready,
+      session,
+      settled,
+      events: turn?.observe?.() ?? turn?.events ?? settled?.events ?? [],
+      fixtureTools,
+      processObservation: await adapter.processObservation?.(),
+    };
+  }
+  const settled = await settledPromise;
+  try { await adapter.shutdown(); } catch {}
+  return {
     ready,
     session,
     settled,
-    events: turn?.events ?? settled?.events ?? [],
-    observations: { ...(adapter.observations ?? {}), ...(turn?.observations ?? {}), ...(settled?.observations ?? {}), fixtureVerified: fixtureResult.ok },
-    toolCalls,
-    provenance: record,
+    events: turn?.observe?.() ?? turn?.events ?? settled?.events ?? [],
+    fixtureTools,
+    processObservation: await adapter.processObservation?.(),
   };
-  const boundary = await resolveProcessBoundary(candidateShape, { ...context, fixture }, record, processBoundary, adapter);
-  if (!boundary) return blockedCandidate(candidateShape, 'ACP process boundary is unavailable');
-  return writeRuntimeAndBoundary({ candidateShape, fixture, context, execution, adapter, boundary });
+}
+
+async function runAcpInternal({ candidateShape, fixture, adapterFactory, context }) {
+  if (typeof adapterFactory !== 'function') return blockedCandidate(candidateShape, 'ACP adapter is unavailable');
+  const record = provenanceFor(context, candidateShape);
+  const normal = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record });
+  const cancellation = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode: 'CANCEL' });
+  const death = await runAcpAttempt({ candidateShape, fixture, adapterFactory, context, record, mode: 'DEATH' });
+  const toolCalls = normal.fixtureTools.snapshot();
+  const fixtureResult = await verifyFixtureResult(fixture, { toolCalls });
+  const envDigest = digest(Object.fromEntries(Object.entries(record?.environment ?? {}).sort()));
+  const trustedBoundary = {
+    cwd: fixture.workspacePath,
+    envDigest,
+    environmentMatchesRecord: true,
+    source: 'MNFS_TRUSTED_PROCESS_RUNNER',
+  };
+  const recovery = await runFreshRecovery({ fixture, toolCalls, context });
+  const execution = {
+    ready: normal.ready,
+    session: normal.session,
+    settled: normal.settled,
+    events: normal.events,
+    trustedProofs: {
+      cwd: fixture.workspacePath,
+      boundary: trustedBoundary,
+      inventory: toolCalls.map((call) => call.id),
+      fixtureVerified: fixtureResult.ok,
+      discovery: null,
+      auth: { outcome: context.preflight?.credentials?.status === 'READY' ? 'AUTHORIZED' : 'BLOCKED', methodClass: context.preflight?.credentials?.authMethodClass ?? '' },
+      output: normal.processObservation?.output ? {
+        bytes: normal.processObservation.output.stdout.bytesSeen + normal.processObservation.output.stderr.bytesSeen,
+        limitBytes: normal.processObservation.output.stdout.limitBytes + normal.processObservation.output.stderr.limitBytes,
+      } : null,
+      processDeath: { ...death.processObservation, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
+      cancellation: { ...cancellation.processObservation, source: 'MNFS_TRUSTED_PROCESS_RUNNER' },
+      recovery,
+      authority: { sessionRole: 'OBSERVATIONAL', recoveryOwner: 'MNFS' },
+      machinery: { reused: ['fixture', 'artifacts', 'process-runner'] },
+      supportedBoundary: { source: 'MNFS_TRUSTED_ADAPTER', kind: `${candidateShape}_PUBLIC_API`, observation: 'official candidate boundary' },
+      upgradePolicy: record?.upgradePolicy,
+      removalConditions: record?.removalConditions,
+    },
+    toolCalls,
+    trustedProvenance: record,
+  };
+  const boundary = { kind: 'ACP_PROCESS_BOUNDARY', boundaryObservation: trustedBoundary };
+  return writeRuntimeAndBoundary({ candidateShape, fixture, context, execution, adapter: null, boundary });
+}
+
+async function runAcp(args) {
+  try {
+    return await runAcpInternal(args);
+  } catch (error) {
+    return blockedCandidate(args.candidateShape, `trusted ${args.candidateShape} ACP execution failed before Evidence: ${error?.message ?? error}`);
+  }
 }
 
 export function createS1CandidateExecutors({
   fixture,
-  processBoundary,
   piSdkAdapterFactory,
+  piRpcAdapterFactory,
   piAcpAdapterFactory,
   openCodeAdapterFactory,
+  secondAcpAdapterFactory,
 } = {}) {
   const withFixture = (context = {}) => ({ ...context, fixture: context.fixture ?? fixture });
   const factory = (shape, supplied) => supplied ?? ((options) => defaultAdapterFactory(shape, options));
   return Object.freeze({
     'PI-SDK': async (context) => {
       const active = withFixture(context);
-      const record = provenanceFor(active, 'PI-SDK');
-      const boundary = await resolveProcessBoundary('PI-SDK', active, record, active.processBoundary ?? processBoundary);
-      return runPiSdk({ candidateShape: 'PI-SDK', fixture: active.fixture, adapterFactory: factory('PI-SDK', piSdkAdapterFactory), processBoundary: boundary, context: active });
+      if (piSdkAdapterFactory) return blockedCandidate('PI-SDK', 'in-process Pi SDK adapter injection is prohibited; use the trusted ActorRun child executor');
+      return runPiSdk({ candidateShape: 'PI-SDK', fixture: active.fixture, context: active });
+    },
+    'PI-RPC': async (context) => {
+      const active = withFixture(context);
+      if (piRpcAdapterFactory) return blockedCandidate('PI-RPC', 'in-process Pi-RPC adapter injection is prohibited; use the trusted ActorRun child executor');
+      return runPiSdk({ candidateShape: 'PI-RPC', fixture: active.fixture, context: active, actorProtocol: 'PI-RPC' });
     },
     'PI-ACP': async (context) => {
       const active = withFixture(context);
-      return runAcp({ candidateShape: 'PI-ACP', fixture: active.fixture, adapterFactory: factory('PI-ACP', piAcpAdapterFactory), processBoundary: active.processBoundary, context: active });
+      return runAcp({ candidateShape: 'PI-ACP', fixture: active.fixture, adapterFactory: factory('PI-ACP', piAcpAdapterFactory), context: active });
     },
     'OPENCODE-ACP': async (context) => {
       const active = withFixture(context);
-      return runAcp({ candidateShape: 'OPENCODE-ACP', fixture: active.fixture, adapterFactory: factory('OPENCODE-ACP', openCodeAdapterFactory), processBoundary: active.processBoundary, context: active });
+      return runAcp({ candidateShape: 'OPENCODE-ACP', fixture: active.fixture, adapterFactory: factory('OPENCODE-ACP', openCodeAdapterFactory), context: active });
+    },
+    'SECOND-ACP': async (context) => {
+      const active = withFixture(context);
+      if (!secondAcpAdapterFactory) return blockedCandidate('SECOND-ACP', 'SECOND-ACP is required but no trusted staged candidate executor is available');
+      return runAcp({ candidateShape: 'SECOND-ACP', fixture: active.fixture, adapterFactory: secondAcpAdapterFactory, context: active });
     },
   });
 }

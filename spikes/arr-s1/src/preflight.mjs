@@ -153,9 +153,10 @@ export function validateCandidateProvenance(input, { allowTestBoundary = false }
     if (!actual || actual.version !== expected.version || actual.package !== expected.package || actual.sourceIdentity !== expected.sourceIdentity || actual.license !== expected.license) {
       errors.push(`${id} exact provenance is unavailable or mismatched`);
     } else if (!allowTestBoundary && (!Array.isArray(actual.stagedPaths) || actual.stagedPaths.length === 0
-      || !actual.surfaces?.adapter || !actual.surfaces?.boundary || !actual.surfaces?.executable || !actual.surfaces?.acpSdk
-      || !actual.environment || typeof actual.environment !== 'object')) {
-      errors.push(`${id} staged adapter, boundary, executable, ACP SDK and explicit environment surfaces are incomplete`);
+      || !actual.upstreamSurfaces || typeof actual.upstreamSurfaces !== 'object'
+      || Object.keys(actual.upstreamSurfaces).length === 0
+      || Object.keys(actual.upstreamSurfaces).some((name) => ['adapter', 'boundary', 'proofDriver'].includes(name)))) {
+      errors.push(`${id} upstream candidate byte surfaces are incomplete or contain MNFS-owned surfaces`);
     }
   }
   for (const id of CONDITIONAL_PROVENANCE_IDS) {

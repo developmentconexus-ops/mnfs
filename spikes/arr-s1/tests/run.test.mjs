@@ -113,7 +113,10 @@ test('runs conditional Pi-RPC and SECOND-ACP only when applicability is REQUIRED
   const calls = [];
   const result = await orchestrateS1({
     runId: 'arr-s1-test-conditional',
-    preflight: async () => readyPreflight(),
+    preflight: async () => ({
+      ...readyPreflight(),
+      provenance: { records: { 'SECOND-ACP': { candidateShape: 'SECOND-ACP', status: 'STAGED_TEST_DOUBLE' } } },
+    }),
     executors: {
       'PI-SDK': executor(calls, 'PI-SDK', 'PASS', { observations: { sdkVsPiAcpProcessBoundaryAmbiguous: true } }),
       'PI-ACP': executor(calls, 'PI-ACP', 'FAIL', {

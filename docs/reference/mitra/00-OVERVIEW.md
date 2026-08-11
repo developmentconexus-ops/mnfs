@@ -23,6 +23,7 @@
 | 06 | [`06-runtime-publicado.md`](06-runtime-publicado.md) | O app final: SPA React, `__mitraEnv`, SDK de runtime, login/RBAC, chat-embed |
 | 07 | [`07-padrao-de-projeto.md`](07-padrao-de-projeto.md) | Como um projeto real nasce: as 8 fases, docs de planejamento, testes, honestidade |
 | 08 | [`08-limites-e-gaps.md`](08-limites-e-gaps.md) | Onde a Mitra falha = onde o Conexus ganha. Todos os REJECT + as apostas OWN |
+| 09 | [`09-agente-embarcado.md`](09-agente-embarcado.md) | O agente **dentro** do app publicado (Playground/Generative UI) + protocolo WS capturado ao vivo |
 
 Cada documento temático segue a mesma estrutura:
 **O que é → Como funciona (diagrama) → Contratos exatos → Evidência (link do mapa) → Decisão Conexus → Ideias de melhoria.**

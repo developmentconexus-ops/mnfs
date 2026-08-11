@@ -4056,6 +4056,103 @@ que envelhece vira prosa desonesta sem ninguém mexer nela.
 
 ---
 
+## OBS-77 — ⭐⭐⭐⭐⭐ M15/M16 (11/08, 15:20–16:07) — o limite de sessão apagou **o objetivo, não as regras**
+
+Turno partido em dois por limite de sessão. É a observação mais forte do dia sobre transferência de
+contexto, e ela vale para o Conexus inteiro.
+
+### 77.1 — ⭐⭐⭐⭐⭐ As restrições sobreviveram ao corte; o objetivo não
+
+Depois do quarto limite de sessão, o agente retomou com `in: 214.4K` — contra os 3–4M dos turnos
+inteiros. O resumo coube; a tarefa não.
+
+O que aconteceu: ele **re-derivou a intenção a partir de um arquivo do projeto**. Achou um backlog
+interno, leu "P1: lista dos 229 produtos do grupo PENDENTE", e começou a construir isso. Duas Server
+Functions (`mcProdutosGrupoPendente` 143, `mcProdutosGrupoPendenteResumo` 144) foram **efetivamente
+publicadas** e registradas em `sf-ids.ts` — não ficaram em arquivo local.
+
+E ao mesmo tempo, no mesmo turno, **nenhuma restrição foi violada**: GET-only no ML, DbExplorer
+`SELECT`-only, nenhuma escrita no ERP, nenhum dado pessoal. A barreira de egresso inclusive pegou um
+POST do DbExplorer em código que não tinha nada a ver com Mercado Livre, e a resposta dele foi a
+correta — **estender a exceção com isca própria**, não afrouxar a regra.
+
+A assimetria é o achado: **proibição atravessa o corte de contexto; propósito não.** Faz sentido
+mecânico — a proibição é uma regra curta, absoluta e repetida; o objetivo é uma sequência com
+estado, e estado é o que o resumo perde primeiro. Consequência para o Conexus: *o que importa não
+pode depender de o agente lembrar por quê.* Se o objetivo precisa sobreviver, ele tem de estar num
+artefato que o agente **releia**, não num resumo que ele **herde**.
+
+O reancoramento que funcionou nomeava as quatro coisas: qual fonte ele leu por engano, quais eram
+os itens reais, quais fatos já medidos ele **não deve remedir** (`CUSSEMICM`, `METALTST`,
+`AD_NROPEDFAB`, `DHALTER`, 270.874 pedidos), e **"quero o estado, não um plano"**. Ele desfez o
+desvio sozinho antes de qualquer outra coisa: SFs removidas, `sf-ids.ts` regenerado para 117,
+script apagado, as duas barreiras reexecutadas depois da remoção.
+
+### 77.2 — ⭐⭐⭐⭐⭐ "Está no fonte, não está no ar" — o achado foi dele
+
+Perguntado pelo **estado** dos quatro itens, ele respondeu com a distinção que eu não tinha pedido e
+que era a única que importava: o `dist` publicado era de 17:51, e `Custos.tsx`, `Alertas.tsx` e
+`SondagemErp.tsx` eram de 18:40.
+
+> *"Nada do trabalho de itens 1, 2 e 4 está no ar. Quem abrir a tela agora vê a cobertura de custo
+> ausente e o parágrafo falso intacto."*
+
+Ele provou cada um **buscando no `dist`**, não no fonte: 0 ocorrências de "produtos do catálogo têm
+custo", 0 referências a `SondagemErp` em `MarketplaceApp.tsx`, 1 ocorrência da frase falsa antiga.
+
+Isso é o oposto do modo de falha padrão de agente, que é relatar o trabalho como feito porque o
+arquivo foi escrito. **Escrever ≠ compilar ≠ rotear ≠ publicar**, e ele separou os quatro sem que
+ninguém pedisse.
+
+### 77.3 — ⭐⭐⭐⭐ A página invisível de três jeitos ao mesmo tempo
+
+`SondagemErp.tsx` existia com 10 KB e ninguém chegava nela. A causa não era esquecimento de rota:
+**a página nunca compilou.** `SondagemErp.tsx:65` passava `texto=` para um `Pill` que aceita
+`children`.
+
+A cadeia inteira: erro de tipo → build quebra → arquivo nunca entra no bundle → ninguém percebe,
+porque a página também nunca foi roteada, então ninguém tentou abrir. **Três invisibilidades se
+protegendo mutuamente.** Rotear expôs o erro de tipo em segundos.
+
+Padrão para o Conexus: artefato não referenciado é artefato não verificado. Uma rota é, entre outras
+coisas, uma prova de que o arquivo compila.
+
+### 77.4 — ⭐⭐⭐ "Imprime em console" não é medição
+
+A sonda de pedidos do ML tinha sido escrita e cobria os quatro recortes pedidos. Mas ele mesmo
+classificou o item como **zero medido**:
+
+> *"Nenhum número dela existe hoje: ela imprime em console, não grava tabela, e não há registro do
+> resultado em lugar nenhum do repositório. Não posso afirmar que rodou."*
+
+Reescrita para gravar `CANAL_SONDAGEM_PEDIDO` — 52 linhas, cada uma com `QUANTIDADE`, `BASE` e
+`MEDIDO_EM`, mais uma SF de leitura (`mcCanalSondagemPedido`, 145) para conferir depois sem acesso
+ao backend. Resultado em [21](21-fluxo-pedido-erp.md) §7.1.
+
+Regra que fica: **medição que não sobrevive ao fim do processo não é medição, é impressão.** Vale
+para o Conexus inteiro — um número que só existiu no stdout de um agente não pode ser conferido,
+contestado nem comparado com a próxima leitura.
+
+### 77.5 — A conferência final, no `dist`, com contagem antes/depois
+
+Fechou publicando e conferindo no bundle novo (`index-_hjzqxyO.js`), com número dos dois lados:
+
+| Pergunta | Antes | Depois |
+|---|---|---|
+| Bloco de cobertura de custo aparece? | 0, 0, 0 | "produtos do catálogo têm custo" 1 · "continuam sem custo" 1 · "Apurado pelo ERP entre" 1 · `custoCobertura` 2 |
+| Rota da sondagem alcançável? | 0 em tudo | `/sondagem-erp` 2 (menu + Route) · "Terreno do pedido" 3 · "Prova de que é a base de teste" 1 |
+| A frase falsa de `/alertas` sumiu? | "ainda não entram nesta comparação" 1 | 0 · "nada foi conferido" 0 · "já é conferido" 1 · "não conferiram" 1 |
+
+Barreiras reexecutadas depois de tudo: `test-erp-somente-leitura.mjs` verde (119 SFs, 41 scripts,
+24 egressos vistos, 11 iscas de SQL + 7 de egresso), `test-metodo-ml.mjs` verde. O script novo
+passou pelas duas.
+
+E fechou declarando quatro coisas que **não** mediu — inclusive que os 40 pedidos são *"o que
+`/orders/search` devolve hoje para este seller"*, não *"tudo que já foi vendido"*. É a terceira
+sessão seguida em que o limite declarado vem antes de eu perguntar.
+
+---
+
 ## Fila de investigação (o que ainda falta varrer nesta sessão)
 
 - [x] ~~Confirmar na UI o modelo ativo~~ — feito: `GPT-5.6 Sol Medium Sub` na Fase 1/V1, `Claude Opus 5 High Sub` do M1 ao M5; seletor **é por turno**

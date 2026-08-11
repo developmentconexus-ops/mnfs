@@ -27,13 +27,22 @@
 > **lote 2 = só leitura · lote 3 = só frontend · lote 4 = a escrita.** Os lotes 2 e 3 são
 > independentes; o 4 depende dos dois.
 
-### Lote 2 — leitura pura (`SELECT` / GET, nenhuma escrita)
+### Lote 2 — leitura pura — ✅ **FECHADO em 11/08/2026, publicado e conferido no dist**
 
-| # | Item | Por que vale | Risco |
-|---|---|---|---|
-| **B1** | **Custo real via DbExplorer** (`CUSSEMICMS`) | Destrava tudo que é financeiro. `PRODUTO_CUSTOS` tem 0 linhas hoje | Mecanismo novo. **Exige trava `SELECT`-only com isca executável** — DbExplorer aceita SQL arbitrário, então a proibição de SQL de escrita precisa virar estrutura, não lembrança |
-| **B11** | **Sondar a estrutura do pedido no ERP** — lista de TOP (pedido e NFE), empresa, série, tipo de negociação, campo que aceita o carimbo do id do canal, identificador de instância | São as 4 incógnitas de [21](21-fluxo-pedido-erp.md) §10. Sem elas, o lote 4 é chute | Nenhum — mesmo mecanismo `SELECT` do B1 |
-| **B5'** | **Medir os pedidos reais do ML** — total por status, janela de datas, campos do payload, se o SKU casa com os 30 vínculos | Usuário informou: **abertos = zero**, muitos já enviados. Decide se a Expedição entra na demonstração ou não ([21](21-fluxo-pedido-erp.md) §7) | Baixo — leitura |
+| # | Item | Resultado medido |
+|---|---|---|
+| **B1** | Custo real via DbExplorer | ✅ **27.415 produtos com custo** em `PRODUTO_CUSTOS` (estava em 0), coluna `CUSSEMICM`, maior `DTATUAL`, empresa 1. Dos 10.037 ativos, **7.568 com custo**. Fora do escopo, declarado na tela: 11.098 com apuração zerada no ERP, 68 só na empresa 2, 1 sem casamento. Portão `lib-erp-leitura.mjs` (`validarSelect` + `consultarErp`) com **11 iscas reprovadas** e 1 `SELECT` legítimo aprovado |
+| **B11** | Sondar a estrutura do pedido no ERP | ✅ `ERP_SONDAGEM_PEDIDO`, **371 linhas em 11 seções** (CABECALHO 145, ITEM 118, TOP_PEDIDO 20, TOP_NOTA 20, SERIE 20, NEGOCIACAO 20, TIPMOV 9, CARIMBO 7, IDENTIDADE 6, EMPRESA 5, AVISO 1). Rota `/sondagem-erp` no ar |
+| **B5'** | Medir os pedidos reais do ML | ✅ **40 pedidos, 35 com produto ligado** — tabela completa em [21](21-fluxo-pedido-erp.md) §7.1. **A Expedição entra na demonstração**, com pedido real, sem fabricar nada |
+
+**Achado de método:** a página de sondagem não estava órfã por esquecimento — **nunca compilou**
+(`SondagemErp.tsx:65`, `Pill` recebendo `texto=` em vez de `children`). Escrita, nunca roteada,
+nunca buildada, erro de tipo nunca exposto: invisível de três jeitos ao mesmo tempo. Reforça a
+regra 2 da fila — e desta vez foi o próprio agente que conferiu no dist, com contagem antes/depois.
+
+Ficou **declarado como não medido** (ver §7.1): valor de `sale_fee` não somado, cobertura da API de
+pedidos não exaurida, os 5 pedidos sem vínculo não destrinchados. E a sondagem do ERP tem tabela e
+SF, **não tem tela** — persistência foi o que se pediu, e o agente não inventou página.
 
 ### Lote 3 — frontend, sem tocar em ERP
 
@@ -95,11 +104,26 @@
 
 | # | Item | Estado |
 |---|---|---|
-| E1 | OBS-73 no log de observação | ✅ escrito |
-| E2 | OBS-74 — renovação forçada, trava furada, 403 ≠ 401 | ❌ falta |
-| E3 | OBS-75 — varredura de coerência, contradição home × prontidão | ❌ falta |
-| E4 | Ratificar o tópico 16 como `C-0xx` em `DECISOES.md` | ❌ falta |
-| E5 | Commitar os docs | ❌ 9 arquivos pendentes, incluindo o log inteiro (3.800+ linhas) |
+| E1 | OBS-73 no log de observação | ✅ |
+| E2 | OBS-74 — renovação forçada, trava furada, 403 ≠ 401 | ✅ `51520d6` |
+| E3 | OBS-75 — varredura de coerência, contradição home × prontidão | ✅ `51520d6` |
+| E3b | OBS-76 — lote A1–A4, as 10 divergências, o texto que virou mentira | ✅ `51520d6` (não estava previsto) |
+| E4 | Ratificar o tópico 16 | ✅ **C-009** — exigiu antes acrescentar os pontos 9–13 ao veredito, que só tinha V1+M1..M5 |
+| E5 | Commitar os docs | ✅ `f62c653` (4.786 linhas), `817bf03` (mapa Mitra), `51520d6` |
+| E6 | OBS-77 — o limite de sessão apagou o objetivo e não as regras; "está no fonte, não está no ar"; a página invisível de três jeitos | ✅ escrito · falta commitar |
+| E7 | Handoff de design system para o Claude.ai — [22](22-handoff-design-system.md) | ✅ escrito · falta commitar |
+
+**Dívida zerada em 11/08.** Regra que fica: observação escrita no mesmo dia do turno. O OBS-76 só
+existiu porque eu estava com o turno fresco na cabeça — três dias depois, os dois lados de cada
+divergência e as datas de leitura teriam virado "o agente achou umas divergências".
+
+### Gap de método aberto pelo OBS-76.5
+
+A barreira de coerência (`test-coerencia.mjs`) vigia **números**. Nada vigia se a **prosa** ainda
+descreve o sistema. O parágrafo de `/alertas` virou mentira no mesmo commit que o contradisse, e
+nenhum teste podia pegar. Falta um análogo para frases que declaram cobertura — *"nada foi
+conferido"*, *"não entra nesta comparação"* — que são exatamente as que o produto usa para ser
+honesto. Prosa honesta envelhece e vira prosa desonesta sem ninguém mexer nela.
 
 ---
 

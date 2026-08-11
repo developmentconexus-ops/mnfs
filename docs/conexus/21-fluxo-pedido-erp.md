@@ -245,6 +245,39 @@ Três saídas possíveis, decididas **depois** da medição, não antes:
 Um pedido fabricado dentro de um fluxo que grava no ERP é o pior lugar possível para começar a
 fingir.
 
+### 7.1 Medido em 11/08/2026 — a primeira saída venceu
+
+Sonda `sondar-pedidos-ml.mjs`, gravada em `CANAL_SONDAGEM_PEDIDO` (52 linhas, cada uma com
+`MEDIDO_EM = 2026-08-11T19:05:46`). Leitura por GET; comprador, `receiver_address`, `sender_address`
+e mais nove ramos descartados **na entrada, antes de contar**.
+
+| O que | Medido | Sobre |
+|---|---|---|
+| Pedidos distintos | **40** — 32 `paid`, 8 `cancelled` | 1 página, `paging.total` confere |
+| Janela | 13/08/2025 a 06/08/2026 | 40 de 40 |
+| Concentração | 2026-06 = 22 · 2026-07 = 14 · 2026-08 = 2 · 2025-08 = 2 | 40 de 40 |
+| Pedidos com linha em anúncio espelhado | **40 de 40** (e todas as linhas, não só alguma) | contra os 34 espelhados |
+| Pedidos com linha ligada a produto do catálogo | **35 de 40** | contra os 30 ligados |
+| Pedidos espelhados sem nenhum vínculo | 5 de 40 | caem nos mesmos 4 anúncios sem `PRODUTO_ID` |
+| Anúncios distintos que aparecem em pedido | 10 dos 34 — **0 fora do espelho** | — |
+| Payload por linha de item | `item.id`, `seller_sku`, `quantity`, `unit_price`, `sale_fee` **40/40**; `seller_custom_field` 4/40; `variation_id` 0/40 | 40 linhas |
+| Situação de envio | não vem no pedido — só `shipping.id`; a situação é `/shipments/{id}`. Lidos os 40, 0 recusados: 35 `delivered`, 4 `cancelled`, 1 `not_delivered/returning_to_sender`; 40/40 com prazo e custo | 40 de 40 |
+
+**Consequência:** a Expedição entra, com **35 pedidos reais que têm produto para baixar**. Não é
+tela vazia e não precisa de pedido fabricado. Os 5 sem vínculo aparecem como sem vínculo — é
+exatamente o estado "não sei" que o produto já sabe mostrar.
+
+Declarado como **não medido** pelo próprio agente, e vale registrar porque é o tipo de coisa que
+vira suposição depois:
+
+- `sale_fee` está presente em 40/40, mas **o valor não foi somado**. Contou-se presença de campo, não
+  comissão. Comparar com `CANAL_COMISSOES` é outra pergunta (B2).
+- Os 40 podem não ser todos os pedidos da conta. O número é *"o que `/orders/search` devolve hoje
+  para este seller"*, não *"tudo que já foi vendido"* — a API do ML tem recortes de janela não
+  testados.
+- Os 5 sem vínculo não foram destrinchados. `seller_sku` veio preenchido em 40/40 e pode casá-los,
+  mas isso não foi medido.
+
 ---
 
 ## 8. Login demonstrativo
@@ -298,12 +331,22 @@ escrita depois da funcionalidade é barreira desenhada para deixar passar o que 
 
 ## 10. O que ainda não sei, e vou descobrir por sondagem
 
-Honestidade sobre o grau de certeza — nada abaixo foi verificado nesta instância:
+Honestidade sobre o grau de certeza. Estado atualizado durante o lote 2:
 
-- os nomes exatos dos serviços de gravação e de faturamento da API Sankhya do cliente
-- se o faturamento é um serviço direto ou um fluxo de confirmação em etapas
-- qual campo aceita o carimbo do id do canal (§4.2) sem atrapalhar nada
-- que identificador de instância dá para ler para a isca I5 (§5.3)
+| Incógnita | Estado |
+|---|---|
+| Qual campo aceita o carimbo do id do canal (§4.2) | **respondido:** `AD_NROPEDFAB`, `VARCHAR2(50)`, vazio em toda a amostra de 200 pedidos |
+| Que identificador de instância dá para a isca I5 (§5.3) | **respondido por consulta:** schema `METALTST`, servidor `oracletst01`. É Oracle, não MySQL |
+| Nomes exatos dos serviços de gravação e faturamento | em aberto |
+| Se o faturamento é serviço direto ou fluxo em etapas | em aberto |
 
-Tudo isso é resolvido no **lote 2**, só com leitura. Nenhuma escrita antes de essas quatro estarem
-respondidas por medição.
+Correção medida no caminho, que vale registrar porque quase custou o lote: **o campo do custo é
+`CUSSEMICM`, sem S final.** `CUSSEMICMS` — nome que veio na instrução original e estava escrito no
+backlog — devolve **0 linhas**. Um agente que aceitasse o nome do prompt teria concluído "custo não
+existe nesta base" e o lote inteiro morreria em cima de uma letra.
+
+Outra: **`TGFTOP` e `TGFTPV` são versionadas por `DHALTER`.** Consulta ingênua devolve o mesmo
+código de TOP repetido, uma linha por revisão. A lista da página de configuração (§6) precisa da
+revisão vigente, senão o operador escolhe uma TOP velha achando que escolheu a atual.
+
+Nenhuma escrita antes das duas incógnitas restantes estarem respondidas por medição.

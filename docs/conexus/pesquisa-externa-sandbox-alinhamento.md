@@ -64,18 +64,32 @@ ratificarmos. Responda com fontes primárias + URLs + data; marque o que não co
 7. **Maturidade/SLA**: Vercel Sandbox é GA? Tem SLA no plano Pro (US$ 20)? Breaking changes
    recentes no SDK `@vercel/sandbox`? Cadência? Nossa Removal Condition dispararia em quê
    (preço, região, limite, deprecation)?
-8. **Alternativa barata: Fly Machines como o próprio sandbox.** Fly Machine JÁ é uma micro-VM
-   Firecracker — e o sandbox-runtime da Anthropic (bubblewrap, open source, sem KVM) roda
-   dentro dela: isolamento em dupla camada, região GRU (São Paulo), sem limite de 24 h,
-   ~US$ 5/mês total. O custo real é operacional: egress allowlist DIY (Fly não tem
-   `networkPolicy` nativo), secrets = env vars visíveis (só o Capability Gateway protege),
-   pool/pre-warm DIY via machines paradas. Para UM operador solo: quantas horas/mês de ops
-   essa rota realmente custa vs Vercel? Existe precedente público de coding agent usando
-   Fly Machines como sandbox? Dado o teto de US$ 20, a diferença de ~US$ 15/mês justifica
-   a Vercel ou o Fly+SRT é o racional?
+8. **Alternativas mais baratas — verificamos na web em 2026-08-10; cruze e critique.**
+   Custo mensal no nosso perfil (200 exec × 25 min × 2 vCPU + hub Node/Postgres always-on):
+
+   | Arquitetura | US$/mês | Key do LLM fora do guest? | Egress allowlist | Região |
+   |---|---|---|---|---|
+   | Hub Fly + workers **Modal** (Starter: crédito recorrente US$ 30/mês cobre o uso) | ~3 | não (env var) | nativa por domínio (beta) | `sa` +50% |
+   | Hub Fly + workers **E2B Hobby** (crédito one-time US$ 100 ≈ 7 meses) | ~3 → ~17 | não (env var) | nativa por domínio | só US |
+   | **Fly total** ("E2B caseiro"): hub machine + worker machine Firecracker EFÊMERA por execução via Machines API + SRT dentro (egress allowlist do próprio SRT) — Topologia B, key fica no hub | ~8–12 | **sim** | via SRT | **GRU/BR** |
+   | Hub Fly + **Vercel Pro** | ~23 | **sim** (proxy OIDC — único gerenciado) | nativa | só iad1 |
+
+   Descartes nossos: Vercel Hobby (Active CPU 5 h/mês cobre ~¼ do perfil), Cloudflare
+   Sandboxes (~US$ 26 com standard-3, sem pin de região), Oracle Always Free (corte de
+   junho/2026 + reclaim de idle), Fly Sprites (~US$ 46). Riscos que já vemos: créditos
+   Modal/E2B são promocionais (podem sumir); rota Fly-total exige probe de bubblewrap no
+   kernel guest do Fly (nunca documentado publicamente; namespaces+cgroups v2 confirmados
+   por staff — probe de 5 min resolve) e ~1 dia de integração (endpoint `/exec` da Machines
+   API trava em 60 s → servidor HTTP próprio na worker via rede privada 6PN).
+   **Pergunta**: dado teto US$ 20, key-fora-do-guest como propriedade normativa e o desejo
+   de zero-ops — qual dessas 4 você ranqueia primeiro e por quê? A diferença de ~US$ 11–20/mês
+   da Vercel se justifica só pelo proxy OIDC + zero-ops, ou a rota Fly-total (BR, soberana,
+   ~US$ 10) é o racional? Modal/E2B com key visível no guest é aceitável na fase 1 solo
+   (o Capability Gateway já protege DB/ERP/git; sobraria só a key do LLM exposta)?
 
 ## Formato de saída
 
-Respostas numeradas 1–8 com fonte + URL + data cada; no fim, diga se mantém
-"Vercel primeiro a qualificar" dadas as informações novas (custo teto US$ 20, B já pago,
-hub no Fly, alternativa Fly+SRT a ~US$ 5), ou se muda a ordem — e o porquê em 5 linhas.
+Respostas numeradas 1–8 com fonte + URL + data cada; no fim, ranqueie as 4 arquiteturas da
+dúvida 8 (Modal ~3 · E2B ~3→17 · Fly-total ~8–12 · Vercel ~23) dadas as informações novas
+(teto US$ 20, Topologia B já paga, hub no Fly) e diga se mantém "Vercel primeiro a
+qualificar" ou muda a ordem — e o porquê em 5 linhas.

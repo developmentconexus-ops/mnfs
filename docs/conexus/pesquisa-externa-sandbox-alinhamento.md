@@ -6,7 +6,7 @@
 
 Recebemos sua pesquisa de sandbox. Cruzamos com duas pesquisas internas nossas e estamos
 **perto de convergir na sua recomendação** (Topologia A + Vercel Sandbox como primeira hipótese),
-com duas informações novas que você não tinha e sete dúvidas que precisam fechar antes de
+com duas informações novas que você não tinha e oito dúvidas que precisam fechar antes de
 ratificarmos. Responda com fontes primárias + URLs + data; marque o que não conseguir verificar.
 
 ## Contexto novo (você não tinha)
@@ -35,7 +35,7 @@ ratificarmos. Responda com fontes primárias + URLs + data; marque o que não co
   sandbox; broker de header não protege protocolo nativo de DB).
 - `ActorRunSandbox` ≠ `PreviewEnvironment`: ADOTADO.
 
-## As 7 dúvidas que precisam fechar
+## As 8 dúvidas que precisam fechar
 
 1. **Credencial do modelo (LLM) na Topologia A**: confirme que o
    `defineSandboxProxy`/forwarding da Vercel consegue injetar `Authorization` para
@@ -64,9 +64,18 @@ ratificarmos. Responda com fontes primárias + URLs + data; marque o que não co
 7. **Maturidade/SLA**: Vercel Sandbox é GA? Tem SLA no plano Pro (US$ 20)? Breaking changes
    recentes no SDK `@vercel/sandbox`? Cadência? Nossa Removal Condition dispararia em quê
    (preço, região, limite, deprecation)?
+8. **Alternativa barata: Fly Machines como o próprio sandbox.** Fly Machine JÁ é uma micro-VM
+   Firecracker — e o sandbox-runtime da Anthropic (bubblewrap, open source, sem KVM) roda
+   dentro dela: isolamento em dupla camada, região GRU (São Paulo), sem limite de 24 h,
+   ~US$ 5/mês total. O custo real é operacional: egress allowlist DIY (Fly não tem
+   `networkPolicy` nativo), secrets = env vars visíveis (só o Capability Gateway protege),
+   pool/pre-warm DIY via machines paradas. Para UM operador solo: quantas horas/mês de ops
+   essa rota realmente custa vs Vercel? Existe precedente público de coding agent usando
+   Fly Machines como sandbox? Dado o teto de US$ 20, a diferença de ~US$ 15/mês justifica
+   a Vercel ou o Fly+SRT é o racional?
 
 ## Formato de saída
 
-Respostas numeradas 1–7 com fonte + URL + data cada; no fim, diga se mantém
+Respostas numeradas 1–8 com fonte + URL + data cada; no fim, diga se mantém
 "Vercel primeiro a qualificar" dadas as informações novas (custo teto US$ 20, B já pago,
-hub no Fly), ou se muda a ordem — e o porquê em 5 linhas.
+hub no Fly, alternativa Fly+SRT a ~US$ 5), ou se muda a ordem — e o porquê em 5 linhas.

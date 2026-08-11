@@ -16,7 +16,7 @@
 | 6 | [Camada de dados](07-camada-dados.md) | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | **DECIDIDO — C-006** |
 | 7 | [Integração externa](08-integracao-externa.md) | Blueprint de conector, vault, túnel, perfil Sankhya | funda | **DECIDIDO — C-007** |
 | 8 | Scaffold + frontend | Template React/Vite, UI-kit, publish | média | pendente |
-| 9 | Agente de 1ª classe | Identidade, versão, tools, headless, contexto em camadas | funda | **aberto** — [prompt de pesquisa externa](pesquisa-externa-agente-prompt.md) pronto; lacunas de harness → [adendo da sonda](sonda-addendum-harness-flow.md) |
+| 9 | Agente de 1ª classe | Identidade, versão, tools, headless, contexto em camadas | funda | **aberto** — [pesquisa interna](pesquisa-interna-agente.md) concluída (7 correções à direção + proposta de decisão); [prompt externo](pesquisa-externa-agente-prompt.md) rodando; lacunas de harness → [adendo da sonda](sonda-addendum-harness-flow.md) |
 | 10 | Estratégia de LLM | Modelos por fase, custo | rasa → aprofunda no build | pendente |
 | 11 | Ciclo de vida | Git model, DEV→PROD, release, rollback | média | pendente |
 | 12 | Runtime publicado | Auth/RBAC, embed, storage | rasa → aprofunda no build | pendente |

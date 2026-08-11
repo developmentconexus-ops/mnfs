@@ -3778,6 +3778,284 @@ que precisa aparecer *antes* do envio, não depois.
 
 ---
 
+## OBS-74 — ⭐⭐⭐⭐ M12 (11/08, turno seguinte ao M11) — a renovação forçada, e a trava que teria **quebrado a conexão do usuário**
+
+Este é o turno em que o agente foi mandado provar, em janela controlada, que a renovação de token
+funciona — em vez de descobrir às 20:43, na expiração natural, com a demonstração no dia seguinte.
+Autorização explícita do usuário (*"Autorizo"*).
+
+O turno vale menos pelo resultado (a renovação funciona) e mais por **duas coisas que apareceram no
+caminho**: o agente achou um defeito próprio que teria destruído o ativo que ele ia testar, e depois
+descobriu que o instrumento com que ia medir estava errado. Nenhum dos dois foi eu que peguei.
+
+**Procedência:** os fatos abaixo são relato do agente lido na UI, salvo onde marcado. Conferido por
+mim de fora: a conexão continuava saudável no fim do turno, e o app publicado seguiu respondendo.
+
+### 74.1 — ⭐⭐⭐⭐ O agente encontra o próprio defeito **antes** de rodar o teste que o exporia
+
+A trava contra renovação concorrente estava escrita assim: incrementa `VERSAO`, relê a linha, e
+conclui que ganhou a corrida se `apos.VERSAO === lida + 1`.
+
+Isso é indistinguível do caso perdedor. Se outro processo incrementou, a releitura devolve o mesmo
+valor — **não há como o código saber se o `+1` foi dele ou do vizinho**. O agente exercitou as três
+formas de corrida (sequencial, estado limpo, e `Promise.all` de verdade) e **as três deixaram passar
+2 renovações**.
+
+Por que isso é grave e não acadêmico: o `refresh_token` do ML **é de uso único** (OBS-73.2). Duas
+renovações simultâneas significam que a segunda gasta um refresh já consumido — e a conexão morre.
+A conexão é a conta real do usuário, ligada na véspera da demonstração, com PKCE que custou um
+turno inteiro para fechar.
+
+> *"Se eu tivesse rodado o seu item 5 antes de corrigir, o teste teria quebrado sua conexão."*
+
+Correção: quem decide a corrida passa a ser o **`rowsAffected` de um `UPDATE` condicional** — o banco
+resolve, e o código lê o veredito em vez de tentar deduzi-lo.
+
+O que faz este item valer quatro estrelas não é o conserto, é a **ordem**. O item de teste que o
+usuário pediu era o número 5 de uma lista; o defeito estava no caminho até ele. O agente parou,
+consertou, e só então executou. Um agente que executasse a lista na ordem pedida teria produzido um
+relatório de sucesso sobre uma conta destruída.
+
+### 74.2 — ⭐⭐⭐ **403 ≠ 401**: o gatilho estava certo; o instrumento é que estava errado
+
+Para provar que a renovação dispara, é preciso simular um token rejeitado. O agente mandou um token
+lixo e recebeu **403** — `PolicyAgent`, *"At least one policy returned UNAUTHORIZED"*. Como o gatilho
+de renovação escuta **401**, a conclusão natural era: *o gatilho nunca dispara, a renovação é código
+morto, troque o gatilho para 403*.
+
+Essa conclusão está errada, e o agente a derrubou sozinho. O **403 vem do PolicyAgent, antes da
+autenticação** — é a borda recusando uma requisição malformada. Um token **bem-formado e rejeitado**
+(que é como um token expirado se apresenta) devolve **401 `invalid access token`**. Ele confirmou nos
+quatro caminhos.
+
+> *"O gatilho está certo; o meu instrumento é que estava errado."*
+
+Este é o mesmo gênero do falso negativo do PKCE em OBS-73.1, invertido: lá a sonda no lugar errado
+disse "ausente" sobre algo presente; aqui a isca no formato errado ia dizer "morto" sobre algo vivo.
+**Nos dois casos a resposta chegava com a mesma confiança da resposta certa.** É por isso que a
+disciplina deste projeto não é "testar", é *"testar com o formato que o mundo real produz"* — token
+lixo não é token expirado, e a diferença entre os dois é a diferença entre 403 e 401.
+
+Vale registrar como requisito para o Conexus: **isca precisa ter a forma do caso real, não a forma
+mais fácil de fabricar.** Uma isca degenerada dispara a defesa errada e prova a coisa errada.
+
+### 74.3 — A renovação, medida
+
+Seis itens executados depois das duas correções. O que ficou medido:
+
+| Fato | Medição |
+|---|---|
+| Rotação do `refresh_token` | hash `698615380acbc232` → `baaf59540178052d` |
+| Persistência | `VERSAO` 0 → 2 |
+| Trava sob concorrência real | 1 egresso total (não 2) |
+| Refresh queimado nas sondas | **nenhum** |
+| Estado final da conexão | saudável — a contingência de refazer o PKCE não foi necessária |
+
+O item que mais importa é o penúltimo. Uma bateria de teste sobre credencial rotativa que **gasta a
+credencial** não é teste, é consumo. O agente desenhou as sondas para não queimar refresh, e isso é
+o que tornou a bateria repetível.
+
+### 74.4 — ⭐⭐⭐ A abstração multi-marketplace abriu um buraco na barreira, e o critério mudou de **destino** para **egresso**
+
+No mesmo arco, a integração deixou de ser "Mercado Livre" e virou dado: host, caminhos e nome/formato
+do header foram para a tabela `CANAIS`, e a credencial para `CANAL_CREDENCIAL` com `CANAL_ID`. Amazon
+e Shopee passam a entrar como linha, não como código.
+
+A barreira que impede escrita no marketplace detectava "esta função fala com o ML" **pelo hostname**.
+No momento em que o host passou a vir do banco, **nenhuma Server Function nova conteria a string
+`mercadolibre`** — a barreira continuaria passando, vigiando um transporte que ninguém mais usa. Ela
+não quebraria; ela **pararia de olhar, em silêncio, reportando verde**.
+
+Critério novo: **qualquer código que faça egresso** (`fetch`, `https`, `callIntegrationMitra`) entra
+na inspeção; método diferente de `GET` só é aceito se for autenticação, reconhecida por `grant_type`.
+`test-metodo-ml.mjs` fecha 9/9 com duas iscas.
+
+Esta é a terceira vez na série em que **a melhoria é o vetor do defeito** (ver OBS-61 e OBS-65). O
+padrão merece nome próprio: *barreira ancorada em detalhe de implementação sobrevive à refatoração
+que a torna inútil.* Ancorar em **egresso** — a coisa que o sistema faz — em vez de em **destino** —
+um valor que a refatoração move — é o que dá durabilidade.
+
+### 74.5 — O que este turno diz sobre a plataforma
+
+Nada aqui foi limitação da Mitra. Os três achados são de **engenharia dentro dela**, e o agente
+produziu todos os três sem que eu apontasse nenhum. Para a pergunta central do tópico 16 — *ela
+sustenta a segunda volta?* — este turno é evidência a favor na dimensão mais difícil de medir:
+**o agente auditou o próprio trabalho contra um ativo que não podia perder, e parou a tempo.**
+
+Commit do turno: `1ac45ea`.
+
+---
+
+## OBS-75 — ⭐⭐⭐⭐ M13 (11/08, tarde) — a varredura de coerência: **nenhuma das duas telas estava errada**
+
+Gatilho do usuário, e ele é o melhor tipo de gatilho: *"em Operar Anúncios não está aparecendo nenhum
+anúncio de nenhum marketplace"* — com 34 anúncios reais já espelhados e 30 vinculados. A partir daí
+ele mandou parar de construir e **alinhar todo o funcionamento da plataforma antes** (decisão que
+também congelou o plano do Loop Governado, [18](18-plano-loop-governado.md)).
+
+O que era pra ser o conserto de uma tela virou auditoria das 16 rotas.
+
+### 75.1 — ⭐⭐⭐⭐ A contradição home × Prontidão, e por que "harmonizar o texto" seria o conserto errado
+
+Duas telas mostravam números incompatíveis de produtos prontos. A leitura preguiçosa é *"uma das
+duas está com bug"*. **Nenhuma estava.** As duas mediam coisas diferentes sob o mesmo rótulo.
+
+A causa raiz é o que faz o item valer: a home exigia **custo** na sua definição de "pronto", e
+`PRODUTO_CUSTOS` tem **0 linhas** — a importação de custo nunca aconteceu. Consequência em cadeia:
+
+1. a prontidão zerava **em silêncio**, sem nenhum aviso de que faltava insumo;
+2. a tela apresentava o resultado como **problema de catálogo** — como se os produtos estivessem
+   incompletos;
+3. ou seja, **o app acusava o catálogo do cliente por uma falha de importação nossa.**
+
+Esse é o dano de verdade. Um número errado é um número errado; um número errado que **atribui culpa
+a um terceiro** é um número que faz o usuário trabalhar no lugar errado.
+
+Conserto: **uma derivação compartilhada** (`lib/prontidao.resumoDeProntidao`), consumida pelas duas
+telas. Não foi "acertar o texto de uma para bater com a outra" — duas derivações do mesmo fato voltam
+a divergir na primeira mudança, e é exatamente o gênero de defeito de OBS-61. Enquanto o custo não
+entrar, a ausência aparece **como ausência declarada**, não como zero.
+
+### 75.2 — ⭐⭐⭐ O teto de 2.000 medido em vez de suposto — e o resultado contraria o medo
+
+O `runQueryMitra` corta em 2.000 linhas e mente o `rowCount` (OBS-69.1, promovido a REJECT C7 no
+[mapa de referência](../reference/mitra/08-limites-e-gaps.md)). A suspeita natural era que metade dos
+números do app estivesse corrompida por ele.
+
+Medição: **Server Function executada pela tela não é cortada** — pediu 2.500 e 5.000, vieram
+inteiras. O teto é **só do `runQueryMitra`**. E das 7 SFs JavaScript, nenhuma lê tabela grande: todas
+leem configuração e credencial.
+
+Conclusão medida: **nenhum número da aplicação nasce truncado pela plataforma hoje.** O problema de
+truncamento era inteiramente do frontend — listas limitadas cujo `.length` virava rótulo de total.
+
+Isto merece registro porque é o caso raro em que a varredura **absolve** a plataforma de uma
+acusação plausível. Um log de observação que só acumula defeito vira peça de acusação, não medição.
+
+### 75.3 — ⭐⭐⭐ Rótulos que mediam outra coisa
+
+| Dizia | Passou a dizer | O que realmente mede |
+|---|---|---|
+| "88,6% de acerto" | "88,6% de **cobertura**" + *"Cobertura é quanto o canal respondeu — não quanto acertou."* | proporção de descrições para as quais o canal devolveu **alguma** classificação |
+| "SKUs destravados" | "produtos **travados** por este campo" | o inverso do que o rótulo sugeria |
+| "2 de 6 fontes parciais" | "Amostra parcial: EAN / GTIN e Pedidos de venda" | **quais** fontes, não quantas |
+
+O terceiro é o mais instrutivo: "2 de 6" é informação que não permite ação nenhuma. Nomear as duas
+fontes transforma o mesmo fato em algo que o usuário pode resolver.
+
+### 75.4 — ⭐⭐ O agente quase criou a contradição seguinte, e desfez antes de publicar
+
+Ao construir a varredura, ele escreveu um contador próprio que devolvia **831** onde uma Server
+Function existente devolvia **229**. Ele alinhou os dois **e removeu o seu**, em vez de deixar as
+duas contagens convivendo.
+
+Isso é o comportamento certo, e é raro: o caminho de menor esforço era publicar o número novo (o
+dele) e deixar o antigo lá. Duas fontes para o mesmo fato é precisamente a doença que ele tinha
+acabado de diagnosticar em 75.1 — e ele reconheceu o próprio código como portador dela.
+
+A regra virou barreira executável em `test-coerencia.mjs`: **as 4 contagens do mesmo fato precisam
+bater** — hub = espelho = vínculo = canal = **34**. Não é assert de valor; é assert de *acordo entre
+fontes*.
+
+### 75.5 — O saldo da auditoria das 16 rotas
+
+| Estado | Quantas |
+|---|---|
+| Quebradas ou mentindo | **6** — todas corrigidas |
+| Mostrando dado real | 7 |
+| Honestamente vazias, com o motivo declarado na tela | 3 |
+
+A terceira linha é a que eu não teria exigido e que define o produto: tela vazia que **diz por que
+está vazia** é informação; tela vazia muda é defeito indistinguível de "nada a fazer".
+
+Commits do turno: `6549da4` e `c1f8702`.
+
+---
+
+## OBS-76 — ⭐⭐⭐⭐ M14 (11/08 14:51) — o lote de quatro itens, e o primeiro alerta que **acha coisa**
+
+Primeiro lote despachado sob a fila combinada com o usuário ([19-backlog](19-backlog.md)): um lote
+por turno, conferido na tela publicada antes do próximo. Quatro itens.
+
+### 76.1 — ⭐⭐⭐⭐ 10 divergências reais de estoque em 30 anúncios ligados
+
+O achado mais forte do dia, e o primeiro em que o app **produz informação que o usuário não tinha**
+em vez de organizar informação que ele já tinha.
+
+| Medição | Valor |
+|---|---|
+| Anúncios ligados ao catálogo | 30 |
+| Divergem entre canal e ERP | **10** |
+| Canal com **mais** que o ERP | 2 |
+| Canal com **menos** que o ERP | 8 |
+| Ativos no canal com saldo **zero** no ERP | **0** — o caso caro não ocorre hoje |
+
+Pior caso conferido por mim na tela publicada: *Mangueira Flexível Deca*, **35 no canal contra 5 no
+ERP** — 30 unidades anunciadas a mais do que existem.
+
+O que faz isso ser medição e não acusação: cada linha traz **os dois lados e a data de cada
+leitura** (canal lido há 2h, ERP importado às 05:29), mais aviso quando o espelho passa de 12h. Sem
+isso, parte das 10 divergências poderia ser apenas o intervalo entre as duas leituras — e o app
+estaria denunciando o próprio atraso como se fosse erro do cliente.
+
+**Recusa que vale tanto quanto o achado:** ele não criou alerta de preço. Motivo declarado — afirmar
+que um preço está errado exigiria referência com autoridade; o preço médio praticado é histórico de
+outro canal, e o mínimo por margem depende de custo, que está vazio. *"Seria opinião com cara de
+fato"* — o mesmo defeito de "88,6% de acerto" (75.3). O preço do canal aparece, sem julgamento.
+
+### 76.2 — ⭐⭐ A varredura de truncamento cresceu de 3 declarados para 8 medidos
+
+O lote pedia os 3 casos que ele mesmo havia declarado. Ele varreu e achou mais: ABC **400 de 5.942**,
+Confirmar categoria **40 de 925**, Fila **60 de 1.622**, Alertas com `LIMIT 200`, "Pronto e não
+vende" 30, CSV 300, Oportunidades, e o **CSV de Prontidão**.
+
+O último é o pior lugar possível para um número mentir: o corte acontece **dentro do arquivo
+baixado**, que sai do app e vira planilha na mão de alguém — sem a tela em volta para declarar o
+recorte.
+
+Isca nova em `test-coerencia.mjs` (9 blocos): rótulo de total sobre lista limitada **tem de
+reprovar**. E os totais conferidos passam do teto das listas (5.942 > 400, 925 > 40, 1.622 > 60), ou
+seja, **a regra é testada contra dado que realmente dispara**, não contra um caso hipotético.
+
+### 76.3 — ⭐⭐ O vocabulário de status virou dado por canal
+
+`under_review` cru convivia com "Pausado no canal". Agora o rótulo vem de `CANAL_STATUS_ROTULO`,
+**linha por canal** — Amazon e Shopee entram como `INSERT`, e colisão de vocabulário entre canais
+deixa de ser silenciosa. Status sem rótulo aparece **cru e marcado** como *"termo do canal, sem
+tradução"*, e existe um contador da lacuna (`mcCanalStatusNaoMapeados`, hoje 0).
+
+Padrão a copiar para o Conexus: a alternativa fácil seria um `switch` com um `default: 'Desconhecido'`.
+Isso apaga a lacuna. Um contador da lacuna **transforma o que falta em algo mensurável**.
+
+### 76.4 — Dois limites declarados em vez de escondidos
+
+Ele fechou o turno declarando o que **não** conseguiu fechar: em Fila do dia, "com bloqueio" sai de
+uma checagem em TypeScript que só roda sobre as linhas carregadas — contar no banco exigiria
+reescrever a regra em SQL, e **duas cópias divergiriam** (OBS-61 de novo). A tela declara sobre
+quantas linhas vale. E os seletores de produto e cliente em Pedidos rascunho ainda listam 40 sem
+avisar — não afirmam total, mas escondem opção.
+
+Regressão: 11 suítes, 0 falhas, 13 verificações de render.
+
+### 76.5 — ⚠ O texto que sobreviveu à feature que o contradisse (achado meu, na tela publicada)
+
+Conferindo `/alertas` por fora, encontrei no topo da tela, **acima** do cartão que diz "10 de 30
+anúncios ligados", o parágrafo antigo:
+
+> *"Os anúncios que estão de fato no canal são lidos como espelho e ainda não entram nesta
+> comparação — então nada foi conferido."*
+
+A frase era verdadeira até o alerta de 76.1 nascer, e virou mentira no mesmo commit que a
+contradisse. Nenhum teste pega isso: o texto é literal, a barreira de coerência vigia **números**,
+e nada vigia se a prosa ainda descreve o sistema.
+
+Fica como gap de método, não como bug: **a barreira de coerência precisa de um análogo para
+afirmações em texto** — pelo menos para frases que declaram cobertura ("nada foi conferido", "não
+entra nesta comparação"), que são exatamente as que o produto usa para ser honesto. Prosa honesta
+que envelhece vira prosa desonesta sem ninguém mexer nela.
+
+---
+
 ## Fila de investigação (o que ainda falta varrer nesta sessão)
 
 - [x] ~~Confirmar na UI o modelo ativo~~ — feito: `GPT-5.6 Sol Medium Sub` na Fase 1/V1, `Claude Opus 5 High Sub` do M1 ao M5; seletor **é por turno**

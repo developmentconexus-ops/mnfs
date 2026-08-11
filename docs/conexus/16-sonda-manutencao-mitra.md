@@ -5,8 +5,9 @@
 > Nada mede o que acontece quando o pedido é *"isso ficou errado, muda"* — que é exatamente onde
 > `marketplace-central` e `MetalDocs` gastam PR hoje.
 >
-> **Profundidade:** funda. **Status:** em execução (aberta 2026-08-10).
-> **Saída:** veredito ADOPT/REJECT/OWN por dimensão de manutenção, alimentando T5, T6, T8, T11, T13.
+> **Profundidade:** funda. **Status:** **fechada 2026-08-11 como C-009** (aberta 2026-08-10).
+> **Saída:** veredito ADOPT/REJECT/OWN por dimensão de manutenção, alimentando T5, T6, T7, T8, T11, T13.
+> 14 turnos executados (V1, M1..M14), 76 observações em [17](17-log-observacao-mitra.md).
 
 ## Por que isto existe
 
@@ -168,7 +169,9 @@ funcionalidade de maior retorno por custo que esta sonda encontrou, e vale mais 
 
 ## Veredito
 
-_(roteiro completo — V1 + M1..M5 executados. Fecha como C-0xx em [DECISOES.md](DECISOES.md).)_
+_(pontos 1–8 escritos com V1 + M1..M5. Pontos 9–13 acrescentados em 11/08 depois de M6..M14 —
+integração real com o Mercado Livre, varredura de coerência e o primeiro lote sob fila governada.
+Fecha como **C-009** em [DECISOES.md](DECISOES.md).)_
 
 1. **O piso da Mitra é o pior comportamento possível dentro dela.** Nada na plataforma força cobertura
    declarada, aposentadoria de artefato, registro consistente ou recusa de inventar dado. Tudo isso
@@ -197,3 +200,48 @@ _(roteiro completo — V1 + M1..M5 executados. Fecha como C-0xx em [DECISOES.md]
 8. **Comportamento de segurança a exigir do agente do Conexus** (OBS-62): com autorização humana em
    mãos e o contorno técnico conhecido, o agente **recusou** replicar a chamada HTTP interna que burla
    o guarda de `DROP`. Caminho oficial ou recusa declarada — nunca o equivalente interno.
+
+### Acrescentado após M6..M14 (11/08)
+
+9. **O teto da Mitra não é de código; é de expressividade da camada de conexão.** Em nove horas de
+   manutenção nada travou o agente. O que travou foi integrar uma API real: a plataforma **não tem
+   conector OAuth2**, `updateIntegrationMitra` **não existe**, e o `refresh_token` do Mercado Livre
+   **rotaciona e é de uso único**. Terceira ocorrência do mesmo padrão (OBS-42 → OBS-72.1 → OBS-73.2):
+   **credencial é modelada como valor estático de configuração, nunca como estado vivo da
+   aplicação.** Toda API moderna com token rotativo bate nesse teto. Este é o achado arquitetural
+   mais importante da sonda inteira, e ele **não aparece em greenfield** — só aparece quando a
+   segunda volta encosta no mundo externo. → requisito duro para T7/T5: a Connection guarda credencial
+   **mutável pela aplicação**, com rotação e versão, ou o produto não integra nada sério.
+10. **O teto é contornável pela aplicação, e isso é as duas coisas.** Server Function JavaScript faz
+    `fetch` cru para host arbitrário — **sem allowlist de egresso** (Node v20.9.0, `fetch` global,
+    sem proxy). Foi o que salvou a integração: o token passou a morar em tabela nossa, a SF monta o
+    `Authorization` sozinha, e a rotação é persistida por nós. Como capacidade, resolve; como
+    postura de segurança, significa que **o guarda de credencial da plataforma não é uma fronteira** —
+    qualquer código de projeto sai para onde quiser. → o Conexus precisa das duas: credencial viva
+    **e** egresso governado. Ter só a segunda vira o teto da Mitra; ter só a primeira vira isto.
+11. **Falso positivo silencioso volta a aparecer, agora nas iscas e nas barreiras** — a mesma doença
+    do ponto 6, um nível acima. Três ocorrências novas: sonda de PKCE rodada no bundle do frontend
+    devolveu `0` sobre algo **presente** (OBS-73.1); isca com token lixo devolveu **403 antes da
+    autenticação**, quando o caso real é **401**, e quase fez trocar um gatilho correto (OBS-74.2); e
+    barreira ancorada em **hostname** parou de vigiar sem avisar quando o host virou dado de banco
+    (OBS-74.4). Princípio derivado: **isca precisa ter a forma do caso real**, e barreira precisa
+    ancorar no que o sistema *faz* (egresso), não em detalhe que a refatoração move (destino).
+12. **A dimensão mais difícil de medir teve resposta favorável: o agente auditou o próprio trabalho
+    contra um ativo que não podia perder, e parou a tempo** (OBS-74.1). Mandado executar uma lista de
+    6 itens, encontrou no caminho que a própria trava de concorrência deixava passar 2 renovações em
+    três formas de corrida — o que teria queimado o `refresh_token` de uso único e destruído a conexão
+    real do usuário na véspera da demonstração. Consertou antes de executar. Um agente que seguisse a
+    ordem pedida teria entregue relatório de sucesso sobre uma conta destruída. **Isto é o
+    comportamento que o Conexus precisa tornar invariante, não torcer para acontecer.**
+13. **Limite operacional da assinatura, medido: 3 paradas por limite de sessão em um dia**, janela de
+    5 horas, e duas delas com a mensagem **consumida com `out: 0`** — o turno some sem executar e sem
+    aviso prévio. Planejamento de trabalho agêntico sobre esta credencial precisa contar com
+    **janelas**, não com continuidade. Como requisito: o modo de falha tem de aparecer **antes** do
+    envio, não depois.
+
+### O que a sonda deixa em aberto de propósito
+
+O produto construído dentro da Mitra (`Marketplace Central`) continua evoluindo, e vai continuar
+gerando observação. Mas a **pergunta da sonda** — *ela sustenta a segunda volta?* — está respondida.
+O que roda agora é uso da plataforma, não teste dela. Observação nova entra no
+[17](17-log-observacao-mitra.md); reabrir o veredito exige achado que contrarie um dos 13 pontos.

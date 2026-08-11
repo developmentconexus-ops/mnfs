@@ -4,8 +4,9 @@
 > **Fontes:** acervo Mitra ([09-agente-embarcado](../reference/mitra/09-agente-embarcado.md)) +
 > [pesquisa interna](pesquisa-interna-agente.md) (Q1–Q10, 7 correções) + deep research externa
 > ([prompt](pesquisa-externa-agente-prompt.md); 3 erros de preço corrigidos com fonte primária) +
-> Codex gpt-5.6-sol xhigh, 2 rodadas adversariais (7,3 → 8,9/10, "sem contradição arquitetural
-> material com as decisões congeladas").
+> Codex gpt-5.6-sol xhigh, 3 rodadas adversariais (7,3 → 8,9/10, "sem contradição arquitetural
+> material com as decisões congeladas"; r3 = emenda AI SDK **alinhada** com 7 condições
+> pré-deploy, nota mantida).
 > **Herda:** C-002 (hub soberano, loop leve, multi-modelo por papel, Mastra fora do hub), C-005
 > (registro git-first, deployment atômico, RC-1/2/3), C-006 (roles mecânicas por projeto), C-007
 > (connector/v1: effects/idempotency/agentEligible/approvalFloor, vault, Connection), C-008
@@ -63,7 +64,7 @@ overengineering.
 | 1 | Formato | Agente = artefato git no registro C-005, kind **`agent`**, contrato **`agent/v1`**: slug, systemPrompt, modelo solicitado + params, tools (refs pinadas a artefatos + overrides que só APERTAM), policies (approvalDefault, budget), ui, evalRef. Extensão da união de kinds do C-005 = decisão explícita desta ratificação. Invariante C-005 generalizado: **kind escolhe contrato de compilação, lifecycle e runtime handler** (handler do `agent` = ProductionAgentRuntime, session-oriented `start/continue AgentRun` — não `execute(slug,input)`). Sem taxonomia pública "config × executável". |
 | 2 | Deployment | **Sem objeto AgentDeployment** — manifesto de deployment C-005 estendido: agentRevisionDigest, modelo solicitado+resolvido+provider, digests das camadas de contexto/policy, toolProjectionDigest + versão do compilador, bindings de Connections, digest da golden suite. **Resultado do eval = atestação imutável separada** referenciando o deploymentManifestDigest (nunca dentro do manifesto — circularidade). |
 | 3 | Identidade | **Sem AgentPrincipal, sem role Postgres ou Connection por agente** (contradiria C-006/C-007). AgentRun grava `actorType=AGENT` + `actorId` **estável entre deployments** (projeto+agentSlug) + deployment. Interativo = autoridade do usuário ∩ allowlist do agente ∩ policies; headless = só autoridade declarada. Gateway segue com `{proj}_query/{proj}_action` por kind. Gatilho p/ agregado: revogação/delegação independente, grants distintos entre agentes, 1º headless real. |
-| 4 | Runtime | **Loop leve no hub**. Camada de dialeto de provider = **Vercel AI SDK** (`ai` + `@ai-sdk/*`, MIT, TS; major **pinado**, upgrade = decisão revisada) — emenda do ratificador na ratificação: multi-provider é **objetivo de produto** (multi-modelo por papel C-002, tiering por agente), plumbing estruturado entra dia 1 enquanto barato. Distinção mantida: framework de AGENTE (loop/memória/storage — Mastra/LangGraph) segue rejeitado; AI SDK é só tradução de dialeto, o loop é nosso. AI SDK fica DENTRO da interface própria `ModelProviderAdapter` — o que é nosso e não vem de lib: budget pré-chamada, custo gravado no trace, modelo solicitado×retornado (drift de alias), taint, montagem do ContextPack. Vendor-específico via providerOptions (cache breakpoints Anthropic; Batches API no headless F1); conformance tests da tradução de tool call por provider. Sem sandbox (E2B segue exclusivo do builder, C-008). Limites de processo no hub: memória/corpo/tempo/concorrência/parser. Se o runtime de produção ganhar browser/shell/código/HTTP arbitrário, gatilho de sandbox reabre. |
+| 4 | Runtime | **Loop leve no hub**. Camada de dialeto de provider = **Vercel AI SDK** (`ai` + `@ai-sdk/*`, MIT, TS; major **pinado**, upgrade = decisão revisada) — emenda do ratificador na ratificação: multi-provider é **objetivo de produto** (multi-modelo por papel C-002, tiering por agente), plumbing estruturado entra dia 1 enquanto barato. Distinção mantida: framework de AGENTE (loop/memória/storage — Mastra/LangGraph) segue rejeitado; AI SDK é só tradução de dialeto, o loop é nosso. AI SDK fica DENTRO da interface própria `ModelProviderAdapter` — o que é nosso e não vem de lib: budget pré-chamada, custo gravado no trace, modelo solicitado×retornado (drift de alias), taint, montagem do ContextPack. Vendor-específico via providerOptions com **allowlist fechada** por provider (cache breakpoints Anthropic; hosted tools/search/browser proibidas; manifesto/usuário/builder não injetam opções); Batches API = capability provider-specific reavaliada no headless F1, **fora da abstração comum** (correção Codex r3). AI SDK **nunca executa tool** (sem `execute` de negócio, sem loop automático — adapter devolve proposta, hub autoriza e executa); nenhum tipo da lib atravessa adapter→domínio/banco; conformance tests da tradução de tool call por provider. Sem sandbox (E2B segue exclusivo do builder, C-008). Limites de processo no hub: memória/corpo/tempo/concorrência/parser. Se o runtime de produção ganhar browser/shell/código/HTTP arbitrário, gatilho de sandbox reabre. |
 | 5 | ToolProjection | Compilada mecanicamente no deployment (nomes `conector_recurso_verbo`, descrição agent-facing, schema estreitado): **nunca** `execute(slug,input)` genérico ao LLM. Fail-closed: artefato sem classificação = fora. Alvo 4–8 tools; >8 exige evidência de eval; 20 = teto do compilador. Projection = **compilador de segurança**: conformance tests + prova de que override não amplia autoridade. Metadata agent-facing gerada pelo builder passa validação/lint/limites/review (supply chain de prompt). |
 | 6 | Metadata nos artefatos | No **contrato do artefato** (payload imutável C-005, não overlay): `agentEligible` default **false**, `effects` (taxonomia C-007), `idempotency`, `approvalFloor`, sensibilidade de leitura, teto de resposta/campos. **Aciona formalmente RC-2 do C-005** (migração aditiva: artefato antigo funciona para consumidores atuais, inelegível para agente até classificar). |
 | 7 | Leitura | Só queries registradas (SQL livre nunca), views/colunas curadas, LIMIT + teto de bytes + statement_timeout + responseProjection. Escopo de dado **declarado** (caso 1 = PROJECT_WIDE explícito). RC-1 dispara antes da publicação se: carteira por vendedor, usuário externo. Dado classe salário/sensível = RC-2. |
@@ -131,3 +132,28 @@ recusa explícita).
   contrato exato de precondição atômica (`NONE/BEST_EFFORT`); protocolo completo do ledger
   (claim, OUTCOME_UNKNOWN, reconciliação, key por unidade); critérios mensuráveis do benchmark
   estreito (perguntas suportadas, qualidade mínima, gatilho objetivo da tool analítica).
+
+## Adendo r3 (2026-08-11) — condições pré-deploy da camada AI SDK (Codex, alinhado)
+
+Veredito r3: emenda **alinhada** ("nenhuma contradição arquitetural material"; nota mantida
+8,9/10 — ganho estratégico compensa dependência crítica nova). Condições obrigatórias antes do
+1º deploy com a lib:
+
+1. Versões **exatas** pinadas + lockfile frozen (major pinado não basta); só `ai` + providers
+   efetivamente qualificados instalados; auditoria/SBOM no CI.
+2. Teste arquitetural: nenhuma tool do AI SDK executa efeito; nenhum tipo da lib (UIMessage/
+   CoreMessage/stream parts) vaza para domínio/persistência — Conversation canônica é Conexus.
+3. `providerOptions` fechado por allowlist; provider-native tools (search/browser/hosted)
+   proibidas.
+4. **Vercel AI Gateway desabilitado** + telemetria explicitamente off; credencial fornecida
+   explícita (sem discovery ambiental); egress restrito ao endpoint do provider qualificado;
+   erros sanitizados.
+5. Conformance ao vivo: schema complexo, tool desconhecida, múltiplas tool calls, toolCallId
+   ausente (id do SDK = observacional; idempotência usa `effectExecutionId` próprio), stream
+   parcial/abort, 429/5xx, usage ausente (nunca vira custo zero — reserva conservadora
+   pré-chamada + reconciliação pós), alias retornado, opção não suportada (warning relevante =
+   falha de qualificação).
+6. Múltiplas tool calls num turno: fase 1 **rejeita effectful paralelas**; reads paralelas só
+   com budget reservado antes.
+7. Batches fora da promessa comum do adapter (capability específica no headless F1). Texto com
+   tool call = provisório; confirmação só após receipt mecânico.

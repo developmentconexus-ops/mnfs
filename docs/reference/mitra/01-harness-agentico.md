@@ -63,6 +63,14 @@ Regras críticas capturadas verbatim:
 - Após **3 tentativas** falhas, PARAR e escalar com dossiê estruturado.
 - Conflito de merge → sempre `AskUserQuestion` em linguagem de negócio, nunca resolver sozinho.
 
+> **Correção 2026-08-11 (sonda do [tópico 16](../../conexus/16-sonda-manutencao-mitra.md), OBS-10).**
+> Este doc trata a pausa da Mitra como sendo sempre "por prompt, não por mecanismo". São **dois
+> regimes distintos na mesma plataforma**: `AskUserQuestion` é mitigação por prompt (o sistema não
+> bloqueia tools posteriores), mas **tool approval tem gate mecânico** — componente `.agent-approval`
+> com `requestId`, três escopos (`allow_once` / `allow_session` / `deny`) e o input da tool visível
+> antes de decidir. O STRENGTHEN do Conexus fica mais preciso: **pôr pergunta no mesmo regime
+> mecânico em que a Mitra já pôs aprovação**, não inventar o mecanismo do zero.
+
 ### A superfície de ação: MCP, não SQL
 
 O agente **não tem uma tool de SQL genérica**. Suas tools **são** as server functions do projeto,
@@ -81,6 +89,14 @@ flowchart TB
 Consequência de design: **a capacidade do agente é um artefato versionado, revisável e
 permissionável** — não uma configuração solta. Para dar uma habilidade nova ao agente, cria-se uma
 server function; ela nasce auditável e sob RBAC.
+
+> **Correção 2026-08-11 (OBS-20).** O mapa v0.9.0 afirma duas vezes *"sem `WebSearch`/`WebFetch`
+> neste build"*. **Existe acesso à web**: rótulo de tool **"Acessando URL"** observado ao vivo
+> buscando `developer.sankhya.com.br/llms.txt` e as páginas de referência do fornecedor — e foi isso
+> que permitiu **provar o ambiente sandbox sem emitir uma requisição ao ERP** (OBS-21). A superfície
+> de ação continua sendo MCP para dados; web é superfície de **leitura de documentação**. Veredito
+> Conexus: **ADOPT com allowlist de domínio**. Detalhe a copiar: o agente procurou o `llms.txt` antes
+> de ler a doc — sabe buscar o índice antes do conteúdo.
 
 ## Contratos exatos
 
@@ -123,6 +139,8 @@ send() · cancel() · loadHistory()
 | `taskId` = sessão contínua sem limite de turnos | ADOPT |
 | Telemetria de token por turno **e** sessão | ADOPT |
 | `AskUserQuestion` encerra o turno (mitigação por prompt) | **REFERENCE + STRENGTHEN** → bloqueio mecânico |
+| Tool approval **com** gate mecânico, 3 escopos, input visível (OBS-10) | **ADOPT** — é o modelo que a pergunta deve seguir |
+| Acesso à web para doc oficial do fornecedor (OBS-20) | **ADOPT** com allowlist de domínio |
 | Compactação delegada ao CLI, sem expor estado ao usuário | ADAPT |
 | WS exige usuário logado (sem headless) | **REJECT → OWN** (agente por evento) |
 | `input` de tool truncado / `loadHistory` texto cru | **REJECT** (protocolo íntegro, histórico tipado) |

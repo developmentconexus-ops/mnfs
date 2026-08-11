@@ -44,6 +44,23 @@ dinamicamente) + `testEndpoint` (teste de conexão padrão). Autorização é um
 O catálogo real observado inclui Gmail, Google Calendar, HubSpot, SAP, Supabase, além de `custom`
 (blueprint próprio) e `CSV` (upload como tipo de conexão).
 
+> **Correção 2026-08-11 (OBS-42, leitura do bundle `integrations_store`).** Duas coisas que este doc
+> descreve como propriedades do blueprint **não são**:
+>
+> - **`testEndpoint` é exceção allowlistada por id**, não propriedade do conector:
+>   `test_endpoint: ["bearer_token","supabase"].includes(e.id) ? \`/${e.id}/test\` : null` — 2 dos 10
+>   templates têm teste; SAP, HubSpot, Totvs, Gmail e o **próprio Sankhya** recebem `null`. É por isso
+>   que a prova de que a conexão apontava para o sandbox teve de ser feita **pelo agente, na unha**
+>   (OBS-21), cruzando o `blueprintId` com o OpenAPI oficial do fornecedor.
+> - **`authStrategy` é derivada da categoria**, não declarada:
+>   `e.category === "custom" ? "STATIC_KEY" : "DYNAMIC_TOKEN"`.
+>
+> O catálogo dos 10 templates está **hardcoded no bundle do frontend** (híbrido: lista fixa embarcada
+> + `fetchConnectorTemplates()` do servidor). **Veredito Conexus:** o ADOPT de blueprint continua,
+> mas `testEndpoint` vira **obrigatório por conector** — sem teste de conexão, provar ambiente
+> (prod × sandbox) fica a cargo de quem está construindo, que foi exatamente o risco corrido nesta
+> sonda com uma base de ERP real do lado.
+
 ### Data Discovery — o antídoto ao "inventar regra"
 
 O padrão mais valioso desta área: antes de codar, o agente **consulta o dado real por SQL** para
@@ -109,7 +126,8 @@ callIntegrationMitra({ ... })
 |---|---|
 | SF INTEGRATION declarativa + credencial simbólica | **ADOPT** |
 | `callIntegrationMitra` (app nunca vê credencial) | ADOPT (princípio) |
-| Blueprint + `fieldsSchema` + `testEndpoint` | ADOPT |
+| Blueprint + `fieldsSchema` + `testEndpoint` | ADOPT — mas `testEndpoint` **obrigatório**, não allowlistado por id (OBS-42) |
+| Catálogo de conectores hardcoded no bundle; `authStrategy` derivada da categoria | **REJECT** — conector é dado, não `if` ternário (OBS-42) |
 | Union fechada de auth + `DYNAMIC_TOKEN` | ADOPT |
 | Data Discovery por SQL antes de codar | **ADOPT (forte)** |
 | 4 camadas rede→conexão→virtual→REST | ADOPT |

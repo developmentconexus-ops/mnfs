@@ -11,7 +11,7 @@
 | 1 | [Visão e escopo do produto](02-visao-escopo.md) | O que É / para quem / caso 1 / o que NÃO é | funda | **DECIDIDO — C-001** |
 | 2 | [Requisitos: piso + teto](03-requisitos.md) | ADOPTs (piso) + pilares P1–P3 + C1–C4 viram requisitos | funda | **DECIDIDO — C-003** |
 | 3 | [Runtime do agente (harness)](04-runtime-agente.md) | Hub próprio × Mastra; Pi × Agent SDK × ACP como workers | funda | **DECIDIDO — C-002** |
-| 4 | Sandbox de execução | E2B × local × alternativa | funda | pendente |
+| 4 | [Sandbox de execução](05-sandbox.md) | E2B × local × alternativa | funda | **DECIDIDO — C-004** |
 | 5 | Registro de artefatos + 2 SDKs | SF/dataLoader/dbAction com slug + bind params | funda | pendente |
 | 6 | Camada de dados | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | pendente |
 | 7 | Integração externa | Blueprint de conector, vault, túnel, perfil Sankhya | funda | pendente |
@@ -22,6 +22,7 @@
 | 12 | Runtime publicado | Auth/RBAC, embed, storage | rasa → aprofunda no build | pendente |
 | 13 | Observabilidade mínima | Log de turno, custo, status, checklist vivo (TodoWrite→eventos→UI) + `tasks.md` durável | rasa | pendente |
 | 14 | Segurança proporcional | Credencial server-side, bind params, tenancy — o mínimo profissional | média | pendente |
+| 16 | [Sonda de manutenção na Mitra](16-sonda-manutencao-mitra.md) | A Mitra sustenta a segunda volta? Evidência atual é toda greenfield | funda | **em execução** |
 | 15 | Cérebro da empresa | Camada semântica por grupo de projetos: schema+regras+processos, discovery assistido, retroalimentação | funda | pendente |
 
 Evidência-base: [referência Mitra](../reference/mitra/00-OVERVIEW.md) ·

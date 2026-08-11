@@ -117,3 +117,29 @@ Tudo tem valor; nada tem consumidor no primeiro Golden Path.
 workers Pi frescos via SDK pinado, com Actor Pack compilado, tools TS nativas, multi-modelo por
 papel, gates humanos mecânicos e Claude Agent SDK como challenger sob trigger. Mastra fica fora do
 hub como referência a minerar.
+
+## Adendo pós-C-008 (2026-08-11) — worker vira remoto, arquitetura não muda
+
+A [C-008](05-sandbox.md) move o worker Pi para microVM E2B alugada. Nada da C-002 muda de
+autoridade — hub continua soberano, worker continua fresco por task, estado continua em git+hub.
+O que a C-008 acrescenta a este tópico:
+
+- **Bridge hub-local↔worker-remoto**: eventos do worker chegam ao hub via stream da API E2B
+  (não IPC local). Reconexão reconstrói do estado do hub, nunca da memória do agente (já era
+  normativo; agora é o caso comum, não o excepcional). `interrupt`/cancel viajam pelo mesmo
+  canal; se o canal cair, TTL provider-side + `onTimeout: kill` garantem que o sandbox morre
+  sozinho.
+- **Desconexão/queda do hub**: reconciliação de sandboxes e chaves órfãs no boot do hub é
+  responsabilidade do orquestrador (C-002), com metadata por ActorRun para reencontrar o que é
+  nosso. Bundle não coletado = falha explícita do run, nunca perda silenciosa.
+- **SYNC→SHARE mediado**: o workspace do worker nasce de git bundle sem credencial enviado pelo
+  hub (`baseCommitSha` congelado); o resultado volta como bundle+evidências coletados pelo hub —
+  o worker jamais fala com o remoto git. Validador independente roda no hub sobre o material em
+  quarentena (preserva a separação implementador × validador).
+- **Identidade de execução** ganha os campos já previstos na C-004: `sandboxProvider` +
+  `sandboxId` + `templateHash` por ActorRun.
+- **Orçamento de turno**: sessão Hobby de 1h vira restrição de desenho — turno representativo
+  ≤40–45 min com marcos 45/50/55/58. Turno que estoura 1h = falha de decomposição (reforça, não
+  contradiz, o worker fresco da C-002). Pause/resume não vira mecanismo padrão.
+- **Chave de LLM por run**: capability efêmera criada pelo hub (`expires_at` ≤ TTL, spend cap
+  por ActorRun, revogação no teardown) — ver invariante desdobrado na C-008.

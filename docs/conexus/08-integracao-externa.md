@@ -106,3 +106,20 @@ Sync/Deployment) e **semântica**, não formato de serialização nem DSL univer
   operações/entidades exatas da 1ª entrega; contrato concreto de paginação/cursor; delete policy
   por entidade; capability usada pelo testConnection; live smoke test escolhido; evidências
   esperadas nos 3 gates. Caminho declarado pelo revisor para 9+/10.
+
+## Adendo pós-C-008 (2026-08-11) — worker remoto e credenciais de integração
+
+A [C-008](05-sandbox.md) reafirma e endurece a fronteira da C-007 para o worker em nuvem:
+
+- **Worker E2B jamais recebe Connection, credencial de ERP ou conteúdo do vault** — coberto
+  pelo invariante `durableSecretNotReadableByGuest` (sem exceção, mesmo com root no guest).
+  Chamada a ERP durante build/validação = só via Capability Gateway no hub, que devolve
+  evidência estruturada ou fixture sanitizada.
+- A ÚNICA credencial que entra no guest é a chave de LLM efêmera por run
+  (`guestReadableRunCapabilityIsEphemeralAndBounded` — `expires_at`, spend cap, revogação);
+  nenhuma credencial de integração se qualifica para essa classe.
+- Egress do sandbox é deny-all + allowlist (LLM, registry, git do hub) — endpoint de ERP NÃO
+  entra na allowlist do worker; se entrar por engano, o teste de conexão semântico do conector
+  continua rodando só no hub.
+- Túnel Cloudflare nomeado (entrada pública real, C-007) segue exclusivo do hub — RunPreview do
+  sandbox é servido por reverse proxy autenticado do hub e nunca vira ingress de webhook.

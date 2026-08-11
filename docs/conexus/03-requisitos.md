@@ -133,3 +133,19 @@ headless/RBAC completo. Enxuto de propósito.
 (HAR-10) e multi-modelo por papel (HAR-11) explícitos, gates mecânicos no hub (HAR-3),
 requisitos tool-agnósticos (HAR-8), plano visual promovido a MVP (HAR-7), Worker Eval como
 gate de challenger (QUA-4). Fases/cortes conforme tabela.
+
+## Revisão pós-C-008 (2026-08-11)
+
+A [C-008](05-sandbox.md) (worker em microVM E2B) não adiciona nem remove requisito; ajusta a
+leitura de quatro pontos:
+
+- **Agency do worker vira premissa de ambiente**: smoke test de browser (QUA-2), serviços e
+  portas são atendidos por máquina completa no sandbox — não por confinamento de processo.
+- **Preview durante build** = `RunPreview` efêmero/privado via proxy autenticado do hub;
+  qualquer requisito de preview estável (dias, compartilhável) continua pendente da decisão
+  separada `PreviewEnvironment`.
+- **HAR (workers frescos, estado em git+hub)**: o fluxo SYNC→SHARE agora é mediado por git
+  bundle (worker nunca fala com o remoto); orçamento de turno ≤40–45 min por sessão de 1h.
+- **Dados nos testes do builder**: QA no worker roda contra `BuildValidationDatabase` sintético;
+  QUA-1 (golden benchmark), QA-DB-3 e validação final continuam locais/autoritativos (C-006).
+- **OBS-1** ganha insumo: P50/P95 de bootstrap/build/teste + custo de sandbox por ActorRun.

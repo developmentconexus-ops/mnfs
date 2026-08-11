@@ -85,3 +85,19 @@ reproduzível nativamente.
 - Tópico 11 (ciclo de vida) herda: release=deployment, tag, versão visível no app, DEV→PROD.
 - Tópico 12 (runtime publicado) herda: auth do `execute` (derivação server-side já normativa).
 - Builder (C-002) ganha: `executeCandidate` no Actor Pack; prompt recomenda expand/contract.
+
+## Adendo pós-C-008 (2026-08-11) — caminho do artefato com worker remoto
+
+A [C-008](05-sandbox.md) não muda nenhum invariante do C-005 (artefato = arquivo em git,
+registry imutável, deployment atômico). Muda o CAMINHO até o registro:
+
+- Worker produz artefatos como commits **locais** dentro do sandbox; o material chega ao hub
+  como **git bundle + evidências**, importado em repositório de **quarentena** (verificação de
+  ancestry sobre `baseCommitSha`, diff de paths permitidos, `resultTreeSha`).
+- Compilação do payload, registro no registry e deployment atômico acontecem **só no hub**,
+  sobre material que passou pela validação independente — worker nunca toca registry nem faz
+  push. "Git push só no hub" preservado literal.
+- Sentinel scan no SHARE: bundle/evidência não podem conter a chave de LLM efêmera nem qualquer
+  segredo (falha = run reprovado).
+- Validação final (QA gates C-005) roda no hub com a suíte completa; o worker roda apenas os
+  testes targeted da unidade de trabalho (estratificação por orçamento de sessão de 1h).

@@ -11,7 +11,7 @@
 | 1 | [Visão e escopo do produto](02-visao-escopo.md) | O que É / para quem / caso 1 / o que NÃO é | funda | **DECIDIDO — C-001** |
 | 2 | [Requisitos: piso + teto](03-requisitos.md) | ADOPTs (piso) + pilares P1–P3 + C1–C4 viram requisitos | funda | **DECIDIDO — C-003** |
 | 3 | [Runtime do agente (harness)](04-runtime-agente.md) | Hub próprio × Mastra; Pi × Agent SDK × ACP como workers | funda | **DECIDIDO — C-002** |
-| 4 | [Sandbox de execução](05-sandbox.md) | E2B × local × alternativa | funda | **DECIDIDO — C-004** |
+| 4 | [Sandbox de execução](05-sandbox.md) | E2B × local × alternativa | funda | **DECIDIDO — C-008** (supersede C-004; ativação probe-gated `CX-SBX-E2B-01`) |
 | 5 | [Registro de artefatos + 2 SDKs](06-registro-artefatos.md) | SF/dataLoader/dbAction com slug + bind params | funda | **DECIDIDO — C-005** |
 | 6 | [Camada de dados](07-camada-dados.md) | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | **DECIDIDO — C-006** |
 | 7 | [Integração externa](08-integracao-externa.md) | Blueprint de conector, vault, túnel, perfil Sankhya | funda | **DECIDIDO — C-007** |

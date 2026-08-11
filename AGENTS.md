@@ -145,6 +145,12 @@ M02 production implementation:         PROHIBITED
 Production Worker dispatch:            PROHIBITED
 ```
 
+> **Scope note (C-000, 2026-08-10):** the ARR/M2 governance and prohibitions above are
+> **MNFS-legacy** — the ARR program and the M2 replan were closed without implementation under
+> C-000 (`docs/conexus/01-relacao-mnfs.md`). They remain preserved history and do NOT block
+> operator-authorized Conexus work (e.g. probes such as `CX-SBX-E2B-01`), which is governed by
+> `docs/conexus/DECISOES.md`.
+
 Canonical S0 Evidence is `docs/acceptance/2026-08-07-arr-s0-host-capability-probe.md` (`ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE`). It records provider-neutral host facts only and grants no named-candidate selection or execution authority.
 
 The accepted S1 pack is `docs/spikes/ARR-S1-AGENT-RUNTIME-CONTRACT.md` + `docs/superpowers/plans/2026-08-07-arr-s1-agent-runtime-conformance.md`, bound to D-022 and the exact accepted Git blobs recorded in `ACCEPTANCE-ARR-S1-S2-PACKS`. The files retain proposed 0.1.0 frontmatter to preserve those bytes. The pack is Pi-first for investigation order, separates runtime choice from SDK/RPC/ACP boundary choice, and still requires the OpenCode native ACP external challenger before final S1 selection.

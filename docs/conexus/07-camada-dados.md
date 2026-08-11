@@ -94,3 +94,23 @@ migration como log pós-fato → migration como gate (C-005); collation problem�
   completo a partir do B2 em cluster limpo (com roles/extensões via manifesto); ensaio de janela
   `maintenance-required` com jobs deferred/retry; QA gates rodando com roles reais + snapshot
   sanitizado.
+
+## Adendo pós-C-008 (2026-08-11) — `BuildValidationDatabase` no sandbox × autoridade local
+
+A [C-008](05-sandbox.md) cria um segundo lugar onde Postgres roda — e este adendo garante que
+NÃO cria uma segunda autoridade (o que violaria a C-006):
+
+- **`BuildValidationDatabase`** (nome próprio, nunca "DEV"): PG17 exato dentro do sandbox E2B,
+  localhost/Unix socket, porta 5432 jamais exposta, **sintético e efêmero** — reconstruído por
+  run a partir de migrations + golden fixtures pequenas (a C-006 já exige DEV recriável; aqui a
+  exigência vira mecanismo). Roda QA-DB-1/2 + smoke de browser dentro do orçamento de sessão.
+- **Continua LOCAL e autoritativo**, via Capability Gateway: DEV por projeto, ETL Sankhya
+  (staging+cursor+upsert com dados grandes), Data Discovery (HAR-2), QA-DB-3 (rehearsal com
+  dump sanitizado), validação final pré-deployment e hub_control. Worker remoto **nunca** recebe
+  credencial de Postgres local — dado real chega a ele só como fixture sanitizada mínima ou
+  evidência estruturada produzida pelo Gateway.
+- **Probes de paridade** (itens do `CX-SBX-E2B-01`): mesmas extensões, ICU/collations pt-BR,
+  roles com testes negativos, tempo initdb+migrations+fixtures dentro do orçamento, pico de
+  RAM/disco, teardown limpo.
+- Drift entre `BuildValidationDatabase` e DEV é impossível por construção: ambos nascem das
+  mesmas migrations + fixtures versionadas; qualquer divergência reprova no gate do hub.

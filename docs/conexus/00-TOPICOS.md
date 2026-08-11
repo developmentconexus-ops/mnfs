@@ -14,7 +14,7 @@
 | 4 | [Sandbox de execução](05-sandbox.md) | E2B × local × alternativa | funda | **DECIDIDO — C-004** |
 | 5 | [Registro de artefatos + 2 SDKs](06-registro-artefatos.md) | SF/dataLoader/dbAction com slug + bind params | funda | **DECIDIDO — C-005** |
 | 6 | [Camada de dados](07-camada-dados.md) | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | **DECIDIDO — C-006** |
-| 7 | Integração externa | Blueprint de conector, vault, túnel, perfil Sankhya | funda | pendente |
+| 7 | [Integração externa](08-integracao-externa.md) | Blueprint de conector, vault, túnel, perfil Sankhya | funda | **DECIDIDO — C-007** |
 | 8 | Scaffold + frontend | Template React/Vite, UI-kit, publish | média | pendente |
 | 9 | Agente de 1ª classe | Identidade, versão, tools, headless, contexto em camadas | funda | pendente |
 | 10 | Estratégia de LLM | Modelos por fase, custo | rasa → aprofunda no build | pendente |

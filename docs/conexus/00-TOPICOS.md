@@ -9,8 +9,8 @@
 |---|---|---|---|---|
 | 0 | [Relação Conexus × MNFS](01-relacao-mnfs.md) | O que do MNFS sobrevive? | funda | **DECIDIDO — C-000** |
 | 1 | [Visão e escopo do produto](02-visao-escopo.md) | O que É / para quem / caso 1 / o que NÃO é | funda | **DECIDIDO — C-001** |
-| 2 | Requisitos: piso + teto | ADOPTs (piso) + pilares P1–P3 + C1–C4 viram requisitos | funda | **em curso** |
-| 3 | Runtime do agente (harness) | Claude Agent SDK × Claude Code/ACP × Pi × **Mastra** (orquestração) | funda | pendente |
+| 2 | [Requisitos: piso + teto](03-requisitos.md) | ADOPTs (piso) + pilares P1–P3 + C1–C4 viram requisitos | funda | **RASCUNHO — aguarda ratificação** |
+| 3 | [Runtime do agente (harness)](04-runtime-agente.md) | Claude Agent SDK × Claude Code/ACP × Pi × **Mastra** (orquestração) | funda | **RASCUNHO — aguarda ratificação** |
 | 4 | Sandbox de execução | E2B × local × alternativa | funda | pendente |
 | 5 | Registro de artefatos + 2 SDKs | SF/dataLoader/dbAction com slug + bind params | funda | pendente |
 | 6 | Camada de dados | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | pendente |

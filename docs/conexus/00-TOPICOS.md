@@ -15,7 +15,7 @@
 | 5 | [Registro de artefatos + 2 SDKs](06-registro-artefatos.md) | SF/dataLoader/dbAction com slug + bind params | funda | **DECIDIDO — C-005** |
 | 6 | [Camada de dados](07-camada-dados.md) | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | **DECIDIDO — C-006** |
 | 7 | [Integração externa](08-integracao-externa.md) | Blueprint de conector, vault, túnel, perfil Sankhya | funda | **DECIDIDO — C-007** |
-| 8 | Scaffold + frontend | Template React/Vite, UI-kit, publish | média | **em pesquisa** — [prompt externo pronto](pesquisa-externa-scaffold-prompt.md); varreduras internas em curso |
+| 8 | Scaffold + frontend | Template React/Vite, UI-kit, publish | média | **em pesquisa** — [interna pronta](pesquisa-interna-scaffold.md); aguarda [deep research externa](pesquisa-externa-scaffold-prompt.md) |
 | 9 | [Agente de 1ª classe](09-agente-primeira-classe.md) | Identidade, versão, tools, headless, contexto em camadas | funda | **DECIDIDO — C-010** (kind `agent` no registro; loop leve no hub; 4 objetos novos; RC-2 acionada; tool analítica → gatilho T15) |
 | 10 | Estratégia de LLM | Modelos por fase, custo | rasa → aprofunda no build | pendente |
 | 11 | Ciclo de vida | Git model, DEV→PROD, release, rollback | média | pendente |

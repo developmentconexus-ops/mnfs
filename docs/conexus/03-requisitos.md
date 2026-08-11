@@ -1,10 +1,11 @@
 # Tópico 2 — Requisitos: piso + teto
 
-**Status: RASCUNHO — aguarda revisão do operador.**
+**Status: DECIDIDO — C-003, ratificado pelo operador em 2026-08-10** (revisado pós-C-002).
 Fontes: piso = ADOPTs do [DECISION-REGISTER](../reference/mitra/DECISION-REGISTER.md); teto =
-pilares P1–P3 + C1–C4 ([visão, C-001](02-visao-escopo.md)); requisitos negativos =
-[08-limites-e-gaps](../reference/mitra/08-limites-e-gaps.md) (não repetidos aqui — a tabela S/O/C/E
-de lá vale como anexo normativo).
+pilares P1–P3 + C1–C4 ([visão, C-001](02-visao-escopo.md)); harness = [C-002](04-runtime-agente.md)
+(padrão Factory Missions: hub + workers frescos + validadores — supera o limite de sessão única da
+Mitra); requisitos negativos = [08-limites-e-gaps](../reference/mitra/08-limites-e-gaps.md) (não
+repetidos aqui — a tabela S/O/C/E de lá vale como anexo normativo).
 
 **Fases:** `MVP` = o mínimo para entregar o caso 1 (replicar o Analisador de Orçamentos) ·
 `F1` = fase interna completa · `F2` = SaaS.
@@ -13,15 +14,17 @@ de lá vale como anexo normativo).
 
 | ID | Requisito | Fase | Fonte |
 |---|---|---|---|
-| HAR-1 | Protocolo de turno rígido (SYNC → trabalho → BUILD → SHARE; 1 commit/turno; sandbox descartável, git como único sobrevivente) | MVP | piso [01](../reference/mitra/01-harness-agentico.md) |
+| HAR-1 | Protocolo de turno rígido **por worker** (SYNC → trabalho → BUILD → SHARE; 1 commit/turno; sandbox descartável, git como único sobrevivente); hub despacha e supervisiona | MVP | piso [01](../reference/mitra/01-harness-agentico.md) + C-002 |
 | HAR-2 | Etapa de escopo separada do build; estágio 2 **audita** o estágio 1 contra o dado real (Data Discovery por SQL antes de codar) | MVP | piso [07](../reference/mitra/07-padrao-de-projeto.md) |
-| HAR-3 | Checkpoint humano: contrato aprovado antes de codar; `AskUserQuestion` com **bloqueio mecânico** no harness | MVP | piso + gap E4 |
+| HAR-3 | Checkpoint humano: contrato aprovado antes de codar; `HANDOFF_REQUIRED` com **gate mecânico no hub** (bloqueia novo turno/tool/efeito até nova autoridade — nunca disciplina de prompt) | MVP | piso + gap E4 + C-002 |
 | HAR-4 | Docs de planejamento versionados como memória (`arquitetura`, `ux`, `design`, `tasks`) relidos pelo agente | MVP | piso [07](../reference/mitra/07-padrao-de-projeto.md) |
 | HAR-5 | Scaffold versionado byte-controlado (template rico → agente herda decisões) com escape hatch | MVP | piso + P2 |
 | HAR-6 | Engenharia como artefato: padrões vivem no template + gates mecânicos (lint, typecheck, teste, benchmark) — zero manual de governança | MVP | P2 |
-| HAR-7 | Plano visual aprovável (schema v2 + render HTML + grafo de dependências reusados do acervo MNFS) na etapa de escopo | F1 | C-000 REUSE |
-| HAR-8 | Checklist vivo de execução: TodoWrite do harness → eventos tipados → UI marca ao vivo; `tasks.md` durável com status/output + causa-raiz ao final | MVP | piso [§17/§34.10](../research/MITRA-INSPIRATION-MAP.md) |
+| HAR-7 | Plano visual aprovável (schema v2 + render HTML + grafo de dependências reusados do acervo MNFS) na etapa de escopo — hub despacha workers **a partir do plano aprovado** | MVP | C-000 REUSE + C-002 |
+| HAR-8 | Checklist vivo de execução: unidades de trabalho do hub + eventos do worker → eventos tipados → UI marca ao vivo; `tasks.md` durável com status/output + causa-raiz ao final | MVP | piso [§17/§34.10](../research/MITRA-INSPIRATION-MAP.md) + C-002 |
 | HAR-9 | Entrega só fecha com "Limitações conhecidas" + critérios de aceite numéricos verificáveis | MVP | piso (traço de honestidade) |
+| HAR-10 | **Forma de HUB** (padrão Factory Missions): Lead decompõe em unidades de trabalho; **worker fresco por unidade** (contexto nunca esgota — apps longos viáveis, ao contrário da sessão única da Mitra); **validador independente do implementador**; estado externalizado em Postgres | MVP | C-002 + Factory Missions + spec camadas L0–L3 (acervo) |
+| HAR-11 | **Multi-modelo por papel**: escopo barato / builder forte / validador de provedor diferente; identidade `runtime + versão + provedor + modelo + authBinding + actorPackHash` persistida por execução (ActorRun) | MVP | C-002 (entrevista — requisito duro) |
 
 ## REG — Registro de artefatos
 
@@ -68,8 +71,8 @@ de lá vale como anexo normativo).
 | ID | Requisito | Fase | Fonte |
 |---|---|---|---|
 | AGT-1 | Agente como objeto de 1ª classe: identidade, versão, tools declaradas, política, ciclo de vida | F1 | OWN central |
-| AGT-2 | Central de agentes: criar/gerenciar/observar agentes da plataforma (candidato: Mastra) | F1 | P3 |
-| AGT-3 | Agente headless por evento (cron/webhook) com identidade de serviço — insight→ação (notificar vendedor, campanha) | F1 | C1 + OWN |
+| AGT-2 | Central de agentes: criar/gerenciar/observar agentes da plataforma (runtime decide no tópico 9; C-002 cobre workers de código) | F1 | P3 |
+| AGT-3 | Agente headless por evento (cron/webhook) com identidade de serviço — insight→ação (notificar vendedor, campanha); mecanismo candidato: cron do pg-boss do hub | F1 | C1 + OWN + C-002 |
 | AGT-4 | Consultor de plataforma: agente que conhece docs/SDKs/padrões do Conexus (usa o mecanismo do cérebro) | F1 | P3 + C4 |
 | AGT-5 | Sessão de agente embutível com eventos tipados (streaming, fila, reconexão) — forma do `AgentTaskSession` | F1 | ADOPT [01](../reference/mitra/01-harness-agentico.md) |
 
@@ -96,7 +99,7 @@ de lá vale como anexo normativo).
 
 | ID | Requisito | Fase | Fonte |
 |---|---|---|---|
-| OBS-1 | Custo/tokens por turno e por projeto visíveis na UI | MVP | C3 + gap E3 |
+| OBS-1 | Custo/tokens por execução (ActorRun), por modelo e por projeto visíveis na UI | MVP | C3 + gap E3 + C-002 |
 | OBS-2 | Três estados de UI sempre distintos: vazio / carregando / falhou; rota indisponível se declara | MVP | REJECT E1/E2 |
 | OBS-3 | Log de turno estruturado (tools, duração, resultado) consultável | F1 | — |
 
@@ -116,12 +119,17 @@ de lá vale como anexo normativo).
 | QUA-1 | **Golden benchmark**: caso 1 como suíte de regressão do builder (mesma spec → comparar saída vs Mitra e vs versões anteriores) | MVP | C2 |
 | QUA-2 | Smoke test que reproduz as chamadas da UI + reporte honesto de falhas | MVP | piso [07](../reference/mitra/07-padrao-de-projeto.md) |
 | QUA-3 | Revisão final item-a-item contra o prompt original antes de entregar | MVP | piso |
+| QUA-4 | **Conexus Worker Eval**: suíte de tarefas reais (feature backend, migration, página React, bug complexo, integração Sankhya, recovery) para comparar runtimes/modelos — gate do challenger (Pi × Claude Agent SDK) | F1 | C-002 |
 
 ## Contagem por fase
 
-MVP: 28 requisitos · F1: 15 · F2: 3. MVP entrega o caso 1 com cérebro v0 (seed manual) e sem
-headless/RBAC completo — enxuto de propósito.
+MVP: 36 requisitos · F1: 17 · F2: 2 (SEG-4 = regra de método, fora da contagem). MVP entrega o
+caso 1 com cérebro v0 (seed manual), hub com workers frescos e plano visual aprovável — sem
+headless/RBAC completo. Enxuto de propósito.
 
 ## Decisão
 
-_(pendente — operador ratifica ou ajusta fases/cortes)_
+**C-003 ratificada em 2026-08-10.** Requisitos aprovados com revisão pós-C-002: forma de HUB
+(HAR-10) e multi-modelo por papel (HAR-11) explícitos, gates mecânicos no hub (HAR-3),
+requisitos tool-agnósticos (HAR-8), plano visual promovido a MVP (HAR-7), Worker Eval como
+gate de challenger (QUA-4). Fases/cortes conforme tabela.

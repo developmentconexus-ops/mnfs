@@ -23,7 +23,7 @@
 | 13 | Observabilidade mínima | Log de turno, custo, status, checklist vivo (TodoWrite→eventos→UI) + `tasks.md` durável | rasa | pendente |
 | 14 | Segurança proporcional | Credencial server-side, bind params, tenancy — o mínimo profissional | média | pendente |
 | 16 | [Sonda de manutenção na Mitra](16-sonda-manutencao-mitra.md) | A Mitra sustenta a segunda volta? Evidência atual é toda greenfield | funda | **roteiro completo — veredito escrito, falta ratificar como C-0xx** |
-| 15 | Cérebro da empresa | Camada semântica por grupo de projetos: schema+regras+processos, discovery assistido, retroalimentação | funda | **pronto para abrir** — evidência na mesa (OBS-47) |
+| 15 | Cérebro da empresa | Camada semântica por grupo de projetos: schema+regras+processos, discovery assistido, retroalimentação | funda | **em pesquisa** — [interna pronta](pesquisa-interna-cerebro.md) (8 correções; dicionário TDD* do Sankhya achado); aguarda deep research externa ([prompt](pesquisa-externa-cerebro-prompt.md)) |
 
 > **Entrada obrigatória do T15, antes de gastar a aposta mais cara** (`17-log`, OBS-47): a Mitra **já
 > tem a metade estrutural** de camada semântica — `DynamicCubeQuery` + `dimension_store`, com

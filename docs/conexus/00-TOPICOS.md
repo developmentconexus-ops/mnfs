@@ -13,7 +13,7 @@
 | 3 | [Runtime do agente (harness)](04-runtime-agente.md) | Hub próprio × Mastra; Pi × Agent SDK × ACP como workers | funda | **DECIDIDO — C-002** |
 | 4 | [Sandbox de execução](05-sandbox.md) | E2B × local × alternativa | funda | **DECIDIDO — C-004** |
 | 5 | [Registro de artefatos + 2 SDKs](06-registro-artefatos.md) | SF/dataLoader/dbAction com slug + bind params | funda | **DECIDIDO — C-005** |
-| 6 | Camada de dados | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | pendente |
+| 6 | [Camada de dados](07-camada-dados.md) | Postgres×MySQL, DB por projeto, migration gate, base efêmera | funda | **DECIDIDO — C-006** |
 | 7 | Integração externa | Blueprint de conector, vault, túnel, perfil Sankhya | funda | pendente |
 | 8 | Scaffold + frontend | Template React/Vite, UI-kit, publish | média | pendente |
 | 9 | Agente de 1ª classe | Identidade, versão, tools, headless, contexto em camadas | funda | pendente |

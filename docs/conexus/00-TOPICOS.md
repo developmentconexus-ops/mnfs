@@ -50,7 +50,7 @@ pendentes que mudam o pipeline (especialmente ciclo de vida, runtime publicado e
 | 14 | Segurança proporcional | Credencial server-side, bind params, tenancy — o mínimo profissional | média | **DECIDIDO** — C-016 ([doc](14-seguranca-proporcional.md)) |
 | 15 | [Cérebro da empresa](15-cerebro-empresa.md) | Camada semântica por grupo de projetos: schema+regras+processos, discovery assistido, retroalimentação | funda | **DECIDIDO — C-011** (kind `brain` + `brain-binding`; AnalyticQuery = 2º regime de leitura, emenda C-010 comp.7; sonda TDD*-first; probe CX-BRAIN-V0-01) |
 | 16 | [Sonda de manutenção na Mitra](16-sonda-manutencao-mitra.md) | A Mitra sustenta a segunda volta? | funda | **DECIDIDO — C-009** (14 turnos, 76 observações; manutenção por classe, conteúdo>canal, conexão/egresso como teto) |
-| 17 | **Modelo de engenharia + execução agentic** | Como intenção vira software correto: pipeline, Mission/Plan/Work Units, standards, contexto, QA, validação e Replan | funda | **EM PESQUISA** (2026-08-12) — [interna consolidada](pesquisa-interna-modelo-engenharia.md) (5 varreduras: MNFS+harness 0.4.0, Mitra medida, Factory AI/RMUX, Conexus C-000..C-016) + [prompt externo](pesquisa-externa-modelo-engenharia-prompt.md); aguarda pesquisa externa |
+| 17 | **Modelo de engenharia + execução agentic** | Como intenção vira software correto: pipeline, Mission/Plan/Work Units, standards, contexto, QA, validação e Replan | funda | **EM PESQUISA** (2026-08-12) — [interna consolidada](pesquisa-interna-modelo-engenharia.md) (5 varreduras: MNFS+harness 0.4.0, Mitra medida, Factory AI/RMUX, Conexus C-000..C-016) + [mapa público da harness Factory AI](../research/FACTORY-AI-HARNESS-REFERENCE-MAP.md) + [prompt externo](pesquisa-externa-modelo-engenharia-prompt.md); aguarda pesquisa externa |
 
 ## Mapa de fases até implementação
 
@@ -73,9 +73,11 @@ software**, sem ressuscitar a governança pesada do MNFS e sem copiar a Mitra/Fa
 Inputs obrigatórios:
 
 - MNFS: Development Governance, Capability Realization, L0–L3, proof-first, fresh Actor,
-  independent validation, Replan, proportionalidade FAST/BOUNDED/CONTROLLED e todo aprendizado de
+  independent validation, Replan, proporcionalidade FAST/BOUNDED/CONTROLLED e todo aprendizado de
   implementação — como candidatos, não autoridade automática;
-- Factory Missions: correctness antes de decomposição, workers frescos, validator e estado externo;
+- [Factory AI harness pública](../research/FACTORY-AI-HARNESS-REFERENCE-MAP.md): Missions,
+  correctness antes de decomposição, workers frescos, validators, Skills/Hooks, Agent Readiness,
+  QA real e estado externalizado — como evidência/candidatos, não receita de implementação;
 - Mitra medida: scope→build, planning docs, checklist, manutenção real, gaps e comportamentos que eram
   apenas escolha do modelo;
 - Conexus C-000..C-0xx: Hub, Pi, E2B, Postgres, git bundle, Brain, scaffold, artifact registry,

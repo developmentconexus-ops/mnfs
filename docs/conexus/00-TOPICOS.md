@@ -44,7 +44,7 @@ pendentes que mudam o pipeline (especialmente ciclo de vida, runtime publicado e
 | 8 | Scaffold + frontend | Template React/Vite, UI-kit, publish | média | **DECIDIDO — C-012** (scaffold rico por digest, ownership 3 classes, outputSchema/DataMeta emenda C-005, probe CX-SCAFFOLD-V0-01) — [doc](10-scaffold-frontend.md) |
 | 9 | [Agente de 1ª classe](09-agente-primeira-classe.md) | Identidade, versão, tools, headless, contexto em camadas | funda | **DECIDIDO — C-010** (kind `agent` no registro; loop leve no hub; 4 objetos novos; RC-2 acionada; tool analítica → gatilho T15) |
 | 10 | Estratégia de LLM | Modelos por fase, custo | rasa → aprofunda no build | **PENDENTE** |
-| 11 | Ciclo de vida | Git model, DEV→PROD, release, rollback | média | **EM PESQUISA** — interna pronta ([pesquisa](pesquisa-interna-ciclo-vida.md)); aguarda externa |
+| 11 | Ciclo de vida | Git model, DEV→PROD, release, rollback | média | **DECIDIDO** — C-014 ([doc](12-ciclo-de-vida.md)) |
 | 12 | Runtime publicado | Auth/RBAC, embed, storage | rasa → aprofunda no build | **PENDENTE** |
 | 13 | Observabilidade mínima | Log de turno, custo, status, checklist vivo (TodoWrite→eventos→UI) + `tasks.md` durável | rasa | **DECIDIDO — C-013** (agent_event Postgres + producer_trust, Pi telemetry nativa, custo multi-estado, SERVED_VERIFIED, probe CX-OBS-V0-01) — [doc](11-observabilidade.md) |
 | 14 | Segurança proporcional | Credencial server-side, bind params, tenancy — o mínimo profissional | média | **PENDENTE** |

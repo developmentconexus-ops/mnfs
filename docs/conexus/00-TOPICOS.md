@@ -43,7 +43,7 @@ pendentes que mudam o pipeline (especialmente ciclo de vida, runtime publicado e
 | 7 | [Integração externa](08-integracao-externa.md) | Blueprint de conector, vault, túnel, perfil Sankhya | funda | **DECIDIDO — C-007** |
 | 8 | Scaffold + frontend | Template React/Vite, UI-kit, publish | média | **DECIDIDO — C-012** (scaffold rico por digest, ownership 3 classes, outputSchema/DataMeta emenda C-005, probe CX-SCAFFOLD-V0-01) — [doc](10-scaffold-frontend.md) |
 | 9 | [Agente de 1ª classe](09-agente-primeira-classe.md) | Identidade, versão, tools, headless, contexto em camadas | funda | **DECIDIDO — C-010** (kind `agent` no registro; loop leve no hub; 4 objetos novos; RC-2 acionada; tool analítica → gatilho T15) |
-| 10 | Estratégia de LLM | Modelos por fase, custo | rasa → aprofunda no build | **EM PESQUISA** — interna pronta ([pesquisa](pesquisa-interna-estrategia-llm.md)); aguarda externa |
+| 10 | Estratégia de LLM | Modelos por fase, custo | rasa → aprofunda no build | **FECHADO SEM DECISÃO NOVA** (2026-08-12) — seleção de modelo já tem mecanismo ratificado (golden eval, C-010); pesquisas ([interna](pesquisa-interna-estrategia-llm.md) + externa cruzada) viram referência de build; resíduo único: reconciliar HAR-11 ("validador de outro provedor") no T17 |
 | 11 | Ciclo de vida | Git model, DEV→PROD, release, rollback | média | **DECIDIDO** — C-014 ([doc](12-ciclo-de-vida.md)) |
 | 12 | Runtime publicado | Auth/RBAC, embed, storage | rasa → aprofunda no build | **DECIDIDO** — C-015 ([doc](13-runtime-publicado.md)) |
 | 13 | Observabilidade mínima | Log de turno, custo, status, checklist vivo (TodoWrite→eventos→UI) + `tasks.md` durável | rasa | **DECIDIDO — C-013** (agent_event Postgres + producer_trust, Pi telemetry nativa, custo multi-estado, SERVED_VERIFIED, probe CX-OBS-V0-01) — [doc](11-observabilidade.md) |
@@ -62,7 +62,8 @@ congelado ou pular direto de dezenas de decisões para código.
 
 Objetivo: decidir as fronteiras caras de mudar e preservar probes para o que ainda é hipótese.
 
-Saídas atuais: C-000..C-013 + tópicos pendentes T10/T11/T12/T14 + Discovery T17.
+Saídas atuais: C-000..C-016 + T10 fechado sem decisão nova (mecanismo já era do build) + Discovery T17
+em andamento — último tópico antes da reconciliação.
 
 ### Fase 2 — Reconciliação de engenharia e execução agentic (T17)
 

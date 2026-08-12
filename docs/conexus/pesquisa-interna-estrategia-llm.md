@@ -40,3 +40,16 @@ Qual modelo passa o golden eval mais barato (QUA-4); consumo real por build do G
 ## Posições preliminares (espelham o prompt externo já publicado)
 
 P1 modelo por papel (com defaults do Q2.2) · P2 caching+batch, sem router · P3 single-provider Anthropic via AI SDK, BYOK não · P4 teto mensal simples + budgets por run, sem chargeback · P5 não decidir agora (lista Q3). Veredito da varredura A: **C-017 fina — 1 página de postura + gatilhos**, grosso do doc = ponteiros ao já-congelado.
+
+## Fechamento (2026-08-12) — T10 FECHADO SEM DECISÃO NOVA
+
+Pesquisa externa cruzada em sessão (corte 12/08/2026). Achados materiais preservados:
+
+1. **Haiku 4.5 com aposentadoria anunciada para 15/10/2026** — antes de a plataforma operar. Não desenhar componente em torno de modelo concreto; contrato diz "tier aprovado", modelo é escolhido no build.
+2. **Preços/famílias mudam mais rápido que o programa** — varredura B e externa divergiram na mesma semana (Sonnet 5 3/15 vs 2/10; famílias GPT-5.2 vs GPT-5.6). Mais uma razão para nunca ratificar número.
+3. **"Validador de outro provedor" (HAR-11) refutado como invariante F1** — fresh Actor + fresh context + contrato de validação próprio entregam o grosso da independência; provider diferente vira gatilho (erro correlacionado do mesmo provider demonstrado, OU 2º provider já operacional por outro motivo, OU ganho material medido em eval).
+4. Nenhum post-mortem público de "arrependimento de single-provider"; padrão de mercado = poucos tiers claros, não roteador por request.
+
+**Razão do fechamento sem C-017** (ratificado pelo operador em 2026-08-12): os 4 itens do Q2 já estão decididos ou pertencem ao build — seleção de modelo tem mecanismo ratificado (golden eval C-010: "mais barato que passa com margem", ID pinado por deployment); credencial por papel é composição C-002+C-008; custo/teto é C-010 (budgets) + C-013 (eventos); provider da chave efêmera é decidido pelo probe CX-SBX-E2B-01 item 5. Ratificar defaults de modelo hoje usurparia o mecanismo do eval e fixaria nomes com validade de meses. Defaults, preços e envelopes deste doc = **referência de build, sem autoridade**.
+
+**Resíduo único**: reconciliar o texto do HAR-11 no T17.

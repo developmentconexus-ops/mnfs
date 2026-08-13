@@ -10,6 +10,9 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3B-16 | Project-Internal Resource Ownership | APROVADO | [3B-16-project-internal-resource-ownership.md](3B-16-project-internal-resource-ownership.md) |
 | 3B-17 | Project Isolation and Explicit Reuse | APROVADO | `../24-arquitetura-system-design.md` |
 | Review transversal 3B | 3B-01..17 × C-000..C-017 | CONCLUÍDO | findings abaixo |
+| 3C-01 | Modular Monolith no F1 | APROVADO | [3C-01-modular-monolith.md](3C-01-modular-monolith.md) |
+| 3C-02 | Identity & Access Module Boundary | APROVADO | [3C-02-identity-access-module-boundary.md](3C-02-identity-access-module-boundary.md) |
+| 3C-03 | Workspace Module Boundary | APROVADO | [3C-03-workspace-module-boundary.md](3C-03-workspace-module-boundary.md) |
 
 ## 3B-17 — síntese normativa
 
@@ -42,7 +45,11 @@ Dívida editorial (não material):
 
 ```text
 3B — System Context & Boundaries: CLOSED / APROVADA
-next: 3C — Domain / Module Architecture
+3C — Domain / Module Architecture: EM ANDAMENTO
+  3C-01 Modular Monolith: APROVADO
+  3C-02 Identity & Access: APROVADO
+  3C-03 Workspace: APROVADO
+next decision: Project module boundary
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

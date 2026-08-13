@@ -363,22 +363,390 @@ Regras:
 - a matriz concreta será derivada das operações reais durante Identity & Access Design;
 - avaliar renomear `ViewerContext.capabilities` para `effectivePermissions`, evitando colisão com outros usos arquiteturais de “capability”.
 
+## 3B-14 — Separação entre Control Plane, Preview e aplicativo publicado
+
+**Status:** APROVADO
+
+### Decisão
+
+O Conexus utiliza uma única identidade global `Account` e uma sessão central do Hub, mas mantém **três contextos de autorização independentes**:
+
+```text
+Account
+  │
+  │ autenticação central
+  │
+  ├── CONTROL_PLANE
+  ├── PREVIEW
+  └── PUBLISHED_APP
+```
+
+A Account responde **quem é a pessoa**. Cada superfície responde, independentemente, **o que essa Account pode fazer naquele recurso e naquele contexto**.
+
+```text
+                     Account
+                        │
+             sessão opaca do Hub
+                        │
+          ┌─────────────┼─────────────┐
+          │             │             │
+          ▼             ▼             ▼
+   Control Plane     RunPreview    Published App
+   Authorization   Authorization   Authorization
+```
+
+Nenhuma role ou permission é transferida implicitamente entre essas superfícies.
+
+### Control Plane
+
+A autorização do Control Plane é a já definida por 3B-10..3B-13:
+
+```text
+Account
+  ├── WorkspaceMembership
+  ├── AreaMembership
+  ├── Area → Project grant
+  └── Account → Project grant
+          │
+          ▼
+PROJECT_VIEWER
+PROJECT_CONTRIBUTOR
+PROJECT_ADMIN
+          │
+          ▼
+effective control-plane permissions
+```
+
+Ela governa, conforme a matriz de permissions que será detalhada posteriormente:
+
+- visibilidade do Project no Conexus;
+- leitura e alteração do Project Baseline;
+- criação e evolução de Changes;
+- dispatch e acompanhamento do Builder;
+- acesso a Plans, ActorRuns, Findings e Evidence;
+- revisão de previews;
+- configuração de bindings e policies;
+- aprovação e promoção de Releases;
+- administração de acesso ao Project e, quando autorizado, ao app publicado.
+
+Ter acesso ao Control Plane **não concede automaticamente acesso aos dados ou capabilities empresariais do aplicativo publicado**.
+
+### Aplicativo publicado
+
+O aplicativo publicado possui seu próprio domínio de grants, roles/profiles, permissions e audience/data scope:
+
+```text
+Account
+  ├── grant direto para o app
+  └── Area → app grant
+          │
+          ▼
+   published-app role/profile
+          │
+          ▼
+   effective app permissions
+```
+
+Exemplos ilustrativos, ainda não congelados:
+
+```text
+orders.view
+orders.approve
+products.view
+price.simulate
+shipment.update
+agent.use
+```
+
+Essas permissions governam capacidades de negócio do runtime. Elas não concedem acesso a source, Changes, Plans, ActorRuns, Findings, configurações técnicas ou Releases do Project.
+
+A forma final de `PublishedApp`, `AppMembership`, roles de app e audience será detalhada em Identity & Access Design e Runtime Architecture. Esta decisão congela a separação de autoridade, não nomes de tabelas ou APIs.
+
+### Preview
+
+`RunPreview` pertence ao lifecycle de construção e é acessado por permissions do Control Plane, como uma futura `preview.review`.
+
+```text
+Project Control Grant
+        │
+        │ preview.review
+        ▼
+    RunPreview
+        ├── candidate digest pinado
+        ├── ambiente de preview
+        ├── identidade de revisão
+        └── dados sintéticos ou controlados
+```
+
+Preview não reutiliza silenciosamente:
+
+- app membership de produção;
+- credenciais de produção;
+- dados de produção;
+- audience de produção;
+- permissões empresariais do usuário final.
+
+Quando a validação exigir comportamento por perfil, o Hub fornece identidades e fixtures de preview explicitamente limitadas e auditáveis.
+
+### Exemplos normativos
+
+#### Funcionário operacional sem acesso ao Builder
+
+```text
+Oscar
+├── Area Comercial
+├── app grant no Marketplace Central
+└── nenhum Project Control Grant
+
+Resultado:
+- usa o aplicativo publicado;
+- consulta e executa apenas as capabilities permitidas;
+- não vê source, Changes, ActorRuns, Findings ou Releases.
+```
+
+#### Construtor sem acesso a dados empresariais de produção
+
+```text
+Carlos
+├── PROJECT_CONTRIBUTOR no Marketplace Central
+└── nenhum published-app grant
+
+Resultado:
+- trabalha na evolução do software;
+- revisa o RunPreview permitido;
+- não recebe acesso implícito ao app em produção nem aos dados reais.
+```
+
+#### Owner do Workspace
+
+```text
+Leandro
+└── WORKSPACE_OWNER
+    └── PROJECT_ADMIN em todos os Projects por herança
+```
+
+O owner pode administrar o acesso dos apps, mas não herda automaticamente todas as app permissions e todos os dados empresariais.
+
+Caso precise utilizar o app, pode conceder a si mesmo uma role de app no F1. Esse self-grant deve ser explícito, auditado, revogável e visível. Separação de deveres que proíba self-grant ou exija segunda aprovação fica condicionada a risco/compliance real futuro.
+
+#### Area com relações independentes
+
+```text
+Area Comercial
+├── PROJECT_VIEWER no Control Plane do Marketplace Central
+└── APP_ROLE_VENDEDOR no app publicado
+```
+
+As duas relações podem coexistir, mas uma não cria a outra.
+
+Outra Area pode possuir apenas uma delas:
+
+```text
+Area Tecnologia
+├── PROJECT_CONTRIBUTOR no Control Plane
+└── nenhum app grant de produção
+```
+
+### Administrar acesso não significa exercer o acesso
+
+A plataforma preserva explicitamente:
+
+```text
+app_access.manage
+≠
+app.use
+```
+
+Uma Account com autoridade administrativa pode conceder, remover, revisar e auditar memberships/roles do app sem possuir automaticamente permissions de negócio como leitura financeira, aprovação de pedidos ou execução de efeitos.
+
+Da mesma forma:
+
+```text
+PROJECT_ADMIN
+≠
+APP_ADMIN ou APP_USER
+```
+
+E:
+
+```text
+APP_ADMIN ou APP_USER
+≠
+PROJECT_VIEWER
+```
+
+### Conta de usuário final sem membership organizacional
+
+O modelo permite futuramente uma Account acessar um app sem possuir `WorkspaceMembership` ou acesso ao Control Plane, por exemplo em um portal externo.
+
+```text
+Account: Cliente externo
+├── Published App Grant
+├── sem WorkspaceMembership
+└── sem Project Control Grant
+```
+
+Isso é uma propriedade do modelo, não autorização para self-signup ou usuários públicos no F1. Provisionamento externo, convite, self-signup, SSO e SCIM permanecem sujeitos às decisões e gatilhos posteriores.
+
+### Resolução de autorização por request
+
+Uma única sessão identifica a Account. O Hub resolve a autorização conforme a rota e o serving context:
+
+```text
+Browser
+  │
+  │ cookie opaco
+  ▼
+Hub
+  ├── rota do Control Plane
+  │     → resolve ControlPlaneAuthorization
+  │
+  ├── rota de Preview
+  │     → resolve PreviewAuthorization
+  │
+  └── rota do app publicado
+        → resolve PublishedAppAuthorization
+```
+
+Sequência conceitual:
+
+```text
+1. validar sessão e status da Account;
+2. derivar server-side a superfície e o recurso;
+3. resolver relações e effective permissions daquela superfície;
+4. aplicar policy e preconditions do domínio;
+5. autorizar ou negar;
+6. registrar superfície, recurso e decisão para auditoria.
+```
+
+Workspace, Project, app e deployment são derivados pelo Hub a partir da rota, do host e do serving context. Eles nunca são confiados ao payload enviado pelo browser como fronteira de autorização.
+
+A sessão não precisa carregar um snapshot gigantesco com todos os Workspaces, Areas, Projects, apps, roles e permissions. A autoridade efetiva é resolvida server-side no contexto da request.
+
+### Contextos de visualização
+
+A arquitetura deverá manter projeções distintas, conceitualmente:
+
+```text
+ControlPlaneViewerContext
+├── account
+├── activeWorkspace
+├── workspaceRole
+├── areaRelations
+├── projectRole
+└── effectivePermissions
+```
+
+```text
+AppViewerContext
+├── account
+├── app/runtime surface
+├── deployment
+├── appRole/profile
+├── effectivePermissions
+└── audience/dataScope
+```
+
+Os nomes finais ainda não estão congelados. A invariante é que roles e permissions de uma superfície não sejam usadas como autoridade da outra.
+
+### Invariantes
+
+1. **Uma identidade:** uma pessoa possui uma única Account central no Hub.
+2. **Autorizações independentes:** Control Plane, Preview e Published App são contextos distintos.
+3. **Sem herança implícita entre superfícies:** `PROJECT_ADMIN` não implica app role e app role não implica acesso ao Project.
+4. **Administrar não implica usar:** `app_access.manage` não concede `app.use` nem permissions empresariais.
+5. **Owner não herda dados do app:** `WORKSPACE_OWNER` administra Projects e grants, mas não recebe automaticamente todas as app permissions.
+6. **Grants de Area são separados:** `Area → Project Control Role` e `Area → Published App Role` são relações independentes.
+7. **Preview pertence ao Control Plane:** revisão de candidate usa ambiente e identidade de preview, não membership de produção.
+8. **Disable revoga ambos:** desabilitar uma Account encerra sua autoridade em todas as superfícies.
+9. **Recurso derivado server-side:** IDs recebidos do cliente nunca definem sozinhos o boundary de autorização.
+10. **Auditoria identifica a superfície:** decisões de acesso distinguem `CONTROL_PLANE`, `PREVIEW` e `PUBLISHED_APP`.
+11. **Policy continua aplicável:** possuir permission nunca bypassa approval, budget, effect gate, EnvironmentConformance ou outras preconditions do domínio.
+12. **Deny por ausência:** sem relação válida na superfície específica, o acesso é negado.
+
+### Reconciliação com C-015
+
+C-015 utiliza atualmente `ProjectMembership(account_id, project_id, role)` para descrever acesso ao app publicado. Depois das decisões 3B-10..3B-14, o nome e a responsabilidade ficaram ambíguos.
+
+A reconciliação futura deverá separar conceitualmente:
+
+```text
+Project Control Grant
+```
+
+para:
+
+```text
+PROJECT_VIEWER
+PROJECT_CONTRIBUTOR
+PROJECT_ADMIN
+```
+
+E algo da família:
+
+```text
+App Membership / Published App Grant / Runtime Audience Grant
+```
+
+para o runtime publicado.
+
+Os nomes finais serão decididos em Data Architecture e Identity & Access Design. Até lá, a semântica efetiva é a separação aprovada nesta decisão.
+
+### Consequências
+
+- usuário operacional pode usar um app sem enxergar o Project no Conexus;
+- construtor pode evoluir o software sem receber dados/capabilities de produção;
+- Project Admin administra acesso ao app sem precisar utilizá-lo;
+- Workspace Owner administra todos os Projects, mas não é usuário universal de todos os apps;
+- RunPreview possui boundary próprio de revisão;
+- roles do Control Plane permanecem exclusivas do Control Plane;
+- roles, permissions e data audience do app são projetadas separadamente;
+- uma futura Account externa pode acessar um app sem ser colaboradora do Workspace;
+- offboarding central por Account revoga todas as superfícies;
+- permission diffs e auditoria deverão indicar a superfície afetada.
+
+### Não construir no F1
+
+```text
+- dois diretórios de identidade;
+- dois logins para a mesma pessoa;
+- custom roles universais;
+- sincronização automática Control Plane → app;
+- owner com bypass silencioso de dados/capabilities;
+- impersonação livre;
+- self-signup público;
+- policy engine genérica;
+- compartilhamento cross-Workspace;
+- separation-of-duties complexa sem consumidor real.
+```
+
+### Deliberadamente deixado para etapas posteriores
+
+- nomes finais de tabelas e agregados;
+- quantidade e natureza das superfícies publicadas por Project;
+- catálogo de app roles e permissions;
+- roles fixas versus roles definidas pelo Project;
+- audience e row/field-level data scope;
+- convite e provisionamento de usuários finais;
+- identidade de preview e fixtures por perfil;
+- SSO, SCIM, passkeys e self-signup;
+- break-glass, impersonation e suporte;
+- restrição de self-grant por compliance;
+- caching e invalidação de effective permissions.
+
 ---
 
 # 5. Questões abertas para concluir 3B
 
 As decisões abaixo ainda não estão aprovadas:
 
-1. **3B-14 — Control Plane access × Published App access**  
-   Separar quem constrói/administra o Project de quem apenas usa o aplicativo publicado.
-
-2. **3B-15 — Recursos do Workspace × bindings do Project**  
+1. **3B-15 — Recursos do Workspace × bindings do Project**  
    Definir ownership e bindings explícitos de Brain, Connections, credentials e recursos compartilháveis.
 
-3. **3B-16 — Ownership dos recursos internos do Project**  
+2. **3B-16 — Ownership dos recursos internos do Project**  
    Fechar ownership de source, data environments, artifacts, agents, releases, findings e Evidence.
 
-4. **3B-17 — Reutilização e compartilhamento entre Projects**  
+3. **3B-17 — Reutilização e compartilhamento entre Projects**  
    Definir isolamento default e as formas permitidas de reuso sem acoplamento oculto.
 
 Após essas fronteiras, 3B pode ser encerrado e o trabalho avança para Domain/Module Architecture.
@@ -387,7 +755,7 @@ Após essas fronteiras, 3B pode ser encerrado e o trabalho avança para Domain/M
 
 ```text
 3A — Architecture Reconciliation       substancialmente analisada; não consolidada
-3B — System Context & Boundaries       em andamento
+3B — System Context & Boundaries       em andamento — 3B-01..3B-14 aprovadas
 3C..3O                                 não iniciadas formalmente
 ```
 

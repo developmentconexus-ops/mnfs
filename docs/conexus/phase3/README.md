@@ -16,6 +16,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-04 | Project Module Boundary | APROVADO | [3C-04-project-module-boundary.md](3C-04-project-module-boundary.md) |
 | 3C-05 | Builder Module Boundary | APROVADO | [3C-05-builder-module-boundary.md](3C-05-builder-module-boundary.md) |
 | 3C-06 | Artifact Registry Module Boundary | APROVADO | [3C-06-artifact-registry-module-boundary.md](3C-06-artifact-registry-module-boundary.md) |
+| 3C-07 | Connections Module Boundary | APROVADO | [3C-07-connections-module-boundary.md](3C-07-connections-module-boundary.md) |
 
 ## 3B-17 — síntese normativa
 
@@ -33,6 +34,10 @@ Findings materiais encaminhados, com owner registrado:
 4. **F3B-R4 — autorização versus browser trust zone** · owner: 3I/3J. 3B-14 separa Control Plane, Preview e Published App logicamente; Security/Deployment precisa decidir o isolamento físico correspondente.
 5. **N3 — planning depth × rigor** · owner: 3C/3G. Os dois eixos permanecem distintos; rigor pode impor piso de artifacts/discovery/plano/gates. A relação final será decidida em 3C/3G — não se define aqui `CONTROLLED = FULL`.
 6. **N4 — disposição de 3A**: 3A permanece reconciliation transversal contínua até C-018 (inclui a reconciliação de vocabulário dos textos C-002/C-009/C-013 exigida por C-017).
+
+Refinamento material aprovado em 3C:
+
+- **3C-07-A — qualification de Connection:** a referência de C-007 a `(revision, environment, key_version)` é refinada semanticamente para `ConnectionRevision + ConnectorDefinitionRevision + credential binding/grant version + external target`. `key_version` criptográfica do vault é detalhe de custódia; recriptografia ou refresh transitório do mesmo grant não criam ConnectionRevision/Release nem invalidam qualification por si sós. Forma física/contratual final: 3E/3F/3I.
 
 Dívida editorial (não material):
 
@@ -55,7 +60,8 @@ Dívida editorial (não material):
   3C-04 Project: APROVADO
   3C-05 Builder: APROVADO
   3C-06 Artifact Registry: APROVADO
-next decision: Connections module boundary
+  3C-07 Connections: APROVADO
+next decision: Capability Gateway module boundary
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

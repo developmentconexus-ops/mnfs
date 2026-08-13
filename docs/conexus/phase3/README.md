@@ -17,6 +17,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-05 | Builder Module Boundary | APROVADO | [3C-05-builder-module-boundary.md](3C-05-builder-module-boundary.md) |
 | 3C-06 | Artifact Registry Module Boundary | APROVADO | [3C-06-artifact-registry-module-boundary.md](3C-06-artifact-registry-module-boundary.md) |
 | 3C-07 | Connections Module Boundary | APROVADO | [3C-07-connections-module-boundary.md](3C-07-connections-module-boundary.md) |
+| 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08-capability-gateway-module-boundary.md](3C-08-capability-gateway-module-boundary.md) |
 
 ## 3B-17 — síntese normativa
 
@@ -61,7 +62,8 @@ Dívida editorial (não material):
   3C-05 Builder: APROVADO
   3C-06 Artifact Registry: APROVADO
   3C-07 Connections: APROVADO
-next decision: Capability Gateway module boundary
+  3C-08 Capability Gateway: APROVADO
+next decision: Brain module boundary
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

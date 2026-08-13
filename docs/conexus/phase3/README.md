@@ -14,6 +14,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-02 | Identity & Access Module Boundary | APROVADO | [3C-02-identity-access-module-boundary.md](3C-02-identity-access-module-boundary.md) |
 | 3C-03 | Workspace Module Boundary | APROVADO | [3C-03-workspace-module-boundary.md](3C-03-workspace-module-boundary.md) |
 | 3C-04 | Project Module Boundary | APROVADO | [3C-04-project-module-boundary.md](3C-04-project-module-boundary.md) |
+| 3C-05 | Builder Module Boundary | APROVADO | [3C-05-builder-module-boundary.md](3C-05-builder-module-boundary.md) |
 
 ## 3B-17 — síntese normativa
 
@@ -51,7 +52,8 @@ Dívida editorial (não material):
   3C-02 Identity & Access: APROVADO
   3C-03 Workspace: APROVADO
   3C-04 Project: APROVADO
-next decision: Builder module boundary
+  3C-05 Builder: APROVADO
+next decision: Artifact Registry module boundary
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

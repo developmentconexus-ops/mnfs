@@ -1,6 +1,6 @@
 # Fase 3 — Architecture & System Design
 
-**Status:** EM ANDAMENTO — ledger de decisões aprovadas pelo operador  
+**Status:** EM ANDAMENTO — ledger de decisões aprovadas pelo operador · **3B CLOSED**; próximo gate: 3C — Domain / Module Architecture  
 **Base canônica:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Início:** 2026-08-12  
 **Autoridade anterior:** C-000..C-017  
@@ -1511,26 +1511,42 @@ RUNTIME
 - import/export e packages cross-Workspace;
 - retenção legal de secrets e Connection metadata.
 
+## 3B-16 — Ownership dos recursos internos do Project
+
+**Status:** APROVADO
+
+Decisão detalhada em [phase3/3B-16-project-internal-resource-ownership.md](phase3/3B-16-project-internal-resource-ownership.md).
+
+Em uma frase: todo recurso interno durável pertence logicamente a um Project ou a uma sub-raiz inequivocamente pertencente a ele; Git, Hub/Postgres, Project Database e Registry/CAS/serving possuem responsabilidades distintas e não são fontes de verdade concorrentes; DEV e PROD são ambientes persistentes quando existentes; bancos de validação são temporários e condicionais.
+
+## 3B-17 — Isolamento de Projects e reuso explícito
+
+**Status:** APROVADO
+
+Síntese normativa: Projects são independentes e isolados por padrão. Reuso F1 ocorre por Platform/scaffold, Workspace Brain e Workspace Connections. Não há acesso direto entre databases, source repos ou recursos runtime internos de Projects distintos. Duplicação local pequena é preferível a abstração compartilhada prematura. Nova abstração compartilhada só nasce após consumidores reais demonstrarem semântica e lifecycle estáveis.
+
 ---
 
-# 5. Questões abertas para concluir 3B
+# 5. Precedências e reconciliações registradas (cross-review 3B)
 
-As decisões abaixo ainda não estão aprovadas:
+Registros de precedência entre a autoridade anterior (C-000..C-017) e as decisões 3B. Nenhum item abaixo cria mecanismo novo nem reabre decisão aprovada.
 
-1. **3B-16 — Ownership dos recursos internos do Project**  
-   Fechar ownership de source, data environments, artifacts, agents, releases, findings e Evidence.
+1. **Plan schema v2 (C-000/C-017 · HAR-7).** O veredito REUSE cobre os padrões de validação, revision/digest, render visual, dependency graph e proof mapping — **re-tipados para Change/Work Unit**. Mission/Milestone/Feature **não** são reutilizados no F1 (C-017 invariante 1 prevalece sobre a leitura literal do schema legado). A forma final do schema re-tipado será definida em 3C/3F.
+2. **Role set do app publicado (C-015 §6 × 3B-14).** O conjunto fechado `{admin, member}` do C-015 §6 permanece o role set F1 do aplicativo publicado, com seu gatilho nomeado de abertura. `APP_ROLE_VENDEDOR` e exemplos similares em 3B-14 são ilustrativos do modelo de superfícies — não constituem emenda ao role set.
 
-2. **3B-17 — Reutilização e compartilhamento entre Projects**  
-   Definir isolamento default e as formas permitidas de reuso sem acoplamento oculto.
-
-Após essas fronteiras, 3B pode ser encerrado e o trabalho avança para Domain/Module Architecture.
-
-# 6. Estado de progresso
+# 6. Encerramento de 3B e estado de progresso
 
 ```text
-3A — Architecture Reconciliation       substancialmente analisada; não consolidada
-3B — System Context & Boundaries       em andamento — 3B-01..3B-15 aprovadas
+3B — System Context & Boundaries: CLOSED
+próximo gate: 3C — Domain / Module Architecture
+```
+
+3B-01..3B-17 aprovadas; review transversal concluído — findings, owners e dívida editorial registrados em [phase3/README.md](phase3/README.md).
+
+```text
+3A — Architecture Reconciliation       reconciliation transversal contínua até C-018
+3B — System Context & Boundaries       CLOSED — 3B-01..3B-17 aprovadas
 3C..3O                                 não iniciadas formalmente
 ```
 
-A quantidade de IDs aprovados não deve ser confundida com percentual linear da Fase 3: Data Architecture, Contracts/APIs, behavioral models, technology qualification, failure/recovery e vertical proof ainda são blocos grandes.
+Este encerramento não constitui C-018, não encerra a Fase 3 e não autoriza implementação. A quantidade de IDs aprovados não deve ser confundida com percentual linear da Fase 3: Data Architecture, Contracts/APIs, behavioral models, technology qualification, failure/recovery e vertical proof ainda são blocos grandes.

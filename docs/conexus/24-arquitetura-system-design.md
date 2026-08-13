@@ -734,19 +734,793 @@ Os nomes finais serão decididos em Data Architecture e Identity & Access Design
 - restrição de self-grant por compliance;
 - caching e invalidação de effective permissions.
 
+## 3B-15 — Recursos do Workspace e bindings explícitos do Project
+
+**Status:** APROVADO
+
+### Decisão em uma frase
+
+No F1, **Brain e Connections são recursos compartilháveis pertencentes ao Workspace; o Project não os herda, copia nem possui — ele os consome apenas por bindings explícitos, tipados, versionados, pinados e restritos ao mesmo Workspace.** Credentials permanecem sob custódia do Hub/Vault e vinculadas a Connections; nunca são recursos entregues diretamente ao Project.
+
+### Três níveis de ownership
+
+A arquitetura separa três níveis:
+
+```text
+PLATFORM
+   ↓ fornece tipos, compilers e mecanismos
+
+WORKSPACE
+   ↓ possui recursos empresariais compartilháveis
+
+PROJECT
+   ↓ possui bindings e uso concreto desses recursos
+```
+
+#### Recursos da Platform
+
+A Platform possui definições e mecanismos reutilizáveis, sem dados nem credenciais de um Workspace específico:
+
+```text
+Platform
+├── Connector Definitions
+├── Connector Compiler
+├── Gateway Auth Strategies
+├── Artifact Schemas
+├── Scaffold Versions
+├── Runtime Adapters
+├── Policy Compilers
+└── Platform Standards
+```
+
+Exemplo:
+
+```text
+Connector Definition: sankhya/v1
+```
+
+Essa definição pode descrever autenticação, operações, input/output schemas, efeitos, idempotência, hosts e testes. Ela não contém `client_id`, `client_secret`, `X-Token`, conta empresarial ou endpoint privado da Metal Nobre.
+
+#### Recursos do Workspace
+
+No F1, existem apenas dois tipos principais de recurso compartilhável:
+
+```text
+Workspace
+├── Brain
+└── Connections
+```
+
+O corte é deliberadamente pequeno. Não nasce um catálogo genérico de “qualquer recurso compartilhável”.
+
+#### Recursos do Project
+
+O Project possui a decisão e o contrato de como utiliza um recurso:
+
+```text
+Project
+├── ProjectBrainBinding
+└── ProjectConnectionBindings
+```
+
+A regra central é:
+
+```text
+Workspace owns resource
+Project owns binding
+```
+
+### Brain como recurso do Workspace
+
+O Brain representa conhecimento reutilizável entre Projects do mesmo Workspace:
+
+```text
+Brain
+├── semantic model
+├── metrics e measures
+├── glossary
+├── business rules
+├── processes
+├── caveats
+├── provenance
+└── executable evidence
+```
+
+Sua fonte publicada pertence ao Workspace. O Project não duplica o Brain nem recebe live inheritance.
+
+### ProjectBrainBinding
+
+A forma conceitual é:
+
+```text
+Workspace Brain
+      │
+      │ BrainRevision / BrainPack digest
+      ▼
+ProjectBrainBinding
+      ├── revisão pinada
+      ├── logical IDs usados
+      ├── logical → local implementation mapping
+      ├── assertions de conformidade
+      ├── refinements/overrides explícitos
+      └── binding digest
+      │
+      ▼
+Project
+```
+
+O Brain pode dizer:
+
+```text
+company:margin
+= receita líquida menos custo canônico
+```
+
+O binding do Project precisa dizer e provar:
+
+```text
+company:margin
+→ vw_margem_venda
+→ grain por item
+→ key e cardinalidade declaradas
+→ assertions de unicidade e consistência
+```
+
+Portanto:
+
+```text
+semântica compartilhada
+≠
+implementação física automaticamente correta
+```
+
+O Project só consome a semântica quando sua implementação local e suas provas correspondentes estão pinadas e válidas.
+
+### Atualização do Brain não é live inheritance
+
+Se `BR-12` está ativo em três Projects e `BR-13` é publicado:
+
+```text
+BR-13 publicada
+        ↓
+Projects recebem UPDATE_AVAILABLE
+        ↓
+Project avalia binding, impacto e golden evidence
+        ↓
+Project produz candidate/release próprio
+        ↓
+Project promove BR-13 explicitamente
+```
+
+Enquanto isso não ocorre:
+
+```text
+Project continua usando BR-12
+```
+
+Publicação no Workspace não significa adoção nem promoção por nenhum Project.
+
+### Connection como recurso do Workspace
+
+Uma Connection representa uma identidade/configuração concreta para acessar um sistema externo:
+
+```text
+Connection
+├── connector revision
+├── external environment
+├── account/tenant externo identificado
+├── non-secret configuration revision
+├── credential_ref
+├── qualification result
+├── authorization metadata
+├── health/status
+└── audit identity
+```
+
+Mesmo quando uma Connection é inicialmente usada por apenas um Project, ela pertence ao Workspace porque:
+
+- representa uma conta ou ambiente empresarial;
+- a credencial não pertence ao código do Project;
+- rotação, revogação e requalificação possuem lifecycle próprio;
+- outros Projects podem reutilizá-la explicitamente;
+- o blast radius e os dependentes precisam ser observáveis centralmente.
+
+### ProjectConnectionBinding
+
+Um Project usa uma Connection somente por binding explícito:
+
+```text
+Workspace Connection
+        │
+        ▼
+ProjectConnectionBinding
+        ├── project
+        ├── project-local symbolic slot
+        ├── project environment
+        ├── connection revision
+        ├── connection environment
+        ├── usage boundary
+        └── binding revision/digest
+        │
+        ▼
+Release / Runtime
+```
+
+Um Project pode possuir:
+
+```text
+0..N ProjectConnectionBindings
+```
+
+E uma Connection pode possuir:
+
+```text
+0..N Project consumers
+```
+
+Nenhuma dessas cardinalidades cria autoridade implícita.
+
+### Slots lógicos locais do Project
+
+Código e artifacts não devem depender de um ID físico ou nome administrativo instável da Connection:
+
+```text
+connection_id = 9d34f...
+Sankhya Metal Nobre Produção 2026
+```
+
+Eles dependem de um contrato lógico local, por exemplo:
+
+```text
+erp.primary
+marketplace.primary
+```
+
+Os nomes finais dos slots serão definidos em Contracts/Data Architecture. A propriedade congelada é que o software depende de uma referência lógica e o Hub resolve o recurso físico por ambiente.
+
+Exemplo:
+
+```text
+slot: erp.primary
+
+workspace → Sankhya Homologação
+preview   → Sankhya Homologação
+PROD      → Sankhya Produção
+```
+
+### Mapeamento de ambiente explícito
+
+Cada Project environment deve resolver uma Connection environment compatível e explicitamente configurada:
+
+```text
+Project workspace/DEV
+→ Connection sandbox ou homologação
+
+RunPreview
+→ Connection homologação ou fixture/sink controlado
+
+Project PROD
+→ Connection produção
+```
+
+Nenhum ambiente é escolhido por nome parecido, fallback implícito ou “a única Connection disponível”.
+
+Exceções, quando realmente necessárias, são configurações explícitas, auditáveis e sujeitas a conformance.
+
+### Exemplo completo — Metal Nobre
+
+```text
+Workspace: Metal Nobre
+│
+├── Brain
+│   ├── BR-12
+│   └── BR-13
+│
+├── Connections
+│   ├── Sankhya Homologação
+│   ├── Sankhya Produção
+│   └── Mercado Livre Produção
+│
+└── Projects
+    ├── Análise de Vendedores
+    ├── Análise de Compras
+    └── Marketplace Central
+```
+
+#### Análise de Vendedores
+
+```text
+Brain Binding
+└── BR-12
+
+Connection Binding: erp.primary
+├── workspace → Sankhya Homologação
+├── preview   → Sankhya Homologação
+└── PROD      → Sankhya Produção
+```
+
+Esse Project não recebe nenhum binding do Mercado Livre.
+
+#### Análise de Compras
+
+```text
+Brain Binding
+└── BR-12
+
+Connection Binding: erp.primary
+├── workspace → Sankhya Homologação
+├── preview   → Sankhya Homologação
+└── PROD      → Sankhya Produção
+```
+
+Ele pode compartilhar as mesmas Connections do Sankhya sem compartilhar source, artifacts, budgets, Releases ou authority com o Project de Vendas.
+
+#### Marketplace Central
+
+```text
+Brain Binding
+└── BR-13
+
+Connection Binding: erp.primary
+├── workspace → Sankhya Homologação
+└── PROD      → Sankhya Produção
+
+Connection Binding: marketplace.primary
+└── PROD      → Mercado Livre Produção
+```
+
+Os dois bindings do Marketplace Central não ampliam os demais Projects.
+
+### Binding não concede todas as operações
+
+Vincular um Project a uma Connection não significa autorizar acesso irrestrito ao sistema externo.
+
+A autoridade efetiva é a interseção de múltiplas camadas:
+
+```text
+Connector Contract
+∩ Connection qualification/authorization
+∩ ProjectConnectionBinding
+∩ ReleaseManifest
+∩ Artifact/Tool classification
+∩ caller effective permissions
+∩ policies e domain preconditions
+=
+effective operation authority
+```
+
+Uma Connection Sankhya pode possuir acesso técnico amplo, enquanto um Project expõe apenas:
+
+```text
+sankhya.orcamentos.list
+sankhya.vendedores.list
+sankhya.faturamento.read
+```
+
+A existência de uma operação como:
+
+```text
+sankhya.pedido.create
+```
+
+no Connector não a torna executável pelo Project. Ela precisa estar classificada, vinculada, incluída no manifesto, autorizada para o caller e admitida pelas policies e effect gates aplicáveis.
+
+### O Project nunca recebe a credencial
+
+Fluxo autorizado:
+
+```text
+Project code / artifact / agent
+        │
+        │ usa slot simbólico e operação tipada
+        ▼
+ReleaseManifest / ConfigBinding
+        │
+        ▼
+Capability Gateway
+        ├── deriva Workspace, Project e environment
+        ├── resolve binding pinado
+        ├── valida Connection revision e health
+        ├── valida operação, permission e policy
+        ├── resolve credential_ref server-side
+        └── executa a chamada permitida
+                │
+                ▼
+              Vault
+                │
+                ▼
+          External System
+```
+
+Fluxos proibidos:
+
+```text
+Project → lê client_secret
+Browser → recebe credential_ref
+Pi/E2B → recebe segredo durável
+Artifact → escolhe Connection física arbitrária
+```
+
+Workers podem receber capabilities efêmeras para usar tools do Gateway, mas nunca o material secreto durável.
+
+### Ownership, custódia e consumo são conceitos diferentes
+
+```text
+Business ownership
+Workspace → Connection
+
+Physical custody
+Hub/Vault → credential material
+
+Consumption
+Project → ProjectConnectionBinding
+```
+
+O Project não é owner nem custodiante da credencial.
+
+### Rotação operacional versus mudança funcional
+
+A arquitetura separa duas classes de mudança.
+
+#### Rotação operacional compatível
+
+Exemplo:
+
+```text
+client_secret v7
+→ client_secret v8
+```
+
+Mantendo a mesma:
+
+- conta externa;
+- empresa/tenant;
+- environment;
+- authorization footprint;
+- host/destination;
+- Connector revision;
+- semântica do binding.
+
+Essa rotação pode ocorrer sem novo build do Project:
+
+```text
+novo secretVersion
+→ testConnection/requalificação
+→ activation/rollback operacional
+→ evento auditado
+→ binding lógico permanece
+```
+
+Ela não deve exigir alterar frontend, source ou artifact somente porque o segredo mudou.
+
+#### Mudança funcional
+
+Exemplos:
+
+```text
+Homologação → Produção
+empresa 1 → empresa 2
+conta A → conta B
+host A → host B
+read-only → escrita
+Connector revision v1 → v2
+```
+
+Essas mudanças alteram semântica, authority ou blast radius:
+
+```text
+nova Connection revision e/ou binding revision
+→ candidates dependentes ficam STALE
+→ conformance e revalidação
+→ novo ReleaseManifest
+→ approval/promotion aplicável
+```
+
+### Health operacional não muda silenciosamente a identidade
+
+Uma Connection pode passar de:
+
+```text
+READY
+→ AUTH_FAILED / UNREACHABLE / DEGRADED
+```
+
+O binding continua identificando a mesma Connection. A capability dependente fica bloqueada ou indisponível de forma honesta.
+
+Nunca ocorre:
+
+```text
+“essa Connection falhou,
+então usei outra parecida”
+```
+
+Failover automático ou pools de Connections exigem decisão futura, consumer e provas próprias.
+
+### Lifecycle e remoção
+
+#### Remover um binding
+
+```text
+remove ProjectConnectionBinding
+```
+
+não remove a Connection do Workspace. Outros Projects podem continuar consumindo-a.
+
+#### Remover ou reorganizar uma Area
+
+Area governa pessoas e acesso. Ela não é owner de Brain, Connection nem binding técnico. Reorganização organizacional não reconfigura integrações silenciosamente.
+
+#### Desabilitar/remover uma Connection
+
+Uma Connection não pode desaparecer silenciosamente enquanto existirem:
+
+- bindings ativos;
+- Releases ativas ou históricas que a referenciam;
+- execuções em andamento;
+- jobs pendentes;
+- receipts, traces ou Evidence que dependam de sua identidade.
+
+O lifecycle detalhado será decidido em Behavioral Architecture, mas deve preservar:
+
+```text
+listar dependentes
+→ impedir novos usos quando aplicável
+→ migrar/remover bindings explicitamente
+→ reconciliar execuções
+→ preservar identidade histórica e provenance
+```
+
+#### Brain revisions históricas
+
+Revisões utilizadas por Releases e Evidence permanecem identificáveis. Retenção ou remoção de conteúdo não pode tornar uma Release histórica inexplicável.
+
+### Cross-Workspace permanece proibido
+
+Mesmo que uma Account seja owner de dois Workspaces:
+
+```text
+Workspace Metal Nobre
+Workspace Aurora
+```
+
+continua proibido:
+
+```text
+Project Aurora
+→ Connection Sankhya Metal Nobre
+```
+
+ou:
+
+```text
+Project Aurora
+→ Brain Metal Nobre
+```
+
+O Hub valida:
+
+```text
+Project.workspace_id
+==
+Resource.workspace_id
+```
+
+Compartilhamento futuro, se admitido, ocorre por capability explícita de export/publication/import, com consentimento, provenance e policy própria — nunca por referência viva acidental.
+
+### Area não é binding técnico
+
+```text
+Area → Project grant
+```
+
+responde:
+
+> Quem pode acessar o Project?
+
+```text
+Project → Workspace Resource Binding
+```
+
+responde:
+
+> Quais recursos técnicos esse software utiliza?
+
+Uma Area pode receber acesso ao Project e ao app publicado, mas não escolhe automaticamente Brain revision, Connection, environment ou credential.
+
+### Administração e separation of authority
+
+A matriz final de permissions será definida em Identity & Access Design, mas o modelo deve permitir separar ações como:
+
+```text
+workspace_resource.create
+workspace_resource.update
+workspace_resource.disable
+workspace_resource.bind
+project_binding.manage
+connection.secret.rotate
+connection.qualify
+brain.publish
+brain.bind
+```
+
+Exemplos de separação desejada:
+
+- um `PROJECT_ADMIN` pode solicitar ou administrar um binding sem receber o segredo;
+- um responsável por integração pode rotacionar/requalificar Connection sem promover Release;
+- um steward do Brain pode publicar nova revisão sem forçar Projects a adotá-la;
+- quem usa o app publicado não recebe authority para alterar o binding que o alimenta.
+
+### Não criar resource-binding engine genérico
+
+O F1 possui explicitamente:
+
+```text
+ProjectBrainBinding
+ProjectConnectionBinding
+```
+
+Não terá uma abstração genérica como:
+
+```text
+workspace_resources
+resource_bindings
+resource_type
+subject_type
+binding_payload
+```
+
+Bindings tipados preservam:
+
+- foreign keys claras;
+- schemas próprios;
+- invariantes específicas;
+- lifecycle compreensível;
+- mensagens de erro úteis;
+- policies por tipo de recurso.
+
+Um terceiro recurso compartilhável só nasce quando houver um consumer real e receberá seu próprio contrato e binding.
+
+### Recursos deliberadamente não compartilhados no F1
+
+```text
+Artifacts          → pertencem ao Project
+Production Agents  → pertencem ao Project
+Project Databases  → pertencem ao Project/environment
+Releases           → pertencem ao Project
+Findings/Evidence  → pertencem ao lifecycle do Project/Change
+Credentials        → pertencem à custódia da Connection/Vault
+Connector defs     → pertencem à Platform
+```
+
+Não serão criados antecipadamente:
+
+```text
+SharedAgent
+SharedArtifact
+SharedDatabase
+SharedJob
+SharedSecret
+SharedProjectModule
+GenericWorkspacePackage
+```
+
+A reutilização legítima entre Projects será tratada em 3B-17.
+
+### Modelo consolidado
+
+```text
+PLATFORM
+├── Connector Definitions
+├── Artifact Schemas
+├── Runtime Adapters
+└── Compilers
+        │
+        ▼
+WORKSPACE
+├── Brain
+│    ├── BrainRevision
+│    └── BrainPack
+│
+└── Connections
+     ├── Connector Revision Ref
+     ├── Environment
+     ├── Credential Ref
+     ├── Qualification
+     └── Health
+        │
+        │ typed + explicit bindings
+        ▼
+PROJECT
+├── ProjectBrainBinding
+├── ProjectConnectionBindings
+├── Config Contract
+└── ReleaseManifest
+        │
+        ▼
+RUNTIME
+└── Capability Gateway
+     ├── resolve binding
+     ├── resolve policy
+     ├── resolve credential
+     └── execute
+```
+
+### Invariantes
+
+1. **Ownership separado:** Workspace possui o recurso; Project possui o binding.
+2. **Binding explícito:** pertencer ao mesmo Workspace não concede uso do recurso.
+3. **Mesmo Workspace:** um Project só pode bindar Brain/Connection do próprio Workspace.
+4. **Binding tipado:** F1 não possui engine genérico de recursos.
+5. **Slot lógico local:** código e artifacts dependem de referência lógica, não de secret ou ID físico arbitrário.
+6. **Environment mapping explícito:** cada Project environment resolve uma Connection environment compatível.
+7. **Credential nunca pertence ao Project:** material secreto permanece no Vault e só é usado pelo Gateway.
+8. **Pinning:** Brain e revisões funcionais de Connection não possuem live inheritance.
+9. **Atualização não é promoção:** nova revisão só gera `UPDATE_AVAILABLE`; Project precisa revalidar e promover.
+10. **Health bloqueia, não reconfigura:** falha operacional nunca provoca rebind silencioso.
+11. **Binding não concede todas as operações:** authority efetiva é a interseção de contratos, manifesto, caller e policies.
+12. **Rotação de secret é distinta de mudança funcional:** rotação compatível pode ocorrer sem rebuild; mudança semântica exige nova revisão/release.
+13. **Remoção preserva provenance:** recursos referenciados historicamente não desaparecem de forma a quebrar explicabilidade.
+14. **Area não governa binding técnico:** autorização organizacional e dependência técnica são grafos distintos.
+15. **Auditoria identifica consumidor:** uso compartilhado registra Workspace, Project, environment, deployment, operation e Actor/Account.
+16. **Fail-closed:** binding ausente, stale, inválido, cross-Workspace ou incompatível com environment impede execução.
+17. **Hub é o resolver:** Project, browser, Worker e LLM não escolhem credencial ou recurso físico fora do binding aprovado.
+
+### Consequências
+
+- Brain da Metal Nobre pode ser reutilizado por vários Projects sem duplicação;
+- Sankhya Produção pode atender vários Projects sem distribuir sua credencial;
+- cada Project escolhe explicitamente quais recursos e revisões utiliza;
+- um Project pode usar zero, uma ou várias Connections;
+- uma Connection pode possuir zero, um ou vários Projects consumidores;
+- Project code usa slots lógicos;
+- ReleaseManifest fixa os bindings funcionais exatos;
+- novo Brain não altera automaticamente nenhum app;
+- Connection inválida bloqueia capabilities dependentes;
+- Project Aurora não acessa Brain ou Connection da Metal Nobre;
+- shared resources adicionais não entram sem consumidor real;
+- Data Architecture deverá materializar ownership, revisions, constraints e dependências históricas dessa boundary.
+
+### Não construir no F1
+
+```text
+- resource-binding engine genérico;
+- live inheritance de Brain;
+- escolha automática de Connection;
+- fallback/failover implícito;
+- secret disponível no Project/browser/sandbox;
+- compartilhamento cross-Workspace;
+- shared artifacts/agents/databases/jobs;
+- pools de Connections;
+- catálogo universal de resource slots;
+- DSL genérica de binding.
+```
+
+### Deliberadamente deixado para etapas posteriores
+
+- nomes finais de tabelas e agregados;
+- schema exato dos bindings;
+- forma autorada do `ProjectConnectionBinding` no repo;
+- estados detalhados de Connection, qualification e binding;
+- catálogo e convenção final de slots;
+- operação allowlist no binding versus manifesto;
+- permissions administrativas exatas;
+- UI de impacto, dependentes e upgrade;
+- caching e invalidação de bindings;
+- failover e Connection pools;
+- shared resources adicionais;
+- import/export e packages cross-Workspace;
+- retenção legal de secrets e Connection metadata.
+
 ---
 
 # 5. Questões abertas para concluir 3B
 
 As decisões abaixo ainda não estão aprovadas:
 
-1. **3B-15 — Recursos do Workspace × bindings do Project**  
-   Definir ownership e bindings explícitos de Brain, Connections, credentials e recursos compartilháveis.
-
-2. **3B-16 — Ownership dos recursos internos do Project**  
+1. **3B-16 — Ownership dos recursos internos do Project**  
    Fechar ownership de source, data environments, artifacts, agents, releases, findings e Evidence.
 
-3. **3B-17 — Reutilização e compartilhamento entre Projects**  
+2. **3B-17 — Reutilização e compartilhamento entre Projects**  
    Definir isolamento default e as formas permitidas de reuso sem acoplamento oculto.
 
 Após essas fronteiras, 3B pode ser encerrado e o trabalho avança para Domain/Module Architecture.
@@ -755,7 +1529,7 @@ Após essas fronteiras, 3B pode ser encerrado e o trabalho avança para Domain/M
 
 ```text
 3A — Architecture Reconciliation       substancialmente analisada; não consolidada
-3B — System Context & Boundaries       em andamento — 3B-01..3B-14 aprovadas
+3B — System Context & Boundaries       em andamento — 3B-01..3B-15 aprovadas
 3C..3O                                 não iniciadas formalmente
 ```
 

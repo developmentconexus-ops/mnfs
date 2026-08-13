@@ -2,63 +2,43 @@
 
 Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger `../24-arquitetura-system-design.md`.
 
-A partir de 3B-16, decisões muito extensas podem receber arquivo próprio para preservar exemplos, diagramas, invariantes, racional e limites sem transformar o ledger principal em um arquivo impraticável. O ledger principal continua sendo a síntese; estes arquivos são parte da evidência e especificação da decisão correspondente.
-
 ## Status
 
 | ID | Decisão | Status | Documento |
 |---|---|---|---|
 | 3B-01..3B-15 | System Context & Boundaries | APROVADO | `../24-arquitetura-system-design.md` |
 | 3B-16 | Project-Internal Resource Ownership | APROVADO | [3B-16-project-internal-resource-ownership.md](3B-16-project-internal-resource-ownership.md) |
-| 3B-17 | Project Isolation and Explicit Reuse | APROVADO | decisão aprovada em sessão; detalhamento será consolidado na revisão transversal de 3B |
+| 3B-17 | Project Isolation and Explicit Reuse | APROVADO | síntese normativa abaixo |
+| Review transversal 3B | 3B-01..17 × C-000..C-017 | CONCLUÍDO | findings abaixo |
 
 ## 3B-17 — síntese normativa
 
-Projects são independentes e isolados por padrão.
+Projects são independentes e isolados por padrão. Reuso F1 ocorre por Platform/scaffold, Workspace Brain e Workspace Connections. Não há acesso direto entre databases, source repos ou recursos runtime internos de Projects distintos. Duplicação local pequena é preferível a abstração compartilhada prematura. Nova abstração compartilhada só nasce após consumidores reais demonstrarem semântica e lifecycle estáveis.
 
-Reuso F1 ocorre somente por:
+## Review transversal — veredito
 
-- Platform/scaffold para infraestrutura genérica;
-- Workspace Brain para semântica empresarial;
-- Workspace Connections para integrações externas.
+3B permanece APROVADA e pode avançar para 3C. Nenhum finding invalida Workspace, Project, Change, ReBAC, bindings ou isolamento já aprovados.
 
-É proibido no F1:
+Findings materiais encaminhados:
 
-- acesso direto ao database de outro Project;
-- import direto de source de outro Project;
-- uso direto de ArtifactRevision ou AgentRevision de outro Project;
-- shared mutable state entre Projects;
-- chamadas runtime Project→Project sem nova decisão arquitetural.
+1. **F3B-R1 — repo canônico do produto:** C-000 previa repo próprio do Conexus após runtime+sandbox. Resolver por cutover ou emenda explícita antes de implementação; não bloqueia 3C.
+2. **F3B-R2 — Plan schema legado:** `MissionPlan v2` usa Mission/Milestone/Feature, enquanto C-017/3B usam Change/Work Unit. Reutilizar padrões de validação/render/graph, não o schema literalmente. Resolver em 3C/3F.
+3. **F3B-R3 — escopo do Registry:** C-005 nasceu Project-scoped, mas Connector é Platform-scoped e Brain é Workspace-scoped. Definir ownership/scope mínimo do registry em 3C/3E/3F.
+4. **F3B-R4 — autorização versus browser trust zone:** 3B-14 separa Control Plane, Preview e Published App logicamente; Security/Deployment precisa decidir o isolamento físico correspondente em 3I/3J.
 
-Duplicação local pequena é preferível a abstração compartilhada prematura. Uma abstração comum só nasce depois de consumidores reais demonstrarem semântica e lifecycle estáveis; nesse caso ela sobe para a raiz correta: Platform, Brain, Connector ou uma futura package layer explicitamente decidida.
+Dívida não material:
 
-Clone/template futuro cria Projects independentes e não live inheritance.
+- 3B-12 ainda usa `PROJECT_MEMBER`; alinhar com `PROJECT_VIEWER | PROJECT_CONTRIBUTOR | PROJECT_ADMIN`.
+- reconciliar `ViewerContext.capabilities` com o termo `effectivePermissions`.
+- app role e data audience permanecem dimensões distintas; múltiplas audiences continuam sob trigger.
+- validation database é temporário sob demanda, não terceiro environment persistente.
+- self-grant de Workspace Admin fica para Identity & Access Design.
 
 ## Encerramento de 3B
 
-Com 3B-17 aprovada, as boundaries previstas para **3B — System Context & Boundaries** estão fechadas:
-
 ```text
-Workspace / tenancy
-Project boundary
-Change / Builder boundary
-Inception / Baseline
-proportional planning
-repository ownership
-ReBAC / Areas / permissions
-authorization surfaces
-Workspace resources / Project bindings
-Project-internal ownership
-Project isolation / reuse
+3B — System Context & Boundaries: CLOSED / APROVADA
+next: 3C — Domain / Module Architecture
 ```
 
-O próximo passo é uma revisão transversal de 3B-01..3B-17 para detectar contradições, duplicações ou gaps antes de iniciar **3C — Domain / Module Architecture**.
-
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.
-
-## Regra
-
-- `APROVADO` exige aprovação explícita do operador e commit;
-- arquivo detalhado não cria entidade ou mecanismo adicional no produto;
-- diagramas e exemplos são explicativos; invariantes e seção “Decisão” são normativas;
-- C-018 só será proposta após reconciliação transversal de toda a Fase 3.

@@ -18,6 +18,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-06 | Artifact Registry Module Boundary | APROVADO | [3C-06-artifact-registry-module-boundary.md](3C-06-artifact-registry-module-boundary.md) |
 | 3C-07 | Connections Module Boundary | APROVADO | [3C-07-connections-module-boundary.md](3C-07-connections-module-boundary.md) |
 | 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08-capability-gateway-module-boundary.md](3C-08-capability-gateway-module-boundary.md) |
+| 3C-09 | Brain Module Boundary | APROVADO | [3C-09-brain-module-boundary.md](3C-09-brain-module-boundary.md) |
 
 ## 3B-17 — síntese normativa
 
@@ -36,9 +37,12 @@ Findings materiais encaminhados, com owner registrado:
 5. **N3 — planning depth × rigor** · owner: 3C/3G. Os dois eixos permanecem distintos; rigor pode impor piso de artifacts/discovery/plano/gates. A relação final será decidida em 3C/3G — não se define aqui `CONTROLLED = FULL`.
 6. **N4 — disposição de 3A**: 3A permanece reconciliation transversal contínua até C-018 (inclui a reconciliação de vocabulário dos textos C-002/C-009/C-013 exigida por C-017).
 
-Refinamento material aprovado em 3C:
+Refinamentos materiais aprovados em 3C:
 
 - **3C-07-A — qualification de Connection:** a referência de C-007 a `(revision, environment, key_version)` é refinada semanticamente para `ConnectionRevision + ConnectorDefinitionRevision + credential binding/grant version + external target`. `key_version` criptográfica do vault é detalhe de custódia; recriptografia ou refresh transitório do mesmo grant não criam ConnectionRevision/Release nem invalidam qualification por si sós. Forma física/contratual final: 3E/3F/3I.
+- **3C-09-A — BrainRevision:** `BrainRevision` é a visão semântica de uma `ArtifactRevision(kind=brain)` exata; Artifact Registry permanece a única authority técnica de revision identity/digest/payload/AVAILABLE. Brain owns significado, validação/compilação e publication semantics.
+- **3C-09-B — Brain Health × Binding Conformance:** validade do conhecimento Workspace-scoped e conformidade da implementação de um Project são eixos distintos; binding local inválido não invalida automaticamente a definição global.
+- **3C-09-C — Evolution by Preserved Semantics:** F1 não constrói RAG/graph/partitioning, mas preserva logical IDs, typed relationships, provenance, compiler boundary, eval signals e `EffectiveBrainSlice`, permitindo evolução futura por gatilhos medidos sem trocar a authority canônica.
 
 Dívida editorial (não material):
 
@@ -63,7 +67,8 @@ Dívida editorial (não material):
   3C-06 Artifact Registry: APROVADO
   3C-07 Connections: APROVADO
   3C-08 Capability Gateway: APROVADO
-next decision: Brain module boundary
+  3C-09 Brain: APROVADO
+next decision: Production Agent Runtime module boundary
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

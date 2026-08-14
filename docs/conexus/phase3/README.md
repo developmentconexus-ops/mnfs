@@ -20,7 +20,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08-capability-gateway-module-boundary.md](3C-08-capability-gateway-module-boundary.md) |
 | 3C-09 | Brain Module Boundary | APROVADO | [3C-09-brain-module-boundary.md](3C-09-brain-module-boundary.md) |
 | 3C-10 | Production Agent Runtime Module Boundary | APROVADO | [3C-10-production-agent-runtime-module-boundary.md](3C-10-production-agent-runtime-module-boundary.md) |
-| 3A-R5 | Builder / Coding Runtime Reassessment | EM PESQUISA | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
+| 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
 
 ## 3B-17 — síntese normativa
 
@@ -37,10 +37,10 @@ Findings materiais encaminhados, com owner registrado:
 3. **F3B-R3 — escopo do Registry e mapa kind→authoring root** · **RESOLVIDO EM 3C por 3C-06 no nível de module ownership/scope/authoring root.** Mapa fechado: `integration → PLATFORM → Platform Connector Catalog Git`; `brain → WORKSPACE → Workspace Brain Git`; `query|action|job|agent|brain-binding → PROJECT → canonical Project repo`. `integration` significa ConnectorDefinition, não Connection. Resíduos legítimos permanecem em 3E/3F para physical schema e contracts de refs/publication.
 4. **F3B-R4 — autorização versus browser trust zone** · owner: 3I/3J. 3B-14 separa Control Plane, Preview e Published App logicamente; Security/Deployment precisa decidir o isolamento físico correspondente.
 5. **N3 — planning depth × rigor** · owner: 3C/3G. Os dois eixos permanecem distintos; rigor pode impor piso de artifacts/discovery/plano/gates. A relação final será decidida em 3C/3G — não se define aqui `CONTROLLED = FULL`.
-6. **N4 — disposição de 3A**: 3A permanece reconciliation transversal contínua até C-018 (inclui a reconciliação de vocabulário dos textos C-002/C-009/C-013 exigida por C-017).
-7. **3A-R5 — Builder/Coding Runtime:** C-002 não é mais estável quanto à escolha Pi/fresh worker. Mastra Code/AgentController/Workspaces/Factory atuais criaram finding material. Builder domain permanece aprovado; runtime/lifetime/memory/planning realization está em reassessment antes de prosseguir com decisões dependentes.
+6. **N4 — disposição de 3A**: 3A permanece reconciliation transversal contínua até C-018 (inclui reconciliações pontuais quando finding material exigir).
+7. **3A-R5 — Builder/Coding Runtime: RESOLVIDO / APROVADO.** Mastra Code / AgentController é o harness principal F1; uma coding session persistente é escopada ao Change e pode atravessar WUs/ActorRuns; persistent thread ON, OM OFF inicialmente; E2B permanece substrate; verifier material é sessão nova independente; Pi fica apenas como fallback sob removal condition. A decisão detalhada registra as supersessões de C-002/C-008 e o refinamento de 3C-05.
 
-Refinamentos materiais aprovados em 3C:
+Refinamentos materiais aprovados em 3C / Architecture Reconciliation:
 
 - **3C-07-A — qualification de Connection:** a referência de C-007 a `(revision, environment, key_version)` é refinada semanticamente para `ConnectionRevision + ConnectorDefinitionRevision + credential binding/grant version + external target`. `key_version` criptográfica do vault é detalhe de custódia; recriptografia ou refresh transitório do mesmo grant não criam ConnectionRevision/Release nem invalidam qualification por si sós. Forma física/contratual final: 3E/3F/3I.
 - **3C-09-A — BrainRevision:** `BrainRevision` é a visão semântica de uma `ArtifactRevision(kind=brain)` exata; Artifact Registry permanece a única authority técnica de revision identity/digest/payload/AVAILABLE. Brain owns significado, validação/compilação e publication semantics.
@@ -48,6 +48,10 @@ Refinamentos materiais aprovados em 3C:
 - **3C-09-C — Evolution by Preserved Semantics:** F1 não constrói RAG/graph/partitioning, mas preserva logical IDs, typed relationships, provenance, compiler boundary, eval signals e `EffectiveBrainSlice`, permitindo evolução futura por gatilhos medidos sem trocar a authority canônica.
 - **3C-10-A — Production Agent substrate:** a rejeição categórica de framework de agente da C-010 é superseded para Production Agents. Mastra passa a ser substrate principal sob `ProductionAgentRuntime`; Conexus preserva authority sobre Registry/Release/I&A/Brain/Connections/Gateway/ApprovalRequest/AgentTrigger.
 - **3C-10-B — durable agent semantics:** Agent é ator lógico durável; `AgentRun` é execução concreta. `AgentTrigger` fecha `SCHEDULE | EVENT`; runtime memory, workflow/checkpoint e suspend/resume podem ser realizados pelo Mastra sem virar authority empresarial.
+- **3A-R5-A — Change-scoped coding cognition:** `CodingSession`, `WorkUnit`, `ActorRun` e sandbox têm lifetimes distintos. Work Unit/ActorRun não exige fresh cognition; novo Change recebe session nova por default.
+- **3A-R5-B — Builder memory baseline:** persistent thread ON; Observational Memory OFF até trigger + eval. Conhecimento durável continua explícito em Git/Baseline/Brain/standards.
+- **3A-R5-C — Builder runtime realization:** Mastra Code / AgentController + Workspace/E2B é a realização F1 escolhida; `@mastra/e2b` é usado inicialmente por YAGNI; Git remoto/durable secrets/authority permanecem Hub-side; ~45 min vira checkpoint operacional, não lei de decomposição.
+- **3A-R5-D — verification:** deterministic proof first; verifier agentic apenas quando material, sempre em sessão nova cognitivamente independente e sem corrigir o que está julgando.
 
 Dívida editorial (não material):
 
@@ -59,7 +63,7 @@ Dívida editorial (não material):
 - validation database é temporário sob demanda, não terceiro environment persistente.
 - self-grant de Workspace Admin fica para Identity & Access Design.
 
-## Encerramento de 3B
+## Encerramento de 3B e estado atual de 3C
 
 ```text
 3B — System Context & Boundaries: CLOSED / APROVADA
@@ -68,15 +72,17 @@ Dívida editorial (não material):
   3C-02 Identity & Access: APROVADO
   3C-03 Workspace: APROVADO
   3C-04 Project: APROVADO
-  3C-05 Builder: APROVADO (runtime realization under 3A-R5 reassessment)
+  3C-05 Builder: APROVADO (runtime realization reconciled by 3A-R5)
   3C-06 Artifact Registry: APROVADO
   3C-07 Connections: APROVADO
   3C-08 Capability Gateway: APROVADO
   3C-09 Brain: APROVADO
   3C-10 Production Agent Runtime: APROVADO
 
-checkpoint before dependent architecture:
-  3A-R5 Builder/Coding Runtime Reassessment: EM PESQUISA
+3A-R5 Builder/Coding Runtime Reassessment: CLOSED / APROVADO
+
+next:
+  continuar 3C pela próxima module boundary dependente
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

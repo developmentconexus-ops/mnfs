@@ -20,6 +20,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08-capability-gateway-module-boundary.md](3C-08-capability-gateway-module-boundary.md) |
 | 3C-09 | Brain Module Boundary | APROVADO | [3C-09-brain-module-boundary.md](3C-09-brain-module-boundary.md) |
 | 3C-10 | Production Agent Runtime Module Boundary | APROVADO | [3C-10-production-agent-runtime-module-boundary.md](3C-10-production-agent-runtime-module-boundary.md) |
+| 3C-11 | Release Module Boundary | APROVADO | [3C-11-release-module-boundary.md](3C-11-release-module-boundary.md) |
 | 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
 
 ## 3B-17 — síntese normativa
@@ -48,6 +49,10 @@ Refinamentos materiais aprovados em 3C / Architecture Reconciliation:
 - **3C-09-C — Evolution by Preserved Semantics:** F1 não constrói RAG/graph/partitioning, mas preserva logical IDs, typed relationships, provenance, compiler boundary, eval signals e `EffectiveBrainSlice`, permitindo evolução futura por gatilhos medidos sem trocar a authority canônica.
 - **3C-10-A — Production Agent substrate:** a rejeição categórica de framework de agente da C-010 é superseded para Production Agents. Mastra passa a ser substrate principal sob `ProductionAgentRuntime`; Conexus preserva authority sobre Registry/Release/I&A/Brain/Connections/Gateway/ApprovalRequest/AgentTrigger.
 - **3C-10-B — durable agent semantics:** Agent é ator lógico durável; `AgentRun` é execução concreta. `AgentTrigger` fecha `SCHEDULE | EVENT`; runtime memory, workflow/checkpoint e suspend/resume podem ser realizados pelo Mastra sem virar authority empresarial.
+- **3C-11-A — Release ownership:** `ReleaseManifest` é a composition root imutável; `Release` owns versões elegíveis e `Promotion` owns tentativas de ativação em `PROD`. `Deployment` não é módulo separado no F1.
+- **3C-11-B — deployment target cut:** `PROD` é o único target persistente de Promotion; E2B, BuildValidationDatabase e RunPreview são execution/validation environments e não entram num `EnvironmentModule` genérico.
+- **3C-11-C — active serving authority:** um active release pointer atualizado via CAS define a composição ativa; Registry `AVAILABLE`, Git ou runtime cache não substituem essa authority.
+- **3C-11-D — promotion mechanics:** EnvironmentConformance, production migration orchestration, rollback eligibility/re-point e `SERVED_VERIFIED` pertencem a Release; canary/blue-green/traffic splitting/staging persistente continuam DEFER.
 - **3A-R5-A — Change-scoped coding cognition:** `CodingSession`, `WorkUnit`, `ActorRun` e sandbox têm lifetimes distintos. Work Unit/ActorRun não exige fresh cognition; novo Change recebe session nova por default.
 - **3A-R5-B — Builder memory baseline:** persistent thread ON; Observational Memory OFF até trigger + eval. Conhecimento durável continua explícito em Git/Baseline/Brain/standards.
 - **3A-R5-C — Builder runtime realization:** Mastra Code / AgentController + Workspace/E2B é a realização F1 escolhida; `@mastra/e2b` é usado inicialmente por YAGNI; Git remoto/durable secrets/authority permanecem Hub-side; ~45 min vira checkpoint operacional, não lei de decomposição.
@@ -78,11 +83,12 @@ Dívida editorial (não material):
   3C-08 Capability Gateway: APROVADO
   3C-09 Brain: APROVADO
   3C-10 Production Agent Runtime: APROVADO
+  3C-11 Release: APROVADO
 
 3A-R5 Builder/Coding Runtime Reassessment: CLOSED / APROVADO
 
 next:
-  continuar 3C pela próxima module boundary dependente
+  3C-12 Published App Runtime Module Boundary
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

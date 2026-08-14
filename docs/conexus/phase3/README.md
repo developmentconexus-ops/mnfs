@@ -1,6 +1,10 @@
 # Fase 3 — Detailed Decision Index
 
-Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger `../24-arquitetura-system-design.md`.
+Este diretório contém as decisões detalhadas da Fase 3.
+
+**Live status / navigation authority:** [LEDGER.md](LEDGER.md)  
+**3B historical/detail authority:** `../24-arquitetura-system-design.md` + `3B-*` docs  
+**Importante:** 3C está fechada, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
 
 ## Status
 
@@ -9,7 +13,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3B-01..3B-15 | System Context & Boundaries | APROVADO | `../24-arquitetura-system-design.md` |
 | 3B-16 | Project-Internal Resource Ownership | APROVADO | [3B-16-project-internal-resource-ownership.md](3B-16-project-internal-resource-ownership.md) |
 | 3B-17 | Project Isolation and Explicit Reuse | APROVADO | `../24-arquitetura-system-design.md` |
-| Review transversal 3B | 3B-01..17 × C-000..C-017 | CONCLUÍDO | findings abaixo |
+| 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
 | 3C-01 | Modular Monolith no F1 | APROVADO | [3C-01-modular-monolith.md](3C-01-modular-monolith.md) |
 | 3C-02 | Identity & Access Module Boundary | APROVADO | [3C-02-identity-access-module-boundary.md](3C-02-identity-access-module-boundary.md) |
 | 3C-03 | Workspace Module Boundary | APROVADO | [3C-03-workspace-module-boundary.md](3C-03-workspace-module-boundary.md) |
@@ -24,96 +28,102 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-12 | Application Runtime Profiles | APROVADO | [3C-12-application-runtime-profiles.md](3C-12-application-runtime-profiles.md) |
 | 3C-13 | Observability & Audit Module Boundary | APROVADO | [3C-13-observability-audit-module-boundary.md](3C-13-observability-audit-module-boundary.md) |
 | 3C-14 | Attachments / Storage Boundary | APROVADO | [3C-14-attachments-storage-boundary.md](3C-14-attachments-storage-boundary.md) |
-| 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
+| 3C-15 | Managed Application Runtime Module Boundary | APROVADO | [3C-15-managed-application-runtime-boundary.md](3C-15-managed-application-runtime-boundary.md) |
+| 3C-R1 | Cross-review Closure & Reconciliation | APROVADO | [3C-R1-cross-review-closure.md](3C-R1-cross-review-closure.md) |
 
-## 3B-17 — síntese normativa
-
-Registrada no ledger ([../24-arquitetura-system-design.md](../24-arquitetura-system-design.md), entrada 3B-17).
-
-## Review transversal — veredito
-
-3B permanece APROVADA e pode avançar para 3C. Nenhum finding invalida Workspace, Project, Change, ReBAC, bindings ou isolamento já aprovados. Precedências Plan schema v2 e role set C-015 §6 registradas na seção 5 do ledger.
-
-Findings materiais encaminhados, com owner registrado:
-
-1. **F3B-R1 — repo canônico do produto** · owner: Architecture Reconciliation / operador. C-000 previa repo próprio do Conexus após runtime+sandbox. Resolver por cutover ou emenda explícita **antes de implementação**; não bloqueia 3C.
-2. **F3B-R2 — Plan schema legado** · owner: 3C/3F. `MissionPlan v2` usa Mission/Milestone/Feature, enquanto C-017/3B usam Change/Work Unit. Reutilizar validation/revision/digest/render/dependency-graph/proof mapping re-tipados para Change/Work Unit, nunca o schema literalmente (precedência na seção 5 do ledger).
-3. **F3B-R3 — escopo do Registry e mapa kind→authoring root** · **RESOLVIDO EM 3C por 3C-06 no nível de module ownership/scope/authoring root.** Mapa fechado: `integration → PLATFORM → Platform Connector Catalog Git`; `brain → WORKSPACE → Workspace Brain Git`; `query|action|job|agent|brain-binding → PROJECT → canonical Project repo`. `integration` significa ConnectorDefinition, não Connection. Resíduos legítimos permanecem em 3E/3F para physical schema e contracts de refs/publication.
-4. **F3B-R4 — autorização versus browser trust zone** · owner: 3I/3J. 3B-14 separa Control Plane, Preview e Published App logicamente; Security/Deployment precisa decidir o isolamento físico correspondente.
-5. **N3 — planning depth × rigor** · owner: 3C/3G. Os dois eixos permanecem distintos; rigor pode impor piso de artifacts/discovery/plano/gates. A relação final será decidida em 3C/3G — não se define aqui `CONTROLLED = FULL`.
-6. **N4 — disposição de 3A**: 3A permanece reconciliation transversal contínua até C-018 (inclui reconciliações pontuais quando finding material exigir).
-7. **3A-R5 — Builder/Coding Runtime: RESOLVIDO / APROVADO.** Mastra Code / AgentController é o harness principal F1; uma coding session persistente é escopada ao Change e pode atravessar WUs/ActorRuns; persistent thread ON, OM OFF inicialmente; E2B permanece substrate; verifier material é sessão nova independente; Pi fica apenas como fallback sob removal condition. A decisão detalhada registra as supersessões de C-002/C-008 e o refinamento de 3C-05.
-
-Refinamentos materiais aprovados em 3C / Architecture Reconciliation:
-
-- **3C-07-A — qualification de Connection:** a referência de C-007 a `(revision, environment, key_version)` é refinada semanticamente para `ConnectionRevision + ConnectorDefinitionRevision + credential binding/grant version + external target`. `key_version` criptográfica do vault é detalhe de custódia; recriptografia ou refresh transitório do mesmo grant não criam ConnectionRevision/Release nem invalidam qualification por si sós. Forma física/contratual final: 3E/3F/3I.
-- **3C-09-A — BrainRevision:** `BrainRevision` é a visão semântica de uma `ArtifactRevision(kind=brain)` exata; Artifact Registry permanece a única authority técnica de revision identity/digest/payload/AVAILABLE. Brain owns significado, validação/compilação e publication semantics.
-- **3C-09-B — Brain Health × Binding Conformance:** validade do conhecimento Workspace-scoped e conformidade da implementação de um Project são eixos distintos; binding local inválido não invalida automaticamente a definição global.
-- **3C-09-C — Evolution by Preserved Semantics:** F1 não constrói RAG/graph/partitioning, mas preserva logical IDs, typed relationships, provenance, compiler boundary, eval signals e `EffectiveBrainSlice`, permitindo evolução futura por gatilhos medidos sem trocar a authority canônica.
-- **3C-10-A — Production Agent substrate:** a rejeição categórica de framework de agente da C-010 é superseded para Production Agents. Mastra passa a ser substrate principal sob `ProductionAgentRuntime`; Conexus preserva authority sobre Registry/Release/I&A/Brain/Connections/Gateway/ApprovalRequest/AgentTrigger.
-- **3C-10-B — durable agent semantics:** Agent é ator lógico durável; `AgentRun` é execução concreta. `AgentTrigger` fecha `SCHEDULE | EVENT`; runtime memory, workflow/checkpoint e suspend/resume podem ser realizados pelo Mastra sem virar authority empresarial.
-- **3C-11-A — Release ownership:** `ReleaseManifest` é a composition root imutável; `Release` owns versões elegíveis e `Promotion` owns tentativas de ativação em `PROD`. `Deployment` não é módulo separado no F1.
-- **3C-11-B — deployment target cut:** `PROD` é o único target persistente de Promotion; E2B, BuildValidationDatabase e RunPreview são execution/validation environments e não entram num `EnvironmentModule` genérico.
-- **3C-11-C — active serving authority:** um active release pointer atualizado via CAS define a composição ativa; Registry `AVAILABLE`, Git ou runtime cache não substituem essa authority.
-- **3C-11-D — promotion mechanics:** EnvironmentConformance, production migration orchestration, rollback eligibility/re-point e `SERVED_VERIFIED` pertencem a Release; canary/blue-green/traffic splitting/staging persistente continuam DEFER.
-- **3C-12-A — one Factory, two runtime profiles:** `ApplicationRuntimeProfile = MANAGED | DEDICATED` é união fechada F1 e fato material do Project Baseline. Ambos usam o mesmo Project/Change/Builder/verification/Release model.
-- **3C-12-B — MANAGED:** aplicações organizacionais usam build real, mas executam backend/capabilities sobre o runtime e os serviços governados compartilhados do Conexus; backend dedicado não é Golden Path.
-- **3C-12-C — DEDICATED:** produtos/software independentes podem possuir frontend/server/data runtime próprios e consumir serviços Conexus somente por bindings explícitos; não são extensões privilegiadas do Hub.
-- **3C-12-D — Release refinement:** `runtimeProfile` entra na composição da Release; MANAGED e DEDICATED possuem outputs de runtime diferentes, mantendo uma única authority de Release/Promotion/PROD.
-- **3C-12-E — C-012 scope refinement:** a premissa `Hub já é o backend` passa a ser baseline MANAGED, não universal para DEDICATED.
-- **3C-12-F — C-015 scope refinement:** a topologia de auth/serving compartilhada/same-origin de C-015 passa a ser baseline MANAGED. DEDICATED pode usar I&A Conexus por binding ou auth própria; trust/identity exchange/ingress ficam para 3I/3J.
-- **3C-13-A — Audit × Telemetry:** `Observability & Audit` é um único módulo F1 com `Audit Trail` durável separado semanticamente de `Operational Telemetry`; nenhum deles substitui o domain owner do estado atual.
-- **3C-13-B — audit-required fail-closed:** ações materiais classificadas como audit-required não terminam silenciosamente sem AuditRecord durável; telemetry comum pode degradar sem bloquear o domínio por default.
-- **3C-13-C — Verification Observability:** verifier/QA pode consultar errors/traces/logs do app-under-test real e correlacioná-los ao Change/ActorRun/candidate; telemetry suporta Findings/Evidence, mas `no error observed != correctness proven`.
-- **3C-13-D — Spotlight/OTel:** Spotlight permanece referência/challenger para observabilidade local com AI/MCP, não dependência; OpenTelemetry é a preferred technical boundary para traces/logs/metrics e correlação, sem virar domain authority.
-- **3C-13-E — missing runtime evidence:** ausência global de telemetry é degradação diagnóstica, mas assertion que declara runtime evidence necessária fica `NOT_PROVEN/INCONCLUSIVE` quando essa evidência falta — nunca PASS por ausência.
-- **3C-14-A — Storage module:** o candidato `Storage` de 3C-01 é REJECTED como módulo de domínio F1; `BlobStore/CAS` é infrastructure capability.
-- **3C-14-B — Attachments:** `Attachments` é ADOPTED como module/capability de produto para arquivos de usuário/aplicação no regime MANAGED; `attachment_id` é identity lógica, digest/path/object key são identities físicas.
-- **3C-14-C — C-015 attachment scope:** a topologia de attachment governado pelo Hub passa a ser baseline MANAGED, não obrigação universal para DEDICATED.
-- **3C-14-D — Dedicated storage freedom:** DEDICATED pode possuir storage próprio ou consumir Conexus Attachments por binding explícito; nenhum master storage credential é entregue por default.
-- **3C-14-E — no byte-domain coupling:** Artifact Registry, Release, Evidence, Observability, backup e Builder workspace não passam por Attachments apenas por armazenarem bytes; storage infrastructure pode ser compartilhada abaixo dos owners sem compartilhar lifecycle.
-- **3A-R5-A — Change-scoped coding cognition:** `CodingSession`, `WorkUnit`, `ActorRun` e sandbox têm lifetimes distintos. Work Unit/ActorRun não exige fresh cognition; novo Change recebe session nova por default.
-- **3A-R5-B — Builder memory baseline:** persistent thread ON; Observational Memory OFF até trigger + eval. Conhecimento durável continua explícito em Git/Baseline/Brain/standards.
-- **3A-R5-C — Builder runtime realization:** Mastra Code / AgentController + Workspace/E2B é a realização F1 escolhida; `@mastra/e2b` é usado inicialmente por YAGNI; Git remoto/durable secrets/authority permanecem Hub-side; ~45 min vira checkpoint operacional, não lei de decomposição.
-- **3A-R5-D — verification:** deterministic proof first; verifier agentic apenas quando material, sempre em sessão nova cognitivamente independente e sem corrigir o que está julgando.
-
-Dívida editorial (não material):
-
-- 3B-12 ainda usa `PROJECT_MEMBER`; reconciliar com as roles de 3B-13 (`PROJECT_VIEWER | PROJECT_CONTRIBUTOR | PROJECT_ADMIN`).
-- avaliar renomear `ViewerContext.capabilities` para `effectivePermissions`.
-- `Workspace` fica reservado ao tenant (3B-01); o environment de desenvolvimento não usa o nome "workspace" — alinhar textos existentes (ex.: C-014, exemplos de 3B-15) nas fases 3C+.
-- distinguir, quando aplicável, o validation database temporário do control/data plane (C-006/3B-16) do database sintético local do sandbox (`BuildValidationDatabase`, C-008).
-- app role e data audience permanecem dimensões distintas; múltiplas audiences continuam sob trigger.
-- validation database é temporário sob demanda, não terceiro environment persistente.
-- self-grant de Workspace Admin fica para Identity & Access Design.
-- textos C-012/C-015 anteriores que descrevem uma única topologia de published runtime devem ser lidos sob a precedência explícita de 3C-12 até a reconciliação editorial final.
-- C-013 usa `agent_event` como nome agent-centric; até 3E/3F, ler sob a generalização platform-wide aprovada por 3C-13.
-- C-015 §13 descreve storage de anexos sob uma topologia shared-runtime; até reconciliação editorial final, ler essa seção como baseline MANAGED conforme 3C-12/3C-14.
-
-## Encerramento de 3B e estado atual de 3C
+## Estado atual
 
 ```text
+3A — Architecture Reconciliation: transversal / contínua até C-018
 3B — System Context & Boundaries: CLOSED / APROVADA
-3C — Domain / Module Architecture: EM ANDAMENTO
-  3C-01 Modular Monolith: APROVADO
-  3C-02 Identity & Access: APROVADO
-  3C-03 Workspace: APROVADO
-  3C-04 Project: APROVADO
-  3C-05 Builder: APROVADO (runtime realization reconciled by 3A-R5)
-  3C-06 Artifact Registry: APROVADO
-  3C-07 Connections: APROVADO
-  3C-08 Capability Gateway: APROVADO
-  3C-09 Brain: APROVADO
-  3C-10 Production Agent Runtime: APROVADO
-  3C-11 Release: APROVADO
-  3C-12 Application Runtime Profiles: APROVADO
-  3C-13 Observability & Audit: APROVADO
-  3C-14 Attachments / Storage Boundary: APROVADO
+3C — Domain / Module Architecture: CLOSED / APROVADA
+3D — Dependency Architecture: NEXT
+```
 
-3A-R5 Builder/Coding Runtime Reassessment: CLOSED / APROVADO
+## Mapa final 3C
 
-next:
-  cross-review final de 3C — validar ownership completo, sobreposições, gaps e boundaries artificiais antes de declarar 3C CLOSED
+```text
+Conexus Hub — modular monolith
+
+Identity & Access
+Workspace
+Project
+Builder
+Artifact Registry
+Connections
+Capability Gateway
+Brain
+Production Agent Runtime
+Release
+Managed Application Runtime
+Observability & Audit
+Attachments
+```
+
+Decisão transversal:
+
+```text
+ApplicationRuntimeProfile = MANAGED | DEDICATED
+```
+
+`DEDICATED Application Runtime` é output/runtime de Project, não módulo do Hub.
+
+## Precedência de fechamento
+
+O cross-review final está materializado em [3C-R1](3C-R1-cross-review-closure.md).
+
+Ele registra, entre outros refinements:
+
+- `AgentTrigger EVENT` reservado/deferred; `SCHEDULE` operacional no F1;
+- C-016 `Gateway-only` reinterpretado para MANAGED / Conexus-governed capabilities, sem impedir network surface própria de DEDICATED;
+- DEDICATED multi-install explicitamente DEFER;
+- Project owns Inception; Builder fornece engineering execution capability sem criar Change artificial;
+- application/use-case orchestration layer declarada como stateless e sem authority própria;
+- Brain `EVIDENCE` passa semanticamente a `EVIDENCE_SPEC`;
+- bindings seguem Git authoring + Project approved intent + Registry compiled revision + specialized validation + Release pin;
+- 3A-R5 supersede fresh implementer-per-WU; fresh independent verifier permanece;
+- `Workspace` sem qualificador significa tenant Conexus; usar `Mastra Workspace` para o substrate;
+- C-006 Project Data topology é baseline MANAGED, não persistence obrigatória de DEDICATED;
+- `Storage`, `Deployment`, `Published App Runtime` universal e outras nomenclaturas antigas são lidas sob a precedência de 3C-R1.
+
+## Findings roteados
+
+O live ledger mantém a lista completa e seus owners: [LEDGER.md](LEDGER.md#7-open-findings--routed-work).
+
+Itens principais para a próxima etapa:
+
+```text
+3D
+→ cycles conceituais e dependency DAG
+→ Managed Runtime ports
+→ Gateway/Connections/Builder/Agent Runtime directionality
+
+3F/3I
+→ DEDICATED identity/authority exchange
+
+3I/3J
+→ physical trust/egress/deployment topology
+```
+
+## Regra de fechamento
+
+3C não deve reabrir por detalhe de tabela, DTO, FSM, queue provider, Docker, DNS, TLS, Mastra implementation ou frontend shape. Esses temas pertencem a 3D–3L conforme o ledger.
+
+Uma boundary 3C só volta ao Decision Loop diante de finding material que demonstre:
+
+```text
+owner ausente
+authority duplicada
+god module inevitável
+módulo artificial comprovado
+ou consumer real sem boundary existente
+```
+
+Até lá:
+
+```text
+3C = CLOSED
+3D = NEXT
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

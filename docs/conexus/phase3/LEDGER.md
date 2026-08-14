@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · próximo gate `3D — Dependency Architecture`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D EM ANDAMENTO — 3D-01 APROVADA` · próximo gate `3D-02 — Capability Gateway Dependency Architecture`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -24,12 +24,15 @@ C-000..C-017
 3C-R1
 → authority de reconciliação final de 3C sobre nomenclatura/escopo conflitante
 
+3D approved docs
+→ fecham dependency architecture sem reabrir ownership de 3C salvo Finding material
+
 este LEDGER
 → status/navigation authority
 → não substitui conteúdo detalhado dos decision docs
 ```
 
-Nenhuma conversa é authority. O repositório deve bastar para reconstruir o estado da arquitetura.
+Nenhuma conversa é authority. Review briefs/reviews como `3D-FABLE-*` são inputs não-autoritativos até que conteúdo seja ratificado por decisão aprovada. O repositório deve bastar para reconstruir o estado da arquitetura.
 
 ---
 
@@ -39,8 +42,8 @@ Nenhuma conversa é authority. O repositório deve bastar para reconstruir o est
 |---|---|---|
 | 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar apenas findings materiais durante 3D–3O |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | nenhuma reabertura sem finding material |
-| 3C — Domain / Module Architecture | **CLOSED / APROVADA** | dependências em 3D |
-| 3D — Dependency Architecture | **NEXT / NÃO INICIADA** | fechar DAG/ports/application orchestration |
+| 3C — Domain / Module Architecture | **CLOSED / APROVADA** | nenhuma reabertura sem finding material |
+| 3D — Dependency Architecture | **EM ANDAMENTO — 3D-01 APROVADA** | 3D-02 Capability Gateway dependency architecture |
 | 3E — Data Architecture | NÃO INICIADA | após 3D |
 | 3F — Contracts & API Architecture | NÃO INICIADA | após dependencies/data adequados |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
@@ -95,7 +98,40 @@ Builder runtime realization adicional:
 
 ---
 
-## 5. Mapa final de módulos 3C
+## 5. 3D — decisões aprovadas
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3D-01 | Macro Dependency Architecture | [3D-01](3D-01-macro-dependency-architecture.md) |
+
+3D-01 congela:
+
+```text
+acyclic import graph
+direct-call-first
+named application orchestration only when justified
+immutable/content-addressed refs travel; revocable authority revalidates
+single narrow approval revalidation inversion
+Release -X-> Builder direct import
+shared pure Rigor evaluation primitive
+cross-module transaction atomicity without cross-module data ownership
+no hidden mutable substrate coupling
+mechanically enforceable dependency boundaries; tooling still open
+```
+
+Review input preservado, sem authority própria:
+
+- `3D-FABLE-R0-independent-dependency-review.md` — revisão adversarial independente que alimentou a reconciliação de 3D-01.
+
+Próximo gate:
+
+```text
+3D-02 — Capability Gateway Dependency Architecture
+```
+
+---
+
+## 6. Mapa final de módulos 3C
 
 ```text
 Conexus Hub — modular monolith
@@ -141,7 +177,7 @@ serving/deployment infrastructure
 
 ---
 
-## 6. Cross-review 3C — resultado
+## 7. Cross-review 3C — resultado
 
 Veredito final: **CLOSE 3C WITH BOUNDED AMENDMENTS → amendments applied by 3C-15 + 3C-R1.**
 
@@ -153,7 +189,7 @@ Findings resolvidos:
 - C-016 Gateway-only universal × DEDICATED → scope refinado em 3C-R1.
 - DEDICATED multi-install → explicitamente DEFER.
 - Inception execution dispatcher → Project authority + Builder engineering execution capability.
-- application/orchestration layer implícita → declarada como stateless use-case layer; dependency rules em 3D.
+- application/orchestration layer implícita → declarada como stateless use-case layer; dependency rules agora iniciadas por 3D-01.
 - Brain `EVIDENCE` collision → `EVIDENCE_SPEC` semantic rename.
 - binding authority pattern → Git authoring + Project approved intent + Registry compiled revision + specialized validation + Release pin.
 - stale Pi/Workspace/Storage/Deployment terminology → precedence registrada.
@@ -162,7 +198,7 @@ Não foram encontrados blockers restantes de module ownership.
 
 ---
 
-## 7. Open findings / routed work
+## 8. Open findings / routed work
 
 Estes itens **não reabrem 3C**; possuem owner posterior explícito.
 
@@ -171,22 +207,23 @@ Estes itens **não reabrem 3C**; possuem owner posterior explícito.
 | F3B-R1 — repo canônico/cutover do produto | 3A / operador — resolver antes de implementação |
 | F3B-R2 — legacy `MissionPlan v2` | 3F — re-tipar para Change/Work Unit; não restaurar Mission/Milestone/Feature |
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
-| N3 — Planning Depth × RigorProfile | 3G |
-| Gateway↔Builder/Connections/AgentRuntime conceptual cycles | **3D** |
-| Managed Runtime dependency graph/ports | **3D** |
+| N3 — Planning Depth × RigorProfile | 3G — primitive compartilhada posicionada em 3D-01; relação behavioral ainda aberta |
+| Gateway↔Builder/Connections/AgentRuntime conceptual cycles | **3D-01 macro rules approved; detalhar Gateway em 3D-02** |
+| Managed Runtime dependency graph/ports | **3D-04 / fechamento restante de 3D** |
 | Project binding contracts | 3F |
 | DEDICATED identity/authority exchange | 3F/3I |
 | DEDICATED network/egress physical policy | 3I/3J |
 | MANAGED/DEDICATED deployment topology | 3J |
 | Mastra telemetry ↔ Conexus correlation realization | 3H/3L |
+| Mastra substrate isolation Builder × Production Agent Runtime | regra de dependency em **3D-01**; realization em 3H |
 | Verification Observability realization (Spotlight/OTel/etc.) | 3H/3L/3N |
 | DEDICATED multi-install/fleet management | DEFER; trigger = first external independent installation requiring Conexus-governed lifecycle |
 
 ---
 
-## 8. Anti-overengineering guardrail
+## 9. Anti-overengineering guardrail
 
-3C CLOSED não autoriza criar:
+3C CLOSED + 3D-01 APPROVED não autorizam criar:
 
 ```text
 microservices
@@ -200,47 +237,52 @@ EventIngressModule
 ApplicationLayerModule
 InstallationModule
 generic binding framework
-workflow DSL / event bus
+workflow DSL / event bus / command bus
+universal mediator / service locator
 OPA/Cedar/OpenFGA
+RigorModule / policy engine
 runtime profile plugin framework
 Kafka/Kubernetes/Temporal as defaults
+outbox/inbox apenas para comunicação local futura
 ```
 
 Qualquer item só volta ao Decision Loop com consumidor/failure class real.
 
 ---
 
-## 9. Próximo gate — 3D
+## 10. Próximo gate — 3D-02
 
-3D deve começar pela pergunta:
+3D-02 deve começar pela pergunta:
 
-> Qual módulo pode depender de qual outro módulo, através de qual narrow port/projection, sem imports/tables access circulares e sem criar um universal mediator?
+> Quais facts/projections o Capability Gateway pode consultar diretamente, quais contexts chegam do caller e como approval/authority revogável é revalidada no instante correto sem criar reverse imports ou policy framework?
 
 Prioridade de análise:
 
 ```text
-Managed Application Runtime
-Capability Gateway
-Connections
-Builder
-Production Agent Runtime
-Brain
-Release
-Identity & Access
-Artifact Registry
-Attachments
-Observability
+Gateway → Identity & Access
+Gateway → Project
+Gateway → Artifact Registry
+Gateway → Connections
+Gateway → Release
+Production Agent Runtime → Gateway + approval revalidation capability
+Builder → Gateway caller context
+Managed Runtime → Gateway caller/runtime context
+Qualification/AnalyticQuery orchestration que usa Gateway sem reverse import
+budget/admission/TOCTOU boundary
 ```
 
-3D não reabre ownership de 3C sem finding material.
+3D-02 deve permanecer narrow: não decidir DTOs finais de 3F, FSMs de 3G ou runtime/security realization de 3H/3I.
 
 ---
 
-## 10. Regra de avanço
+## 11. Regra de avanço
 
 ```text
+3B = CLOSED
 3C = CLOSED
-3D = NEXT
+3D = EM ANDAMENTO
+3D-01 = APPROVED
+3D-02 = NEXT
 ```
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

@@ -23,6 +23,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-11 | Release Module Boundary | APROVADO | [3C-11-release-module-boundary.md](3C-11-release-module-boundary.md) |
 | 3C-12 | Application Runtime Profiles | APROVADO | [3C-12-application-runtime-profiles.md](3C-12-application-runtime-profiles.md) |
 | 3C-13 | Observability & Audit Module Boundary | APROVADO | [3C-13-observability-audit-module-boundary.md](3C-13-observability-audit-module-boundary.md) |
+| 3C-14 | Attachments / Storage Boundary | APROVADO | [3C-14-attachments-storage-boundary.md](3C-14-attachments-storage-boundary.md) |
 | 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
 
 ## 3B-17 — síntese normativa
@@ -66,6 +67,11 @@ Refinamentos materiais aprovados em 3C / Architecture Reconciliation:
 - **3C-13-C — Verification Observability:** verifier/QA pode consultar errors/traces/logs do app-under-test real e correlacioná-los ao Change/ActorRun/candidate; telemetry suporta Findings/Evidence, mas `no error observed != correctness proven`.
 - **3C-13-D — Spotlight/OTel:** Spotlight permanece referência/challenger para observabilidade local com AI/MCP, não dependência; OpenTelemetry é a preferred technical boundary para traces/logs/metrics e correlação, sem virar domain authority.
 - **3C-13-E — missing runtime evidence:** ausência global de telemetry é degradação diagnóstica, mas assertion que declara runtime evidence necessária fica `NOT_PROVEN/INCONCLUSIVE` quando essa evidência falta — nunca PASS por ausência.
+- **3C-14-A — Storage module:** o candidato `Storage` de 3C-01 é REJECTED como módulo de domínio F1; `BlobStore/CAS` é infrastructure capability.
+- **3C-14-B — Attachments:** `Attachments` é ADOPTED como module/capability de produto para arquivos de usuário/aplicação no regime MANAGED; `attachment_id` é identity lógica, digest/path/object key são identities físicas.
+- **3C-14-C — C-015 attachment scope:** a topologia de attachment governado pelo Hub passa a ser baseline MANAGED, não obrigação universal para DEDICATED.
+- **3C-14-D — Dedicated storage freedom:** DEDICATED pode possuir storage próprio ou consumir Conexus Attachments por binding explícito; nenhum master storage credential é entregue por default.
+- **3C-14-E — no byte-domain coupling:** Artifact Registry, Release, Evidence, Observability, backup e Builder workspace não passam por Attachments apenas por armazenarem bytes; storage infrastructure pode ser compartilhada abaixo dos owners sem compartilhar lifecycle.
 - **3A-R5-A — Change-scoped coding cognition:** `CodingSession`, `WorkUnit`, `ActorRun` e sandbox têm lifetimes distintos. Work Unit/ActorRun não exige fresh cognition; novo Change recebe session nova por default.
 - **3A-R5-B — Builder memory baseline:** persistent thread ON; Observational Memory OFF até trigger + eval. Conhecimento durável continua explícito em Git/Baseline/Brain/standards.
 - **3A-R5-C — Builder runtime realization:** Mastra Code / AgentController + Workspace/E2B é a realização F1 escolhida; `@mastra/e2b` é usado inicialmente por YAGNI; Git remoto/durable secrets/authority permanecem Hub-side; ~45 min vira checkpoint operacional, não lei de decomposição.
@@ -82,6 +88,7 @@ Dívida editorial (não material):
 - self-grant de Workspace Admin fica para Identity & Access Design.
 - textos C-012/C-015 anteriores que descrevem uma única topologia de published runtime devem ser lidos sob a precedência explícita de 3C-12 até a reconciliação editorial final.
 - C-013 usa `agent_event` como nome agent-centric; até 3E/3F, ler sob a generalização platform-wide aprovada por 3C-13.
+- C-015 §13 descreve storage de anexos sob uma topologia shared-runtime; até reconciliação editorial final, ler essa seção como baseline MANAGED conforme 3C-12/3C-14.
 
 ## Encerramento de 3B e estado atual de 3C
 
@@ -101,11 +108,12 @@ Dívida editorial (não material):
   3C-11 Release: APROVADO
   3C-12 Application Runtime Profiles: APROVADO
   3C-13 Observability & Audit: APROVADO
+  3C-14 Attachments / Storage Boundary: APROVADO
 
 3A-R5 Builder/Coding Runtime Reassessment: CLOSED / APROVADO
 
 next:
-  3C-14 Storage / Attachments boundary — decidir se merece módulo próprio no F1
+  cross-review final de 3C — validar ownership completo, sobreposições, gaps e boundaries artificiais antes de declarar 3C CLOSED
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

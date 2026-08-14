@@ -19,6 +19,8 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-07 | Connections Module Boundary | APROVADO | [3C-07-connections-module-boundary.md](3C-07-connections-module-boundary.md) |
 | 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08-capability-gateway-module-boundary.md](3C-08-capability-gateway-module-boundary.md) |
 | 3C-09 | Brain Module Boundary | APROVADO | [3C-09-brain-module-boundary.md](3C-09-brain-module-boundary.md) |
+| 3C-10 | Production Agent Runtime Module Boundary | APROVADO | [3C-10-production-agent-runtime-module-boundary.md](3C-10-production-agent-runtime-module-boundary.md) |
+| 3A-R5 | Builder / Coding Runtime Reassessment | EM PESQUISA | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
 
 ## 3B-17 — síntese normativa
 
@@ -36,6 +38,7 @@ Findings materiais encaminhados, com owner registrado:
 4. **F3B-R4 — autorização versus browser trust zone** · owner: 3I/3J. 3B-14 separa Control Plane, Preview e Published App logicamente; Security/Deployment precisa decidir o isolamento físico correspondente.
 5. **N3 — planning depth × rigor** · owner: 3C/3G. Os dois eixos permanecem distintos; rigor pode impor piso de artifacts/discovery/plano/gates. A relação final será decidida em 3C/3G — não se define aqui `CONTROLLED = FULL`.
 6. **N4 — disposição de 3A**: 3A permanece reconciliation transversal contínua até C-018 (inclui a reconciliação de vocabulário dos textos C-002/C-009/C-013 exigida por C-017).
+7. **3A-R5 — Builder/Coding Runtime:** C-002 não é mais estável quanto à escolha Pi/fresh worker. Mastra Code/AgentController/Workspaces/Factory atuais criaram finding material. Builder domain permanece aprovado; runtime/lifetime/memory/planning realization está em reassessment antes de prosseguir com decisões dependentes.
 
 Refinamentos materiais aprovados em 3C:
 
@@ -43,6 +46,8 @@ Refinamentos materiais aprovados em 3C:
 - **3C-09-A — BrainRevision:** `BrainRevision` é a visão semântica de uma `ArtifactRevision(kind=brain)` exata; Artifact Registry permanece a única authority técnica de revision identity/digest/payload/AVAILABLE. Brain owns significado, validação/compilação e publication semantics.
 - **3C-09-B — Brain Health × Binding Conformance:** validade do conhecimento Workspace-scoped e conformidade da implementação de um Project são eixos distintos; binding local inválido não invalida automaticamente a definição global.
 - **3C-09-C — Evolution by Preserved Semantics:** F1 não constrói RAG/graph/partitioning, mas preserva logical IDs, typed relationships, provenance, compiler boundary, eval signals e `EffectiveBrainSlice`, permitindo evolução futura por gatilhos medidos sem trocar a authority canônica.
+- **3C-10-A — Production Agent substrate:** a rejeição categórica de framework de agente da C-010 é superseded para Production Agents. Mastra passa a ser substrate principal sob `ProductionAgentRuntime`; Conexus preserva authority sobre Registry/Release/I&A/Brain/Connections/Gateway/ApprovalRequest/AgentTrigger.
+- **3C-10-B — durable agent semantics:** Agent é ator lógico durável; `AgentRun` é execução concreta. `AgentTrigger` fecha `SCHEDULE | EVENT`; runtime memory, workflow/checkpoint e suspend/resume podem ser realizados pelo Mastra sem virar authority empresarial.
 
 Dívida editorial (não material):
 
@@ -63,12 +68,15 @@ Dívida editorial (não material):
   3C-02 Identity & Access: APROVADO
   3C-03 Workspace: APROVADO
   3C-04 Project: APROVADO
-  3C-05 Builder: APROVADO
+  3C-05 Builder: APROVADO (runtime realization under 3A-R5 reassessment)
   3C-06 Artifact Registry: APROVADO
   3C-07 Connections: APROVADO
   3C-08 Capability Gateway: APROVADO
   3C-09 Brain: APROVADO
-next decision: Production Agent Runtime module boundary
+  3C-10 Production Agent Runtime: APROVADO
+
+checkpoint before dependent architecture:
+  3A-R5 Builder/Coding Runtime Reassessment: EM PESQUISA
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

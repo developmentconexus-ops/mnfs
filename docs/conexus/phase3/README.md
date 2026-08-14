@@ -21,6 +21,7 @@ Este diretório contém decisões detalhadas da Fase 3 que complementam o ledger
 | 3C-09 | Brain Module Boundary | APROVADO | [3C-09-brain-module-boundary.md](3C-09-brain-module-boundary.md) |
 | 3C-10 | Production Agent Runtime Module Boundary | APROVADO | [3C-10-production-agent-runtime-module-boundary.md](3C-10-production-agent-runtime-module-boundary.md) |
 | 3C-11 | Release Module Boundary | APROVADO | [3C-11-release-module-boundary.md](3C-11-release-module-boundary.md) |
+| 3C-12 | Application Runtime Profiles | APROVADO | [3C-12-application-runtime-profiles.md](3C-12-application-runtime-profiles.md) |
 | 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
 
 ## 3B-17 — síntese normativa
@@ -53,6 +54,12 @@ Refinamentos materiais aprovados em 3C / Architecture Reconciliation:
 - **3C-11-B — deployment target cut:** `PROD` é o único target persistente de Promotion; E2B, BuildValidationDatabase e RunPreview são execution/validation environments e não entram num `EnvironmentModule` genérico.
 - **3C-11-C — active serving authority:** um active release pointer atualizado via CAS define a composição ativa; Registry `AVAILABLE`, Git ou runtime cache não substituem essa authority.
 - **3C-11-D — promotion mechanics:** EnvironmentConformance, production migration orchestration, rollback eligibility/re-point e `SERVED_VERIFIED` pertencem a Release; canary/blue-green/traffic splitting/staging persistente continuam DEFER.
+- **3C-12-A — one Factory, two runtime profiles:** `ApplicationRuntimeProfile = MANAGED | DEDICATED` é união fechada F1 e fato material do Project Baseline. Ambos usam o mesmo Project/Change/Builder/verification/Release model.
+- **3C-12-B — MANAGED:** aplicações organizacionais usam build real, mas executam backend/capabilities sobre o runtime e os serviços governados compartilhados do Conexus; backend dedicado não é Golden Path.
+- **3C-12-C — DEDICATED:** produtos/software independentes podem possuir frontend/server/data runtime próprios e consumir serviços Conexus somente por bindings explícitos; não são extensões privilegiadas do Hub.
+- **3C-12-D — Release refinement:** `runtimeProfile` entra na composição da Release; MANAGED e DEDICATED possuem outputs de runtime diferentes, mantendo uma única authority de Release/Promotion/PROD.
+- **3C-12-E — C-012 scope refinement:** a premissa `Hub já é o backend` passa a ser baseline MANAGED, não universal para DEDICATED.
+- **3C-12-F — C-015 scope refinement:** a topologia de auth/serving compartilhada/same-origin de C-015 passa a ser baseline MANAGED. DEDICATED pode usar I&A Conexus por binding ou auth própria; trust/identity exchange/ingress ficam para 3I/3J.
 - **3A-R5-A — Change-scoped coding cognition:** `CodingSession`, `WorkUnit`, `ActorRun` e sandbox têm lifetimes distintos. Work Unit/ActorRun não exige fresh cognition; novo Change recebe session nova por default.
 - **3A-R5-B — Builder memory baseline:** persistent thread ON; Observational Memory OFF até trigger + eval. Conhecimento durável continua explícito em Git/Baseline/Brain/standards.
 - **3A-R5-C — Builder runtime realization:** Mastra Code / AgentController + Workspace/E2B é a realização F1 escolhida; `@mastra/e2b` é usado inicialmente por YAGNI; Git remoto/durable secrets/authority permanecem Hub-side; ~45 min vira checkpoint operacional, não lei de decomposição.
@@ -67,6 +74,7 @@ Dívida editorial (não material):
 - app role e data audience permanecem dimensões distintas; múltiplas audiences continuam sob trigger.
 - validation database é temporário sob demanda, não terceiro environment persistente.
 - self-grant de Workspace Admin fica para Identity & Access Design.
+- textos C-012/C-015 anteriores que descrevem uma única topologia de published runtime devem ser lidos sob a precedência explícita de 3C-12 até a reconciliação editorial final.
 
 ## Encerramento de 3B e estado atual de 3C
 
@@ -84,11 +92,12 @@ Dívida editorial (não material):
   3C-09 Brain: APROVADO
   3C-10 Production Agent Runtime: APROVADO
   3C-11 Release: APROVADO
+  3C-12 Application Runtime Profiles: APROVADO
 
 3A-R5 Builder/Coding Runtime Reassessment: CLOSED / APROVADO
 
 next:
-  3C-12 Published App Runtime Module Boundary
+  3C-13 Observability / Audit Module Boundary
 ```
 
 Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.

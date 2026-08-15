@@ -6,6 +6,8 @@
 **Base revisada:** `f068d48b363a36bf20af1b71cd54957c44175b4b` (branch `agent/conexus-phase-3-system-design`, PR #40)  
 **Importante:** este documento não constitui C-018, não é decisão 3D-03, não altera LEDGER nem decisões aprovadas, e não autoriza implementação. R0/R1 são inputs não-autoritativos; onde esta revisão os corrige, esta prevalece como opinião de review.
 
+> **CORREÇÃO R2.1:** o `AnalyticQueryUseCase` (§4.5, tabela §5 linha 5, §10.6) foi **retirado** por `3D-FABLE-R2-1-analytic-query-orchestration-correction.md` — era estruturalmente inalcançável sob a própria regra §6.1 (as duas invocações nascem dentro de módulos: tool loop do PAR e serving do MAR). Forma correta: sequenciamento caller-side com aresta estreita nova `MAR → Brain`. A lista fechada F1 é **sete** use cases. O deletion test do §3 foi refinado em R2.1 §6. O restante desta revisão permanece válido.
+
 ---
 
 ## 1. Verdict
@@ -91,7 +93,7 @@ Fluxo: validar semântica/elegibilidade no owner do recurso (Brain/Connections) 
 
 `Project → Builder` é proibida (L2 → L5). 3C-R1 §4 já congelou a semântica: Project owns Inception authority; Builder fornece engineering execution capability. O use case pede investigação bounded ao Builder sob authority do Project e entrega material de Baseline candidate ao Project. Ataque tentado: *é só a UI chamando Builder?* Não — há ordem com authority significativa: verificar fase de Inception no Project (pode investigar?), despachar com escopo do Project, rotear resultado para candidatura de Baseline. Condição A + B leve. Mantido. Não nasce `InceptionRun`/`InceptionModule` (3C-R1 já proíbe); a representação operacional fica em 3E/3G/3H.
 
-### 4.5 Brain/AnalyticQuery ↔ Gateway — MANTIDO (condição A), com decisão de localização
+### 4.5 Brain/AnalyticQuery ↔ Gateway — ~~MANTIDO~~ **SUPERSEDED por R2.1: RETIRADO** (a análise abaixo continha o erro corrigido em R2.1 — a opção (c) é inalcançável sob §6.1)
 
 `Brain → Gateway` proibida (L2 → L4). Alguém acima dos dois precisa sequenciar `compile semântico → execução física → interpretação`. Três candidatos atacados:
 

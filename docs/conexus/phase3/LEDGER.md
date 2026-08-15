@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · próximo gate `3E — Data Architecture`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E EM ANDAMENTO — 3E-01 APROVADA` · próximo gate `3E-02 — Module Durable Record Inventory & Reference Closure`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -29,11 +29,14 @@ C-000..C-017
 3D-R1
 → fechamento/reconciliação final de 3D
 
+3E-01
+→ foundation física de ownership/persistência do Hub; prevalece sobre reviews 3E-FABLE-R0/R0.1
+
 este LEDGER
 → status/navigation authority
 ```
 
-Nenhuma conversa é authority. Arquivos `3D-FABLE-*` permanecem review inputs não-autoritativos; somente conteúdo ratificado em decisões aprovadas ganha authority.
+Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-autoritativos; somente conteúdo ratificado em decisões aprovadas ganha authority.
 
 ---
 
@@ -45,12 +48,12 @@ Nenhuma conversa é authority. Arquivos `3D-FABLE-*` permanecem review inputs n�
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
-| 3E — Data Architecture | **NEXT / NÃO INICIADA** | materializar ownership/schema/persistence a partir do intake 3D |
-| 3F — Contracts & API Architecture | NÃO INICIADA | após dependencies/data adequados |
+| 3E — Data Architecture | **EM ANDAMENTO — 3E-01 APROVADA** | 3E-02 Durable Record Inventory & Reference Closure |
+| 3F — Contracts & API Architecture | NÃO INICIADA | após data architecture suficiente |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
-| 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress |
-| 3J — Deployment / Operations Architecture | NÃO INICIADA | local/server/cloud/topology |
+| 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
+| 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | UX/scaffold/product surfaces |
 | 3L — Technology Qualification | NÃO INICIADA | probes/qualification |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | recovery/failure classes |
@@ -109,125 +112,156 @@ Builder runtime realization adicional:
 | 3D-04 | Remaining Module Dependency Closure | [3D-04](3D-04-remaining-module-dependency-closure.md) |
 | 3D-R1 | Final Closure & Reconciliation | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 
-### Resultado final
+Resultado final resumido:
 
 ```text
 modular monolith
-acyclic module import graph
+acyclic import graph
 direct-call-first
 no cross-module table/internal access
-immutable refs travel; revocable authority revalidates
-Application Orchestration = control-plane-only
-seven named F1 use cases
+seven named control-plane use cases
 runtime never calls L7
-one domain inversion only = effect approval claim
-I&A directly resolved at L7 / MAR / Gateway
-four justified infra boundaries only:
-  CodingRuntime
-  CredentialBackend
-  BlobStore/CAS
-  GitInfra
-MigrationRunner = internal Release seam
-job/v1 machinery = internal MAR seam
+one domain inversion = approval claim
+I&A resolved directly at L7 / MAR / Gateway
+four infra boundaries = CodingRuntime / CredentialBackend / BlobStore-CAS / GitInfra
+MigrationRunner = Release seam
+job/v1 machinery = MAR seam
 ```
-
-### Matriz final resumida
-
-```text
-Project      → Workspace
-Connections  → Registry
-Brain        → Registry
-Release      → Project / Registry / Connections / Brain / Rigor
-Gateway      → I&A / Project / Registry / Connections / Release
-Builder      → Project / Brain / Registry / Gateway / Rigor
-PAR          → Release / Registry / Brain / Gateway
-MAR          → I&A / Attachments / Brain / Release / Gateway / PAR
-```
-
-Observability/Audit permanece leaf/sink de evidence/telemetry/audit.
-
-### Use cases control-plane F1
-
-```text
-CreateProject
-SetProjectBinding
-QualifyConnection
-InceptionInvestigation
-BrainHealthProbe
-ComposeRelease
-PromoteRelease
-```
-
-`AnalyticQuery` é runtime sequencing direto:
-
-```text
-PAR → Brain + Gateway
-MAR → Brain + Gateway
-```
-
-Review inputs preservados como evidência não-autoritativa:
-
-- `3D-FABLE-R0-independent-dependency-review.md`
-- `3D-FABLE-R1-capability-gateway-dependency-review.md`
-- `3D-FABLE-R2-application-orchestration-review.md`
-- `3D-FABLE-R2-1-analytic-query-orchestration-correction.md`
-- `3D-FABLE-R3-remaining-dependency-closure-review.md`
-- `3D-FABLE-R3-1-jobqueue-seam-correction.md`
-- `3D-FABLE-R4-final-dependency-cross-review.md`
 
 3D só pode ser reaberta por Finding material.
 
 ---
 
-## 6. Mapa de módulos aprovado
+## 6. 3E — Data Architecture
+
+### 3E-01 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3E-01 | Hub Control Data Ownership & Persistence Boundaries | [3E-01](3E-01-hub-control-data-ownership-persistence-boundaries.md) |
+
+3E-01 congela:
 
 ```text
-Conexus Hub — modular monolith
-
-Identity & Access
-Workspace
-Project
-Builder
-Artifact Registry
-Connections
-Capability Gateway
-Brain
-Production Agent Runtime
-Release
-Managed Application Runtime
-Observability & Audit
-Attachments
+hub_control = um PostgreSQL database de authority do Hub
+um schema por module owner:
+  iam / ws / prj / bld / reg / con / gw / brn / par / rel / mar / obs / att
+sem shared/common schema
+Rigor = stateless primitive, sem schema
+uma lineage ordenada de migrations do hub_control
+Project Data permanece C-006 database-per-Project
 ```
 
-Transversal:
+Cluster F1 passa a reconhecer explicitamente:
 
 ```text
-ApplicationRuntimeProfile
-├── MANAGED
-└── DEDICATED
+hub_control
+mastra_builder
+mastra_par
+Project databases
+validation databases efêmeros
 ```
 
-`DEDICATED Application Runtime` é output/runtime de Project, não módulo do Hub.
-
-Infrastructure não promovida a domínio:
+Mastra:
 
 ```text
-Git
-PostgreSQL / Project Data
-BlobStore / CAS
-credential backend / vault
-E2B / sandbox
-Mastra substrate
-MigrationRunner (internal Release seam)
-job/queue/scheduler substrate (não selecionado)
-serving/deployment infrastructure
+mastra_builder = substrate isolado do Builder; menor durabilidade
+mastra_par     = substrate isolado do PAR; Conversation/checkpoint mechanics duráveis
+nenhum módulo Conexus lê/escreve tabelas mastra_*
+correlação apenas por runtime refs opacos
 ```
+
+A escolha de dois databases Mastra foi revalidada contra documentação atual do Mastra via Context7; `schemaName` existe, mas dois databases vencem por lifecycle, backup/restore e replaceability, não por limitação de schema support.
+
+### Cross-module persistence
+
+```text
+Tier 1: FK intra-módulo normal
+Tier 2: FK cross-module somente para identidade estrutural estável
+        PK + RESTRICT/NO ACTION; lista exata fica para 3E-02
+Tier 3: opaque IDs/digests = default para demais refs
+```
+
+Proibido:
+
+```text
+cross-module table/repository access
+CASCADE/SET NULL em FK cross-module
+FK para digest
+FK de/para obs.*
+FK de/para mastra_*
+current-state mirror de outro owner
+schema shared/common
+```
+
+Pin histórico é permitido/obrigatório quando registra a revisão/digest exata usada naquela ocorrência.
+
+### Atomicidade
+
+Classe de domínio F1 fechada:
+
+```text
+CreateProject = PRJ + IAM
+material effect admission = GW + PAR approval claim
+```
+
+Classe transversal:
+
+```text
+audit-required mutation + obs.audit_record
+→ mesma transaction quando necessário para fail-closed
+→ OBS continua historical sink, não domain authority
+```
+
+`TxScope` é opaco e non-query-capable; nunca `pg.Client`, raw connection ou query builder. Shared transaction nunca concede shared table access.
+
+### Gateway durable minimum
+
+Existência/ownership aprovados, shape/FSM ainda abertos:
+
+```text
+gw.effect_attempt
+gw.idempotency_claim
+gw.budget_counter / reservation state onde durability é exigida
+```
+
+### MAR route mapping
+
+```text
+mar owns route→Project/environment mapping
+não espelha active Release
+active pointer continua authority de Release
+```
+
+### Observability
+
+```text
+Audit Trail = histórico durável / fail-closed quando requerido
+Operational Telemetry = observação degradável
+obs nunca vira source of truth do current domain state
+```
+
+### DB roles
+
+3E-01 não congela quantidade/formato de roles do `hub_control`.
+
+```text
+role-per-module NÃO é mecanismo de module ownership
+runtime/migrator/maintenance/diagnostic roles → 3I/ops
+```
+
+### Reviews preservados
+
+- `3E-FABLE-R0-hub-control-data-boundaries-review.md`
+- `3E-FABLE-R0.1-hub-control-data-boundaries-corrections.md`
+
+São inputs não-autoritativos; 3E-01 é authority.
 
 ---
 
 ## 7. Open findings / routed work
 
-Estes itens não reabrem 3C/3D automaticamente.
+Estes itens não reabrem fases anteriores automaticamente.
 
 | Finding / questão | Owner posterior |
 |---|---|
@@ -236,122 +270,96 @@ Estes itens não reabrem 3C/3D automaticamente.
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
 | N3 — Planning Depth × RigorProfile | 3G |
 | F3D02-R1 — AgentRun in-flight × stricter new Release | 3G/3I |
-| F3D04-R1 — serving route mapping physical representation | **3E/3J** |
 | F3D04-R2 — archived Project with active Release | 3G/3I |
+| F3E01-R1 — `mastra_par` no procedimento de backup/restore | 3J |
+| F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | 3E / implementation verification |
 | Project binding contracts | 3F |
 | DEDICATED identity/authority exchange | 3F/3I |
 | DEDICATED egress/network policy | 3I/3J |
 | MANAGED/DEDICATED deployment topology | 3J |
-| Mastra storage/runtime isolation realization | **3E/3H** |
 | Mastra telemetry ↔ Conexus correlation | 3H/3L |
 | Verification Observability realization | 3H/3L/3N |
 | job/v1 queue/scheduler substrate | 3H/3L only on concrete need |
 | DEDICATED multi-install/fleet management | DEFER |
 
-Guard notes:
+Resolvido por 3E-01:
 
-- future `AgentTrigger EVENT` ingress must declare its authn/trust boundary when activated;
-- DEDICATED Platform Services identity exchange must declare its authority boundary in 3F/3I.
+- F3D04-R1 ownership do route mapping → `mar`; host/path/topology continua 3J.
+- F3E01-R3 cluster inventory → `hub_control + mastra_builder + mastra_par + project/validation DBs`.
 
 ---
 
 ## 8. Anti-overengineering guardrail
 
-3D CLOSED does not authorize:
+Fases fechadas/decididas não autorizam:
 
 ```text
 microservices
-EnvironmentModule
-DeploymentModule
-StorageModule
-JobModule
-SchedulerModule
-WebhookModule
-EventIngressModule before consumer
+database por módulo do Hub
+role de DB por módulo
+schema shared/common
+EnvironmentModule / DeploymentModule / StorageModule
+JobModule / SchedulerModule
 ApplicationLayerModule
-InstallationModule
 generic binding framework
 workflow DSL / event bus / command bus
 universal mediator / service locator
-UseCaseBase / UseCaseBus / UseCaseRegistry
-runtime → application-layer dispatcher
-OPA/Cedar/OpenFGA
+generic repository / UnitOfWork framework
+generic transaction bus
+event sourcing / CQRS / saga framework
+outbox/inbox para comunicação local hipotética
+OPA/Cedar/OpenFGA por default
+RLS por default
 RigorModule / policy engine
-Gateway split modules / AdmissionCore
-UniversalExecutionContext
-CallerAuthorityVerifier framework
-shared JobQueue/Scheduler port without consumer
+Gateway split / AdmissionCore
+shared JobQueue/Scheduler port
 MigrationRunner provider framework
-runtime profile plugin framework
+Mastra external migration machinery sem failure class
 Kafka/Kubernetes/Temporal by default
-outbox/inbox for hypothetical local communication
 ```
 
-Any of these returns only through the Decision Loop with a named consumer/failure class.
+Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class real.
 
 ---
 
-## 9. 3E intake — Data Architecture
+## 9. Próximo gate — 3E-02
 
-3E inherits from 3D and must not re-decide module ownership/dependency direction.
-
-Minimum intake:
+**3E-02 — Module Durable Record Inventory & Reference Closure** deve fechar:
 
 ```text
-module-owned persistence/schema boundaries
-Gateway admission/effect ledger
-budget + idempotency + attempt/traffic-state persistence
-CreateProject cross-owner atomic transaction realization
-approval-claim + admission atomic relationship
-MAR route→Project serving mapping persistence
-Observability/Audit persistence + lineage projections
-Mastra storage partition/isolation between Builder and PAR
-physical representation of narrow refs/projections
-no cross-owner persistence shortcut / hidden authority
+inventário mínimo de records duráveis por módulo
+owner de cada record
+identidade/chaves conceituais
+opaque ID vs digest vs generation/CAS
+lista EXATA e fechada de FKs Tier 2
+refs/projections necessárias sem current-state mirroring
+records explicitamente DEFER/REJECT para evitar schema speculative design
 ```
 
-Same PostgreSQL does **not** imply shared table ownership.
+Não decidir em 3E-02:
+
+```text
+final DTO/HTTP contracts → 3F
+full FSMs → 3G
+runtime substrate mechanics → 3H
+DB security roles/RLS → 3I
+deployment/host/DNS/backup procedure details → 3J
+technology/tool selection beyond required current verification → 3L
+```
+
+Após o fechamento dos gates necessários de 3E, executar cross-review final de Data Architecture antes de 3F.
 
 ---
 
-## 10. Próximo gate — 3E
-
-3E — Data Architecture deve começar pela pergunta:
-
-> Como materializar fisicamente as authorities e estados já aprovados, no menor modelo de dados suficiente, preservando module ownership, atomicidade necessária, auditabilidade e isolamento sem criar um "shared database domain"?
-
-A primeira rodada deve fechar pelo menos:
-
-```text
-Hub control-plane persistence topology
-module schema/table ownership
-cross-module references vs FKs
-transaction boundaries
-immutable refs/digests
-operational ledgers
-Mastra substrate storage isolation
-Project Data vs Hub control data separation
-```
-
-Não decidir em 3E:
-
-```text
-final HTTP/DTO contracts → 3F
-full FSM semantics → 3G
-runtime substrate selection → 3H/3L
-security/egress policy → 3I
-deployment topology → 3J
-```
-
----
-
-## 11. Regra de avanço
+## 10. Regra de avanço
 
 ```text
 3B = CLOSED
 3C = CLOSED
 3D = CLOSED / APPROVED
-3E = NEXT
+3E = EM ANDAMENTO
+3E-01 = APPROVED
+3E-02 = NEXT
 ```
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

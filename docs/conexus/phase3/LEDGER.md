@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D EM ANDAMENTO — 3D-01 + 3D-02 + 3D-03 APROVADAS` · próximo gate `3D-04 — Remaining Module Dependency Closure`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D EM ANDAMENTO — 3D-01 + 3D-02 + 3D-03 + 3D-04 APROVADAS` · próximo gate `3D-R1 — Final Dependency Cross-Review`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -27,6 +27,9 @@ C-000..C-017
 3D approved docs
 → fecham dependency architecture sem reabrir ownership de 3C salvo Finding material
 
+3D-04
+→ matriz final de imports/infra e precedência sobre descrições mais largas de arestas em 3D-01/R0
+
 este LEDGER
 → status/navigation authority
 → não substitui conteúdo detalhado dos decision docs
@@ -43,8 +46,8 @@ Nenhuma conversa é authority. Review briefs/reviews como `3D-FABLE-*` são inpu
 | 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar apenas findings materiais durante 3D–3O |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | nenhuma reabertura sem finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | nenhuma reabertura sem finding material |
-| 3D — Dependency Architecture | **EM ANDAMENTO — 3D-01 + 3D-02 + 3D-03 APROVADAS** | 3D-04 Remaining Module Dependency Closure |
-| 3E — Data Architecture | NÃO INICIADA | após 3D |
+| 3D — Dependency Architecture | **EM ANDAMENTO — 3D-01..3D-04 APROVADAS** | 3D-R1 Final Dependency Cross-Review |
+| 3E — Data Architecture | NÃO INICIADA | após 3D CLOSED |
 | 3F — Contracts & API Architecture | NÃO INICIADA | após dependencies/data adequados |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
@@ -105,6 +108,7 @@ Builder runtime realization adicional:
 | 3D-01 | Macro Dependency Architecture | [3D-01](3D-01-macro-dependency-architecture.md) |
 | 3D-02 | Capability Gateway Dependency Architecture | [3D-02](3D-02-capability-gateway-dependency-architecture.md) |
 | 3D-03 | Application / Use-case Orchestration | [3D-03](3D-03-application-use-case-orchestration.md) |
+| 3D-04 | Remaining Module Dependency Closure | [3D-04](3D-04-remaining-module-dependency-closure.md) |
 
 ### 3D-01 congela
 
@@ -163,18 +167,45 @@ MAR → Brain + Gateway
 nova aresta estreita MAR → Brain aprovada
 ```
 
+### 3D-04 congela
+
+```text
+final module import matrix = DAG
+I&A resolved directly only at:
+  L7/control plane
+  Managed Application Runtime
+  Capability Gateway
+interior modules do not re-resolve I&A
+MAR → Brain stays narrow
+MAR → BlobStore/CAS for serving content-addressed bytes
+MAR -X-> Project / Registry
+Release -X-> Builder / MAR
+four justified infra boundaries only:
+  CodingRuntime
+  CredentialBackend
+  BlobStore/CAS
+  GitInfra
+MigrationRunner = internal Release seam
+job/v1 machinery = internal MAR seam
+no shared JobQueue/Scheduler port before real consumer
+```
+
 Review inputs preservados, sem authority própria:
 
 - `3D-FABLE-R0-independent-dependency-review.md` — revisão adversarial que alimentou 3D-01.
 - `3D-FABLE-R1-capability-gateway-dependency-review.md` — revisão adversarial que alimentou 3D-02.
 - `3D-FABLE-R2-application-orchestration-review.md` — revisão adversarial que alimentou 3D-03.
-- `3D-FABLE-R2-1-analytic-query-orchestration-correction.md` — correção adversarial que removeu o `AnalyticQueryUseCase` e fechou runtime → L7.
+- `3D-FABLE-R2-1-analytic-query-orchestration-correction.md` — correção que removeu `AnalyticQueryUseCase`.
+- `3D-FABLE-R3-remaining-dependency-closure-review.md` — revisão que fechou a matriz restante.
+- `3D-FABLE-R3-1-jobqueue-seam-correction.md` — correção YAGNI que retirou shared `JobQueue` port.
 
 Próximo gate:
 
 ```text
-3D-04 — Remaining Module Dependency Closure
+3D-R1 — Final Dependency Cross-Review
 ```
+
+3D **ainda não está CLOSED** até esse gate passar.
 
 ---
 
@@ -217,8 +248,8 @@ BlobStore / CAS
 credential backend / vault
 E2B / sandbox
 Mastra substrate
-MigrationRunner
-queue/job substrate
+MigrationRunner (internal Release seam)
+job/queue/scheduler substrate (não selecionado; job/v1 seam interno MAR)
 serving/deployment infrastructure
 ```
 
@@ -236,7 +267,7 @@ Findings resolvidos:
 - C-016 Gateway-only universal × DEDICATED → scope refinado em 3C-R1.
 - DEDICATED multi-install → explicitamente DEFER.
 - Inception execution dispatcher → Project authority + Builder engineering execution capability.
-- application/orchestration layer implícita → declarada por 3C-R1; dependency/orchestration rules agora **CLOSED por 3D-01/3D-03**.
+- application/orchestration layer implícita → dependency/orchestration rules **CLOSED por 3D-01/3D-03**.
 - Brain `EVIDENCE` collision → `EVIDENCE_SPEC` semantic rename.
 - binding authority pattern → Git authoring + Project approved intent + Registry compiled revision + specialized validation + Release pin.
 - stale Pi/Workspace/Storage/Deployment terminology → precedence registrada.
@@ -255,9 +286,9 @@ Estes itens **não reabrem 3C**; possuem owner posterior explícito.
 | F3B-R2 — legacy `MissionPlan v2` | 3F — re-tipar para Change/Work Unit; não restaurar Mission/Milestone/Feature |
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
 | N3 — Planning Depth × RigorProfile | 3G — primitive compartilhada posicionada em 3D-01; relação behavioral ainda aberta |
-| Gateway↔Builder/Connections/AgentRuntime conceptual cycles | **dependency direction CLOSED por 3D-01/3D-02** |
 | F3D02-R1 — in-flight AgentRun policy narrowing após nova Release mais restritiva | **3G/3I** — não assumir preserve/revoke silenciosamente |
-| Managed Runtime + remaining module dependency graph/ports | **3D-04** |
+| F3D04-R1 — serving route mapping physical representation | **3E/3J** |
+| F3D04-R2 — Project arquivado com Release ativa: continuar servir/drain/stop | **3G/3I** |
 | Project binding contracts | 3F |
 | DEDICATED identity/authority exchange | 3F/3I |
 | DEDICATED network/egress physical policy | 3I/3J |
@@ -265,13 +296,14 @@ Estes itens **não reabrem 3C**; possuem owner posterior explícito.
 | Mastra telemetry ↔ Conexus correlation realization | 3H/3L |
 | Mastra substrate isolation Builder × Production Agent Runtime | regra de dependency em **3D-01**; realization em 3H |
 | Verification Observability realization (Spotlight/OTel/etc.) | 3H/3L/3N |
+| `job/v1` queue/scheduler substrate | **3H/3L** only on concrete need; no shared port in 3D |
 | DEDICATED multi-install/fleet management | DEFER; trigger = first external independent installation requiring Conexus-governed lifecycle |
 
 ---
 
 ## 9. Anti-overengineering guardrail
 
-3C CLOSED + 3D-01/3D-02/3D-03 APPROVED não autorizam criar:
+3C CLOSED + 3D-01..3D-04 APPROVED não autorizam criar:
 
 ```text
 microservices
@@ -293,6 +325,8 @@ OPA/Cedar/OpenFGA
 RigorModule / policy engine
 Gateway split modules / AdmissionCore
 UniversalExecutionContext / CallerAuthorityVerifier
+shared JobQueue/Scheduler port without consumer
+MigrationRunner provider framework
 runtime profile plugin framework
 Kafka/Kubernetes/Temporal as defaults
 outbox/inbox apenas para comunicação local futura
@@ -302,43 +336,34 @@ Qualquer item só volta ao Decision Loop com consumidor/failure class real.
 
 ---
 
-## 10. Próximo gate — 3D-04
+## 10. Próximo gate — 3D-R1
 
-3D-04 deve fechar o dependency graph restante e provar que o conjunto final de módulos continua acíclico após 3D-01/02/03.
+Antes de 3E, 3D-R1 deve fazer a reconciliação final da Dependency Architecture.
 
-Prioridade:
+Pergunta central:
 
-```text
-Managed Application Runtime
-  → I&A / Release / Gateway / PAR / Attachments / Observability / Brain
-  → job/queue substrate como infra, não domínio
+> A matriz final de 3D-04, as surfaces/authority rules de 3D-02 e a orchestration de 3D-03 formam um único DAG implementável, sem contradições textuais, dependency inversions escondidas, invariantes vazadas para L7 ou infra ports especulativas?
 
-Release
-  → Project / Registry / Connections / Brain / migration+serving infra
-  -X-> Builder / MAR reverse import
-
-Builder / Project / Inception
-Connections / Qualification
-Brain / Registry / health paths
-Production Agent Runtime
-Attachments
-Workspace
-Identity & Access
-Observability & Audit
-shared primitives / infrastructure seams
-```
-
-3D-04 deve produzir:
+Checklist mínimo:
 
 ```text
-remaining allowed/forbidden edge closure
-narrow projections/contexts necessários
-no hidden cycles
-no new generic ports sem failure class
-full compatibility com 3D-03 runtime-vs-control-plane rule
+3D-04 matrix vs 3D-01 §16 precedence
+full topological cycle proof
+no module/runtime → L7
+seven use cases: owner invariants remain owner-enforced
+one domain inversion only = approval claim
+four infra boundaries pass burden-of-proof individually
+no cross-module table access implied
+all routed findings have later owner
+no blocker requires reopening 3C
 ```
 
-Se o fechamento estiver limpo, a próxima ação será uma cross-review final de 3D antes de 3E.
+Se passar:
+
+```text
+3D = CLOSED / APROVADA
+3E = NEXT
+```
 
 ---
 
@@ -351,7 +376,8 @@ Se o fechamento estiver limpo, a próxima ação será uma cross-review final de
 3D-01 = APPROVED
 3D-02 = APPROVED
 3D-03 = APPROVED
-3D-04 = NEXT
+3D-04 = APPROVED
+3D-R1 = NEXT
 ```
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E EM ANDAMENTO — 3E-01 APROVADA` · próximo gate `3E-02 — Module Durable Record Inventory & Reference Closure`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E EM ANDAMENTO — 3E-01 + 3E-02 APROVADAS` · próximo gate `3E-R1 — Data Architecture Cross-Review`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -30,7 +30,10 @@ C-000..C-017
 → fechamento/reconciliação final de 3D
 
 3E-01
-→ foundation física de ownership/persistência do Hub; prevalece sobre reviews 3E-FABLE-R0/R0.1
+→ foundation física de ownership/persistência do Hub
+
+3E-02
+→ inventário mínimo durável + identity/ref classes + allowlist FK Tier-2
 
 este LEDGER
 → status/navigation authority
@@ -48,8 +51,8 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
-| 3E — Data Architecture | **EM ANDAMENTO — 3E-01 APROVADA** | 3E-02 Durable Record Inventory & Reference Closure |
-| 3F — Contracts & API Architecture | NÃO INICIADA | após data architecture suficiente |
+| 3E — Data Architecture | **EM ANDAMENTO — 3E-01 + 3E-02 APROVADAS** | 3E-R1 cross-review/closure |
+| 3F — Contracts & API Architecture | NÃO INICIADA | somente após closure suficiente de 3E |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
@@ -75,7 +78,7 @@ Detalhes adicionais:
 
 ---
 
-## 4. 3C — decisões aprovadas
+## 4. 3C — CLOSED / APPROVED
 
 | ID | Boundary/decisão | Documento |
 |---|---|---|
@@ -144,118 +147,141 @@ job/v1 machinery = MAR seam
 
 ```text
 hub_control = um PostgreSQL database de authority do Hub
-um schema por module owner:
-  iam / ws / prj / bld / reg / con / gw / brn / par / rel / mar / obs / att
+schemas owner: iam/ws/prj/bld/reg/con/gw/brn/par/rel/mar/obs/att
 sem shared/common schema
-Rigor = stateless primitive, sem schema
 uma lineage ordenada de migrations do hub_control
-Project Data permanece C-006 database-per-Project
+Project Data = C-006 database-per-Project
+mastra_builder e mastra_par fisicamente isolados
+TxScope opaco e non-query-capable
 ```
 
-Cluster F1 passa a reconhecer explicitamente:
+Cross-module refs:
 
 ```text
-hub_control
-mastra_builder
-mastra_par
-Project databases
-validation databases efêmeros
+Tier 1 = FK intra-owner
+Tier 2 = FK cross-owner somente identidade estrutural estável + allowlist explícita
+Tier 3 = opaque ref/digest, default
 ```
 
-Mastra:
-
-```text
-mastra_builder = substrate isolado do Builder; menor durabilidade
-mastra_par     = substrate isolado do PAR; Conversation/checkpoint mechanics duráveis
-nenhum módulo Conexus lê/escreve tabelas mastra_*
-correlação apenas por runtime refs opacos
-```
-
-A escolha de dois databases Mastra foi revalidada contra documentação atual do Mastra via Context7; `schemaName` existe, mas dois databases vencem por lifecycle, backup/restore e replaceability, não por limitação de schema support.
-
-### Cross-module persistence
-
-```text
-Tier 1: FK intra-módulo normal
-Tier 2: FK cross-module somente para identidade estrutural estável
-        PK + RESTRICT/NO ACTION; lista exata fica para 3E-02
-Tier 3: opaque IDs/digests = default para demais refs
-```
-
-Proibido:
-
-```text
-cross-module table/repository access
-CASCADE/SET NULL em FK cross-module
-FK para digest
-FK de/para obs.*
-FK de/para mastra_*
-current-state mirror de outro owner
-schema shared/common
-```
-
-Pin histórico é permitido/obrigatório quando registra a revisão/digest exata usada naquela ocorrência.
-
-### Atomicidade
-
-Classe de domínio F1 fechada:
+Atomicidade:
 
 ```text
 CreateProject = PRJ + IAM
 material effect admission = GW + PAR approval claim
+audit-required mutation + OBS = classe transversal fail-closed
 ```
 
-Classe transversal:
+Gateway minimum:
 
 ```text
-audit-required mutation + obs.audit_record
-→ mesma transaction quando necessário para fail-closed
-→ OBS continua historical sink, não domain authority
+effect_attempt
+idempotency_claim
+budget_counter/reservation state onde durability é necessária
 ```
 
-`TxScope` é opaco e non-query-capable; nunca `pg.Client`, raw connection ou query builder. Shared transaction nunca concede shared table access.
+MAR route mapping pertence a MAR e não espelha active Release. OBS nunca vira current domain truth. Role-per-module não é mecanismo de ownership; DB roles finais pertencem a 3I/ops.
 
-### Gateway durable minimum
+### 3E-02 — APPROVED
 
-Existência/ownership aprovados, shape/FSM ainda abertos:
+| ID | Decisão | Documento |
+|---|---|---|
+| 3E-02 | Module Durable Record Inventory & Reference Closure | [3E-02](3E-02-module-durable-record-inventory-reference-closure.md) |
+
+3E-02 fecha o piso de **44 classes duráveis**:
 
 ```text
-gw.effect_attempt
-gw.idempotency_claim
-gw.budget_counter / reservation state onde durability é exigida
+iam  7  account / session / workspace_membership / area_membership /
+        area_project_grant / account_project_grant / published_app_access
+ws   2  workspace / area
+prj  5  project / approved_baseline / brain_binding /
+        connection_binding / config_contract_revision
+bld  8  change / contract_revision / plan_revision / work_unit /
+        actor_run / coding_session / finding / change_acceptance
+reg  2  artifact / artifact_revision
+con  3  connection / connection_revision / connection_qualification
+gw   3  effect_attempt / idempotency_claim / budget_counter
+brn  3  knowledge_proposal / health / binding_validation
+par  4  conversation / agent_run / approval_request / agent_trigger
+rel  3  release / promotion / active_pointer
+mar  2  serving_route / job_run
+obs  2  audit_record / operational_event
+att  2  attachment / blob
 ```
 
-### MAR route mapping
+Normas importantes:
 
 ```text
-mar owns route→Project/environment mapping
-não espelha active Release
-active pointer continua authority de Release
+CONTROL_PLANE grants != PUBLISHED_APP access
+Preview não ganha membership tree própria
+ProjectBrainBinding e ProjectConnectionBinding permanecem concretos/tipados
+ProjectConnectionBinding pina Connection + EXACT ConnectionRevision ref
+Config Contract possui revisão durável content-addressed, sem settings bag
+Connection = único conceito com ownerScope WORKSPACE|PROJECT
+ConnectionQualification = append-only; sem record por probe técnico
+Registry kind→scope fechado:
+  integration→PLATFORM
+  brain→WORKSPACE
+  query/action/job/agent/brain-binding→PROJECT
+att.blob = metadata/refcount somente do backing de Attachments
+  -X-> global CAS registry/refcount
 ```
 
-### Observability
+Identity/ref classes:
 
 ```text
-Audit Trail = histórico durável / fail-closed quando requerido
-Operational Telemetry = observação degradável
-obs nunca vira source of truth do current domain state
+opaque ID = domain identity
+digest = immutable/content-addressed pin; nunca FK Tier-2
+generation/CAS = optimistic concurrency do owner
+provider/runtime ref = correlation only
 ```
 
-### DB roles
-
-3E-01 não congela quantidade/formato de roles do `hub_control`.
+#### Allowlist fechada — 16 FKs Tier-2
 
 ```text
-role-per-module NÃO é mecanismo de module ownership
-runtime/migrator/maintenance/diagnostic roles → 3I/ops
+1  iam.workspace_membership.workspace_id → ws.workspace
+2  iam.area_membership.area_id → ws.area
+3  iam.area_project_grant.area_id → ws.area
+4  iam.area_project_grant.project_id → prj.project
+5  iam.account_project_grant.project_id → prj.project
+6  iam.published_app_access.project_id → prj.project
+7  prj.project.workspace_id → ws.workspace
+8  con.connection.workspace_id → ws.workspace        [ownerScope=WORKSPACE]
+9  con.connection.project_id → prj.project           [ownerScope=PROJECT]
+10 reg.artifact.workspace_id → ws.workspace          [kind=brain]
+11 reg.artifact.project_id → prj.project             [PROJECT-scoped kinds]
+12 bld.change.project_id → prj.project
+13 rel.release.project_id → prj.project
+14 rel.active_pointer.project_id → prj.project
+15 mar.serving_route.project_id → prj.project
+16 att.attachment.project_id → prj.project
 ```
 
-### Reviews preservados
+Todas são `RESTRICT/NO ACTION`; nunca CASCADE/SET NULL. Nova FK Tier-2 exige Decision Loop.
 
-- `3E-FABLE-R0-hub-control-data-boundaries-review.md`
-- `3E-FABLE-R0.1-hub-control-data-boundaries-corrections.md`
+Refs explicitamente Tier-3/sem FK incluem:
 
-São inputs não-autoritativos; 3E-01 é authority.
+```text
+prj.connection_binding → Connection + exact ConnectionRevision
+prj.brain_binding → binding/revision digests
+gw.effect_attempt ↔ par.approval_request
+runtime/provider refs
+obs.* correlations
+mastra_* correlations
+qualquer digest
+```
+
+Historical exact pins são permitidos/obrigatórios; mutable mirror de current-state de outro owner é proibido.
+
+#### Reviews preservados
+
+Inputs não-autoritativos:
+
+- `3E-FABLE-R1-durable-record-inventory-review.md`
+- `3E-FABLE-R1.1-iam-workspace-inventory-correction.md`
+- `3E-FABLE-R1.2-project-connections-inventory-correction.md`
+- `3E-FABLE-R1.3-connections-registry-inventory-correction.md`
+
+3E-02 é a authority resultante e incorpora a emenda do operador sobre exact `ConnectionRevision` no ProjectConnectionBinding e a restrição de `att.blob` ao domínio Attachments.
 
 ---
 
@@ -273,6 +299,8 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3D04-R2 — archived Project with active Release | 3G/3I |
 | F3E01-R1 — `mastra_par` no procedimento de backup/restore | 3J |
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | 3E / implementation verification |
+| F3E02-R1 — Mastra `workflowDefinitions` não pode virar authoring authority | 3H/3L probe |
+| F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
 | Project binding contracts | 3F |
 | DEDICATED identity/authority exchange | 3F/3I |
 | DEDICATED egress/network policy | 3I/3J |
@@ -282,9 +310,9 @@ Estes itens não reabrem fases anteriores automaticamente.
 | job/v1 queue/scheduler substrate | 3H/3L only on concrete need |
 | DEDICATED multi-install/fleet management | DEFER |
 
-Resolvido por 3E-01:
+Resolvido:
 
-- F3D04-R1 ownership do route mapping → `mar`; host/path/topology continua 3J.
+- F3D04-R1 route mapping ownership → `mar`; topology física continua 3J.
 - F3E01-R3 cluster inventory → `hub_control + mastra_builder + mastra_par + project/validation DBs`.
 
 ---
@@ -298,14 +326,17 @@ microservices
 database por módulo do Hub
 role de DB por módulo
 schema shared/common
+GenericGrant / relationship graph
+GenericProjectBinding / BindingEngine
+Generic resource/scope ownership engine
+WorkspaceConnection + ProjectConnection classes separadas
 EnvironmentModule / DeploymentModule / StorageModule
 JobModule / SchedulerModule
 ApplicationLayerModule
-generic binding framework
-workflow DSL / event bus / command bus
-universal mediator / service locator
 generic repository / UnitOfWork framework
 generic transaction bus
+workflow DSL / event bus / command bus
+universal mediator / service locator
 event sourcing / CQRS / saga framework
 outbox/inbox para comunicação local hipotética
 OPA/Cedar/OpenFGA por default
@@ -315,6 +346,7 @@ Gateway split / AdmissionCore
 shared JobQueue/Scheduler port
 MigrationRunner provider framework
 Mastra external migration machinery sem failure class
+cross-domain global CAS refcount
 Kafka/Kubernetes/Temporal by default
 ```
 
@@ -322,32 +354,20 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 
 ---
 
-## 9. Próximo gate — 3E-02
+## 9. Próximo gate — 3E-R1
 
-**3E-02 — Module Durable Record Inventory & Reference Closure** deve fechar:
-
-```text
-inventário mínimo de records duráveis por módulo
-owner de cada record
-identidade/chaves conceituais
-opaque ID vs digest vs generation/CAS
-lista EXATA e fechada de FKs Tier 2
-refs/projections necessárias sem current-state mirroring
-records explicitamente DEFER/REJECT para evitar schema speculative design
-```
-
-Não decidir em 3E-02:
+**3E-R1 — Data Architecture Cross-Review** deve revisar 3E-01 + 3E-02 contra o intake de 3D-R1 e responder:
 
 ```text
-final DTO/HTTP contracts → 3F
-full FSMs → 3G
-runtime substrate mechanics → 3H
-DB security roles/RLS → 3I
-deployment/host/DNS/backup procedure details → 3J
-technology/tool selection beyond required current verification → 3L
+1. Todo state/authority material aprovado em 3C/3D possui forma durável suficiente?
+2. Algum record/FK cria hidden authority ou cross-owner persistence shortcut?
+3. Existem mutable mirrors, generic frameworks ou records especulativos?
+4. Transactions/OBS/Mastra/Project Data permanecem corretamente separados?
+5. Os findings restantes pertencem realmente a 3F+ e não bloqueiam Data Architecture?
+6. 3E pode ser CLOSED / APPROVED sem outra subdecisão?
 ```
 
-Após o fechamento dos gates necessários de 3E, executar cross-review final de Data Architecture antes de 3F.
+3E-R1 não deve inventar colunas finais/DDL, contracts 3F, FSMs 3G, runtime 3H, security 3I ou deployment 3J.
 
 ---
 
@@ -359,7 +379,8 @@ Após o fechamento dos gates necessários de 3E, executar cross-review final de 
 3D = CLOSED / APPROVED
 3E = EM ANDAMENTO
 3E-01 = APPROVED
-3E-02 = NEXT
+3E-02 = APPROVED
+3E-R1 = NEXT
 ```
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

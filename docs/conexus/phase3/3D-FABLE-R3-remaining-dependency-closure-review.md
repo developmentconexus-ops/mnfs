@@ -6,6 +6,8 @@
 **Base revisada:** `eaf807a6e53d8e77dedfcea54420b03c0c19de1f` (branch `agent/conexus-phase-3-system-design`, PR #40)  
 **Importante:** este documento não constitui C-018, não é decisão 3D-04, não altera LEDGER nem decisões aprovadas, e não autoriza implementação. R0–R2.1 são inputs não-autoritativos; onde esta revisão os corrige, esta prevalece como opinião de review.
 
+> **CORREÇÃO R3.1:** `JobQueue` como shared infra port (§1.3, §3.1, §4, §10.4) foi **retirada** por `3D-FABLE-R3-1-jobqueue-seam-correction.md` — reprova no mesmo burden-of-proof que rebaixou o MigrationRunner (sem failure class atual, sem substituto, segundo consumidor especulativo e semanticamente distinto). `job/v1` machinery = seam interno do MAR; substrate qualificado em 3H/3L. **Portas de infra finais: QUATRO** (CodingRuntime, CredentialBackend, BlobStore/CAS, GitInfra). A matriz de módulos §4 permanece inalterada.
+
 ---
 
 ## 1. Verdict

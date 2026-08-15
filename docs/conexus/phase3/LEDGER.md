@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E EM ANDAMENTO — 3E-01 + 3E-02 APROVADAS` · próximo gate `3E-R1 — Data Architecture Cross-Review`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F NEXT — NÃO INICIADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -35,6 +35,9 @@ C-000..C-017
 3E-02
 → inventário mínimo durável + identity/ref classes + allowlist FK Tier-2
 
+3E-R1
+→ fechamento/reconciliação final de 3E; inclui correção aritmética 44→46 sem mudança semântica
+
 este LEDGER
 → status/navigation authority
 ```
@@ -47,12 +50,12 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar findings materiais durante 3E–3O |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar findings materiais durante 3F–3O |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
-| 3E — Data Architecture | **EM ANDAMENTO — 3E-01 + 3E-02 APROVADAS** | 3E-R1 cross-review/closure |
-| 3F — Contracts & API Architecture | NÃO INICIADA | somente após closure suficiente de 3E |
+| 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
+| 3F — Contracts & API Architecture | **NEXT — NÃO INICIADA** | [handoff inicial](3F-CONTRACTS-API-ARCHITECTURE-HANDOFF.md); primeira decisão deve ser trabalhada com o operador |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
@@ -135,7 +138,7 @@ job/v1 machinery = MAR seam
 
 ---
 
-## 6. 3E — Data Architecture
+## 6. 3E — CLOSED / APPROVED
 
 ### 3E-01 — APPROVED
 
@@ -187,7 +190,7 @@ MAR route mapping pertence a MAR e não espelha active Release. OBS nunca vira c
 |---|---|---|
 | 3E-02 | Module Durable Record Inventory & Reference Closure | [3E-02](3E-02-module-durable-record-inventory-reference-closure.md) |
 
-3E-02 fecha o piso de **44 classes duráveis**:
+3E-02 fecha o piso de **46 classes duráveis**:
 
 ```text
 iam  7  account / session / workspace_membership / area_membership /
@@ -280,8 +283,30 @@ Inputs não-autoritativos:
 - `3E-FABLE-R1.1-iam-workspace-inventory-correction.md`
 - `3E-FABLE-R1.2-project-connections-inventory-correction.md`
 - `3E-FABLE-R1.3-connections-registry-inventory-correction.md`
+- `3E-FABLE-R2-final-data-architecture-cross-review.md`
+- `3E-FABLE-R2.1-arithmetic-erratum.md`
 
-3E-02 é a authority resultante e incorpora a emenda do operador sobre exact `ConnectionRevision` no ProjectConnectionBinding e a restrição de `att.blob` ao domínio Attachments.
+Os totais aritméticos históricos R1→R1.3 ficaram sempre subcontados em 2; isso é documentado no erratum R2.1 e em 3E-R1. 3E-02 é a authority resultante e incorpora a emenda do operador sobre exact `ConnectionRevision` no ProjectConnectionBinding e a restrição de `att.blob` ao domínio Attachments.
+
+### 3E-R1 — APPROVED / CLOSED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3E-R1 | Data Architecture Final Closure | [3E-R1](3E-R1-data-architecture-final-closure.md) |
+
+Fechamento final:
+
+```text
+3E-01 = APPROVED
+3E-02 = APPROVED
+3E-R1 = APPROVED
+46 durable record classes
+16 Tier-2 FKs
+nenhuma classe removida por correção aritmética
+nenhum Finding material adicional de Data Architecture
+```
+
+3E só pode ser reaberta por Finding material.
 
 ---
 
@@ -298,7 +323,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3D02-R1 — AgentRun in-flight × stricter new Release | 3G/3I |
 | F3D04-R2 — archived Project with active Release | 3G/3I |
 | F3E01-R1 — `mastra_par` no procedimento de backup/restore | 3J |
-| F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | 3E / implementation verification |
+| F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` não pode virar authoring authority | 3H/3L probe |
 | F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
 | Project binding contracts | 3F |
@@ -314,6 +339,7 @@ Resolvido:
 
 - F3D04-R1 route mapping ownership → `mar`; topology física continua 3J.
 - F3E01-R3 cluster inventory → `hub_control + mastra_builder + mastra_par + project/validation DBs`.
+- 3E arithmetic discrepancy `44 vs 46` → corrigida como defeito documental; nenhuma classe removida.
 
 ---
 
@@ -354,20 +380,15 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 
 ---
 
-## 9. Próximo gate — 3E-R1
+## 9. Handoff para 3F — sem iniciar a fase
 
-**3E-R1 — Data Architecture Cross-Review** deve revisar 3E-01 + 3E-02 contra o intake de 3D-R1 e responder:
+3E está fechada. O próximo estágio é 3F — Contracts & API Architecture, mas **3F ainda não foi iniciado**.
 
-```text
-1. Todo state/authority material aprovado em 3C/3D possui forma durável suficiente?
-2. Algum record/FK cria hidden authority ou cross-owner persistence shortcut?
-3. Existem mutable mirrors, generic frameworks ou records especulativos?
-4. Transactions/OBS/Mastra/Project Data permanecem corretamente separados?
-5. Os findings restantes pertencem realmente a 3F+ e não bloqueiam Data Architecture?
-6. 3E pode ser CLOSED / APPROVED sem outra subdecisão?
-```
+O handoff inicial está em:
 
-3E-R1 não deve inventar colunas finais/DDL, contracts 3F, FSMs 3G, runtime 3H, security 3I ou deployment 3J.
+- [3F-CONTRACTS-API-ARCHITECTURE-HANDOFF.md](3F-CONTRACTS-API-ARCHITECTURE-HANDOFF.md)
+
+A primeira decisão 3F deve ser trabalhada com o operador antes de qualquer documento de decisão aprovado. O handoff apenas reconstrói intake, pergunta inicial e guardrails; não congela contracts, DTOs, APIs, versionamento ou tecnologia.
 
 ---
 
@@ -377,10 +398,11 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3B = CLOSED
 3C = CLOSED
 3D = CLOSED / APPROVED
-3E = EM ANDAMENTO
+3E = CLOSED / APPROVED
 3E-01 = APPROVED
 3E-02 = APPROVED
-3E-R1 = NEXT
+3E-R1 = APPROVED
+3F = NEXT / NOT STARTED
 ```
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

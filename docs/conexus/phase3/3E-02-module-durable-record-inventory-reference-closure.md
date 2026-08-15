@@ -6,7 +6,7 @@
 
 ## Decisão em uma frase
 
-O Conexus F1 fecha um **piso explícito de 44 classes de records duráveis em 13 schemas de `hub_control`**, com ownership por módulo, distinção entre opaque IDs, digests content-addressed, generations/CAS e runtime refs, uma **allowlist fechada de 16 FKs Tier-2**, sem espelhos mutáveis de authority alheia, e com Project bindings, Connection ownership/qualification e Artifact Registry scopes materializados conforme as boundaries aprovadas em 3C/3D/3E-01.
+O Conexus F1 fecha um **piso explícito de 46 classes de records duráveis em 13 schemas de `hub_control`**, com ownership por módulo, distinção entre opaque IDs, digests content-addressed, generations/CAS e runtime refs, uma **allowlist fechada de 16 FKs Tier-2**, sem espelhos mutáveis de authority alheia, e com Project bindings, Connection ownership/qualification e Artifact Registry scopes materializados conforme as boundaries aprovadas em 3C/3D/3E-01.
 
 ---
 
@@ -49,13 +49,13 @@ Uma nova classe de record durável só entra no F1 quando todas as condições f
 
 Portanto:
 
-> **44 classes é piso fechado do escopo arquitetural atual, não licença para criar qualquer tabela conveniente.**
+> **46 classes é piso fechado do escopo arquitetural atual, não licença para criar qualquer tabela conveniente.**
 
 Nova classe exige Decision Loop / Finding admitido. Uma migration não cria authority por si só.
 
 ---
 
-## 3. Inventário F1 — 44 classes
+## 3. Inventário F1 — 46 classes
 
 Nomes abaixo são semânticos. Colunas finais, tipos, índices e DDL pertencem à realização posterior.
 
@@ -565,7 +565,7 @@ technology qualification/probes → 3L
 failure/recovery machinery → 3M
 ```
 
-Também não autoriza criar os 44 records imediatamente; implementation só será autorizada pela governança posterior apropriada.
+Também não autoriza criar os 46 records imediatamente; implementation só será autorizada pela governança posterior apropriada.
 
 ---
 
@@ -577,7 +577,7 @@ Ratificado:
 3E-01 = APPROVED
 3E-02 = APPROVED
 
-44 durable record classes
+46 durable record classes
 16 Tier-2 cross-module FKs
 Project bindings concretos e pinados
 Connection WORKSPACE|PROJECT + append-only Qualification

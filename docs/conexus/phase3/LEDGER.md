@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D EM ANDAMENTO — 3D-01 APROVADA` · próximo gate `3D-02 — Capability Gateway Dependency Architecture`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D EM ANDAMENTO — 3D-01 + 3D-02 APROVADAS` · próximo gate `3D-03 — Application / Use-case Orchestration`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -43,7 +43,7 @@ Nenhuma conversa é authority. Review briefs/reviews como `3D-FABLE-*` são inpu
 | 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar apenas findings materiais durante 3D–3O |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | nenhuma reabertura sem finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | nenhuma reabertura sem finding material |
-| 3D — Dependency Architecture | **EM ANDAMENTO — 3D-01 APROVADA** | 3D-02 Capability Gateway dependency architecture |
+| 3D — Dependency Architecture | **EM ANDAMENTO — 3D-01 + 3D-02 APROVADAS** | 3D-03 Application / Use-case Orchestration |
 | 3E — Data Architecture | NÃO INICIADA | após 3D |
 | 3F — Contracts & API Architecture | NÃO INICIADA | após dependencies/data adequados |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
@@ -103,8 +103,9 @@ Builder runtime realization adicional:
 | ID | Decisão | Documento |
 |---|---|---|
 | 3D-01 | Macro Dependency Architecture | [3D-01](3D-01-macro-dependency-architecture.md) |
+| 3D-02 | Capability Gateway Dependency Architecture | [3D-02](3D-02-capability-gateway-dependency-architecture.md) |
 
-3D-01 congela:
+### 3D-01 congela
 
 ```text
 acyclic import graph
@@ -119,14 +120,34 @@ no hidden mutable substrate coupling
 mechanically enforceable dependency boundaries; tooling still open
 ```
 
-Review input preservado, sem authority própria:
+### 3D-02 congela
 
-- `3D-FABLE-R0-independent-dependency-review.md` — revisão adversarial independente que alimentou a reconciliação de 3D-01.
+```text
+Gateway = one Admission + Execution boundary
+GW direct projections only from I&A / Project / Registry / Connections / Release
+source of composition/binding is surface-specific
+PUBLISHED_APP → active Release pins
+AGENT_RUN → run-pinned composition
+BUILDER/CANDIDATE → current approved Project/Change intent
+QUALIFICATION → exact ConnectionRevision/ConnectorDefinition
+caller authority revalidation is surface-specific
+approval effect = exact single-claim/replay-safe atomic admission
+Gateway-owned effect/idempotency/budget-enforcement mechanics
+architecturally closed admission authority families
+reads stay lightweight
+health != authorization
+OUTCOME_UNKNOWN != blind retry
+```
+
+Review inputs preservados, sem authority própria:
+
+- `3D-FABLE-R0-independent-dependency-review.md` — revisão adversarial que alimentou 3D-01.
+- `3D-FABLE-R1-capability-gateway-dependency-review.md` — revisão adversarial que alimentou 3D-02.
 
 Próximo gate:
 
 ```text
-3D-02 — Capability Gateway Dependency Architecture
+3D-03 — Application / Use-case Orchestration
 ```
 
 ---
@@ -189,7 +210,7 @@ Findings resolvidos:
 - C-016 Gateway-only universal × DEDICATED → scope refinado em 3C-R1.
 - DEDICATED multi-install → explicitamente DEFER.
 - Inception execution dispatcher → Project authority + Builder engineering execution capability.
-- application/orchestration layer implícita → declarada como stateless use-case layer; dependency rules agora iniciadas por 3D-01.
+- application/orchestration layer implícita → declarada como stateless use-case layer; dependency rules em 3D-01 e próximo detalhamento em 3D-03.
 - Brain `EVIDENCE` collision → `EVIDENCE_SPEC` semantic rename.
 - binding authority pattern → Git authoring + Project approved intent + Registry compiled revision + specialized validation + Release pin.
 - stale Pi/Workspace/Storage/Deployment terminology → precedence registrada.
@@ -208,7 +229,8 @@ Estes itens **não reabrem 3C**; possuem owner posterior explícito.
 | F3B-R2 — legacy `MissionPlan v2` | 3F — re-tipar para Change/Work Unit; não restaurar Mission/Milestone/Feature |
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
 | N3 — Planning Depth × RigorProfile | 3G — primitive compartilhada posicionada em 3D-01; relação behavioral ainda aberta |
-| Gateway↔Builder/Connections/AgentRuntime conceptual cycles | **3D-01 macro rules approved; detalhar Gateway em 3D-02** |
+| Gateway↔Builder/Connections/AgentRuntime conceptual cycles | **dependency direction CLOSED por 3D-01/3D-02** |
+| F3D02-R1 — in-flight AgentRun policy narrowing após nova Release mais restritiva | **3G/3I** — não assumir preserve/revoke silenciosamente |
 | Managed Runtime dependency graph/ports | **3D-04 / fechamento restante de 3D** |
 | Project binding contracts | 3F |
 | DEDICATED identity/authority exchange | 3F/3I |
@@ -223,7 +245,7 @@ Estes itens **não reabrem 3C**; possuem owner posterior explícito.
 
 ## 9. Anti-overengineering guardrail
 
-3C CLOSED + 3D-01 APPROVED não autorizam criar:
+3C CLOSED + 3D-01/3D-02 APPROVED não autorizam criar:
 
 ```text
 microservices
@@ -241,6 +263,8 @@ workflow DSL / event bus / command bus
 universal mediator / service locator
 OPA/Cedar/OpenFGA
 RigorModule / policy engine
+Gateway split modules / AdmissionCore
+UniversalExecutionContext / CallerAuthorityVerifier
 runtime profile plugin framework
 Kafka/Kubernetes/Temporal as defaults
 outbox/inbox apenas para comunicação local futura
@@ -250,28 +274,28 @@ Qualquer item só volta ao Decision Loop com consumidor/failure class real.
 
 ---
 
-## 10. Próximo gate — 3D-02
+## 10. Próximo gate — 3D-03
 
-3D-02 deve começar pela pergunta:
+3D-03 deve responder:
 
-> Quais facts/projections o Capability Gateway pode consultar diretamente, quais contexts chegam do caller e como approval/authority revogável é revalidada no instante correto sem criar reverse imports ou policy framework?
+> Quais fluxos cross-module justificam um use case de Application Orchestration, quais devem continuar chamadas diretas e como impedir que a camada vire `ApplicationLayerModule`/god-layer ou passe a possuir invariantes dos módulos coordenados?
 
-Prioridade de análise:
+Prioridade:
 
 ```text
-Gateway → Identity & Access
-Gateway → Project
-Gateway → Artifact Registry
-Gateway → Connections
-Gateway → Release
-Production Agent Runtime → Gateway + approval revalidation capability
-Builder → Gateway caller context
-Managed Runtime → Gateway caller/runtime context
-Qualification/AnalyticQuery orchestration que usa Gateway sem reverse import
-budget/admission/TOCTOU boundary
+CreateProject
+SetProjectBinding
+QualifyConnection
+Inception investigation
+AnalyticQuery / Brain probe
+ComposeRelease
+PromoteRelease / served verification
+knowledge proposal only if orchestration is materially justified
+single-owner operations stay direct
+transaction participation without direct table access
 ```
 
-3D-02 deve permanecer narrow: não decidir DTOs finais de 3F, FSMs de 3G ou runtime/security realization de 3H/3I.
+3D-03 não congela HTTP/DTOs de 3F nem FSMs de 3G.
 
 ---
 
@@ -282,7 +306,8 @@ budget/admission/TOCTOU boundary
 3C = CLOSED
 3D = EM ANDAMENTO
 3D-01 = APPROVED
-3D-02 = NEXT
+3D-02 = APPROVED
+3D-03 = NEXT
 ```
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

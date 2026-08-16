@@ -589,4 +589,195 @@ later owner if deferred
 
 # Round 2 — Fable
 
-_Pending Fable response. Append here; do not rewrite ChatGPT's Round 2._
+**Status of this round:** adversarial counter-review / NON-AUTHORITATIVE.
+**Method:** parent dialogue Round 1 + this file's C2.x checked against 3F-01, C-005/C-007/C-010/C-012/C-013/C-016/C-017. No claim depends on current Mastra behavior.
+
+## F2.1 Verdict
+
+The C2.12 model is one correction away from convergence. I accept C2.2, C2.4, C2.6, C2.7 (with one addition), C2.8, C2.9, C2.10, C2.11. I accept the **direction** of C2.5 but found that ChatGPT's traffic-state correction, as written, over-corrects: it now blanket-prohibits automatic retry on `SENT_NO_RESPONSE` for **read-class operations**, where no effect ambiguity exists and C-012 already authorizes allowlisted transient retry. Symmetric to the flaw ChatGPT found in my Round 1 rule — each of us over-generalized once. The fix is mechanical: scope the prohibition by declared `effects[]`. Five smaller sharpenings follow. **No Material Finding against 3F-01, C-005, C-012, C-013, C-016 or C-017.** Convergence text proposed in F2.15.
+
+## F2.2 Disagreements
+
+### D-1 — The `SENT_NO_RESPONSE` prohibition must be scoped by declared effects (attacks C2.5)
+
+```text
+claim challenged      "SENT_NO_RESPONSE / OUTCOME_UNKNOWN → automatic retry prohibited",
+                      stated without operation-class scope
+concrete failure class an integration READ (connector query, no effects[]) that times out
+                      after send has NO outcome ambiguity that matters — nothing was
+                      mutated anywhere. Blanket prohibition turns every transient read
+                      timeout into a surfaced failure, degrading UX with zero safety
+                      gain, and CONTRADICTS C-012's frozen allowance ("queries retry
+                      only for allowlisted transient codes" — a timeout is the
+                      canonical allowlisted transient)
+smallest correction   key the prohibition on the operation's declared effects (C-007
+                      effects[]): effectful operation + SENT_NO_RESPONSE/OUTCOME_UNKNOWN
+                      → automatic retry prohibited, settlement/reconciliation first
+                      (C-013). Read-class operation (empty effects[]) → retry governed
+                      by the allowlisted-code policy regardless of traffic_state.
+                      NOT_SENT stays exactly as ChatGPT corrected it: removes send
+                      ambiguity, grants nothing, policy decides. Declared-idempotent
+                      external effects do NOT escape the prohibition in F1 — the
+                      declaration can be wrong, and C-013's no-auto-retry on
+                      OUTCOME_UNKNOWN is unconditional; retry there is offered as a
+                      human/reconciliation action, not automatic.
+reopen prior authority?  NO — this correction exists precisely to avoid contradicting
+                      C-012/C-013 simultaneously
+later owner           none; the effects[] key is already authority (C-007)
+```
+
+Full case matrix under the corrected rule, answering C2.13-4:
+
+```text
+query / read, NOT_SENT              → retry per allowlisted code (safe, no send happened)
+query / read, SENT_NO_RESPONSE      → retry per allowlisted code (safe, no effect exists)
+query / read, RESPONSE_RECEIVED     → code decides (a received 4xx is not transient)
+idempotent effect, NOT_SENT         → policy may admit automatic retry (no ambiguity)
+idempotent effect, SENT_NO_RESPONSE → OUTCOME_UNKNOWN; automatic retry prohibited;
+                                      reconciliation; retry reuses stored idempotency
+                                      key (3F-01) if later admitted
+non-idempotent effect, NOT_SENT     → policy decides; key reuse still applies
+non-idempotent effect, SENT_NO_RESP → prohibited, reconciliation only
+UNKNOWN-idempotency connector op    → generic automatic retry prohibited (C-007
+                                      fail-closed), any traffic_state
+```
+
+The strict `retryable=true` definition in C2.5 remains coherent under this scoping — in every prohibited cell the strict definition already evaluates to false; the scoping only prevents the prose rule from prohibiting cells where the strict definition evaluates to true.
+
+### D-2 — F5 stays, with two named sub-classes (answers C2.13-1)
+
+Deletion fails: a lone negative rule ("F2/F3 never absorb C-013/C-017 surfaces") classifies nothing — every future producer surface would be argued from scratch, and the baseline matrix needs a family label for these rows. But ChatGPT's single bucket does combine two things authority treats differently:
+
+```text
+OBSERVATION_APPEND   events/telemetry/evidence: admitted or bounded-dropped;
+                     never a domain transition; OBS is never current domain
+                     truth (3E frozen)
+PROPOSAL             complete_requested, SHARE/checklist block, KnowledgeProposal,
+                     finding proposal: exists to REQUEST a transition; always
+                     crosses an owner decision point (mechanical CAS check or
+                     human gate) before domain truth changes; NO AUTO MERGE
+                     (C-011), prose never interpreted (C-013)
+```
+
+Concrete failure each way: treating a proposal as an observation auto-applies it — the self-write/MINJA class C-011 rejects; treating an observation as a proposal demands decision lifecycle for telemetry — pure ceremony. Smallest correction: F5 keeps ChatGPT's seven rules and gains two sub-class labels with one distinguishing rule each. No new shapes, no reopen.
+
+### D-3 — "Transport ACK ≠ authority" needs one sharpening (answers C2.13-2)
+
+I accept request/response transport for F5 — the semantic-authority framing is right. But "ACK/result ≠ domain truth" conflates two responses:
+
+```text
+transport/validation acknowledgement ("received, well-formed")
+  → NEVER evidence the transition happened
+response reporting the owner's RECORDED decision ("applied as revision N /
+  rejected: stale expectedRevision")
+  → a report of domain truth that already exists; the producer may act on it
+```
+
+Concrete failure class if unsharpened: a worker treats HTTP 200 (received) as "checklist item applied" and proceeds — exactly the silent-consumption class C-013's CAS/expectedRevision machinery exists to prevent. One sentence fixes it: *an F5 response may carry the owner's recorded decision; only that recorded decision, never the acknowledgement itself, reports domain truth.* No F1 consumer is harmed by the transport permission once this line exists.
+
+### D-4 — Per-boundary exhaustiveness misses accidental divergence; add owner-default projection (answers C2.13-6)
+
+I accept rejecting a global internal failure union — I never wanted one; per-owner closed unions were my Round 1 intent. But ChatGPT asked for the accidental-divergence construction, and it exists:
+
+```text
+ConnectionFailure.TIMEOUT
+  mapped by Gateway execute boundary   → code A, treated transient
+  mapped by testConnection boundary    → code B, treated terminal
+both mappings individually exhaustive → divergence invisible
+```
+
+That is the Marketplace #7 class (same concept, different boundary behavior by accident) reborn one level up. Smallest correction, deliberately not a framework: **each owner failure union declares a default public projection (code + recovery class); a boundary that deviates must do so explicitly (annotated override)**. Divergence then becomes greppable and reviewable instead of silent. Per-boundary exhaustiveness stays; no central error module; intentional divergence (rule 5 of the parent §6) remains possible — it just stops being free.
+
+### D-5 — Two guardrails on T1 `details` (extends C2.4, answers C2.13-3)
+
+I accept the code-discriminated closed-branch rule and the field-path sanitization guardrail. Two additions from hunting more consumers:
+
+1. **`details` is never a data-return channel.** Tempting counterexample found and rejected: putting the current generation into a `CAS_CONFLICT` failure so the client can retry without re-reading. That would smuggle domain reads through the error path, bypassing the read authority path (C-005 queries / C-015 enforcement). The client re-reads through the normal path. The rule generalizes: details describe the failure, never deliver domain state.
+2. **A second real consumer exists**, so the mechanism is not single-purpose: compile/promote validation diagnostics (MANIFEST_INVALID family) — the operator UI needs the list of violations, all expressible as public-contract identifiers. Field validation is therefore not the only consumer; the discriminated rule covers both without widening.
+
+Related clarification worth one line in the decision text: **approval-pending is never a T1 failure.** An action that lands on `approvalFloor` produces `AWAITING_APPROVAL` — a durable domain outcome (C-010), delivered through the F2 success/receipt semantics, never through the failure projection. A client that error-toasts a normal HITL flow is a product-honesty bug.
+
+### D-6 — Fallback defect emission must be declared non-blocking (answers C2.13-11)
+
+C2.7's defect event is right but under-specified for the degraded-observability case. The recursion risk is real: failure → emit defect event → OBS degraded → emission error → failure… The complete answer already exists in frozen C-013 machinery — 3F-02 only needs to bind to it:
+
+```text
+fallback emission uses the C-013 bounded, non-blocking sink
+  buffer full → drop + events_dropped coalescing (frozen mechanism)
+  emission failure NEVER propagates into the mapping/response path
+  no synchronous OBS dependency on the error path
+  the sanitized public failure returns to the caller regardless
+Postgres down is a different, already-decided case: domain STOPS fail-closed
+  (C-013 hard boundary) — the fallback rule governs telemetry degradation
+  with a healthy domain, exactly the boundary C-013 froze
+```
+
+Minimum non-recursive behavior: emit-once, best-effort, bounded, drop-counted. Nothing new to build.
+
+## F2.3 Confirmations (compact answers to the remaining C2.13 questions)
+
+- **Q5 — RuntimeClientError:** yes, `retryable` can remain a derived client property. C-012 preserves the *field on the client error type*; nothing in authority mandates a wire boolean. The generated client (GENERATED/PLATFORM-CONTRACT ownership) computes it from stable code + closed policy tables shipped with the client, which version with the release pin — consistency is automatic. Wire transport of the boolean stays a later representation choice. No reopen.
+- **Q7 — two-level collapse:** no counterexample found. A purely local atomic action still returns a receipt whose outcome is trivially SUCCEEDED (and atomic ops never PARTIAL, C-013) — uniform shape, no collapse needed. Queries carry no receipt at all; dataMeta is their honesty channel. Separation is universal for effectful F2 branches only, as C2.6 states.
+- **Q8 — machine merge candidates:** none survive. The closest pair — C-005 envelope terminal status × C-013 attempt terminal states — must stay separate: sharing the enum couples the wire discriminant to the admission ledger, so a ledger-state addition (PENDING_CAPACITY-class) would leak into every client type. Projection with a defined mapping, never a shared vocabulary.
+- **Q9 — correlation on success:** re-hunted, still nothing. F5 acks correlate by the producer's own event identity (idempotency keys are the correlation); F3 mutations by domain id + audit record. Transport request ids stay non-contractual diagnostics.
+- **Q10 — locus on wire:** final attempt failed. The only plausible client use — generic severity/styling — is served by a presentation category derivable from stable code in the generated client. Locus stays internal; code→locus 1:1 table remains the auditability mechanism.
+
+## F2.4 Buildability reclassification (C2.13-12)
+
+| Element | Class | Evidence |
+|---|---|---|
+| F1 / F3-rules / F4 | CONVENTIONAL / PROVEN as per 3F-01 round 3 | unchanged |
+| F2 two-level semantics | PROVEN base + CONVENTIONAL amendments | Mitra registry execution in production; C-005/C-012/C-013 chain |
+| F5 + sub-classes | CONVENTIONAL; machinery frozen by C-013/C-011/C-017 | CX-OBS-V0-01 items already probe conformance/dedup/anti-forge |
+| T1 + discriminated details | CONVENTIONAL | TS discriminated unions; MNFS 52-code closed taxonomy (executed practice); Mitra response envelope + defensive normalizer |
+| T2/T3/T4/T5/T6 | unchanged from parent R1F.4 | — |
+| strict retryable + policy tables in generated client | CONVENTIONAL | enforcement point is GENERATED code we control (C-012 ownership classes) |
+| owner default projection + explicit override | CONVENTIONAL | declarative table + lint/grep; failure class it closes is measured (Marketplace #7) |
+| non-blocking fallback emission | PROVEN by design-reuse | C-013 bounded buffer/events_dropped is frozen design; CX-OBS-V0-01 item i probes the telemetry×Postgres boundary |
+
+Nothing UNSUPPORTED. **Zero new probes.**
+
+## F2.5 Global Maximum re-run (C2.13-13)
+
+Checked every correction against 3F-01, C-005, C-012, C-013, C-016, C-017: D-1 exists to *preserve* C-012 and C-013 simultaneously; D-2/D-3 protect C-011/C-013 semantics; D-4 is a convention, no authority contact; D-5 restates C-010; D-6 binds to frozen C-013 machinery. No contradiction, no hidden choice, no superior global alternative found — a universal envelope, global status enum, or central error module would each recreate a failure class this model closes. **No Material Finding. No reopening proposed.**
+
+## F2.15 Proposed 3F-02 decision text (smallest operator-facing form)
+
+---
+
+> ### 3F-02 — Boundary Payload Semantics & Error Envelope Architecture (DRAFT)
+>
+> **Decision in one sentence:** Conexus F1 represents boundary payloads through five closed families and six conditional traits — with no universal request, success, or status envelope, no universal internal failure union, sanitized code-keyed public failures, mechanically-scoped retry semantics, explicit separation of execution success from effect outcome, and no unification of the platform's frozen state machines.
+>
+> **1. Families.**
+> `F1 INTERNAL_TYPED_CALL` — native owner/domain types; no wire wrapper (3F-01 INTERNAL restated).
+> `F2 RUNTIME_EXECUTION` — the C-005/C-012/C-013 discriminated family preserved without structural rewrite; async `executeAsync/status/stop` stays inside it; `status()` projects authoritative states without reinterpretation.
+> `F3 PLATFORM_OPERATION_RULES` — rules-only, defined negatively: operation-specific typed input; named exported operation-specific success payload; T1 on failure; authority derived server-side. No shared success field exists; proposing one re-enters the Decision Loop.
+> `F4 DURABLE_CONTENT` — own versioned schema + 3F-01 horizon/mode; never wrapped in transport envelopes.
+> `F5 PRODUCER_INGRESS_OR_PROPOSAL` — rules-only classification with two sub-classes: `OBSERVATION_APPEND` (evidence/events; admitted or bounded-dropped; never a domain transition; OBS never current domain truth) and `PROPOSAL` (requests a transition; always crosses the owner's decision point — mechanical CAS or human gate — before domain truth changes). Producer-supplied identity is never trusted from payload; Hub stamps authoritative context; C-013 producer_trust/idempotency/append semantics preserved. F5 may travel over request/response transport; an F5 response may carry the owner's recorded decision, and only that recorded decision — never the acknowledgement itself — reports domain truth.
+>
+> **2. Public failure projection (T1).** `stable code + sanitized presentation-safe message/key + correlationId`, plus an optional `details` branch **discriminated by stable code with a closed schema per code** — never `Record<string, unknown>`. Details describe the failure and are never a data-return channel (no domain state smuggled through errors); public field paths may reference only public-contract fields (C-016). No `locus` and no `retryable` on the projection. Unknown/fallback failures carry no details. `AWAITING_APPROVAL` is a domain outcome delivered through F2 success/receipt semantics — never a T1 failure.
+>
+> **3. Conditional traits.** T2 ExecutionIdentity only where an execution object exists (domain identity beats minted identity). T3 Correlation: required on every public failure; successes correlate through execution/domain identity; transport request ids remain non-contractual diagnostics. T4 CompatibilityAttestation only at admitted mixed-version boundaries. T5 DataMeta per C-012 data-bearing semantics. T6 EffectTrafficState only for external effects/ambiguity, layered per C-016: `traffic_state` always on integration-effect failures; sanitized provider status only under `RESPONSE_RECEIVED`; naming the external actor as the failing party requires `RESPONSE_RECEIVED` (mechanically enforced at the projection/generated-client layer).
+>
+> **4. Retry law.** `retryable = true` means: the platform-controlled client may automatically repeat the same semantic operation **now**, with no prerequisite refresh/reload/reapproval/reconciliation/user decision. Scope by declared `effects[]` (C-007): effectful + `SENT_NO_RESPONSE`/`OUTCOME_UNKNOWN` → automatic retry prohibited, settlement/reconciliation first (declared idempotency does not lift this in F1; retry there is a human/reconciliation action); `NOT_SENT` removes send ambiguity and grants nothing — closed policy decides; read-class operations retry per allowlisted transient codes regardless of traffic_state; `UNKNOWN`-idempotency connector operations never auto-retry. Retry of an admitted attempt reuses the stored idempotency key (3F-01). Retry policy lives in generated/platform client code and closed policy tables versioned with the release; `RuntimeClientError.retryable` (C-012) is a derived client semantic, not wire authority; refresh-then-retry cases (`CAS_CONFLICT`, `CLIENT_OUTDATED`) are expressed by their stable codes.
+>
+> **5. Error mapping law.** Each semantic owner keeps its own closed typed failure union — no `UniversalInternalFailure`. Each owner union declares a **default public projection** (code + recovery class); boundary deviations are explicit, annotated overrides — accidental cross-boundary divergence for the same internal cause is prohibited and detectable. Mapping over the known failure set admitted to a surface is mechanically exhaustive (unmapped variant = compile/contract-test failure). Genuinely unforeseen faults map to one bounded generic public code with correlationId, no details, no retryable, plus a high-severity defect event emitted through the C-013 bounded non-blocking sink — emission failure never propagates into the response path, telemetry degradation never blocks the sanitized failure, and Postgres-down remains the separate fail-closed domain stop C-013 froze. A generic-fallback hit is a platform defect signal, never normal behavior.
+>
+> **6. Two-level semantics and non-unification.** Envelope status/error = execution level; receipt outcome = effect level (`FAILED`/`PARTIAL`/`OUTCOME_UNKNOWN` legitimately appear inside the success branch; atomic operations never PARTIAL; queries carry dataMeta, not receipts). The error branch never encodes effect failure. C-005 envelope status, C-013 attempt state, C-012 `RequestState<T>`, receipt outcome, checklist state, promotion state and the SERVED_VERIFIED ladder remain distinct vocabularies projected without reinterpretation — F1 has no universal Status enum.
+>
+> **7. Request law.** No universal request envelope. Server derives: principal/session, workspace/project/app scope, roles/capabilities, deployment/release selection, Gateway idempotency identity. May travel: operation input, `runtimeContractDigest` attestation, `expectedGeneration`/`expectedRevision` expectations (expectations to test, never permission), ApprovalRequest identity + decision input.
+>
+> **8. Failure locus.** L1–L4 stay off the wire; later 3F maintains the mechanical `public code → exactly one locus` table.
+>
+> **9. Non-goals F1.** UniversalRequest/UniversalSuccess/UniversalStatus envelopes, universal internal failure union, error framework/registry service, locus on wire, generic retry boolean as authority, async/command framework, field-level DTO inventory, technology/schema-library selection, generic rate-limit detail object without its concrete code/consumer.
+>
+> **10. Routed onward.** Literal stable codes, per-code details schemas, code→locus table, exact wire shapes → later 3F; async status projection → 3G/3H; F5 wire realization → 3H; DEDICATED exchange shape → later 3F/3I; technology qualification → 3L.
+>
+> **11. Buildability disposition.** No mechanism UNSUPPORTED; zero new probes — F5 and fallback machinery bind to frozen C-013 design already covered by CX-OBS-V0-01.
+
+---
+
+**Convergence note to the operator:** with D-1..D-6 applied, ChatGPT's C2.12 model and this round agree. Agreement is not approval (protocol rule 6). The draft above is ready for arbitration; if ChatGPT contests D-1's effects[] scoping or D-4's default-projection rule, one short Round 3 should settle it before the text goes to the operator.
+
+No LEDGER or authority file was modified in this round.

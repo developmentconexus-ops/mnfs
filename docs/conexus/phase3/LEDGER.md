@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA / 3F-R1 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -56,11 +56,14 @@ C-000..C-017
 3F-06
 → DEDICATED server-to-platform exchange, application+Release authority context, Release-as-attestation e support horizon
 
+3F-R1
+→ fechamento/reconciliação final de Contracts & API Architecture; routing de realization e reopen triggers
+
 este LEDGER
 → status/navigation authority
 ```
 
-Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-autoritativos; somente conteúdo ratificado em decisões aprovadas ganha authority.
+Nenhuma conversa é authority. Arquivos `*-FABLE-*` e `*-CHATGPT-*` são review inputs não-autoritativos; somente conteúdo ratificado em decisões aprovadas ganha authority.
 
 ---
 
@@ -68,13 +71,13 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar findings materiais durante 3F–3O |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar findings materiais durante 3G–3O |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
-| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 + 3F-06 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) · [3F-03](3F-03-approval-claim-approval-request-contract.md) · [3F-04](3F-04-project-binding-contract-architecture.md) · [3F-05](3F-05-public-failure-code-details-contract.md) · [3F-06](3F-06-dedicated-platform-service-exchange.md); próxima decisão deve ser trabalhada com o operador |
-| 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
+| 3F — Contracts & API Architecture | **CLOSED / APROVADA** | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
+| 3G — Behavioral / State Architecture | **NÃO INICIADA / NEXT** | próxima fase — FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
@@ -328,7 +331,7 @@ nenhum Finding material adicional de Data Architecture
 
 ---
 
-## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 + 3F-06 APPROVED
+## 7. 3F — CLOSED / APPROVED
 
 ### 3F-01 — APPROVED
 
@@ -687,7 +690,7 @@ absent by default
 closed + code-discriminated + public-identifiers-only
 VALIDATION_FAILED freezes ValidationIssues
 params? closed/discriminated by issueCode; never generic bag
-MANIFEST_INVALID exact diagnostic fields remain later-3F
+MANIFEST_INVALID exact diagnostic fields → promote/compile implementation + 3K presentation
 ```
 
 Implementation future mínimo:
@@ -773,7 +776,45 @@ READY FOR OPERATOR APPROVAL
 no Material Finding against 3F-01..3F-05, 3C-12 or C-014
 ```
 
-3F permanece aberta. A próxima decisão deve ser trabalhada com o operador antes de ser materializada.
+### 3F-R1 — APPROVED / CLOSED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3F-R1 | Contracts & API Architecture Final Closure | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
+
+Cross-review independente ChatGPT + Fable convergiu antes da ratificação:
+
+```text
+CLOSE 3F
+material blockers = 0
+material 3F decisions still required = 0
+3F-07 = NOT JUSTIFIED
+new probes = 0
+```
+
+Fechamento global:
+
+```text
+3C ownership
+→ 3D dependency direction
+→ 3E durable truth/reference
+→ 3F contract/interaction semantics
+```
+
+`ReleaseManifest` permanece composition root única; current Project intent não é runtime composition; MANAGED e DEDICATED continuam uma única Factory; public failure, lifecycle e effect outcome permanecem separados; authority continua server-derived; PRESERVE horizons são coerentes.
+
+O antigo routing de exact compatibility handshake está semanticamente resolvido:
+
+```text
+MANAGED published app → C-012 runtimeContractDigest
+DEDICATED → exact ReleaseRef as T4
+Control Plane → 3F-01 fail-closed staleness + 3F-02 T4 + 3F-05 CLIENT_OUTDATED
+exact transport placement → implementation
+```
+
+Para authenticated/admitted failures de 3F-05, `code` é a behavior key; HTTP status/transport não vira segunda taxonomy. Pre-contract auth/challenge permanece integralmente 3I.
+
+3F só reabre por evidence material conforme [3F-R1](3F-R1-contracts-api-architecture-final-closure.md).
 
 ---
 
@@ -792,13 +833,13 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` não pode virar authoring authority | 3H/3L probe |
 | F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
-| exact wire layout / HTTP mapping por public boundary | later 3F / implementation |
-| exact `MANIFEST_INVALID` promote/compile diagnostic fields | later 3F |
-| per-family approval card/display contracts | later 3F / 3K |
+| exact wire layout / HTTP mapping por public boundary | implementation + contract tests; 3L somente se transport/schema technology exigir qualification |
+| exact `MANIFEST_INVALID` promote/compile diagnostic fields | promote/compile implementation + 3K presentation, sob 3F-05 |
+| per-family approval card/display contracts | 3K + implementation, sob 3F-03 |
 | ApprovalRequest lifecycle/FSM completo | 3G |
 | approver eligibility / admin revocation / post-admission cancellation | 3I / 3G |
 | reconciliation / re-send after `OUTCOME_UNKNOWN` | 3M / 3G |
-| authored Project binding source/file schema + exact literal mutation DTOs | later 3F / implementation |
+| authored Project binding source/file schema + exact literal mutation DTOs | implementation; 3K authoring UI; 3L somente se tooling exigir qualification |
 | exact `brn.binding_validation` ref if 3N proves it load-bearing | Decision Loop / 3N |
 | Project binding Control Plane UI realization | 3K |
 | binding lifecycle state labels / Project mutation lifecycle | 3G |
@@ -829,8 +870,10 @@ Resolvido:
 - F3B-R2 legacy `MissionPlan v2` → 3F-01 define one-time `TRANSFORM` para semântica atual de Change / Work Unit; sem compatibility layer permanente.
 - approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; lifecycle, approver authority e post-admission cancellation permanecem roteados.
 - Project binding contract shapes → **RESOLVIDO por 3F-04** como dois contratos concretos, Git-first, exact-pinned e sem GenericBinding/BindingSet; lifecycle, authority e UI permanecem roteados.
-- literal stable public codes + per-code baseline details + public-code→locus contract → **RESOLVIDO por 3F-05** com 9-code baseline, details fechados e static projection; exact wire/HTTP/promote diagnostics permanecem roteados.
+- literal stable public codes + per-code baseline details + public-code→locus contract → **RESOLVIDO por 3F-05** com 9-code baseline, details fechados e static projection; exact wire/HTTP/promote diagnostics são realization roteada.
 - DEDICATED identity/authority exchange shape → **RESOLVIDO por 3F-06** como server-to-platform exchange com `DedicatedApplicationPrincipal + exact ReleaseRef`, scope/audience derivados, Release-as-attestation e support horizon; concrete trust/credential/delegation mechanics permanecem 3I.
+- exact compatibility handshake posterior de 3F-01 → **RESOLVIDO semanticamente por C-012 + 3F-02 T4 + 3F-05 + 3F-06**; exact transport placement/serialization permanece implementation realization, e mudança de semantic source/horizon/stale behavior/authority exige reopen 3F.
+- 3F final coherence/closure → **RESOLVIDO por 3F-R1** após reviews independentes ChatGPT + Fable; zero blocker material, zero decisão 3F adicional e zero probe novo.
 
 ---
 
@@ -927,16 +970,17 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3E-01 = APPROVED
 3E-02 = APPROVED
 3E-R1 = APPROVED
-3F = IN PROGRESS
+3F = CLOSED / APPROVED
 3F-01 = APPROVED
 3F-02 = APPROVED
 3F-03 = APPROVED
 3F-04 = APPROVED
 3F-05 = APPROVED
 3F-06 = APPROVED
-3G = NOT STARTED
+3F-R1 = APPROVED
+3G = NOT STARTED / NEXT
 ```
 
-A próxima decisão de 3F deve ser trabalhada com o operador antes de ser documentada como authority.
+A próxima fase é 3G. A primeira decisão de Behavioral / State Architecture deve ser trabalhada com o operador antes de ser documentada como authority.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA / 3F-R1 APROVADA` · `3G IN PROGRESS / 3G-01 APROVADA / 3G-02 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA / 3F-R1 APROVADA` · `3G IN PROGRESS / 3G-01 APROVADA / 3G-02 APROVADA / 3G-03 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -65,6 +65,9 @@ C-000..C-017
 3G-02
 → Builder Change/Finding facts + independent predicates, contract/governance gates, context-pinned proof, per-Change serialization, honest terminal closure e immutable acceptance
 
+3G-03
+→ immutable Work Unit bounded authority, ActorRun attempt/output/terminal semantics, atomic delivery boundary, retry/cancel/crash laws e Gateway-preserved effect authority
+
 este LEDGER
 → status/navigation authority
 ```
@@ -83,7 +86,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` e `*-CHATGPT-*` são review 
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
-| 3G — Behavioral / State Architecture | **EM ANDAMENTO / 3G-01 + 3G-02 APROVADAS** | selecionar a próxima decisão 3G pelo Decision Loop |
+| 3G — Behavioral / State Architecture | **EM ANDAMENTO / 3G-01 + 3G-02 + 3G-03 APROVADAS** | selecionar a próxima decisão 3G pelo Decision Loop |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
@@ -969,7 +972,77 @@ new durable records / FKs / atomicity classes / public codes = NONE
 READY FOR OPERATOR DECISION
 ```
 
-3G permanece aberta; 3G-02 não preaprova a próxima decisão.
+### 3G-03 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3G-03 | Builder Work Unit & ActorRun Execution Lifecycle Architecture | [3G-03](3G-03-builder-work-unit-actor-run-execution-lifecycle-architecture.md) |
+
+3G-03 congela o menor lifecycle de bounded work/attempt do Builder F1:
+
+```text
+Work Unit
+→ immutable bounded work authority
+→ current approved/admitted decomposition membership
+→ acceptedDelivery absent | one exact delivery
+→ no durable WorkUnit FSM
+
+ActorRun
+→ one concrete attempt
+→ exact execution identity
+→ one write-once role-appropriate produced-output identity
+→ terminal write-once: DELIVERED | FAILED | CANCELLED
+```
+
+Output/delivery/recovery:
+
+```text
+same exact output re-presentation → idempotent read-back
+different output → new ActorRun
+output identity = canonical-content identity, not storage packaging/location
+custody failure/recovery → 3M; identity remains stable
+
+WU execution delivery
+→ ActorRun DELIVERED + WorkUnit acceptedDelivery
+→ same atomic Builder mutation under 3G-02 per-Change serialization root
+
+delivery-local judgment != Change correctness
+verifier DELIVERED != automatic verdict/Evidence authority
+```
+
+Retry/cancel/concurrency:
+
+```text
+one non-terminal WU-execution ActorRun per Work Unit in F1
+FAILED != retryable
+same-WU retry only while immutable WU remains current/admissible
+scope/sets/pins/fulfills change → successor Work Unit
+cancel terminal wins over late runtime output
+
+orphan FAILED only when terminal absent + produced output absent
+produced output present → recover/judge same exact output; do not fail merely on runtime death
+```
+
+External-effect replay authority permanece no Gateway; Builder pode usar effect state apenas como context/advisory efficiency signal. `CodingSession`/Mastra/E2B continuam mechanics subordinadas e não mudam bounded-work authority.
+
+3G-03 não força `InceptionInvestigation` a criar synthetic Change apenas por simetria. Caso a realization prove necessidade de ActorRun verdadeiramente pré-Change, retorna ao Decision Loop.
+
+Review/provenance não-autoritativa:
+
+- [3G-FABLE-DIALOGUE-builder-work-unit-actor-run-lifecycle.md](3G-FABLE-DIALOGUE-builder-work-unit-actor-run-lifecycle.md)
+- [3G-FABLE-DIALOGUE-builder-work-unit-actor-run-lifecycle-R2.md](3G-FABLE-DIALOGUE-builder-work-unit-actor-run-lifecycle-R2.md)
+
+Convergência antes da ratificação:
+
+```text
+Material Finding contra prior authority = NONE
+reopen 3C/3D/3E/3F/3G-01/3G-02 = NONE
+new durable record / FK / atomicity class / engine / scheduler / lease = NONE
+WorkUnit FSM / fourth ActorRun terminal = NOT JUSTIFIED
+READY FOR OPERATOR DECISION
+```
+
+3G permanece aberta; 3G-03 não preaprova a próxima decisão.
 
 ---
 
@@ -982,7 +1055,8 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3B-R1 — repo canônico/cutover do produto | 3A / operador — antes de implementação |
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
 | N3 — Planning Depth × RigorProfile | 3G |
-| Work Unit / ActorRun lifecycle, retry, delivery, cancel/drain | later 3G + 3H/3M |
+| Mastra ActorRun/CodingSession/Workspace/E2B realization + runtime liveness/orphan detection | 3H/3M |
+| InceptionInvestigation pre-Change agent execution shape, somente se concrete realization provar necessidade | Decision Loop / 3H |
 | Release-side placement of context-pinned `change_acceptance` admissibility | later 3G Release lifecycle |
 | F3D02-R1 — AgentRun in-flight × stricter new Release | 3G/3I |
 | F3D04-R2 — archived Project with active Release | 3G/3I |
@@ -1028,7 +1102,8 @@ Resolvido:
 - F3B-R2 legacy `MissionPlan v2` → 3F-01 define one-time `TRANSFORM` para semântica atual de Change / Work Unit; sem compatibility layer permanente.
 - approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; approver authority e post-admission cancellation permanecem roteados.
 - ApprovalRequest F1 lifecycle/state architecture → **RESOLVIDO por 3G-01** como owner-local durable facts + canonical derived projection, decision write-once, derived expiry, monotonic STALE, concurrency-safe single binding e non-reauthorizing recovery; AgentRun reaction, authority/security e recovery machinery permanecem roteados aos seus owners.
-- Builder Change/Finding lifecycle + contract revision/checkpoint + routing/closure semantics → **RESOLVIDO por 3G-02** com independent decision predicates, decision-relevant Finding admission, full-context derived Evidence staleness, decreasing-autonomy routing, per-Change authority serialization, write-once honest closure e immutable context-pinned acceptance; Work Unit/ActorRun lifecycle, N3 e Release-side acceptance gate placement permanecem roteados.
+- Builder Change/Finding lifecycle + contract revision/checkpoint + routing/closure semantics → **RESOLVIDO por 3G-02** com independent decision predicates, decision-relevant Finding admission, full-context derived Evidence staleness, decreasing-autonomy routing, per-Change authority serialization, write-once honest closure e immutable context-pinned acceptance; N3 e Release-side acceptance gate placement permanecem roteados.
+- Builder Work Unit/ActorRun lifecycle, retry, delivery e cancel semantics → **RESOLVIDO por 3G-03** com immutable bounded-work authority, current decomposition membership, one exact accepted delivery, write-once attempt output/terminal facts, crash recovery keyed by produced-output presence, same-WU retry guards, successor Work Unit on authority change e Gateway-preserved effect replay authority; runtime realization/liveness detection/custody recovery permanecem 3H/3M.
 - Project binding contract shapes → **RESOLVIDO por 3F-04** como dois contratos concretos, Git-first, exact-pinned e sem GenericBinding/BindingSet; lifecycle, authority e UI permanecem roteados.
 - literal stable public codes + per-code baseline details + public-code→locus contract → **RESOLVIDO por 3F-05** com 9-code baseline, details fechados e static projection; exact wire/HTTP/promote diagnostics são realization roteada.
 - DEDICATED identity/authority exchange shape → **RESOLVIDO por 3F-06** como server-to-platform exchange com `DedicatedApplicationPrincipal + exact ReleaseRef`, scope/audience derivados, Release-as-attestation e support horizon; concrete trust/credential/delegation mechanics permanecem 3I.
@@ -1132,6 +1207,19 @@ lock/transaction aberta durante Mastra/E2B/external I/O
 fixed retry-count como architecture law
 AI semantic-freshness classifier
 Finding para commentary sem decision relevance
+WorkUnit persisted status FSM / status fan-out
+ActorRun generic FSM engine / StateRegistry
+fourth ActorRun terminal apenas para TIMEOUT/RUNTIME_LOST/SUPERSEDED/DELIVERY_REJECTED
+persisted generic retryable flag
+CandidateService / DeliveryQueue / retry scheduler
+UniversalOutput / UniversalDelivery / UniversalHandoff
+same-WU best-of-N competing runs / winner arbitration sem consumer
+mutable Work Unit authority ou mutable produced-output target
+OBS-derived current produced-output/presentation truth
+ActorLease / worker claim / heartbeat-as-authority / fencing antes de multi-writer failure class
+hard timeout/heartbeat architecture law
+cross-owner Gateway effect-state transaction at Builder dispatch
+synthetic Inception Change apenas para lifecycle symmetry
 Kafka/Kubernetes/Temporal by default
 ```
 
@@ -1160,9 +1248,10 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3G = IN PROGRESS
 3G-01 = APPROVED
 3G-02 = APPROVED
+3G-03 = APPROVED
 ```
 
-As duas primeiras decisões de Behavioral / State Architecture foram trabalhadas com o operador, passaram por review adversarial independente e ganharam authority como 3G-01 e 3G-02.
+As três primeiras decisões de Behavioral / State Architecture foram trabalhadas com o operador, passaram por review adversarial independente e ganharam authority como 3G-01, 3G-02 e 3G-03.
 
 A próxima decisão de 3G deve ser selecionada pelo mesmo Decision Loop e trabalhada com o operador antes de ser documentada como authority.
 

@@ -4,7 +4,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 
 **Live status / navigation authority:** [LEDGER.md](LEDGER.md)  
 **3B historical/detail authority:** `../24-arquitetura-system-design.md` + `3B-*` docs  
-**Importante:** 3F está fechada/aprovada; 3G está em andamento com 3G-01 aprovada, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
+**Importante:** 3F está fechada/aprovada; 3G está em andamento com 3G-01 e 3G-02 aprovadas, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
 
 ## Status
 
@@ -15,26 +15,27 @@ Este diretório contém as decisões detalhadas da Fase 3.
 | 3B-17 | Project Isolation and Explicit Reuse | APROVADO | `../24-arquitetura-system-design.md` |
 | 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
 | 3C-01 | Modular Monolith no F1 | APROVADO | [3C-01-modular-monolith.md](3C-01-modular-monolith.md) |
-| 3C-02 | Identity & Access Module Boundary | APROVADO | [3C-02-identity-access-module-boundary.md](3C-02-identity-access-module-boundary.md) |
-| 3C-03 | Workspace Module Boundary | APROVADO | [3C-03-workspace-module-boundary.md](3C-03-workspace-module-boundary.md) |
-| 3C-04 | Project Module Boundary | APROVADO | [3C-04-project-module-boundary.md](3C-04-project-module-boundary.md) |
-| 3C-05 | Builder Module Boundary | APROVADO | [3C-05-builder-module-boundary.md](3C-05-builder-module-boundary.md) |
-| 3C-06 | Artifact Registry Module Boundary | APROVADO | [3C-06-artifact-registry-module-boundary.md](3C-06-artifact-registry-module-boundary.md) |
-| 3C-07 | Connections Module Boundary | APROVADO | [3C-07-connections-module-boundary.md](3C-07-connections-module-boundary.md) |
-| 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08-capability-gateway-module-boundary.md](3C-08-capability-gateway-module-boundary.md) |
-| 3C-09 | Brain Module Boundary | APROVADO | [3C-09-brain-module-boundary.md](3C-09-brain-module-boundary.md) |
+| 3C-02 | Identity & Access Module Boundary | APROVADO | [3C-02](3C-02-identity-access-module-boundary.md) |
+| 3C-03 | Workspace Module Boundary | APROVADO | [3C-03](3C-03-workspace-module-boundary.md) |
+| 3C-04 | Project Module Boundary | APROVADO | [3C-04](3C-04-project-module-boundary.md) |
+| 3C-05 | Builder Module Boundary | APROVADO | [3C-05](3C-05-builder-module-boundary.md) |
+| 3C-06 | Artifact Registry Module Boundary | APROVADO | [3C-06](3C-06-artifact-registry-module-boundary.md) |
+| 3C-07 | Connections Module Boundary | APROVADO | [3C-07](3C-07-connections-module-boundary.md) |
+| 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08](3C-08-capability-gateway-module-boundary.md) |
+| 3C-09 | Brain Module Boundary | APROVADO | [3C-09](3C-09-brain-module-boundary.md) |
 | 3C-10 | Production Agent Runtime Module Boundary | APROVADO | [3C-10](3C-10-production-agent-runtime-module-boundary.md) |
-| 3C-11 | Release Module Boundary | APROVADO | [3C-11-release-module-boundary.md](3C-11-release-module-boundary.md) |
-| 3C-12 | Application Runtime Profiles | APROVADO | [3C-12-application-runtime-profiles.md](3C-12-application-runtime-profiles.md) |
-| 3C-13 | Observability & Audit Module Boundary | APROVADO | [3C-13-observability-audit-module-boundary.md](3C-13-observability-audit-module-boundary.md) |
-| 3C-14 | Attachments / Storage Boundary | APROVADO | [3C-14-attachments-storage-boundary.md](3C-14-attachments-storage-boundary.md) |
-| 3C-15 | Managed Application Runtime Module Boundary | APROVADO | [3C-15-managed-application-runtime-boundary.md](3C-15-managed-application-runtime-boundary.md) |
-| 3C-R1 | Domain / Module Architecture closure | APROVADO / CLOSED | [3C-R1-cross-review-closure.md](3C-R1-cross-review-closure.md) |
-| 3D-R1 | Dependency Architecture closure | APROVADO / CLOSED | [3D-R1-dependency-architecture-final-closure.md](3D-R1-dependency-architecture-final-closure.md) |
-| 3E-R1 | Data Architecture closure | APROVADO / CLOSED | [3E-R1-data-architecture-final-closure.md](3E-R1-data-architecture-final-closure.md) |
+| 3C-11 | Release Module Boundary | APROVADO | [3C-11](3C-11-release-module-boundary.md) |
+| 3C-12 | Application Runtime Profiles | APROVADO | [3C-12](3C-12-application-runtime-profiles.md) |
+| 3C-13 | Observability & Audit Module Boundary | APROVADO | [3C-13](3C-13-observability-audit-module-boundary.md) |
+| 3C-14 | Attachments / Storage Boundary | APROVADO | [3C-14](3C-14-attachments-storage-boundary.md) |
+| 3C-15 | Managed Application Runtime Boundary | APROVADO | [3C-15](3C-15-managed-application-runtime-boundary.md) |
+| 3C-R1 | Domain / Module Architecture closure | APROVADO / CLOSED | [3C-R1](3C-R1-cross-review-closure.md) |
+| 3D-R1 | Dependency Architecture closure | APROVADO / CLOSED | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
+| 3E-R1 | Data Architecture closure | APROVADO / CLOSED | [3E-R1](3E-R1-data-architecture-final-closure.md) |
 | 3F-01..3F-06 | Contracts & API Architecture decisions | APROVADAS | [LEDGER §7](LEDGER.md#7-3f--closed--approved) |
-| 3F-R1 | Contracts & API Architecture Final Closure | APROVADO / CLOSED | [3F-R1-contracts-api-architecture-final-closure.md](3F-R1-contracts-api-architecture-final-closure.md) |
+| 3F-R1 | Contracts & API Architecture Final Closure | APROVADO / CLOSED | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
 | 3G-01 | ApprovalRequest Lifecycle & Claim-Binding State Architecture | APROVADO | [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) |
+| 3G-02 | Builder Change & Finding Lifecycle, Contract Revision & Closure Architecture | APROVADO | [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md) |
 
 ## Estado atual
 
@@ -45,7 +46,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 3D — Dependency Architecture: CLOSED / APROVADA
 3E — Data Architecture: CLOSED / APROVADA
 3F — Contracts & API Architecture: CLOSED / APROVADA
-3G — Behavioral / State Architecture: IN PROGRESS / 3G-01 APROVADA
+3G — Behavioral / State Architecture: IN PROGRESS / 3G-01 + 3G-02 APROVADAS
 ```
 
 ## Mapa estrutural preservado
@@ -78,48 +79,71 @@ ApplicationRuntimeProfile = MANAGED | DEDICATED
 
 ## Precedência atual
 
-O fechamento de Contracts & API Architecture permanece materializado em [3F-R1](3F-R1-contracts-api-architecture-final-closure.md). A primeira authority de Behavioral / State Architecture agora é [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md).
+O fechamento de Contracts & API Architecture permanece materializado em [3F-R1](3F-R1-contracts-api-architecture-final-closure.md). Behavioral / State Architecture possui agora duas authorities aprovadas: [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) e [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md).
 
 3F-R1 reconcilia 3C–3F e confirma, entre outros pontos:
 
 - `ReleaseManifest` como composition root única;
 - current Project intent separado de Release-pinned runtime composition;
-- MANAGED e DEDICATED como profiles da mesma Factory, não duas factories;
+- MANAGED e DEDICATED como profiles da mesma Factory;
 - approval exact-subject + single-claim;
-- dois Project binding contracts concretos, sem GenericBinding/BindingSet;
+- dois Project binding contracts concretos;
 - public failure `code` como behavior key, sem ErrorRegistry;
-- DEDICATED server-to-platform com `DedicatedApplicationPrincipal + exact ReleaseRef` e authority derivada server-side;
-- compatibility/PRESERVE horizons coerentes;
-- nenhum `3F-07`, blocker material ou probe novo necessário para avançar.
+- DEDICATED server-to-platform com `DedicatedApplicationPrincipal + exact ReleaseRef`;
+- compatibility/PRESERVE horizons coerentes.
 
-3G-01 adiciona, sem reabrir 3F:
+3G-01 adiciona:
 
-- `ApprovalRequest` como durable facts + canonical owner-local projection, sem mutable authoritative status duplicado;
-- decision write-once, derived expiry, monotonic `STALE` e permanent committed binding;
-- captured database-sourced `guardNow` por lifecycle invocation;
-- conditional/CAS guarded mutations + whole-admission abort on failed required guarded write;
-- rollback não consome approval e `RECOVER_BOUND` do mesmo attempt não reautoriza;
-- impossible durable fact combinations fail closed;
-- PAR-terminal separado de GC/PRESERVE horizon;
-- expiry silencioso no state layer, com AgentRun/runtime/UX/recovery roteados aos owners posteriores.
+- `ApprovalRequest` como durable facts + canonical owner-local projection;
+- decision write-once, derived expiry, monotonic `STALE`, permanent committed binding;
+- captured database-sourced `guardNow`;
+- concurrency-safe guarded mutations + admission abort discipline;
+- rollback não consome approval e same-attempt recovery não reautoriza.
 
-Detalhes históricos de 3C permanecem em [3C-R1](3C-R1-cross-review-closure.md); 3D e 3E permanecem fechadas por seus respectivos `*-R1`.
+3G-02 adiciona, sem mega-FSM:
+
+- Change com decision predicates independentes em vez de `ChangeState` exclusivo;
+- contract/Plan/governance/discovery como checkpoint/dispatch gates;
+- Evidence compatibility pelo full applicable execution context, com staleness derivada;
+- Finding apenas para gaps decision-relevant, resolution sem reopen in-place e route separado por autonomia decrescente;
+- per-Change serialization root para authority admissions, bounded-work/budget admissions e closure;
+- terminal closure write-once em `ACCEPTED | NO_CHANGE_REQUIRED | REJECTED | BLOCKED | ESCALATED`;
+- successful closure + immutable `change_acceptance` owner-local atomic;
+- context-pinned acceptance que pode ficar inadmissível após drift sem reabrir o Change;
+- successor verification Change somente on-demand quando consumidor real precisar restaurar admissibilidade.
 
 ## Findings roteados
 
 O live ledger mantém a lista completa e seus owners: [LEDGER.md](LEDGER.md#8-open-findings--routed-work).
 
-3G-01 resolve o item `ApprovalRequest lifecycle/FSM completo` no escopo do exact F1 approval path. Permanecem para decisões posteriores, entre outros:
+Resolvido por 3G-01:
+
+```text
+ApprovalRequest lifecycle/FSM completo no exact F1 approval path
+```
+
+Resolvido por 3G-02:
+
+```text
+Builder Change + Finding lifecycle
+contract revision/checkpoint gate
+Finding routing / loop prevention semantics
+Change closure / acceptance proof semantics
+```
+
+Permanecem para decisões posteriores, entre outros:
 
 ```text
 3G
-→ Builder Change/Finding lifecycle + Planning Depth × RigorProfile
+→ Work Unit / ActorRun lifecycle
+→ Planning Depth × RigorProfile
 → binding + Project mutation lifecycle
 → AgentRun semantic response to approval expiry
 → AgentRun in-flight × stricter new Release
 → archived Project with active Release
 → DEDICATED old-vs-new Release admissibility window
 → Gateway effect_attempt lifecycle/state work
+→ Release-side placement of context-pinned acceptance admissibility
 
 3I / later
 → approver/binding authority enforcement
@@ -127,12 +151,13 @@ O live ledger mantém a lista completa e seus owners: [LEDGER.md](LEDGER.md#8-op
 → DEDICATED concrete trust/credential realization
 
 3H / 3K / 3M / implementation
-→ runtime wake/suspend/resume mechanics
-→ UI/display e exact wire realization já constrangidos por 3F/3G-01
-→ reconciliation / GC / recovery machinery
+→ Mastra/runtime wake/session/suspend/resume mechanics
+→ UI/display e exact wire realization
+→ reconciliation / GC / crash recovery machinery
+→ numeric correction-budget calibration
 ```
 
-Esses itens não reabrem 3F nem 3G-01 automaticamente.
+Esses itens não reabrem 3F, 3G-01 ou 3G-02 automaticamente.
 
 ## Regra de avanço
 
@@ -144,6 +169,7 @@ Estado atual:
 3F = CLOSED / APPROVED
 3G = IN PROGRESS
 3G-01 = APPROVED
+3G-02 = APPROVED
 ```
 
 A próxima decisão de 3G deve ser selecionada pelo mesmo Decision Loop e trabalhada com o operador antes de ganhar authority.

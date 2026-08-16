@@ -867,3 +867,205 @@ later owner if deferred
 If current Mastra behavior becomes material to an argument, verify through Context7 `/mastra-ai/mastra` and applicable primary Mastra source/skill.
 
 Do not modify `LEDGER.md`, approved authority, earlier rounds or product code.
+
+---
+
+# Round 2 — Fable
+
+## 0. Position and provenance
+
+Authority re-verified from `AGENTS.md` read order at HEAD `3bf3902`; no authority document changed since Round 1 — only this R2 file is new. This round makes **no current-Mastra claim**; nothing below depends on substrate behavior. Postgres claims are limited to the READ COMMITTED semantics already cited in the 3G-01 dialogue.
+
+Verdict up front:
+
+```text
+Round 2 consolidation                       → structurally SOUND; survives most attacks
+FB-1 narrowing (admission-only serializes)  → ACCEPTED with one completion (R2F-1)
+                                              and one TOCTOU note (R2F-2)
+FB-9 delivery-boundary rewording            → ACCEPTED
+FB-5 atomic success law                     → ACCEPTED
+FB-8 "explicit ≠ manual" wording            → ACCEPTED
+material completions this round             → R2F-1 .. R2F-6
+Material Finding against prior authority    → NONE; no reopen
+readiness                                   → READY FOR OPERATOR DECISION
+                                              with this round's deltas incorporated
+```
+
+The B4 governance-drift question (Q4/Q5/Q8) has a smallest sustainable answer that also supplies the concrete consumer Q7 asked for; it is the centerpiece of this round (R2F-2).
+
+---
+
+## 1. Material findings on the consolidated model
+
+### R2F-1 — the serialization set omits bounded-work admission and budget mutations (answers A3)
+
+**Claim challenged:** §2's enumerated set of Builder mutations that must serialize.
+
+**Counterexamples.**
+
+1. *Dispatch racing closure.* Terminal closure commits at t2; a concurrent Work Unit/ActorRun admission read the Change as open at t1 and commits at t3. Result: an ActorRun launched — consuming budget, opening a sandbox, producing deliveries — against a terminally closed Change. Its later evidence admission will abort on the closure guard, but the dispatch itself already violated "no later Builder mutation may alter that closed Change authority", and the run is live machinery with no admissible destination.
+2. *Budget race.* Two concurrent fix-class dispatch admissions each read remaining correction budget ≥ 1 and both commit; the aggregate bound C-017 makes load-bearing is silently exceeded — the exact lost-update class 3G-01 outlawed, on a different fact.
+
+**Smallest correction.** Add to the serialize set:
+
+```text
+bounded-work admission (Work Unit / ActorRun creation, dispatch admission)
+correction-budget reservation/consumption mutations
+```
+
+Both change dispatch admissibility and both must observe terminal closure under the same root. This is a completion of the FB-1 law, not a new mechanism; budget realization stays in the existing admission-ledger family.
+
+**Reopen:** none. **Owner:** 3G-02.
+
+### R2F-2 — governance drift: guard-time semantics at closure + context-pinned acceptance + successor verification Change (answers B4, B5, C7, C8)
+
+**Claim challenged / question answered:** §3's open cross-lifecycle question, and one TOCTOU ChatGPT did not name: the closure predicate's governance-currency check reads **non-Builder state** (current published governance), so it cannot be serialized by the Change root. Drift can commit between the closure guard's evaluation and the closure commit.
+
+**Resolution — three laws, no new machinery.**
+
+**(a) Guard-time semantics at closure.** Closure admissibility evaluates governance currency **once, at its authority guard**, exactly as 3G-01 evaluates expiry at `guardNow`. A closure lawful at its guard is not re-evaluated because governance drifts before commit. This is not a hole, because of (b):
+
+**(b) Acceptance is a context-pinned proof, never a timeless promise.** `change_acceptance` records what was proven **under exact pinned identities** — contract revision, governance snapshot, execution context (C-017 invariant 12 already pins all of this into the verification digest). Any later consumer — Release compose/promote first of all — derives admissibility by comparing those pins against the governance/context it currently requires. Drift after the closure guard, whether it raced the commit by milliseconds or happened a week later, lands in the same place: **the closed Change stays closed and true; its acceptance proof becomes inadmissible to the consumer until revalidated.** C-017 invariant 12 already demands exactly this at "aceite/**promote**"; 3G-02 just states it as the acceptance-consumption law instead of inventing a closure-side race fix.
+
+**(c) Restoration is a new Builder proof act — the successor verification Change.** When drift makes an acceptance inadmissible, the path back is not reopening or mutating anything: it is a verification Change against the same result identity under the new governance — precisely the `NO_CHANGE_REQUIRED` machinery — whose success atomically produces a **new** acceptance proof pinned to current governance. No reopen, no mutable acceptance, no new record class, no Release-owned proof machinery (Release keeps its gate; Builder keeps proof production; ownership intact).
+
+This answers the open questions:
+
+- **Q4/Q5:** 3G-02 freezes the three laws above as the cross-lifecycle invariant and routes the *placement* of the admissibility check inside compose/promote to the later Release lifecycle decision. Deciding more now — the Release FSM — would be scope creep; deciding less leaves the C-017 invariant-12 obligation ownerless.
+- **Q7:** `NO_CHANGE_REQUIRED` acceptance now has a concrete, current consumer: it is the proof shape of governance/context revalidation, besides its original role (verified no-op closure of a "fix X" request whose truth already held). Keep it.
+- **Q8:** `change_acceptance` remains **unique per Change** — success closure creates exactly one, atomically. Proof multiplicity lives at the *result-identity* level across successor verification Changes, each proof immutable and pinned to its own context. No mutable acceptance set exists anywhere.
+
+**Reopen:** none — this realizes C-017 invariant 12, touches no approved Release semantics. **Owner:** 3G-02 for the three laws; Release-side gate placement to the later Release lifecycle decision.
+
+### R2F-3 — checkpoint admissibility must include the C-017 discovery obligation
+
+**Claim challenged:** the consolidated model's checkpoint gate covers contract/plan/governance but never mentions discovery (HAR-2 / C-017 invariant 3).
+
+**Failure class.** C-017: a Change touching real data requires Gateway-mediated discovery evidence **before the contract closes**, or an explicit `discovery: NOT_APPLICABLE` with reason; assertions must be born from discovered facts, not supposition. A 3G-02 that stays silent lets an implementation approve checkpoints on invented data assumptions — the exact Mitra-observed failure class the obligation exists to kill.
+
+**Smallest correction.** One clause: checkpoint approval of a contract revision is admissible only when the applicable discovery obligation is satisfied — discovery evidence admitted or non-applicability explicitly declared. Realization (what "touches real data" detects) is already C-017's; 3G-02 just seats the obligation in the gate that enforces it.
+
+**Reopen:** none. **Owner:** 3G-02.
+
+### R2F-4 — the Finding admission criterion must be decision-relevance, or the anti-noise guard becomes a reverse classifier
+
+**Claim challenged:** §5's "pure commentary/telemetry need not be admitted as a Finding".
+
+**Failure class.** Without a criterion, the anti-noise guard is the same hidden classifier FB-4 killed, running in the opposite direction: implementation pressure now *suppresses* real gaps as "commentary" to avoid waiver ceremony, and zero-OPEN closure passes vacuously.
+
+**Smallest correction.** Freeze the admission test:
+
+> An observation MUST be admitted as a Finding when, if true, it would change a dispatch, closure, route, or checkpoint decision of this Change. An observation that could change no decision is telemetry/evidence, not a Finding.
+
+Decision-relevance is mechanical enough to test (the proof traces exercise both directions), keeps waiver volume proportional to real gaps (answers D9/D10 — zero-OPEN does not over-block F1 with this line drawn), and never depends on severity aesthetics.
+
+**Reopen:** none. **Owner:** 3G-02.
+
+### R2F-5 — composite interventions: the least-autonomy route governs (completes D11)
+
+Hunting for an incomparable pair under the decreasing-autonomy reading, the one residual case is a Finding whose proven facts require **two** interventions at once — e.g., contract invalidation *and* a business ambiguity only a human can resolve. The order stays total; what is missing is the composition rule:
+
+> When proven facts require multiple intervention kinds, the authoritative route is the **least-autonomy** one among them; the remaining work follows from that resolution as newly admitted facts/work (a human answer feeding a revision proposal, a checkpoint authorizing fix work).
+
+With this, D11 closes: no pair or combination is incomparable, and D12 is implementable exactly as §8 describes — the old Finding's route only ever elevates, resolution-by-decision + new admission carries any "lesser" continuation, and the no-silent-downgrade guard is a one-direction CAS on the route fact.
+
+### R2F-6 — name the inherited dispatch/closure inputs 3G-02 is silent about
+
+Two C-017 obligations survive the E15 sweep as *inherited but unmentioned*; silence invites implementations to drop them because "3G-02 defines the gates and didn't list these":
+
+```text
+dispatch admissibility inputs (inherited, not re-frozen):
+  Actor Pack compilation success — compile failure BLOCKS dispatch (C-017 invariant 7)
+  declared required-access present (C-017 invariant 2)
+
+closure admissibility inputs (inherited, not re-frozen):
+  RigorProfile recalculation at Change closure — the highest recalculated floor
+  governs what evidence is admissible (C-017 invariant 6); the calculation itself
+  remains the later 3G / N3 decision
+```
+
+3G-02 should name both as inputs to its predicates with their owners, exactly as it already does for budgets. One paragraph; no new decision content.
+
+---
+
+## 2. Answers to the remaining §15 questions
+
+**A1 — narrowed boundary sufficient?** Yes, with one caveat now explicit. Raw OBS/CAS/validator production is content-addressed or append-only and never enters closure truth except through serialized Builder admission — I could not construct a counterexample through that path. The one cross-owner read the closure predicate performs (current governance) cannot be serialized by the Change root, and R2F-2(a) handles it by guard-time semantics degrading into the acceptance-admissibility law — after which the narrowing is airtight.
+
+**A2 — bottleneck?** No. The root serializes **authority commits**, not work: admissions are short transactions, no transaction spans external I/O (3D-R1), and lock scope is one Change. Future parallel Work Units keep working — their sandboxed execution runs concurrently; only their admissions/deliveries serialize per Change, which C-017's serial-judgment model requires anyway. No global lock, no scheduler.
+
+**C6 — atomicity.** Correct minimum. Both records are `bld.*`, one owner, one transaction; 3E implies nothing different. Compose with the Class-2 audit-required transversal write where existing audit policy requires — same pattern 3G-01 §17 froze; no new class.
+
+**E13 — predicate family minimal?** Yes, three. Each has a distinct consumer that would lose its decision if collapsed: `dispatchAdmissible` gates work admission; `closureAdmissible` gates the terminal act; `checkpointRequired` is consumed by the approval surface and by both other predicates as an input — but it is not derivable *from* them (a Change can be non-dispatchable for budget reasons with no checkpoint required, and closure-inadmissible for matrix reasons likewise). Deleting any one re-hides a protected decision inside another predicate's failure reason.
+
+**E14 — masquerading rules?** Two demotions to note in the authority draft: the resolution-reason examples in §5 must be marked non-frozen (they will otherwise be copied as an enum), and the predicate names/signatures in §7 are illustrative only — both already half-said; say them once, normatively. Nothing else survives as disguised implementation: the serialize set, atomic success law, and guard-time semantics are all properties an implementation could otherwise legally violate, which is the test for architecture.
+
+**E15 — remaining C-017 obligations.** After FB-2/FB-3 restorations plus R2F-3 (discovery) and R2F-6 (Actor Pack compile gate, rigor recalc at closure), my sweep of C-017 invariants 1–13 finds nothing else missing from 3G-02's scope: invariants 4 (validation layers), 9 (rule lifecycle), 10 (sets/parallelism), 11 (commit matrix) live in later decisions and are correctly not re-frozen here.
+
+**F16/F17 — product/references.** Preserved. The user-facing surface consumes predicates + terminal outcomes — five macro-steps remain expressible with zero internal vocabulary leaking; nothing Missions-scale entered. Sweeping every rule for imitation-only justification: routes, budgets, fingerprint, discovery, immutable closure, independent verifier all trace to C-017/C-009/3E/3A-R5 invariants; I found no rule whose only support is "Factory/Mitra has it". Nothing to delete.
+
+**G18 — strongest schedules.** After R2F-1: (i) *false ACCEPTED* — the late-Finding race is closed by serialization; the governance-drift-at-commit variant degrades to inadmissible acceptance (R2F-2), which is honest, not false; (ii) *work under stale authority* — dispatch now serializes and gates on revision/plan/governance/budget/access/Actor-Pack; I could not construct an admission that both passes the gates and lands on superseded authority; (iii) *stale evidence accepted* — multi-pin compatibility plus explicit revalidation leaves only byte-identical genuine re-matches, which are correct; (iv) *route autonomy silently increased* — one-direction CAS plus resolution-by-decision path; no schedule found; (v) *terminal closure rewritten* — write-once guard plus zero-rows abort on every later Builder mutation. Named residuals, both accepted with triggers: non-monotonic DB time (inherited 3G-01 residual) and governance drift racing closure commit (absorbed by design into R2F-2's admissibility law).
+
+**G19 — readiness.** With R2F-1..R2F-6 incorporated, I have no remaining reachable counterexample and no unnamed hidden decision. **3G-02 is ready for operator review** — the authority draft should carry: Round-1 FB-1..FB-10 as refined in this file's §2–§11, plus R2F-1 (serialize-set completion), R2F-2 (guard-time closure semantics, context-pinned acceptance, successor verification Change), R2F-3 (discovery in checkpoint gate), R2F-4 (decision-relevance Finding admission), R2F-5 (least-autonomy composition), R2F-6 (inherited inputs named), and the proof traces from both rounds including both orders of every race with controls demonstrably firing. Agreement is not authority; the operator decides.
+
+---
+
+## 3. Proof strategy delta
+
+Add to §14:
+
+```text
+13. Work Unit/ActorRun admission racing terminal closure, both orders
+    → dispatch after closure aborts; closure after dispatch sees the
+      admitted work's facts                                             (R2F-1)
+14. two concurrent fix-class dispatches against remaining budget = 1
+    → exactly one admits                                                (R2F-1)
+15. governance drift committing between closure guard and closure commit
+    → closure stands; acceptance inadmissible to Release until
+      successor verification proof                                      (R2F-2)
+16. successor verification Change under new governance
+    → new acceptance pinned to current snapshot; old Change and old
+      acceptance untouched                                              (R2F-2)
+17. checkpoint approval attempted without discovery evidence or declared
+    NOT_APPLICABLE on a real-data Change
+    → checkpoint refused                                                (R2F-3)
+18. gap observation that would change a closure decision handled as
+    "commentary"
+    → must be refused by the admission criterion / test harness         (R2F-4)
+19. Finding requiring both contract revision and human decision
+    → route = HUMAN; resolution feeds revision path                     (R2F-5)
+20. dispatch with failed Actor Pack compilation
+    → refused                                                           (R2F-6)
+```
+
+---
+
+## 4. YAGNI audit of this round
+
+R2F-1..R2F-6 add:
+
+```text
+new durable records                  0
+new cross-module FKs                 0
+new atomicity classes                0
+new public codes                     0
+new subsystems/engines               0
+new Release-side machinery           0   (gate placement routed, proof reuses
+                                          NO_CHANGE_REQUIRED machinery)
+```
+
+The successor-verification-Change mechanism is deliberately the *reuse* answer: the alternative designs for B4 — mutable acceptance sets, Release-owned revalidation proofs, reopening closures — each either duplicate proof authority outside Builder or rewrite history. Reusing `NO_CHANGE_REQUIRED` closes the loop with machinery the candidate already carries.
+
+---
+
+## 5. Disposition
+
+```text
+Material Finding against prior authority   NONE — no reopen of 3C/3D/3E/3F/3G-01
+consolidated model                          CONFIRMED with R2F-1..R2F-6
+strongest open question (B4)                RESOLVED by guard-time closure semantics
+                                            + context-pinned acceptance
+                                            + successor verification Change
+readiness                                   READY FOR OPERATOR DECISION
+                                            once this round's deltas are incorporated
+```

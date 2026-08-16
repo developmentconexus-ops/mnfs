@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -47,6 +47,9 @@ C-000..C-017
 3F-03
 → exact sealed approval subject, single-claim/recovery binding, monotonic stale e atomic Gateway↔PAR admission
 
+3F-04
+→ typed ProjectConnectionBinding/ProjectBrainBinding contracts, Git-first adoption, exact pins, CAS e UX-safe product surface
+
 este LEDGER
 → status/navigation authority
 ```
@@ -64,7 +67,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
-| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 + 3F-03 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) · [3F-03](3F-03-approval-claim-approval-request-contract.md); próxima decisão deve ser trabalhada com o operador |
+| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 + 3F-03 + 3F-04 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) · [3F-03](3F-03-approval-claim-approval-request-contract.md) · [3F-04](3F-04-project-binding-contract-architecture.md); próxima decisão deve ser trabalhada com o operador |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
@@ -319,7 +322,7 @@ nenhum Finding material adicional de Data Architecture
 
 ---
 
-## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 + 3F-03 APPROVED
+## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 + 3F-03 + 3F-04 APPROVED
 
 ### 3F-01 — APPROVED
 
@@ -557,6 +560,79 @@ zero new probes
 no Material Finding against prior authority
 ```
 
+### 3F-04 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3F-04 | Project Binding Contract Architecture | [3F-04](3F-04-project-binding-contract-architecture.md) |
+
+3F-04 congela dois contratos concretos:
+
+```text
+ProjectConnectionBinding
+→ immutable pointer version
+→ (Project, slot, DEV|PREVIEW|PROD)
+→ exact Connection + exact ConnectionRevision
+
+ProjectBrainBinding
+→ immutable adoption/version
+→ exact Brain revision + exact brain-binding/v1 artifact revision
+```
+
+Shared laws, sem shared base:
+
+```text
+Git-first reproducible authoring
+mandatory source revision + acting principal provenance
+Hub current-authority adoption via expected-current CAS
+immutable historical versions
+same-Workspace / owner-admissibility checks
+no selector fallback / no live inheritance
+specialized-owner validation
+explicit Git-first UNBIND
+Release pins exact refs
+PUBLISHED_APP/AGENT_RUN never resolve mutable current Project binding
+```
+
+A assimetria é deliberada:
+
+```text
+brain-binding/v1 = semantic CONTENT → Registry artifact justified
+ProjectConnectionBinding = POINTER → no connection-binding artifact
+```
+
+Connection binding não copia credential, ConnectorDefinition, external environment, health, qualification, operation allowlist ou Release state. Qualification pode permanecer pending: binding structurally valid pode ser current Project intent, mas Release continua fail-closed até os gates atuais passarem.
+
+Brain binding não embute target Brain digest no artifact; o mesmo `brain-binding/v1` revision pode ser explicitamente revalidado/adotado com Brain revision posterior quando compatível, sem live inheritance.
+
+No `BindingSet`/`bindingSetDigest`: ReleaseManifest digest já commits the complete served composition.
+
+Product-experience laws:
+
+```text
+rigorous architecture underneath; simple experience on top
+UX-1 selection-time exact capture
+  friendly UI choice → exact revision captured at Save → deterministic Git source
+UX-2 update-available is read-only projection
+  never auto-adopts; explicit user action uses the same Git-first path
+```
+
+Git/digest/revision/CAS/binding-version internals não precisam fazer parte do vocabulário do usuário; Control Plane pode author/commit Git automaticamente e apresentar `Usar conexão`, `Testar conexão`, `Salvar`, `Atualização disponível`, `Parar de usar`, `Publicar` e `Histórico`.
+
+Review/provenance não-autoritativa:
+
+- [3F-FABLE-DIALOGUE-project-binding-contract-architecture.md](3F-FABLE-DIALOGUE-project-binding-contract-architecture.md)
+- [3F-FABLE-DIALOGUE-project-binding-contract-architecture-R2.md](3F-FABLE-DIALOGUE-project-binding-contract-architecture-R2.md)
+
+Convergência final:
+
+```text
+READY FOR OPERATOR APPROVAL
+no UNSUPPORTED mechanism
+zero new probes
+no Material Finding against prior authority
+```
+
 3F permanece aberta. A próxima decisão deve ser trabalhada com o operador antes de ser materializada.
 
 ---
@@ -576,13 +652,20 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` não pode virar authoring authority | 3H/3L probe |
 | F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
-| Project binding contract shapes | later 3F |
 | literal stable public codes / per-code details schemas | later 3F |
 | public-code → failure-locus mechanical table | later 3F |
 | per-family approval card/display contracts | later 3F / 3K |
 | ApprovalRequest lifecycle/FSM completo | 3G |
 | approver eligibility / admin revocation / post-admission cancellation | 3I / 3G |
 | reconciliation / re-send after `OUTCOME_UNKNOWN` | 3M / 3G |
+| authored Project binding source/file schema + exact literal mutation DTOs | later 3F / implementation |
+| exact `brn.binding_validation` ref if 3N proves it load-bearing | Decision Loop / 3N |
+| Project binding Control Plane UI realization | 3K |
+| binding lifecycle state labels / Project mutation lifecycle | 3G |
+| binding change permissions / authority enforcement | 3I |
+| binding/Release/runtime end-to-end proof | 3N / 3O |
+| pools/failover/shared resource extensions | Decision Loop on real consumer |
+| break-glass binding/runtime override | Decision Loop on real incident failure class |
 | DEDICATED identity/authority exchange shape | later 3F / trust em 3I |
 | DEDICATED egress/network policy | 3I/3J |
 | MANAGED/DEDICATED deployment topology | 3J |
@@ -602,6 +685,7 @@ Resolvido:
 - 3E arithmetic discrepancy `44 vs 46` → corrigida como defeito documental; nenhuma classe removida.
 - F3B-R2 legacy `MissionPlan v2` → 3F-01 define one-time `TRANSFORM` para semântica atual de Change / Work Unit; sem compatibility layer permanente.
 - approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; lifecycle, approver authority e post-admission cancellation permanecem roteados.
+- Project binding contract shapes → **RESOLVIDO por 3F-04** como dois contratos concretos, Git-first, exact-pinned e sem GenericBinding/BindingSet; lifecycle, authority e UI permanecem roteados.
 
 ---
 
@@ -656,6 +740,18 @@ keyed-hash approval commitment subsystem
 persistent effect-attempt preallocation record
 UniversalAuthoritySnapshot / DisplayContext bag
 transaction across external I/O
+Binding<T> / BindingRepository / BindingService / BindingSet / bindingSetDigest
+generic binding mutation `{kind,target,payload}`
+connection-binding Registry artifact
+universal slot catalog / automatic slot inference
+binding-level credential/health/qualification/ConnectorDefinition/environment mirrors
+binding operation allowlist
+embedded target Brain digest apenas para simetria
+binding `latest` / `current` / name-matching / time-varying auto-selection
+implicit selector fallback or Connection failover
+dual Git + Hub-only binding authoring paths
+DB-only emergency binding rebind sem Decision Loop
+runtime mutable-current Project binding lookup para PUBLISHED_APP/AGENT_RUN
 Kafka/Kubernetes/Temporal by default
 ```
 
@@ -677,6 +773,7 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3F-01 = APPROVED
 3F-02 = APPROVED
 3F-03 = APPROVED
+3F-04 = APPROVED
 3G = NOT STARTED
 ```
 

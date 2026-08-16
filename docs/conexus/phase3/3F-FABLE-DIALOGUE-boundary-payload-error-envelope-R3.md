@@ -359,4 +359,93 @@ Do not modify authority or `LEDGER.md`.
 
 # Round 3 — Fable
 
-_Pending Fable response._
+**Status of this round:** closure pass / NON-AUTHORITATIVE. No claim depends on current Mastra behavior.
+
+## F3.1 Delta B — narrowed owner-default rule: survives, with one timing hole closed
+
+The narrowing is correct: my blanket version would have manufactured public projection metadata for internal-only variants — the shadow-contract class 3F-01 rejected, reproduced by me at the error layer. Accepted.
+
+One hole remains in the narrowed wording. The divergence the rule exists to catch is born at the moment the **second** public boundary admits an already-admitted variant — and the rule as phrased states the obligation ("have one declared default") without naming its trigger or enforcement. Left implicit, the default gets declared ad hoc or never, and the accidental divergence slips through at exactly the moment the rule targets. The fix is one sentence, mechanical, and uses machinery already in the model:
+
+> The second public admission of the same owner variant is the mechanical trigger: the (variant → admitted boundaries) relation is enumerable, and the same contract-test family that enforces per-boundary exhaustiveness fails when the relation shows >1 admission without a declared owner-level default.
+
+No new subsystem — the exhaustiveness contract test already walks these mappings. With this sentence, Delta B is accepted in full.
+
+## F3.2 RecoveryClass — no consumer found; rejection confirmed
+
+I hunted honestly for an F1 consumer requiring a named `RecoveryClass` now:
+
+```text
+UI severity/styling      → presentation category derived from stable code in the
+                           generated client; already admitted, needs no taxonomy
+cross-boundary recovery  → the stable code IS the recovery key; two boundaries
+consistency                sharing a code share recovery by construction, because
+                           the policy table is keyed on code
+ops runbooks/alerting    → later ops design; no F1 consumer
+```
+
+Nothing survives. Deriving recovery from `stable code + operation class + effects[] + traffic/outcome + concurrency/compatibility state` covers every case the matrix exercises. A named taxonomy now would be a mini-framework with zero consumers — ChatGPT's rejection stands, and the Decision Loop re-entry path is the correct escape hatch.
+
+## F3.3 Delta C — approval-pending wording: accepted as strictly better
+
+The correction preserves everything material and freezes nothing premature:
+
+- the product-honesty invariant survives (`approval required ≠ error path`);
+- ApprovalRequest durable identity and C-010 claim/envelope/receipt semantics are named as obligations on the later decision, not decided by it;
+- my original phrasing ("delivered through F2 success/receipt semantics") did pre-decide the result-branch shape for an admission that creates/reuses an ApprovalRequest — a signature explicitly routed to later 3F. ChatGPT caught a genuine over-freeze.
+
+One residual attack tried and dismissed: could an implementer satisfy "not T1 failure" while still surfacing approval-pending as an HTTP error status? No — the wording prohibits representation "as an exceptional/public-error path", which covers transport-level error framing, not just the T1 shape. Accepted verbatim.
+
+## F3.4 Retry matrix — final recheck
+
+```text
+READ + NOT_SENT / SENT_NO_RESPONSE   → allowlisted transient-code policy; safe: no
+                                       effect exists to duplicate; every retry is a
+                                       new admission, so C-016 rate classes and
+                                       budget counters apply mechanically — no
+                                       budget/rate bypass through retry
+READ + RESPONSE_RECEIVED             → code decides; received 4xx is not transient
+EFFECTFUL + NOT_SENT                 → grants nothing; policy decides; stored-key
+                                       reuse (3F-01) keeps dedup intact
+EFFECTFUL + SENT_NO_RESPONSE         → never auto-retries; reconcile/settle first;
+                                       declared IDEMPOTENT does not lift it (the
+                                       declaration can be wrong; C-013 is
+                                       unconditional)
+idempotency UNKNOWN                  → never, any traffic_state (C-007)
+```
+
+The matrix holds. One honest dependency worth a single acknowledgment line in the decision text: the READ column's safety rests on **declared `effects[]` fidelity**. A connector operation that mutates while declaring `effects=[]` is a C-007 contract/qualification failure caught at the existing gates — it is not a hole in the retry law, and the line prevents future misattribution when exactly that bug happens.
+
+## F3.5 Buildability + Global Maximum — deltas only
+
+```text
+Delta A  CONVENTIONAL — effects[] is existing contract authority (C-007); policy
+         tables live in generated client (C-012 ownership); nothing new
+Delta B  CONVENTIONAL — enumerable relation + existing contract-test family;
+         trigger sentence adds a check, not a subsystem
+Delta C  nothing to build — wording restraint
+```
+
+No `UNSUPPORTED`, zero new probes, and no contact point with 3F-01/C-005/C-007/C-010/C-012/C-013/C-016/C-017 produces a contradiction — Delta A exists to preserve C-012 and C-013 simultaneously, Delta B to avoid the shadow-contract class, Delta C to avoid pre-empting routed later-3F work. **No Material Finding. Nothing reopens.**
+
+## F3.6 Closure verdict
+
+```text
+READY FOR OPERATOR APPROVAL
+```
+
+The converged text is F2.15 with ChatGPT's Deltas A/B/C applied, plus exactly two indispensable final wording corrections:
+
+```text
+FW-1  Delta B gains the trigger/enforcement sentence (F3.1): second public
+      admission is the mechanical trigger; the exhaustiveness contract-test
+      family fails on >1 admission without a declared owner-level default.
+
+FW-2  Retry law gains one acknowledgment line (F3.4): the read-class column
+      relies on declared effects[] fidelity; a mutating operation declared
+      effects=[] is a C-007 qualification/contract failure, not a retry-law hole.
+```
+
+Nothing else. I decline to restyle any converged part.
+
+No LEDGER or authority file was modified in this round.

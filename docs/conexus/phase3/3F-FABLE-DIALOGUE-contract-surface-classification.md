@@ -1167,3 +1167,136 @@ Everything below is the draft the operator can approve, reject, or amend. It is 
 **Convergence note to the operator:** ChatGPT and Fable now agree on the model's shape after two adversarial rounds each way; per protocol rule 6 this agreement is *not* approval. The five sharpenings S-1..S-5 are incorporated in the draft above. If ChatGPT accepts them in a short Round 3 confirmation, the draft is ready for operator arbitration as the first 3F decision.
 
 No LEDGER or authority file was modified in this round.
+
+---
+
+# Round 3 — Fable — Final Adversarial + Buildability Review
+
+**Status of this round:** final adversarial review + buildability audit / NON-AUTHORITATIVE.
+**Method:** the R2.11 draft was re-attacked with a different weapon: instead of asking "is the architecture right?", this round asks **"can we actually build each mechanism with the stack and topology already decided, and what evidence proves it?"** Evidence corpus used: Mitra reference maps (`docs/reference/mitra/00,02,04,05,06`, backed by the frozen `MITRA-INSPIRATION-MAP.md` v0.9.0 evidence chain), `docs/research/FACTORY-AI-HARNESS-REFERENCE-MAP.md` (public contracts only, per its own evidence classes), C-005..C-017, 3A-R5, and in-house executed practice from the MNFS acervo (C-000 fact base). Nothing was copied from Mitra or Factory by analogy; each mechanism was tested against *observed* behavior or *executed* in-house practice.
+**Protocol rule 8 compliance:** no claim depends on current Mastra behavior. Every Mastra-adjacent item below is classified `PROBE_REQUIRED` and cites only the probe already frozen by 3A-R5 (`CX-BUILDER-MASTRA-01`). Context7 verification therefore not triggered.
+
+## R3.1 Verdict summary
+
+All ten mechanisms are realizable with the decided stack (TypeScript modular monolith Hub, PostgreSQL `hub_control`, git-first registry, E2B/Mastra builder substrate, pg-boss seam, C-015 serving topology). **No mechanism classified UNSUPPORTED.** Every `PROBE_REQUIRED` item maps to a probe that prior authority *already declared* — this round adds zero new probes. I found **one internal inconsistency in my own Round 2** (R3.4) and **four final corrections** (R3.6), all small. The 3D/3E challenge was re-run with the buildability lens and again produced no Material Finding. Verdict at R3.7.
+
+## R3.2 Buildability classification — the ten mechanisms
+
+### 1. `INTERNAL | INDEPENDENT | CONDITIONAL` — **CONVENTIONAL**
+
+A design-time classification discipline over a TS modular monolith. Runtime cost: zero. Enforcement of INTERNAL narrowness is lint/import-boundary machinery C-012 already mandates for the frontend (`noRestrictedImports`, generated-check) applied to the Hub — commodity tooling. No topology assumption beyond 3C-01, which is already authority.
+
+### 2. Durable-representation trait D1/D2/D3 — **CONVENTIONAL**
+
+A decision *procedure*, not a subsystem. It executes at design/review time and its output is matrix rows. The only buildability risk is governance (future actors misapplying it), mitigated by the matrix being a binding baseline plus Decision Loop for new rows — the same mechanism every closed union in C-005..C-017 already uses. No machinery to build; nothing to probe.
+
+### 3. Five gap modes — **PROVEN (3 of 5 by direct observation) + CONVENTIONAL (2)**
+
+| Mode | Class | Evidence |
+|---|---|---|
+| DISCARD | **PROVEN** | Mitra runs the exact pattern in production: sandbox discarded at 20-min idle, only git survives (`00-OVERVIEW` fact 1, `05-ciclo-de-vida`); 3A-R5 froze the same invariant for us. The Sankhya import cursor is *derived from the mirror itself* (`SELECT MAX(DTALTER)` minus 1h overlap, `04-integracao-externa`) — durable continuation state that is disposable by construction, observed working against a real ERP |
+| TRANSFORM | **PROVEN** | forward-only migrations executed in-house (MNFS versioned store migrations, C-000 REUSE verdict) and observed in Mitra (migrations materialized by the system, forward-only, `05`) |
+| REJECT_STALE | **PROVEN** (pattern) | Mitra rollback = promote of an old tag, code-only, explicitly coherent with forward-only migrations (`05`) — a fail-closed staleness decision in production. Our digest-handshake variant (CLIENT_OUTDATED) is not observed in Mitra — it is our *addition*, and it is commodity build-hash checking, covered by `CX-SCAFFOLD-V0-01` boundary items |
+| QUIESCE | CONVENTIONAL | drain of a Postgres-backed queue + maintenance window; pg-boss stop/drain is standard; C-006 already designed the drain semantics including queued/deferred/retry |
+| PRESERVE | **PROVEN** (mechanism class) + CONVENTIONAL (horizon) | Mitra's registry executes artifacts by id in production while the platform evolves underneath (`02`, `06`) — the mechanism class works at commercial scale. Horizon *enforcement* (references computed from complete ReleaseManifests gating GC) is conventional given C-014's complete-manifest invariant and C-015's two-phase GC precedent |
+
+### 4. Idempotency/fingerprint/digest derivation versioning — **CONVENTIONAL**, with one realization rule promoted to the decision text
+
+Digest pinning is *executed in-house practice*, not theory: `treehouse` pinned by sha256, D-022 acceptance by exact git blob bytes, plan approval by pinned revision (C-000 fact base; AGENTS.md legacy state). Canonical JSON serialization has a standardized profile (RFC 8785-class canonicalization) with pinnable implementations — no research risk.
+
+The buildability audit produced one materially better realization than R2's wording implies: for **idempotency keys**, the safest construction is **persist-once, reuse-verbatim** — the key is computed once at admission, stored in `gw.idempotency_claim`, and every retry reuses the *stored* key instead of recomputing. Derivation drift then cannot double-execute an effect, structurally, for any already-admitted attempt; derivation versioning only governs *new* admissions. Recompute-and-compare survives only where comparison across time is inherent — finding fingerprints (already versioned by C-017) — and there derivation versioning is genuinely required. This becomes FC-2.
+
+### 5. Adapter → vendor compatibility — **PROVEN (loop) + PROBE_REQUIRED (specific substrates, probes already declared)**
+
+The pin + conformance loop is in-house executed practice: spike AS-02 ran SRT pinned with conformance criteria S1–S15 PASS; binary pinning by sha256 is MNFS operational history. Factory's public SDKs (typed TS/Python contracts, JSON-RPC daemon, typed event streams) demonstrate that vendor-side harness contracts are stable, versioned, consumable surfaces — evidence that the *category* is tractable, not a recommendation to adopt Factory. What remains empirical is per-substrate: Mastra/AgentController + `@mastra/e2b` fidelity, egress policy delivery, credential non-exposure — all items 1–14 of `CX-BUILDER-MASTRA-01` (3A-R5) plus `CX-SBX-E2B-01` (C-008). **Zero new probes needed; 3F-01 adds no assumption those probes do not already cover.**
+
+### 6. Browser/runtime contract — **PROVEN (neighboring production evidence) + CONVENTIONAL (our handshake)**
+
+Mitra ships the exact shape in production against a real ERP: SPA + restricted runtime SDK executing only registered artifacts by id + publish-time environment injection (`window.__mitraEnv`, `06-runtime-publicado`). What Mitra does *not* have is a staleness handshake — and its measured failure mode (routes silently degrading to an empty SPA response, `05`/`06` REJECT rows) is precisely the failure class CLIENT_OUTDATED closes. Digest comparison + fail-closed refuse + reload is commodity engineering; `CX-SCAFFOLD-V0-01` already includes the boundary proof (codegen reproduced hub-side, digest checks). No new probe.
+
+### 7. Artifact kind/vN compatibility — **PROVEN (mechanism class) + CONVENTIONAL (our revisioning discipline)**
+
+Mitra proves the load-bearing half in production: registry-executed artifacts (SF/dataLoader/dbAction by id), declarative `INTEGRATION` artifacts as pure JSON contracts executed by the platform, credential by symbolic handle (`02`, `04`). Mitra's *measured weakness* — SFs are mutable in place, "o script é a versão", no platform versioning (`02`) — is exactly what C-005's immutable compiled revisions fix; our addition is standard content-addressed revisioning plus schema validation, both conventional. PRESERVE-horizon enforcement rides on C-014 complete manifests (conventional reference-closure computation). Executor-side backward execution for admitted revisions is contract-test discipline already mandated by C-005 conformance requirements and exercised by `CX-REL-V0-01`.
+
+### 8. ApprovalRequest hash-pinned envelope — **CONVENTIONAL** (with in-house exact-bytes precedent)
+
+Deterministic canonical bytes → hash → encrypted storage → atomic claim in one Postgres transaction → deterministic executor of the exact envelope. Every element is commodity: canonicalization per item 4, SHA-256, AES-GCM already pinned by C-007, single-database atomicity guaranteed by 3E-01 (`gw` + `par` in one `hub_control`). The in-house precedent for exact-bytes-as-authority is D-022 (acceptance bound to exact git blobs) — the same discipline, already operated. One realization detail worth a single line in later 3F design, not in 3F-01: hash is computed over plaintext canonical bytes *before* encryption and stored alongside. Notably, the Mitra sonda (C-009) demonstrates the *absence* of this machinery in the competitor — approval restraint there was model choice, never invariant — which is the product reason to build it, and nothing in it is technologically novel.
+
+### 9. ETL/sync cursor — **PROVEN**
+
+The strongest single piece of buildability evidence in the corpus: Mitra's real Sankhya import runs pagination-until-exhausted with a safety ceiling, chunked upsert, overlap cursor derived from the mirror itself, and a complete import log (`LOG_IMPORTACOES` with stages, duration, params, error — success *and* failure) — observed against a production ERP gateway that truncates at 5.000 rows/call (`04-integracao-externa`). C-006's cursor+overlap+staging+upsert contract is this pattern, hardened. The R2.9 decomposition (semantic contract in `connector/v1` / our watermark migration-private / provider token DISCARD-tolerant) matches what was observed working.
+
+### 10. Failure loci — **CONVENTIONAL** (with in-house taxonomy precedent)
+
+Typed, closed error taxonomy is executed in-house practice: the MNFS kernel ships 52 typed error codes (C-000 fact base, REUSE-as-pattern verdict). Mapping four semantic loci onto boundary-specific closed code unions is classification work, not technology. The L4-pages-someone / L3-does-not distinction is ordinary alerting discipline wired to `agent_event` (C-013).
+
+## R3.3 Hunted: "architecturally pretty but hard to realize"
+
+I specifically hunted for mechanisms that read well but would fight the stack. Results:
+
+```text
+PRESERVE horizon computation      → rides on C-014 complete manifests + C-015
+                                    two-phase GC precedent; reference closure is
+                                    a query, not a subsystem. NOT hard.
+compositional executionContext    → Merkle-style composition, already aciclic by
+digests (C-017)                     C-017 construction. NOT hard.
+end-to-end external idempotency   → CANNOT be guaranteed by us — and the draft
+                                    does not claim it. Sankhya offers no
+                                    idempotency-key surface; C-007 effects[] with
+                                    idempotency UNKNOWN fail-closed and C-013
+                                    OUTCOME_UNKNOWN reconciliation already carry
+                                    this honestly. FC-3 makes the boundary of the
+                                    claim explicit in the decision text so nobody
+                                    reads `idempotency_claim` as a vendor promise.
+canonicalization determinism in JS → real pitfall class (number normalization,
+                                    key ordering, unicode), fully closed by
+                                    pinning a canonicalization profile AND its
+                                    implementation, consistent with the C-005
+                                    parser-pinning culture. FC-1.
+```
+
+Nothing surfaced that the stack cannot carry. No UNSUPPORTED classification was needed anywhere.
+
+## R3.4 One inconsistency found in Round 2 — corrected here
+
+R2.8 states externally-owned surfaces admit only `REJECT_STALE` and `TRANSFORM`; R2.9 classifies provider-issued continuation tokens as `DISCARD`-tolerant. Both are right and the wording collides: R2.8 governs the vendor's *API/SDK evolution* (where PRESERVE is never ours to promise), R2.9 governs *provider-issued state that Conexus retains*. The R2.11 draft §3 copied only the R2.8 half. FC-4 fixes the sentence.
+
+## R3.5 Global Maximum challenge re-run against 3D/3E — with the buildability lens
+
+New angle, same outcome. The buildability evidence *actively confirms* the closed decisions rather than straining them: Mitra operates database-per-project + registry execution + server-side credential custody in production, which is the C-006/3E/C-007 shape; the registry mechanism class proves 3D's Gateway-mediated execution is realizable; nothing in the Factory public contracts suggests any identified gap needs a port, bus, or transport layer direct-call-first forbids. **No Material Finding against 3D or 3E. No reopening proposed — third adversarial pass, third confirmation.**
+
+## R3.6 Final indispensable corrections to the R2.11 draft (no redesign)
+
+```text
+FC-1  §4 digest contracts: each authority-bearing digest domain declares algorithm,
+      canonical-bytes profile AND pinned implementation identity (library/version),
+      per the C-005 parser-pinning culture. Concrete library selection remains
+      later 3F/3L work.
+
+FC-2  §2 D2 realization rule: idempotency keys are persist-once, reuse-verbatim —
+      retries reuse the stored key, never recompute; derivation versioning governs
+      new admissions only. Recompute-and-compare (finding fingerprints) requires
+      versioned derivation, as already stated.
+
+FC-3  §5 one clause added: idempotency_claim and the failure loci assert Conexus-side
+      deduplication only; they never assert external-system idempotency — external
+      effect uncertainty remains carried by C-007 effects[]/UNKNOWN fail-closed and
+      C-013 OUTCOME_UNKNOWN reconciliation.
+
+FC-4  §3 externally-owned sentence becomes: "Externally-owned surfaces admit only
+      REJECT_STALE and TRANSFORM for the vendor contract itself; PRESERVE is never
+      promised on a surface Conexus does not own; DISCARD may additionally govern
+      provider-issued state Conexus retains, where disposability is already designed."
+```
+
+Nothing else in the R2.11 draft requires change. I explicitly decline to restyle, re-partition, or extend the model further — every remaining idea I considered failed the deletion test or duplicated an existing probe.
+
+## R3.7 BUILDABILITY VERDICT
+
+```text
+READY FOR OPERATOR APPROVAL
+```
+
+with FC-1..FC-4 applied to the R2.11 draft text. Evidence basis: 3 of 5 gap modes and 3 of 10 mechanisms directly observed working in production (Mitra, frozen evidence chain), the pin/conformance and exact-bytes disciplines already executed in-house (AS-02, D-022, treehouse), all remaining items conventional engineering, and every empirical residue already covered by probes prior authority declared (`CX-BUILDER-MASTRA-01`, `CX-SBX-E2B-01`, `CX-SCAFFOLD-V0-01`, `CX-REL-V0-01`, `CX-PUB-V0-01`, `CX-OBS-V0-01`). This round adds zero probes, zero subsystems, and zero reopenings.
+
+No LEDGER or authority file was modified in this round.

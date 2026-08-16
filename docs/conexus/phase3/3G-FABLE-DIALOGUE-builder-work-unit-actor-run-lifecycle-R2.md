@@ -731,3 +731,209 @@ later owner if deferred
 ```
 
 Do not modify `LEDGER.md`, approved authority, earlier dialogue files or product code. Append `# Round 2 — Fable` to this R2 file and commit/push only this dialogue file.
+
+---
+
+# Round 2 — Fable
+
+## 0. Position and provenance
+
+Authority re-verified from `AGENTS.md` read order at HEAD `4ca673d`; no authority document changed since Round 1 — only this R2 file is new. This round makes **no current-Mastra claim**; nothing below depends on substrate behavior.
+
+Verdict up front:
+
+```text
+consolidated model                              → SOUND; survives most attacks
+generic write-once producedOutputRef            → ACCEPTED (Q1–Q4: no incompatible
+                                                  role class found)
+orphan terminalization as consolidated          → DEFECT FOUND (R2F-1)
+material sharpenings this round                 → R2F-1 .. R2F-5
+Material Finding against prior authority        → NONE; no reopen
+readiness                                       → READY FOR OPERATOR DECISION
+                                                  with this round's deltas incorporated
+```
+
+---
+
+## 1. Material findings
+
+### R2F-1 — orphan terminalization must not target a run with a durably presented output (answers Q6, corrects §3)
+
+**Claim challenged:** §3 permits guarded orphan `FAILED` over any "non-terminal ActorRun + sufficient basis that execution is no longer live", and asks terminalization to "lose against a concurrently committed terminal/delivery presentation" — but presentation is not terminal, so as guarded (`terminal IS NULL`) the terminalization **wins** against a run that has already presented.
+
+**Counterexample.** A1 durably presents `producedOutputRef = X`; the runtime then dies (or merely goes quiet). Liveness evidence honestly says "no longer live". The orphan act writes `FAILED` — write-once, irreversible — onto a run whose valid candidate sits durably awaiting judgment **that needs no runtime to proceed**. The candidate is never judged; the terminal asserts failure where none was proven; work is discarded against C-017's honest-outcome discipline. This is not a liveness false-positive (which §3 correctly tolerates); it is the guard targeting the wrong population.
+
+**Smallest correction.** Key the two recovery paths on the ref, and put it in the guard:
+
+```text
+non-terminal + producedOutputRef ABSENT
+→ orphan-limbo population
+→ explicit guarded terminalization (FAILED, typed reason) applies
+   guard: terminal IS NULL AND producedOutputRef IS NULL
+
+non-terminal + producedOutputRef PRESENT
+→ not an orphan: judgment of the recorded identity resumes (Case B)
+→ terminal arises only from that judgment (DELIVERED or FAILED-by-rejection)
+   or from explicit CANCELLED by authority
+```
+
+With the ref inside the mechanical predicate, the Q6 race closes deterministically in both orders under the existing serialization root: presentation commits first → terminalization guard hits zero rows and aborts; terminalization commits first → late presentation is refused and quarantined. No lease, no heartbeat, no new fact.
+
+**Reopen:** none. **Owner:** 3G-03.
+
+### R2F-2 — same-identity re-presentation is idempotent read-back (answers Q10)
+
+The write-once presentation guard (`WHERE producedOutputRef IS NULL`) leaves retry behavior undefined: a crash between the presentation commit and its acknowledgment makes re-presentation the *normal* recovery path, not an anomaly. Freeze the mirror of 3G-01's decision law:
+
+```text
+re-presentation of the SAME exact identity X on the same ActorRun
+→ zero rows → idempotent read-back of the recorded fact; success semantics
+
+presentation of a DIFFERENT identity Y
+→ refused; Y requires a new admitted ActorRun
+```
+
+Zero new facts; makes presentation safely retryable by construction and closes Q10 without any idempotency-key machinery.
+
+**Owner:** 3G-03.
+
+### R2F-3 — Work Unit admitted authority is immutable; evolution is a successor Work Unit (answers Q15)
+
+**Claim challenged:** §7/§10 leave open whether a WU can remain "a member of the current approved decomposition" while its own declared authority (sets/scope/pins/fulfills) changes.
+
+**Failure class.** If WU authority facts are mutable, "membership" loses meaning: a widened `writeSet` on the same WU identity silently converts every historical attempt, budget consumption and reconciliation judgment made under the old authority into judgments about a different bounded work — the same drift class FB-2 killed for outputs, one level up.
+
+**Smallest correction.** One law: a Work Unit's admitted authority facts are **immutable after admission**; any change of sets, scope, pins or fulfills is the admission of a **successor Work Unit** under current decomposition authority (serialized like any bounded-work admission). This makes Q15's answer crisp — a WU whose sets must widen is *by definition* no longer the current bounded work — and makes decomposition membership well-defined for DIRECT Changes using only existing admission facts (Q14: confirmed, no Plan object needed).
+
+**Owner:** 3G-03.
+
+### R2F-4 — every ActorRun belongs to exactly one Change (answers Q13)
+
+**Claim challenged:** §6 scopes serialization "for ActorRuns associated with a Change", implying some might not be.
+
+**Failure class.** An ActorRun with no owning Change has no serialization root, no budget aggregate, no closure relationship — it floats outside every law this decision freezes. The only candidate I found is Project Inception investigation (3B-05/3D-03), which precedes first Changes.
+
+**Smallest correction.** Freeze the C-017 work-graph law explicitly: **ActorRun admission requires exactly one owning Change**. If Inception (or any future flow) needs agentic Builder execution, it admits an investigation-class Change (the `NO_CHANGE_REQUIRED` machinery fits naturally) or returns through the Decision Loop. No orphan population exists by construction.
+
+**Reopen:** none — instantiates C-017's graph. **Owner:** 3G-03; Inception realization stays with its own use-case owner.
+
+### R2F-5 — identity is canonical-content-level and immutable; custody/resolvability is repairable (answers Q8, Q9)
+
+Q8's "packaging repair" worry dissolves once the decision states where identity lives: the recorded output identity MUST be at the **canonical content level appropriate to the result class** — commit/tree identity for code, report/Evidence digest for verification, receipt identity for effects — never at the level of archive bytes or storage location. Then:
+
+```text
+re-packaging the same tree            → same identity; nothing changed
+broken ref/storage to same content    → custody repair (3M); identity untouched
+semantically different result         → different identity → new ActorRun
+```
+
+Q9 follows: temporarily unresolvable X leaves A1 lawfully non-terminal (judgment blocked, no deadline in architecture); restoration is 3M custody recovery; a permanent-loss determination supports an explicit `FAILED` act. Both waiting and explicit failure are lawful; no new state, no timer.
+
+**Owner:** 3G-03 for the identity-level law; custody machinery 3M.
+
+---
+
+## 2. Answers to the remaining §16 questions
+
+**Q1–Q4 — generic output ref.** Valid, not a fake universal. I attacked it with every current role class: code mutation (commit/bundle identity), verification report (Evidence-candidate digest), no-op verification (source identity + oracle proof composite), effectful work (receipt-set manifest), discovery (evidence identity). Each resolves to one exact identity in an **already-authorized typed owner**; the abstraction is "one identity presented for judgment", never one payload or one resolver — interpretation stays role-typed. Q2: verifier crash recovery *should* ride the same ref — the alternative (rerun a whole verification LLM pass because a report awaiting admission was lost with the process) is strictly worse and needs a second recovery doctrine; generic is globally smaller. Q3: a single `DELIVERED` meaning is safe **mechanically** — verdict/Finding content flows only through separate admission, so no machine consumer can read terminal-as-verdict; the residual risk is presentation labeling, which is a one-line 3K note ("role-class run outcomes must not render as content success"), not architecture. Q4: none found.
+
+**Q5 — lease/liveness fact.** Not needed in F1, for a topology reason worth stating in the decision: the Hub is a single modular-monolith process (3C-01) — there is no second authority-writer to split-brain with. The Hub-vs-runtime "split" is already safe because the runtime holds zero authority; write-once terminal + late-output law settle it. Named trigger: a multi-process/distributed Hub dispatch topology would need a lease/claim fact via Decision Loop — that trigger belongs in the reopen list.
+
+**Q7 — zombie run on superseded WU.** No mandatory drain law needed for correctness: its presentation is refused under current authority, and — the part worth stating — **attempt budgets are the mechanical bound on zombie cost**, already durable and already gates. Authority MAY cancel (`CANCELLED`, reason authority-withdrawn); when/whether to auto-cancel is cost/product policy → 3H/3K/implementation. Freezing auto-cancel now would be policy masquerading as architecture.
+
+**Q11.** Preserved mechanically — see Q3. `DELIVERED` on a verifier run changes no Finding/Evidence fact; promotion still requires the separate C-017 admission acts, which serialize independently.
+
+**Q12.** No better three-term partition exists because the space is complete: outcomes factor as (output admitted?) × (deliberately stopped before admission?) → `DELIVERED`, `FAILED`, `CANCELLED` cover it exhaustively and exclusively. The self-report ambiguity is carried by the word, not the semantics — mark the literals non-frozen (an implementation may spell `OUTPUT_ADMITTED`) and freeze the meanings.
+
+**Q14.** Well-defined — see R2F-3.
+
+**Q16/Q17 — effect ambiguity and run reasoning.** I could not construct an unsafe **run-level** behavior that architecture must block before the Gateway: local compensating work based on a wrong assumption about an ambiguous effect is a *content quality* failure, caught where content truth is judged — assertions/witnesses under the applicable rigor (C-017 invariant 4/6), not by making Builder an effect authority. The Q17 fact supplier: Gateway's own projection (traffic/outcome state) consumed as **evidence/context** — the dispatch context MAY surface known `OUTCOME_UNKNOWN` state to the run, and the honest-uncertainty discipline (unknown is unknown, never assumed either way — C-013 heritage) governs what the agent may write into produced content. Reading a projection creates no second authority; deciding replay would — and that stays refused.
+
+**Q18/Q19 — post-cancel contamination.** Real, and already double-covered: (a) **mechanically**, post-terminal runtime mutations can only re-enter through a future attempt's own presented output, which passes full set/byte reconciliation — contaminated extra changes surface there and fail delivery; (b) **cognitively**, contaminated-session risk is precisely 3A-R5's named fresh-session trigger, realized by 3H. 3G-03 needs one sentence stating (a) as the semantic consequence; no quarantine state, no new law. Q20: no durable cancel-intent — terminal `CANCELLED` is the user's decision; "stopping…" is ephemeral 3K surface.
+
+**Q21 — re-sweep.** After the two rounds, remaining gaps found: (i) `bld.coding_session` deserves one line — it records continuity/correlation facts only, never authority; lifecycle mechanics 3H under 3A-R5 (without this line it is the only 3E Builder record 3G-03 never characterizes); (ii) validator budget reservation before dispatch (C-017 invariant 4) is covered by generic budget gates but worth naming in the dispatch inputs alongside FB-7's items. Nothing else missing from C-017 invariants 1–13 or 3G-02 within this scope.
+
+**Q22 — handoff vs 3F.** No duplication — say why explicitly: the typed handoff is an **F5 `PROPOSAL`** under 3F-02's already-approved family (producer proposes; owner validates/decides/applies; transport never redefines authority). Delivery admission is the owner-side judgment of that proposal. No universal handoff contract arises; per-role schemas are implementation under existing F5 law. This one sentence also future-proofs against someone "discovering" a HandoffContract subsystem.
+
+**Q23.** Only same-WU competing implementations are blocked. Verifier/role-class runs are outside the one-active law by the FB-3 partition; C-017's verifier topology (fresh session judging a delivered candidate) is untouched, including a verifier running while another WU of the same Change executes.
+
+**Q24.** None found: no timeout, lease, heartbeat, or cap is load-bearing for correctness anywhere in the consolidated model — liveness is evidence-based act, cost is budget-bounded, races are guard-bounded. Calibration numbers remain calibration.
+
+**Q25 — steelman against durable `producedOutputRef`.** Strongest version: the identity already lives in its typed owner, so the ref duplicates a pointer, and crash recovery could rediscover outputs by correlating `agent_event`. Refutation: **presentation is an authority act, and OBS is never current domain truth** (C-013/3D-R1) — reconstructing "was a candidate durably presented for judgment?" from telemetry would make OBS load-bearing for authority, which is structurally forbidden. The ref is the Builder-owned fact of that act; it stays.
+
+**Q26 — steelman for a WU terminal fact.** Strongest version: operational queries ("abandoned work") need a one-column answer. Refutation: queryability is a non-authoritative projection/view problem — the same argument that lost as 3G-01 Alternative B — and a durable WU terminal would *require* fan-out writes on every decomposition change, recreating exactly FC-3. Rejected.
+
+**Q27 — steelman for a fourth terminal.** Strongest version: `SUPERSEDED` distinguishes "run was fine; authority moved" from failure for honest history. Refutation: `CANCELLED` + typed reason carries the same history; no consumer branches on terminal beyond reason; a fourth value would exist only for taxonomy aesthetics. Rejected.
+
+**Q28 — deletable rule.** Exactly one: the Builder-side advisory effect-state check (§8) is genuinely optional — deleting it loses efficiency, no failure class, because enforcement is entirely Gateway-side. It should be marked MAY/non-normative in the decision. Everything else fails the deletion test: each remaining rule re-opens a named failure class when removed.
+
+**Q29.** None found — every rule traces to C-017/3G-02/3A-R5/C-008/3E invariants; Mitra/Factory contributed problem-shapes (honest stop, worker≠validator) whose Conexus justification is independent.
+
+**Q30.** Yes — existing `bld.*` facts + write-once guarded mutations + the 3G-02 root + typed refs + the 3A-R5 runtime boundary. No engine, no queue, no scheduler, no new record.
+
+**Q31 — strongest schedules, final sweep.** (i) *duplicate active attempt* — admission guard + root, both orders deterministic; (ii) *moving candidate* — write-once + canonical-identity verification (R2F-5) leaves no schedule; (iii) *delivery after Change closure* — FB-4 membership: late delivery aborts on the closed-Change guard; (iv) *late output after cancel/orphan* — write-once terminal + R2F-1's ref-keyed guard closes both orders; (v) *stale decomposition retry* — FB-5 + R2F-3 membership/immutability; (vi) *verifier output as correctness authority* — impossible mechanically: terminal ≠ verdict, and verdict admission is a separate serialized act. No schedule survives.
+
+---
+
+## 3. Proof strategy delta
+
+Add to the consolidated obligations:
+
+```text
+32. orphan terminalization attempted on run with durable producedOutputRef
+    → zero rows / refused; judgment of recorded identity resumes        (R2F-1)
+33. same-identity re-presentation after crash → idempotent read-back;
+    different identity → refused, new ActorRun required                  (R2F-2)
+34. attempt to mutate admitted WU authority facts (sets/pins/fulfills)
+    → refused; successor Work Unit admission required                    (R2F-3)
+35. ActorRun admission without owning Change → refused                   (R2F-4)
+36. re-packaged same canonical content → same identity, judgment
+    unaffected; unresolvable identity → run lawfully non-terminal,
+    custody repair path, no invented delivery                            (R2F-5)
+37. post-cancel runtime mutations reappearing inside a later attempt's
+    candidate → surfaced and refused by set/byte reconciliation          (Q18)
+```
+
+---
+
+## 4. YAGNI audit of this round
+
+R2F-1..R2F-5 add:
+
+```text
+new durable records        0
+new facts/columns          0   (R2F-1 reuses the existing ref in the guard)
+new atomicity classes      0
+new subsystems/timers      0
+new public codes           0
+```
+
+One rule demoted to non-normative (advisory effect check), one trigger added to the reopen list (multi-process Hub dispatch → lease fact via Decision Loop).
+
+---
+
+## 5. Disposition
+
+```text
+claim challenged → counterexample → smallest correction summary:
+
+R2F-1  orphan act can FAIL a run with valid presented candidate
+       → guard excludes ref-present runs; two recovery paths keyed on ref
+R2F-2  presentation retry undefined → same-identity idempotent read-back,
+       different-identity refused
+R2F-3  mutable WU authority undermines membership/judgment history
+       → WU admitted authority immutable; evolution = successor WU
+R2F-4  ActorRun without owning Change floats outside all laws
+       → every ActorRun belongs to exactly one Change
+R2F-5  identity level unstated → canonical content level per class;
+       identity immutable, custody repairable
+
+reopen of 3C/3D/3E/3F/3G-01/3G-02   NONE
+new machinery                        NONE
+Global Maximum                       CURRENT STRUCTURE CONFIRMED
+readiness (Q32)                      READY FOR OPERATOR DECISION once this
+                                     round's deltas are incorporated into the
+                                     authority draft; no further round needed
+```
+
+The authority draft should carry: Round-1 FB-1..FB-7 as consolidated by ChatGPT Round 2, corrected/extended by R2F-1..R2F-5, the coding_session and validator-budget one-liners (Q21), the F5 handoff linkage (Q22), the single-process-topology rationale with its lease-fact reopen trigger (Q5), and proof traces 1–37 with controls demonstrably firing. Agreement is not authority; the operator decides.

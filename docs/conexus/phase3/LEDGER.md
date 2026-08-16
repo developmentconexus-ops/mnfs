@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA / 3F-R1 APROVADA` · `3G IN PROGRESS / 3G-01 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA / 3F-R1 APROVADA` · `3G IN PROGRESS / 3G-01 APROVADA / 3G-02 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -62,6 +62,9 @@ C-000..C-017
 3G-01
 → ApprovalRequest durable-facts + canonical projection lifecycle, temporal/concurrency guards, monotonic STALE, permanent committed binding e recovery non-reauthorization
 
+3G-02
+→ Builder Change/Finding facts + independent predicates, contract/governance gates, context-pinned proof, per-Change serialization, honest terminal closure e immutable acceptance
+
 este LEDGER
 → status/navigation authority
 ```
@@ -80,7 +83,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` e `*-CHATGPT-*` são review 
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
-| 3G — Behavioral / State Architecture | **EM ANDAMENTO / 3G-01 APROVADA** | selecionar a próxima decisão 3G pelo Decision Loop |
+| 3G — Behavioral / State Architecture | **EM ANDAMENTO / 3G-01 + 3G-02 APROVADAS** | selecionar a próxima decisão 3G pelo Decision Loop |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
@@ -895,7 +898,78 @@ new subsystem/record/dependency = NONE
 READY FOR OPERATOR DECISION
 ```
 
-3G permanece aberta; 3G-01 não preaprova a próxima decisão.
+### 3G-02 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3G-02 | Builder Change & Finding Lifecycle, Contract Revision & Closure Architecture | [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md) |
+
+3G-02 congela o behavioral/state model mínimo do Builder `Change`/`Finding` F1:
+
+```text
+Change
+→ durable facts + independent decision predicates
+→ no exclusive ChangeState / mega-FSM
+
+Finding
+→ admitted only for decision-relevant gaps
+→ resolution absent/present = OPEN/RESOLVED semantics
+→ route separate from lifecycle
+```
+
+Checkpoint/dispatch/proof:
+
+```text
+contract revision + required Plan pin + governance snapshot + discovery obligations
+→ checkpoint/dispatch gates
+
+Evidence admissibility
+→ exact full applicable execution-context compatibility
+→ staleness derived; no fan-out mutable STALE status
+
+Finding route
+→ LOCAL_FIX → FIX_WORK_UNIT → REPLAN → HUMAN
+→ order means decreasing autonomous authority
+→ composite need uses least-autonomy route
+```
+
+Concurrency/closure:
+
+```text
+one Change-owned serialization root
+→ Builder authority admissions/mutations that change checkpoint/dispatch/closure
+→ includes bounded-work admission + correction-budget reservation
+→ raw OBS/CAS/Mastra production stays outside
+
+terminal closure = write-once
+  ACCEPTED | NO_CHANGE_REQUIRED | REJECTED | BLOCKED | ESCALATED
+
+SUCCESS = ACCEPTED | NO_CHANGE_REQUIRED
+→ atomic owner-local terminal closure + immutable change_acceptance
+
+NON_SUCCESS
+→ terminal fact only; no change_acceptance
+```
+
+Acceptance é context-pinned proof, não promessa eterna. Governance/context drift posterior não reabre/muta historical Change/acceptance; consumer posterior precisa revalidar admissibility. Quando consumidor real precisar restaurar prova sob contexto novo, Builder usa **successor verification Change on-demand**, normalmente `NO_CHANGE_REQUIRED` quando nenhuma mutação é necessária. Drift sozinho nunca dispara eager fan-out/scheduler de revalidation.
+
+Mastra Code / AgentController + E2B permanecem mechanics subordinadas: CodingSession liveness nunca concede bounded-work authority, e executor self-report nunca fecha Change.
+
+Review/provenance não-autoritativa:
+
+- [3G-FABLE-DIALOGUE-builder-change-finding-lifecycle.md](3G-FABLE-DIALOGUE-builder-change-finding-lifecycle.md)
+- [3G-FABLE-DIALOGUE-builder-change-finding-lifecycle-R2.md](3G-FABLE-DIALOGUE-builder-change-finding-lifecycle-R2.md)
+
+Convergência antes da ratificação:
+
+```text
+Material Finding contra prior authority = NONE
+reopen 3C/3D/3E/3F/3G-01 = NONE
+new durable records / FKs / atomicity classes / public codes = NONE
+READY FOR OPERATOR DECISION
+```
+
+3G permanece aberta; 3G-02 não preaprova a próxima decisão.
 
 ---
 
@@ -908,6 +982,8 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3B-R1 — repo canônico/cutover do produto | 3A / operador — antes de implementação |
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
 | N3 — Planning Depth × RigorProfile | 3G |
+| Work Unit / ActorRun lifecycle, retry, delivery, cancel/drain | later 3G + 3H/3M |
+| Release-side placement of context-pinned `change_acceptance` admissibility | later 3G Release lifecycle |
 | F3D02-R1 — AgentRun in-flight × stricter new Release | 3G/3I |
 | F3D04-R2 — archived Project with active Release | 3G/3I |
 | F3E01-R1 — `mastra_par` no procedimento de backup/restore | 3J |
@@ -952,6 +1028,7 @@ Resolvido:
 - F3B-R2 legacy `MissionPlan v2` → 3F-01 define one-time `TRANSFORM` para semântica atual de Change / Work Unit; sem compatibility layer permanente.
 - approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; approver authority e post-admission cancellation permanecem roteados.
 - ApprovalRequest F1 lifecycle/state architecture → **RESOLVIDO por 3G-01** como owner-local durable facts + canonical derived projection, decision write-once, derived expiry, monotonic STALE, concurrency-safe single binding e non-reauthorizing recovery; AgentRun reaction, authority/security e recovery machinery permanecem roteados aos seus owners.
+- Builder Change/Finding lifecycle + contract revision/checkpoint + routing/closure semantics → **RESOLVIDO por 3G-02** com independent decision predicates, decision-relevant Finding admission, full-context derived Evidence staleness, decreasing-autonomy routing, per-Change authority serialization, write-once honest closure e immutable context-pinned acceptance; Work Unit/ActorRun lifecycle, N3 e Release-side acceptance gate placement permanecem roteados.
 - Project binding contract shapes → **RESOLVIDO por 3F-04** como dois contratos concretos, Git-first, exact-pinned e sem GenericBinding/BindingSet; lifecycle, authority e UI permanecem roteados.
 - literal stable public codes + per-code baseline details + public-code→locus contract → **RESOLVIDO por 3F-05** com 9-code baseline, details fechados e static projection; exact wire/HTTP/promote diagnostics são realization roteada.
 - DEDICATED identity/authority exchange shape → **RESOLVIDO por 3F-06** como server-to-platform exchange com `DedicatedApplicationPrincipal + exact ReleaseRef`, scope/audience derivados, Release-as-attestation e support horizon; concrete trust/credential/delegation mechanics permanecem 3I.
@@ -1042,6 +1119,19 @@ ApprovalRequest event-sourced lifecycle sem failure class
 expiry cron/scheduler como ApprovalRequest correctness authority
 SERIALIZABLE como correctness crutch exclusivo do ApprovalRequest lifecycle
 new durable approval lifecycle record / Tier-2 FK sem consumer
+ChangeState enum/mega-FSM como authority exclusiva
+generic FindingEngine / RoutePolicyEngine / RetryEngine
+Mission / Milestone sem consumer real
+fan-out mutable STALE updates para WorkUnit/ActorRun/Evidence em contract drift
+durable monotonic Evidence.STALE por default
+eager successor verification fan-out após governance drift
+mutable/reopenable change_acceptance
+multiple mutable acceptance proofs por Change
+cross-owner transaction para raw Evidence/OBS/CAS production
+lock/transaction aberta durante Mastra/E2B/external I/O
+fixed retry-count como architecture law
+AI semantic-freshness classifier
+Finding para commentary sem decision relevance
 Kafka/Kubernetes/Temporal by default
 ```
 
@@ -1069,9 +1159,10 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3F-R1 = APPROVED
 3G = IN PROGRESS
 3G-01 = APPROVED
+3G-02 = APPROVED
 ```
 
-A primeira decisão de Behavioral / State Architecture foi trabalhada com o operador, passou por review adversarial independente e ganhou authority como 3G-01.
+As duas primeiras decisões de Behavioral / State Architecture foram trabalhadas com o operador, passaram por review adversarial independente e ganharam authority como 3G-01 e 3G-02.
 
 A próxima decisão de 3G deve ser selecionada pelo mesmo Decision Loop e trabalhada com o operador antes de ser documentada como authority.
 

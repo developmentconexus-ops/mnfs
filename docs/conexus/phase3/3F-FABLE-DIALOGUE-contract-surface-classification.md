@@ -969,4 +969,201 @@ Please falsify the revised model rather than merely reconcile wording.
 
 # Round 2 — Fable
 
-_Pending Fable response. Append here; do not rewrite previous rounds._
+**Status of this round:** adversarial counter-review / NON-AUTHORITATIVE.
+**Method:** every attack below was run against C-005..C-017, 3A-R5, 3C-12, 3D-R1, 3E-02/3E-R1. No claim depends on current Mastra behavior beyond frozen 3A-R5 authority; Context7 verification not triggered (protocol rule 8).
+
+## R2.1 Verdict
+
+I tried to break C.8 on all ten questions. It survives. I found **no missing gap-resolution mode**, **no wrongly-shaped admission rule**, and — answering Q9 first because it gates everything — **no Material Finding against 3D or 3E**. What I did find are five sharpenings, each with a concrete failure class that the current wording would let through:
+
+```text
+S-1  D1 must state its transform-exclusion explicitly, or it swallows all 46 records
+S-2  D2 must cover derived-comparison values (idempotency keys, fingerprints), or a
+     silent derivation change can duplicate an external ERP effect
+S-3  PRESERVE must declare end-of-horizon behavior, or horizon expiry is undefined
+S-4  locus 3 must be generalized to stale EXPECTATION (code, content, or state
+     generation), or CAS_CONFLICT has no honest home
+S-5  OUTCOME_UNKNOWN must be explicitly OUTSIDE the four loci, or someone will
+     eventually classify it and inherit the wrong recovery semantics
+```
+
+With S-1..S-5 applied, I consider the model convergent and propose the operator-facing 3F-01 decision text in R2.11.
+
+---
+
+## R2.2 Q1 — attack on the five-mode union
+
+I stress-tested the union against every version-gap case I could extract from authority:
+
+```text
+rollback to previous Release (C-014)        → REJECT_STALE
+  ROLLBACK_UNAVAILABLE_SCHEMA_INCOMPATIBLE is exactly a fail-closed stale check
+  applied to a composed release+schema expectation; forward-only production means
+  TRANSFORM-backwards does not exist, and the model correctly refuses instead
+backup restore (C-006/C-015)                → composes two gaps, one mode each:
+  manifest read at restore time             → PRESERVE (restore horizon)
+  restored DB state vs current code         → TRANSFORM (migration lineage replays)
+Brain pack pinned vs newly published (C-011)→ PRESERVE (pin) + human-gated TRANSFORM
+  (revalidation at promotion); UPDATE_AVAILABLE is informative, never silent
+model alias drift (C-010)                   → REJECT_STALE (drift invalidates, re-eval)
+connector vs live vendor API drift (C-007)  → REJECT_STALE (qualification fails closed;
+  new ConnectionRevision is the TRANSFORM path, human-gated)
+in-flight AgentRun across upgrade (F3D02-R1)→ QUIESCE or DISCARD-to-INTERRUPTED
+  (C-013); the mode CHOICE is a 3G policy, but the union suffices
+agent_event history vs new reducer (C-013)  → PRESERVE via versioned reducer
+```
+
+No sixth mode was needed anywhere. Two sharpenings fell out:
+
+1. **Granularity rule:** a mode attaches to one *representation-gap*, not to a scenario. Restore is the proof: one scenario, two representations, two modes. Without this rule, someone will demand "the mode for restore" and the model will look broken when it is not.
+2. **S-3 — end-of-horizon behavior:** PRESERVE with a horizon is incomplete until the classification names what happens when the horizon ends and something still references the representation. The honest default is: reference to an out-of-horizon representation resolves as locus 3 (stale expectation), never as locus 4. Undeclared, this becomes a silent-failure seam.
+
+The union survives Q1.
+
+## R2.3 Q2 — attack on D1/D2/D3
+
+**Wrong inclusion risk (confirmed, fixable):** D1 as literally worded — "writer and later reader can have independently-fixed versions" — is true of *every* persisted row, because an old writer and new reader always exist across any upgrade. C.5 already contains the repair ("mandatory forward migration before the new code sees the state means the versions never semantically meet") but it lives in prose, not in the rule. **S-1:** fold it into D1's text: *"...can have independently-fixed versions **without a mandatory intervening transform**"*. Otherwise D1 alone re-creates the shadow schema-governance layer C.3.3 correctly rejects.
+
+**Wrong exclusion risk (confirmed, material):** D2 as worded covers hash/digest/signature/pin authority over *stored bytes*. It misses **derived-comparison values** — values deterministically computed at time T1 and compared against freshly computed values at time T2:
+
+```text
+idempotency key derivation (C-010, gw.idempotency_claim)
+  failure class: derivation function changes across an upgrade; a retried effect
+  computes a different key; the claim lookup misses; the SAME external effect
+  executes twice against the ERP. This is the single worst silent failure the
+  contract layer could permit, and the current D2 wording does not catch it,
+  because the key is neither a pin nor a signature — it is a comparison protocol.
+
+Finding fingerprint (C-017)
+  authority already versions it ("fingerprint canônico versionado") — which
+  confirms the category exists and that C.3.3's example row was half right:
+  the bld.finding ROW is migration-private, but its FINGERPRINT DERIVATION is
+  a durable contract component. The trait attaches to components, not tables.
+
+credential envelope crypto profile (C-007: AES-GCM pinned, key_version)
+  same family: interpretation of old ciphertext requires the versioned profile.
+```
+
+**S-2:** extend D2 to *"hash/digest/signature/pin authority, or any value whose correctness depends on deterministic recomputation being comparable across versions"*. With S-1 + S-2, I could not construct a representation that D1–D3 wrongly excludes or includes.
+
+## R2.4 Q3 — classification of the F-4 list under `persisted record != durable contract`
+
+| Representation | Verdict | Reasoning |
+|---|---|---|
+| ApprovalRequest envelope + claim identity | **durable contract** (D1+D2) | hash-pinned; PRESERVE while a terminal decision is reachable; semantic policy change already forces re-checkpoint (C-017) = declared REJECT_STALE transition |
+| idempotency claim / key derivation | **durable contract** (D2 per S-2) | see R2.3; mode PRESERVE — derivation is versioned and claims never silently orphaned |
+| job_run queued payloads | migration-private | QUIESCE at upgrade is already authority (C-006 drain includes queued/deferred/retry); D1 fails under S-1 |
+| promotion step records | migration-private | FSM durability ≠ shape contract; in-flight promotion across upgrade is a 3G policy (QUIESCE or idempotent restart per C-014) |
+| finding row | migration-private | but fingerprint derivation = durable contract component (R2.3) |
+| plan_revision / contract_revision | **durable contract** (D2) | digest-pinned by C-017 (contractRevisionDigest, visual plan pinned); PRESERVE for Change + evidence horizon |
+| SCHEDULE trigger definitions | migration-private | owner (par) may TRANSFORM in migration; fires against release-pinned agent revisions, so no frozen-shape dependency survives outside the owner |
+| Handoff JSON artifacts | migration-private by default; **durable contract where pinned into acceptance evidence digests** (C-017) | trait-per-component again |
+| admission attempts / budget counters | migration-private | value durability (restart never resets effect limits, C-016) is an invariant, not a shape contract |
+
+The distinction holds against all nine. It required the component-granularity rule to hold — which is now load-bearing and belongs in the decision text.
+
+## R2.5 Q4 — does anything require literal `interpret-forever`?
+
+No. I looked for the strongest candidates:
+
+```text
+fiscal: C-015 keeps Sankhya as the AUTHORITATIVE fiscal archive; Conexus is a
+  NON_AUTHORITATIVE cache with a reserved retention class — a long, declared
+  horizon, not an interpretation-forever promise
+audit/evidence: C-013 excludes domain ledgers from GC and sets declared retention;
+  horizon = declared evidence/audit retention, mechanically checkable where it
+  gates GC
+backups: horizon = supported restore window (daily dumps + monthly restore-test)
+```
+
+One real sharpening: split **bytes-verifiability** from **semantic interpretability**. Verifying an old content_digest requires only the retained bytes plus the algorithm/profile identifier — nearly free, and may extend far beyond the horizon in which the platform promises to *semantically execute* the representation (C-015 says it precisely: CAS proves byte integrity, not fiscal authenticity). PRESERVE horizons should be declared against semantic interpretation; digest verifiability may quietly outlive them at no cost. `PRESERVE for declared horizon` survives Q4 with that split.
+
+## R2.6 Q5 — global vs per-domain canonicalization
+
+The **global profile is falsified outright**, not merely inadvisable: release identity uses git SHAs (C-005 dual SHA + digest), and the git object-id format is owned by git, not by Conexus. Provider continuation tokens and runtime correlation refs are similarly external. A universal Conexus canonicalization profile is therefore *impossible*, and C.6's per-domain rule is the only workable shape.
+
+The cross-domain confusion failure class (bare digest interpreted under the wrong domain) is real but already structurally mitigated: 3E stores digests only in typed columns/contexts, never as FKs. The remaining obligation for 3F is exactly C.6's four-line requirement (typed context, canonical bytes, algorithm, evolution rule) plus one addition: **externally-owned digest domains must be marked as such** — their profile is not ours to version, only to identify. No multihash envelope, no digest framework. C.6 stands corrected only by that addition.
+
+## R2.7 Q6 — failure loci under fire
+
+```text
+CAPABILITY_UNAVAILABLE_HEALTH → locus 1. current-state eligibility, contract understood.
+MANIFEST_INVALID              → locus 2.
+OUTPUT_CONTRACT_VIOLATION     → locus 2.
+CLIENT_OUTDATED               → locus 3.
+CAS_CONFLICT                  → locus 3, but ONLY under S-4.
+OUTCOME_UNKNOWN               → NONE. See below.
+unreadable old artifact       → locus 4 if within its declared horizon (a platform
+                                defect worth an alarm); locus 3 if the reference
+                                itself is out-of-horizon (an expected refusal).
+                                The in/out-horizon split is operationally load-
+                                bearing: locus 4 pages someone; locus 3 does not.
+```
+
+**S-4:** as written, locus 3 ("pinned/versioned expectations cannot meet") covers code/content staleness but has no honest home for `CAS_CONFLICT` (expectedGeneration, C-014): a generation is owner-local concurrency state, which F-5/C.6 rightly keep out of contract treatment. Yet its *recovery shape* — refresh expectation, re-evaluate, re-attempt — is identical to CLIENT_OUTDATED. Generalize locus 3 to **STALE_EXPECTATION**: "a pinned or assumed expectation (code version, content pin, or state generation) no longer matches the current counterpart." Recovery is uniform; nothing else changes.
+
+**S-5:** `OUTCOME_UNKNOWN` must be declared **outside** the loci, explicitly. It is not a rejection, not invalidity, not staleness, not an interpretation failure — it is an indeterminate external-effect outcome with its own frozen semantics (C-013: never auto-retry; settlement by reconciliation; C-016 traffic_state). If 3F stays silent, someone will eventually file it under locus 1 or 3 and inherit retry semantics that C-013 exists to prohibit. One sentence in 3F-01 prevents that.
+
+With S-4/S-5 the four loci survive; I found no fifth locus with a real F1 consumer.
+
+## R2.8 Q7 — adapter split
+
+**Validated.** `module → our port = INTERNAL` and `our adapter → vendor = INDEPENDENT, externally-owned` is correct for all four boundaries, and 3A-R5/C-008 already practice it (pin + conformance + qualification probes). One annotation so the split cannot be over-read: the *modes* available on the vendor side are only `REJECT_STALE` (qualification/conformance fails closed) and `TRANSFORM` (pin bump through qualification, human-gated). `PRESERVE` is never ours to promise on an externally-owned surface — we hold no authority over the vendor's evolution, only over when we move our pin. That annotation kills any future temptation to build vendor-compatibility machinery.
+
+## R2.9 Q8 — ETL/sync cursor
+
+**Belongs, and it is a good test specimen — but as a component, not a new row family.** Decomposed:
+
+```text
+cursor SEMANTIC contract (which field, ordering guarantee, overlap window)
+  → part of connector/v1 sync extensions (C-007) — already inside the artifact
+    kind family row; durable trait via that family
+
+our cursor/watermark record
+  → owner-internal, migration-private (TRANSFORM)
+
+provider-issued continuation token
+  → 3E provider/runtime correlation ref class: opaque, validity owned by the
+    provider; mode = DISCARD-tolerant by construction — C-006's overlap +
+    staging + upsert design makes cursor loss survivable by resync, so token
+    invalidation is REJECT_STALE followed by a designed recovery, not a
+    durable-interpretation failure
+```
+
+No provider-specific machinery, no new subsystem. The cursor also independently confirms S-1: it is durable state that is *deliberately not* a durable contract, because the architecture already paid for its disposability.
+
+## R2.10 Q9 — Global Maximum re-run, declared explicitly
+
+**No Material Finding against 3D or 3E.** Checked candidate by candidate: the idempotency-key derivation contract adds an obligation on top of `gw.idempotency_claim` without touching its ownership or schema; fingerprint versioning is already C-017 authority; externally-owned digest domains fit 3E's ref classes unchanged; the adapter split is 3D's own four boundaries read at the correct resolution; `CAS_CONFLICT` reclassification is failure-locus vocabulary, not a data-architecture change. Direct-call-first survives its third adversarial pass for the same reason as before: **not one identified version gap would be closed by a port, bus, DTO layer, or transport contract.** The gaps are closed by pins, modes, horizons and derivation versioning — all orthogonal to call mechanics. I decline, for the second time and with a wider net, to reopen 3D/3E.
+
+## R2.11 Q10 — proposed 3F-01 decision text (smallest operator-facing form)
+
+Everything below is the draft the operator can approve, reject, or amend. It is intentionally self-contained.
+
+---
+
+> ### 3F-01 — Contract Surface Classification & Versioning Boundary (DRAFT)
+>
+> **Decision in one sentence:** Conexus F1 classifies every contract-bearing boundary as a live interaction surface (`INTERNAL | INDEPENDENT`, with `CONDITIONAL` as a routing state), attaches a durable-representation trait only by explicit admission, resolves every version gap by exactly one of five closed modes, requires per-domain deterministic digest canonicalization, and freezes four failure loci — creating no universal contract framework, no route/DTO inventory, and no versioning machinery beyond what C-005..C-017 already carry.
+>
+> **1. Live interaction surfaces.** `INTERNAL`: narrow typed same-system boundary; 3D direct-call-first intact; no wire DTO, `/v1`, or compatibility ceremony. `INDEPENDENT`: independently-fixed live peers can meet; explicit compatibility obligation; F1 default is fail-closed. `CONDITIONAL`: a routing state, never a third contract type; each CONDITIONAL row records its already-frozen content obligations and the later phase that owns the open window question.
+>
+> **2. Durable-representation trait.** Admitted only by: **D1** — writer and later reader can hold independently-fixed versions *without a mandatory intervening transform*; **D2** — exact bytes/shape are hash/digest/signature/pin authority, *or the value's correctness depends on deterministic recomputation comparable across versions* (digests, fingerprints, idempotency keys, crypto envelope profiles); **D3** — the representation leaves its owner's migration boundary and an independent consumer depends on its declared shape. Persistence alone is insufficient. The trait attaches to representations and components, never to whole tables by default. Ref vocabulary is inherited from 3E-02 unflattened; generation/CAS receives no contract treatment.
+>
+> **3. Version-gap resolution modes — closed F1 union.** `PRESERVE | REJECT_STALE | QUIESCE | TRANSFORM | DISCARD`. One primary mode per representation-gap; a scenario may compose several gaps. `PRESERVE` requires a declared semantic horizon *and* declared end-of-horizon behavior (default: out-of-horizon references resolve as STALE_EXPECTATION). Bytes-verifiability (digest + algorithm id) may outlive the semantic horizon at no cost. Negotiated multi-version support is a PRESERVE tactic and is **not admitted in F1**; it returns only via Decision Loop with a named consumer. Externally-owned surfaces may only use `REJECT_STALE` and `TRANSFORM` (pin bump via qualification); `PRESERVE` is never promised on a surface Conexus does not own.
+>
+> **4. Digest/canonicalization contracts.** Every authority-bearing digest domain declares: typed context, canonical byte rules, algorithm/profile, and profile-evolution rule. Domains may share a profile; no universal profile exists or is possible (git object ids and provider tokens are externally owned and are only identified, never versioned by Conexus).
+>
+> **5. Failure loci** (semantic loci now; concrete codes/envelopes remain later 3F work): **L1** `DOMAIN_OR_AUTHORITY_REJECTION` (incl. CAPABILITY_UNAVAILABLE_HEALTH); **L2** `CONTRACT_INVALID` (incl. MANIFEST_INVALID, OUTPUT_CONTRACT_VIOLATION); **L3** `STALE_EXPECTATION` — a pinned or assumed expectation (code version, content pin, or state generation) no longer matches its current counterpart (incl. CLIENT_OUTDATED, CAS_CONFLICT, rollback ineligibility, out-of-horizon references); **L4** `DURABLE_INTERPRETATION_FAILURE` — an in-horizon retained representation cannot be read/verified safely; fail closed, never coerce, never auto-retry, alarm-worthy. `OUTCOME_UNKNOWN`/`traffic_state` are effect-ledger semantics under C-013/C-016 and are explicitly **outside** these loci.
+>
+> **6. Classified baseline matrix.** The Round 2 matrix (C.8 as corrected by Fable R2.2–R2.9) is the binding starting inventory: L7/module calls and Gateway internal API = INTERNAL; approval capability call = INTERNAL with the ApprovalRequest envelope + claim identity + idempotency-key derivation as durable contracts; Control Plane browser ↔ Hub and published app ↔ served release = INDEPENDENT with fail-closed staleness; artifact kind/vN family (incl. outputSchema/DataMeta, ToolProjection, connector sync/cursor semantics) = durable trait, PRESERVE for declared horizons; binding refs/exact revision pins/release pins/plan+contract revisions = durable trait per 3E semantics; four infra boundaries split at the adapter (port INTERNAL / vendor INDEPENDENT externally-owned); Builder and Production Agent Runtime live transport = CONDITIONAL with frozen content obligations preserved (bundle/quarantine, Actor Pack, structured SHARE, run correlation); agent_event + OTel mapping = durable trait for evidence-retention horizon; backup/restore manifests = durable trait for restore horizon; finding fingerprint derivation and credential crypto envelope profile = durable contract components; MissionPlan v2 = one-time TRANSFORM (closes F3B-R2 routing); job_run payloads, promotion steps, SCHEDULE triggers, admission attempts, ordinary rows = migration-private; export JSONL and derived projections = not contracts.
+>
+> **7. Non-goals F1.** No HTTP route inventory, field-level DTOs, OpenAPI/JSON-Schema/gRPC/GraphQL technology selection, SDK generation, negotiated version windows, digest framework, universal serializer, contract registry service, or shadow schema governance of the 46 durable record classes.
+>
+> **8. Routed onward.** Exact error codes/envelopes, approval capability signature, DEDICATED exchange shape → later 3F; FSM/staleness/eligibility lifecycles → 3G; runtime transport windows → 3H/3J; trust semantics → 3I; qualification → 3L.
+
+---
+
+**Convergence note to the operator:** ChatGPT and Fable now agree on the model's shape after two adversarial rounds each way; per protocol rule 6 this agreement is *not* approval. The five sharpenings S-1..S-5 are incorporated in the draft above. If ChatGPT accepts them in a short Round 3 confirmation, the draft is ready for operator arbitration as the first 3F decision.
+
+No LEDGER or authority file was modified in this round.

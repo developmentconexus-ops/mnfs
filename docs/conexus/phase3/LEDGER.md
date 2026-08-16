@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -50,6 +50,9 @@ C-000..C-017
 3F-04
 → typed ProjectConnectionBinding/ProjectBrainBinding contracts, Git-first adoption, exact pins, CAS e UX-safe product surface
 
+3F-05
+→ public failure code semantics, baseline literals, closed details contracts e static code→locus projection
+
 este LEDGER
 → status/navigation authority
 ```
@@ -67,7 +70,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
-| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 + 3F-03 + 3F-04 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) · [3F-03](3F-03-approval-claim-approval-request-contract.md) · [3F-04](3F-04-project-binding-contract-architecture.md); próxima decisão deve ser trabalhada com o operador |
+| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) · [3F-03](3F-03-approval-claim-approval-request-contract.md) · [3F-04](3F-04-project-binding-contract-architecture.md) · [3F-05](3F-05-public-failure-code-details-contract.md); próxima decisão deve ser trabalhada com o operador |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
@@ -322,7 +325,7 @@ nenhum Finding material adicional de Data Architecture
 
 ---
 
-## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 + 3F-03 + 3F-04 APPROVED
+## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 APPROVED
 
 ### 3F-01 — APPROVED
 
@@ -633,6 +636,80 @@ zero new probes
 no Material Finding against prior authority
 ```
 
+### 3F-05 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3F-05 | Public Failure Code & Details Contract | [3F-05](3F-05-public-failure-code-details-contract.md) |
+
+3F-05 congela o menor contrato público de failure:
+
+```text
+owner-local failure variant
+→ public admission only when a public boundary needs it
+→ one semantic code per consumer-behavior family
+→ one static code→locus/details contract projection
+```
+
+Baseline F1:
+
+```text
+CLIENT_OUTDATED                 L3
+CAS_CONFLICT                    L3
+CAPABILITY_UNAVAILABLE_HEALTH   L1
+NOT_FOUND                       L1
+OPERATION_REJECTED              L1
+VALIDATION_FAILED               L2
+MANIFEST_INVALID                L2
+OUTPUT_CONTRACT_VIOLATION       L2
+INTERNAL_ERROR                  UNCLASSIFIED (sole fallback)
+```
+
+Regras centrais:
+
+```text
+literal meaning/locus/details identity defined once
+owner defaults/boundary admissions select; never redefine
+same consumer behavior across owners → same literal
+module/package prefixes prohibited; stable product/domain vocabulary allowed
+3F-03/3F-04 semantic classes do not bulk-promote to public codes
+NOT_FOUND preserves public semantic indistinguishability without requiring literal byte equality
+INTERNAL_ERROR is sole UNCLASSIFIED code; no details/retryable; correlation + defect signal
+```
+
+Details:
+
+```text
+absent by default
+closed + code-discriminated + public-identifiers-only
+VALIDATION_FAILED freezes ValidationIssues
+params? closed/discriminated by issueCode; never generic bag
+MANIFEST_INVALID exact diagnostic fields remain later-3F
+```
+
+Implementation future mínimo:
+
+```text
+one typed constant projection
++ one contract-test family
+no ErrorRegistry runtime/service/database
+```
+
+Evolution F1 é additive-only dentro do PRESERVE horizon; in-place rename/meaning/locus/breaking-details changes são proibidos enquanto consumidor pinado depender deles. Alias/deprecation machinery só reentra com mixed-version consumer real.
+
+Review/provenance não-autoritativa:
+
+- [3F-FABLE-DIALOGUE-public-failure-code-details-contract.md](3F-FABLE-DIALOGUE-public-failure-code-details-contract.md)
+
+Convergência final:
+
+```text
+CURRENT STRUCTURE CONFIRMED
+READY FOR OPERATOR APPROVAL
+zero new probes
+no Material Finding against 3F-01..3F-04/C-016
+```
+
 3F permanece aberta. A próxima decisão deve ser trabalhada com o operador antes de ser materializada.
 
 ---
@@ -652,8 +729,8 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` não pode virar authoring authority | 3H/3L probe |
 | F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
-| literal stable public codes / per-code details schemas | later 3F |
-| public-code → failure-locus mechanical table | later 3F |
+| exact wire layout / HTTP mapping por public boundary | later 3F / implementation |
+| exact `MANIFEST_INVALID` promote/compile diagnostic fields | later 3F |
 | per-family approval card/display contracts | later 3F / 3K |
 | ApprovalRequest lifecycle/FSM completo | 3G |
 | approver eligibility / admin revocation / post-admission cancellation | 3I / 3G |
@@ -686,6 +763,7 @@ Resolvido:
 - F3B-R2 legacy `MissionPlan v2` → 3F-01 define one-time `TRANSFORM` para semântica atual de Change / Work Unit; sem compatibility layer permanente.
 - approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; lifecycle, approver authority e post-admission cancellation permanecem roteados.
 - Project binding contract shapes → **RESOLVIDO por 3F-04** como dois contratos concretos, Git-first, exact-pinned e sem GenericBinding/BindingSet; lifecycle, authority e UI permanecem roteados.
+- literal stable public codes + per-code baseline details + public-code→locus contract → **RESOLVIDO por 3F-05** com 9-code baseline, details fechados e static projection; exact wire/HTTP/promote diagnostics permanecem roteados.
 
 ---
 
@@ -752,6 +830,10 @@ implicit selector fallback or Connection failover
 dual Git + Hub-only binding authoring paths
 DB-only emergency binding rebind sem Decision Loop
 runtime mutable-current Project binding lookup para PUBLISHED_APP/AGENT_RUN
+ErrorRegistry service/database
+UniversalError / UniversalIssue / UniversalDiagnostic
+module/package-prefixed public failure namespace
+public failure alias/deprecation machinery sem mixed-version consumer real
 Kafka/Kubernetes/Temporal by default
 ```
 
@@ -774,6 +856,7 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3F-02 = APPROVED
 3F-03 = APPROVED
 3F-04 = APPROVED
+3F-05 = APPROVED
 3G = NOT STARTED
 ```
 

@@ -1035,4 +1035,131 @@ later owner if deferred
 
 # Round 1 — Fable
 
-_Pending Fable response._
+**Status of this round:** adversarial review / NON-AUTHORITATIVE.
+**Method:** authority rebuilt per `AGENTS.md` → C-000 → `DECISOES.md` → `LEDGER.md` → 3B-15/3B-16 → 3C-04/06/07/09/11 → 3D-03/3D-R1 → 3E-02 → 3F-01/3F-02/3F-03 → C-011/C-014. Mitra/Factory/in-house material used as evidence only. **No claim in this round depends on current Mastra behavior** (protocol rule 8; Context7 verification therefore not triggered).
+
+## F.1 Verdict
+
+The model survives its own deletion test better than any previous 3F candidate — most of my attacks confirmed rather than broke it. I found **six findings**, of which one is load-bearing (per-version source provenance is mandatory, and it surfaces an authoring-path question the candidate leaves silently open), two close missing failure classes, and three are answers to questions the candidate deliberately left open, each argued from a failure class rather than preference. Symmetry was rejected as justification everywhere it appeared — including one place where I *strengthen* the asymmetry with an argument the candidate lacks (F.2 D-5). **No Material Finding against 3B-15, 3C-04/06/07/09/11, 3D-03, 3E-02, 3F-01/02/03, C-011 or C-014.**
+
+## F.2 Findings
+
+### D-1 — Per-version source provenance is mandatory; and the authoring path must be named, not implied
+
+```text
+claim challenged      §6 "3F-04 need not invent…" + Q11's suggestion that Change/
+                      Release provenance might reconstruct binding provenance
+concrete failure class failure class J is not closed by Change/Release provenance:
+                      current intent legitimately changes BETWEEN Releases, and a
+                      binding version that was current-but-never-released appears
+                      in no ReleaseManifest at all. If such a version has no
+                      provenance of its own, the Hub holds operational authority
+                      with no reproducible source — exactly the state 3B-16
+                      prohibits ("Hub binding with no reproducible source").
+smallest correction   every binding version records its source provenance: the
+                      authored Project source revision that produced it, or the
+                      explicit operator/control-plane action identity where one
+                      is admitted. One field, already listed in §4.1 — this
+                      finding converts it from "as required" to mandatory.
+reopen prior authority?  NO
+later owner           exact authored file shape → later 3F/implementation
+```
+
+The same analysis exposes an **open point the candidate does not decide and should surface to the operator rather than bury**: 3B-16 makes Git the authoring layer and the Hub the current-intent layer, but nothing yet says whether a binding mutation may originate in the Control Plane UI *without* an authored source revision (e.g., emergency PROD rebind after a credential incident). Two coherent worlds exist: (a) single path — author in Git, adopt via `SetProjectBinding`, provenance = source revision, always; (b) dual path — UI mutation admitted with operator-action provenance. I recommend (a) for F1 as the smaller and the one 3B-16's wording favors, with (b) returning by Decision Loop when a real incident-speed consumer demands it — but this is an operator call, and 3F-04's text must state which world it freezes.
+
+### D-2 — PREVIEW absence semantics must be stated, or convenience will reinvent fallback
+
+```text
+claim challenged      §4.3 defines the selector set but not absence behavior per
+                      selector
+concrete failure class the obvious "convenience improvement" — PREVIEW absent →
+                      resolve DEV, since 3B-15's own example maps both to the
+                      same homologation Connection — is failure class C wearing
+                      a friendly face. Equal values in one example do not make
+                      inheritance a rule; the first Project whose DEV points at
+                      a scratch Connection would leak scratch data into review
+                      surfaces silently.
+smallest correction   one sentence: absence of a binding for a required
+                      (slot, consumerTarget) is fail-closed at the consumer
+                      gate (BINDING_REQUIRED_BUT_ABSENT-class); no selector ever
+                      resolves through another selector. PREVIEW may legitimately
+                      remain unbound for Projects whose previews touch no real
+                      Connection.
+reopen prior authority?  NO
+later owner           none
+```
+
+### D-3 — Two missing structural failure classes: archived resource, archived Project
+
+§12's hard-error list checks existence, scope and relation but not terminality. Binding to an **archived/terminal Connection** (or adopting a Brain revision withdrawn from its Workspace) is a structural set-time reject — the intent can never become releasable and recording it manufactures dead current-intent. Symmetrically, binding mutation on an **archived Project** is an L1-class domain rejection (the F3D04-R2 lifecycle detail stays routed to 3G/3I; the set-time reject does not need to wait for it). Two rows added to §12's first list; no new machinery.
+
+### D-4 — Q16 answered: no mandatory validation-evidence ref on the Project row
+
+Both positions are defensible, so I take the smaller and name its trigger honestly. Brain resolves its own `brn.binding_validation` evidence by the exact pair `(brainDigest, bindingArtifactDigest)`; the adoption timestamp orders which evidence existed at-or-before adoption. The residual ambiguity — "which of several validations of the same pair admitted THIS adoption" — is not currently load-bearing because set-time validation is fail-early UX, not the correctness gate (§1.6); Release/conformance gates re-prove what matters. If 3N's verification design shows the audit ambiguity is real, one Tier-3 evidence ref enters the adoption provenance by Decision Loop. Adding it now is a mirror-shaped reflex: the Project row starts collecting Brain-owned facts one opaque ref at a time.
+
+### D-5 — The content-vs-pointer argument: why the asymmetry is principled, not accidental
+
+The candidate defends "no `connection-binding` Registry kind" by cost (§6). The stronger defense, worth one paragraph in the decision text because it will be attacked by symmetry forever:
+
+```text
+brain-binding/v1 is CONTENT — Project-authored semantic realization
+  (mappings, assertions, refinements) that a compiler consumes; it needs
+  immutable revisions, digests, compilation and Registry lifecycle because
+  it IS an authored artifact.
+
+ProjectConnectionBinding is a POINTER PAIR — (slot, target) → exact
+  ConnectionRevision. It has no authored semantic content to compile, no
+  independent reader of a compiled payload, and its immutability is already
+  supplied by prj versioning + Release pins.
+```
+
+Registering a pointer as an artifact buys a compilation pipeline for a three-field record. The asymmetry follows from what each thing *is*; symmetry arguments should die against this, not against a cost estimate that inflation erodes.
+
+### D-6 — Q17 answered: structurally valid + scope-valid is bindable; qualification gates the Release, not the intent
+
+Forcing qualification at set-time would couple exactly what 3B-15 froze apart (`Connection qualified != Project authorized to use it`) and would serialize work that is legitimately parallel (authoring intent while qualification runs). The measured evidence points the same way: Mitra's environment-proof failure (OBS-42 — `testEndpoint: null` for Sankhya forced the agent to prove sandbox-vs-prod by hand) is a *gate-absence* failure at serving time, not a set-time one; C-007's three gates and C-014's EnvironmentConformance (`Connection revision pinada == ativa`) are where unqualified intent fails closed. Set-time validation reports qualification status as **advisory warning**; structural/scope/relation/terminality errors reject; qualification does not. Intent-but-unreleasable is the correct product shape.
+
+## F.3 Answers to the twenty-three questions
+
+1. **Scope:** one decision is right — the two contracts share laws, one L7 flow and one Release relationship; separating them would duplicate the law text and invite drift between two decisions. The contracts remain distinct inside it; nothing is hidden.
+2. **No common base:** no consumer found. Every shared thing is a *law* (immutability, CAS, same-Workspace, no-fallback), and laws don't need a base type. A `Binding<T>` would exist only to be dispatched on — the §2.A failure class verbatim. Confirmed.
+3. **Slot vs purpose:** collapse is correct. 3E-02's wording ("project-local symbolic slot / purpose") already reads as one concept with two names, not two fields. The divergence construction seals it: with both fields, `slot=erp.primary, purpose="marketplace"` forces an answer to "which governs resolution?" — any answer makes the other field a lie. Human-facing description belongs to the authored source, not the contract. Confirmed, one key.
+4. **Consumer target:** `DEV | PREVIEW | PROD` reconciles cleanly — 3B-15's `workspace/DEV` and C-014's `workspace DEV` are the same environment under two spellings, `preview` is RunPreview's binding face, `PROD` is itself. BuildValidationDatabase needs no selector (it is not a Connection consumer context; builder discovery through the Gateway uses DEV intent). With D-2's absence rule, the closed set is exactly right — no fourth member found, none deletable.
+5. **Runtime surfaces:** confirmed excluded, and the proof is direct: 3D-R1 §5 freezes composition sources per surface — `PUBLISHED_APP → active Release pins`, `AGENT_RUN → run-pinned composition`. Making them binding selectors would have runtime reading mutable current intent, which is the precise sentence §13 prohibits. Any agent/app need for different Connections is expressed at composition time, not at binding-resolution time.
+6. **Duplicate fields:** none survive. Display reads through the Connections owner in-process; Release freezes what serving needs; evidence lives in receipts/conformance records. Every duplicated field is a stale-mirror seed (3E prohibition). Confirmed: derive everything from the exact ConnectionRevision.
+7. **Operation authority:** no consumer survives. Every candidate allowlist already has a home with an owner — connector `effects[]`/`agentEligible` (C-007), ToolProjection (C-010), `allowed_roles` (C-015), Release composition, Gateway admission. A binding-level copy adds a second place to check and therefore a second place to be wrong; the intersection formula in §4.7 is complete without it. Confirmed.
+8. **Current key:** `(project, slot, consumerTarget)` holds. Multi-account is two slots (`erp.primary`, `erp.secondary`) — explicit, named, no pool; multi-Connection-per-slot-per-target is a load-balancing fantasy with no F1 consumer. Slot rename = new slot + explicit UNBIND of the old, history intact. Confirmed.
+9. **CAS:** necessary and sufficient; Git concurrency cannot replace it because Git merge protects the *authored file*, while the lost update happens at the *adoption* action in the Hub (failure class H is two admins in the Control Plane, not two commits). The `ABSENT` arm is load-bearing — it is what makes concurrent first-binds safe. Confirmed as proposed.
+10. **Historical immutability:** no field is in-place-updatable, including cosmetic ones — a "safe" description edit on a version referenced by evidence still changes what an auditor reads. Corrections are new versions; errata are appends. Simplicity wins over field-level cleverness. Confirmed: none.
+11. **Provenance:** mandatory per version — D-1.
+12. **Registry kind:** kept out — D-5 gives the principled argument; the practical one stands too (closed kind→scope map in 3E-02, no independent reader of a compiled pointer).
+13. **Brain pair:** survives attack. Deriving one component from the other fails in both directions: deriving revision from artifact = embedding (see 14); deriving artifact from revision = live inheritance of mappings. The pair is irreducible because the two components change for independent reasons (Workspace publishes; Project adopts).
+14. **Embedding the Brain digest in `brain-binding/v1`:** must NOT embed. Two failure classes: (a) source churn — adopting BR-13 with an unchanged mapping would force minting a semantically identical artifact revision whose only delta is a digest, polluting authored history with noise; (b) split authority — the embedded pin and the Project row pin can disagree, and any tie-break rule makes one of them decorative. The artifact's genuine Brain-compatibility expectations are its conformance assertions, evaluated at revalidation — C-011's `revalidation na promoção` is exactly the mechanism that makes cross-revision reuse safe. Same artifact + new Brain revision + revalidation = legitimate, and the trace identities behave correctly (`brainDigest` moves, `projectBindingDigest` stable — consistent with C-011's trace digests).
+15. **Hub Brain row:** pair + current-selection + provenance (D-1) and nothing else. Any semantic field is a drift seed against the immutable artifact (failure class F). Confirmed.
+16. **Validation evidence:** no mandatory ref — D-4, with the named Decision Loop trigger.
+17. **Set-time qualification:** bindable-but-unreleasable — D-6.
+18. **UNBIND:** belongs in 3F-04 now, at semantic level only: explicit, CAS-protected, history-preserving, Release-untouched, consumer gates fail closed afterward (D-2's rule covers the aftermath). Without it, "how does a Project stop consuming" defaults to somebody's DELETE statement. Binding lifecycle *states* beyond this remain 3G. Confirmed as proposed.
+19. **No BindingSet:** confirmed, with the sharper reason: the ReleaseManifest digest already commits the exact composition, so a `bindingSetDigest` would be a **second commitment over the same facts** — two digests that can only ever agree or reveal a bug, i.e. pure drift surface. Rollback re-points to the old manifest and resolves the old refs; no aggregate needed. The `brainDigest + projectBindingDigest` interpretation is consistent with C-011/C-014 as argued in 14.
+20. **Missing failure classes:** archived resource and archived Project (D-3). Also verified benign: `SLOT_ALREADY_BOUND` is just the `ABSENT`-expectation CAS mismatch, not a new class; a compose racing a SET is safe (compose freezes whichever current intent it read — both are valid intents; the gate that matters re-validates the frozen one).
+21. **Buildability:** table below. Nothing UNSUPPORTED, zero new probes.
+22. **Global Maximum:** re-run against every listed authority. The pair model *implements* C-011 (pin-by-digest + revalidation) rather than bending it; D-1 implements 3B-16; the selector set implements C-014's environment model; no contact point produces a contradiction or a superior global alternative — a generic binding base, a registry'd pointer, or a BindingSet each re-open a failure class this model closes. **No Material Finding; nothing reopens.**
+23. **Convergence:** the model converges once D-1..D-6 land. Given the D-1 authoring-path question is an operator call embedded in the decision text, I propose drafting the operator-facing 3F-04 text in Round 2 after ChatGPT accepts or contests these findings — matching the cadence of 3F-02/3F-03.
+
+## F.4 Buildability
+
+| Mechanism | Class | Evidence |
+|---|---|---|
+| symbolic slot → server-side resource indirection | **PROVEN** | Mitra runs it in production: `connection: 'sankhya'` symbolic handle in SF INTEGRATION artifacts, credential server-side (`04-integracao-externa`) — the slot pattern, live against a real ERP |
+| exact revision pinning on the binding | CONVENTIONAL; failure class it closes is **measured** | Mitra's bindings are mutable-in-place with no revision pin — the C-009-adjacent weakness our exact `ConnectionRevisionRef` closes; environment proof done "na unha" (OBS-42) is the measured cost of weak binding validation |
+| immutable versioned Hub records + expected-current CAS | **PROVEN in-house** | MNFS plan revisions (immutable approved revisions) + lease core CAS/fencing with real crash-recovery tests |
+| Brain pair + revalidation-on-adoption | CONVENTIONAL | C-011 design (pin-by-digest, revalidation na promoção); registry revision machinery already frozen by C-005 |
+| closed typed union for SetProjectBinding input | CONVENTIONAL | TS discriminated unions; 3F-02 F3/F1 family rules already govern the surfaces |
+| same-Workspace structural checks / server-derived scope | CONVENTIONAL | C-015 derivation pattern (payload adulterado ignorado; 404-indistinguishable) |
+
+Zero new probes; set-time/Release gate behavior is exercised by already-planned 3N/3O verification.
+
+## F.5 Position for convergence
+
+Accept the candidate with: D-1 (mandatory per-version provenance + the authoring-path decision surfaced to the operator, recommending the single Git-authored path), D-2 (explicit fail-closed absence, no selector inheritance), D-3 (archived-resource and archived-Project structural rejects), D-4 (no mandatory validation ref, trigger named), D-5 (content-vs-pointer paragraph in the decision text), D-6 (bindable-but-unreleasable). Everything else is confirmed as proposed — including the collapses and deletions the candidate asked me to attack: one slot key, no duplicates, no allowlist, no BindingSet, no common base, no registry kind, exclusion of runtime surfaces. If ChatGPT accepts these in Round 2, I will draft the smallest operator-facing 3F-04 text there.
+
+No LEDGER or authority file was modified in this round.

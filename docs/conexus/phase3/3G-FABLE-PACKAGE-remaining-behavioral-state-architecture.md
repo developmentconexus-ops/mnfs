@@ -1557,3 +1557,231 @@ whether any prior 3B–3F / 3G-01..03 decision needs material reopen
 ```
 
 Do not edit `LEDGER.md`, accepted authority or product code. Append review to this package file and commit/push only this package.
+
+---
+
+# Fable Package Review — Round 1
+
+**Reviewer:** Fable (independent adversarial reviewer)  
+**Reviewed at HEAD:** `c25f1ad896e045b93d7a2dd57aa09864e5906f0e`  
+**Method:** DevelopmentConexus Engineering Method v1.0.0, applied to the package as one behavioral/state architecture system.  
+**Authority basis re-read for this review:** 3G-01/3G-02/3G-03 full approved texts, LEDGER, C-013/C-014/C-016/C-017 decision records, 3E-02 durable inventory, 3F-02/3F-03/3F-04/3F-06 as summarized in the live ledger.  
+**Mastra note:** no conclusion below depends on current Mastra API behavior. The only Mastra assumption the package leans on — durable checkpoint/suspend/resume as runtime mechanics — was already frozen by 3C-10/3A-R5 and remains routed to 3H/3L realization. Context7 verification was therefore not required and no new Mastra claim is introduced here.
+
+## R1.0 Verdict summary
+
+```text
+PACKAGE NEEDS ONE CONSOLIDATION ROUND
+
+3G-04 survives — one clarifying correction (F6)
+3G-05 survives — one material correction (F1)
+3G-06 survives — one material correction (F2) + one minor alignment (M1)
+3G-07 survives — one material decision to make explicit (F4) + two corrections (F5, F7)
+3G-08 survives — one material correction (F3)
+
+delete / merge / split          = NONE justified
+3G-09 materially required       = NO
+reopen 3B–3F / 3G-01..03        = NONE
+after consolidation             = proceed directly to 3G-R1
+```
+
+No finding below invalidates the partition into five candidates, creates a new durable record class, or requires a new subsystem. Every correction is expressible as fields/guards inside already-approved owner records and as explicit sentences in the candidate texts. The package's own template (`claim challenged → schedule → authority → root cause → smallest correction → complexity → reopen → later owner`) is used for each material finding.
+
+## R1.1 Sweep completeness (assignment A, questions 1–4)
+
+**Q1 — missing material 3G items.** I checked every ledger-routed behavioral item against the package: N3 → 3G-04; approval expiry × suspended AgentRun → 3G-05; Gateway effect_attempt/budget/idempotency → 3G-06; Project/binding mutation lifecycle → 3G-07; F3D02-R1 (in-flight run × new Release) → 3G-05 (3I authority part stays routed); F3D04-R2 (archived Project × active Release) → 3G-07; DEDICATED old-vs-new window → 3G-08 (residual honestly routed to 3I/3J); Release-side `change_acceptance` placement → 3G-08. All routed items land in exactly one candidate.
+
+I also swept the 46 durable classes for behavioral/state semantics not covered by 3G-01..08 or prior authority:
+
+```text
+brn.knowledge_proposal / health      → C-011 already froze the human-gate proposal flow,
+                                       NO AUTO MERGE, self-write REJECT, and the 5-state
+                                       drift machine (UNVERIFIED/VALID/SUSPECT/INVALID/CHECK_ERROR)
+                                       with runtime obligations; remaining work is realization
+con.connection/revision/qualification → C-007 gates + append-only qualification + C-016
+                                       registered rotation design (trigger-gated) suffice
+att.attachment/blob                   → C-015 froze PENDING→AVAILABLE CAS + two-phase GC
+mar.job_run                           → C-013 admission-ledger machine already frozen; substrate 3H
+iam session / reg artifact / obs.*    → C-015 / C-005 / append-only; no open behavioral decision
+par.conversation / bld.coding_session → container/correlation facts; lifecycle is realization (3H)
+```
+
+**Conclusion: the sweep is complete. No material 3G decision is missing and no 3G-09 is justified.** What would falsify this: a durable class above whose owner cannot answer an admission/closure/recovery question from existing authority during 3G-R1 or 3N.
+
+**Q2 — anything that should be deleted from 3G as 3H/3I/3J/3M.** No candidate is a realization concern in disguise. 3G-08 is the closest call — much of §7.5–7.8 restates C-014 — but it adds genuinely new authority: consumer-time acceptance recheck at compose **and** promote, rollback-under-archive admissibility, DEDICATED fail-closed admissibility, and the drift law of §7.10. Keep all five.
+
+**Q3 — shared-authority combination.** None found. 3G-04 spans Builder and Release but only as consumer-time admissibility (correct). 3G-05's origin-run guard is PAR-internal. 3G-07 explicitly refuses cross-owner mutation on archive.
+
+**Q4 — can 3G close with these five.** Yes, after the corrections below.
+
+## R1.2 Material findings
+
+### F1 — 3G-05: cross-fact admission guards lack the concurrency law they depend on
+
+- **Claim challenged:** §4.5/§4.7 — "AgentRun CANCELLED → unbound approval from that run can never later execute" and "disable commits first → no new AgentRun from that firing".
+- **Concrete failure schedule:** run R non-terminal; human ALLOW_ONCE commits; agent-origin claim path reads `R non-terminal` (plain read); concurrently PAR commits `R = CANCELLED`; the FIRST_CLAIM admission transaction commits bind + Gateway admission; external effect executes for a cancelled run. Symmetric schedule exists for trigger firing: firing admission reads `enabled`, disable commits, admission commits anyway.
+- **Authority affected:** 3G-05 §4.5 origin-run terminal guard, §4.5 "current pending proposal" membership, §4.7 trigger race law.
+- **Root cause:** 3G-01 §10 requires the mutation predicate to restate every *ApprovalRequest* fact it depends on; 3G-05 adds three new concurrently mutable PAR facts to the claim/admission decision (origin-run terminality, current-pending-proposal membership, trigger enabled) but states them as preconditions without stating the guard discipline. A precondition checked by pre-read is not a control that can be shown to fire.
+- **Smallest globally coherent correction:** one normative sentence in 3G-05: the origin-run non-terminal fact, the current-pending-proposal fact and the trigger enabled fact are concurrently mutable PAR-owned facts and MUST participate in the owner-local guarded/CAS predicate of the admission that depends on them (or be serialized by an equivalent PAR-owned guard), under the same discipline as 3G-01 §10. All facts are PAR-local (`par.agent_run`, `par.approval_request`, `par.agent_trigger` — same owner schema), so no cross-owner machinery and no new atomicity class is created. "Current pending proposal" may be realized as a field inside `par.agent_run` under the package's §9 allowance.
+- **Essential vs accidental:** essential — it protects the package's own headline invariant; without it the invariant is aspirational.
+- **Reopen prior authority:** NO — this is an application of 3G-01's discipline inside 3G-05's own scope.
+- **Later owner if deferred:** not deferrable; belongs in the consolidated 3G-05.
+
+### F2 — 3G-06: "closed before dispatch" is referenced but has no durable fact, and schedule 37 has no committed answer
+
+- **Claim challenged:** §5.2/§5.7/Q17 — traffic 3-state + outcome + budget facts can recover every crash schedule; budget law "NOT_SENT + cancelled/known-not-executed → reservation may be released".
+- **Concrete failure schedule:** admission commits (`NOT_SENT`); applicable authority cancels the attempt (e.g., the origin run cancelled — schedule 37); budget reservation is released per §5.7; Hub crashes; recovery finds a `NOT_SENT` attempt with a committed approval binding — and 3G-01 proof 17 explicitly sanctions recovering and dispatching such an attempt. The effect executes after cancellation with its budget already released. There is no durable fact that distinguishes "NOT_SENT, pending dispatch" from "NOT_SENT, closed, never to be dispatched".
+- **Authority affected:** 3G-06 §5.4 cancellation semantics, §5.7 budget release, §5.8 fresh-attempt law, interaction with 3G-01 §13/§14 recovery.
+- **Root cause:** the model has three traffic states and a response-side outcome family, but no pre-dispatch disposition. "Cancelled while NOT_SENT" is used as a load-bearing condition without a fact to carry it.
+- **Smallest globally coherent correction:** add one owner-local, write-once **closed-before-dispatch disposition fact** on `gw.effect_attempt` (a field, not a new durable class — covered by §9). Laws: (a) the dispatch transition `NOT_SENT → SENT_NO_RESPONSE` and the close transition compete under guarded mutation; exactly one wins; (b) budget release for a not-sent attempt is admissible only after the close fact commits; (c) recovery of `NOT_SENT + closed` never dispatches; recovery of `NOT_SENT` without the close fact may dispatch (admission remains the point of no return, consistent with 3G-01); (d) the consumed approval binding remains permanent either way. This also gives schedule 37 its committed answer: cancel-vs-dispatch is a guarded race; if no close is attempted, dispatch proceeds under committed admission authority. *Who* may close post-admission remains 3I authority as already routed; 3G-06 owns only the semantic fact and its guard.
+- **Essential vs accidental:** essential — recovery correctness and budget honesty both hang on this fact; it is the Gateway analogue of 3G-03's write-once terminal discipline, not new machinery.
+- **Reopen prior authority:** NO — 3F-03/3G-01 untouched; approval consumption stays permanent.
+- **Later owner if deferred:** not deferrable; belongs in the consolidated 3G-06.
+
+### F3 — 3G-08: pointer CAS does not serialize Promotions; migrations can interleave
+
+- **Claim challenged:** §7.6/proof 4/schedule 42 — "CAS race between two Promotions → exactly one pointer swap wins" presented as sufficient.
+- **Concrete failure schedule:** Promotion P1 (Release X) and P2 (Release Y) both admitted for the same Project PROD; both execute migration steps concurrently against the same database; interleaved DDL produces a schema neither Release's conformance proof describes. Worse: P2 runs a maintenance-required migration, blocks/drains old serving, then loses the pointer CAS to P1 — serving resumes under P1's Release on a schema P2 half-migrated. Pointer CAS fired correctly and the system is still wrong, because the CAS protects only the final step.
+- **Authority affected:** 3G-08 §7.5–7.7; C-014 migration safety (not contradicted — under-enforced).
+- **Root cause:** Promotion's material steps (conformance, migration, drain) are neither idempotent nor commutative across concurrent Promotions; the only serialization point in the text is the last step.
+- **Smallest globally coherent correction:** one law in 3G-08: **at most one non-terminal Promotion per (Project, PROD target) at a time**; Promotion admission is a guarded owner-local check against existing Promotion facts; a second admission fails closed while one is non-terminal (recovery/continuation of the same Promotion is already covered by §7.5). This is a guard on already-approved records — no queue, no scheduler, no workflow engine. C-014's human-gated promote flow already implies it; freezing it makes the implication enforceable.
+- **Essential vs accidental:** essential — migration safety is an existing C-014 invariant; this is the missing enforcement, not new capability.
+- **Reopen prior authority:** NO — narrows/enforces C-014, does not change it.
+- **Later owner if deferred:** not deferrable; belongs in the consolidated 3G-08.
+
+### F4 — 3G-07/3G-05: archived Project × NEW AgentRun admission is undecided, and both readings are currently supportable
+
+- **Claim challenged:** §6.4 blocks "new control-plane trigger/config authoring" while §6.5 says "scheduled/runtime behavior of that active Release remains runtime behavior". Neither sentence decides whether a **new** AgentRun (trigger-fired or conversation-originated from the served app) may be **admitted** while the Project is ARCHIVED.
+- **Concrete failure schedule/consumer:** Project archived with active Release and an enabled SCHEDULE trigger. Reading A: the trigger keeps admitting new AgentRuns indefinitely, autonomously producing approval requests/effects on an "archived" project. Reading B: new-run admission is refused while archived — but then the served MANAGED app's embedded agent conversation breaks, i.e., serving silently degrades, contradicting §6.5's own commitment. Two implementers can build opposite systems from the current text.
+- **Authority affected:** 3G-07 §6.4/§6.5, 3G-05 §4.7, F3D04-R2 closure.
+- **Root cause:** the candidate resolves the Release pointer question but never classifies new AgentRun admission as intent-side or serving-side.
+- **Smallest globally coherent correction:** decide it explicitly in the consolidated text. **Recommendation: Reading A (serving-side).** AgentRun executes under Release-pinned composition; an enabled trigger + active Release is standing runtime authorization exactly like a MANAGED request path; archive freezes trigger/binding/Change **authoring**, not firing. Reading B would make Project lifecycle a partial serving authority — the precise failure §6.5 exists to prevent — and would silently break served apps. Product consequence (archive does not stop scheduled agents; user disables triggers first, UI must say so) is a 3K surfacing obligation and should be named as such. This is an operator-visible product decision; if the operator instead wants B, it must be chosen knowingly, not inherited from ambiguity.
+- **Essential vs accidental:** essential to decide; either mechanism is simple.
+- **Reopen prior authority:** NO.
+- **Later owner if deferred:** not deferrable as ambiguity; the 3K copy is deferrable.
+
+### F5 — 3G-07: §6.6 contradicts §6.4 for INCEPTION-time binding
+
+- **Claim challenged:** §6.6 — "Project ACTIVE AND specialized owner checks pass AND expectedCurrentBindingRef matches → SET/UNBIND may commit".
+- **Concrete counterexample:** §6.4 INCEPTION explicitly admits "necessary setup explicitly admitted by existing Inception authority", and InceptionInvestigation touching real ERP data plausibly requires a Connection binding before any Baseline exists. Under §6.6's literal law that SET is unreachable: textual contradiction inside the same candidate.
+- **Authority affected:** 3G-07 §6.4/§6.6; Inception shape (deliberately open per §6.8/3G-03 §5.1).
+- **Root cause:** §6.6 wrote the common case (ACTIVE) as the universal law.
+- **Smallest globally coherent correction:** rephrase §6.6's gate to "Project lifecycle admits the mutation — ACTIVE, or INCEPTION setup explicitly admitted by existing Inception authority — AND …". No new state, no new fact.
+- **Essential vs accidental:** textual; zero added mechanism.
+- **Reopen prior authority:** NO.
+- **Later owner:** consolidated 3G-07.
+
+### F6 — 3G-04: PlanningDepth's authoritative selection point is unnamed
+
+- **Claim challenged:** Q6 — "are DIRECT/LIGHT/FULL deterministic enough without an LLM planning classifier becoming authority?" §3.2 gives elevation/lowering laws but never says **who** fixes the applicable floor.
+- **Concrete risk:** DIRECT/LIGHT/FULL are semantic thresholds, so the de-facto classifier is the proposing agent; without an anchored authority point, agent proposal silently becomes floor authority — the exact hidden-classifier failure 3G-04 §3.7 forbids.
+- **Authority affected:** 3G-04 §3.2; C-017 checkpoint law; 3G-02 §4.2.
+- **Root cause:** the selection authority already exists in prior decisions but the candidate does not cite it as the mechanism.
+- **Smallest globally coherent correction:** one sentence: the applicable PlanningDepth is fixed at the existing C-017 **checkpoint approval** — 3G-02 §4.2 already makes the plan requirement part of the approved contract-revision identity — with mechanical/operator signals able only to elevate; agent proposal is never floor authority. No new gate, no classifier.
+- **Essential vs accidental:** essential clarification, zero mechanism.
+- **Reopen prior authority:** NO.
+- **Later owner:** consolidated 3G-04.
+
+### F7 — 3G-07/3G-08: recovery rollback under ARCHIVED has no mechanical discriminator from ordinary Promotion
+
+- **Claim challenged:** §6.5/§7.8/Q24 — "ordinary new Promotion blocked; recovery/rollback still admissible under explicit recovery authority".
+- **Concrete failure schedule:** Project archived; operator invokes "recovery" Promotion targeting an arbitrary older AVAILABLE Release that was never served — functionally an ordinary deployment wearing the recovery label. The archive freeze is bypassed by intent-naming, which no guard can check.
+- **Authority affected:** 3G-07 §6.5, 3G-08 §7.8.
+- **Root cause:** "recovery" is defined by purpose ("keep already-served Release safe") but admitted by label.
+- **Smallest globally coherent correction:** while ARCHIVED, a recovery Promotion may target only a Release **previously activated for that Project** (provable from existing pointer/Promotion history — no new record). That is exactly the set reachable by honest rollback; everything else is ordinary Promotion and stays blocked. Operator permission for the recovery act remains 3I/3K as routed.
+- **Essential vs accidental:** essential — converts an intent check into a mechanical guard.
+- **Reopen prior authority:** NO.
+- **Later owner:** consolidated 3G-07/3G-08 (one of the two texts states it; the other references it).
+
+### M1 — 3G-06 minor: PARTIAL settlement must keep unknown units conservative
+
+§5.7's "known response/outcome → settle against actual attempted/effect units" should state explicitly that within a `PARTIAL` breakdown, **unknown units retain conservative reservation** under C-013's precedence law; only succeeded/rejected/unprocessed units settle. Likely intended; one clause makes it enforceable.
+
+## R1.3 Confirmed claims (attacked and survived)
+
+- **SENT_NO_RESPONSE marked before external I/O (Q16):** CORRECT and the only safe order. Marking after I/O can leave a durable `NOT_SENT` for an effect that was actually sent, which would license unsafe retry under 3F-02's own retry law. The pre-I/O transition matches C-013's OUTCOME_UNKNOWN discipline and C-016's traffic_state semantics; §5.2's reading ("dispatch boundary crossed", conservatively over-uncertain) is the honest one. No contradiction with prior authority.
+- **AgentRun `COMPLETED | FAILED | CANCELLED` with no fourth terminal (Q9):** holds. Suspension is a non-terminal run + runtime checkpoint mechanics; approval wait authority is fully carried by the correlated ApprovalRequest (Q10 — yes; C-010's durable `AWAITING_APPROVAL` was already reconciled into the 3G-01 projection, so no duplicate durable status is needed). `COMPLETED != effects succeeded` preserves receipt honesty.
+- **Origin-run terminal guard vs 3F-03/3G-01 (Q11):** no conflict *as a concept* — ApprovalRequest facts are never rewritten; the refusal is a PAR consumer-boundary condition outside the 3G-01 projection, analogous to §11's "outside projection" family. It becomes sound only with F1's guard law.
+- **DENY/EXPIRED/STALE resuming the same run as a typed non-effect outcome (Q12):** safe and correctly avoids both auto-terminalization and auto-re-approval. Expiry stays silent in ApprovalRequest authority; wake mechanics stay 3H.
+- **In-flight run pinning vs newer Release (Q13, schedule 38, 44):** correct; pin is compatibility identity, not permission; last-mile owner/Gateway checks remain live. The 3I "stricter authority" residue stays routed.
+- **PlanningDepth × RigorProfile orthogonality (Q5, Q8):** holds. The same input (e.g., material authority surface) may elevate both floors — that is input correlation, not axis coupling; each axis gates independently and both `DIRECT+CONTROLLED` and `FULL+BOUNDED` are representable. No 3×3 cell is load-bearing; the two-gate conjunction suffices.
+- **Release-time rigor recalculation (Q7) and acceptance recheck at compose AND promote (Q28):** correct consumer-time admissibility, not duplicate authority. Compose and promote are separated in time; promote's recheck is the TOCTOU defense and is cheap when nothing drifted. Schedule 41/45 resolve to "Promotion refused / composition refused until directed revalidation" with history immutable — coherent with 3G-02 §16.
+- **BUILDING/VERIFIED/AVAILABLE as derived facts (Q27):** consistent with C-014; none of the three can be deleted without losing the "failure before AVAILABLE never yields a usable Release" boundary or the compose/verify separation.
+- **Serve-verification failure needs no new terminal (Q29); maintenance-required separation (Q30):** confirmed; Promotion step facts + `MAINTENANCE_RECOVERY_REQUIRED` represent both honestly, mechanics stay 3M/C-014.
+- **Archive semantics (Q22, Q31):** control-plane freeze with serving continuity is the globally safest reading of `Project intent != serving authority`; no authority cycle once F4/F7 land. Restore without auto-adoption (Q23) is consistent with 3B-16 and 3F-04; no new lifecycle fact required.
+- **Binding mutation with CAS + Project gate, no Binding FSM (Q26):** holds under 3F-04's immutable versions + expected-current CAS; `update available` stays read-only projection.
+- **DEDICATED old-Release admissibility (Q32):** deliberately incomplete but honestly fail-closed with named owners (3I/3J) and reopen triggers; does not block 3G closure.
+- **No explicit unpublish/retire Release in F1 (Q33):** YAGNI holds. F1 is the internal phase; an operational stop path exists at 3J/3I level, and product-level unpublish enters only with a named consumer through the Decision Loop — correctly listed as a reopen trigger, not built.
+- **Active Release after governance drift (Q34):** confirmed; automatic deactivation would be `change_acceptance` staleness fan-out — the exact defect class 3G-02 forbids. Emergency stop remains 3I/ops.
+- **Builder/PAR never second effect authority (Q11 of §5, §5.10, schedule 38):** preserved; effect-state projection is advisory context only; replay refusal is Gateway-local.
+- **No hidden workflow engine / state fan-out / duplicate authority:** none found across the five candidates after F1–F7; Promotion step facts are append-only facts, not an engine; no state label is shared across owners (`DELIVERED` vs `COMPLETED` vs effect outcome vs `SERVED_VERIFIED` stay distinct vocabularies).
+
+## R1.4 The 45 assignment items — disposition ledger
+
+```text
+ 1 no missing material 3G item                      → R1.1
+ 2 nothing to delete to 3H/3I/3J/3M                 → R1.1
+ 3 no shared-authority combination                  → R1.1
+ 4 3G closes with five candidates + corrections     → R1.1
+ 5 orthogonality holds; no counterexample           → R1.3
+ 6 deterministic via checkpoint anchoring           → F6
+ 7 Release recalculation = consumer admissibility   → R1.3
+ 8 no load-bearing 3×3 interaction                  → R1.3
+ 9 three terminals suffice                          → R1.3
+10 ApprovalRequest alone carries wait authority     → R1.3
+11 origin-run guard compatible, needs F1 guard law  → F1/R1.3
+12 DENY/EXPIRE/STALE resume safe                    → R1.3
+13 newer Release never auto-invalidates in-flight   → R1.3
+14 trigger enable/disable sufficient; race law needs F1 discipline → F1
+15 no load-bearing current-Mastra claim; Context7 not required     → header note
+16 pre-I/O SENT_NO_RESPONSE correct                 → R1.3
+17 crash schedules recoverable ONLY with F2's closed-before-dispatch fact → F2
+18 PARTIAL/new-attempt law neither over- nor under-blocks; unknown units conservative → M1
+19 no provider-idempotency promise                  → confirmed (§5.6 explicit)
+20 no missing cross-owner atomicity (Class-1 + Class-2 suffice)    → confirmed
+21 settlement-vs-ambiguity representation honestly routed to 3M    → confirmed
+22 ARCHIVED as control-plane freeze = safest        → R1.3 (with F4 decided)
+23 restore needs no new fact; no 3B-16 conflict     → R1.3
+24 recovery-vs-ordinary needs mechanical bound      → F7
+25 archive must NOT disable scheduled agents (recommended Reading A; explicit decision required) → F4
+26 binding stays CAS + Project gate, no durable status → R1.3
+27 BUILDING/VERIFIED/AVAILABLE all needed as derived facts → R1.3
+28 recheck at compose AND promote both required     → R1.3
+29 no additional terminal for serve-verification failure → R1.3
+30 maintenance-required cleanly separated from 3M   → R1.3
+31 no authority cycle in archive+active+rollback    → R1.3 (after F7)
+32 DEDICATED residue does not block closure         → R1.3
+33 explicit Release retirement = YAGNI until consumer → R1.3
+34 served Release after drift violates no invariant → R1.3
+35 expiry × cancel: both derived/guarded paths refuse claim; no write conflict → safe
+36 ALLOW_ONCE then cancel before FIRST_CLAIM: claim refused by origin-run guard (F1);
+   request rests APPROVED_UNCLAIMED and expires silently; no STALE (correct — no B2 mismatch) → safe
+37 admission commits then run cancels before dispatch: resolved by F2's guarded
+   close-vs-dispatch race; approval stays consumed either way → F2
+38 ambiguity + new run + new Release: unrelated work proceeds; replay refused at Gateway;
+   old attempt unaffected by new Release → safe
+39 binding change during serve+compose: old Release pinned; compose captures guard-time intent;
+   C-014 EnvironmentConformance (pinned Connection revision == active) catches drift at promote → safe
+40 archive races: fail closed under Project lifecycle guard (§6.7); ordinary Promotion
+   admission must restate not-archived in its guard (fold into F3's admission guard) → safe
+41 acceptance drift after AVAILABLE: promote recheck refuses; Release immutable → safe
+42 two Promotions, migration before losing CAS: NOT safe on current text → F3
+43 maintenance migration done, crash before swap: durable step facts resume same
+   Promotion idempotently or enter MAINTENANCE_RECOVERY_REQUIRED; old serving stays blocked → safe
+44 DEDICATED old Release call: admissible in horizon; not rejected for newness → safe
+45 floor raise at composition: compose refused until directed revalidation; history immutable → safe
+```
+
+## R1.5 Final disposition
+
+```text
+PACKAGE NEEDS ONE CONSOLIDATION ROUND
+```
+
+1. **Survivors:** 3G-04, 3G-05, 3G-06, 3G-07, 3G-08 all survive as scoped.
+2. **Corrections required:** F1 (3G-05 guard law), F2 (3G-06 closed-before-dispatch fact + schedule-37 answer), F3 (3G-08 single non-terminal Promotion per Project/PROD), F4 (3G-07/05 archived × new AgentRun admission — explicit decision, Reading A recommended), F5 (3G-07 §6.6 INCEPTION wording), F6 (3G-04 checkpoint anchoring), F7 (recovery-rollback target bound), M1 (PARTIAL unknown-unit reservation clause).
+3. **Delete / merge / split:** none. The five-owner partition is the smallest coherent one; every merge candidate would fuse distinct state authorities.
+4. **3G-09:** not materially required. Brain/Connections/Attachments/MAR/IAM behavioral semantics are already frozen by C-007/C-011/C-013/C-015/C-016; remainder is realization.
+5. **Reopen 3B–3F / 3G-01..03:** NO for all. Every finding is a correction inside the candidates; F1 and F3 apply existing disciplines (3G-01 §10, C-014) rather than changing them.
+6. **Path to closure:** after exactly **one** consolidation round incorporating F1–F7/M1 into the candidate texts, the package is ready for operator review and 3G can proceed directly to 3G-R1. The 3G-R1 closure burden should additionally verify, end-to-end, the three corrected schedules (36/37/42) and the F4 decision as ratified.
+7. **No new machinery:** all corrections are guards, write-once facts inside approved records, or explicit sentences — zero new modules, records, FKs, atomicity classes, schedulers, engines or public codes. The package-level YAGNI table in §9 remains true after consolidation.

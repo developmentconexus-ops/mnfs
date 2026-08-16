@@ -144,21 +144,21 @@ assert.match(s2Plan, /candidate\.selectionEligible = false/iu, 'S2 plan must imp
 for (const [name, text] of [
   ['STATUS', status],
   ['Documentation Map', map],
-  ['AGENTS', agents],
   ['ARR review', arr],
 ]) {
   assert.match(text, /ARR-S1[\s\S]{0,220}ACCEPTED 0\.1\.0[\s\S]{0,180}D-022/iu, `${name} must expose accepted S1 pack authority`);
   assert.match(text, /ARR-S2[\s\S]{0,220}ACCEPTED 0\.1\.0[\s\S]{0,180}D-022/iu, `${name} must expose accepted S2 pack authority`);
 }
 
-assert.match(agents, /deterministic S1\/S2 harness implementation:\s+AUTHORIZED/iu, 'AGENTS must authorize deterministic harness implementation after pack acceptance');
+assert.match(agents, /docs\/tracking\/STATUS\.md[\s\S]*docs\/tracking\/DECISIONS\.md/u, 'AGENTS must route MNFS Fresh Actors to the current status and decision owners');
+assert.match(agents, /exact task authority\/evidence/u, 'AGENTS must route exact task authority/evidence rather than duplicate S1/S2 authorization status');
+assert.doesNotMatch(agents, /ARR-S1[\s\S]{0,220}ACCEPTED 0\.1\.0|ARR-S2[\s\S]{0,220}ACCEPTED 0\.1\.0|deterministic S1\/S2 harness implementation|Candidate execution\/selection/u, 'AGENTS must not duplicate volatile S1/S2 status or execution projections');
 assert.match(status, /deterministic S1\/S2 harness implementation:\s+AUTHORIZED/iu, 'STATUS must authorize deterministic harness implementation after pack acceptance');
 assert.match(map, /deterministic S1\/S2 harness implementation[\s\S]{0,160}authorized/iu, 'Documentation Map must expose the accepted implementation boundary');
 assert.match(arr, /deterministic S1\/S2 harness implementation[\s\S]{0,160}authorized/iu, 'ARR review must expose the accepted implementation boundary');
 
 assert.match(status, /## Still prohibited until later authority\/Evidence[\s\S]{0,700}candidate acquisition\/installation\/execution/iu, 'STATUS must keep candidate operations explicitly prohibited');
 assert.match(map, /Candidate installation\/execution[\s\S]{0,240}remain prohibited/iu, 'Documentation Map must keep candidate execution prohibited');
-assert.match(agents, /Candidate execution\/selection:\s+PROHIBITED/iu, 'AGENTS must keep candidate execution prohibited');
 assert.match(arr, /Candidate installation\/execution[\s\S]{0,260}remain prohibited/iu, 'ARR review must keep candidate execution prohibited');
 
 for (const id of [

@@ -1,8 +1,9 @@
 # 3G-08 — Release, Promotion & Runtime Admissibility Architecture
 
-**Status:** CANDIDATE / AWAITING OPERATOR RATIFICATION / NOT AUTHORITY  
+**Status:** APPROVED pelo operador em 2026-08-16  
 **Fase:** 3G — Behavioral / State Architecture  
-**Importante:** este draft não altera authority existente, não fecha 3G e não autoriza implementação até ratificação explícita do operador.
+**Authority:** oitava decisão aprovada de 3G  
+**Importante:** esta decisão não constitui C-018, não encerra a Fase 3 e não autoriza implementação de produto, merge ou PR readiness.
 
 ## Decisão em uma frase
 
@@ -18,9 +19,9 @@ Materializa sem reabrir:
 - 3C-11 — Release owns composition/Promotion/active pointer; PROD é único persistent target F1;
 - 3D-03/04 — ComposeRelease/PromoteRelease em L7; Release não importa Builder/MAR;
 - 3G-02 — change_acceptance immutable/context-pinned e successor verification on-demand;
-- 3G-04 candidate — Release-time rigor consumer admissibility;
-- 3G-05 candidate — new run pins current active Release; in-flight run not rewritten;
-- 3G-07 candidate — Archive freezes ordinary Promotion but not active serving/recovery;
+- 3G-04 — Release-time rigor consumer admissibility;
+- 3G-05 — new run pins current active Release; in-flight run not rewritten;
+- 3G-07 — Archive freezes ordinary Promotion but not active serving/recovery;
 - 3F-06 — DEDICATED exact ReleaseRef and PRESERVE support horizon;
 - pacote ChatGPT↔Fable + final review.
 
@@ -317,7 +318,7 @@ data restore
 
 ## 12. ARCHIVED Project recovery bound
 
-Ordinary compose/promotion is blocked by 3G-07 candidate.
+Ordinary compose/promotion is blocked by 3G-07.
 
 Recovery while archived may target only:
 
@@ -463,8 +464,8 @@ DEDICATED support retirement once consumer→ Decision Loop / 3I/3J
 
 ---
 
-## 19. Candidato à ratificação
+## 19. Decisão ratificada
 
-Se ratificado:
+A aprovação do operador em 2026-08-16 congela:
 
 > **Release stays immutable, current eligibility is checked at compose/promote, one Promotion owns PROD material activation at a time, recovery follows durable steps without hidden workflow state, maintenance safety survives failed Promotion terminalization, rollback remains explicit/currently conformant, and runtime identities never become `latest` by convenience.**

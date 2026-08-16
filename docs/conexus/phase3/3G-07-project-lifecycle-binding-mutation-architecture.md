@@ -1,8 +1,9 @@
 # 3G-07 — Project Lifecycle & Binding Mutation Architecture
 
-**Status:** CANDIDATE / AWAITING OPERATOR RATIFICATION / NOT AUTHORITY  
+**Status:** APPROVED pelo operador em 2026-08-16  
 **Fase:** 3G — Behavioral / State Architecture  
-**Importante:** este draft não altera authority existente, não fecha 3G e não autoriza implementação até ratificação explícita do operador.
+**Authority:** sétima decisão aprovada de 3G  
+**Importante:** esta decisão não constitui C-018, não encerra a Fase 3 e não autoriza implementação de produto, merge ou PR readiness.
 
 ## Decisão em uma frase
 
@@ -20,8 +21,8 @@ Materializa sem reabrir:
 - 3D-03/04 — InceptionInvestigation e SetProjectBinding use cases; archived serving residue roteado para 3G;
 - 3F-04 — immutable typed binding versions, Git-first, expected-current CAS, no BindingSet;
 - 3G-03 — Inception pre-Change runtime shape permanece open;
-- 3G-05 candidate — runtime/trigger behavior under archive;
-- 3G-08 candidate — Promotion/recovery rules;
+- 3G-05 — runtime/trigger behavior under archive;
+- 3G-08 — Promotion/recovery rules;
 - pacote ChatGPT↔Fable + final review.
 
 Final review confirmou archive como authoring freeze, não unpublish, e aprovou explicit trigger DISABLE como narrowing.
@@ -154,7 +155,7 @@ Archive nunca apaga ou cascata resources.
 
 ## 7. Archived Project with active Release
 
-Ratification candidate fecha F3D04-R2:
+Esta decisão fecha F3D04-R2:
 
 ```text
 archive Project
@@ -381,8 +382,8 @@ pre-Change runtime realization → 3H + Decision Loop only if needed
 
 ---
 
-## 17. Candidato à ratificação
+## 17. Decisão ratificada
 
-Se ratificado:
+A aprovação do operador em 2026-08-16 congela:
 
 > **Project lifecycle remains narrow: INCEPTION establishes intent, ACTIVE evolves it, ARCHIVED freezes expansion without becoming serving authority. Existing serving/runtime may continue; explicit trigger DISABLE narrows behavior; recovery is mechanically bounded to previously activated conformant Releases; bindings need no FSM.**

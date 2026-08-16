@@ -4,7 +4,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 
 **Live status / navigation authority:** [LEDGER.md](LEDGER.md)  
 **3B historical/detail authority:** `../24-arquitetura-system-design.md` + `3B-*` docs  
-**Importante:** 3F está fechada/aprovada, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
+**Importante:** 3F está fechada/aprovada; 3G está em andamento com 3G-01 aprovada, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
 
 ## Status
 
@@ -23,7 +23,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 | 3C-07 | Connections Module Boundary | APROVADO | [3C-07-connections-module-boundary.md](3C-07-connections-module-boundary.md) |
 | 3C-08 | Capability Gateway Module Boundary | APROVADO | [3C-08-capability-gateway-module-boundary.md](3C-08-capability-gateway-module-boundary.md) |
 | 3C-09 | Brain Module Boundary | APROVADO | [3C-09-brain-module-boundary.md](3C-09-brain-module-boundary.md) |
-| 3C-10 | Production Agent Runtime Module Boundary | APROVADO | [3C-10-production-agent-runtime-module-boundary.md](3C-10-production-agent-runtime-module-boundary.md) |
+| 3C-10 | Production Agent Runtime Module Boundary | APROVADO | [3C-10](3C-10-production-agent-runtime-module-boundary.md) |
 | 3C-11 | Release Module Boundary | APROVADO | [3C-11-release-module-boundary.md](3C-11-release-module-boundary.md) |
 | 3C-12 | Application Runtime Profiles | APROVADO | [3C-12-application-runtime-profiles.md](3C-12-application-runtime-profiles.md) |
 | 3C-13 | Observability & Audit Module Boundary | APROVADO | [3C-13-observability-audit-module-boundary.md](3C-13-observability-audit-module-boundary.md) |
@@ -34,6 +34,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 | 3E-R1 | Data Architecture closure | APROVADO / CLOSED | [3E-R1-data-architecture-final-closure.md](3E-R1-data-architecture-final-closure.md) |
 | 3F-01..3F-06 | Contracts & API Architecture decisions | APROVADAS | [LEDGER §7](LEDGER.md#7-3f--closed--approved) |
 | 3F-R1 | Contracts & API Architecture Final Closure | APROVADO / CLOSED | [3F-R1-contracts-api-architecture-final-closure.md](3F-R1-contracts-api-architecture-final-closure.md) |
+| 3G-01 | ApprovalRequest Lifecycle & Claim-Binding State Architecture | APROVADO | [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) |
 
 ## Estado atual
 
@@ -44,7 +45,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 3D — Dependency Architecture: CLOSED / APROVADA
 3E — Data Architecture: CLOSED / APROVADA
 3F — Contracts & API Architecture: CLOSED / APROVADA
-3G — Behavioral / State Architecture: NOT STARTED / NEXT
+3G — Behavioral / State Architecture: IN PROGRESS / 3G-01 APROVADA
 ```
 
 ## Mapa estrutural preservado
@@ -75,11 +76,11 @@ ApplicationRuntimeProfile = MANAGED | DEDICATED
 
 `DEDICATED Application Runtime` é output/runtime de Project, não módulo do Hub.
 
-## Precedência de fechamento
+## Precedência atual
 
-O fechamento mais recente está materializado em [3F-R1](3F-R1-contracts-api-architecture-final-closure.md).
+O fechamento de Contracts & API Architecture permanece materializado em [3F-R1](3F-R1-contracts-api-architecture-final-closure.md). A primeira authority de Behavioral / State Architecture agora é [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md).
 
-Ele reconcilia 3C–3F e confirma, entre outros pontos:
+3F-R1 reconcilia 3C–3F e confirma, entre outros pontos:
 
 - `ReleaseManifest` como composition root única;
 - current Project intent separado de Release-pinned runtime composition;
@@ -91,43 +92,60 @@ Ele reconcilia 3C–3F e confirma, entre outros pontos:
 - compatibility/PRESERVE horizons coerentes;
 - nenhum `3F-07`, blocker material ou probe novo necessário para avançar.
 
+3G-01 adiciona, sem reabrir 3F:
+
+- `ApprovalRequest` como durable facts + canonical owner-local projection, sem mutable authoritative status duplicado;
+- decision write-once, derived expiry, monotonic `STALE` e permanent committed binding;
+- captured database-sourced `guardNow` por lifecycle invocation;
+- conditional/CAS guarded mutations + whole-admission abort on failed required guarded write;
+- rollback não consome approval e `RECOVER_BOUND` do mesmo attempt não reautoriza;
+- impossible durable fact combinations fail closed;
+- PAR-terminal separado de GC/PRESERVE horizon;
+- expiry silencioso no state layer, com AgentRun/runtime/UX/recovery roteados aos owners posteriores.
+
 Detalhes históricos de 3C permanecem em [3C-R1](3C-R1-cross-review-closure.md); 3D e 3E permanecem fechadas por seus respectivos `*-R1`.
 
 ## Findings roteados
 
 O live ledger mantém a lista completa e seus owners: [LEDGER.md](LEDGER.md#8-open-findings--routed-work).
 
-Itens principais que alimentam a próxima fase incluem:
+3G-01 resolve o item `ApprovalRequest lifecycle/FSM completo` no escopo do exact F1 approval path. Permanecem para decisões posteriores, entre outros:
 
 ```text
 3G
-→ ApprovalRequest lifecycle/FSM
+→ Builder Change/Finding lifecycle + Planning Depth × RigorProfile
 → binding + Project mutation lifecycle
+→ AgentRun semantic response to approval expiry
 → AgentRun in-flight × stricter new Release
 → archived Project with active Release
 → DEDICATED old-vs-new Release admissibility window
+→ Gateway effect_attempt lifecycle/state work
 
 3I / later
 → approver/binding authority enforcement
+→ post-admission cancellation / revocation
 → DEDICATED concrete trust/credential realization
 
-3H / 3K / implementation
-→ runtime transport, UI/display e exact wire realization já constrangidos por 3F
+3H / 3K / 3M / implementation
+→ runtime wake/suspend/resume mechanics
+→ UI/display e exact wire realization já constrangidos por 3F/3G-01
+→ reconciliation / GC / recovery machinery
 ```
 
-Esses itens não reabrem 3F automaticamente.
+Esses itens não reabrem 3F nem 3G-01 automaticamente.
 
 ## Regra de avanço
 
 3F só reabre diante de evidence material conforme `3F-R1`.
 
-Até lá:
+Estado atual:
 
 ```text
 3F = CLOSED / APPROVED
-3G = NEXT / NOT STARTED
+3G = IN PROGRESS
+3G-01 = APPROVED
 ```
 
-A primeira decisão de 3G deve ser trabalhada com o operador antes de ganhar authority.
+A próxima decisão de 3G deve ser selecionada pelo mesmo Decision Loop e trabalhada com o operador antes de ganhar authority.
 
-Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação, merge ou PR readiness.
+Isso não encerra 3G, não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação, merge ou PR readiness.

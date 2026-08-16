@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -41,6 +41,9 @@ C-000..C-017
 3F-01
 → classificação de contract surfaces, durable representations, version gaps e failure loci
 
+3F-02
+→ famílias semânticas de boundary/payload, public failure projection, retry/error mapping e state non-unification
+
 este LEDGER
 → status/navigation authority
 ```
@@ -58,7 +61,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
-| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 APROVADA** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md); próxima decisão deve ser trabalhada com o operador |
+| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md); próxima decisão deve ser trabalhada com o operador |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
@@ -313,7 +316,7 @@ nenhum Finding material adicional de Data Architecture
 
 ---
 
-## 7. 3F — IN PROGRESS / 3F-01 APPROVED
+## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 APPROVED
 
 ### 3F-01 — APPROVED
 
@@ -383,6 +386,92 @@ no Material Finding against 3D/3E
 
 Mitra/Factory/in-house evidence permaneceram referências/evidência, não authority.
 
+### 3F-02 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3F-02 | Boundary Payload Semantics & Error Envelope Architecture | [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) |
+
+3F-02 congela:
+
+```text
+F1 INTERNAL_TYPED_CALL
+F2 RUNTIME_EXECUTION
+F3 PLATFORM_OPERATION_RULES
+F4 DURABLE_CONTENT
+F5 PRODUCER_INGRESS_OR_PROPOSAL
+   OBSERVATION_APPEND | PROPOSAL
+
+T1 PublicFailureProjection
+T2 ExecutionIdentity
+T3 Correlation
+T4 CompatibilityAttestation
+T5 DataMeta
+T6 EffectTrafficState
+```
+
+Guardrails principais:
+
+```text
+NO UniversalRequest
+NO UniversalSuccess
+NO UniversalStatus
+NO UniversalInternalFailure
+NO RecoveryClass taxonomy sem consumidor
+
+public failure = stable code + sanitized message/key + correlationId
++ optional code-discriminated closed details
+L1-L4 ficam fora do wire
+retryable não é public-wire authority genérica
+execution status/error != effect receipt outcome
+state machines permanecem vocabulários distintos
+server deriva authority/context
+AWAITING_APPROVAL != T1 public failure
+```
+
+Retry law preserva effect ambiguity:
+
+```text
+READ / effects=[] + NOT_SENT|SENT_NO_RESPONSE
+  → allowlisted transient-code policy may retry
+
+EFFECTFUL + SENT_NO_RESPONSE / OUTCOME_UNKNOWN
+  → no automatic retry; reconcile/settle first
+
+idempotency=UNKNOWN
+  → generic automatic retry proibido
+```
+
+A coluna READ depende de `effects[]` fiel; mutation declarada como `effects=[]` é contract/qualification failure C-007.
+
+Error mapping permanece proporcional:
+
+```text
+internal-only variants não ganham public projection
+per-boundary mapping = mechanically exhaustive
+second public admission da mesma owner variant
+→ owner-level default dos shared public semantics se torna obrigatório
+→ contract test falha em >1 admission sem default
+intentional deviation → explicit annotated override + rationale
+```
+
+Fallback genuinely unforeseen usa sanitized generic code + correlation e defect signal pelo caminho bounded/non-blocking C-013, sem recursão.
+
+Review/provenance não-autoritativa:
+
+- [3F-FABLE-DIALOGUE-boundary-payload-error-envelope.md](3F-FABLE-DIALOGUE-boundary-payload-error-envelope.md)
+- [3F-FABLE-DIALOGUE-boundary-payload-error-envelope-R2.md](3F-FABLE-DIALOGUE-boundary-payload-error-envelope-R2.md)
+- [3F-FABLE-DIALOGUE-boundary-payload-error-envelope-R3.md](3F-FABLE-DIALOGUE-boundary-payload-error-envelope-R3.md)
+
+Convergência final:
+
+```text
+READY FOR OPERATOR APPROVAL
+no UNSUPPORTED mechanism
+zero new probes
+no Material Finding against prior authority
+```
+
 3F permanece aberta. A próxima decisão deve ser trabalhada com o operador antes de ser materializada.
 
 ---
@@ -403,11 +492,14 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3E02-R1 — Mastra `workflowDefinitions` não pode virar authoring authority | 3H/3L probe |
 | F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
 | Project binding contract shapes | later 3F |
-| exact error codes / error envelopes | later 3F |
-| approval capability exact signature | later 3F |
+| literal stable public codes / per-code details schemas | later 3F |
+| public-code → failure-locus mechanical table | later 3F |
+| approval capability exact signature/result shape | later 3F |
 | DEDICATED identity/authority exchange shape | later 3F / trust em 3I |
 | DEDICATED egress/network policy | 3I/3J |
 | MANAGED/DEDICATED deployment topology | 3J |
+| async/attempt status projection | 3G/3H |
+| F5 wire realization | 3H |
 | Mastra telemetry ↔ Conexus correlation | 3H/3L |
 | Verification Observability realization | 3H/3L/3N |
 | job/v1 queue/scheduler substrate | 3H/3L only on concrete need |
@@ -455,6 +547,10 @@ cross-domain global CAS refcount
 wire DTO / /v1 por module boundary
 generic contract registry service
 UniversalContract / UniversalEnvelope
+UniversalRequest / UniversalSuccess / UniversalStatus
+UniversalInternalFailure / central error registry
+RecoveryClass taxonomy sem consumidor
+generic details/metadata/context bag
 universal serializer / UniversalDigestFramework
 shadow versioning layer sobre as 46 classes duráveis
 negotiated multi-version windows sem consumidor nomeado
@@ -477,6 +573,7 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3E-R1 = APPROVED
 3F = IN PROGRESS
 3F-01 = APPROVED
+3F-02 = APPROVED
 3G = NOT STARTED
 ```
 

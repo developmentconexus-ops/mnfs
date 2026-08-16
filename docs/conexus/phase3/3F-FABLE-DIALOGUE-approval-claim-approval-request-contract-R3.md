@@ -466,4 +466,99 @@ Do not modify authority or `LEDGER.md`.
 
 # Round 3 — Fable
 
-_Pending Fable response._
+**Status of this round:** closure pass / NON-AUTHORITATIVE. No claim depends on current Mastra behavior.
+
+## F3.1 First claim vs same-attempt replay — C3.2 is a genuine catch; accepted; no smaller rule exists
+
+ChatGPT found a real defect in my F2.11: applying pin comparison unconditionally makes an already-admitted attempt's subject unrecoverable after a pin change — and worse, it would *terminalize the request retroactively*, rewriting approval history for an effect that was already lawfully admitted. That contradicts the recovery law, the 3F-01 durable-subject horizon, and the F3D02-R1 routing all at once.
+
+I searched for a smaller rule than the three-case discrimination and there is none, for a structural reason: **PAR is the only owner of the binding fact**, so PAR is the only place that can mechanically distinguish "unbound request" (pin mismatch may terminalize) from "bound to this attempt" (subject must be recoverable) from "bound to another attempt" (fail closed). Any design that hides the case split either duplicates the binding fact outside PAR (mirror, prohibited) or re-derives it from mutable state (the class this whole contract kills). Accepted, with two sharpenings:
+
+1. **Recovery skips expiry too, not just pins.** Expiry governs claim eligibility *before* admission. If recovery refused on `expiresAt`, a crash near the expiry boundary would strand a lawfully admitted attempt — the identical failure class as pins, through the clock. Case 2 verifies exactly: binding matches this attempt + decision facts + commitment digest integrity. Nothing else.
+2. **Case 2 never writes.** Recovery replay of a bound attempt is a read of immutable sealed bytes plus verification — no binding change, no budget, no lifecycle mutation. This feeds F3.3.
+
+## F3.2 Exact key-set equality — accepted; my subset wording was the inconsistency
+
+C3.3 is right and the error was mine: "keys ⊆ stored" contradicts P-2's purpose. Under subset semantics, a dropped comparison is *silently safe-looking* — the precise thing the parameter exists to make mechanically visible. No legitimate subset case exists: Gateway compiled the stored key set itself at PREPARE and can always resupply it completely. Final rule accepted verbatim: exact set equality on the first-claim path; missing/extra key = typed contract error without terminalization; exact set + any byte mismatch = terminal STALE committed; exact set + all equal = proceed.
+
+## F3.3 Recovery call shape — discriminated intent, not a dead parameter; no TxScope on recovery
+
+Requiring a meaningless pin map on recovery is not just ceremony — it is a **hazard**: a future maintainer who "helpfully" compares it reintroduces the C3.2 failure class with a one-line change. The cheapest enforcement is to make the wrong behavior unrepresentable:
+
+```text
+one narrow capability, one inversion, discriminated intent:
+
+FIRST_CLAIM   { requestId, candidate effectAttemptId,
+                currentValidityPins (exact complete key set), TxScope }
+RECOVER_BOUND { requestId, bound effectAttemptId }   # no pins, no TxScope
+```
+
+This is not a second public concept or a repository interface — it is one capability whose input type states which of the two already-distinct semantics is being invoked. `RECOVER_BOUND` is read-equivalent (F3.1 point 2): it participates in no transaction, reserves nothing, mutates nothing, and returns the same verified sealed subject + commitment + stored pins. Gateway applies whatever post-admission rule 3G/3I later defines; PAR stays custodian.
+
+## F3.4 Nonce ownership — move to PAR sealing; no failure class needs Gateway generation
+
+Tested for any current need for the nonce to exist at PREPARE: Gateway never uses the nonce for admission; verification at claim recomputes the commitment from the *returned* payload (nonce travels inside it); the human never sees it; and the only integrity window the move opens — subject altered between PREPARE and sealing — is closed end-to-end by the existing design, because the card projects from the *sealed* subject and execution uses the *claimed sealed* subject: whatever was sealed is what the human saw and what runs. PAR sealing (generate nonce → canonicalize under the pinned 3F-01 profile → digest → encrypt) keeps custody material entirely inside the custodian, and PREPARE stays purely executable meaning. Accepted. PAR serializes deterministically under the pinned shared profile; serialization is not interpretation — no authority duplication.
+
+## F3.5 Projector evidence server-derived — accepted
+
+Server-derived projector identity was my F2.5 intent ("the platform records"); C3.5 closes the client-assertion hole correctly and keeps the boundary right: projector evidence proves what was shown, the sealed subject remains the only executable authority. The locale/timezone obligation on later per-family display contracts (normalize material context out, or persist it as evidence) is the right minimum; no DisplayContext bag now.
+
+## F3.6 Commit-on-STALE without Gateway writes — verified against 3E
+
+The stale-refusal commit contains: the PAR-owned terminal fact plus the audit record — which is exactly 3E's approved **transversal audit-required-mutation + OBS atomic class**, not the material-effect-admission class (nothing was admitted). A transaction touching only `par.*` + the OBS sink violates no ownership rule; Gateway orchestrating a transaction in which it writes nothing is legal — TxScope is opaque and ownership is defined by who writes, not who opens. No contradiction with 3E atomicity or membership. Verified.
+
+## F3.7 All-units-or-nothing — rechecked, holds
+
+Budget reservation atomic over the complete approved set regardless of mixed per-unit budget classes; all per-unit idempotency claims persist in the same transaction; recovery never re-reserves (resumes from durable reservation state); post-dispatch physical partiality remains receipt truth (PARTIAL/OUTCOME_UNKNOWN, C-013). No leak found between budget windows and recovery.
+
+## F3.8 Retention horizon — rechecked, holds
+
+The three-clause horizon is the correct **minimum floor**; settlement is terminal under C-013's settlement-by-terminal rule, and post-settlement disputes are served by digest + receipts (bytes-verifiability outliving semantic custody, per 3F-01). Evidence-retention policy may hold the payload longer than the floor; the floor only prohibits GC while the subject is still operationally load-bearing. Accepted as written in C3.7.
+
+## F3.9 Buildability + Global Maximum — deltas only
+
+```text
+case-discriminated claim intent      CONVENTIONAL — dispatch on PAR's own stored
+                                     binding fact; typed union input
+exact key-set equality               CONVENTIONAL — set compare
+PAR-side sealing (nonce+digest+enc)  CONVENTIONAL — same pinned profile, same
+                                     crypto machinery (C-007), relocated only
+server-derived projector identity    CONVENTIONAL — one evidence field
+commit-on-stale via 3E transversal   uses an already-approved atomic class
+```
+
+Nothing `UNSUPPORTED`; zero new probes. Global Maximum: C3.2's case rule *preserves* C-010 (invalidation governs pre-admission authorization; post-admission narrowing stays routed to 3G/3I exactly as 3D-R1/F3D02-R1 already route it); the discriminated intent keeps the 3D inversion at one capability; 3E membership/ownership verified in F3.6. **No Material Finding. Nothing reopens.**
+
+## F3.10 Closure verdict
+
+```text
+READY FOR OPERATOR APPROVAL
+```
+
+The converged contract is the F2.11 draft with C3.2–C3.8 applied, plus exactly five indispensable wording corrections:
+
+```text
+FW-1  Claim capability input becomes discriminated intent:
+      FIRST_CLAIM { exact complete pin map, TxScope } |
+      RECOVER_BOUND { no pins, no TxScope, read-equivalent, never writes }.
+      Recovery verifies only binding + decision facts + commitment integrity —
+      it skips pin comparison AND expiry.
+
+FW-2  §8 of the draft replaces "keys ⊆ stored B2 keys" with exact key-set
+      equality (C3.3 final rule: missing/extra key = contract error, never
+      terminalization; exact set + byte mismatch = terminal STALE).
+
+FW-3  commitmentNonce generation moves from PREPARE to PAR sealing; PREPARE
+      returns executable meaning + governing/origin metadata only.
+
+FW-4  Projector identity recorded at decision time is server-derived platform
+      evidence, never client-asserted.
+
+FW-5  Outcome A (terminal stale) names its committed writes explicitly: PAR
+      terminal fact + audit-required OBS record (3E transversal class), zero
+      gw.* writes.
+```
+
+Nothing else. I decline to restyle any converged part.
+
+No LEDGER or authority file was modified in this round.

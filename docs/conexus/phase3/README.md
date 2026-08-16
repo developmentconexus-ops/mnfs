@@ -4,7 +4,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 
 **Live status / navigation authority:** [LEDGER.md](LEDGER.md)  
 **3B historical/detail authority:** `../24-arquitetura-system-design.md` + `3B-*` docs  
-**Importante:** 3C está fechada, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
+**Importante:** 3F está fechada/aprovada, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
 
 ## Status
 
@@ -29,7 +29,11 @@ Este diretório contém as decisões detalhadas da Fase 3.
 | 3C-13 | Observability & Audit Module Boundary | APROVADO | [3C-13-observability-audit-module-boundary.md](3C-13-observability-audit-module-boundary.md) |
 | 3C-14 | Attachments / Storage Boundary | APROVADO | [3C-14-attachments-storage-boundary.md](3C-14-attachments-storage-boundary.md) |
 | 3C-15 | Managed Application Runtime Module Boundary | APROVADO | [3C-15-managed-application-runtime-boundary.md](3C-15-managed-application-runtime-boundary.md) |
-| 3C-R1 | Cross-review Closure & Reconciliation | APROVADO | [3C-R1-cross-review-closure.md](3C-R1-cross-review-closure.md) |
+| 3C-R1 | Domain / Module Architecture closure | APROVADO / CLOSED | [3C-R1-cross-review-closure.md](3C-R1-cross-review-closure.md) |
+| 3D-R1 | Dependency Architecture closure | APROVADO / CLOSED | [3D-R1-dependency-architecture-final-closure.md](3D-R1-dependency-architecture-final-closure.md) |
+| 3E-R1 | Data Architecture closure | APROVADO / CLOSED | [3E-R1-data-architecture-final-closure.md](3E-R1-data-architecture-final-closure.md) |
+| 3F-01..3F-06 | Contracts & API Architecture decisions | APROVADAS | [LEDGER §7](LEDGER.md#7-3f--closed--approved) |
+| 3F-R1 | Contracts & API Architecture Final Closure | APROVADO / CLOSED | [3F-R1-contracts-api-architecture-final-closure.md](3F-R1-contracts-api-architecture-final-closure.md) |
 
 ## Estado atual
 
@@ -37,10 +41,13 @@ Este diretório contém as decisões detalhadas da Fase 3.
 3A — Architecture Reconciliation: transversal / contínua até C-018
 3B — System Context & Boundaries: CLOSED / APROVADA
 3C — Domain / Module Architecture: CLOSED / APROVADA
-3D — Dependency Architecture: NEXT
+3D — Dependency Architecture: CLOSED / APROVADA
+3E — Data Architecture: CLOSED / APROVADA
+3F — Contracts & API Architecture: CLOSED / APROVADA
+3G — Behavioral / State Architecture: NOT STARTED / NEXT
 ```
 
-## Mapa final 3C
+## Mapa estrutural preservado
 
 ```text
 Conexus Hub — modular monolith
@@ -70,60 +77,57 @@ ApplicationRuntimeProfile = MANAGED | DEDICATED
 
 ## Precedência de fechamento
 
-O cross-review final está materializado em [3C-R1](3C-R1-cross-review-closure.md).
+O fechamento mais recente está materializado em [3F-R1](3F-R1-contracts-api-architecture-final-closure.md).
 
-Ele registra, entre outros refinements:
+Ele reconcilia 3C–3F e confirma, entre outros pontos:
 
-- `AgentTrigger EVENT` reservado/deferred; `SCHEDULE` operacional no F1;
-- C-016 `Gateway-only` reinterpretado para MANAGED / Conexus-governed capabilities, sem impedir network surface própria de DEDICATED;
-- DEDICATED multi-install explicitamente DEFER;
-- Project owns Inception; Builder fornece engineering execution capability sem criar Change artificial;
-- application/use-case orchestration layer declarada como stateless e sem authority própria;
-- Brain `EVIDENCE` passa semanticamente a `EVIDENCE_SPEC`;
-- bindings seguem Git authoring + Project approved intent + Registry compiled revision + specialized validation + Release pin;
-- 3A-R5 supersede fresh implementer-per-WU; fresh independent verifier permanece;
-- `Workspace` sem qualificador significa tenant Conexus; usar `Mastra Workspace` para o substrate;
-- C-006 Project Data topology é baseline MANAGED, não persistence obrigatória de DEDICATED;
-- `Storage`, `Deployment`, `Published App Runtime` universal e outras nomenclaturas antigas são lidas sob a precedência de 3C-R1.
+- `ReleaseManifest` como composition root única;
+- current Project intent separado de Release-pinned runtime composition;
+- MANAGED e DEDICATED como profiles da mesma Factory, não duas factories;
+- approval exact-subject + single-claim;
+- dois Project binding contracts concretos, sem GenericBinding/BindingSet;
+- public failure `code` como behavior key, sem ErrorRegistry;
+- DEDICATED server-to-platform com `DedicatedApplicationPrincipal + exact ReleaseRef` e authority derivada server-side;
+- compatibility/PRESERVE horizons coerentes;
+- nenhum `3F-07`, blocker material ou probe novo necessário para avançar.
+
+Detalhes históricos de 3C permanecem em [3C-R1](3C-R1-cross-review-closure.md); 3D e 3E permanecem fechadas por seus respectivos `*-R1`.
 
 ## Findings roteados
 
-O live ledger mantém a lista completa e seus owners: [LEDGER.md](LEDGER.md#7-open-findings--routed-work).
+O live ledger mantém a lista completa e seus owners: [LEDGER.md](LEDGER.md#8-open-findings--routed-work).
 
-Itens principais para a próxima etapa:
-
-```text
-3D
-→ cycles conceituais e dependency DAG
-→ Managed Runtime ports
-→ Gateway/Connections/Builder/Agent Runtime directionality
-
-3F/3I
-→ DEDICATED identity/authority exchange
-
-3I/3J
-→ physical trust/egress/deployment topology
-```
-
-## Regra de fechamento
-
-3C não deve reabrir por detalhe de tabela, DTO, FSM, queue provider, Docker, DNS, TLS, Mastra implementation ou frontend shape. Esses temas pertencem a 3D–3L conforme o ledger.
-
-Uma boundary 3C só volta ao Decision Loop diante de finding material que demonstre:
+Itens principais que alimentam a próxima fase incluem:
 
 ```text
-owner ausente
-authority duplicada
-god module inevitável
-módulo artificial comprovado
-ou consumer real sem boundary existente
+3G
+→ ApprovalRequest lifecycle/FSM
+→ binding + Project mutation lifecycle
+→ AgentRun in-flight × stricter new Release
+→ archived Project with active Release
+→ DEDICATED old-vs-new Release admissibility window
+
+3I / later
+→ approver/binding authority enforcement
+→ DEDICATED concrete trust/credential realization
+
+3H / 3K / implementation
+→ runtime transport, UI/display e exact wire realization já constrangidos por 3F
 ```
+
+Esses itens não reabrem 3F automaticamente.
+
+## Regra de avanço
+
+3F só reabre diante de evidence material conforme `3F-R1`.
 
 Até lá:
 
 ```text
-3C = CLOSED
-3D = NEXT
+3F = CLOSED / APPROVED
+3G = NEXT / NOT STARTED
 ```
 
-Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação.
+A primeira decisão de 3G deve ser trabalhada com o operador antes de ganhar authority.
+
+Isso não encerra a Fase 3 completa, não constitui C-018 e não autoriza implementação, merge ou PR readiness.

@@ -484,3 +484,195 @@ later owner if deferred
 ```
 
 Do not modify authority or `LEDGER.md` in this review round.
+
+---
+
+# Round 1 — Fable
+
+**Status of this round:** adversarial review / NON-AUTHORITATIVE.
+**Method:** DevelopmentConexus Engineering Method v1.0.0 (local copy) applied — evidence checked against 3F-01..3F-04, C-005/C-007/C-011/C-012/C-013/C-014/C-015/C-016; adversarial challenge run on alternative C; structural inversion test applied to the baseline. No claim depends on current Mastra behavior.
+
+## F.1 Verdict
+
+Alternative C (owner default + boundary admission + static contract projection) survives as the Global Maximum — alternatives A/B/D are correctly rejected and my attempts to falsify C failed (F.3 Q1). But the candidate has **two genuine defects and four sharpenings**: the literal baseline is one layer incomplete — it enumerates the distinct-behavior codes while omitting the **generic foreseen classes** that everything else maps to by default, and without those two literals every boundary mints its own generic (`failure class A` reborn at the layer this decision exists to close); and the **one-locus law has a hole at the fallback code**, which the candidate's own proof test 1 would trip over. Method outcome: **CURRENT STRUCTURE CONFIRMED** with bounded corrections. No Material Finding against 3F-01..04 or C-016. Draft in F.5; closing verdict at the end.
+
+## F.2 Findings
+
+### F-1 — The baseline is missing its floor: two generic foreseen literals
+
+```text
+claim challenged      §7's conservative baseline (5 candidates + not-found + fallback)
+                      as sufficient
+concrete failure class the fallback is reserved by 3F-02 for UNFORESEEN faults only.
+                      A foreseen, well-typed domain rejection with no distinct client
+                      behavior (binding target not adoptable, mutation not admitted,
+                      rate refusal…) therefore has NO code to map to — so each
+                      boundary invents its own generic ("REJECTED", "DENIED",
+                      "CANNOT_PROCEED"…), and clients branch on accidental boundary
+                      wording. That is failure class A, reborn one layer down, on
+                      day one of implementation.
+smallest correction   freeze two generic literals in the baseline:
+                        OPERATION_REJECTED  (L1) — contract understood; domain/
+                          authority/eligibility refuses; behavior: present message,
+                          no automatic retry
+                        VALIDATION_FAILED   (L2) — submitted input violates its
+                          contract; behavior: field-level presentation; carries the
+                          only currently-frozen details schema (F-5)
+                      Every foreseen owner variant WITHOUT a distinct public
+                      behavior maps to one of these by default; distinct literals
+                      exist only where a distinct client behavior is evidenced.
+reopen prior authority?  NO — this is the 3F-02 exhaustive-mapping law made landable
+later owner           none; baseline is exactly 3F-05's scope
+```
+
+### F-2 — The one-locus law has a hole at the fallback
+
+```text
+claim challenged      §6.3 "same literal never maps to two loci" + §10 proof test 1,
+                      applied to the fallback literal
+concrete failure class an unforeseen fault is by definition UNCLASSIFIED — it is not
+                      L1 (domain understood+refused), not L2 (no contract was
+                      evaluated), not L3, not L4. Forcing it into a locus to satisfy
+                      the projection check either corrupts a locus's meaning or
+                      makes the check unimplementable. The candidate's own collision
+                      test would flag its own fallback.
+smallest correction   the fallback literal is the SOLE declared exception to the
+                      code→locus table: it is explicitly UNCLASSIFIED by definition,
+                      carries no details, no retryable, correlationId always, and
+                      emits the defect event (3F-02). The projection verifies that
+                      exactly one code has this status.
+reopen prior authority?  NO — 3F-02's law governs classified codes; this names the
+                      boundary of the law instead of leaving it to be discovered
+later owner           none
+```
+
+### F-3 — The literal is the authority unit; mappings select, never define
+
+The candidate's identity rule implies this but never states who owns a literal's meaning — which is exactly where a hidden second authority would grow (Q1). State it:
+
+```text
+literal definition (meaning + locus + details-contract identity)
+  = a single public-contract fact, recorded once in the static projection
+
+owner default / boundary admission / boundary override
+  = choices of WHICH literal a variant maps to
+  = may never redefine what a literal means
+```
+
+Under Method §3 (Mechanism ≠ Authority): the projection centralizes only the **public contract surface** — which is legitimately singular, like any contract — while owner unions keep all internal meaning. It is a contract record, not an ErrorRegistry in disguise (Q5): no runtime, no service, no owner-variant catalog, no registration of internal failures.
+
+### F-4 — Sharpen the namespace rule: domain vocabulary allowed, module identity prohibited
+
+The flat-vs-prefix question (Q2) hides two different things:
+
+```text
+module/package identity in literals   (GW_, PRJ_, BLD_)   → PROHIBITED
+  leaks architecture into a long-lived contract; breaks the client-refactor test
+product-domain vocabulary in literals (BINDING_, APPROVAL_) → PERMITTED
+  stable product language; survives any internal refactor
+```
+
+Without this distinction, the prohibition on prefixes gets read as a prohibition on descriptive names, and the naming pressure produces cryptic literals instead. Collision risk in the flat namespace is already closed mechanically by the projection's uniqueness check.
+
+### F-5 — Details: freeze the validation-issue shape now; defer the diagnostics fields; permit schema reuse by reference
+
+Q13/Q14 split cleanly under the named-consumer test:
+
+```text
+VALIDATION_FAILED details — freeze the minimal closed shape NOW:
+  issues[]: { field (public contract path), issueCode, params? (closed) }
+  consumer is current and ratified: C-007 fieldsSchema credential forms and
+  binding forms exist in F1; without the shape, field highlighting requires
+  message parsing (the exact 3F-02 F-3 failure class)
+
+MANIFEST_INVALID diagnostics — consumer exists (Control Plane promote/compile
+  view) but the field vocabulary depends on manifest validation output that
+  later 3F freezes; freeze only that its details are a closed issue collection
+  over public identifiers; exact fields belong to the promote-surface contract
+```
+
+Two codes may declare details contracts that **reference the same schema** — reuse by reference is not a `UniversalIssue` model; each code still owns one declared details-contract identity.
+
+### F-6 — Consolidation is the point, not the exception: one literal per behavior family
+
+Q3 asked whether unrelated owners may share a literal. The stronger, correct statement is that they **should** when consumer behavior is identical — that is what semantic codes are for. Concrete F1 case: the refresh-then-retry family (checklist CAS per C-013, binding expectation per 3F-04, decision CAS per 3F-03, promotion `CAS_CONFLICT` per C-014) is ONE client behavior — reload current state, re-evaluate, retry. One literal, one handler in the generated client. The caller always knows which operation failed from the call site; the code does not need to carry owner identity. Distinct literals in this family would make clients write four identical handlers that drift independently.
+
+Also under this finding: **`NOT_FOUND` indistinguishability is a law attached to the literal, not a per-boundary presentation choice** (Q11). The security property IS the cross-boundary uniformity: foreign/unauthorized identity must be byte-indistinguishable from nonexistent (same literal, same shape, no details, per C-015). One boundary distinguishing them creates an existence oracle — so this cannot be left boundary-specific.
+
+## F.3 The twenty questions
+
+1. **Global Maximum:** yes, with F-3's explicit literal-ownership rule. Attacked C by structural inversion (what if boundaries owned codes outright? → failure class A; what if owners owned public admission? → internal-only variants leak public codes) — both inversions fail, C stands. No hidden second authority once F-3 lands.
+2. **Flat namespace:** correct, with F-4's split. The concrete future-cost of module prefixes is measured in kind: they turn every internal reorganization into a public contract event — the client-refactor proof test fails permanently.
+3. **Reuse:** yes — F-6 inverts it into the design intent.
+4. **Static projection necessary:** yes. Delete it and the one-locus, uniqueness, and owner-default laws become unenforceable prose — literal drift is then invisible until a client breaks. It is the *smallest* mechanism that makes 3F-02's laws mechanical.
+5. **Registry in disguise:** no, per F-3's Mechanism≠Authority analysis — provided it records only public-contract facts and never enumerates internal variants.
+6. **Smallest enforcement:** one typed constant module (literal → locus + details-contract identity; uniqueness by construction of object keys; exhaustiveness by TS closed unions) plus one contract test that walks boundary mappings verifying: known-variant coverage, owner-default on second admission, no locus/details collision, exactly one UNCLASSIFIED code. No codegen, no service, no database.
+7. **Freeze now vs governance only:** both — governance laws AND the literals whose consumers are already ratified. Freezing zero literals now would hand the first implementer the naming decisions this contract exists to govern.
+8. **The five candidates:** all five are real, not illustrative — each has a ratified mechanism and consumer: `CLIENT_OUTDATED` (C-012 handshake + generated-client reload), `CAS_CONFLICT` (C-014 literal; F-6 family), `CAPABILITY_UNAVAILABLE_HEALTH` (C-011/C-012 health gate + app unavailable-state), `MANIFEST_INVALID` (C-015 candidate REJECTED + Control Plane diagnostics), `OUTPUT_CONTRACT_VIOLATION` (C-005/C-012 runtime authority + client fail). Freeze all five.
+9. **Approval classes:** zero new public literals. Unknown/foreign request → `NOT_FOUND`; decision CAS → `CAS_CONFLICT`; malformed decision → `VALIDATION_FAILED`; FIRST_CLAIM key-set violations are INTERNAL-surface contract errors between Gateway and PAR — if one ever reaches a public wire it is a platform defect and surfaces as the fallback; DENY/EXPIRE/STALE are outcomes, not failures (3F-03).
+10. **Binding classes:** zero new public literals now. Expectation-stale → `CAS_CONFLICT`; scope/foreign → `NOT_FOUND`; not-adoptable, mutation-not-admitted → `OPERATION_REJECTED` with message; required-but-absent surfaces primarily as the proactive checklist read-model (3F-04 UX), and as `OPERATION_REJECTED` where an operation actually fails. A distinct literal enters only when a distinct client *behavior* (not a distinct message) is evidenced — none is today. This is the no-bulk-promotion law working as intended.
+11. **Not-found:** shared literal + attached indistinguishability law — F-6.
+12. **Fallback literal:** name it now — `INTERNAL_ERROR` — precisely because leaving it unnamed invites per-boundary variants of "UNKNOWN_ERROR". Deliberately meaning-free; sole UNCLASSIFIED code (F-2); laws from 3F-02 attached (no details, no retryable, correlationId, defect event).
+13/14. **Details:** F-5 — validation shape now, diagnostics fields deferred to the promote-surface contract, reuse by reference permitted.
+15. **Evolution:** additive-only suffices for F1, and more sharply than the candidate states: a shipped literal enters the release-facing contract family, and 3F-01's regime for that family is pinned fail-closed with PRESERVE horizons — an in-place rename would break every active pinned release consuming it. So renames are not "handled without aliases"; they are **structurally excluded in F1**. Alias/deprecation machinery would be machinery for an operation the architecture already forbids. The reopen trigger (a real windowed-compatibility consumer, likely DEDICATED external installs) is correctly listed in §11.
+16. **UX:** confirmed — code as machine key, message-key as localized presentation, `CAS_CONFLICT` → "changed while you were editing" is exactly the 3F-04 pattern. Zero internals leak; the literal never needs to be shown to an ordinary user.
+17. **Deletion test, one by one:** module prefixes — already deleted, refactor-stability is the recovered benefit; static projection — deleting it returns invisible literal drift (keep); shared literals — deleting returns N drifting handlers for one behavior (keep); details — deleting returns message-parsing for forms, a named-consumer break (keep minimal); owner defaults — deleting returns cross-boundary divergence, the measured Marketplace #7 class (keep). Every retained element survives; nothing else is deletable.
+18. **Cross-check:** no Material Finding. C-016 sanitization is preserved verbatim (message/key presentation-safe, correlation-only bridge); 3F-02's laws are implemented, not modified; F-1/F-2 operate inside the scope 3F-02 explicitly routed here. Nothing reopens.
+19. **Buildability:** everything CONVENTIONAL — typed constant + contract test + generated-client mapping tables (C-012 machinery). In-house PROVEN precedent: the MNFS kernel's 52-code closed typed taxonomy, operated in practice. **Zero new probes.**
+20. Draft below.
+
+## F.4 Structural inversion check on the baseline
+
+Method §3 test applied: if every current boundary were the opposite (many external SDK consumers, multi-version windows, third-party clients), which conclusions survive? The governance laws (literal ownership, one locus, owner default, no internal leakage) all survive — they are consumer-count-independent. What would change: evolution (aliases would return) and namespace pressure (composition might return). Both are already the reopen triggers of §11. The baseline is therefore not overfit to today's single-operator shape.
+
+## F.5 Proposed 3F-05 decision text (smallest operator-facing form)
+
+---
+
+> ### 3F-05 — Public Failure Code & Details Contract (DRAFT)
+>
+> **Decision in one sentence:** Conexus F1 governs public failure codes by owner-default + boundary-admission with a static contract projection — flat semantic literals owned as single public-contract facts, a nine-literal baseline covering every currently-evidenced public behavior including the two generic foreseen classes, code-discriminated closed details only where a named consumer exists, additive-only evolution under the release-facing PRESERVE regime, and no error registry, service, or taxonomy framework.
+>
+> **1. Laws.** (a) A literal's definition — meaning, locus, details-contract identity — is a single public-contract fact recorded once in the static projection; owner defaults and boundary admissions select literals and may never redefine them. (b) Owner-local variants stay private until admitted to a public boundary; admission mapping is mechanically exhaustive; the same variant on a second public boundary requires the owner-level default; boundary overrides are explicit with rationale. (c) One literal per consumer-behavior family across owners — distinct literals require a distinct evidenced client behavior, never a distinct owner or message. (d) Flat namespace: product-domain vocabulary permitted, module/package identity prohibited. (e) Loci L1–L4 never on the wire; each classified literal maps to exactly one locus; the fallback is the sole declared UNCLASSIFIED code. (f) No bulk promotion: 3F-03/3F-04 semantic classes are not public codes by name; they map to the baseline generics until a distinct behavior is evidenced.
+>
+> **2. Baseline literals** (strings operator-approvable; semantics frozen):
+>
+> | Literal | Locus | Client behavior | Details |
+> |---|---|---|---|
+> | `CLIENT_OUTDATED` | L3 | reload/refresh contract attestation, then retry | none |
+> | `CAS_CONFLICT` | L3 | re-read current state, re-evaluate, retry — one shared literal for the whole refresh-then-retry family (checklist, bindings, approval decisions, promotion) | none — never a data channel |
+> | `CAPABILITY_UNAVAILABLE_HEALTH` | L1 | present unavailable state; no retry storm | none |
+> | `NOT_FOUND` | L1 | treat as nonexistent — **with attached law:** foreign/unauthorized identity is byte-indistinguishable from nonexistent on every public boundary (C-015); no details ever | none |
+> | `OPERATION_REJECTED` | L1 | present sanitized message; no automatic retry — the generic foreseen domain/authority rejection | none |
+> | `VALIDATION_FAILED` | L2 | field-level presentation | frozen minimal closed shape: `issues[]: { field: public contract path, issueCode, params? }` |
+> | `MANIFEST_INVALID` | L2 | present diagnostics | closed issue collection over public identifiers; exact fields → promote-surface contract |
+> | `OUTPUT_CONTRACT_VIOLATION` | L2 | fail the operation; surface as platform-side contract defect | none now |
+> | `INTERNAL_ERROR` | UNCLASSIFIED (sole exception) | present generic failure + correlationId | none; no retryable; always emits the 3F-02 defect event |
+>
+> **3. Details.** Absent by default; closed, code-specific, public-identifiers-only; two codes may reference the same schema without creating a Universal model; everything in 3F-02's forbidden list stays forbidden.
+>
+> **4. Static projection.** One typed constant module (literal → locus + details identity; uniqueness by construction) + one contract test walking boundary admissions (coverage, owner defaults, collisions, single UNCLASSIFIED). Compile/test-time only; records public contract facts exclusively; never enumerates internal variants; no runtime component.
+>
+> **5. Evolution.** Additive-only in F1: shipped literals join the release-facing contract family under 3F-01 PRESERVE — in-place rename/meaning/locus/details-breaking changes are structurally excluded while any pinned release consumes them; splits/merges are explicit contract evolution. No alias/deprecation machinery (reopen trigger: a real windowed-compatibility consumer).
+>
+> **6. UX law.** Code is a machine key, never required in user-facing display; message/key carries sanitized localized presentation; correlationId is the support bridge; generated clients translate codes into product language (per 3F-04 §11 patterns).
+>
+> **7. Non-goals.** ErrorRegistry/service/database, UniversalError/Issue/Diagnostic, RecoveryClass, module-prefixed codes, HTTP status/route inventory, SDK generation, schema-library choice, localization framework, complete owner catalogs, public codes for internal-only variants, alias machinery.
+>
+> **8. Routed onward.** Exact wire layout per boundary, promote-diagnostics fields, HTTP mapping, tooling realization → later 3F/implementation; new literals → boundary admission + Decision Loop with evidenced behavior.
+>
+> **9. Proof strategy** (architecture-stage): the six falsification tests of §10 plus: the baseline-floor test — every foreseen rejection on a current surface must map to a baseline literal without inventing a new generic; and the UNCLASSIFIED-uniqueness check. Implementation evidence later: compile-time exhaustiveness + the contract test firing on seeded violations.
+>
+> **10. Reopen triggers.** As §11 of this dialogue, plus: a foreseen-rejection class that demonstrably cannot map to `OPERATION_REJECTED`/`VALIDATION_FAILED` without losing a needed client behavior.
+
+---
+
+## F.6 Closing verdict
+
+All twenty questions converge; the two defects (F-1, F-2) are corrected inside the draft; the four sharpenings are folded in; the structural inversion check shows the result is not overfit to F1's current shape. No material question remains.
+
+```text
+READY FOR OPERATOR APPROVAL
+```
+
+No LEDGER or authority file was modified in this round.

@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -53,6 +53,9 @@ C-000..C-017
 3F-05
 → public failure code semantics, baseline literals, closed details contracts e static code→locus projection
 
+3F-06
+→ DEDICATED server-to-platform exchange, application+Release authority context, Release-as-attestation e support horizon
+
 este LEDGER
 → status/navigation authority
 ```
@@ -70,7 +73,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
-| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) · [3F-03](3F-03-approval-claim-approval-request-contract.md) · [3F-04](3F-04-project-binding-contract-architecture.md) · [3F-05](3F-05-public-failure-code-details-contract.md); próxima decisão deve ser trabalhada com o operador |
+| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 + 3F-06 APROVADAS** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) · [3F-02](3F-02-boundary-payload-semantics-error-envelope-architecture.md) · [3F-03](3F-03-approval-claim-approval-request-contract.md) · [3F-04](3F-04-project-binding-contract-architecture.md) · [3F-05](3F-05-public-failure-code-details-contract.md) · [3F-06](3F-06-dedicated-platform-service-exchange.md); próxima decisão deve ser trabalhada com o operador |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
@@ -325,7 +328,7 @@ nenhum Finding material adicional de Data Architecture
 
 ---
 
-## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 APPROVED
+## 7. 3F — IN PROGRESS / 3F-01 + 3F-02 + 3F-03 + 3F-04 + 3F-05 + 3F-06 APPROVED
 
 ### 3F-01 — APPROVED
 
@@ -546,7 +549,7 @@ projector identity/version/digest recorded server-side as decision evidence
 large sets use deterministic preview + exact total + full list before decision
 ```
 
-PRESERVE horizon keeps sealed payload while request/attempt remains operationally load-bearing, including `OUTCOME_UNKNOWN` until reconciliation/settlement concludes.
+PRESERVE horizon keeps sealed payload while request/attempt remains operationally load-bearing, incluindo `OUTCOME_UNKNOWN` until reconciliation/settlement concludes.
 
 Review/provenance não-autoritativa:
 
@@ -710,6 +713,66 @@ zero new probes
 no Material Finding against 3F-01..3F-04/C-016
 ```
 
+### 3F-06 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3F-06 | DEDICATED Platform Service Exchange | [3F-06](3F-06-dedicated-platform-service-exchange.md) |
+
+3F-06 congela o menor exchange semântico DEDICATED:
+
+```text
+F1 access surface = server-to-platform
+asserted identities = DedicatedApplicationPrincipal + exact ReleaseRef
+optional DelegatedConexusPrincipal somente quando 3I estabelecer independentemente
+Project/Workspace/audiences/bindings/service-contract identities = derived + verified server-side
+```
+
+Authority/composition:
+
+```text
+caller scope fields never grant authority
+Release must belong to principal Project or fail closed
+one operation targets one service owner; audience eligibility derives from Release-pinned composition
+runtime never resolves mutable current Project bindings
+new binding revision → authoring/adoption → new Release
+ApplicationPrincipal != end-user principal
+app-user ref under own auth = correlation only, never Conexus authority
+```
+
+Compatibility:
+
+```text
+DEDICATED ReleaseManifest pins exact service-contract identities consumed by build
+exact ReleaseRef = T4 compatibility attestation for this surface
+no second per-call contract digest/attestation
+in-horizon pinned contracts MUST remain supported
+support removal while still in PRESERVE horizon = contract-breaking change
+```
+
+Failures/security boundary:
+
+```text
+3F-05 baseline governs authenticated/admitted exchanges
+NOT_FOUND keeps semantic indistinguishability / no existence oracle
+authentication/credential failures are PRE-CONTRACT → 3I
+raw Connection/platform master credentials never cross merely to enable service call
+```
+
+3I continua responsável por OAuth/mTLS/JWT/keys-or-other, credential issuance/rotation/revocation, bearer-vs-PoP, replay/challenge/anti-oracle semantics, delegation realization, instance identity, network/egress e break-glass.
+
+Review/provenance não-autoritativa:
+
+- [3F-FABLE-DIALOGUE-dedicated-platform-service-exchange.md](3F-FABLE-DIALOGUE-dedicated-platform-service-exchange.md)
+
+Convergência final:
+
+```text
+CURRENT STRUCTURE CONFIRMED
+READY FOR OPERATOR APPROVAL
+no Material Finding against 3F-01..3F-05, 3C-12 or C-014
+```
+
 3F permanece aberta. A próxima decisão deve ser trabalhada com o operador antes de ser materializada.
 
 ---
@@ -743,7 +806,8 @@ Estes itens não reabrem fases anteriores automaticamente.
 | binding/Release/runtime end-to-end proof | 3N / 3O |
 | pools/failover/shared resource extensions | Decision Loop on real consumer |
 | break-glass binding/runtime override | Decision Loop on real incident failure class |
-| DEDICATED identity/authority exchange shape | later 3F / trust em 3I |
+| DEDICATED trust/credential mechanism + optional delegation realization | 3I |
+| DEDICATED Release admissibility window / old-vs-new lifecycle | 3G/3I |
 | DEDICATED egress/network policy | 3I/3J |
 | MANAGED/DEDICATED deployment topology | 3J |
 | async/attempt status projection | 3G/3H |
@@ -753,6 +817,8 @@ Estes itens não reabrem fases anteriores automaticamente.
 | job/v1 queue/scheduler substrate | 3H/3L only on concrete need |
 | app-origin approvals / second approval consumer | Decision Loop when real consumer exists |
 | duplicate Gateway approval-subject custody under future availability split | Decision Loop / 3J when real topology requires |
+| DEDICATED browser-direct Platform-Service authority | Decision Loop on named consumer |
+| DEDICATED durable credential/grant record | Decision Loop if 3I proves lifecycle need |
 | DEDICATED multi-install/fleet management | DEFER |
 
 Resolvido:
@@ -764,6 +830,7 @@ Resolvido:
 - approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; lifecycle, approver authority e post-admission cancellation permanecem roteados.
 - Project binding contract shapes → **RESOLVIDO por 3F-04** como dois contratos concretos, Git-first, exact-pinned e sem GenericBinding/BindingSet; lifecycle, authority e UI permanecem roteados.
 - literal stable public codes + per-code baseline details + public-code→locus contract → **RESOLVIDO por 3F-05** com 9-code baseline, details fechados e static projection; exact wire/HTTP/promote diagnostics permanecem roteados.
+- DEDICATED identity/authority exchange shape → **RESOLVIDO por 3F-06** como server-to-platform exchange com `DedicatedApplicationPrincipal + exact ReleaseRef`, scope/audience derivados, Release-as-attestation e support horizon; concrete trust/credential/delegation mechanics permanecem 3I.
 
 ---
 
@@ -834,6 +901,15 @@ ErrorRegistry service/database
 UniversalError / UniversalIssue / UniversalDiagnostic
 module/package-prefixed public failure namespace
 public failure alias/deprecation machinery sem mixed-version consumer real
+Universal DedicatedRequest/Response/Error/Context
+PlatformServiceRegistry / service mesh / runtime plugin registry
+caller-asserted Project/Workspace/audience authority fields
+DEDICATED per-call compatibility digest paralelo à Release
+wildcard DEDICATED service audience
+DEDICATED direct browser→Platform-Service authority sem consumidor
+DedicatedAccessGrant / PlatformServiceBinding / DedicatedSession / ServiceCredential domain records sem lifecycle provado
+DEDICATED identity federation/delegation framework sem consumidor
+OAuth/mTLS/JWT/API-key architecture predecidida em 3F
 Kafka/Kubernetes/Temporal by default
 ```
 
@@ -857,6 +933,7 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3F-03 = APPROVED
 3F-04 = APPROVED
 3F-05 = APPROVED
+3F-06 = APPROVED
 3G = NOT STARTED
 ```
 

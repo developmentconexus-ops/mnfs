@@ -1114,3 +1114,122 @@ STOP / SPLIT PREREQUISITE
 Do **not** request another consolidation round for naming, editorial sharpening or realization detail. If the structure is sound with only non-material wording edits, list them as authority-draft notes and return `CURRENT STRUCTURE CONFIRMED`.
 
 Do not edit `LEDGER.md`, accepted authority or product code. Append final review to this R2 file and commit/push only the R2 package.
+
+---
+
+# Fable Package Final Review — Round 2
+
+**Reviewer:** Fable (independent adversarial reviewer)  
+**Reviewed at HEAD:** `eaf9c317a524d796fc03386fb0d742fca218e25f`  
+**Scope:** original package + Fable Round 1 + this R2 consolidation, reviewed as one behavioral/state system under DevelopmentConexus Engineering Method v1.0.0.  
+**Authority basis:** 3G-01/3G-02/3G-03 approved texts, LEDGER, C-013/C-014/C-016/C-017, 3E-02 inventory, 3F-02/3F-03/3F-04/3F-06.  
+**Mastra note:** no conclusion below depends on current Mastra API behavior. The single Mastra assumption in the system — durable checkpoint/suspend/resume as subordinate runtime mechanics — was frozen by 3C-10/3A-R5 and its realization stays 3H/3L. Context7 verification therefore was not required; no new Mastra claim is made.
+
+## FR2.0 Verdict
+
+```text
+PACKAGE CURRENT STRUCTURE CONFIRMED
+```
+
+All Round-1 corrections (F1, F2, F3, F5, F6, F7, M1) are incorporated with correct semantics. The F4 decision as consolidated — archive is authoring freeze, not serving authority — plus the trigger-DISABLE narrowing refinement survive adversarial attack and are the smallest Global Maximum I can construct for that failure cluster. No material finding remains. Five authority-draft notes (AD-1..AD-5) are recorded below as **mandatory drafting content**, none of which changes structure, adds mechanism, or requires another consolidation round.
+
+## FR2.1 Falsification results — the 24 required attacks
+
+**1. F1 guard composition closes cancel×FIRST_CLAIM and disable×firing?** YES at the architecture level. All participating facts (`agent_run` terminality, current-pending-proposal, `approval_request` claim facts, `agent_trigger` enabled) are `par.*`, so the guard composes inside the existing Class-1 admission transaction and the standalone PAR mutations without any new cross-owner atomicity. One realization hazard is real and is captured as AD-2: under the accepted F1 PostgreSQL baseline (no SERIALIZABLE crutch, per 3G-01), restating a *different-row* fact inside a mutation predicate via a non-conflicting read does not serialize — write skew across `approval_request`/`agent_run` rows remains schedulable. The R2 text already forbids "plain pre-read" and offers "equivalent short PAR serialization", which is the correct mechanism family (locking read/CAS on the fact's row, or the owner serialization scope). Structure correct; draft must not let "predicate" be read as "subquery".
+
+**2. Current-pending-proposal without hidden FSM?** YES. It is one owner-local mutable PAR fact (naturally realized on `par.agent_run` under the package's new-fields allowance), advanced/cleared under the same guard family. It scopes consumer-boundary admissibility only; ApprovalRequest keeps sole authority over its own lifecycle. No second subject authority, no FSM. Recorded as AD-3 so the draft names it explicitly as non-authority-bearing over the request.
+
+**3. `closedBeforeDispatch` vs 3F-03 permanent binding / 3G-01 recovery?** NO contradiction. RECOVER_BOUND remains read-equivalent subject reconstruction; whether a recovered `NOT_SENT` attempt may still dispatch is Gateway current-attempt authority, which 3G-01 §14 explicitly leaves with Gateway. `NOT_SENT + closed → never dispatch` refines Gateway's own side without touching approval facts; the binding stays permanently consumed in every order. 3G-01 proof 17 remains satisfiable: crash-recovery of an unclosed `NOT_SENT` attempt still recovers and may dispatch.
+
+**4. `NOT_SENT + closed` honest in every order?** YES. Close-then-crash: recovery sees the write-once close fact, never dispatches; budget release settles idempotently from the closed fact (AD-5). Dispatch-then-crash: `SENT_NO_RESPONSE` → `OUTCOME_UNKNOWN`, reservation retained, close guard can no longer fire (requires `NOT_SENT`). Close×dispatch race: both are conditional mutations on the **same** `gw.effect_attempt` row, so they conflict under the baseline isolation and exactly one wins — this pair, unlike attack 1, needs no extra serialization care.
+
+**5. Fourth traffic state vs separate fact?** Separate fact is strictly smaller and correct. `traffic_state {NOT_SENT|SENT_NO_RESPONSE|RESPONSE_RECEIVED}` is C-016-frozen envelope vocabulary describing what crossed the boundary; disposition-before-dispatch is a different dimension. A fourth traffic value would mutate frozen vocabulary and conflate dimensions. Confirmed as consolidated.
+
+**6. One non-terminal Promotion per (Project, PROD) protects migration/drain races?** YES, provided material steps execute only under the admitted non-terminal Promotion — which §5.5 requires. Admission refusal is not a queue (no ordering/retention promise); no lease exists or is needed.
+
+**7. Could two Promotions still interleave between admission and first material step?** Only through the same enforcement hazard as attack 1: "at most one non-terminal" must be enforced by a conflicting guard (uniqueness over non-terminal promotions per Project/target, or admission through the Release-owner serialization scope), not by a read-then-insert. Folded into AD-2. With that, no interleaving schedule survives: the loser fails admission and performs zero DDL/drain.
+
+**8. Same-Promotion recovery claim/lease?** Not needed. Single-authority-writer modular monolith (the 3G-03 §17 rationale carries unchanged to Release); recovery reads durable step facts. Lease/fencing returns only via the existing multi-writer reopen trigger (3J/Decision Loop).
+
+**9. Does the F4 reading preserve `Project intent != serving authority` without an uncontrolled automation source?** YES. New-run admission while archived is bounded by: active Release serving root, pre-existing enabled trigger or served-surface origin, all last-mile owner/security/health checks, approval floors and budgets unchanged, plus the explicit DISABLE narrowing path and the mandatory 3K disclosure. Every autonomous action an archived Project can take was individually authorized before archive and remains individually revocable without restore. That is controlled, and the alternative readings are worse (silent serving degradation, or Project lifecycle becoming partial serving authority).
+
+**10. Trigger DISABLE while archived — keep or remove?** KEEP. It is monotone narrowing, the same asymmetry family as "operator may elevate rigor, agent may never lower" and 3I revocation narrowing an in-horizon Release. The alternative (restore → disable → re-archive) transiently reopens the entire authoring surface to stop one automation — strictly more dangerous and more ceremony. The freeze is on authority *expansion*; narrowing does not contradict it. The deliberate asymmetry with binding UNBIND (still refused while archived) is coherent and worth one recorded sentence — AD-4: DISABLE narrows live runtime behavior that has no other stop path; UNBIND only edits future composition intent, which is already frozen and has no urgency while archived.
+
+**11. Is the archived new-run boundary exactly right?** YES as consolidated: serving-rooted admissions (served conversation/request paths, pre-existing enabled triggers, DEDICATED exchange under an in-horizon exact ReleaseRef) continue; control-plane ad-hoc/dev/authoring invocation stays behind the Project lifecycle gate of its originating surface. I attempted to construct a run class that is neither and found none within approved surfaces.
+
+**12. Does "previously activated" mechanically separate recovery from deployment?** YES. The set is provable from existing Promotion/active-pointer history — no new record, no trusted label. A never-activated AVAILABLE Release is refused mechanically in every schedule I could construct, including "compose just before archive, then claim recovery".
+
+**13. Previously-activated-but-schema-broken target?** Closed. F7 admissibility explicitly composes with current rollback/conformance gates; C-014's `ROLLBACK_UNAVAILABLE_SCHEMA_INCOMPATIBLE` refuses the incompatible target regardless of history membership. A target whose swap committed but never reached `SERVED_VERIFIED` is honestly in the previously-activated set — it was the actual serving composition — and remains subject to the same current gates.
+
+**14. F5 INCEPTION wording sufficient without predeciding pre-Change runtime shape?** YES. "Explicitly admitted by existing Inception authority" gates setup mutations without asserting anything about how Inception executes; §4.7 keeps the shape open with the existing reopen trigger. The §6.6-vs-§6.4 contradiction from Round 1 is resolved.
+
+**15. Checkpoint anchoring of PlanningDepth deterministic?** YES. The floor is fixed by the existing C-017/3G-02 human checkpoint as part of approved semantic identity; deterministic signals and operator judgment elevate only; agent proposal is input, never authority. No second classifier exists to drift.
+
+**16. Mechanical elevation × dispatch race?** Settled by an **existing** guard: elevation that changes the required Plan/contract identity is a semantic revision, and 3G-02 §12 places both contract/checkpoint mutation and dispatch admission under the same per-Change serialization root. Elevation-first → dispatch refused pending checkpoint; dispatch-first → in-flight output falls under 3G-02 §5.1 superseded-context law. No new mechanism required; this is exactly why anchoring on the checkpoint was the right correction.
+
+**17. PARTIAL settlement conservative without over-blocking?** YES. Unknown units retain reservation until reconciliation; succeeded/rejected settle per typed accounting; unprocessed units are proven not-attempted by the C-013 accounting law itself (`attempted excludes unprocessed`), so their release requires no extra proof machinery and they are not blocked.
+
+**18. Schedules 36/37/42, both orders:**
+
+```text
+36a cancel commits first        → guarded FIRST_CLAIM refuses; request rests APPROVED_UNCLAIMED,
+                                  expires silently; ALLOW_ONCE fact immutable          → HOLDS
+36b claim admission commits 1st → binding permanent; later cancel cannot rewrite
+                                  committed admission; schedule 37 laws take over      → HOLDS
+37a close wins                  → never dispatches, incl. after crash/restart; budget
+                                  releases only after close fact; approval consumed    → HOLDS
+37b dispatch wins               → SENT_NO_RESPONSE; ambiguity law governs; close guard
+                                  can no longer fire; approval consumed                → HOLDS
+42a P1 admitted, P2 requests    → P2 admission refused; zero DDL/drain by P2           → HOLDS
+42b both request concurrently   → guarded admission (AD-2 enforcement) admits exactly
+                                  one; loser performs no material step                 → HOLDS
+```
+
+**19. Archive × serving × schedule × disable:** archive commits → pointer/serving/runs/triggers untouched → firing admits new run under guards → explicit DISABLE commits → next firing refused → ENABLE/CREATE refused until restore → restore → ACTIVE re-admits authoring. All races resolve through the F1/§4.6 guard family. HOLDS.
+
+**20. Acceptance drift compose→promote after deltas:** unchanged and correct — compose is guard-time lawful, promote recheck refuses on drift, Release stays immutable, restoration is on-demand successor verification, no fan-out. The new Project-lifecycle clause in both gates composes without circularity. HOLDS.
+
+**21. Final re-sweep of 46 durable classes:** result unchanged from Round 1 — `brn.*` (C-011), `con.*` (C-007/C-016), `att.*` (C-015), `mar.*` (C-013), `iam.*` (C-015), `reg.*` (C-005), `obs.*` (append-only), `par.conversation`/`bld.coding_session` (container/correlation, realization). The R2 corrections added no durable class and left no class without an owner/lifecycle answer. **No material 3G decision is missing.**
+
+**22. Does any R2 correction justify a 3G-09?** NO. `closedBeforeDispatch` lives inside 3G-06's owner scope; the Promotion guard inside 3G-08's; the PAR guard law inside 3G-05's. Nothing crosses candidates in a way that needs a new decision container.
+
+**23. Did any R2 correction create hidden authority/record/subsystem/contract?** NO. Re-audited: one write-once field in `gw.effect_attempt`; guard predicates over existing `par.*`/`rel.*` facts; explicit lifecycle sentences. Terminal vocabularies remain distinct per owner; no public/wire code was created; no engine, queue, scheduler, lease, or fan-out entered.
+
+**24. Proceed to authority drafting + 3G-R1?** YES — see disposition.
+
+## FR2.2 Authority-draft notes (mandatory content; non-structural; no further consolidation round required)
+
+**AD-1 — 3G-08: Promotion terminalization and maintenance serving-block survival.** The F3 guard makes one interaction with C-014 recovery worth stating explicitly in the drafted authority, because a naive reading could either deadlock or silently resume unsafe serving: (i) a stuck/abandoned Promotion is explicitly terminalized — write-once terminal outcome by applicable recovery authority — and only then may a successor/recovery Promotion be admitted under the one-non-terminal guard (otherwise `MAINTENANCE_RECOVERY_REQUIRED` + forward-fix would be unreachable); (ii) the maintenance-required serving-block is carried by durable serving/Release-side facts that **survive** that terminalization, so closing the failed Promotion never resumes incompatible old serving — exit remains only through C-014's CAS/restore/forward-fix; (iii) 3G-R1 closure schedules must include: maintenance-required stuck → old Promotion terminalized → recovery Promotion admitted → serving-block persists until safe serving is established. All of this is derivable from C-014 plus the R2 structure; nothing structural changes.
+
+**AD-2 — 3G-05/3G-08: cross-row guards must conflict, not merely restate.** The drafts must state that when an admission depends on a concurrently mutable fact stored on a **different row/record** (origin-run terminality, pending-proposal, trigger enabled; absence of another non-terminal Promotion), the guard must be realized as a conflicting operation under the accepted F1 PostgreSQL baseline — a locking read/CAS on the fact's row, a uniqueness guarantee over the guarded condition, or the applicable owner serialization scope — because a non-conflicting predicate read does not exclude write-skew schedules. Same-row guarded mutations (`approval_request` decision/bind, `effect_attempt` close/dispatch) already conflict and need nothing extra. Mechanism choice stays implementation; the 3G-01 §18 "demonstrate the control firing" discipline applies to every one of these guards.
+
+**AD-3 — 3G-05: current-pending-proposal fact.** Name it in the draft as an owner-local mutable PAR fact (naturally on `par.agent_run`), advanced/cleared under the same guard family, explicitly **not** a second authority over ApprovalRequest and never a hidden run FSM.
+
+**AD-4 — 3G-07: record the DISABLE/UNBIND asymmetry rationale.** One sentence: while ARCHIVED, trigger DISABLE is admissible because it narrows live runtime behavior that has no other stop path short of restore; binding UNBIND stays refused because it edits only future composition intent, which archive already freezes and which nothing consumes while archived. This blocks future symmetry creep in either direction.
+
+**AD-5 — 3G-06: budget release after close is idempotent settlement.** Crash between close-fact commit and budget release must settle idempotently from the durable closed fact on recovery; release is a consequence of the fact, never an independent write racing it.
+
+## FR2.3 YAGNI final audit
+
+```text
+new module                      0
+new durable record class        0
+new Tier-2 FK                   0
+new cross-owner atomicity class 0
+new queue/scheduler             0
+new workflow engine             0
+new lease/fencing               0
+new public failure taxonomy     0
+duplicate state authority       0 found
+runtime self-report as authority 0 found
+reachable false-success path    0 found after F1–F7/M1 + AD-1
+```
+
+## FR2.4 Final disposition
+
+Answering assignment 8.3 and the operator's questions directly: 3G-04, 3G-05, 3G-06, 3G-07 and 3G-08 stand as consolidated; nothing needs deletion, merger or split; no 3G-09 is justified; no 3B–3F or 3G-01..03 decision needs reopening; the AD-1..AD-5 notes are drafting obligations, not corrections, and 3G-R1's closure burden already lists the corrected schedules plus AD-1's addition.
+
+```text
+PACKAGE CURRENT STRUCTURE CONFIRMED
+→ ready for operator package ratification + authority drafting + 3G-R1 closure
+```

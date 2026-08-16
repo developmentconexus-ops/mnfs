@@ -1,8 +1,9 @@
 # 3G-06 — Gateway EffectAttempt, Idempotency & Budget State Architecture
 
-**Status:** CANDIDATE / AWAITING OPERATOR RATIFICATION / NOT AUTHORITY  
+**Status:** APPROVED pelo operador em 2026-08-16  
 **Fase:** 3G — Behavioral / State Architecture  
-**Importante:** este draft não altera authority existente, não fecha 3G e não autoriza implementação até ratificação explícita do operador.
+**Authority:** sexta decisão aprovada de 3G  
+**Importante:** esta decisão não constitui C-018, não encerra a Fase 3 e não autoriza implementação de produto, merge ou PR readiness.
 
 ## Decisão em uma frase
 
@@ -423,8 +424,8 @@ exact schema/indexes                 → implementation
 
 ---
 
-## 18. Candidato à ratificação
+## 18. Decisão ratificada
 
-Se ratificado:
+A aprovação do operador em 2026-08-16 congela:
 
 > **EffectAttempt preserves exact physical-effect truth; close-before-dispatch and dispatch are a guarded race, traffic/outcome/budget/idempotency remain separate, ambiguity is never rewritten into convenience, and Gateway remains the sole replay authority.**

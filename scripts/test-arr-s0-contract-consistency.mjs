@@ -121,11 +121,9 @@ assert.match(status, /ARR-S1 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'S
 assert.match(status, /ARR-S2 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'STATUS must project accepted S2 authority while preserving S0 closeout');
 assert.match(status, /microVM \/ KVM\s+BLOCKED_BY_HOST/u, 'STATUS must preserve KVM class result');
 
-assert.match(agents, /ARR-S0 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'AGENTS must orient Fresh Actors to accepted S0 Evidence');
-assert.match(agents, /ARR-S1 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'AGENTS must expose accepted S1 authority without changing S0 truth');
-assert.match(agents, /ARR-S2 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022/u, 'AGENTS must expose accepted S2 authority without changing S0 truth');
-assert.match(agents, /ACCEPTANCE-ARR-S0-HOST-CAPABILITY-PROBE/u, 'AGENTS must name canonical S0 Evidence');
-assert.match(agents, /Candidate execution\/selection:\s+PROHIBITED/u, 'AGENTS must preserve candidate non-execution after S0 closeout');
+assert.match(agents, /docs\/tracking\/STATUS\.md[\s\S]*docs\/tracking\/DECISIONS\.md/u, 'AGENTS must route MNFS Fresh Actors to the current status and decision owners');
+assert.match(agents, /exact task authority\/evidence/u, 'AGENTS must route task-specific authority and evidence instead of duplicating ARR status');
+assert.doesNotMatch(agents, /ARR-S0 real host Evidence|ARR-S1 contract \+ plan|ARR-S2 contract \+ plan|Candidate execution\/selection/u, 'AGENTS must not duplicate volatile ARR status or execution projections');
 
 assert.match(arrReview, /ARR-S0 Task 12\s+COMPLETE — ACCEPT_WITH_LIMITATIONS/u, 'ARR review must close Task 12');
 assert.match(arrReview, /ARR-S1 contract \+ plan\s+ACCEPTED 0\.1\.0 — D-022/u, 'ARR review must project accepted S1 authority');

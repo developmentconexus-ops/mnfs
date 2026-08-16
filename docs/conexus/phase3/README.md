@@ -4,7 +4,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 
 **Live status / navigation authority:** [LEDGER.md](LEDGER.md)  
 **3B historical/detail authority:** `../24-arquitetura-system-design.md` + `3B-*` docs  
-**Importante:** 3F está fechada/aprovada; 3G está em andamento com 3G-01 e 3G-02 aprovadas, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
+**Importante:** 3F está fechada/aprovada; 3G está em andamento com 3G-01, 3G-02 e 3G-03 aprovadas, mas a Fase 3 completa continua em andamento e ainda não constitui C-018.
 
 ## Status
 
@@ -14,7 +14,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 | 3B-16 | Project-Internal Resource Ownership | APROVADO | [3B-16-project-internal-resource-ownership.md](3B-16-project-internal-resource-ownership.md) |
 | 3B-17 | Project Isolation and Explicit Reuse | APROVADO | `../24-arquitetura-system-design.md` |
 | 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5-builder-coding-runtime-reassessment.md](3A-R5-builder-coding-runtime-reassessment.md) |
-| 3C-01 | Modular Monolith no F1 | APROVADO | [3C-01-modular-monolith.md](3C-01-modular-monolith.md) |
+| 3C-01 | Modular Monolith no F1 | APROVADO | [3C-01](3C-01-modular-monolith.md) |
 | 3C-02 | Identity & Access Module Boundary | APROVADO | [3C-02](3C-02-identity-access-module-boundary.md) |
 | 3C-03 | Workspace Module Boundary | APROVADO | [3C-03](3C-03-workspace-module-boundary.md) |
 | 3C-04 | Project Module Boundary | APROVADO | [3C-04](3C-04-project-module-boundary.md) |
@@ -36,6 +36,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 | 3F-R1 | Contracts & API Architecture Final Closure | APROVADO / CLOSED | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
 | 3G-01 | ApprovalRequest Lifecycle & Claim-Binding State Architecture | APROVADO | [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) |
 | 3G-02 | Builder Change & Finding Lifecycle, Contract Revision & Closure Architecture | APROVADO | [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md) |
+| 3G-03 | Builder Work Unit & ActorRun Execution Lifecycle Architecture | APROVADO | [3G-03](3G-03-builder-work-unit-actor-run-execution-lifecycle-architecture.md) |
 
 ## Estado atual
 
@@ -46,7 +47,7 @@ Este diretório contém as decisões detalhadas da Fase 3.
 3D — Dependency Architecture: CLOSED / APROVADA
 3E — Data Architecture: CLOSED / APROVADA
 3F — Contracts & API Architecture: CLOSED / APROVADA
-3G — Behavioral / State Architecture: IN PROGRESS / 3G-01 + 3G-02 APROVADAS
+3G — Behavioral / State Architecture: IN PROGRESS / 3G-01 + 3G-02 + 3G-03 APROVADAS
 ```
 
 ## Mapa estrutural preservado
@@ -79,7 +80,7 @@ ApplicationRuntimeProfile = MANAGED | DEDICATED
 
 ## Precedência atual
 
-O fechamento de Contracts & API Architecture permanece materializado em [3F-R1](3F-R1-contracts-api-architecture-final-closure.md). Behavioral / State Architecture possui agora duas authorities aprovadas: [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) e [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md).
+O fechamento de Contracts & API Architecture permanece materializado em [3F-R1](3F-R1-contracts-api-architecture-final-closure.md). Behavioral / State Architecture possui agora três authorities aprovadas: [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md), [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md) e [3G-03](3G-03-builder-work-unit-actor-run-execution-lifecycle-architecture.md).
 
 3F-R1 reconcilia 3C–3F e confirma, entre outros pontos:
 
@@ -112,6 +113,21 @@ O fechamento de Contracts & API Architecture permanece materializado em [3F-R1](
 - context-pinned acceptance que pode ficar inadmissível após drift sem reabrir o Change;
 - successor verification Change somente on-demand quando consumidor real precisar restaurar admissibilidade.
 
+3G-03 adiciona, sem Work Unit FSM ou retry engine:
+
+- Work Unit como bounded work authority imutável e membro da current approved/admitted decomposition;
+- no máximo uma `acceptedDelivery` por Work Unit, sem durable `FAILED/BLOCKED/SUPERSEDED/DONE` fan-out;
+- ActorRun como attempt concreto com execution identity pinada, one exact write-once produced-output identity e terminal partition `DELIVERED | FAILED | CANCELLED`;
+- same-output re-presentation idempotente; diferente output exige novo ActorRun;
+- output identity no canonical-content level, separada de custody/storage recovery;
+- crash sem output durável pode terminalizar explicitamente; crash com output durável retoma julgamento do mesmo exact output;
+- `ActorRun DELIVERED + WorkUnit acceptedDelivery` atômicos dentro do Builder para WU execution;
+- same-WU retry somente enquanto bounded authority continua current/admissible; mudança de scope/sets/pins/fulfills cria successor Work Unit;
+- cancellation vence late runtime output;
+- Gateway continua enforcement de external-effect replay safety;
+- Mastra/CodingSession/E2B continuam mechanics subordinadas;
+- InceptionInvestigaton não recebe `Change` sintético por simetria; exceção pré-Change volta pelo Decision Loop se surgir consumer real.
+
 ## Findings roteados
 
 O live ledger mantém a lista completa e seus owners: [LEDGER.md](LEDGER.md#8-open-findings--routed-work).
@@ -131,18 +147,27 @@ Finding routing / loop prevention semantics
 Change closure / acceptance proof semantics
 ```
 
+Resolvido por 3G-03:
+
+```text
+Builder Work Unit bounded-authority lifecycle
+ActorRun attempt/output/terminal semantics
+same-WU retry vs successor Work Unit
+cancel / late-output semantics
+crash recovery around produced output and delivery boundary
+```
+
 Permanecem para decisões posteriores, entre outros:
 
 ```text
 3G
-→ Work Unit / ActorRun lifecycle
 → Planning Depth × RigorProfile
-→ binding + Project mutation lifecycle
+→ Gateway effect_attempt lifecycle/state work
 → AgentRun semantic response to approval expiry
+→ binding + Project mutation lifecycle
 → AgentRun in-flight × stricter new Release
 → archived Project with active Release
 → DEDICATED old-vs-new Release admissibility window
-→ Gateway effect_attempt lifecycle/state work
 → Release-side placement of context-pinned acceptance admissibility
 
 3I / later
@@ -151,13 +176,15 @@ Permanecem para decisões posteriores, entre outros:
 → DEDICATED concrete trust/credential realization
 
 3H / 3K / 3M / implementation
-→ Mastra/runtime wake/session/suspend/resume mechanics
+→ Mastra ActorRun/CodingSession/Workspace/E2B realization
+→ runtime liveness/orphan detection and fresh-session mechanics
 → UI/display e exact wire realization
-→ reconciliation / GC / crash recovery machinery
-→ numeric correction-budget calibration
+→ reconciliation / GC / custody/crash recovery machinery
+→ numeric correction/attempt-budget calibration
+→ InceptionInvestigation pre-Change execution shape only if concrete realization proves need
 ```
 
-Esses itens não reabrem 3F, 3G-01 ou 3G-02 automaticamente.
+Esses itens não reabrem 3F, 3G-01, 3G-02 ou 3G-03 automaticamente.
 
 ## Regra de avanço
 
@@ -170,6 +197,7 @@ Estado atual:
 3G = IN PROGRESS
 3G-01 = APPROVED
 3G-02 = APPROVED
+3G-03 = APPROVED
 ```
 
 A próxima decisão de 3G deve ser selecionada pelo mesmo Decision Loop e trabalhada com o operador antes de ganhar authority.

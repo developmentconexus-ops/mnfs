@@ -152,11 +152,29 @@ export function collectAnchors(content) {
   return anchors;
 }
 
+const outsideLegacyMnfsDocumentRegistryPrefixes = [
+  'docs/conexus/',
+  'docs/reference/mitra/',
+];
+
+const outsideLegacyMnfsDocumentRegistryPaths = new Set([
+  'docs/engineering/standards/root-cause-global-maximum-method.md',
+  'docs/research/factory-in-a-box.md',
+]);
+
+function belongsToLegacyMnfsDocumentRegistry(root, file) {
+  const rel = path.relative(root, file).split(path.sep).join('/');
+  if (outsideLegacyMnfsDocumentRegistryPaths.has(rel)) return false;
+  return !outsideLegacyMnfsDocumentRegistryPrefixes.some((prefix) => rel.startsWith(prefix));
+}
+
 export async function loadDocumentRegistry(root) {
   const documents = new Map();
   const paths = new Map();
   const aliases = new Map();
-  const markdownFiles = (await walk(path.join(root, 'docs'))).filter((file) => file.endsWith('.md'));
+  const markdownFiles = (await walk(path.join(root, 'docs')))
+    .filter((file) => file.endsWith('.md'))
+    .filter((file) => belongsToLegacyMnfsDocumentRegistry(root, file));
   for (const file of markdownFiles) {
     const rel = path.relative(root, file);
     const content = await readFile(file, 'utf8');

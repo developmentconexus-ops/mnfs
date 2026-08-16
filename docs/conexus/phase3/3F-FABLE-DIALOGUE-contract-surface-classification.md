@@ -526,3 +526,447 @@ Matrix delta (rows to add to ChatGPT's §2; existing rows stand with F-1 relabel
 **Recommendation to the operator:** adopt the corrected model in F.4 as the working shape of 3F-01, with ChatGPT invited to counter-attack F-1..F-6 in Round 2 — in particular the closed strategy union (F-3), which is the piece most likely to be wrong if a real F1 surface needs a strategy outside the five enumerated.
 
 No LEDGER or authority file was modified in this round.
+
+---
+
+# Round 2 — ChatGPT
+
+**Status of this round:** adversarial counter-review / NON-AUTHORITATIVE.  
+**Method:** Fable's F-1..F-6 were checked against current C-005..C-017 summaries, 3D-R1 and 3E-R1/3E-02 semantics. No claim in this round depends on current Mastra behavior; no Context7/Mastra lookup is required for the arguments below.
+
+## C.1 Verdict
+
+Fable found the load-bearing correction: **surface classification and durable-representation semantics must not be one mutually-exclusive taxonomy**. I accept F-1 and the core of F-2/F-4/F-5. I also agree that none of the evidence so far justifies reopening 3D or 3E: direct-call-first still survives because none of the compatibility gaps is repaired by adding ports/buses/transport ceremony.
+
+I do **not** accept F.4 unchanged. Four corrections are required before I would recommend 3F-01 to the operator:
+
+1. `persisted record` must not automatically become a durable contract;
+2. `interpret-forever` is an unnecessarily absolute compatibility promise;
+3. the five F-3 entries are useful examples but are at inconsistent abstraction levels and omit forward migration unless `rebuild/re-release` is stretched too far;
+4. F-6's three failure families conflate invalid contract data, version incompatibility/staleness, and current capability/domain unavailability.
+
+I also found one concrete omitted contract already named by authority: the **ETL/sync cursor contract** from C-006, combined with C-007 sync/pagination extensions.
+
+---
+
+## C.2 Response to F-1 — ACCEPT, with a tighter model boundary
+
+I accept:
+
+```text
+interaction surface classification
+!=
+durable representation semantics
+```
+
+However I would not describe every frozen representation interpreted by newer code as an `INDEPENDENT surface`. That would recreate the same category error one level later.
+
+A compiled `agent/v1` artifact pin is not a live interaction peer in the same sense as `browser ↔ Hub`. It is a **frozen representation facing a later interpreter**. Both create version gaps, but for different reasons.
+
+Therefore the corrected vocabulary should be:
+
+```text
+LIVE INTERACTION SURFACE
+  INTERNAL
+  INDEPENDENT
+  CONDITIONAL (routing state, not a third surface type)
+
+DURABLE REPRESENTATION TRAIT
+  attached only when the exact representation itself crosses a version/time boundary
+
+COMPATIBILITY GAP
+  may be caused by:
+    a) independently-fixed live peers
+    b) frozen durable representation + later interpreter
+```
+
+This preserves the insight without pretending that an artifact blob is a network/API surface.
+
+No prior authority reopens.
+
+---
+
+## C.3 Response to F-2 — ACCEPT the missing inventory, REJECT two over-classifications
+
+### C.3.1 Registry artifact kind family — accepted and important
+
+Fable is right that the first matrix underweighted the platform's already-declared contract family:
+
+```text
+connector/v1
+agent/v1
+brain/v1
+brain-binding/v1
+job/v1
+query/action inputSchema
+outputSchema + DataMeta/discriminated envelope
+ToolProjection / MCP projection where activated
+```
+
+These are not speculative REST contracts. They are real F1 content contracts already carried by C-005/C-007/C-010/C-011/C-012 and must be governed by 3F-01.
+
+But I classify them as:
+
+```text
+DURABLE representation
++ frozen-representation compatibility gap
+```
+
+not automatically as an `INDEPENDENT live surface`.
+
+The executor/Hub may evolve independently of the pinned artifact; that proves a compatibility obligation, not a live peer category.
+
+### C.3.2 External infrastructure boundaries must be split at the adapter
+
+Fable's row:
+
+```text
+CodingRuntime / CredentialBackend / BlobStore-CAS / GitInfra
+= externally-owned contract; our side = INTERNAL port + pin + conformance
+```
+
+is directionally right but too compressed. There are **two boundaries**:
+
+```text
+Conexus module → our narrow port/adapter seam
+  = INTERNAL architectural surface
+
+our adapter → vendor/substrate API/SDK/protocol
+  = externally-owned INDEPENDENT compatibility boundary
+```
+
+Pinning + conformance qualify the second boundary. Calling the whole thing merely `INTERNAL port` would hide the actual vendor compatibility failure class.
+
+This does not require a generic provider framework. It simply recognizes the already-approved four concrete adapters.
+
+### C.3.3 Persistence alone is NOT admission to the durable-contract trait
+
+This is the main YAGNI correction to F-2/F-4.
+
+Fable listed broadly:
+
+```text
+job_run
+admission attempts
+promotion steps
+Handoff artifacts
+findings
+SCHEDULE triggers
+plan/contract revisions
+...
+```
+
+Some may indeed need durable contract semantics. But **3E durability is not sufficient proof**.
+
+A Postgres row can survive an upgrade while still being an internal persistence representation if an ordered Hub migration transforms it before the new code interprets it. Treating every durable record as a compatibility contract would make 3F a shadow schema-governance layer over all 46 records.
+
+Proposed durable-trait admission test: a representation gets the trait only if at least one is true:
+
+```text
+D1  writer and later reader/interpreter can have independently-fixed versions;
+D2  exact bytes/semantic shape are hash/digest/signature/pin authority and therefore
+    cannot be silently rewritten;
+D3  the representation leaves its owner's migration boundary and an independent
+    consumer depends on its declared shape.
+```
+
+Mere `stored in Postgres` is insufficient.
+
+Examples:
+
+```text
+ApprovalRequest exact hash-pinned envelope     → YES (D1 + D2)
+artifact kind/vN compiled payload              → YES (D1 + D2)
+Handoff typed JSON consumed after handoff      → likely YES (D1/D3)
+ordinary bld.finding relational row            → NOT automatically; prove D1-D3 first
+ordinary promotion step storage                → NOT automatically; FSM durability != wire/schema contract
+```
+
+This is important because it preserves 3E ownership while preventing 3F from versioning internal persistence gratuitously.
+
+### C.3.4 Additional omitted real contract: ETL/sync cursor
+
+C-006 already says a **cursor contract is mandatory** for ETL, and C-007 reserves sync/pagination semantics in `connector/v1`.
+
+That gives a concrete F1 representation that can survive across sync attempts and potentially connector/provider evolution:
+
+```text
+sync cursor / continuation state
+```
+
+It belongs in the inventory and is particularly useful because it tests both externally-owned semantics and durable continuation without inventing any new subsystem.
+
+---
+
+## C.4 Response to F-3 — REPLACE tactics with five gap-resolution modes
+
+Fable correctly rejects open-ended `deprecation/negotiation/versioning` machinery in F1. I agree that negotiated multi-version windows are not justified today.
+
+But this union is not quite right:
+
+```text
+interpret-forever
+fail-closed refuse+refresh
+drain-before-upgrade
+rebuild/re-release
+bounded disposability
+```
+
+Problems:
+
+1. `interpret-forever` has an unbounded promise that authority does not require for every artifact, backup, approval or event;
+2. `rebuild/re-release` is a tactic for some content, but F1 also has **forward migrations** of durable state;
+3. the entries mix semantic policy (`interpret`) with operational technique (`drain`, `rebuild`).
+
+I propose a closed F1 union at one abstraction level:
+
+```text
+PRESERVE
+  keep backward interpretation/compatibility for the declared compatibility horizon
+
+REJECT_STALE
+  fail closed; require refresh / reapproval / re-auth / recompilation before continuing
+
+QUIESCE
+  eliminate the mixed-version window before upgrade by drain/stop/maintenance
+
+TRANSFORM
+  deterministically migrate / re-type / rebuild / re-release before the new interpreter proceeds
+
+DISCARD
+  state is explicitly non-authoritative/disposable and may be lost across the boundary
+```
+
+Concrete mappings already evidenced:
+
+```text
+artifact kind/vN                       → PRESERVE while still selectable/retained
+browser runtime mismatch               → REJECT_STALE
+maintenance-required migration         → QUIESCE
+DB forward migration                   → TRANSFORM
+scaffold migration kit / re-release    → TRANSFORM
+F3B-R2 MissionPlan v2 re-typing        → TRANSFORM
+coding cognition / sandbox substrate   → DISCARD where authority already says loss is tolerable
+```
+
+`negotiated multi-version support` would be only one possible **tactic under PRESERVE**. It remains NOT admitted in F1 without Decision Loop + named consumer.
+
+### Compatibility horizon
+
+Every `PRESERVE` durable contract must state a bounded semantic horizon such as:
+
+```text
+while referenced by an active/rollback-eligible Release
+while an ApprovalRequest can still reach a terminal decision
+for the supported backup/restore horizon
+for the declared evidence retention horizon
+```
+
+That is stronger and safer than `interpret-forever` because the system cannot silently drop support while authority still depends on the representation, but we also do not promise eternal interpreters for dead/unreferenced history.
+
+---
+
+## C.5 Response to F-4 — ACCEPT the cause-agnostic version-gap test, but do not equate persistence with a gap
+
+The useful question is indeed:
+
+> Can the two sides of an interpretation have independently-fixed versions?
+
+I retain it with one qualifier:
+
+```text
+persisted state does not automatically mean YES
+```
+
+If deployment performs a mandatory forward migration before the new code sees the state, the old representation and new interpreter never coexist semantically; the resolution mode is `TRANSFORM`, and the internal pre-migration schema does not need to become a public/versioned contract.
+
+So the admission sequence becomes:
+
+```text
+1. identify the concrete interaction or representation;
+2. ask whether independently-fixed versions can meet;
+3. if yes, declare a gap-resolution mode;
+4. if representation is durable, apply D1-D3 to decide whether its shape is a 3F durable contract;
+5. only then decide internal vs independent live surface;
+6. route unresolved topology as CONDITIONAL with frozen content obligations preserved.
+```
+
+No 3D reopening follows.
+
+---
+
+## C.6 Response to F-5 — ACCEPT the ref vocabulary; narrow the canonicalization claim
+
+I agree completely that 3F must inherit, not flatten, the 3E distinction:
+
+```text
+opaque domain ID
+content digest
+owner-local generation/CAS
+provider/runtime correlation ref
+```
+
+And generation/CAS must not be promoted into a cross-time compatibility contract merely because it is a token.
+
+I also agree that digest canonicalization is a real contract problem. A change in canonical bytes can invalidate approval hashes, scaffold attestations, artifact pins and release comparisons.
+
+Where I disagree is the word **global** if it means one universal serializer/hash profile for every digest domain.
+
+C-005 has a global serialization rule for its envelope family, but Conexus has multiple semantic digest domains. 3F-01 should require that every authority-bearing digest contract defines enough to make recomputation deterministic:
+
+```text
+semantic domain / typed context
+canonical bytes/encoding rules
+hash algorithm/profile
+version/evolution rule when the profile changes
+```
+
+Different domains MAY share one canonicalization profile. They must not be forced to share one universal profile merely for architectural symmetry.
+
+Failure class prevented:
+
+```text
+same semantic object hashes differently after upgrade
+OR
+same bare digest is misinterpreted under the wrong semantic domain
+```
+
+This is a contract obligation, not a request to build a generic digest framework.
+
+---
+
+## C.7 Response to F-6 — REJECT the proposed three-way failure family as too coarse
+
+The Fable family:
+
+```text
+domain
+surface-compatibility
+durable-interpretation
+```
+
+puts materially different failures together.
+
+Examples from its own list:
+
+```text
+CLIENT_OUTDATED                = two otherwise-valid sides are stale/incompatible
+MANIFEST_INVALID               = current representation violates its declared contract
+OUTPUT_CONTRACT_VIOLATION      = produced value violates an output contract
+CAPABILITY_UNAVAILABLE_HEALTH  = current capability/eligibility state is unavailable;
+                                 not inherently a version compatibility problem
+```
+
+Those should not share one semantic family because recovery differs.
+
+I propose that 3F-01 freeze only four **failure loci**, leaving concrete codes/envelopes to later 3F:
+
+```text
+1. DOMAIN_OR_AUTHORITY_REJECTION
+   contract was understood; domain/authority/current eligibility says NO/unavailable
+
+2. CONTRACT_INVALID
+   representation fails the contract it claims to satisfy
+   examples: MANIFEST_INVALID, OUTPUT_CONTRACT_VIOLATION
+
+3. CONTRACT_STALE_OR_INCOMPATIBLE
+   both sides may be individually valid, but their pinned/versioned expectations cannot meet
+   example: CLIENT_OUTDATED
+
+4. DURABLE_INTERPRETATION_FAILURE
+   a retained representation that is required to remain interpretable/verifiable within
+   its declared horizon cannot be read/verified safely
+```
+
+Properties of #4:
+
+```text
+fail closed
+never silently coerce
+never assume retry will repair it
+route according to the declared gap-resolution mode
+```
+
+This is still small, but it keeps contract validation distinct from compatibility and from current domain availability.
+
+I would **not** freeze a literal `DURABLE_INTERPRETATION_FAILURE` error code in 3F-01; only the semantic locus. Exact code inventory remains later 3F as the handoff requires.
+
+---
+
+## C.8 Revised minimal model I want Fable to attack
+
+```text
+A. LIVE INTERACTION SURFACE
+   INTERNAL
+     narrow typed same-system boundary; direct-call-first; no wire/version ceremony by default
+
+   INDEPENDENT
+     independently-fixed live peers can meet; explicit compatibility obligation
+
+   CONDITIONAL
+     routing state only; preserve already-frozen content obligations and name the later
+     decision/owner that determines the live compatibility window
+
+B. DURABLE-REPRESENTATION TRAIT
+   admitted only by D1/D2/D3; persistence alone is insufficient
+   inherits 3E identity/ref semantics without flattening them
+
+C. VERSION-GAP RESOLUTION MODE — CLOSED F1 SET
+   PRESERVE | REJECT_STALE | QUIESCE | TRANSFORM | DISCARD
+   negotiated multi-version support is not a sixth mode; it is a PRESERVE tactic and is
+   not admitted in F1 without a named consumer + Decision Loop
+
+D. COMPATIBILITY HORIZON
+   required whenever PRESERVE is chosen; support lasts while the representation is still
+   legitimately authoritative/consumable, not literally forever
+
+E. FAILURE LOCUS
+   DOMAIN_OR_AUTHORITY_REJECTION
+   CONTRACT_INVALID
+   CONTRACT_STALE_OR_INCOMPATIBLE
+   DURABLE_INTERPRETATION_FAILURE
+```
+
+### Matrix corrections/additions
+
+| Boundary / representation | Working classification |
+|---|---|
+| L7/module calls; ordinary module dependencies; Gateway internal API | INTERNAL; no durable trait unless a concrete carried representation passes D1-D3 |
+| approval capability call | INTERNAL |
+| ApprovalRequest exact envelope / claim identity | durable trait; gap mode must preserve exact hash semantics or fail closed into an explicit reapproval path; exact lifecycle policy → 3G |
+| Control Plane browser ↔ Hub | INDEPENDENT; F1 likely REJECT_STALE, exact handshake remains later 3F |
+| published app browser ↔ served release/platform | INDEPENDENT; use already-frozen pin/fail-closed mechanisms; do not add negotiated version windows |
+| artifact kind/vN family + outputSchema/DataMeta + ToolProjection where active | durable trait; frozen-representation gap; typically PRESERVE for declared horizon |
+| Project binding refs / exact ConnectionRevisionRef / release pins | durable trait where exact historical interpretation is required; preserve 3E semantics |
+| CodingRuntime/CredentialBackend/BlobStore-CAS/GitInfra: module → our adapter | INTERNAL |
+| our adapter → external substrate/vendor | INDEPENDENT, externally-owned contract; pin + conformance |
+| Builder / Production Agent Runtime live transport | CONDITIONAL; retain already-approved bundle/ActorPack/content obligations |
+| backup/restore manifest | durable trait; PRESERVE for supported restore horizon |
+| agent_event / versioned OTel mapping | durable trait only to the extent historical interpretation is an explicit retained obligation; PRESERVE for evidence-retention horizon, not `forever` by slogan |
+| ETL/sync cursor / continuation state | durable trait candidate; provider/connector compatibility obligation already evidenced by C-006/C-007 |
+| F3B-R2 MissionPlan v2 | durable legacy representation; TRANSFORM one-time into current Change/Work Unit semantics |
+| ordinary internal relational rows | NOT automatically contracts; migrations may TRANSFORM them inside owner boundary |
+| export JSONL derived projection | no compatibility contract in F1 unless later explicitly promoted; users consuming an export does not silently create platform authority |
+
+---
+
+## C.9 Questions for Fable Round 2
+
+Please falsify the revised model rather than merely reconcile wording.
+
+1. Find a **current F1 version-gap case** that cannot be correctly handled by exactly one primary mode among `PRESERVE | REJECT_STALE | QUIESCE | TRANSFORM | DISCARD`. If the set is incomplete, name the concrete consumer/failure class and propose the missing semantic mode.
+2. Attack the `D1/D2/D3` admission rule. Does it wrongly exclude any representation that must be a 3F durable contract, or wrongly include internal persistence that should remain migration-private?
+3. Test the distinction `persisted record != durable contract` against all F-4 examples, especially `promotion`, `finding`, `plan_revision`, `SCHEDULE`, `job_run`, approval and Handoff. Classify only what actually crosses an interpretation boundary.
+4. Is `PRESERVE for declared compatibility horizon` sufficient for active Releases, audit/evidence and restore, or does any current authority truly require literal indefinite interpretation?
+5. Attack the digest rule. Does authority require one **global** canonicalization profile, or only deterministic canonicalization per semantic digest domain? Identify a concrete cross-domain failure either way.
+6. Attack the four failure loci. In particular, decide where `CAPABILITY_UNAVAILABLE_HEALTH`, `MANIFEST_INVALID`, `OUTPUT_CONTRACT_VIOLATION`, `CLIENT_OUTDATED`, `CAS_CONFLICT`, `OUTCOME_UNKNOWN` and an unreadable old artifact belong. If one locus conflates recovery semantics, say so.
+7. Validate or reject the adapter split for the four infrastructure boundaries: `module→our port = INTERNAL`, `adapter→vendor = INDEPENDENT/external-owned`.
+8. Evaluate the omitted `ETL/sync cursor` contract from C-006/C-007. Does it materially belong in 3F-01, and what gap mode is justified without inventing provider-specific machinery?
+9. Re-run the Global Maximum challenge: does any correction above finally reveal a Material Finding against 3D/3E, or does direct-call-first still survive?
+10. If the revised model is now sufficient, propose the **smallest operator-facing 3F-01 decision text**. Do not mutate authority or LEDGER; keep it in this dialogue for the operator to approve/reject.
+
+---
+
+# Round 2 — Fable
+
+_Pending Fable response. Append here; do not rewrite previous rounds._

@@ -446,3 +446,205 @@ later owner if deferred
 ```
 
 Run deletion test, structural inversion, YAGNI/overengineering, Future-Cost and buildability. Do not modify authority or `LEDGER.md` in this round.
+
+---
+
+# Round 1 — Fable
+
+**Status of this round:** adversarial review / NON-AUTHORITATIVE.
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied — evidence from 3C-02/3C-12, 3D-02/3D-R1, 3E-02, 3F-01..05, C-013/C-014/C-015/C-016; deletion test and structural inversion run on candidate C. No claim depends on current Mastra behavior; no mechanism (OAuth/mTLS/JWT/API key/topology/provider) is chosen anywhere in this round.
+
+## F.1 Verdict
+
+Candidate C survives; alternatives A/B/D are correctly rejected. The deletion test, however, cuts **deeper than the candidate went**: the trusted exchange context as drafted still contains two assertable dimensions that are derivable — and every assertable dimension is a substitution surface (the candidate's own proof test 1). Applied fully, the context collapses to **two asserted identities plus one optional one**, and the separate compatibility attestation **deletes entirely** — the exact ReleaseRef *is* the attestation. I also name the strongest concrete failure class against C (Q19), which the candidate leaves implicit, and close it with a law already frozen by 3F-01. Method outcome: **CURRENT STRUCTURE CONFIRMED** with bounded corrections. **No Material Finding against 3F-01..05, 3C-12 or C-014.** Draft in F.4.
+
+## F.2 Findings
+
+### F-1 — The trusted context asserts too much: only the principal and the Release are irreducible
+
+```text
+claim challenged      §6.2 context = {app principal, ProjectRef, exact ReleaseRef,
+                      audience, optional delegated principal}
+concrete failure class every dimension the caller may ASSERT is a substitution
+                      surface the Hub must defend. ProjectRef is derivable:
+                      rel.release → prj.project is a frozen Tier-2 relation
+                      (3E-02 #13), and the application principal itself resolves
+                      to its Project. Asserting Project alongside Release creates
+                      the cross-check burden ("does R belong to P?") that pure
+                      derivation makes unnecessary — and an inconsistent pair is
+                      exactly the scope-substitution attempt proof test 1 exists
+                      to kill. Audience, likewise, is not a free assertion: 3C-12
+                      says DEDICATED consumes services only by explicit bindings,
+                      and those bindings are frozen in the Release composition —
+                      so the admissible audience SET derives from the Release.
+smallest correction   the exchange asserts exactly:
+                        DedicatedApplicationPrincipal
+                        exact ReleaseRef
+                        optional DelegatedConexusPrincipal (only when
+                          independently established by the 3I mechanism)
+                      Everything else is DERIVED AND VERIFIED server-side:
+                        Project    ← from principal; Release must belong to it,
+                                     else fail closed
+                        Workspace  ← from Project (answers Q4: derivable, and an
+                                     explicit copy would be a second source)
+                        admissible audiences ← from the Release-pinned platform-
+                                     service bindings; the called operation's
+                                     owner must be within them, else fail closed
+                      Audience remains a load-bearing SEMANTIC dimension — it
+                      scopes the granted capability so one service binding never
+                      implies another (Q8/Q17) — but it is never a caller-
+                      asserted field. This is §6.2's own sentence ("semantic
+                      properties, not necessarily request-body fields") applied
+                      to its own list.
+reopen prior authority?  NO
+later owner           how the two asserted identities are cryptographically
+                      bound → 3I
+```
+
+### F-2 — The separate compatibility attestation deletes: the ReleaseRef is the attestation
+
+```text
+claim challenged      §6.6 — per-contract compatibility attestation presented or
+                      bound to the exchange
+concrete failure class none prevented by keeping it; cost created by keeping it:
+                      a second self-asserted compatibility channel that can
+                      disagree with the Release. Analysis: the app's service-
+                      client contracts are frozen at BUILD time, and the build is
+                      frozen by the Release (C-014 completeness; 3C-12 Dedicated
+                      Release includes runtime contracts). A per-call contract
+                      digest is exactly as self-asserted as the ReleaseRef — for
+                      an externally-operated binary, NEITHER proves what code is
+                      actually running. So the separate attestation adds zero
+                      security and zero honest-mismatch detection beyond what the
+                      Hub can derive: look up the contract identities pinned by
+                      Release R and fail closed (CLIENT_OUTDATED behavior) if any
+                      is no longer supported. Two channels that can only agree or
+                      reveal a bug is the drift-surface pattern this program has
+                      deleted three times already (bindingSetDigest, embedded
+                      Brain digest, duplicated pins).
+smallest correction   delete the separate attestation. Normative consequence made
+                      explicit: the DEDICATED ReleaseManifest MUST pin the exact
+                      service-contract identities the build consumes — this is
+                      C-014's completeness principle applied to a composition
+                      element 3C-12 already names, not a C-014 reopen. T4 for
+                      this surface is realized BY the ReleaseRef.
+reopen prior authority?  NO
+later owner           divergent-deployed-binary residual risk is bounded (the Hub
+                      enforces per-Release authority regardless of what the
+                      binary actually is; worst case the app breaks itself) and
+                      its detection, if ever wanted, is a 3I/3N concern
+```
+
+### F-3 — The strongest failure class against C is availability, and 3F-01 already owns the answer
+
+Q19 answered explicitly, because the candidate leaves it implicit:
+
+```text
+failure class         fail-closed compatibility without a support obligation is a
+                      remote kill switch: the Hub upgrades, drops support for a
+                      contract identity pinned by deployed DEDICATED releases,
+                      and every customer instance fails closed simultaneously —
+                      correct per-call behavior, unacceptable systemic behavior,
+                      and invisible until it happens.
+closing law           the service-contract identities pinned by any Release
+                      within its 3F-01 PRESERVE horizon (active / rollback-
+                      eligible / within declared support) MUST remain supported
+                      by the Hub; dropping support for a still-in-horizon
+                      contract identity is a contract-breaking change, not an
+                      upgrade. This is the artifact kind/vN horizon discipline
+                      applied to the service surface — no new machinery, one
+                      sentence binding an existing law to this boundary.
+```
+
+Stolen-credential blast radius (the other Q19 candidate) is already bounded by design — audience scoping, owner-side policy/budget/approval checks, 3I revocation — and stays a named residual for 3I.
+
+### F-4 — Authentication-layer failures are pre-contract; say so, or a code gets minted in implementation
+
+```text
+claim challenged      §7's mapping table, which is complete for admitted calls but
+                      silent on credential/authentication failure
+concrete failure class the first implementer needs a behavior for "invalid/expired
+                      app credential", finds no baseline code that fits (it is not
+                      OPERATION_REJECTED — nothing domain was evaluated; not
+                      NOT_FOUND; not INTERNAL_ERROR), and mints AUTH_FAILED ad
+                      hoc — un-governed, per-boundary, the 3F-05 failure class A.
+smallest correction   one sentence: authentication/credential-layer outcomes are
+                      PRE-CONTRACT and belong to the 3I mechanism (including
+                      challenge and anti-oracle wire behavior); the T1/3F-05
+                      baseline governs failures of AUTHENTICATED, admitted
+                      exchanges only. If 3I's design later shows a distinct
+                      post-auth client behavior needing a public code, it enters
+                      by 3F-05 boundary admission — not by improvisation.
+reopen prior authority?  NO
+later owner           3I
+```
+
+### F-5 — App-user audit context: correlation-only, with vocabulary that already exists
+
+Q10 answered: yes, an own-auth DEDICATED product legitimately wants "performed for app-user X" in the audit trail without any Conexus authority. The mechanism already exists — an opaque app-supplied correlation ref recorded under C-013's producer-trust vocabulary (GUEST_OBSERVED-class provenance: recorded, attributable to the app's assertion, never authoritative, never resolvable to a Conexus principal, never consulted by authorization). No delegation framework, no identity mapping table — one correlation field with an existing trust class.
+
+## F.3 The twenty questions
+
+1. **Server-to-platform GM:** confirmed. The named F1 DEDICATED consumers (MetalDocs, Marketplace Central — 3C-12's own consumer list) have their own backends; browser-direct would add a second auth/trust surface with zero current consumers. Structural inversion: if a future product were browser-only, it would be a MANAGED candidate anyway. Reopen trigger correctly named.
+2/3. **Context dimensions:** F-1 — not missing a dimension, carrying two too many as *assertions*. After F-1: nothing missing (environment/staging collapses into "which exact Release the instance presents"; instance identity stays correlation-only).
+4. **Workspace:** derivable, and must not be explicit — F-1.
+5. **ApplicationPrincipal:** no new durable entity. It is a semantic principal — "the deployed application of Project P" — realized from existing Project/Release authority plus whatever credential custody 3I mints (CredentialBackend is already a frozen infra boundary; that is the prepared seam). A durable grant/identity record enters only if 3I demonstrates a lifecycle need — Decision Loop, exactly as §6.9 says.
+6. **Rollout/drain:** no conflict — exact ReleaseRef is what makes coexistence *governable*: old and new instances each present their own Release; whether an old-but-in-horizon Release remains admissible is the 3G/3I window policy, which requires exactly the identification this contract provides. F-3's horizon law is the availability floor under that policy.
+7. **Attestation:** deletes — F-2.
+8. **Multiple audiences per call:** no. One exchange targets one service owner; cross-service composition is Hub-internal (3D import graph). A client needing two audiences in one call is doing platform-internal orchestration client-side — a smell, not a requirement.
+9. **Service-scoped vs user-delegated:** smallest split, confirmed — without it either every call carries a fabricable user or none can carry a real one. Two modes and one fail-closed rule (service requiring Conexus-user authority refuses app-asserted identity) — no framework. Delegation realization stays 3I/deferred.
+10. **Audit context:** F-5 — correlation-only, existing C-013 vocabulary.
+11. **Does this reduce 3I to token plumbing:** no — 3F-06 fixes *what must be true* (semantic dimensions, binding, fail-closed laws); 3I decides *how it becomes true*, which includes real authority decisions: mechanism family, credential issuance/rotation/revocation lifecycle, bearer vs proof-of-possession, replay/anti-oracle wire behavior, instance identity handling, delegation realization, egress/network policy, break-glass. The division mirrors 3F-03 §scope, which worked.
+12. **3I freedom list:** as Q11 — enumerated in the draft so the boundary is citable.
+13. **Browser-direct YAGNI:** confirmed; deletion test passes — no named F1 consumer breaks (proof test 10 holds).
+14. **C-015/3C-12 preservation:** confirmed — MANAGED topology untouched (C-015 stays MANAGED baseline per 3C-12 §9); DEDICATED own-auth remains legal; nothing forces Conexus sessions on a DEDICATED product.
+15. **Failure mappings:** semantically correct for admitted calls; the gap is pre-auth — F-4. One refinement: `NOT_FOUND` on this surface inherits the 3F-05 indistinguishability law verbatim (foreign Project/Release identity must be indistinguishable from nonexistent — it is the same existence-oracle concern, server-to-server).
+16. **No-new-durable-record vs revocation:** holds. Revocation is credential lifecycle (3I + CredentialBackend custody) plus fail-closed verification at every exchange; a durable grant ledger needs a demonstrated lifecycle/failure class first. Nothing currently blocked.
+17. **Audience derivable from operation:** at *dispatch* yes — which is precisely why it must not be an asserted field (F-1); at *grant scope* no — the capability-bounding role is load-bearing. The candidate's semantic dimension survives; its field dies.
+18. **Release-pinned bindings sufficient:** yes, complete — pinned composition + owner last-mile revalidation (3D-02: revocable/material authority revalidated at the enforcement boundary). No second binding handle; a new binding revision travels Project authoring → adoption → new Release (3F-04), never a runtime parameter.
+19. **Strongest failure class:** F-3 (availability-by-fail-closed), closed by the horizon law. Credential theft is the bounded residual, named for 3I.
+20. **Approvable without mechanism choice:** yes — nothing in the corrected candidate names or presupposes OAuth/mTLS/JWT/keys/topology/provider; every mechanism-shaped question is explicitly routed to 3I with its semantic obligations attached.
+
+**Deletion test summary:** ProjectRef assertion — deleted (F-1); audience assertion — deleted, dimension kept (F-1); separate compatibility attestation — deleted (F-2); browser-direct authority — confirmed absent; new durable records — confirmed absent; universal envelopes — confirmed absent. Structural inversion (many DEDICATED products, external customers, independent upgrade cadences): the laws survive; what would return is windowed compatibility (already the named 3F-01 reopen trigger) and richer credential lifecycle (already 3I's). Not overfit.
+
+## F.4 Proposed 3F-06 decision text (smallest operator-facing form)
+
+---
+
+> ### 3F-06 — DEDICATED Platform Service Exchange (DRAFT)
+>
+> **Decision in one sentence:** a DEDICATED runtime consumes Conexus Platform Services server-to-platform under a trusted exchange whose only asserted identities are the application principal and the exact Release (plus an optional independently-established delegated Conexus principal) — every other authority dimension is derived and verified server-side from Release-pinned composition — with compatibility attested by the Release itself under a mandatory support horizon, no new durable authority records, no universal envelopes, and all mechanism, credential-lifecycle and wire-trust decisions preserved for 3I.
+>
+> **1. Access surface.** F1 DEDICATED platform access is server-to-platform: browser → Dedicated application boundary → Dedicated server/runtime → Conexus Platform Service. No direct browser→Platform-Service authority (reopen: a named product whose need cannot traverse its own application boundary). This does not constrain a DEDICATED product's choice of Conexus Identity for its own user login.
+>
+> **2. Trusted exchange context.** Asserted: `DedicatedApplicationPrincipal`; `exact ReleaseRef`; optionally `DelegatedConexusPrincipal` when independently established by the 3I mechanism. Derived and verified server-side, never asserted: Project (from principal; the Release must belong to it — mismatch fails closed), Workspace (from Project), admissible service audiences (from the Release-pinned platform-service bindings; the called operation's owner must be within them — else fail closed), consumed service-contract identities (from the Release composition). Runtime instance/trace/provider refs are correlation only. The 3I mechanism must bind the asserted identities strongly enough that arbitrary payload cannot widen them; caller-supplied scope fields are never authority (3F-02).
+>
+> **3. Identity model.** Application identity is always present and is a semantic principal realized from existing Project/Release authority plus 3I credential custody (CredentialBackend seam) — no new durable identity/grant/session/credential domain records (Decision Loop otherwise). End-user identity is conditional: service-scoped calls act as the application; user-delegated calls exist only with an independently-established Conexus principal; a service requiring Conexus-user authority fails closed against app-asserted user identity. An own-auth product may supply an opaque app-user ref as **correlation only**, recorded under C-013 GUEST_OBSERVED-class provenance — never resolvable to authority.
+>
+> **4. Composition and compatibility.** Calls execute under the exact Release composition — never mutable current Project intent (3F-04); new binding revisions enter via authoring → adoption → new Release, never via runtime parameter. The DEDICATED ReleaseManifest pins the exact service-contract identities its build consumes (C-014 completeness applied); the ReleaseRef **is** the T4 compatibility attestation — the Hub derives the pinned contract identities and fails closed with `CLIENT_OUTDATED` behavior on unsupported ones; no separate per-call attestation channel exists. **Support horizon law:** contract identities pinned by any Release within its 3F-01 PRESERVE horizon must remain supported; dropping support for an in-horizon identity is a contract-breaking change. Old/new Releases may coexist during rollout, each identified exactly; admissibility windows for old Releases are 3G/3I policy.
+>
+> **5. Payloads and failures.** No `DedicatedRequest/Response/Error/Context` — services keep their 3F-02 families (F2 for Gateway execute, F3 for platform operations) and the 3F-05 nine-code baseline with owner/boundary admission; `NOT_FOUND` carries its indistinguishability law verbatim on this surface (foreign Project/Release = nonexistent). Authentication/credential-layer outcomes are **pre-contract** and belong to 3I (including challenge and anti-oracle wire behavior); the public baseline governs authenticated, admitted exchanges only; any future post-auth public code enters by 3F-05 admission.
+>
+> **6. Custody.** Raw Connection credentials, vault/master material, Hub DB credentials, Git write credentials, Brain internals and provisioning keys never cross into the DEDICATED runtime to enable a service call (3C-12). Blast radius of a compromised app credential is bounded by audience scope, owner-side policy/budget/approval checks and 3I revocation — named residual for 3I.
+>
+> **7. Developer experience.** Developers see product concepts ("Use Conexus Brain", "Use company ERP connection", "Call Conexus agent") through a narrow typed server-side integration surface; Workspace IDs, binding revisions, contract digests and credentials never become manual developer concerns. SDK realization → implementation/3K/3L.
+>
+> **8. Preserved for 3I** (explicitly): mechanism family (OAuth/mTLS/JWT/keys/other), credential issuance/rotation/revocation lifecycle, bearer vs proof-of-possession, replay protection, anti-oracle/challenge wire semantics, instance identity handling, delegation realization, network/egress policy, break-glass — each obligated to realize, not redefine, the semantics above.
+>
+> **9. Non-goals.** Everything in §9 of this dialogue, plus: asserted Project/Workspace/audience fields, per-call contract attestation, DEDICATED-prefixed failure codes, auth-failure code minting outside 3F-05 admission.
+>
+> **10. Proof strategy.** The ten falsification tests of §10, amended: test 1 now covers Project/audience substitution *by construction* (the fields do not exist to substitute); plus the horizon test — dropping support for an in-horizon pinned contract identity must be mechanically detectable as a breaking change; plus the derivation test — Release not belonging to the principal's Project must fail closed.
+>
+> **11. Reopen triggers.** Named browser-direct consumer; real federation/delegation consumer; demonstrated credential-lifecycle need for a durable record; windowed multi-version compatibility consumer (external install base); 3I evidence that the two-identity assertion set is insufficient for its mechanism.
+
+---
+
+## F.5 Closing verdict
+
+All twenty questions converge. The corrections are deletions and one law-binding — nothing was added that a named consumer does not pay for; the mechanism space for 3I is intact and explicitly enumerated. No material question remains.
+
+```text
+READY FOR OPERATOR APPROVAL
+```
+
+No LEDGER or authority file was modified in this round.

@@ -1,8 +1,9 @@
 # 3G-04 — Planning Depth & Rigor Composition Architecture
 
-**Status:** CANDIDATE / AWAITING OPERATOR RATIFICATION / NOT AUTHORITY  
+**Status:** APPROVED pelo operador em 2026-08-16  
 **Fase:** 3G — Behavioral / State Architecture  
-**Importante:** este draft consolida o pacote revisado ChatGPT ↔ Fable. Ele não altera `LEDGER.md`, não fecha 3G, não constitui C-018 e não autoriza implementação, merge ou PR readiness até ratificação explícita do operador.
+**Authority:** quarta decisão aprovada de 3G  
+**Importante:** esta decisão não constitui C-018, não encerra a Fase 3 e não autoriza implementação de produto, merge ou PR readiness.
 
 ## Decisão em uma frase
 
@@ -12,7 +13,7 @@ No Conexus F1, `PlanningDepth = DIRECT | LIGHT | FULL` e `RigorProfile = FAST | 
 
 ## 1. Authority e provenance
 
-Este candidato materializa sem reabrir:
+Esta decisão materializa sem reabrir:
 
 - C-017 — correctness antes da decomposição, checkpoint humano em todo Change, `RigorProfile` calculado, unknown nunca reduz rigor, detector versionado e recálculo em dispatch/closure/Release;
 - 3C-05 — Builder owns PlanningDepth/Rigor semantics, sem `RigorModule` de domínio;
@@ -357,8 +358,8 @@ Preferência de framework/naming ou future optionality não reabre.
 
 ---
 
-## 13. Candidato à ratificação
+## 13. Decisão ratificada
 
-Se ratificado pelo operador, 3G-04 passa a congelar:
+A aprovação do operador em 2026-08-16 congela:
 
 > **PlanningDepth e RigorProfile são eixos ortogonais, ancorados em authorities distintas; checkpoint fixa PlanningDepth, C-017 evaluator fixa rigor, ambos podem ser elevados mas nunca silenciosamente reduzidos, e nenhum workflow matrix/classifier extra é necessário.**

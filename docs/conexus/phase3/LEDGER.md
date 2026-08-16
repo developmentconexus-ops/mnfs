@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA / 3F-R1 APROVADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA / 3F-01 APROVADA / 3F-02 APROVADA / 3F-03 APROVADA / 3F-04 APROVADA / 3F-05 APROVADA / 3F-06 APROVADA / 3F-R1 APROVADA` · `3G IN PROGRESS / 3G-01 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -59,6 +59,9 @@ C-000..C-017
 3F-R1
 → fechamento/reconciliação final de Contracts & API Architecture; routing de realization e reopen triggers
 
+3G-01
+→ ApprovalRequest durable-facts + canonical projection lifecycle, temporal/concurrency guards, monotonic STALE, permanent committed binding e recovery non-reauthorization
+
 este LEDGER
 → status/navigation authority
 ```
@@ -77,7 +80,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` e `*-CHATGPT-*` são review 
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
-| 3G — Behavioral / State Architecture | **NÃO INICIADA / NEXT** | próxima fase — FSMs/lifecycles |
+| 3G — Behavioral / State Architecture | **EM ANDAMENTO / 3G-01 APROVADA** | selecionar a próxima decisão 3G pelo Decision Loop |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
@@ -818,6 +821,84 @@ Para authenticated/admitted failures de 3F-05, `code` é a behavior key; HTTP st
 
 ---
 
+## 7A. 3G — IN PROGRESS
+
+### 3G-01 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3G-01 | ApprovalRequest Lifecycle & Claim-Binding State Architecture | [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) |
+
+3G-01 congela o lifecycle/state model mínimo da `ApprovalRequest` F1:
+
+```text
+current authority = owner-local durable facts
+  decision absent | ALLOW_ONCE | DENY
+  immutable expiresAt
+  monotonic STALE fact
+  permanent committed boundEffectAttemptId
+
+canonical lifecycle = derived projection over facts + invocation guardNow
+no second mutable authoritative status
+```
+
+Core behavior:
+
+```text
+request creation requires expiresAt > creationGuardNow
+decision = write-once
+same-value decision retry = idempotent read-back
+different-value retry = conflict
+derived expiry = no correctness scheduler/write
+STALE = durable/monotonic, only from still-claimable B2 mismatch
+committed binding = permanent R↔A
+rollback before admission commit = does not consume approval
+RECOVER_BOUND(A) = same-attempt recovery, never reauthorization
+impossible durable fact combinations = fail-closed L4/corruption
+```
+
+Temporal/concurrency laws:
+
+```text
+one DB-sourced guardNow captured per lifecycle invocation
+same captured value used by every temporal comparison + mutation predicate
+guardNow >= expiresAt = expired
+all mutable lifecycle transitions use owner-local conditional/CAS guarded mutation
+inside material admission, failed required guarded write / zero rows = abort whole transaction
+correctness does not require stronger isolation merely for ApprovalRequest lifecycle
+```
+
+Atomicity remains inside existing 3E classes:
+
+```text
+decision / STALE + required OBS audit = Class-2 transversal behavior
+successful material admission = existing GW + PAR Class-1 domain atomicity
++ existing Class-2 audit write when required
+RECOVER_BOUND = read-equivalent
+```
+
+Lifecycle labels are owner-local semantic projection names, not automatically public/wire codes. `BOUND` is terminal only for PAR lifecycle mutation; sealed custody/evidence remains through the 3F-03 PRESERVE horizon, while exact GC/recovery machinery stays 3M.
+
+Expiry is silent inside ApprovalRequest authority. Later AgentRun semantics, runtime wake/timer mechanics and UX remain routed to later 3G / 3H / 3K respectively.
+
+Review/provenance não-autoritativa:
+
+- [3G-FABLE-DIALOGUE-approval-request-lifecycle.md](3G-FABLE-DIALOGUE-approval-request-lifecycle.md)
+- [3G-FABLE-DIALOGUE-approval-request-lifecycle-R2.md](3G-FABLE-DIALOGUE-approval-request-lifecycle-R2.md)
+
+Convergência antes da ratificação:
+
+```text
+Material Finding contra prior authority = NONE
+reopen 3C/3D/3E/3F = NONE
+new subsystem/record/dependency = NONE
+READY FOR OPERATOR DECISION
+```
+
+3G permanece aberta; 3G-01 não preaprova a próxima decisão.
+
+---
+
 ## 8. Open findings / routed work
 
 Estes itens não reabrem fases anteriores automaticamente.
@@ -835,10 +916,11 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
 | exact wire layout / HTTP mapping por public boundary | implementation + contract tests; 3L somente se transport/schema technology exigir qualification |
 | exact `MANIFEST_INVALID` promote/compile diagnostic fields | promote/compile implementation + 3K presentation, sob 3F-05 |
-| per-family approval card/display contracts | 3K + implementation, sob 3F-03 |
-| ApprovalRequest lifecycle/FSM completo | 3G |
-| approver eligibility / admin revocation / post-admission cancellation | 3I / 3G |
-| reconciliation / re-send after `OUTCOME_UNKNOWN` | 3M / 3G |
+| per-family approval card/display contracts | 3K + implementation, sob 3F-03/3G-01 |
+| approver eligibility / admin revocation / post-admission cancellation | 3I / later 3G |
+| semantic effect of approval expiry on suspended AgentRun | later 3G |
+| Gateway effect_attempt complete lifecycle + budget/idempotency guarded state | later 3G |
+| reconciliation / re-send after `OUTCOME_UNKNOWN` | 3M / later 3G where semantic state is needed |
 | authored Project binding source/file schema + exact literal mutation DTOs | implementation; 3K authoring UI; 3L somente se tooling exigir qualification |
 | exact `brn.binding_validation` ref if 3N proves it load-bearing | Decision Loop / 3N |
 | Project binding Control Plane UI realization | 3K |
@@ -868,7 +950,8 @@ Resolvido:
 - F3E01-R3 cluster inventory → `hub_control + mastra_builder + mastra_par + project/validation DBs`.
 - 3E arithmetic discrepancy `44 vs 46` → corrigida como defeito documental; nenhuma classe removida.
 - F3B-R2 legacy `MissionPlan v2` → 3F-01 define one-time `TRANSFORM` para semântica atual de Change / Work Unit; sem compatibility layer permanente.
-- approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; lifecycle, approver authority e post-admission cancellation permanecem roteados.
+- approval capability exact claim/recovery semantics + ApprovalRequest exact-subject contract → **RESOLVIDO por 3F-03**; approver authority e post-admission cancellation permanecem roteados.
+- ApprovalRequest F1 lifecycle/state architecture → **RESOLVIDO por 3G-01** como owner-local durable facts + canonical derived projection, decision write-once, derived expiry, monotonic STALE, concurrency-safe single binding e non-reauthorizing recovery; AgentRun reaction, authority/security e recovery machinery permanecem roteados aos seus owners.
 - Project binding contract shapes → **RESOLVIDO por 3F-04** como dois contratos concretos, Git-first, exact-pinned e sem GenericBinding/BindingSet; lifecycle, authority e UI permanecem roteados.
 - literal stable public codes + per-code baseline details + public-code→locus contract → **RESOLVIDO por 3F-05** com 9-code baseline, details fechados e static projection; exact wire/HTTP/promote diagnostics são realization roteada.
 - DEDICATED identity/authority exchange shape → **RESOLVIDO por 3F-06** como server-to-platform exchange com `DedicatedApplicationPrincipal + exact ReleaseRef`, scope/audience derivados, Release-as-attestation e support horizon; concrete trust/credential/delegation mechanics permanecem 3I.
@@ -953,6 +1036,12 @@ DEDICATED direct browser→Platform-Service authority sem consumidor
 DedicatedAccessGrant / PlatformServiceBinding / DedicatedSession / ServiceCredential domain records sem lifecycle provado
 DEDICATED identity federation/delegation framework sem consumidor
 OAuth/mTLS/JWT/API-key architecture predecidida em 3F
+persisted mutable ApprovalRequest status as second authority
+GenericFSM / StateRegistry / shared state engine
+ApprovalRequest event-sourced lifecycle sem failure class
+expiry cron/scheduler como ApprovalRequest correctness authority
+SERIALIZABLE como correctness crutch exclusivo do ApprovalRequest lifecycle
+new durable approval lifecycle record / Tier-2 FK sem consumer
 Kafka/Kubernetes/Temporal by default
 ```
 
@@ -978,9 +1067,12 @@ Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class rea
 3F-05 = APPROVED
 3F-06 = APPROVED
 3F-R1 = APPROVED
-3G = NOT STARTED / NEXT
+3G = IN PROGRESS
+3G-01 = APPROVED
 ```
 
-A próxima fase é 3G. A primeira decisão de Behavioral / State Architecture deve ser trabalhada com o operador antes de ser documentada como authority.
+A primeira decisão de Behavioral / State Architecture foi trabalhada com o operador, passou por review adversarial independente e ganhou authority como 3G-01.
+
+A próxima decisão de 3G deve ser selecionada pelo mesmo Decision Loop e trabalhada com o operador antes de ser documentada como authority.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

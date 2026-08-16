@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F NEXT — NÃO INICIADA`  
+**Estado:** `3B CLOSED` · `3C CLOSED` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F EM ANDAMENTO / 3F-01 APROVADA`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 inteira e não autoriza implementação.
@@ -38,6 +38,9 @@ C-000..C-017
 3E-R1
 → fechamento/reconciliação final de 3E; inclui correção aritmética 44→46 sem mudança semântica
 
+3F-01
+→ classificação de contract surfaces, durable representations, version gaps e failure loci
+
 este LEDGER
 → status/navigation authority
 ```
@@ -55,7 +58,7 @@ Nenhuma conversa é authority. Arquivos `*-FABLE-*` são review inputs não-auto
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas com Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
 | 3E — Data Architecture | **CLOSED / APROVADA** | [3E-R1](3E-R1-data-architecture-final-closure.md) |
-| 3F — Contracts & API Architecture | **NEXT — NÃO INICIADA** | [handoff inicial](3F-CONTRACTS-API-ARCHITECTURE-HANDOFF.md); primeira decisão deve ser trabalhada com o operador |
+| 3F — Contracts & API Architecture | **EM ANDAMENTO / 3F-01 APROVADA** | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md); próxima decisão deve ser trabalhada com o operador |
 | 3G — Behavioral / State Architecture | NÃO INICIADA | FSMs/lifecycles |
 | 3H — Runtime & Agent Architecture | NÃO INICIADA | realization/correlation/runtime mechanics |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
@@ -310,14 +313,87 @@ nenhum Finding material adicional de Data Architecture
 
 ---
 
-## 7. Open findings / routed work
+## 7. 3F — IN PROGRESS / 3F-01 APPROVED
+
+### 3F-01 — APPROVED
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3F-01 | Contract Surface Classification & Versioning Boundary | [3F-01](3F-01-contract-surface-classification-versioning-boundary.md) |
+
+3F-01 congela o modelo mínimo:
+
+```text
+LIVE SURFACE
+  INTERNAL | INDEPENDENT
+  CONDITIONAL = routing state only
+
+DURABLE REPRESENTATION
+  admitted only by D1 / D2 / D3
+  persistence alone != contract
+
+VERSION-GAP MODES
+  PRESERVE | REJECT_STALE | QUIESCE | TRANSFORM | DISCARD
+
+FAILURE LOCI
+  DOMAIN_OR_AUTHORITY_REJECTION
+  CONTRACT_INVALID
+  STALE_EXPECTATION
+  DURABLE_INTERPRETATION_FAILURE
+```
+
+Regras normativas importantes:
+
+```text
+direct-call-first permanece
+wire/version ceremony não nasce por module boundary
+PRESERVE exige semantic horizon + end-of-horizon behavior
+idempotency key de attempt admitido = persist-once + reuse-verbatim
+Conexus dedup != external-system idempotency guarantee
+OUTCOME_UNKNOWN permanece fora de contract failure taxonomy
+cada authority-bearing digest domain define typed context + canonical bytes + algorithm/profile
++ pinned canonicalization implementation + evolution rule
+no universal digest/serializer framework
+```
+
+Baseline classification inclui:
+
+```text
+L7/module/Gateway internal calls → INTERNAL
+browser↔Hub e published app↔platform → INDEPENDENT
+artifact kind/vN family → durable trait / PRESERVE horizon
+approval envelope/claim → durable trait
+four infra boundaries → internal port + independent vendor side
+Builder/PAR live transport → CONDITIONAL até 3H/3J
+ordinary 3E relational rows → migration-private por default
+```
+
+Review/provenance não-autoritativa:
+
+- [3F-FABLE-DIALOGUE-contract-surface-classification.md](3F-FABLE-DIALOGUE-contract-surface-classification.md)
+
+O review adversarial + buildability encontrou:
+
+```text
+no UNSUPPORTED mechanism
+zero new probes
+zero new subsystems
+no Material Finding against 3D/3E
+```
+
+Mitra/Factory/in-house evidence permaneceram referências/evidência, não authority.
+
+3F permanece aberta. A próxima decisão deve ser trabalhada com o operador antes de ser materializada.
+
+---
+
+## 8. Open findings / routed work
 
 Estes itens não reabrem fases anteriores automaticamente.
 
 | Finding / questão | Owner posterior |
 |---|---|
 | F3B-R1 — repo canônico/cutover do produto | 3A / operador — antes de implementação |
-| F3B-R2 — legacy `MissionPlan v2` | 3F |
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
 | N3 — Planning Depth × RigorProfile | 3G |
 | F3D02-R1 — AgentRun in-flight × stricter new Release | 3G/3I |
@@ -326,8 +402,10 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` não pode virar authoring authority | 3H/3L probe |
 | F3E02-R2 — physical storage/custody do CredentialBackend | 3I / infra implementation |
-| Project binding contracts | 3F |
-| DEDICATED identity/authority exchange | 3F/3I |
+| Project binding contract shapes | later 3F |
+| exact error codes / error envelopes | later 3F |
+| approval capability exact signature | later 3F |
+| DEDICATED identity/authority exchange shape | later 3F / trust em 3I |
 | DEDICATED egress/network policy | 3I/3J |
 | MANAGED/DEDICATED deployment topology | 3J |
 | Mastra telemetry ↔ Conexus correlation | 3H/3L |
@@ -340,10 +418,11 @@ Resolvido:
 - F3D04-R1 route mapping ownership → `mar`; topology física continua 3J.
 - F3E01-R3 cluster inventory → `hub_control + mastra_builder + mastra_par + project/validation DBs`.
 - 3E arithmetic discrepancy `44 vs 46` → corrigida como defeito documental; nenhuma classe removida.
+- F3B-R2 legacy `MissionPlan v2` → 3F-01 define one-time `TRANSFORM` para semântica atual de Change / Work Unit; sem compatibility layer permanente.
 
 ---
 
-## 8. Anti-overengineering guardrail
+## 9. Anti-overengineering guardrail
 
 Fases fechadas/decididas não autorizam:
 
@@ -373,22 +452,16 @@ shared JobQueue/Scheduler port
 MigrationRunner provider framework
 Mastra external migration machinery sem failure class
 cross-domain global CAS refcount
+wire DTO / /v1 por module boundary
+generic contract registry service
+UniversalContract / UniversalEnvelope
+universal serializer / UniversalDigestFramework
+shadow versioning layer sobre as 46 classes duráveis
+negotiated multi-version windows sem consumidor nomeado
 Kafka/Kubernetes/Temporal by default
 ```
 
 Qualquer item retorna apenas pelo Decision Loop com consumidor/failure class real.
-
----
-
-## 9. Handoff para 3F — sem iniciar a fase
-
-3E está fechada. O próximo estágio é 3F — Contracts & API Architecture, mas **3F ainda não foi iniciado**.
-
-O handoff inicial está em:
-
-- [3F-CONTRACTS-API-ARCHITECTURE-HANDOFF.md](3F-CONTRACTS-API-ARCHITECTURE-HANDOFF.md)
-
-A primeira decisão 3F deve ser trabalhada com o operador antes de qualquer documento de decisão aprovado. O handoff apenas reconstrói intake, pergunta inicial e guardrails; não congela contracts, DTOs, APIs, versionamento ou tecnologia.
 
 ---
 
@@ -402,7 +475,11 @@ A primeira decisão 3F deve ser trabalhada com o operador antes de qualquer docu
 3E-01 = APPROVED
 3E-02 = APPROVED
 3E-R1 = APPROVED
-3F = NEXT / NOT STARTED
+3F = IN PROGRESS
+3F-01 = APPROVED
+3G = NOT STARTED
 ```
+
+A próxima decisão de 3F deve ser trabalhada com o operador antes de ser documentada como authority.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger.

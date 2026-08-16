@@ -1,8 +1,9 @@
 # 3G-05 — Production AgentRun, Approval Continuation & Trigger Architecture
 
-**Status:** CANDIDATE / AWAITING OPERATOR RATIFICATION / NOT AUTHORITY  
+**Status:** APPROVED pelo operador em 2026-08-16  
 **Fase:** 3G — Behavioral / State Architecture  
-**Importante:** este draft não altera authority existente, não fecha 3G e não autoriza implementação até ratificação explícita do operador.
+**Authority:** quinta decisão aprovada de 3G  
+**Importante:** esta decisão não constitui C-018, não encerra a Fase 3 e não autoriza implementação de produto, merge ou PR readiness.
 
 ## Decisão em uma frase
 
@@ -19,7 +20,7 @@ Materializa sem reabrir:
 - 3D-02/04 — Gateway last-mile authority; PAR não re-resolve I&A;
 - 3F-06 — exact ReleaseRef é runtime compatibility identity para DEDICATED;
 - C-013/C-016 — ambiguity, budgets, current owner enforcement;
-- 3G-07 candidate — archive é control-plane freeze, não serving authority;
+- 3G-07 — archive é control-plane freeze, não serving authority;
 - pacote ChatGPT↔Fable + R2 Final Review.
 
 Final review confirmou:
@@ -293,7 +294,7 @@ Disable nunca cancela automaticamente already-admitted run.
 
 ## 9. ARCHIVED Project × AgentRun
 
-Ratification candidate adota explicitamente:
+A decisão adota explicitamente:
 
 > **Archive congela expansão/authoring de intent; não vira serving authority.**
 
@@ -422,8 +423,8 @@ recovery mechanics                     → 3M
 
 ---
 
-## 15. Candidato à ratificação
+## 15. Decisão ratificada
 
-Se ratificado, 3G-05 congela:
+A aprovação do operador em 2026-08-16 congela:
 
 > **AgentRun é composição pinada e terminal write-once; ApprovalRequest governa approval wait, Mastra governa suspend mechanics, guard facts concorrentes devem realmente conflitar, newer Release não reescreve run, e Project archive não despublica nem para run/trigger já autorizado, preservando explicit DISABLE como narrowing.**

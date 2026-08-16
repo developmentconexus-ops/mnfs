@@ -1,28 +1,29 @@
 # 3G-R1 — Behavioral / State Architecture Final Closure
 
-**Status:** CANDIDATE / AWAITING OPERATOR RATIFICATION / NOT AUTHORITY  
+**Status:** APPROVED / CLOSED pelo operador em 2026-08-16  
 **Fase:** 3G — Behavioral / State Architecture  
-**Importante:** este draft consolida o fechamento proposto de 3G após review independente do pacote inteiro. Ele NÃO fecha 3G, não atualiza `LEDGER.md`, não constitui C-018 e não autoriza implementação, merge ou PR readiness até ratificação explícita do operador.
+**Authority:** fechamento final aprovado de 3G  
+**Importante:** esta decisão fecha 3G, mas não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto, merge ou PR readiness.
 
 ## Decisão em uma frase
 
-Se 3G-04..3G-08 forem ratificadas juntamente com este fechamento, o Conexus F1 encerra Behavioral / State Architecture com oito decisões coerentes e owner-local: ApprovalRequest, Change/Finding, WorkUnit/ActorRun, Planning/Rigor, Production AgentRun/Trigger, Gateway EffectAttempt, Project/Binding lifecycle e Release/Promotion; nenhum estado universal, workflow engine, queue, lease, nova durable record class ou 3G-09 é necessário, nenhuma authority anterior precisa reabrir, e os resíduos restantes pertencem explicitamente a runtime/security/deployment/product/recovery/verification posteriores.
+Com a ratificação conjunta de 3G-04..3G-08 e deste fechamento, o Conexus F1 encerra Behavioral / State Architecture com oito decisões coerentes e owner-local: ApprovalRequest, Change/Finding, WorkUnit/ActorRun, Planning/Rigor, Production AgentRun/Trigger, Gateway EffectAttempt, Project/Binding lifecycle e Release/Promotion; nenhum estado universal, workflow engine, queue, lease, nova durable record class ou 3G-09 é necessário, nenhuma authority anterior precisa reabrir, e os resíduos restantes pertencem explicitamente a runtime/security/deployment/product/recovery/verification posteriores.
 
 ---
 
 ## 1. Authority e provenance
 
-Closure candidate considera:
+Este fechamento considera como authority:
 
 ```text
 3G-01 ApprovalRequest
 3G-02 Change / Finding / closure
 3G-03 Work Unit / Builder ActorRun
-3G-04 PlanningDepth / Rigor candidate
-3G-05 Production AgentRun / Trigger candidate
-3G-06 Gateway EffectAttempt candidate
-3G-07 Project / Binding lifecycle candidate
-3G-08 Release / Promotion candidate
+3G-04 PlanningDepth / Rigor
+3G-05 Production AgentRun / Trigger
+3G-06 Gateway EffectAttempt
+3G-07 Project / Binding lifecycle
+3G-08 Release / Promotion
 ```
 
 Inputs não-autoritativos de challenge:
@@ -42,7 +43,7 @@ new engine/queue/lease = NONE
 reachable false-success after corrections = 0 found
 ```
 
-As authority-draft notes AD-1..AD-5 foram incorporadas nos respectivos drafts candidatos.
+As authority-draft notes AD-1..AD-5 foram incorporadas nas respectivas authorities.
 
 ---
 
@@ -283,7 +284,7 @@ PAR conversation container
 Builder coding_session continuity/correlation
 ```
 
-Conclusion candidate:
+Final conclusion:
 
 ```text
 remaining material 3G decision = 0
@@ -432,9 +433,9 @@ Framework preference, naming, symmetry, vendor feature or hypothetical future op
 
 ---
 
-## 12. Closure candidate
+## 12. Ratificação e fechamento
 
-If the operator ratifies 3G-04, 3G-05, 3G-06, 3G-07, 3G-08 and this 3G-R1 together, the intended status becomes:
+A aprovação do operador em 2026-08-16 ratifica:
 
 ```text
 3G-01 = APPROVED
@@ -445,24 +446,24 @@ If the operator ratifies 3G-04, 3G-05, 3G-06, 3G-07, 3G-08 and this 3G-R1 togeth
 3G-06 = APPROVED
 3G-07 = APPROVED
 3G-08 = APPROVED
-3G-R1 = APPROVED
+3G-R1 = APPROVED / CLOSED
 3G = CLOSED / APPROVED
 ```
 
-This closure would **not**:
+Este fechamento **não**:
 
 ```text
-constitute C-018
-close Phase 3
-start product implementation
-merge PR #40
-preapprove 3H decisions
+constitui C-018
+fecha a Fase 3 completa
+inicia implementação de produto
+mergeia PR #40
+preaprova decisões de 3H
 ```
 
-It only closes Behavioral / State Architecture and advances the architecture sequence to 3H.
+Ele fecha somente Behavioral / State Architecture e avança a sequência arquitetural para 3H.
 
 ---
 
-## 13. Candidato à ratificação
+## 13. Decisão final ratificada
 
-> **Behavioral / State Architecture is globally coherent when each owner keeps its own state truth, cross-owner workflows remain composition rather than shared FSMs, history stays immutable while current consumers re-evaluate admissibility, ambiguity is preserved rather than hidden, and every deferred mechanism has a named later owner. Under that model, no additional 3G decision is justified.**
+> **Behavioral / State Architecture é globalmente coerente porque cada owner mantém sua própria state truth, workflows cross-owner permanecem composição em vez de FSM compartilhada, história fica imutável enquanto consumers atuais reavaliam admissibility, ambiguity é preservada em vez de escondida e todo mecanismo deferred possui later owner explícito. Sob esse modelo, nenhuma decisão 3G adicional é justificada.**

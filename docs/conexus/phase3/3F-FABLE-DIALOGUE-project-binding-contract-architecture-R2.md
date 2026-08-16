@@ -719,4 +719,111 @@ Do not modify authority or `LEDGER.md`.
 
 # Round 2 — Fable
 
-_Pending Fable response._
+**Status of this round:** convergence pass + product-experience pass / NON-AUTHORITATIVE.
+**Method:** C2.x re-checked against 3B-15/3B-16, 3C-04/06/07/09/11, 3D-03/3D-R1, 3E-02, 3F-01/02/03, C-011/C-014/C-015. No claim depends on current Mastra behavior.
+
+## F2.1 Verdict
+
+Converged. Every C2 correction survives attack; my re-attacks on the eighteen questions produced **zero new disagreements** and three precisions (F2.2). The mandatory product-experience pass (F2.3) produced a genuinely useful result: for every mechanism in this contract, the simplest honest user experience and the rigorous architecture **coincide** — no invariant needs to leak into the UX, and no UX simplification threatens an invariant. Two small contract-level rules fall out of the UX pass and are folded into the draft. **No Material Finding.** Draft in F2.4, closing verdict at the end.
+
+## F2.2 The eighteen questions — convergence answers
+
+1. **Git-only authoring path — confirmed.** Hunted once more for a Hub-only-mutation consumer: emergency rebind (dismantled by C2.2 — the Release stays pinned, so DB-only rebind wouldn't even fix the incident), first-run setup speed (UI-commits-Git covers), Brain UPDATE_AVAILABLE adoption (UI click → platform commit → adopt). Nothing survives. One precision: provenance must capture **both** the source revision **and** the acting principal when the platform authors the commit on the user's behalf — otherwise UI-mediated commits collapse attribution into a bot identity and the audit question "who changed the PROD connection?" has no answer. One field, already in D-1's spirit.
+2. **Reproducibility — sufficient as stated.** The law is mechanically testable ("re-resolve the source revision → identical exact refs") without freezing file syntax. `latest`/name-matching/auto-select confirmed prohibited; the same law also excludes time-varying resolution ("most recently qualified") by construction, since re-resolution would differ.
+3. **`owner-admissible for NEW adoption` — closes the class without stealing 3G.** Searched for a case where new adoption should proceed against an owner's non-selectable verdict: bug reproduction against a retired revision uses historical Release pins, not new adoption; rollback re-points a manifest, which is not adoption. No case survives. The narrowing is correct.
+4. **Historical pins — verified safe.** Adoption prohibition and historical resolvability are disjoint by construction: adoption is a Project-intent write path; historical refs resolve under 3F-01 PRESERVE horizons. Sharpening worth one sentence in the draft: **rollback eligibility may fail for its own reasons (C-014 schema rule) but never because a pinned binding target has since become non-adoptable** — re-pointing resolves pins, it does not re-adopt.
+5. **Qualification — confirmed.** Advisory at set-time; the UI badge reads live from the Connections owner at render; nothing persisted in `prj.*`. The one temptation ("cache the badge") is a stale-mirror seed and stays prohibited.
+6. **Connection shape — nothing deletable.** The one candidate (derive `connectionId` from the revision ref) is barred twice: 3E-02 froze the pair explicitly, and the pair encodes two genuinely distinct intents — "use THIS Connection" (stable identity) and "at THIS revision" (exact content). The redundancy is safe because `REVISION_RELATION_INVALID` is checked at set-time.
+7. **Brain pair — irreducible, re-confirmed.** The two components change for independent reasons (Workspace publishes; Project adopts); each derivation direction re-creates a named failure class (embedding → churn/split authority; deriving artifact from revision → live inheritance of mappings).
+8. **Artifact reuse after revalidation — holds against the strongest attack.** The hard case is semantic drift under a stable logical ID between BR-12 and BR-13. Embedding the Brain digest would only force a human re-look — and that human decision point **already exists**: SetProjectBinding is an explicit human-initiated adoption. Embedding adds no detection power (if the artifact's conformance assertions pass, no mechanism detects the drift either way) and costs churn + split authority. No semantic class requires it.
+9. **CAS — sufficient; no generation, no set-level concurrency.** Keys are independent; concurrent SETs on different slots don't interact; Release composition reads a consistent snapshot in one transaction. `ABSENT | exact prior ref` covers first-bind races and replacement races completely.
+10. **UNBIND Git-first — confirmed.** Removal is authored (binding entry removed from source), committed, adopted with CAS. No DELETE-only path exists; history preserved.
+11. **Closed union — confirmed.** Four concrete operations, each owning its invariants. A `{kind,target,payload}` shape would move validation to runtime dispatch — failure class A of the parent round, verbatim.
+12. **Failure classes — adequate.** `BINDING_TARGET_NOT_ADOPTABLE` + `PROJECT_BINDING_MUTATION_NOT_ADMITTED` absorb D-3 without lifecycle labels; `BINDING_SOURCE_NOT_REPRODUCIBLE` is the right new class for the Git-first law. Nothing missing that changes fields or invariants; literal codes stay later-3F.
+13. **No BindingSet — final.** The rollback construction fails: re-validation reads manifest refs directly (C-014 revalidação leve), and "what changed between releases" is a manifest diff. A `bindingSetDigest` remains a second commitment over the same facts — drift surface, no consumer.
+14. **Runtime — re-confirmed** via 3D-R1 §5 composition sources; no mutable current-intent lookup for PUBLISHED_APP/AGENT_RUN, ever.
+15. **Validation evidence — no mandatory ref.** Final attempt found no failure class that pair + adoption-time ordering leaves open *while set-time validation remains advisory*. The 3N trigger stands.
+16. **Buildability deltas:** UI-authors-Git-behind-the-scenes is **PROVEN in production — by Mitra itself**: the Studio UI drives commits to GitHub invisibly (SYNC/SHARE per turn, code viewer reads GitHub, sandbox discarded — only Git survives). The exact interaction shape this contract needs, live at commercial scale. Owner-admissibility checks and the closed union are CONVENTIONAL. Zero new probes.
+17. **Global Maximum — no Material Finding.** The Git-only path is the smallest coherent authority model (a dual path adds a source-less authority and solves nothing); every prior-authority contact point in C2.16's list checks out.
+18. Draft below.
+
+## F2.3 Product-experience pass
+
+Guardrail applied: *rigorous architecture underneath; simple experience on top.* For each mechanism — what stays internal, what the user must understand, how a normal person acts, leakage check, and whether a simpler experience exists that keeps the invariants.
+
+| Mechanism | Internal (never surfaces) | User concept | Control Plane action |
+|---|---|---|---|
+| Connection binding | exact ConnectionRevision ref, Git commit, adoption, CAS ref | "Which connection does this project use in Production / Development / Preview?" | Project → Connections: one row per purpose (friendly slot label), a dropdown of available connections per environment, **Test connection**, **Save** |
+| revision pinning | digest/revision identity | "This project keeps using what you chose until you update it" | selection at Save silently captures the connection's current exact revision; later changes to the Connection surface as **"Update available → Update"**, never silent |
+| CAS | expectedCurrentBindingRef | none | conflict renders as "This setting changed while you were editing — reload and try again" (the 3F-02 L3 refresh pattern) |
+| Git-first authoring | file shape, commit, adoption flow | none | Save does it all; **History** shows who changed what, when — served by immutable versions + provenance |
+| Brain binding pair | brainDigest, artifact revision, revalidation machinery | "This project uses the company Brain. An update is available." | **Review & update** → runs revalidation → adopts on success; on failure: "This update needs adjustments in the project" → routes to a Builder Change |
+| UNBIND | version history semantics | "Stop using this connection for Production" | confirm dialog: *"Future publishes requiring it will fail until you choose another. **The currently published version is not affected.**"* — Release immutability spoken in product language |
+| qualification advisory | qualification records | "Not tested yet" | badge: "You can save this, but publishing will require a successful connection test" — bindable-but-unreleasable, translated |
+| absence fail-closed | resolution law | "Production connection: not set" | required slots appear as a proactive checklist instead of a publish-time surprise; fail-closed unchanged underneath |
+
+**Leakage verdict:** zero necessary leakage. Digest, revision, CAS, Git, adoption, binding versions — none of them needs to exist in the user's vocabulary. Every invariant has a faithful product-language surface, including the subtlest one (Release immutability = "your published version is not affected").
+
+**Simpler-experience test:** the simplest candidate UX — "pick a connection, Save" — is exactly what the architecture supports, *because* selection-time capture resolves to an exact revision deterministically. The seemingly friendlier alternative ("just always use the connection's latest") is failure class B (live inheritance). Simplest honest UX and rigorous architecture coincide; neither is paying a tax for the other.
+
+Two contract-level rules fall out of this pass and enter the draft:
+
+```text
+UX-1  selection-time capture: the authoring layer resolves a user's resource
+      selection to the exact revision at Save; the authored source always
+      contains exact refs (this is HOW reproducibility and a simple UX coexist)
+
+UX-2  update-available is a read-only derived projection (pinned ref vs
+      owner's current); it never auto-adopts — adoption is always an explicit
+      user action through the same single path
+```
+
+## F2.4 Proposed 3F-04 decision text (smallest operator-facing form)
+
+---
+
+> ### 3F-04 — Project Binding Contract Architecture (DRAFT)
+>
+> **Decision in one sentence:** Conexus F1 freezes two distinct typed Project binding contracts — `ProjectConnectionBinding` as an immutable pointer version `(project, slot, consumerTarget) → exact Connection + exact ConnectionRevision`, and `ProjectBrainBinding` as an immutable adoption of the exact pair `Brain revision + brain-binding/v1 artifact revision` — sharing laws but no base type, authored exclusively through the Project's canonical Git source and adopted into Hub current authority via the single `SetProjectBinding` flow with expected-current CAS, validated by their specialized owners, frozen exactly by Releases, and surfaced to users as simple product choices with zero internal machinery leakage.
+>
+> **1. Two contracts, shared laws, no base.** `ProjectConnectionBinding ≠ ProjectBrainBinding`; they share laws only: Project-owned current intent; immutable historical versions; Git-first reproducible source with mandatory per-version provenance; expected-current CAS on SET and UNBIND; same-Workspace/owner-scope fail-closed checks; no implicit fallback or live inheritance; set-time specialized-owner validation; Release pins exact adopted refs; active Release/AgentRun never re-resolve mutable current intent; explicit CAS-protected UNBIND. No `Binding<T>`, `BindingSet`, `BindingEngine`, generic payload, or `connection-binding` Registry kind.
+>
+> **2. The asymmetry is principled.** `brain-binding/v1` is authored semantic **content** (logical→local mappings, assertions, refinements) with an independent compiler/reader — hence a Registry artifact. `ProjectConnectionBinding` is a **pointer pair** with no compiled content and no independent reader — hence a Project record, not an artifact. Symmetry arguments die here.
+>
+> **3. Single Git-first authoring path.** F1 has exactly one binding mutation path: binding intent is authored in the Project's canonical repository (directly or by the Control Plane authoring the commit on the user's behalf) → the source revision becomes immutable provenance → `SetProjectBinding` validates and adopts the exact resolved intent into Hub current authority. **No DB-only mutation path exists.** Provenance per version records the source revision **and the acting principal**. The authored source must resolve deterministically to the exact adopted refs — no `latest`, no name-matching, no auto-selection, no time-varying resolution (`BINDING_SOURCE_NOT_REPRODUCIBLE` otherwise). Emergency Hub-only rebind is rejected as a consumer (it could not alter a pinned active Release anyway); a future break-glass capability returns only by Decision Loop.
+>
+> **4. ProjectConnectionBinding.** Logical current key `(project, slot, consumerTarget)`; `slot` is the single Project-local symbolic purpose key (no separate free-form `purpose`; no universal slot catalog; never name-inferred); `consumerTarget = DEV | PREVIEW | PROD` closed. Immutable version content: Project, slot, consumerTarget, exact Connection identity, exact ConnectionRevision ref, source provenance, version identity — nothing else. Never copied in: credential material/handle, ConnectorDefinition digest, external environment, health, qualification, operation allowlists, Release refs. Effective execution authority remains the intersection of connector contract ∩ Connection eligibility ∩ binding ∩ Release ∩ tool/artifact classification ∩ caller authority ∩ policy ∩ Gateway admission. Absence of a required `(slot, consumerTarget)` binding **fails closed at the consumer gate; no selector ever resolves through another selector** — equal values across selectors are explicit data, not inheritance. `AGENT_RUN` and `PUBLISHED_APP` are not selectors: they consume run-pinned/Release-pinned composition (3D-R1 §5). Multi-account = distinct explicit slots; pools/failover are future decisions.
+>
+> **5. ProjectBrainBinding.** Current authority is the exact pair `Brain revision/digest + Project-scoped brain-binding/v1 artifact revision/digest`, plus immutable version identity, current selection and provenance. Semantic payload lives **only** in the artifact; `prj.brain_binding` never mirrors mappings/assertions/validation results. `brain-binding/v1` does **not** embed the target Brain digest (source churn + split authority); the same artifact may be adopted with a newer Brain revision **only after explicit specialized revalidation** — never by live inheritance. Trace identities behave as C-011 requires: `brainDigest` moves, `projectBindingDigest` may remain stable.
+>
+> **6. Adoption admissibility.** At set-time, owners validate structurally: existence, revision-relation, scope (cross-Workspace always fails closed; scope derived server-side), Project lifecycle admits mutation, and the target is **owner-admissible for NEW adoption**. 3F-04 freezes new-adoption admissibility semantics, not lifecycle state names (3G). Historical pins in Releases/evidence are never invalidated by later non-adoptability; rollback re-points a manifest and never re-adopts. Qualification is **not** a set-time requirement: a structurally valid but unqualified binding is legitimate intent that remains unreleasable until the Release/conformance gates pass; set-time qualification status is advisory, read live, never persisted into the binding.
+>
+> **7. CAS and UNBIND.** SET and UNBIND require `expectedCurrentBindingRef = ABSENT | exact prior binding-version ref`; mismatch fails closed as stale expectation (3F-02 L3 family). UNBIND is authored in Git and adopted like any mutation: removes current intent, preserves all historical versions, never touches an existing Release; consumer gates subsequently fail closed where a binding is required. No binding-generation framework; no set-level concurrency object.
+>
+> **8. `SetProjectBinding` surface.** One L7 flow (3D-03) with a closed discriminated input: `SET_CONNECTION | SET_BRAIN | UNBIND_CONNECTION | UNBIND_BRAIN`, each with its own typed fields/invariants (per C2.12). No `{kind, target, payload}`. Browser surface follows 3F-02 F3 rules; authority derived server-side.
+>
+> **9. Three-layer authority law.** Git source revision = what was authored; Hub current binding ref = which immutable version is current Project authority; ReleaseManifest = which exact composition was frozen for serving. Therefore: new commit ≠ current binding; new current binding ≠ active Release changed; new Workspace resource revision ≠ Project binding changed. No `BindingSet`/`bindingSetDigest` — the ReleaseManifest digest already commits the composition; a second aggregate is pure drift surface.
+>
+> **10. Failure semantics** (classes now, codes later-3F): `PROJECT_BINDING_MUTATION_NOT_ADMITTED`, `BINDING_SOURCE_NOT_REPRODUCIBLE`, `BINDING_REQUIRED_BUT_ABSENT`, `BINDING_SCOPE_MISMATCH`, `BINDING_TARGET_NOT_ADOPTABLE`, `BINDING_EXPECTATION_STALE`, `BINDING_REFERENCE_INVALID`, `BRAIN_BINDING_INCOMPATIBLE`. Qualification-not-PASS is not a mutation failure. All per 3F-02: exhaustive owner mapping, no locus on wire, code-scoped details only with a named consumer.
+>
+> **11. Product-experience principles.** Rigorous architecture underneath; simple experience on top — binding machinery never leaks: users act on "Use this connection", "Production", "Test connection", "Save", "Update available → Update", "Stop using" — never on digests, revisions, CAS, Git or adoption. Two normative rules make this coexistence work: **UX-1 selection-time capture** — the authoring layer resolves a user's selection to the exact revision at Save, so the authored source always carries exact refs; **UX-2 update-available is a read-only derived projection** (pinned vs current) that never auto-adopts — adoption is always an explicit user action through the single authored path. Conflicts surface as "changed while you were editing — reload"; UNBIND confirms with "the currently published version is not affected" (Release immutability in product language); required-but-absent bindings surface as a proactive setup checklist. No UX simplification may bypass authority, auditability or fail-closed behavior; no internal complexity may be imposed on the user because it exists internally.
+>
+> **12. Non-goals.** Everything in parent §15, plus: dual authoring paths, break-glass rebind (Decision Loop only), persisted qualification/health snapshots, embedded Brain digest in `brain-binding/v1`, mandatory `brn.binding_validation` ref (3N trigger only), auto-adoption of updates, generic `{kind,target,payload}` mutation.
+>
+> **13. Routed onward.** Lifecycle state machines/labels, binding status FSM → 3G; approver/authority enforcement → 3I; authored file schema, literal codes, per-code details → later 3F/implementation; Release/composition end-to-end proof → 3N/3O; per-family UI realization → 3K.
+>
+> **14. Buildability disposition.** Nothing UNSUPPORTED; zero new probes. Symbolic slots and UI-authors-Git-behind-the-scenes are PROVEN in production (Mitra: `connection:'sankhya'` handles; Studio commits to GitHub invisibly); immutable versions + CAS are PROVEN in-house (MNFS plan revisions, lease core); the rest is conventional over frozen machinery.
+
+---
+
+## F2.5 Closing verdict
+
+All eighteen questions converge; the UX pass strengthened rather than strained the contract; no material question remains open — the one operator-level choice this dialogue surfaced (authoring path) is resolved inside the draft as the single Git-first path with the platform authoring commits behind the UI, per C2.2's acceptance of my Round 1 recommendation.
+
+```text
+READY FOR OPERATOR APPROVAL
+```
+
+No indispensable corrections beyond the draft above; the two UX rules (UX-1/UX-2) and the acting-principal provenance precision are already folded in.
+
+No LEDGER or authority file was modified in this round.

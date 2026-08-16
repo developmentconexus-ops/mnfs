@@ -1373,3 +1373,263 @@ Include:
 - whether the candidate can proceed to operator review or needs another round.
 
 Do not modify earlier rounds, `LEDGER.md`, approved authority or product code. Commit/push only this dialogue file.
+
+---
+
+# Round 1 — Fable
+
+## 0. Verdict and provenance
+
+Authority reconstructed independently from `AGENTS.md` read order at HEAD `1445686`: Method v1.0.0 → `DOCUMENTATION-MAP` → `DECISOES.md` → `LEDGER.md` (3G-01 APPROVED) → 3C-05 → 3A-R5 → C-017 canonical source (`docs/conexus/23-modelo-engenharia.md`) → 3D-R1 → 3E-01/3E-02 → 3F-01/3F-02/3F-R1 → 3G-01 → Mitra/Factory research maps as evidence. This round makes **no current-Mastra claim**: every argument below is independent of Mastra behavior — 3A-R5 froze the runtime boundary and `CX-BUILDER-MASTRA-01` gates realization — so Context7 verification is not required for this round.
+
+Verdict up front:
+
+```text
+Alternative C (hybrid facts + projections)        → structurally CONFIRMED
+Change/Finding scoped together                     → CONFIRMED (Q1)
+zero new durable records / no FSM engine           → CONFIRMED
+Material Finding against prior authority           → NONE; no reopen of 3C/3D/3E/3F/3G-01
+material completions required                      → FB-1 .. FB-10 below
+candidate as written                               → NOT yet operator-ready;
+                                                     one consolidation round needed
+```
+
+Two of the findings are not refinements but **essential C-017 complexity that Round 1 dropped**: the policy/standards snapshot gate (C-017 invariant 8) and the multi-pin evidence staleness law (C-017 invariant 12). Both must return; YAGNI does not authorize removing frozen obligations (Method §3, complexity law).
+
+---
+
+## 1. Material findings
+
+### FB-1 — Trace 20 has no answer: closure needs a frozen serialization law, and the Change row is the natural root
+
+**Claim challenged:** §22/§27 leave the closure/late-Finding race as an open question. It cannot stay open — without a frozen law the candidate's central promise ("no accepted Change with a concurrently admitted blocking gap") is unenforceable.
+
+**Counterexample.** Closure evaluation is a multi-row read (Findings, revisions, assertion×verdict matrix) followed by one write. Under READ COMMITTED: closure transaction reads Findings at t1 and sees none open; a validator's `OPEN` Finding insert commits at t2; closure commits `ACCEPTED` at t3. No isolation anomaly — every statement behaved as documented — yet the Change closed accepted with a durable blocking gap. The 3G-01 single-row guarded mutation is insufficient here because the closure predicate spans rows that a `WHERE` clause on `bld.change` cannot restate.
+
+**Smallest correction.** Freeze the semantic law, not SQL:
+
+> The owning `bld.change` row is the **single serialization root** for closure-relevant truth. Every Builder mutation that can change the closure or dispatch predicate of a Change — Finding create/route/resolve, contract/plan revision transitions, acceptance-relevant admissions — executes inside a transaction that first performs a guarded touch of that Change row conditioned on `terminal closure absent` (zero rows → abort). Terminal closure itself is a write-once guarded mutation on the same row, and the closure predicate is evaluated while holding that serialization.
+
+Consequences, all free: the late-Finding race becomes deterministic in both orders (Finding first → closure re-evaluates and refuses; closure first → the Finding writer's guarded touch hits zero rows and aborts, which **also mechanically enforces closure immutability against late writes** — post-closure discoveries become a new Change exactly as §11 requires); Finding route/resolution concurrency (trace 19) reduces to 3G-01-style guarded single-row writes on the Finding row *plus* this serialization; and correctness needs no isolation level above the F1 baseline, matching 3G-01's frozen discipline. Per-Change serialization cost is irrelevant: Builder work within one Change is serial by authority (C-017 invariant 10).
+
+**Reopen:** none. **Owner:** 3G-02 invariant; SQL/locking realization stays implementation.
+
+### FB-2 — The checkpoint/dispatch gate is incomplete: plan pin and policy snapshot are co-equal gates in C-017
+
+**Claim challenged:** §7/§19/§21 treat `currentContractRevision = approvedContractRevision` as *the* hard gate.
+
+**Failure classes.** Two frozen obligations are missing:
+
+1. **Plan pin.** C-017 invariant 2 lists `plano pinado` inside the semantic-revision scope of the contract, and invariant 3 forbids Work Unit dispatch before the pinned plan is approved when the Change requires one. As written, §19's "approved Plan/revision when required" is a bullet, not a law, and §7's invariant would admit a dispatch where the contract refs match but the pinned plan changed.
+2. **Policy/standards snapshot.** C-017 invariant 8: the Hub pins the applicable policy/standards/gates digest at each dispatch; a **semantic** change of that set during the cycle *blocks dispatch AND acceptance* until a new human checkpoint (`HANDOFF_REQUIRED`), with only provably non-semantic diffs eligible for automatic revalidation. Round 1 never mentions this axis. A dispatch that passes revision equality while the governing policy set changed semantically violates frozen authority — this is essential complexity dropped under YAGNI (Q4's answer is therefore: yes, twice).
+
+**Smallest correction.** Two sentences:
+
+> (a) When a Change requires an explicit Plan, the pinned Plan revision ref is part of the contract revision's semantic identity: adopting a different plan revision **is** a contract revision transition and travels the same checkpoint path. This preserves the two-fact gate without a third current/approved pair.
+> (b) Dispatch admissibility and closure admissibility both include: the applicable policy/standards snapshot pinned for this Change is current, or its drift has been re-checkpointed per C-017 invariant 8. The pinned digests are durable facts already required by C-017; currency is derived by comparison, not by fan-out rewrites.
+
+**Reopen:** none — this restores authority, not new mechanism. **Owner:** 3G-02.
+
+### FB-3 — Evidence staleness is multi-pin, not contract-revision-only; and that is also why no durable STALE fact is needed
+
+**Claim challenged:** §8 derives staleness solely from contract-revision compatibility.
+
+**Counterexample.** Evidence E1 proves assertion COR-002 against tree/commit C1 under contract R1. A later fix changes the tree to C2; the contract revision never changes. Under §8's rule E1 still "proves the current Change" — but it proves nothing about the candidate that will actually close. C-017 invariant 12 already freezes the wider law: **any** component of the pinned execution context changing after validation makes the Evidence STALE.
+
+**Smallest correction.** The compatibility predicate is: evidence is admissible for closure iff its `contractRevisionDigest` **and** its applicable execution-context pins (tree/candidate identity, policy snapshot, environment identity per C-017 invariants 2/8/12) match what is being closed. Still fully derived — digest comparison, zero fan-out writes — so FC-3 stays solved.
+
+**Answer to Q7, precisely.** No durable monotonic invalidation analogous to 3G-01 STALE is needed, and the reason should be stated in the decision so nobody "fixes" it later: 3F-03 STALE protects **authorization monotonicity** — a returned external pin must never resurrect a consumed authority. Evidence validity is **proof compatibility** — if contract, tree and policy pins all genuinely return to the exact state E1 was produced under, E1 genuinely proves that state again, and its "resurrection" is epistemically correct, not a defect. Different semantics, deliberately different mechanism. (Q8 follows: R1 evidence may serve R2 only through the explicitly recorded mechanical revalidation C-017 already permits — a recorded admission act referencing the old evidence plus the compatibility proof; never by assumption.)
+
+**Reopen:** none. **Owner:** 3G-02.
+
+### FB-4 — "No unresolved Finding that still requires action" is a hidden classifier; make waiver an explicit resolution instead
+
+**Claim challenged:** §10.1/§22's closure clause quietly implies some OPEN Findings do not require action — without naming the fact or authority that decides which.
+
+**Failure class.** An implicit "doesn't require action" classification is an unaudited, human-free bypass of a blocking gap: any implementation pressure ("it's cosmetic") silently converts OPEN into non-blocking with no durable decision, which is precisely FC-6 wearing different clothes.
+
+**Smallest correction.** Closure requires **zero OPEN Findings**, full stop. The escape is explicit: an applicable authority may resolve a Finding as *waived/not-blocking with recorded reason* — one more resolution kind under §18's already-open reason list, write-once, auditable, no third lifecycle state. `OPEN | RESOLVED` survives intact (Q9: yes, sufficient — with this correction the pair is also *crisp*).
+
+**Reopen:** none. **Owner:** 3G-02.
+
+### FB-5 — Terminal closure fact vs `change_acceptance`: decide the split now
+
+**Claim challenged:** §23 freezes closure-record properties without deciding which record carries which outcome — Q23 left open by its own author.
+
+**Failure class.** If `bld.change_acceptance` rows exist for `BLOCKED/REJECTED/ESCALATED`, the record 3E froze as "immutable stable **Release input**" starts carrying non-inputs and every Release-side consumer needs a filter it can get wrong. If instead non-success closures write nothing durable, closure immutability has no anchor for three of five outcomes.
+
+**Smallest correction.**
+
+```text
+terminal closure fact          → on bld.change, write-once, all five outcomes
+bld.change_acceptance          → created only for the success class
+                                 (ACCEPTED | NO_CHANGE_REQUIRED)
+                                 carrying the proof/matrix linkage Release consumes
+```
+
+And freeze the consumer-facing partition as law: **success class** (`ACCEPTED`, `NO_CHANGE_REQUIRED`) is the only class eligible as Release/verification input; `REJECTED | BLOCKED | ESCALATED` are never eligible. Within the non-success class the three labels answer Q19/Q21: the load-bearing behavioral split is binary at the consumer boundary, and the three non-success labels carry why/what-next semantics (explicit authority termination vs cannot-complete vs superseded by a higher-level decision) that product and audit genuinely distinguish — keep five, collapse nothing, but the *law* rides on the partition, not the labels.
+
+**Reopen:** none — uses only existing 3E records. **Owner:** 3G-02.
+
+### FB-6 — Change must not promise a single canonical projection; freeze decision predicates instead
+
+**Claim challenged:** §9's operational-condition list, even disclaimed, imports the 3G-01 shape where it does not fit — this is the residue Q2 asks about.
+
+**Failure class.** 3G-01's projection is total and exclusive over a five-row fact space. Change conditions are **not mutually exclusive**: `CHECKPOINT_REQUIRED` and an open `HUMAN` Finding and a prerequisite outage can all hold at once. An implementation copying the 3G-01 pattern will force one enum value and either lie (drop a condition) or explode states (the FC-9 road).
+
+**Smallest correction.** 3G-02 freezes a small set of independent **decision predicates** — dispatch admissibility, checkpoint requirement, closure admissibility — each defined once over durable facts, plus the terminal outcome. Presentation composes conditions freely; no canonical exclusive operational enum exists to drift. This is a deliberate, stated structural difference from 3G-01, not a deviation from it: same fact discipline, different projection topology because the domain genuinely differs.
+
+**Reopen:** none. **Owner:** 3G-02. (Q3's deletable rule: the condition-label taxonomy itself.)
+
+### FB-7 — The route order is valid only under one reading: monotonically decreasing autonomy
+
+**Answer to Q12, replacing §16's open question.** As "intervention size", `REPLAN < HUMAN` is contestable — a `HUMAN` ambiguity can resolve with zero contract change, while every `REPLAN` already ends at a human checkpoint, so neither dominates by magnitude. The order becomes strictly valid when read as **shrinking autonomous authority**:
+
+```text
+LOCAL_FIX       full autonomy inside current authorization
+FIX_WORK_UNIT   bounded autonomy through new admitted work
+REPLAN          proposal-only autonomy; authority change requires checkpoint
+HUMAN           no autonomous substitute; ask before anything
+```
+
+Elevation = withdrawal of autonomy; that is a true total order and the apparent REPLAN/HUMAN incomparability dissolves. Freeze the reading, not new machinery.
+
+**Downgrade law, sharpened.** C-017: the Hub may elevate, never lower. Complete it: *automatic/derived* routing never lowers; an **explicit applicable human decision** is a superior authority input that may resolve, re-scope, or authorize lesser work — recorded, never silent. A human answering a `HUMAN` Finding with "trivial, fix locally" is not a downgrade; it is a resolution-by-decision followed by newly authorized work. Without this sentence the model either forbids the human from doing the obvious (wrong) or lets implementations call silent lowering "human-approved" (worse). Durable mechanics (Q13): current authoritative route is a guarded single-row fact permitting only elevation writes; human redirection lands as Finding resolution + whatever new work/route facts the decision creates — no schema/DDL frozen.
+
+### FB-8 — Budget/access exhaustion must never auto-terminalize (answers Q20)
+
+**Failure class.** Terminal closure is immutable (§11 — correct). If exhaustion *automatically* wrote terminal `BLOCKED`, a transient budget ceiling would irreversibly close the Change and strip the operator of the option C-017 gives them — raise budget, re-scope, or close honestly. Auto-termination + immutability = irreversibility by accident.
+
+**Smallest correction.** Exhaustion is a **derived blocking condition**: no further automatic dispatch of the affected class, surface to the operator. Terminal closure — all five outcomes — occurs only through an explicit authoritative closure act. C-017's "esgotamento ⇒ BLOCKED/ESCALATED honesto" is preserved in its true meaning: exhaustion must never be converted into fake success and the *honest closure*, when chosen, is `BLOCKED/ESCALATED`; it does not mandate self-closing.
+
+### FB-9 — LOCAL_FIX needs its admissibility boundary stated, or it becomes ghost work
+
+**Claim challenged:** §20's `OPEN + LOCAL_FIX → may continue in the same CodingSession` conflates session with bounded work.
+
+**Failure class.** If a validator Finding *after* the Work Unit's delivery boundary can be routed `LOCAL_FIX` "because the session is still alive", correction work happens with no admitted bounded-work identity — outside budgets/evidence linkage — precisely FC-1. C-017 already draws the line: local correction is *pré-SHARE*, contract and write-set intact.
+
+**Smallest correction.** `LOCAL_FIX` is admissible only while the producing bounded work is still open (before its delivery/SHARE boundary), as continuation inside the existing authorization and correction budget. After delivery, the minimum route is `FIX_WORK_UNIT`. The persistent CodingSession may of course be reused by the fix Work Unit (3A-R5); session liveness never substitutes for work admission.
+
+**Owner:** 3G-02 for the boundary; ActorRun linkage in the later Work Unit/ActorRun lifecycle decision.
+
+### FB-10 — In-flight ActorRun under a superseded revision: name the deferral, don't hide it
+
+C-017 forbids **new** dispatch under an unapproved revision and makes prior evidence stale; it does not say what happens to a *currently executing* ActorRun when the current revision moves. 3G-02 should state the authority consequence it already owns — the run's output is judged by FB-3 compatibility like any evidence; it cannot deliver new authority under the superseded revision — and explicitly route interrupt/cancel/drain policy to the ActorRun lifecycle decision (later 3G). Round 1 is silent, which is a hidden decision left to implementation (Q33 class).
+
+---
+
+## 2. Answers to the remaining falsification questions
+
+**A1 — scope.** Together is correct. Finding routing is the transition source for every Change gate (`REPLAN` → revision path, `HUMAN` → dispatch pause, resolution → closure eligibility), and FB-1 makes them share one serialization root. Splitting would leave each half unable to state its own gate; merging more (Work Unit lifecycle) would drag in retry/crash semantics 3G-02 correctly defers.
+
+**A2/A3.** The workflow-engine residue is the condition-label taxonomy — FB-6 deletes it. Nothing else in the candidate fails the deletion test after FB-1..FB-10; each surviving rule closes a named FC.
+
+**A4.** Yes — twice: C-017 invariant 8 (policy snapshot) and invariant 12 (execution-context staleness) were dropped. FB-2/FB-3 restore them. Everything else correctly preserved C-017.
+
+**B5.** Not sufficient as listed. Load-bearing additions: pinned Plan participation via contract semantic identity (FB-2a), pinned policy-snapshot digests (FB-2b, already C-017 facts), durable correction-budget state (existing admission-ledger family), Change generation/serialization root (FB-1). Checkpoint approval itself follows the 3G-01 pattern: the *approved ref* is authority; who/when/what-was-shown is evidence under the existing audit architecture with the 3G-01 §16 horizon discipline — approver identity does not become a mandatory Change state field.
+
+**B6.** Yes — derived mismatch works in every current case *after* FB-2 folds plan and policy into the gate. No persisted `CHECKPOINT_REQUIRED` status.
+
+**C10/C11.** `route != status` holds and produces no ambiguous combination once FB-7's autonomy reading and FB-9's boundary are fixed; the C-017 family is minimal and complete — I found no fifth route with a current consumer (validator-retry, "defer", "wontfix" all collapse into resolution kinds or existing routes).
+
+**C14.** Realization can safely wait, for a stated reason: the **aggregate budget is the mechanical safety boundary** — durable counters that cannot be argued with — while fingerprint-repetition is an early-elevation heuristic. A gamed "new hypothesis" burns budget and still terminates. No AI novelty judge is needed or permitted (C-017's anti-"IA de frescura" analog). Exact caps stay calibration.
+
+**D15.** Revision equality is insufficient — FB-2. With FB-2 + terminal-closure absence + budget non-exhaustion for correction-class dispatch + declared required-access present (C-017 invariant 2), the gate is complete; I found no further owner-local condition needing freezing now.
+
+**D16.** Safe under FB-9's boundary: continuation runs inside existing authorization; the harness cannot touch contract authority (digest-pinned Hub-side) regardless of session liveness.
+
+**D17.** Reject for F1 — YAGNI. Proving independence requires read/write/effect-set disjointness machinery whose trigger (measured parallelism) C-017 explicitly gates. In a serial, one-Work-Unit baseline the optimization is nearly vacuous. `OPEN + HUMAN` pauses new dispatch for the Change; the seam is named for the parallelism trigger.
+
+**D18.** Atomic route+WorkUnit creation is not required now: route is a Finding fact; admitting the fix Work Unit is a separate guarded act under FB-1 serialization. If the WU-creation crashes after routing, the durable route still demands it — re-derivable, no orphan authority. The later WU lifecycle can harden ordering if evidence demands.
+
+**E22.** Immutability survives its strongest counterexample. The real product cost: "continue that blocked Change" becomes a new Change and, per 3A-R5, a fresh session by default — accumulated cognition is lost. That cost is bounded by design (durable knowledge must already live in Git/Baseline/Brain/standards, never in invisible session memory), and the alternative — reopening — rewrites `change_acceptance` as a Release input and violates FC-8. Successor-Change correlation + continuation UX are 3K/3H realization.
+
+**E24.** FB-1 is the exact guard, and the proof obligation must show the control firing (a blocked late-Finding insert aborting), not just happy paths.
+
+**F25.** No — the durable state added here is exactly the mechanization C-009 demands ("make mandatory what the good model did spontaneously"). Mitra's stop-after-3-tries lives in instructions; Conexus makes the loop bound durable and mechanical. That is transfer of *problem*, not imitation of *mechanism*.
+
+**F26.** No validator invariant is lost: 3A-R5 keeps the verifier in a fresh independent session without write tools; the persistent session is implementer-side only. Preserved verbatim in the candidate.
+
+**F27.** Nothing copied without function found. The five macro-steps mirror Mitra's surface but are explicitly non-frozen presentation; routes/fingerprint/budget all trace to C-017's own invariants, not to Factory possession.
+
+**F28.** Yes — with FB-6 the product surface consumes predicates and terminal outcomes; nothing forces internal vocabulary outward, and 3F-02/3F-05 still govern any future public admission (zero new public codes required by 3G-02).
+
+**G30.** Conventional: existing `bld.*` records + guarded single-row mutations + one serialization root per Change + pure predicate functions. No engine, queue, or scheduler. The closure evaluation is a read-heavy single transaction — trivially fine at F1 scale.
+
+**G31.** Strongest construction found: the FB-1 late-Finding/ACCEPTED race (closed). Second strongest: revision transition committing between dispatch-guard evaluation and Work Unit admission — closed by the same serialization root, since both are closure-relevant writes on the Change row. Third: crash between Finding route write and fix-WU creation — benign under D18. After FB-1 I could not construct a reachable violation of single-closure, no-false-ACCEPTED, or route monotonicity.
+
+**G32.** Implementation masquerading as architecture: the operational-condition labels (FB-6), the §25 function-name list (fine as illustration, must not freeze), and any numeric caps (already correctly demoted). Conversely FB-1 is architecture masquerading as implementation detail — it must be frozen because an invariant that cannot be enforced at the F1 isolation baseline is not an invariant.
+
+**G33.** Hidden decisions found and closed here: FB-2 (plan/policy gates), FB-3 (multi-pin staleness), FB-4 (waiver-as-resolution), FB-5 (acceptance-record split + success-class law), FB-8 (no auto-terminal), FB-9 (LOCAL_FIX boundary), FB-10 (in-flight run deferral, named). Remaining and correctly routed: Work Unit/ActorRun lifecycles, RigorProfile×PlanningDepth calculation (N3), interrupt/cancel policy, session mechanics (3H), UI (3K), recovery drills (3M), numeric calibration (implementation).
+
+**G34.** No reopen of prior authority is required. FB-2/FB-3 *restore* C-017 obligations; FB-7 *reads* C-017's elevation chain without contesting it; everything else completes 3G-02's own scope.
+
+---
+
+## 3. Strongest argument against my own position
+
+Two, stated honestly:
+
+1. **FB-1 could be attacked as premature implementation.** A skeptic: "serialization roots are locking strategy, not architecture." Response: 3G-01 froze guarded-mutation semantics for exactly this reason — an invariant whose enforcement is impossible at the accepted isolation baseline is decoration. FB-1 freezes the *semantic* law (single serialization root, zero-rows abort, closure evaluated under it) and explicitly leaves SQL/locking free. If the operator prefers, the law can be phrased purely as "no admissible interleaving may commit ACCEPTED concurrently with a blocking-relevant write" — but then the proof obligation must still demonstrate a mechanism, and the Change-row root is the only one on the table that needs no new machinery.
+2. **FB-4 could over-block.** Requiring explicit waiver for every trivial Finding adds one human/authority act per cosmetic observation. If real usage shows waiver fatigue, a severity-class auto-resolution *policy* can enter later through the Decision Loop — as recorded policy, not as an implicit classifier. The named trigger keeps the honest default now.
+
+---
+
+## 4. Additions to the proof strategy
+
+Add to §27:
+
+```text
+21. semantic policy/standards drift after dispatch pin
+    → dispatch blocked AND closure blocked until re-checkpoint          (FB-2)
+22. plan revision adopted without checkpoint
+    → treated as contract revision transition; dispatch refused         (FB-2)
+23. evidence with matching contract revision but changed tree/context
+    → inadmissible for closure                                          (FB-3)
+24. late-Finding insert racing ACCEPTED closure, both orders
+    → serialization control demonstrably fires; no accepted-with-gap;
+      post-closure Finding write aborts                                 (FB-1)
+25. OPEN cosmetic Finding at closure
+    → closure refused until explicit waiver resolution recorded         (FB-4)
+26. BLOCKED closure attempt via budget exhaustion alone
+    → no auto-terminal; explicit closure act required                   (FB-8)
+27. non-success closure
+    → terminal fact on Change; NO change_acceptance row;
+      Release cannot consume it                                         (FB-5)
+28. post-delivery Finding routed LOCAL_FIX
+    → refused; minimum FIX_WORK_UNIT                                    (FB-9)
+29. human decision redirecting a HUMAN-routed Finding to lesser work
+    → recorded resolution + new authorized work; no silent downgrade    (FB-7)
+```
+
+---
+
+## 5. YAGNI audit of this round
+
+FB-1..FB-10 add:
+
+```text
+new durable records                  0
+new cross-module FKs                 0
+new dependencies / atomicity classes 0
+new public codes                     0
+new subsystems/engines/schedulers    0
+```
+
+Everything lands on existing `bld.*` records, existing C-017 facts, and the guarded-mutation discipline 3G-01 already froze.
+
+---
+
+## 6. Disposition
+
+```text
+Material Finding against prior authority   NONE — no reopen
+candidate structure                         CONFIRMED (hybrid facts + predicates,
+                                            zero new records, no FSM engine)
+required completions                        FB-1 .. FB-10
+readiness                                   NOT ready for operator decision as written;
+                                            ready after one consolidation round
+                                            incorporating the findings above
+```
+
+ChatGPT should contest, not absorb by default: FB-1's serialization framing, FB-5's success-class partition, FB-6's predicates-over-projection break from the 3G-01 shape, and FB-7's autonomy reading of the route order are the four places where a genuinely better smaller model might still exist. Agreement remains not authority; the operator decides.

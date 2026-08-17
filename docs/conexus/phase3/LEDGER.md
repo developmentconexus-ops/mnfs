@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H IN PROGRESS / 3H-01 + 3H-02 APROVADAS`  
-**Próxima decisão:** `3H-03 — Runtime Isolation, Correlation & Handoff`  
+**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H IN PROGRESS / 3H-01 + 3H-02 + 3H-03 APROVADAS`  
+**Próxima decisão:** `3H-R1 — Runtime & Agent Architecture Final Closure`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -41,6 +41,9 @@ C-000..C-017
 3H-02
 → Production Agent Runtime Realization
 
+3H-03
+→ Runtime Isolation, Correlation & Handoff
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -72,7 +75,7 @@ Nenhuma conversa cria authority.
 | 3E — Data Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
-| 3H — Runtime & Agent Architecture | **IN PROGRESS / 3H-01 + 3H-02 APROVADAS** | 3H-03 — Runtime Isolation, Correlation & Handoff |
+| 3H — Runtime & Agent Architecture | **IN PROGRESS / 3H-01 + 3H-02 + 3H-03 APROVADAS** | 3H-R1 — Runtime & Agent Architecture Final Closure |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | UX/scaffold/product surfaces |
@@ -297,8 +300,12 @@ PACKAGE CURRENT STRUCTURE CONFIRMED
 |---|---|---|
 | 3H-01 | Builder Coding Runtime Realization & Session/Sandbox Mapping | [3H-01](3H-01-builder-coding-runtime-realization-session-sandbox-mapping.md) |
 | 3H-02 | Production Agent Runtime Realization | [3H-02](3H-02-production-agent-runtime-realization.md) |
+| 3H-03 | Runtime Isolation, Correlation & Handoff | [3H-03](3H-03-runtime-isolation-correlation-handoff.md) |
 
-Ratificações pelo operador: **2026-08-16**.
+Ratificações pelo operador:
+
+- 3H-01 / 3H-02: **2026-08-16**;
+- 3H-03: **2026-08-17**.
 
 ### 9.1 3H-01 — Builder runtime laws
 
@@ -388,11 +395,72 @@ Final result:
 CURRENT STRUCTURE CONFIRMED
 ```
 
-**3H permanece aberta. Próxima decisão:** `3H-03 — Runtime Isolation, Correlation & Handoff`.
+### 9.3 3H-03 — Runtime isolation / correlation / handoff laws
+
+```text
+BuilderMastra != ParMastra
+mastra_builder != mastra_par
+same-process role runtime requires distinct role-local PubSub instances
+shared external broker additionally requires distinct per-role namespace/keyPrefix
+governed execution cannot use standalone/ephemeral Mastra or in-memory fallback
+same-process is allowed only while enabled global mutable state is mechanically isolated
+unpartitionable enabled global mutable state => 3J process-split trigger
+ActorRunId / AgentRunId remain durable correlation anchors
+one domain run may span 0..N trace segments
+OTel is preferred observational plumbing, never authority
+runtime role must be mechanically attributable on every relevant telemetry signal
+RequestContext is rebuilt from owner facts and REPLACED WHOLE on dispatch/resume
+Conexus owner IDs do not ride OTel baggage by default
+high-cardinality run/trace IDs are not default metric dimensions
+F5 control handoff != Operational Telemetry
+in-process F5 target identity derives from owner dispatch closure/handle; payload id is cross-check only
+producer provenance reuses HUB_AUTHORITY | GATEWAY_AUTHORITY | PROVIDER_OBSERVED | GUEST_OBSERVED
+Verification Observability composes Hub + Mastra + E2B + app-under-test while preserving provenance
+E2B pull by pinned physical sandboxId is the exact provider observation anchor
+E2B OTLP push is best-effort Operational Telemetry enrichment, not sole deciding evidence
+required verification evidence missing => NOT_PROVEN/INCONCLUSIVE
+```
+
+3H-03 outcome:
+
+```text
+prior authority reopen = NONE
+Alternative A = GLOBAL MAXIMUM
+new module = 0
+new durable record class = 0
+new runtime bus / queue / generic outbox = 0
+mandatory process split = 0 unless CX-RUNTIME-ISOLATION-01 proves it necessary
+mandatory OtelBridge / Collector / Sentry / Spotlight = 0
+3H-04 = NOT JUSTIFIED
+```
+
+Review provenance, non-authoritative:
+
+- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff.md`
+- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff-R2.md`
+- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff-R3.md`
+
+Final result:
+
+```text
+CURRENT STRUCTURE CONFIRMED
+```
+
+### 9.4 Teste de fechamento após 3H-03
+
+Aplicando o Decision Loop aos resíduos de runtime:
+
+```text
+remaining material 3H decision = 0
+3H-04 = NOT JUSTIFIED
+prior phase reopen = NONE
+```
+
+Os resíduos restantes estão roteados para 3I/3J/3L/3M/3N/3O, implementation ou Decision Loop sobre consumidor real. Portanto 3H não ganha uma quarta decisão material; o próximo passo é **3H-R1 — Runtime & Agent Architecture Final Closure**, que deve reconciliar 3H-01..03 antes de declarar 3H CLOSED.
 
 ---
 
-## 10. Open findings / routed work after 3H-02
+## 10. Open findings / routed work after 3H-03
 
 Estes itens não reabrem fases anteriores automaticamente.
 
@@ -402,8 +470,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
 | Builder runtime orphan/lost detection policy after 3H-01 liveness surface | 3M |
 | Production Agent admitted-but-undispatched / active-process-loss / missing-snapshot recovery policy | 3M |
-| InceptionInvestigation pre-Change agent execution shape, somente se realization provar necessidade | Decision Loop / later 3H |
-| Production Agent cross-runtime isolation/correlation/F5 handoff | 3H-03 |
+| InceptionInvestigation pre-Change agent execution shape, somente se realization futura provar necessidade | Decision Loop |
 | F3E01-R1 — `mastra_par` backup/restore procedure | 3J |
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` never authoring authority | 3L probe / implementation enforcement under 3H-02 |
@@ -415,6 +482,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | current security narrowing for old Releases / emergency stop | 3I/3J |
 | DEDICATED egress/network policy | 3I/3J |
 | MANAGED/DEDICATED physical deployment topology | 3J |
+| Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J |
 | old Product Agent runtime coexistence / drain / cutover | 3J |
 | `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L |
 | physical Promotion/migration recovery and restore | 3M/3J |
@@ -433,16 +501,22 @@ Estes itens não reabrem fases anteriores automaticamente.
 | exact `brn.binding_validation` ref if proof shows it load-bearing | Decision Loop / 3N |
 | binding change permissions | 3I |
 | binding/Release/runtime end-to-end proof | 3N/3O |
-| Mastra telemetry ↔ Conexus cross-runtime correlation | 3H-03 / 3L |
-| Verification Observability package realization beyond 3H-01 verifier isolation | 3H-03 / 3L / 3N |
+| exact Mastra telemetry role attributes / OTel Bridge/export realization | 3L |
+| Verification Observability capture/correlation qualification | 3L/3N |
 | `CX-BUILDER-MASTRA-01` qualification | 3L |
 | `CX-AGENT-MASTRA-01` including stable occurrence transport, restart, memory isolation, upgrade | 3L |
+| `CX-RUNTIME-ISOLATION-01` cross-role qualification | 3L |
+| role-local PubSub/default-bucket/external-broker namespace probes | 3L |
+| E2B pull/OTLP exact pinned-version behavior | 3L; 3J if production exporter adopted |
+| OTel baggage/redaction/egress policy | 3I |
 | Semantic Recall / Observational Memory / Memory Extractors enablement | 3L eval + named Product consumer |
+| Durable Agent enablement and its process-global registry | Decision Loop + 3L on named consumer |
+| Observational Memory process-global `activeOps` if enabled | 3L on named consumer |
 | Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | 3J/3L optional deployment qualification |
-| `job/v1` queue/scheduler substrate | later 3H/3L only on concrete need |
-| async/attempt status projection for UI/query convenience | 3H/3K/implementation; never second authority |
+| `job/v1` queue/scheduler substrate | 3L/Decision Loop only on concrete need |
+| async/attempt status projection for UI/query convenience | 3K/implementation; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
 | Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
 | EVENT / Signals / Notification Inbox / Webhook Signals | C-007 / Decision Loop on first EVENT consumer |
@@ -454,18 +528,19 @@ Estes itens não reabrem fases anteriores automaticamente.
 | DEDICATED Release retirement/support lifecycle | Decision Loop when real install base requires |
 | DEDICATED multi-install/fleet management | DEFER |
 
-Technology qualification already named:
+Technology qualification now includes:
 
 ```text
 CX-BUILDER-MASTRA-01
 CX-AGENT-MASTRA-01
+CX-RUNTIME-ISOLATION-01
 ```
 
-3L proves substrate behavior; material failure reopens substrate/realization, not domain semantics automatically.
+3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
 
 ---
 
-## 11. Resolved routed work through 3H-02
+## 11. Resolved routed work through 3H-03
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -500,13 +575,21 @@ stable per-revision occurrence admission property               → 3H-02; exact
 Stored Agent/Editor/version override exclusion                  → 3H-02
 EVENT/Signals operational exclusion F1                          → 3H-02; first consumer returns C-007
 Mastra capability coverage classification                       → 3H-02; optional features routed to 3L/3N/3J/Decision Loop
+Builder↔PAR role-specific Mastra/store/PubSub isolation        → 3H-03
+same-process vs condition-triggered process split              → 3H-03; physical topology 3J
+Conexus IDs ↔ 0..N OTel/runtime trace correlation              → 3H-03
+RequestContext rebuild/replace-whole boundary                  → 3H-03
+F5 control handoff identity/channel separation                 → 3H-03
+producer_trust mapping for runtime/provider/guest observations → 3H-03
+Verification Observability Mastra+E2B+app realization          → 3H-03; qualification 3L/3N
+E2B pull anchor + OTLP enrichment semantics                    → 3H-03
 ```
 
 ---
 
 ## 12. Anti-overengineering guardrail
 
-Normative details live in exact approved decisions. Global summary:
+Normative anti-overengineering details live in the exact approved decisions. Global summary:
 
 ```text
 NO microservices by default
@@ -537,6 +620,12 @@ NO ScheduleOccurrence table / hidden backlog in F1
 NO EVENT/Signal ingress before first trusted consumer
 NO Durable Agent cache/pubsub requirement without reconnectable-stream consumer
 NO semantic/observational memory enabled merely because framework supports it
+NO RuntimeBus / EventBus / UniversalRuntimeEvent / generic F5 envelope
+NO generic F5 outbox/queue without non-rederivable durable-delivery consumer
+NO mandatory Builder/PAR process split without isolation Finding
+NO mandatory OtelBridge / Collector / Sentry / Spotlight
+NO owner IDs in OTel baggage by default
+NO high-cardinality run IDs as default metric dimensions
 NO Kafka/Kubernetes/Temporal/Inngest merely for optionality
 NO Mastra Platform dependency as architecture requirement
 ```
@@ -558,15 +647,19 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3H = IN PROGRESS
 3H-01 = APPROVED
 3H-02 = APPROVED
-3H-03 = NEXT
+3H-03 = APPROVED
+3H-04 = NOT JUSTIFIED
+3H-R1 = NEXT
 ```
 
 3H-01 foi ratificada após package intake, ChatGPT/Fable adversarial rounds e final consolidation sem Material Finding contra prior authority.
 
 3H-02 foi ratificada após ChatGPT Round 1, independent Fable Round 1, ChatGPT Round 2 evidence correction/consolidation, independent Fable Round 2 e final ChatGPT Round 3 consolidation; uma auditoria adicional das capabilities atuais do Mastra confirmou a classificação `ADOPT / SELECTIVE / DEFER / REJECT-as-authority` sem encontrar primitive material ausente.
 
+3H-03 foi ratificada em **2026-08-17** após dois rounds adversariais, source review de Mastra/E2B/OpenTelemetry/Spotlight e final ChatGPT Round 3 consolidation; o teste posterior encontrou `remaining material 3H decision = 0` e manteve `3H-04 = NOT JUSTIFIED`.
+
 Próxima decisão:
 
-> **3H-03 — Runtime Isolation, Correlation & Handoff**, cobrindo isolamento Builder/PAR/runtime, cross-runtime correlation, F5 handoff/correlation e remaining Verification Observability realization sem criar nova authority.
+> **3H-R1 — Runtime & Agent Architecture Final Closure**, para reconciliar 3H-01..03, confirmar que todos os resíduos estão corretamente roteados e decidir formalmente `3H CLOSED / APPROVED` antes de iniciar 3I.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H IN PROGRESS / 3H-01 + 3H-02 + 3H-03 APROVADAS`  
-**Próxima decisão:** `3H-R1 — Runtime & Agent Architecture Final Closure`  
+**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS`  
+**Próxima fase:** `3I — Security / Authority Architecture` — intake/decomposition antes da primeira decisão material  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -44,6 +44,9 @@ C-000..C-017
 3H-03
 → Runtime Isolation, Correlation & Handoff
 
+3H-R1
+→ Runtime & Agent Architecture Final Closure
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -68,15 +71,15 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar findings materiais durante 3H–3O |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar findings materiais durante 3I–3O |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3E — Data Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
-| 3H — Runtime & Agent Architecture | **IN PROGRESS / 3H-01 + 3H-02 + 3H-03 APROVADAS** | 3H-R1 — Runtime & Agent Architecture Final Closure |
-| 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
+| 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
+| 3I — Security / Authority Architecture | **NÃO INICIADA / NEXT** | intake/decomposition; trust/identity/egress/DB roles |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | UX/scaffold/product surfaces |
 | 3L — Technology Qualification | NÃO INICIADA | probes/qualification |
@@ -294,18 +297,19 @@ PACKAGE CURRENT STRUCTURE CONFIRMED
 
 ---
 
-## 9. 3H — IN PROGRESS
+## 9. 3H — CLOSED / APPROVED
 
 | ID | Decisão | Documento |
 |---|---|---|
 | 3H-01 | Builder Coding Runtime Realization & Session/Sandbox Mapping | [3H-01](3H-01-builder-coding-runtime-realization-session-sandbox-mapping.md) |
 | 3H-02 | Production Agent Runtime Realization | [3H-02](3H-02-production-agent-runtime-realization.md) |
 | 3H-03 | Runtime Isolation, Correlation & Handoff | [3H-03](3H-03-runtime-isolation-correlation-handoff.md) |
+| 3H-R1 | Runtime & Agent Architecture Final Closure | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 
 Ratificações pelo operador:
 
 - 3H-01 / 3H-02: **2026-08-16**;
-- 3H-03: **2026-08-17**.
+- 3H-03 / 3H-R1: **2026-08-17**.
 
 ### 9.1 3H-01 — Builder runtime laws
 
@@ -360,7 +364,7 @@ old non-terminal run resumes exact old Release/runtime projection
 Mastra traces/logs/metrics/hooks = Operational Telemetry / diagnostics, never terminal/correctness authority
 ```
 
-3H-02 framework coverage audit additionally classifies current Mastra primitives instead of blindly enabling them:
+3H-02 framework coverage audit additionally classifica current Mastra primitives:
 
 ```text
 ADOPT: Agent, threads/messages, tools/hooks, selective suspend/resume, schedules mechanics, observability
@@ -446,21 +450,40 @@ Final result:
 CURRENT STRUCTURE CONFIRMED
 ```
 
-### 9.4 Teste de fechamento após 3H-03
+### 9.4 Final closure — 3H-R1
 
-Aplicando o Decision Loop aos resíduos de runtime:
+O closure review adversarial encontrou:
+
+```text
+Material Finding against 3H-01/02/03 or prior authority = NONE
+missing material 3H decision                             = NONE
+3H-04                                                    = NOT JUSTIFIED
+reopen                                                   = NONE
+verdict                                                  = CLOSE 3H
+```
+
+Três correções não-materiais foram incorporadas no closure authority:
+
+1. **model spend-cap enforcement** — C-008 continua load-bearing após 3A-R5; o enforcement point atual é input explícito de 3I, composto com admission/budget/usage evidence existentes;
+2. **C-013 admission coherence** — 3N deve provar ActorRun/AgentRun como realizações owner-local de persist-first/reservation/dispatch/honest-terminal, sem `UniversalAttempt` paralelo;
+3. **`job/v1` / sync** — continua conscientemente deferred por C-007 `dispatch defer total`; primeiro Golden Path sync/mirror é likely near-term Decision Loop trigger.
+
+Fechamento final:
 
 ```text
 remaining material 3H decision = 0
 3H-04 = NOT JUSTIFIED
 prior phase reopen = NONE
+new Hub module = 0
+new durable record class = 0
+new runtime bus / queue / generic outbox = 0
+mandatory process split = 0 unless qualification fires
+3H = CLOSED / APPROVED
 ```
-
-Os resíduos restantes estão roteados para 3I/3J/3L/3M/3N/3O, implementation ou Decision Loop sobre consumidor real. Portanto 3H não ganha uma quarta decisão material; o próximo passo é **3H-R1 — Runtime & Agent Architecture Final Closure**, que deve reconciliar 3H-01..03 antes de declarar 3H CLOSED.
 
 ---
 
-## 10. Open findings / routed work after 3H-03
+## 10. Open findings / routed work after 3H closure
 
 Estes itens não reabrem fases anteriores automaticamente.
 
@@ -481,6 +504,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | DEDICATED concrete trust/credential/delegation mechanism | 3I |
 | current security narrowing for old Releases / emergency stop | 3I/3J |
 | DEDICATED egress/network policy | 3I/3J |
+| per-ActorRun / per-AgentRun model spend-cap enforcement point after control-side credential move | 3I + existing admission/budget/C-013 usage evidence |
 | MANAGED/DEDICATED physical deployment topology | 3J |
 | Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J |
 | old Product Agent runtime coexistence / drain / cutover | 3J |
@@ -503,6 +527,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | binding/Release/runtime end-to-end proof | 3N/3O |
 | exact Mastra telemetry role attributes / OTel Bridge/export realization | 3L |
 | Verification Observability capture/correlation qualification | 3L/3N |
+| C-013 admission-ledger ↔ ActorRun/AgentRun coherence; verify one owner-local attempt realization and no parallel `UniversalAttempt` FSM | 3N |
 | `CX-BUILDER-MASTRA-01` qualification | 3L |
 | `CX-AGENT-MASTRA-01` including stable occurrence transport, restart, memory isolation, upgrade | 3L |
 | `CX-RUNTIME-ISOLATION-01` cross-role qualification | 3L |
@@ -515,7 +540,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | 3J/3L optional deployment qualification |
-| `job/v1` queue/scheduler substrate | 3L/Decision Loop only on concrete need |
+| `job/v1` / deterministic sync dispatch | **Decision Loop before first concrete sync consumer; C-007 `dispatch defer total`; first Golden Path Sankhya mirror/sync is likely near-term trigger** |
 | async/attempt status projection for UI/query convenience | 3K/implementation; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
 | Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
@@ -528,7 +553,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | DEDICATED Release retirement/support lifecycle | Decision Loop when real install base requires |
 | DEDICATED multi-install/fleet management | DEFER |
 
-Technology qualification now includes:
+Technology qualification permanece:
 
 ```text
 CX-BUILDER-MASTRA-01
@@ -540,7 +565,7 @@ CX-RUNTIME-ISOLATION-01
 
 ---
 
-## 11. Resolved routed work through 3H-03
+## 11. Resolved routed work through 3H-R1
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -583,6 +608,7 @@ F5 control handoff identity/channel separation                 → 3H-03
 producer_trust mapping for runtime/provider/guest observations → 3H-03
 Verification Observability Mastra+E2B+app realization          → 3H-03; qualification 3L/3N
 E2B pull anchor + OTLP enrichment semantics                    → 3H-03
+3H completeness / no remaining runtime decision                → 3H-R1
 ```
 
 ---
@@ -643,23 +669,27 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3E = CLOSED / APPROVED
 3F = CLOSED / APPROVED
 3G = CLOSED / APPROVED
+3H = CLOSED / APPROVED
 
-3H = IN PROGRESS
 3H-01 = APPROVED
 3H-02 = APPROVED
 3H-03 = APPROVED
 3H-04 = NOT JUSTIFIED
-3H-R1 = NEXT
+3H-R1 = APPROVED / CLOSED
+
+3I = NOT STARTED / NEXT
 ```
 
 3H-01 foi ratificada após package intake, ChatGPT/Fable adversarial rounds e final consolidation sem Material Finding contra prior authority.
 
-3H-02 foi ratificada após ChatGPT Round 1, independent Fable Round 1, ChatGPT Round 2 evidence correction/consolidation, independent Fable Round 2 e final ChatGPT Round 3 consolidation; uma auditoria adicional das capabilities atuais do Mastra confirmou a classificação `ADOPT / SELECTIVE / DEFER / REJECT-as-authority` sem encontrar primitive material ausente.
+3H-02 foi ratificada após rounds adversariais, evidence correction e auditoria adicional das capabilities atuais do Mastra, sem primitive material ausente.
 
-3H-03 foi ratificada em **2026-08-17** após dois rounds adversariais, source review de Mastra/E2B/OpenTelemetry/Spotlight e final ChatGPT Round 3 consolidation; o teste posterior encontrou `remaining material 3H decision = 0` e manteve `3H-04 = NOT JUSTIFIED`.
+3H-03 foi ratificada em **2026-08-17** após dois rounds adversariais, source review de Mastra/E2B/OpenTelemetry/Spotlight e final consolidation.
 
-Próxima decisão:
+3H-R1 foi ratificada em **2026-08-17** após closure review adversarial com `Material Finding = NONE`, `missing material 3H decision = NONE`, `3H-04 = NOT JUSTIFIED` e três correções não-materiais de routing/proof visibility incorporadas.
 
-> **3H-R1 — Runtime & Agent Architecture Final Closure**, para reconciliar 3H-01..03, confirmar que todos os resíduos estão corretamente roteados e decidir formalmente `3H CLOSED / APPROVED` antes de iniciar 3I.
+Próxima fase:
+
+> **3I — Security / Authority Architecture.** Primeiro passo: intake/decomposition independente para identificar as decisões materiais de trust, identity, credential custody, authorization/revocation, egress, model-spend enforcement e DEDICATED authority, sem antecipar Deployment/Operations ou Technology Qualification.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

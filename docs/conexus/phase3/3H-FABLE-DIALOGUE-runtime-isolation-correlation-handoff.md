@@ -1745,3 +1745,253 @@ later owner if deferred
 ```
 
 Do not modify `LEDGER.md`, approved authority or product code. Append `Round 1 — Fable` to this dialogue file and commit/push only this dialogue change.
+
+---
+
+# Round 1 — Fable
+
+**Role:** independent adversarial Senior/Staff/Principal Software Engineer + Software Architect.
+**Authority reconstructed from:** `AGENTS.md` → method → `DECISOES.md` (esp. C-012/C-013/C-016/C-017) → `LEDGER.md` → 3C-13, 3D-R1, 3E-01/02, 3F-02/3F-R1, 3G-R1, 3H-01, 3H-02. This dialogue treated as proposal only.
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Nothing here approves 3H-03.
+
+---
+
+## 27. External evidence verified this round
+
+Evidence IDs `F1..F7` are local to this round (ChatGPT's `R1..R11` retained as cited).
+
+| ID | Verified fact | Source |
+|---|---|---|
+| F1 | OTel **baggage**: "There are no built-in integrity checks to ensure that Baggage items are yours"; automatic instrumentation "includes Baggage in most of your service's network requests"; "downstream services could propagate Baggage outside your network." | opentelemetry.io baggage concepts (current) |
+| F2 | `OtelBridge` (experimental) creates native OTel spans against **"your globally configured OpenTelemetry SDK"** and forwards Mastra logs to **"the globally registered OpenTelemetry LoggerProvider"** — the OTel JS pipeline is process-global by design. `OtelExporter` runs its own provider with per-signal toggles/batching. `tracingOptions.traceId/parentSpanId` accepts ids extracted from an active OTel span context (W3C-format compatible in the documented path). | Context7 `/mastra-ai/mastra` `integrations/observability/opentelemetry.mdx`, `reference/observability/tracing/bridges/otel.mdx`, `observability/otel-exporter/README.md`, `docs/observability/tracing/overview.mdx` |
+| F3 | Mastra instance config owns `storage`, `agents`, `workflows`, `memory` registry, `pubsub` — all per-instance constructor options; `MastraStorageExporter` requires the instance's configured storage. No additional process-global mutable registry surfaced in the queried docs beyond the known module-level hooks emitter (R2). | Context7 `/mastra-ai/mastra` configuration/reference docs |
+| F4 | `WorkflowRunState` (persisted snapshot) includes `requestContext` — RequestContext **is persisted across suspend/restart** in the workflow-snapshot family that also backs agent suspension. | `packages/core/src/workflows/types.ts` (verified in the 3H-02 dialogue evidence chain, current source) |
+| F5 | E2B sandbox metrics: CPU/memory/disk sampled ~5s, **retrieved by pull** (`sbx.getMetrics()`, `e2b sandbox logs/metrics <sandboxId>`). The metrics page documents **no OTLP push export, no export metadata fields, no delivery guarantees**; an OTel-export surface appears in docs navigation but its shape/identity metadata could not be verified at primary source this round. | docs.e2b.dev/sandbox/metrics (current) |
+| F6 | Spotlight (current): local-only debugging, desktop app, "real-time local errors, traces, and logs to your agent via MCP" (Cursor/Claude Code and other MCP editors); **requires Sentry SDK instrumentation** (`Sentry.init({spotlight: true})`); production use explicitly discouraged; no OTLP ingestion documented on the main site. | spotlightjs.com (current) |
+| F7 | 3C-13 already freezes: `producer_trust ∈ {HUB_AUTHORITY, GATEWAY_AUTHORITY, PROVIDER_OBSERVED, GUEST_OBSERVED}`; OTel as preferred technical boundary; Spotlight as challenger; and "runtime evidence required but absent ⇒ NOT_PROVEN/INCONCLUSIVE, never PASS" (invariant 12). | `3C-13-observability-audit-module-boundary.md` |
+
+Disposition on ChatGPT's R1–R11: accurate except **R9, which is partially unverified** — the OTLP push-export claim for E2B could not be confirmed at primary source; the verified provider-observation path is SDK/CLI **pull by `sandboxId`** (FBL-R1-01 below).
+
+---
+
+## 28. Verdict up front
+
+1. **No material Finding against approved authority.** No reopen of 3C-13/3D/3E/3F/3G/3H-01/3H-02.
+2. **Alternative A is the Global Maximum**; B correctly deferred with trigger, C/D/E correctly rejected. The process-split *trigger* is globally superior to a mandatory split now (§31 Q10/Q11).
+3. Six corrections, all bounded: E2B provider-export claim rewritten to the verified pull path (FBL-R1-01); role attribution under the process-global OTel pipeline made mechanical (FBL-R1-02); §17's layer language mapped onto the existing `producer_trust` taxonomy instead of a second ontology (FBL-R1-03); Conexus IDs banned from OTel baggage by default with verified leak evidence (FBL-R1-04); RequestContext protected by a rebuild-on-resume law rather than prose prohibition (FBL-R1-05); F5 in-process identity derived from the dispatch closure, not producer payload (FBL-R1-06).
+4. Several sections are restatements to demote (§31 Q4); nothing rises to overengineering after the §11.4 trim.
+5. Disposition: **CURRENT STRUCTURE CONFIRMED** with FBL-R1-01..06; one ChatGPT consolidation round, then operator-ready.
+
+---
+
+## 29. Material findings
+
+Format: claim challenged / counterexample / authority affected / evidence / smallest correction / Global Maximum effect / reopen / later owner.
+
+### FBL-R1-01 — E2B provider telemetry: the verified path is pull-by-`sandboxId`; OTLP push is unverified and must not be load-bearing
+
+- **Claim challenged:** R9 and §17.2/§23-P23 lean on E2B OTLP push export ("e2b.* resource metrics… via OTLP HTTP/protobuf… best effort") as the provider-observation mechanism.
+- **Evidence:** F5 — the current metrics documentation shows SDK/CLI pull (`getMetrics`/logs, keyed by `sandboxId`), with no OTLP export shape, no identity-metadata fields, no delivery semantics verifiable at primary source this round.
+- **Why this matters:** if the candidate's provider layer depends on an unverified push surface, P23 tests a mechanism that may not exist in the pinned version, and Verification Observability quietly loses its provider layer. The pull path is not a downgrade — it is **inherently correlated**: the platform queries metrics/logs for a physical `sandboxId` it already pinned to the ActorRun (3H-01), so provider observations arrive pre-associated with no trust in guest-supplied fields. This is also exactly the already-approved C-013 shape ("E2B = resumo por run"; 5s samples not imported; `metrics_state COMPLETE|PARTIAL|MISSING`).
+- **Smallest correction:** reword the provider layer as: *provider observations are obtained by platform-side pull keyed by the pinned physical `sandboxId` (verified current mechanism), summarized per run under existing C-013 semantics; provider OTLP push export, if 3L verifies it exists with sufficient identity metadata, is an optional enhancement, never a required evidence path.* P23 becomes: pull unavailable/partial ⇒ `metrics_state` degraded honestly; no false authority.
+- **Reopen:** no. **Later owner:** 3L (verify push surface), 3J (if adopted).
+
+### FBL-R1-02 — Role attribution must survive the process-global OTel pipeline
+
+- **Claim challenged:** §7 isolates the two Mastra instances, but §11 routes both through OTel — and F2 shows the bridge/logger path is **globally registered by design**. One process ⇒ one global tracer/logger provider serving both roles.
+- **Counterexample:** BuilderMastra and ParMastra both emit through the global SDK; a config slip gives both the same `serviceName`/resource identity; OBS can no longer distinguish Builder runtime observations from PAR runtime observations — provenance blur inside a single trust class, silently corrupting Verification Observability queries and any per-role diagnosis.
+- **Smallest correction:** freeze: *every span/log/metric emitted by a role-specific Mastra instance carries mechanical role-distinguishing identity (distinct `serviceName`/resource attributes per instance Observability config); sharing the process-global OTel pipeline is acceptable context plumbing (Q8), but role attribution is a per-signal fact, never inferred from deployment.* Probe: both instances emit through one global SDK → every signal attributable to exactly one role.
+- **Reopen:** no. **Later owner:** exact attribute names → 3L.
+
+### FBL-R1-03 — §17's layers map onto `producer_trust`; no parallel provenance taxonomy
+
+- **Claim challenged:** §17.1 introduces "Layer A/B/C" and §17.3/§12.2 speak of platform-vs-guest provenance — while 3C-13 already froze the provenance vocabulary: `HUB_AUTHORITY | GATEWAY_AUTHORITY | PROVIDER_OBSERVED | GUEST_OBSERVED` (F7).
+- **Failure class:** two provenance vocabularies for the same meaning is the presumed-wrong duplicate-authority pattern (method §3, "two authorities for the same meaning"); implementers would map them ad hoc, and acceptance-eligibility rules (only HUB/GATEWAY authority feeds acceptance) would need re-derivation.
+- **Smallest correction:** state that the three observation layers are *sources*, classified by the existing `producer_trust` axis: Mastra runtime telemetry (hub-process, non-authority) and E2B provider pull → `PROVIDER_OBSERVED`-class runtime observation under the C-013 versioned mapping; app-under-test/guest → `GUEST_OBSERVED`; owner/Gateway records → `HUB_AUTHORITY`/`GATEWAY_AUTHORITY`. Q63 dissolves: Gateway is not a "fourth layer" of §17.1 — it is an authority producer already in the taxonomy; effect verification consumes `GATEWAY_AUTHORITY` receipts, not runtime telemetry.
+- **Reopen:** no.
+
+### FBL-R1-04 — Conexus owner IDs never ride OTel baggage by default
+
+- **Claim challenged:** §12.3 bans sensitive payloads in baggage but leaves ID placement open (Q46/Q47).
+- **Evidence:** F1 — baggage has no integrity, is attached by auto-instrumentation to *most outbound requests*, and propagates beyond the network boundary. An app-under-test with auto-instrumentation calling any third-party endpoint would exfiltrate `ActorRunId`/`ProjectId`-class identifiers as a side effect of correlation plumbing.
+- **Smallest correction:** freeze: *Conexus owner IDs are carried in RequestContext, span/log attributes and resource metadata — never in OTel baggage by default. Any future baggage use requires an explicit 3I decision including egress stripping.* This is the correlation-side complement of the §12.1 authority prohibition, with a verified leak mechanism instead of hypothesis.
+- **Reopen:** no. **Later owner:** 3I (propagation/redaction policy details, as already routed).
+
+### FBL-R1-05 — RequestContext: rebuild-on-resume law, not prose prohibition
+
+- **Claim challenged:** §10.1/§10.2 forbid authority in RequestContext, and Q41 asks whether a frozen allowlist is needed.
+- **Evidence:** F4 — `requestContext` is a persisted field of the workflow snapshot family backing suspension. Whatever is in it *will* come back verbatim after restart.
+- **Why prohibition alone is weak:** "don't put authority in it" fails silently the first time an implementer adds a convenient flag; the snapshot then resurrects it. An architecture-frozen key allowlist is the wrong fix (freezes implementation detail into authority).
+- **Smallest correction:** freeze the mechanism instead: *at every dispatch/resume, the owner **rebuilds** the runtime context from current owner facts and overwrites what the snapshot carried; snapshot-carried context is diagnostic residue only.* This is the exact 3H-01 "mechanically applied, unconditionally" / 3H-02 "guarded resume" pattern extended to the context object. Q42/Q43 then answer themselves: tool/model/permission surfaces apply mechanically from the pinned composition (3H-02), so a stale context cannot select tools on resume even in principle. Probe (extends P11): poison the snapshot context with a changed role/binding/config flag → resumed execution observably uses rebuilt values.
+- **Reopen:** no.
+
+### FBL-R1-06 — In-process F5 identity derives from the dispatch closure, not producer payload
+
+- **Claim challenged:** §14.3 has the owner derive scope from admitted context, but Q56 remains open: in-process, may the handler trust producer-supplied `ActorRunId/AgentRunId`?
+- **Failure class:** an in-process runtime adapter holding N concurrent runs mis-wires a callback (classic closure/loop bug) and reports completion for run B with run A's payload id; a handler trusting payload ids commits the wrong run's terminal. No malice needed.
+- **Smallest correction:** freeze: *the owner-side handler obtains run identity from the dispatch-scoped closure/opaque handle established at admission; producer-payload ids are cross-checks that must match or the proposal is refused.* One sentence; kills the whole mis-attribution class in-process, and out-of-process transports later inherit the same rule via authenticated context (Q57 → 3I/3J).
+- **Reopen:** no.
+
+---
+
+## 30. Block A — scope (Q1–Q4)
+
+- **Q1 —** one decision is correct: Verification Observability shares the correlation model, provenance taxonomy and capture laws with the rest of 3H-03; a 3H-04 split would force cross-references for every shared law and duplicate the evidence base. Independent failure classes exist but hang off the same invariants.
+- **Q2 —** no: two role-specific instances/configurations is the *logical runtime realization* forced by the already-ratified `mastra_builder != mastra_par` storage split (storage is an instance property, F3/R1 — one instance cannot honor two stores). Process/container placement stays 3J, with the split trigger as escape valve. Correctly scoped.
+- **Q3 —** no 3I leak found. The baggage law (FBL-R1-04) sits at the border but is an authority/correlation prohibition (3H's), with policy mechanics explicitly routed to 3I.
+- **Q4 — demote to restatement:** §2 entirely; §13's audit paragraph (3C-13); the NOT_PROVEN core of §17.4 (3C-13 invariant 12 — keep only the *capture-policy* addition as new); §15/§16 (3H-01/3H-02 restates with only the correlation deltas new); §19's ADOPT/challenger table (3C-13 already froze it — keep only the 3L probe pointer). The genuinely new 3H-03 laws: instance isolation + qualification + split trigger, domain-ID-first correlation with 0..N traces, context rebuild law, OTel-preferred-but-optional-bridge, channel separation, direct-call F5 semantics, verification capture policy, cardinality prohibition, and the FBL corrections.
+
+---
+
+## 31. Block B/C — Mastra isolation, tools (Q5–Q19)
+
+- **Q5 —** verified to the extent current docs/source expose it: storage/agents/workflows/memory/pubsub are instance constructor config (F3, R1); the AgentController lives on its instance. Full source sweep of every internal path is a 3L probe obligation (P5), not a dialogue-provable fact — the candidate correctly makes qualification, not assumption, the gate.
+- **Q6 —** known module-global surfaces found: the hooks emitter (R2, with owner tokens in normal scorer use but broadcast for unowned public hooks) and the **OTel global provider/logger** (F2 — by OTel design). The first is covered by P5 + the fixture below; the second is FBL-R1-02. No other module-global mutable state surfaced in queried docs; absence is not proven — hence P5's sweep framing is right.
+- **Q7 —** yes, per current evidence, with P1/P2 as the proof; hidden global fallbacks are exactly what P5 hunts.
+- **Q8 —** the OTel/logger machinery is process-wide **context plumbing**, not cross-instance domain mutation — acceptable with mechanical role attribution (FBL-R1-02). AsyncLocalStorage-based context follows async chains, not instances; concurrent Builder/PAR executions keep separate chains.
+- **Q9 —** no static cross-instance resolution path surfaced in current docs; P2/P4 are the negative proofs. The one documented global-ish behavior remains unowned hook broadcast (R2).
+- **Q10/Q11 —** the trigger is globally superior. Mandating the split now buys isolation we cannot name a current failure class for, at the price of an internal RPC boundary, supervision, and dev friction (Alternative B costs) — while the trigger converts any *discovered* unavoidable coupling into the split at 3J time. Builder privilege/power is not a process-boundary argument in F1: the dangerous powers live in E2B guests and behind Gateway/credential custody (control-side, 3A-R5/C-008), not in the hub process address space; residual hub-process trust is 3I's threat model.
+- **Q12 —** none cheaper exists: one instance cannot satisfy two storages (F3), so two instances is the floor 3E-01 already paid for.
+- **Q13 —** sharing immutable/stateless clients (model/provider SDK objects) is mechanism sharing — admissible; the law's "mutable" qualifier already draws the right line. Do not over-prohibit.
+- **Q14 —** yes, and generalize it: *each instance enables only the facilities its role consumes* (no Editor, no schedule worker, no background workers on BuilderMastra; no AgentController on ParMastra). Config minimalism is the cheapest attack-surface control in the whole candidate.
+- **Q15 — constructed bleed fixture:** register an unowned public hook listener via ParMastra's process context; trigger a Builder-side path that emits through the module-level emitter; listener fires with Builder-originated data (R2 broadcast behavior). Qualification must show either owner-token filtering covers every enabled emission or the event cannot influence PAR execution. This becomes the concrete P5 fixture.
+- **Q16/Q17 —** no global toolset registration route surfaced in current docs — tools attach per agent/workspace/instance config; P3 remains the negative qualification. 
+- **Q18/Q19 —** yes and yes: future Product Agent code-execution capability gets its own sandbox lineage decision at its Decision Loop/3I — 3H-03 only needs the already-stated fact that Builder E2B lineage is Builder-instance-scoped.
+
+---
+
+## 32. Block D — correlation model (Q20–Q27)
+
+- **Q20 —** `0..N traces` is correct. A persisted reused root-trace-id across resumes produces trace trees whose segments arrive days/weeks apart — real backends bound span-arrival windows and completeness assumptions; the "one eternal trace" would render worse than linked segments (Q22: yes, it violates practical tracing/retention semantics). Domain-ID query assembles the full causal history regardless.
+- **Q21 —** none constructible: any consumer that "needs one trace id" actually needs *navigation*, which the domain-ID anchor provides; a trace id has no authority meaning and its continuity buys nothing the anchor doesn't.
+- **Q23/Q24 —** root/dispatch spans carry the full owner correlation set; children inherit via trace context — freeze exactly that property (root-stamped, inherited) and leave the field list to 3L. Load-bearing set: Workspace/Project/run-family IDs + runtime role.
+- **Q25 —** yes — R6's allowlisted `requestContextKeys` extraction exists for precisely this; per-span duplication cost is a 3L tuning concern.
+- **Q26 —** resolve `ReleaseRef` via AgentRun at query time; stamping it on the root span is a cheap optional optimization, not law.
+- **Q27 —** candidate/output identity is stamped at the verification **launch boundary** (§17.2, where it is already known); OBS causal edges (C-013 lineage) remain the durable association. Both exist already — no new mechanism.
+
+---
+
+## 33. Block E/G — OTel, trust (Q28–Q48)
+
+- **Q28 —** yes for F1: `OtelExporter` exports Mastra spans/logs under its own provider (F2); external code's spans live in their own segments, linked by Conexus IDs — sufficient because no invariant requires one tree (§11.3).
+- **Q29/Q30 —** keep OPTIONAL, probe-gated (not ADOPT): the bridge is experimental and its value is navigation convenience (unified tree through instrumented HTTP/DB/tool code). It becomes mandatory only if a *required* verification correlation provably cannot be achieved by ID-linked segments — no such class is constructible while launch-boundary stamping exists (Q30 answered: none).
+- **Q31/Q32/Q33 —** documented paths are W3C-compatible (F2 shows extraction from OTel span context into `tracingOptions`); every-path validity, log-trace correlation fidelity and RequestContext-driven sampling selection are 3L probe items (P24/P26 + a sampling probe). Current evidence supports feasibility; none of it needs architecture text.
+- **Q34 —** yes: per-instance/per-config Observability with distinct sampling (F2/R6) means a verification-scoped config can run always-capture while ordinary telemetry stays sampled — no global 100% required.
+- **Q35/Q36/Q37 —** yes; exemplars are a later optional note; the *prohibition* (no owner IDs as default metric dimensions) stays in 3H-03 because it protects a boundary implementers cross by habit — the rest of metrics design goes to 3L/3J (trim §11.4's dimension suggestions to illustrative status).
+- **Q44/Q45 —** external `traceparent` as diagnostic parentage after sanitization is fine *below* privilege boundaries; at privilege/ingress boundaries prefer new-root + span-link so an attacker-supplied context cannot poison sampling/parentage; exact policy is 3I's — 3H-03 freezes only "authority is never derived from propagated context" (already invariant 13).
+- **Q46/Q47 —** answered by FBL-R1-04 with F1 evidence: baggage leaks by design; RequestContext + span attributes are the default carriers; ID-bearing baggage requires a 3I decision.
+- **Q48 —** yes, with FBL-R1-04 the deferral is now explicit rather than implicit.
+
+---
+
+## 34. Block F — RequestContext (Q38–Q43)
+
+- **Q38/Q39 —** verified: the workflow snapshot family persists `requestContext` (F4); direct-Agent suspension rides the same snapshot storage (R5 + 3H-02 V1). Assume survival everywhere; design for it.
+- **Q40 —** construction: AgentRun suspends with context `{binding: B1, role: R1}`; Project rebinds to B2 and role narrows; fresh process resumes; a tool reads context and calls Gateway "under B1". With FBL-R1-05 the rebuilt context says B2 — and even without the read, Gateway re-resolves current binding authority at admission (3G-06/3H-02), so the class is doubly closed: context rebuild (first line) + owner guard (last line).
+- **Q41 —** rebuild-on-resume law (FBL-R1-05) — stronger than prose, cheaper than a frozen allowlist.
+- **Q42/Q43 —** yes, context may parameterize projection *inputs* (correlation, request-scoped config), but the load-bearing surfaces (model/tool/permission) apply mechanically from the pinned composition at dispatch/resume (3H-02 law) — old context cannot select tools because tools are never selected *from* context.
+
+---
+
+## 35. Block H/I — F5 handoff, telemetry vs control (Q49–Q62)
+
+- **Q49 —** yes: direct typed owner ingress is the 3D-R1-consistent realization; transport is semantics-free per 3F-02 rule 5.
+- **Q50 —** none: every current producer proposal lands on a write-once/guarded owner fact (§14.5 enumeration) that makes redelivery idempotent — an outbox would duplicate that protection at the transport layer.
+- **Q51 —** crash-after-commit-before-response: Builder output re-presentation hits `producedOutputRef` idempotent read-back (3G-03 §7.2); PAR completion retry hits terminal write-once and returns the recorded decision; schedule-fire redelivery hits the occurrence cursor (3H-02). Every owner fact needed already exists; no ledger.
+- **Q52 —** crash-before-commit: no owner truth exists; the runtime retries per its own semantics (re-present output, re-propose completion) or the run enters the orphan path (3M). The retry *authority* is the producer's existing run context — no generic F5 record required.
+- **Q53 —** correct and worth stating: for in-process direct Agents, "completion proposal" is often just the code path after `await generate()` returns. That is an admissible F5 carrier — F5 is rules, not shape (3F-02); the owner guard still runs. No semantics change; add one sentence so implementers don't invent a redundant self-call.
+- **Q54 —** semantic separation suffices; method topology is implementation.
+- **Q55 —** no — the §14.6 families are owner-specific and remain so; the only risk pattern would be a shared base type carrying semantics, which the law already bans.
+- **Q56 —** closed by FBL-R1-06 (closure-derived identity, payload as cross-check).
+- **Q57 —** out-of-process callbacks derive owner context from the authenticated transport session + owner lookup; 3H-03 keeps only "owner derives scope" (already §14.3); mechanics → 3I/3J.
+- **Q58/Q59 —** the channels are **decoupled by design** — no atomicity assumption exists to protect. Emitting both from one callback is fine; recommended convention: owner proposal first, telemetry second (a crash between them then leaves committed truth + missing telemetry, which is the degradable direction; the reverse leaves S8, also safe but noisier). Convention, not law.
+- **Q60 —** none: OBS is a sink (3C-13); normal completion needs no OBS→owner path.
+- **Q61/Q62 —** already covered by existing authority: a verifier is an ActorRun whose report proposes Findings through Builder admission (C-017/3G-02); OBS never becomes the owner. Demote — no new text needed.
+
+---
+
+## 36. Block J/K — Verification Observability, sampling (Q63–Q79)
+
+- **Q63 —** layers correct as *sources*, classified by `producer_trust` (FBL-R1-03); Gateway is an authority producer, not a fourth telemetry layer.
+- **Q64/Q65 —** FBL-R1-01: pull-by-`sandboxId` is the verified, inherently-correlated mechanism; provider push export is unverified and never required-deciding evidence. Best-effort provider data enters as `PROVIDER_OBSERVED` with honest `metrics_state` absence semantics (C-013).
+- **Q66 —** yes, because the platform's association does not depend on guest cooperation: the launch boundary records `ActorRunId ↔ sandboxId ↔ invocation identity` on the platform side regardless of what the guest emits; an uncooperative guest only impoverishes its own layer → NOT_PROVEN for guest-required assertions.
+- **Q67/Q68 —** platform-side attachment of immutable resource attributes (proxy/collector) is a good realization and is 3J/3I mechanism — 3H-03 keeps the property (platform-stamped association wins; guest fields stay `GUEST_OBSERVED`).
+- **Q69 —** yes — F6 confirms Spotlight currently delivers exactly the local agent-debugging shape (MCP to coding agents); the 3L challenger probe stands as 3C-13 already framed it.
+- **Q70 —** the Sentry-SDK requirement is real (F6) but less decisive than it looks: generated apps are born from the Conexus scaffold (C-012), which controls instrumentation as PLATFORM-CONTRACT surface — the platform chooses what the app embeds. Portability still favors OTel-first instrumentation; the probe compares, the architecture does not pre-commit.
+- **Q71/Q72/Q73 —** freeze nothing about browser instrumentation now (Q73: no). The realization space — scaffold-embedded instrumentation (C-012 lineage), Builder's browser tooling capturing console/network during verification (a legitimate additional `GUEST/PROVIDER`-class source, Q72: yes), Spotlight challenger — belongs to 3L with C-012 owning the scaffold surface. 3H-03's provenance and capture laws already govern whatever is chosen.
+- **Q74 —** necessary as architecture: it is the *capture-policy* consequence of 3C-13's invariant 12 — without it, a realization could satisfy "NOT_PROVEN when missing" while making missingness the common case via default samplers. The law makes required-evidence capture a property, and NOT_PROVEN the exception path, not the steady state.
+- **Q75 —** yes — guest code can bypass its own sampling/instrumentation entirely; that is precisely why guest-missing ⇒ NOT_PROVEN (never PASS) and why platform/Mastra layers carry the always-capture obligation (Q76: yes, exactly that split).
+- **Q77 —** it closes the false-green class fully; the residual is verification *availability* cost (re-run needed), which is the correct trade.
+- **Q78/Q79 —** real concern, correctly resolved by assertion-class awareness: latency/perf-sensitive assertions should not run under distorting 100% capture; the property to freeze is only "required evidence must not be silently sampled away" — the capture policy is per assertion class (Q79: yes), mechanics → 3N/implementation.
+
+---
+
+## 37. Block L/M/N — metrics, storage, topology (Q80–Q93)
+
+- **Q80 —** justified and correctly scoped (R8): per-run dimensions explode cardinality and add nothing traces/logs don't already provide.
+- **Q81 —** keep the candidate's list illustrative (role, operation class, outcome class, provider family) — do not freeze names; trim from normative text.
+- **Q82 —** yes: cost/usage stays event/trace data aggregated by OBS cost projections (C-013's multi-state cost machinery) — per-run metrics would duplicate that authority.
+- **Q83 —** no conflict surfaced in current docs; 3L verifies whatever metrics surface Mastra ships when pinned.
+- **Q84 —** yes — necessary consequence of 3E-01's no-cross-store-SQL law.
+- **Q85/Q86 —** reading Mastra telemetry via public API into OBS is *possible* but inferior: it couples OBS to runtime read availability, duplicates storage, and inverts the push/projection direction every other producer uses. Export/projection remains globally superior; MastraStorageExporter stays dev/Studio convenience.
+- **Q87 —** no collector required: direct exporters to one OBS-compatible endpoint satisfy the property; a collector is a 3J topology choice (P24's "OBS-compatible endpoint" wording already allows both).
+- **Q88 —** "OBS/OTel pipeline" is acceptable as a *logical* boundary name; consolidation should add one clarifying line that it does not imply a specific collector/backend topology (3J).
+- **Q89–Q92 —** same-process crash coupling is acceptable under approved F1: modular monolith is ratified (3C-01), domain recovery is owner-record-based and independent (§8), and no availability SLO/consumer exists to justify the split — an unhandled Builder OOM killing PAR serving is an *availability* event, 3J's dimension (Q91), with the process-split trigger (§7.5) plus 3J as the escalation path. No measured consumer today (Q92).
+- **Q93 —** yes: a forced split now creates an internal RPC protocol, auth surface and supervision graph with zero current failure class — textbook accidental complexity.
+
+---
+
+## 38. Block O — YAGNI / Global Maximum (Q94–Q103)
+
+- **Q94 —** most deletable: §11.4's suggested metric dimensions (keep only the prohibition); §10's projection-target list (illustrative); §19's ADOPT table rows that restate 3C-13.
+- **Q95 —** nothing qualifies after the trims; closest was the E2B push-export dependency, which FBL-R1-01 converts from unverified rigor into verified mechanism.
+- **Q96 —** pulled in by this round: role attribution under the global OTel pipeline (FBL-R1-02), producer_trust mapping (FBL-R1-03), baggage default prohibition (FBL-R1-04), context rebuild law (FBL-R1-05), closure-derived F5 identity (FBL-R1-06). All are laws on existing acts; zero new machinery.
+- **Q97 —** yes.
+- **Q98 —** strongest for one shared instance: "one instance, role namespaces, half the config surface." Refuted structurally: storage is per-instance (F3), so a shared instance either violates `mastra_builder != mastra_par` (ratified) or needs a namespacing layer *inside* one store — rebuilding isolation Mastra already gives per instance, with a larger bleed surface (registries, tools, hooks).
+- **Q99 —** strongest for mandatory split now: Builder's high-power runtime adjacent to production agent serving in one address space. Refuted for F1: the dangerous capabilities are physically elsewhere (E2B guest, Gateway-mediated credentials); in-process residual risk is a 3I trust-model item; availability blast radius is 3J; and the split trigger already converts any *proven* coupling into the split. Paying the RPC boundary now buys no named class.
+- **Q100 —** strongest for RuntimeBus/ledger: "future multi-process topology will need durable handoff anyway." Refuted: §14.5's owner facts already make every current handoff idempotent/recoverable; the named reopen trigger (§21) covers the day an asynchronous transport genuinely lacks recovery anchors — building it now is speculative infrastructure for a topology F1 does not have.
+- **Q101 —** strongest for Sentry/Spotlight-primary: best-in-class local DX today, MCP-native agent debugging. Refuted: local-only positioning and Sentry-SDK coupling (F6) versus a platform whose portability boundary is already ratified as OTel (3C-13); the challenger probe captures the DX value without protocol lock-in.
+- **Q102 —** **`CURRENT STRUCTURE CONFIRMED`** — with FBL-R1-01..06 and the §30-Q4 demotions/trims.
+- **Q103 —** one ChatGPT consolidation round folding the corrections, probe additions below, and trims; then **ready for operator decision**. A further adversarial round is needed only if a correction is contested.
+
+---
+
+## 39. Proof-strategy additions
+
+```text
+P28 (new) both Mastra instances emit through one process-global OTel SDK
+     → every span/log mechanically attributable to exactly one runtime role
+P29 (new) unowned public hook listener registered in one role's context; other role emits
+     → event cannot influence the listening role's execution (concrete P5 fixture)
+P30 (new) snapshot requestContext poisoned with stale role/binding/config
+     → resumed execution observably uses owner-rebuilt context (extends P11)
+P31 (new) in-process completion callback mis-wired across two concurrent runs
+     → closure-derived identity refuses the mismatched payload; no wrong-run terminal
+P32 (new) app-under-test with OTel auto-instrumentation calls an external third-party endpoint
+     → no Conexus owner ID present in outbound baggage/headers
+P23 (reworded) E2B provider pull unavailable/partial for a run
+     → per-run provider summary records degraded metrics_state honestly; no false authority
+```
+
+---
+
+## 40. Final disposition
+
+```text
+Material Finding against approved authority        = NONE
+reopen required                                    = NONE
+R9 (E2B OTLP push) evidence status                 = PARTIALLY UNVERIFIED → pull-path law (FBL-R1-01)
+process-global OTel pipeline                       = named + role-attribution law (FBL-R1-02)
+provenance vocabulary                              = mapped to existing producer_trust (FBL-R1-03)
+owner IDs in OTel baggage                          = PROHIBITED by default, evidence-backed (FBL-R1-04)
+RequestContext protection                          = rebuild-on-resume law (FBL-R1-05)
+in-process F5 identity                             = closure-derived, payload as cross-check (FBL-R1-06)
+overengineering                                    = none after trims (§38 Q94)
+Alternative A                                      = CONFIRMED Global Maximum
+recommendation                                     = CURRENT STRUCTURE CONFIRMED
+readiness                                          = ChatGPT consolidation round, then operator decision
+```
+
+This round approves nothing. Operator ratification remains the only path to authority.
+
+— Fable, Round 1

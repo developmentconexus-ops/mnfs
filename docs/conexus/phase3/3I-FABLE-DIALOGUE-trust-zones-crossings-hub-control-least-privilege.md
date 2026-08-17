@@ -1244,3 +1244,311 @@ Attack especially:
 Use official PostgreSQL/OpenTelemetry/E2B/OWASP sources only if external verification is needed. Preserve 3A-R6 proportionality: do not expand generic security work. Return Material Findings, corrected candidate, proof obligations, YAGNI cuts, reopen triggers and whether this package can be the last material 3I decision before bounded closure review.
 
 Append below, commit/push. **Do not update LEDGER, approved authority or product code. Do not allocate a new 3I ID.**
+
+---
+
+## 27. Fable independent adversarial review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied. Authority reconstructed independently: 3C-01/02/08, 3D-01..04/3D-R1 (entry boundaries, seams), 3E-01 §12/§13 (audit classes; DB-role routing to 3I), 3E-02 (closed classes/FK allowlist, TxScope), C-008, C-012..C-017 (esp. C-016 egress invariants + supply chain, C-015 session/cookie laws, C-014 conformance incl. `rolbypassrls`), 3H-03, 3I-01..3I-04, 3A-R6. External verification run against official sources only, on **2026-08-17**: PostgreSQL current documentation (pages identify PostgreSQL 18.6) fetched raw and quoted verbatim below for the umbrella-login question; OTel and E2B behavior rests on the same-session dated primary-source sweeps already recorded in the 3I intake and custody dialogues (spec-default `tracecontext,baggage` propagation, no SDK-level baggage redaction; E2B pause preserves memory/filesystem with indefinite retention); OWASP CSRF/CSP guidance as the candidate cites it, used only at property level.
+
+## F.1 Verdict
+
+**One authority is correct** (F-1): the split test finds one shared root cause, one closure lifecycle, one proof style (negative capability tests), with plane-scoped reopen triggers already in place — splitting would duplicate the crossing vocabulary for ceremony. The trust-zone model, crossing matrix, telemetry laws and E2B properties survive with one material addition (the egress destination-selection prohibition, F-2) and one YAGNI trim (browser CSP section demotes to citation-only, F-3). On the decisive DB question: the target invariant T8 is **proportional enforcement, not overengineering** — it was routed to 3I by 3E-01's own text, it closes the one failure class that would otherwise reduce the entire 3C/3D/3E ownership architecture to review discipline, and current PostgreSQL documentation confirms with verbatim quotes that the umbrella-login alternative fails the invariant **by construction** (F-4). The two cross-owner transaction profiles and the narrow audit insert survive as the smallest shapes, with both realization variants admitted (F-5). **Material Finding against approved authority = NONE; reopen = NOT JUSTIFIED.** After this authority plus the bounded closure review, **3I has no remaining material decision** (F-6). Method outcome: **CURRENT STRUCTURE CONFIRMED** with bounded corrections.
+
+## F.2 Findings
+
+### F-1 — One authority, not two: the split test fails on every axis that would justify it
+
+```text
+claim challenged      §26-Q1 — one package or two authorities
+split test            materially incompatible ownership? NO — both planes
+                      enforce the same law ("every material crossing has a
+                      named owner and a bounded capability; no generic reach
+                      substitutes"), and the DB plane is literally a ROW of
+                      the same crossing matrix (§8: Hub processes →
+                      hub_control). incompatible proof? NO — both prove by
+                      negative capability tests (forbidden fetch denied;
+                      forbidden SELECT denied); §20/§21 are one test style in
+                      two planes. incompatible lifecycle? NO — both close at
+                      property level now and realize post-C-018.
+                      incompatible reopen? PARTIALLY — and the candidate
+                      already scopes triggers per plane (§24 items 6–9 are
+                      DB-plane; 1–5, 10–12 are crossing-plane), which is the
+                      correct treatment inside one authority. The intake's
+                      original reason to keep G separate was ORDERING
+                      ("realization must not drive principal semantics") —
+                      satisfied: every semantic input (3I-01..04) is closed.
+                      Splitting now would produce two documents citing one
+                      zone model — a duplicate-vocabulary seam for zero
+                      decision-quality gain, against 3A-R6 proportionality.
+smallest correction   keep one authority; keep reopen triggers plane-scoped
+                      so a PG realization failure reopens the DB plane, not
+                      the zone model.
+reopen prior authority?  NO
+```
+
+### F-2 — The Hub egress law is missing its anti-injection clause: destinations are never selected by model output, caller payload, or artifact content
+
+```text
+claim challenged      §11 platform-control egress requirements
+concrete failure class §11 requires owner credentials and "bounded destination
+                      class configured server-side" but never states WHO may
+                      not choose the destination. The prompt-injection /
+                      compromised-loop schedule — model output or artifact
+                      content steering a legitimate owner adapter (model
+                      adapter, GitInfra, build mechanics) toward an attacker
+                      destination — is the C-009 lesson ("egresso governado")
+                      and the exact reason the intake added the Hub
+                      control-side zone. A destination-class law without a
+                      selection law leaves the widest current abuse channel
+                      unstated.
+smallest correction   add one clause to §11's requirements, normative:
+                      "no egress destination is ever derived from model
+                      output, caller payload, or artifact content; owner
+                      destinations derive only from that owner's pinned
+                      configuration/authority (Connection host authority for
+                      Gateway; GitInfra remote config; E2B endpoint config;
+                      provider endpoint config; backup target config;
+                      registry/catalog pins per C-016)." A capability whose
+                      PURPOSE is model-chosen egress (Product Agent browsing)
+                      remains consumer-gated and enters only as an OWNED
+                      capability with its own declared destination authority
+                      — the law forbids ownerless model-selected egress, not
+                      the governed capability class.
+reopen prior authority?  NO — completes §11 with the law the intake round
+                      already converged
+later owner           decision text
+```
+
+### F-3 — Browser: request-authenticity is MUST DECIDE at property level with C-015 cited as the existing layer; the CSP section demotes to citation-only
+
+```text
+claim challenged      §26-Q4/Q5
+request-authenticity  architecture, not realization — it is a trust-boundary
+                      property (possession of ambient cookie != authentic
+                      cross-origin mutation authority), and no prior
+                      authority states it: C-015 froze SameSite=Strict +
+                      __Host- cookies, which IS a CSRF layer but not a
+                      complete one (safe-method mutations, same-site
+                      subdomain contexts, framework gaps). The candidate's
+                      form is right: freeze the property, cite C-015's cookie
+                      attributes as the existing baseline layer, route the
+                      mechanism family (framework-native token / Fetch
+                      Metadata / origin validation) to Realization Planning.
+                      Do not freeze a token protocol.
+CSP / self-only egress §10 adds no property C-016 has not already frozen:
+                      "browser self-only por CSP em todas as diretivas de
+                      carga/envio restringindo ORIGENS DE REDE" is C-016
+                      invariant law, and the impossibility of app-level
+                      widening is already carried by C-012's
+                      PLATFORM-CONTRACT non-exceptionable classes + CSP
+                      placement. Demote §10 to CITATION-ONLY (one paragraph:
+                      cite C-016/C-012, state the Decision Loop re-entry for
+                      any new browser origin). This trims restatement risk —
+                      two normative statements of one invariant is the
+                      drift-surface the method presumes wrong.
+reopen prior authority?  NO
+later owner           decision text (citation form)
+```
+
+### F-4 — The DB invariant is proportional, and the umbrella login fails it by documented construction: current PostgreSQL semantics force per-owner LOGIN capabilities
+
+```text
+claim challenged      §26-Q9/Q10/Q11/Q12 — proportionality and the umbrella
+                      alternative
+proportionality       T8 is not new security ambition: 3E-01 §13 itself
+                      routed "runtime role(s) ... schema grants adicionais"
+                      to 3I under threat model, and the threat model is
+                      concrete — hub_control modules run hand-written SQL,
+                      so one injection/persistence defect in ANY module
+                      reaches all thirteen schemas under a broad login,
+                      silently converting the entire module DAG into
+                      convention. The method demands the strongest
+                      reasonable enforcement covering paths the boundary
+                      structurally admits; owner-scoped capabilities are
+                      PG-native, add zero new records/engines, and their
+                      cost (credentials, pool wiring, negative test matrix)
+                      is bounded and mostly one-time. ADOPT.
+PostgreSQL facts      (postgresql.org/docs/current, pages identify 18.6,
+                      fetched raw 2026-08-17)
+                      - NOINHERIT gives nothing automatically, BUT: "if the
+                        role was granted WITH SET TRUE, the session user can
+                        use SET ROLE to ... acquire the privileges available
+                        to the named role" — and SET "defaults to TRUE";
+                      - "The SET ROLE command always allows selecting any
+                        role that the original login role is directly or
+                        indirectly a member of, provided that there is a
+                        chain of membership grants each of which has SET
+                        TRUE";
+                      - RESET ROLE / SET ROLE NONE "can be executed by any
+                        user" — so SQL injected through a session that did
+                        SET ROLE A can RESET ROLE and SET ROLE B; permission
+                        checks for SET ROLE use the SESSION user, which only
+                        authentication fixes;
+                      - the per-grant escape hatches do not rescue the
+                        umbrella: WITH SET FALSE + INHERIT TRUE activates
+                        the privileges PERMANENTLY AND SIMULTANEOUSLY (the
+                        opposite of isolation, plus the documented
+                        Trojan-horse residual on owned objects); WITH SET
+                        FALSE + INHERIT FALSE makes the membership dead
+                        ("the privileges of that role cannot be exercised
+                        either with or without SET ROLE");
+                      - no server-side mechanism binds a session to a subset
+                        of its SET-able memberships: NOT FOUND in current
+                        docs. Authentication is the only boundary.
+consequence           Alternative B is not merely "too broad" — it is
+                      incapable of satisfying T8 under current documented
+                      semantics. And the honest enforcement consequence must
+                      be stated: under current PostgreSQL, the T8 negative
+                      property is realizable ONLY by separate LOGIN
+                      roles/credentials per owner capability (distinct
+                      authentication per capability class). That is implied
+                      by enforcement, not ceremony — the candidate's
+                      "equivalent realizations allowed if negative tests
+                      prove the property" stays, but implementers should
+                      know the search space is effectively per-owner logins.
+                      Two honesty notes for the decision text: (1) the
+                      connection/pool budget of ~13 owner capabilities plus
+                      profiles is a real realization cost (pool sizing /
+                      lazy pools / PG max_connections) — a realization
+                      concern that must not be silently "solved" by
+                      collapsing capability classes; (2) one documented
+                      proof caveat: schema-USAGE revocation "is not a
+                      completely secure way to prevent object access" for
+                      ALREADY-RUNNING sessions — negative tests must test
+                      fresh sessions, and revocation latency for live
+                      sessions is bounded by session lifetime.
+reopen prior authority?  NO
+later owner           decision text (consequence + two notes); Realization
+                      Planning (roles/pools/grants); 3N/3O (negative matrix)
+```
+
+### F-5 — The two transaction profiles and the audit insert are the smallest shapes; both realization variants are admissible
+
+```text
+claim challenged      §26-Q13/Q14
+transaction profiles  each profile is a login whose privileges are the exact
+                      operation set of its one use case (CreateProject:
+                      prj-create + iam-initial-grant surfaces; effect
+                      admission: gw-admission + par-claim surfaces) — not
+                      full DML on both schemas. Bounded to the closed
+                      two-case allowlist with Decision Loop for any third,
+                      it cannot drift into a god role: god-role drift
+                      requires either privilege growth (blocked — profile
+                      privileges are enumerated per use case) or case growth
+                      (blocked — Decision Loop). The alternative (two
+                      sessions + application-level compensation) sacrifices
+                      the approved single-transaction atomicity for nothing.
+                      CONFIRMED smallest.
+audit insert          challenged for a smaller shape; none exists materially.
+                      The property is: append-only path into
+                      obs.audit_record within the owner transaction; no
+                      read/update/delete on OBS; OBS never becomes domain
+                      owner. Two realizations satisfy it: (a) narrow
+                      column-scoped INSERT grant on obs.audit_record to the
+                      audit-required transaction capabilities — simplest,
+                      directly testable (INSERT allowed; SELECT/UPDATE/
+                      DELETE denied); (b) an obs-owned SECURITY DEFINER
+                      insert function with EXECUTE granted — centralizes
+                      shape validation in one owned write path at the cost
+                      of a DB-function contract surface; note this is NOT
+                      the rejected Alternative E (an authorization
+                      substrate) — it is one write helper, and the
+                      documented "SET ROLE cannot be used within a SECURITY
+                      DEFINER function" constraint is irrelevant to it
+                      (the function runs as its owner; no switching).
+                      Freeze the PROPERTY, admit both realizations, let
+                      Realization Planning pick. Anything smaller (owner-
+                      local audit staging projected later) breaks 3E-01's
+                      fail-closed same-transaction law and is rejected.
+reopen prior authority?  NO
+later owner           decision text (property + both variants); Realization
+```
+
+### F-6 — Closure statement: this is the last material 3I decision
+
+```text
+claim challenged      §26 final question — can 3I close after this?
+sweep                 LEDGER rows owned by 3I, tested against this package:
+                      - "OTel baggage/redaction/egress policy → 3I"
+                        → CLOSED by §12.3 (+ F-2's law); mechanics → 3L/
+                          Realization;
+                      - "F3B-R4 browser/runtime physical trust zones →
+                        3I/3J" → trust semantics CLOSED by the zone model;
+                        physical placement stays 3J;
+                      - "DEDICATED egress/network policy → 3I/3J" → trust
+                        semantics CLOSED (Z4/Z5 + 3I-04); physical ingress
+                        stays 3J on first-consumer trigger per 3A-R6;
+                      - "Product Agent browser/workspace/code-exec
+                        trust/egress if first consumer enables it" →
+                        remains CONSUMER-GATED Decision Loop by design —
+                        not an open 3I decision, and F-2's law already
+                        pre-binds its shape (owned capability with declared
+                        destination authority);
+                      - hub_control roles → CLOSED at property level by
+                        this package; spelling → Realization Planning.
+                      No other 3I-owned row remains in the ledger. The
+                      bounded closure review (3A-R6) then asks only:
+                      missing trust boundary? duplicate authorization
+                      authority? secret path widened? revocation path
+                      missing? durable security record secretly required?
+                      — with NONE expected findings on current evidence.
+verdict               after this authority + the bounded closure review,
+                      remaining material 3I decision = 0. 3I can close.
+                      3A-R6 classification of this package: MUST DECIDE —
+                      satisfied at property level; everything routed in §23
+                      is DEFER SAFELY with named owner/trigger; §22 list is
+                      REJECT F1 and stands.
+```
+
+## F.3 Answers to the twenty attack points
+
+1. One authority (F-1); plane-scoped reopen triggers preserved.
+2. Six logical zones are minimal and sufficient; the operator's own access is Z1 browser control-plane; nothing in the zone model commits deployment topology — Z4 physical ingress is explicitly deferred, and Z6 is a zone, not a credential domain (§7 says so).
+3. Reconciliation is sound and does NOT weaken Gateway-only application egress: the two classes are disjoint by construction (business/Connection execution vs named infrastructure mechanics), and F-2's destination-selection law closes the bypass channel the split could otherwise open. No adapter accepts caller/model-chosen destinations; no universal client exists.
+4. MUST DECIDE at property level (F-3), with C-015's SameSite/__Host- cookie laws cited as the existing layer; mechanism family → Realization Planning.
+5. Citation-only (F-3): C-016 + C-012 already freeze it; this package adds the pointer and the Decision Loop re-entry line, nothing normative.
+6. Confirmed as frozen law re-cited: root-capable untrusted guest, deny-by-default outside guest (current E2B network control keeps it technically plausible; exact API → 3L CX-SBX-E2B-01), zero durable secrets, telemetry-ingest as the single capability class — all consistent with C-008/3I-02 and this session's dated E2B persistence facts (guest state survives pause/resume indefinitely; server-side expiry is the only enforcement).
+7. Confirmed: producer-trust assignment at the admitted boundary, never from payload; guest capability writes the operational path only and cannot mint `AuditRecord` — composition of C-013 (acceptance consumes only HUB/GATEWAY authority) with 3E-01's fail-closed audit class, now stated explicitly.
+8. Smallest baggage law = the candidate's §12.3 + mechanical enforcement framing from the intake: governed runtimes configure propagators without baggage (or prove stripping at egress) — the OTel spec default is `tracecontext,baggage` and no SDK-level redaction exists, so convention is not enforcement. Proofs 10–11 already demand the negative wire test. No tracing-security machinery.
+9. Proportional — ADOPT (F-4). The alternative converts the entire ownership architecture into convention against a concrete, common defect class.
+10. Invariant survives with its honest scope: it contains the SQL-path defect class; it does not contain full-process RCE, and §17 must keep saying so.
+11. Confirmed with verbatim current-doc quotes (F-4): NOINHERIT+SET-TRUE umbrella retains reachability of every owner; RESET ROLE is unrestricted; WITH SET FALSE either deadens the membership or (with INHERIT) activates privileges simultaneously. The umbrella fails T8 by construction.
+12. Correctly frozen as property, not count — with the honesty note that current PG semantics make per-owner LOGIN capabilities the only known realization (F-4); equivalent-realization escape stays for future PG mechanisms.
+13. Proven smallest (F-5): per-use-case enumerated privileges; single PostgreSQL transaction preserved; god-role drift blocked on both growth axes.
+14. Challenged; no smaller shape exists (F-5). Property frozen; grant-based and SECDEF-function realizations both admissible.
+15. Property level belongs here (T11 negative CONNECT matrix); spelling → 3J/Realization. Confirmed as drafted.
+16. Keep NOBYPASSRLS: near-zero cost, C-014's EnvironmentConformance already measures `rolbypassrls` for Project Data — symmetry of hygiene, and Project DB futures may adopt RLS. Harmless defense-in-depth, worth one line.
+17. Yes, meaningful (F-4/§17): SQL-path containment is a different failure class from process RCE; the package correctly claims the first and disclaims the second. Separate credentials also keep blast-radius accounting honest per store (T11).
+18. None found. Sweep: Release reads Registry via public API; Gateway composes con/rel/par facts via APIs plus its own schema; OBS is an event sink with no domain reads; reporting rolls up obs-owned tables only. The two closed atomicity cases remain the only cross-owner writes.
+19. No — zero new records, modules, databases, engines, processes. The package is enforcement of existing semantics.
+20. Routing verified clean (§23); no hidden C-018 blocker: PG role semantics are stable documented behavior needing no 3L probe (unlike Mastra/E2B); negative privilege matrix lands in Realization/3N/3O; the only 3L touchpoints are the already-owned E2B firewall and OTel propagator items.
+
+## F.4 Closing verdict
+
+```text
+Material Finding against approved authority   = NONE
+reopen required                                = NONE
+package shape                                  = ONE authority, two enforcement
+                                                 planes, plane-scoped triggers (F-1)
+corrections to consolidate                     = F-2 (destination-selection law
+                                                      added to §11)
+                                                 F-3 (request-authenticity property
+                                                      with C-015 cited; §10 demoted
+                                                      to citation-only)
+                                                 F-4 (per-owner-login consequence
+                                                      stated; pool-budget and
+                                                      live-session-USAGE notes)
+                                                 F-5 (audit-insert property with
+                                                      both realizations admitted)
+umbrella login (Alt B)                         = REJECTED by documented PG
+                                                 construction, verbatim-quoted
+new module/record/database/process/engine      = 0
+service mesh / universal egress / RLS engine   = 0
+after this + bounded closure review            = remaining material 3I decision = 0
+                                                 → 3I CAN CLOSE (F-6)
+
+verdict = CURRENT STRUCTURE CONFIRMED — ready for consolidation and operator
+          review as the final material 3I package; ID and LEDGER updates
+          remain with the operator
+```

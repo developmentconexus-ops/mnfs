@@ -729,3 +729,256 @@ verdict = ACCEPT CANDIDATE | RESTRUCTURE | STOP
 ```
 
 Append to this dialogue, commit/push. Do not create `3J-03` authority, do not close 3J, do not touch product code.
+
+---
+
+## 18. Fable independent review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Authority reconstructed independently on **2026-08-17** from `AGENTS.md → DOCUMENTATION-MAP → DECISOES.md → LEDGER.md → exact authorities`: C-002 (pg-boss as Hub job substrate), C-006 (transactional-only migration; maintenance-required drain law for Project migrations; forward-only production), C-013 (Postgres down = domain stops fail-closed; persist-first admission ledger; in-app alarm baseline, external alerting gated), C-014 (Promotion machinery; maintenance windows; migration QA gates), C-015 (public-bind-without-TLS refuses startup; low-disk watermark), 3G-06 (OUTCOME_UNKNOWN Gateway truth), 3H-01/3H-02 (FRESH_BASE; PAR re-drive from durable facts; no fake resume), 3I-01 §13 (whole-Hub stop obligation: ingress/process stop, fail-closed new work, in-flight boundary), 3I-02 (root/KEK custody; E6 fail-closed missing root; accepted trusted-host residual), 3I-04 §15 (signing key operational, needed only when exchange enabled), 3I-05 (T11 operational DB authority out of request runtime; §14.4 migration authority separate), 3J-01 (out-of-band admin seam independent of served path), 3J-02 (recovery posture; pre-migration checkpoint; regenerable-secret class), LEDGER post-3J-02. Dialogue treated as challenger input only. Canonical state matches §1.
+
+### 18.1 Verdict summary
+
+**ACCEPT CANDIDATE** — with one genuinely material finding (the emergency-stop property stops one layer too high: VM autostart can resurrect a contained Hub, F-1), one ordering precision that prevents a real implementer error in the deploy sequence (F-2), and one custody-visibility correction for missing root/KEK (F-3). The three execution contexts, the credential exclusions, the availability floor/matrix, the deploy≠Promotion separation and the DEFER/REJECT lists all survive attack. **3J-04 justified? NO** — after 3J-01/02/03 every 3A-R6 §7 mandatory item has an owner (checklist at 18.7); the correct next step is `3J-R1` bounded closure.
+
+### 18.2 Material Findings
+
+#### F-1 — MATERIAL: emergency stop must defeat every auto-start layer, not only service supervision
+
+```text
+claim attacked     §11.1 property + §11.3 fallback are complete
+failure            the property forbids "silently defeated by normal
+                   service auto-restart" and §11.2 suppresses the SERVICE
+                   supervisor. But the same failure class recurs one layer
+                   down: §7 admits VM autostart so normal host reboots
+                   restart production deterministically. Then: operator
+                   powers off the Linux VM for containment (§11.3) →
+                   Windows host later reboots (patch/power) → hypervisor
+                   autostart resurrects the VM → supervisor inside starts
+                   the Hub → the emergency stop is silently defeated by
+                   exactly the mechanism §3 lists as a failure class, one
+                   layer below where the candidate looked.
+smallest fix       extend the §11.1 property: "…and the stop cannot be
+                   silently defeated by ANY configured auto-start layer —
+                   service supervision, VM/hypervisor autostart, or host
+                   power-on defaults." §11.3 containment therefore includes
+                   marking the VM stopped-held/autostart-disabled at the
+                   hypervisor layer; §11.2 step 6's explicit operator
+                   release applies to every layer that was suppressed.
+                   Exact hypervisor mechanics = runbook/Realization.
+proof addition     "host reboot while emergency stop is in force → Hub does
+                   not return without explicit operator release" (18.6).
+```
+
+#### F-2 — MATERIAL (ordering precision): the migration step must run the exact target revision's lineage
+
+```text
+claim attacked     §9.3 sequence is implementable as written
+failure            step 6 runs the hub_control migration lineage BEFORE
+                   step 7 "install/select exact new platform build". The
+                   migrations being run ARE part of the new revision; as
+                   written, an implementer can read steps 5–7 as "run the
+                   migrations available on the host, then fetch the new
+                   build" — running the OLD tree's lineage or a mixed
+                   state. §9.3's note ("preparation may happen before
+                   downtime") implies the right answer without stating it.
+smallest fix       rewrite step 6: "run the ordered hub_control migration
+                   lineage OF THE EXACT TARGET REVISION (already staged
+                   before downtime) with the dedicated migrator
+                   capability"; step 7 becomes "activate/select that same
+                   staged build". One revision identity spans steps 2–9;
+                   mixed-revision deploys are not a state.
+```
+
+#### F-3 — MATERIAL (custody visibility): missing root/KEK where one previously existed is an incident signal, not quiet degradation
+
+```text
+claim attacked     §5.3 treats missing Connection root/KEK like any other
+                   missing capability secret (mandate Q3)
+adjudication       capability-LOCAL availability is CORRECT — the answer to
+                   Q3 is "degrade only Connections/Gateway secret-bearing
+                   surfaces", never whole-Hub boot: nothing else consumes
+                   the KEK, 3I-02 E6 already fails those paths closed, and
+                   blocking MANAGED serving because Connection custody is
+                   degraded would fabricate coupling no authority created.
+failure            but availability class != diagnostic class. A root key
+                   that WAS present and is now missing/corrupt on a running
+                   production host is a tamper/loss indicator for the
+                   platform's most sensitive custody boundary. §5.3 as
+                   written lets it surface as one more "capability
+                   unavailable" row — operationally indistinguishable from
+                   a missing model key.
+smallest fix       one clause: "missing/corrupt previously-provisioned
+                   root/KEK (or CredentialBackend backing) surfaces as an
+                   operational INCIDENT state, distinct from ordinary
+                   capability degradation, while availability behavior
+                   remains capability-local." No new machinery — it is a
+                   severity classification on the existing status surface.
+```
+
+### 18.3 Availability corrections (mandate Q3–Q6, Q20, Q21)
+
+```text
+floor (§6.1)        CONFIRMED complete and coherent with C-013's fail-closed
+                    Postgres boundary; "no cached/latest authority fallback"
+                    matches 3I-01 I8. Nothing belongs on the floor that is
+                    not there; nothing there is capability-local.
+matrix (§6.2)       CONFIRMED — every row traces to an existing owner law
+                    (C-013 domain stop; 3H-02 no fake resume; C-014
+                    SERVED_VERIFIED no-rebuild; 3I-02 E6; 3I-05 §6 adapters
+                    fail closed; 3J-02 posture). Two additions:
+                    (a) cross-reference the §10 rule INTO the matrix: "B2
+                        unavailable + material migration required → the
+                        migration path fails closed (3J-02 checkpoint law)"
+                        — it is the one row where a capability outage blocks
+                        an unrelated-looking operation, so it must be
+                        visible in the matrix, not only in §10;
+                    (b) F-3's incident classification for root/KEK.
+no orchestrator     CONFIRMED — the matrix is a composition table of
+(§6.3, Q6)          existing owner boundaries, not a dependency engine; the
+                    REJECT list already kills HealthAuthority/partial-start
+                    FSM. Keep the matrix descriptive, never executable.
+in-app status (Q21) SUFFICIENT F1, matching C-013 (in-app alarm; external
+                    channel consumer-gated). Add one honesty line: with the
+                    Hub itself down, F1 detection is humans noticing —
+                    acceptable for first internal use; an SLA/monitoring
+                    requirement is a named reopen, not silent machinery.
+3M/3K leakage (Q20) NONE — matrix rows state availability outcomes only;
+                    settlement stays 3M, status UX stays 3K via §15.
+```
+
+### 18.4 Secret / operational-context corrections (Q1, Q2, Q13–Q16)
+
+```text
+three contexts (Q1) CONFIRMED — context B is not smuggled services: it is
+                    the realization class REQUIRED by already-approved
+                    authority (3I-05 §14.4 migration authority separate;
+                    T11 operational credentials out of request runtime;
+                    3J-02 backup credential separation). Bounded job
+                    invocations on the same VM, no daemons/modules/domain.
+credential
+exclusion (Q2)      CONFIRMED. Note the backup credential's real power
+                    (read-everything DB role + B2 write): its ONLY home is
+                    context B; host compromise reaching it is the accepted
+                    3I-02 residual, already mitigated at the backup plane
+                    by 3J-02 immutability.
+pg-boss reuse (Q13) REJECT reuse — and the decisive reason is credential
+                    separation, not taste: a pg-boss-scheduled backup runs
+                    INSIDE Hub application context with Hub runtime
+                    credentials, which the exclusion law forbids; it also
+                    dies exactly when the Hub is unhealthy. OS-level
+                    timer/job class stands; exact mechanism Realization.
+                    This is not mechanism duplication: pg-boss remains the
+                    substrate for DOMAIN jobs; context B is not a queue.
+injection (Q14)     SUFFICIENT without premature pinning. The §5.2 negative
+                    list correctly omits environment variables from the
+                    forbidden set — banning env would pin mechanism in the
+                    other direction. Add the protection clause implied but
+                    unstated: "whatever mechanism, secret material is
+                    readable only by the owning execution context's OS
+                    identity (file/unit permission class), and is absent
+                    from process listings and diagnostic dumps."
+key copies (Q15)    CONFIRMED distinct — operational copy on host for
+                    runtime use; independent recovery copy outside the
+                    host+B2 loss path (3J-02 §7). No correction.
+signing key (Q16)   CONFIRMED — not a boot prerequisite while no DEDICATED
+                    consumer is enabled (3I-04: exchange-enabled is the
+                    condition); becomes required-for-that-surface only when
+                    enabled. §5.3's row is exactly right.
+```
+
+### 18.5 Platform-deploy corrections (Q8–Q12)
+
+```text
+deploy != Promotion (Q11)  CONFIRMED clean both directions; no
+                           PlatformDeployment record, matching AGENTS.md
+                           (Git/CI own mechanical history) and 3A-R6.
+sequence (Q9)              F-2 ordering fix; otherwise CONFIRMED — posture
+                           check always (step 1), checkpoint on material
+                           schema change (step 2, 3J-02 law), proof before
+                           reopen (steps 9–10).
+drain (Q8)                 CONFIRMED honest. Precision worth one line:
+                           queued DURABLE work survives shutdown by design
+                           (C-013 persist-first; pg-boss rows are durable)
+                           — drain concerns only in-process synchronous
+                           work, which §8 step 3 already says. C-006's
+                           complete-drain law for maintenance-required
+                           PROJECT migrations is a different, narrower
+                           obligation owned by C-014/Promotion paths and
+                           is unaffected by this package's bounded drain.
+rollback (Q10)             CONFIRMED correctly compatibility-gated;
+                           "demonstrably compatible" = a proof obligation
+                           at Realization, not operator faith. Forward-
+                           only across incompatible migration matches
+                           C-006. No automatic engine.
+old PAR runtime (Q12)      CONFIRMED still DEFER SAFELY on its 3A-R6
+                           trigger; nothing in §9 pre-solves it.
+```
+
+### 18.6 Emergency-stop corrections (Q17–Q19) and proof additions
+
+```text
+Q17  F-1: the stop must defeat service supervision AND VM/hypervisor
+     autostart AND host power-on defaults; independence from Hub/VPN path
+     already holds via the 3J-01 admin seam (Windows host/hypervisor
+     console + physical access).
+Q18  preserving Postgres during a NORMAL emergency stop is the correct
+     default-with-escape: it keeps custody/forensics and avoids needless
+     crash recovery, while §11.3 remains available when the host/DB itself
+     is suspect. Not over-specific — it is one sentence with a judgment
+     clause, and the alternative (always power off) destroys evidence.
+Q19  hypervisor power-off is proportional (existing layer, no machinery).
+     Its recovery truth must be stated on restart: normal §6 readiness +
+     DB crash recovery + operator decision whether 3J-02 restore/proof is
+     needed + 3M settlement of interrupted work. Add that one line to
+     §11.3 so "power off" never reads as consequence-free.
+
+proof additions to §13:
+19. host reboot during an in-force emergency stop → Hub does not return
+    without explicit operator release (F-1)
+20. platform deploy rehearsal proves single-revision identity across
+    checkpoint→migration→activation→proof (F-2)
+21. root/KEK removed from a provisioned host → Connections/Gateway fail
+    closed AND operational status shows INCIDENT class, while MANAGED
+    serving of unaffected apps continues (F-3)
+```
+
+### 18.7 3A-R6 §7 completeness check and routing (Q22, Q23)
+
+Every 3A-R6 3J MUST DECIDE item now has an owner: deployment shape / single-host+split triggers / monolith+PG+Mastra placement / E2B connectivity / MANAGED serving / TLS-ingress → **3J-01**; backup ownership+set / restore-proof responsibility → **3J-02**; secret injection+custody / startup+shutdown+restart / material deploy sequence / whole-Hub emergency stop / host-loss honesty / minimum availability set → **3J-03** (host-loss seam split across 01/02/03 as adjudicated in the intake review). The two 3A-R6 DEFER items (DEDICATED physical; old-PAR drain) remain deferred with triggers. §15 routing is clean: no 3M semantics inside the matrix, no 3L technology pins (Mastra restore behavior correctly routed), no 3K UX. Anti-overengineering: §14 REJECT list CONFIRMED; nothing new needed beyond it.
+
+```text
+3J-04 justified? = NO
+next step        = 3J-R1 — Deployment / Operations Architecture Final
+                   Closure (bounded), after F-1/F-2/F-3 are folded into
+                   the consolidated 3J-03 text
+```
+
+### 18.8 Closing block
+
+```text
+Material Findings                  = 3
+  F-1 stop must defeat every auto-start layer (VM autostart resurrection)
+  F-2 single-revision identity across the deploy sequence
+  F-3 root/KEK loss = incident class; availability stays capability-local
+availability corrections           = matrix + B2-blocks-migration row;
+                                     incident classification; honesty line
+                                     on whole-Hub-down detection
+secret/operational-context corr.   = pg-boss reuse REJECTED on credential-
+                                     separation grounds; injection
+                                     protection clause; env not banned
+platform-deploy corrections        = F-2; drain precision (durable queued
+                                     work survives; C-006 Project drain law
+                                     unaffected)
+emergency-stop corrections         = F-1 layered property; §11.3 restart
+                                     truth line; Q18 default confirmed
+routing corrections                = none material; §15 stands
+anti-overengineering cuts          = §14 stands; matrix stays descriptive,
+                                     never an engine
+3J-04 justified?                   = NO — 3A-R6 coverage complete; 3J-R1 next
+prior authority reopen             = NONE
+
+verdict = ACCEPT CANDIDATE
+          with F-1/F-2/F-3 folded into the consolidated 3J-03 text before
+          operator ratification; ID, LEDGER and 3J closure remain with the
+          operator
+```

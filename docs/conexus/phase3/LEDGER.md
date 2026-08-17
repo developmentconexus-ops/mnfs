@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-02 APROVADAS`  
-**Fase atual:** `3I — Security / Authority Architecture` — 3I-02 ratificada; próxima decisão material = Per-ActorRun / Per-AgentRun Model Spend Enforcement  
+**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-03 APROVADAS`  
+**Fase atual:** `3I — Security / Authority Architecture` — 3I-03 ratificada; próxima decisão material = DEDICATED Trusted Exchange  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -53,6 +53,9 @@ C-000..C-017
 3I-02
 → Credential & Capability Custody
 
+3I-03
+→ Per-ActorRun / Per-AgentRun Model Spend Enforcement
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -85,7 +88,7 @@ Nenhuma conversa cria authority.
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
-| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-02 APROVADAS** | Per-ActorRun / Per-AgentRun Model Spend Enforcement é a próxima decisão material |
+| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-03 APROVADAS** | DEDICATED Trusted Exchange é a próxima decisão material |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | UX/scaffold/product surfaces |
 | 3L — Technology Qualification | NÃO INICIADA | probes/qualification |
@@ -495,8 +498,9 @@ mandatory process split = 0 unless qualification fires
 |---|---|---|
 | 3I-01 | Current Authorization, Approver Eligibility & Revocation | [3I-01](3I-01-current-authorization-approver-eligibility-revocation.md) |
 | 3I-02 | Credential & Capability Custody | [3I-02](3I-02-credential-capability-custody.md) |
+| 3I-03 | Per-ActorRun / Per-AgentRun Model Spend Enforcement | [3I-03](3I-03-per-run-model-spend-enforcement.md) |
 
-Ratificações pelo operador: **3I-01 / 3I-02 — 2026-08-17**.
+Ratificações pelo operador: **3I-01 / 3I-02 / 3I-03 — 2026-08-17**.
 
 ### 10.1 3I-01 — Current authorization / revocation laws
 
@@ -594,10 +598,56 @@ Review provenance, non-authoritative:
 - `3I-FABLE-DIALOGUE-security-authority-intake-decomposition.md`;
 - `3I-FABLE-DIALOGUE-credential-capability-custody.md`.
 
+### 10.3 3I-03 — Per-run model spend laws
+
+```text
+Builder ActorRun owns Builder model-spend authority; Production AgentRun owns Product model-spend authority
+Gateway budget_counter remains external-effect-only; OBS remains evidence/accounting only
+effective per-run modelSpendCapUsd/maxModelCalls are server-derived and pinned; caller/runtime cannot widen them
+one unsettled billable model-call liability per run is the F1 baseline
+provider I/O starts only after exact maximum liability reservation commits on the owner row
+committed spend + outstanding liability <= run cap is the absolute owner-accounting invariant
+every physical provider attempt requires its own owner admission; retries/fallbacks below the gate are disabled or must re-enter the gate
+fallback/substitute provider/model requires a fresh qualified cost profile and reservation
+all billable model calls caused by a governed run are budgeted or the feature stays disabled
+qualified cost envelope requires exact provider/model/pricing profile + finite billable request ceilings
+unknown/missing/ambiguous usage or cost never becomes zero; conservative settlement burns reserved maximum
+downward settlement requires qualified usage evidence that preserves MISSING != ZERO; framework aggregates are non-authoritative when missingness can be lost
+no NOT_SENT refund optimization F1; no retroactive run-budget refund after conservative settlement
+provider/profile may use conservative-only settlement when reliable downward settlement is unavailable
+cancel/terminal blocks new calls but does not refund already-admitted liability; monotonic settlement may complete after terminal without reviving the run
+restart/resume/suspend/new trace cannot reset spend authority
+streaming reserves full qualified maximum before the stream starts
+provider-native account/project spend controls are defense-in-depth only, never per-run authority
+actual provider-invoice bound is conditional on cost-envelope qualification; broken envelope blocks the profile and returns to 3L
+```
+
+3I-03 outcome:
+
+```text
+Material Finding against prior authority = NONE
+Alternative A = GLOBAL MAXIMUM
+CURRENT STRUCTURE CONFIRMED
+new Hub module = 0
+new durable domain record = 0
+new hub_control schema/database = 0
+ModelCallAttempt = 0
+BudgetService/Runtime = 0
+model proxy/token broker = 0
+quota engine = 0
+per-run provider API key = 0
+parallel billable-call machinery = 0
+NOT_SENT refund optimization = DEFERRED
+```
+
+Review provenance, non-authoritative:
+
+- `3I-FABLE-DIALOGUE-security-authority-intake-decomposition.md`;
+- `3I-FABLE-DIALOGUE-per-run-model-spend-enforcement.md`.
+
 Remaining 3I material families from the approved intake, **not yet numbered**:
 
 ```text
-Per-ActorRun / Per-AgentRun Model Spend Enforcement
 DEDICATED Trusted Exchange
 Trust Zones & Crossings / Hub control-side egress / telemetry crossing
 hub_control Least-Privilege Realization
@@ -608,20 +658,20 @@ Dependency shape now:
 ```text
 3I-01 = APPROVED
 ├── 3I-02 Credential/Custody = APPROVED
-└── Model Spend = NEXT
+└── 3I-03 Model Spend = APPROVED
         ↓
-DEDICATED Trusted Exchange
+DEDICATED Trusted Exchange = NEXT
         ↓
 Trust Zones/Crossings
 
 hub_control Least Privilege may advance after 3I-01 without driving authority semantics
 ```
 
-No `3I-03` ID is created by this ledger update.
+No `3I-04` ID is created by this ledger update.
 
 ---
 
-## 11. Open findings / routed work after 3I-02
+## 11. Open findings / routed work after 3I-03
 
 Estes itens não reabrem fases anteriores automaticamente.
 
@@ -638,13 +688,17 @@ Estes itens não reabrem fases anteriores automaticamente.
 | CredentialBackend exact encrypted backing primitive/path + host root-key custody | 3I-02 law closed; implementation/3J; no new record/schema/database silently |
 | guest telemetry capability pause/resume expiry/scope transport proof | implementation/3L under 3I-02 |
 | orphan encrypted backing cleanup/repair if selected realization can produce it | 3M/3J/implementation under 3I-02 |
-| Production Agent browser/workspace/code execution trust/egress if first consumer enables it | 3I / Decision Loop |
-| DEDICATED concrete trust/credential/delegation mechanism | 3I |
+| Builder/PAR model-call pre-provider interception + retry/fallback neutralization | 3L/implementation under 3I-03 |
+| provider usage extraction preserving MISSING != ZERO | 3L under 3I-03 |
+| provider/model/request qualified cost-envelope proof | 3L under 3I-03 |
+| model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03 |
+| model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
+| Product Agent browser/workspace/code execution trust/egress if first consumer enables it | 3I / Decision Loop |
+| DEDICATED concrete trust/credential/delegation mechanism | **NEXT 3I material decision** |
 | whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | 3J; required before production by 3I-01 |
 | post-whole-Hub-stop settlement/recovery | 3M |
 | selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely Release/MAR serving-admission owner |
 | DEDICATED egress/network policy | 3I/3J |
-| per-ActorRun / per-AgentRun model spend-cap enforcement point after control-side credential move | **NEXT 3I material decision** + existing admission/budget/C-013 usage evidence |
 | MANAGED/DEDICATED physical deployment topology | 3J |
 | Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J |
 | old Product Agent runtime coexistence / drain / cutover | 3J |
@@ -705,7 +759,7 @@ CX-RUNTIME-ISOLATION-01
 
 ---
 
-## 12. Resolved routed work through 3I-02
+## 12. Resolved routed work through 3I-03
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -768,6 +822,16 @@ root-key rekey + backup compromise-path/recovery laws            → 3I-02; runb
 guest telemetry capability server-expiry/revocation              → 3I-02; exact transport proof 3L/implementation
 guest ActorRun LLM key deletion                                  → 3I-02
 metadata-only secret audit / no per-use secret ledger            → 3I-02
+Builder/PAR owner-local model-spend authority                    → 3I-03
+one-outstanding per-run model liability + pre-I/O reservation   → 3I-03
+unknown/missing model usage burns conservative reservation       → 3I-03
+qualified downward settlement preserves MISSING != ZERO          → 3I-03; exact extraction 3L
+retry/fallback below model-spend gate prohibited                 → 3I-03; pinned mechanism proof 3L
+all billable model-bearing run features budgeted-or-disabled     → 3I-03; capability sweep 3L
+cancel/restart/resume cannot reset run spend                      → 3I-03
+qualified cost-envelope + broken-profile fail-closed             → 3I-03; exact proof 3L
+provider-native spend control = defense-in-depth only             → 3I-03
+model-call reservation included in owner-local C-013 coherence   → 3I-03; proof 3N
 ```
 
 ---
@@ -833,6 +897,13 @@ NO orphan-GC framework by default
 NO per-decrypt/per-use secret audit ledger by default
 NO generic guest-capability service
 NO revival of guest LLM provider key
+NO ModelCallAttempt / ModelBudget / QuotaReservation durable class F1
+NO BudgetService / BudgetRuntime / ModelProxy / TokenBroker / generic QuotaService F1
+NO provider API key per run merely for accounting isolation
+NO parallel billable model-call reservation machinery F1
+NO hidden automatic provider retry/fallback below owner spend gate
+NO model-call traffic FSM / NOT_SENT refund optimization F1
+NO post-invoice run-budget refund engine F1
 ```
 
 Expansion returns only through Decision Loop with named current consumer/failure class.
@@ -859,6 +930,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3I = IN PROGRESS
 3I-01 = APPROVED
 3I-02 = APPROVED
+3I-03 = APPROVED
 ```
 
 3H-01 foi ratificada após package intake, ChatGPT/Fable adversarial rounds e final consolidation sem Material Finding contra prior authority.
@@ -875,8 +947,10 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3I-02 foi ratificada em **2026-08-17** após dois rounds adversariais de custody com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, storage tension de 3E resolvida sem novo domain record/schema/database, durable-before-visible cross-store publication, transient-token memory-only YAGNI baseline, crash-safe rekey/recovery e guest-capability closure.
 
+3I-03 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, owner-local ActorRun/AgentRun spend authority, one-outstanding liability, conservative unknown settlement, retry/fallback escape closure, qualified missingness-preserving usage settlement e cost-envelope honesty; a otimização `NOT_SENT` foi deliberadamente deferred por YAGNI.
+
 Próxima ação dentro de 3I:
 
-> **Per-ActorRun / Per-AgentRun Model Spend Enforcement** é a próxima decisão material. Depois dela, o caminho principal para **DEDICATED Trusted Exchange** fica desbloqueado pelas dependências do intake; Trust Zones/Crossings vem em seguida. `hub_control` Least Privilege pode continuar em paralelo sem dirigir semantics, mas não substitui a próxima dependência material. Não criar `3I-03` até a próxima decisão estar efetivamente definida.
+> **DEDICATED Trusted Exchange** é a próxima decisão material. Ela deve realizar a semântica já congelada em 3F-06 consumindo 3I-01 current authority e 3I-02 custody, sem criar machine-identity framework ou durable credential/grant record sem lifecycle provado. Depois dela, **Trust Zones & Crossings** fecha egress/telemetry crossings; `hub_control` Least Privilege pode avançar em paralelo sem dirigir semantics. Não criar `3I-04` até a próxima decisão estar efetivamente definida.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

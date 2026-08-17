@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-05 APROVADAS`  
-**Fase atual:** `3I — Security / Authority Architecture` — 3I-05 ratificada; próxima ação = bounded independent 3I closure review  
+**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J NÃO INICIADA / NEXT`  
+**Fase atual:** `3J — Deployment / Operations Architecture` — NOT STARTED / NEXT; primeiro passo = intake/decomposition independente da primeira topologia real sob 3A-R6  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -65,6 +65,9 @@ C-000..C-017
 3I-05
 → Trust Zones, Crossings & hub_control Least Privilege
 
+3I-R1
+→ Security / Authority Architecture Final Closure
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -89,7 +92,7 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 APROVADA** | aplicar 3A-R6 durante 3I–3O; F3B-R1 antes do Realization Planning |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 APROVADA** | aplicar 3A-R6 durante 3J–3O; F3B-R1 antes do Realization Planning |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
@@ -97,8 +100,8 @@ Nenhuma conversa cria authority.
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
-| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-05 APROVADAS** | bounded independent 3I closure review; close only if no Material Finding |
-| 3J — Deployment / Operations Architecture | NÃO INICIADA | primeira topologia real / backup / serving / stop; future-scale machinery deferred |
+| 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
+| 3J — Deployment / Operations Architecture | **NÃO INICIADA / NEXT** | intake/decomposition da primeira topologia real / backup / serving / stop; future-scale machinery deferred |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
@@ -141,7 +144,7 @@ Critical path ratificado:
 3I
 → 3I-04 DEDICATED Trusted Exchange = APPROVED
 → 3I-05 Trust Zones/Crossings + hub_control Least Privilege = APPROVED
-→ bounded independent 3I closure review
+→ 3I-R1 Security / Authority Architecture Final Closure = APPROVED / CLOSED
 
 3J
 → first production topology only
@@ -459,7 +462,7 @@ old non-terminal run resumes exact old Release/runtime projection
 Mastra traces/logs/metrics/hooks = Operational Telemetry / diagnostics, never terminal/correctness authority
 ```
 
-3H-02 framework coverage audit additionally classifica current Mastra primitives:
+3H-02 framework coverage audit adicionalmente classifica current Mastra primitives:
 
 ```text
 ADOPT: Agent, threads/messages, tools/hooks, selective suspend/resume, schedules mechanics, observability
@@ -578,7 +581,7 @@ mandatory process split = 0 unless qualification fires
 
 ---
 
-## 10. 3I — IN PROGRESS
+## 10. 3I — CLOSED / APPROVED
 
 | ID | Decisão | Documento |
 |---|---|---|
@@ -587,8 +590,9 @@ mandatory process split = 0 unless qualification fires
 | 3I-03 | Per-ActorRun / Per-AgentRun Model Spend Enforcement | [3I-03](3I-03-per-run-model-spend-enforcement.md) |
 | 3I-04 | DEDICATED Trusted Exchange | [3I-04](3I-04-dedicated-trusted-exchange.md) |
 | 3I-05 | Trust Zones, Crossings & `hub_control` Least Privilege | [3I-05](3I-05-trust-zones-crossings-hub-control-least-privilege.md) |
+| 3I-R1 | Security / Authority Architecture Final Closure | [3I-R1](3I-R1-security-authority-architecture-final-closure.md) |
 
-Ratificações pelo operador: **3I-01 / 3I-02 / 3I-03 / 3I-04 / 3I-05 — 2026-08-17**.
+Ratificações pelo operador: **3I-01 / 3I-02 / 3I-03 / 3I-04 / 3I-05 / 3I-R1 — 2026-08-17**.
 
 ### 10.1 3I-01 — Current authorization / revocation laws
 
@@ -826,25 +830,52 @@ Review provenance, non-authoritative:
 
 - `3I-FABLE-DIALOGUE-trust-zones-crossings-hub-control-least-privilege.md`.
 
-Current dependency/closure shape:
+### 10.6 Final closure — 3I-R1
+
+O bounded independent closure review encontrou:
 
 ```text
-3I-01 = APPROVED
-3I-02 = APPROVED
-3I-03 = APPROVED
-3I-04 = APPROVED
-3I-05 = APPROVED
-        ↓
-bounded independent 3I closure review = NEXT
-        ↓
-3I-R1 only if no Material Finding
+Material Finding against approved authority = NONE
+missing material 3I decision                 = 0
+unrouted material security blocker           = 0
+3I-06                                        = NOT JUSTIFIED
+reopen                                       = NONE
+verdict                                      = CLOSE 3I
 ```
 
-No additional material 3I topic is currently justified. The closure review may still surface a Material Finding and reopen only the implicated authority.
+Uma única ambiguidade de composição foi incorporada sem reabrir 3I-01/3I-05:
+
+```text
+3I-01 current-authority serialization
++
+3I-05 owner-scoped persistence / no cross-owner schema authority
+→ devem ser provadas simultaneamente na mesma realization
+→ stale authority cannot commit after concurrent revoke/narrow
+→ consuming owner não ganha broad iam SQL / umbrella role para realizar o guard
+```
+
+Exact conflict/serialization primitive pertence ao post-C-018 Realization Planning. A necessidade de broad cross-owner privilege, new durable authority state ou new authorization owner para realizar essa propriedade é reopen trigger material.
+
+Fechamento:
+
+```text
+3I = CLOSED / APPROVED
+3I-01..3I-05 = APPROVED
+3I-R1 = APPROVED / CLOSED
+remaining material 3I decision = 0
+prior phase reopen = NONE
+new Hub module = 0
+new durable security record = 0
+new security DB/schema/service/engine = 0
+```
+
+Review provenance, non-authoritative:
+
+- `3I-FABLE-DIALOGUE-final-security-authority-closure.md`.
 
 ---
 
-## 11. Open findings / routed work after 3I-05
+## 11. Open findings / routed work after 3I-R1
 
 Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quando cada item volta ao critical path.
 
@@ -879,6 +910,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | fleet/per-install credential / per-Release credential / binary attestation | REJECT F1 / Decision Loop on real install-base/security requirement |
 | `hub_control` PostgreSQL role/isolation properties | **RESOLVED by 3I-05 at property level**; exact LOGIN/role/GRANT/pool spelling → Realization Planning |
 | `hub_control` owner-capability negative privilege matrix | Realization Planning + 3N/3O proof under 3I-05 |
+| current-authority serialization × owner-isolation combined proof (3I-R1 CR-1) | **Realization Planning + 3N/3O**; broad cross-owner privilege/new authority state requirement → Decision Loop |
 | cross-owner transaction profiles / audit append mechanism | Realization Planning under closed 3E/3I-05 properties; third case → Decision Loop |
 | Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J; qualification-triggered |
 | old Product Agent runtime coexistence / drain / cutover | **DEFER SAFELY — trigger: first runtime-affecting upgrade after production / 3J** |
@@ -897,7 +929,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | exact `MANIFEST_INVALID` diagnostics | Realization Planning/implementation + 3K where user-observable |
 | authored Project binding source/file schema + exact mutation DTOs | post-C-018 Realization Planning + implementation |
 | exact `brn.binding_validation` ref if proof shows it load-bearing | Decision Loop / 3N |
-| exact security-sensitive mutation serialization spelling (`FOR UPDATE`/SERIALIZABLE/equivalent) | Realization Planning/implementation verification; 3L only if pinned PostgreSQL behavior becomes load-bearing |
+| exact security-sensitive mutation serialization spelling (`FOR UPDATE`/SERIALIZABLE/guard/equivalent) | **3I-R1 property closed**; exact realization → Realization Planning/implementation verification; 3L only if pinned behavior becomes load-bearing |
 | binding/Release/runtime end-to-end proof | 3N/3O — MUST |
 | exact Mastra telemetry role attributes / OTel Bridge/export realization | 3L only to the extent Verification Observability needs them; exporter topology can defer |
 | Verification Observability capture/correlation qualification | 3L/3N — MUST QUALIFY subset |
@@ -943,7 +975,7 @@ Verification Observability deciding-evidence subset
 
 ---
 
-## 12. Resolved routed work through 3I-05
+## 12. Resolved routed work through 3I-R1
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -1034,6 +1066,8 @@ ordinary broad/SET-able umbrella DB login rejected               → 3I-05
 two narrow cross-owner atomic transaction capability classes     → 3I-05
 audit-required narrow append-only OBS path                        → 3I-05
 hub_control/Mastra/Project DB credential isolation                → 3I-05
+current-authority serialization × owner isolation composition     → 3I-R1
+3I global security/authority coherence + completeness             → 3I-R1
 ```
 
 ---
@@ -1142,32 +1176,22 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3F = CLOSED / APPROVED
 3G = CLOSED / APPROVED
 3H = CLOSED / APPROVED
+3I = CLOSED / APPROVED
 
-3H-01 = APPROVED
-3H-02 = APPROVED
-3H-03 = APPROVED
-3H-04 = NOT JUSTIFIED
-3H-R1 = APPROVED / CLOSED
-
-3I = IN PROGRESS
 3I-01 = APPROVED
 3I-02 = APPROVED
 3I-03 = APPROVED
 3I-04 = APPROVED
 3I-05 = APPROVED
+3I-06 = NOT JUSTIFIED
+3I-R1 = APPROVED / CLOSED
+
+3J = NOT STARTED / NEXT
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
 
-3H-01 foi ratificada após package intake, ChatGPT/Fable adversarial rounds e final consolidation sem Material Finding contra prior authority.
-
-3H-02 foi ratificada após rounds adversariais, evidence correction e auditoria adicional das capabilities atuais do Mastra, sem primitive material ausente.
-
-3H-03 foi ratificada em **2026-08-17** após dois rounds adversariais, source review de Mastra/E2B/OpenTelemetry/Spotlight e final consolidation.
-
 3H-R1 foi ratificada em **2026-08-17** após closure review adversarial com `Material Finding = NONE`, `missing material 3H decision = NONE`, `3H-04 = NOT JUSTIFIED` e três correções não-materiais de routing/proof visibility incorporadas.
-
-3I intake/decomposition foi concluído sem Material Finding contra 3B..3H. O principal-taxonomy candidate falhou materiality e virou somente preâmbulo de 3I-01; o decomposition restante preserva owner/failure-class boundaries sem numerar antecipadamente decisões.
 
 3I-01 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, incorporando atomicity contra concurrent revocation, durable re-entry current-authority law, exact approver eligibility, post-approval expiry+cancel/close composition, owner-committed-state vs raw-observation split e emergency-stop deletion test.
 
@@ -1179,10 +1203,12 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3I-05 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`; fecha trust-zone/crossing semantics, separa business egress de platform-control owner egress com anti-injection de destination authority, mantém producer trust não elevável por transport e torna `hub_control` ownership fisicamente enforçável por owner-scoped DB capabilities + somente duas narrow cross-owner transaction cases, sem novo module/record/database/process/security engine.
 
-Próxima ação dentro de 3I:
+3I-R1 foi ratificada em **2026-08-17** após bounded independent closure review com `Material Finding = NONE`, `missing material 3I decision = 0`, `3I-06 = NOT JUSTIFIED`, `reopen = NONE` e `CLOSE 3I`. O closure tornou explícita uma única composição: current-authority serialization de 3I-01 deve ser realizada e provada junto do owner-isolation de 3I-05, sem broad IAM SQL/umbrella role; exact conflict primitive permanece derived Realization Planning.
 
-> Executar **um único bounded independent 3I closure review** sobre 3I-01..3I-05 + routed work. O review deve verificar somente: missing trust boundary, duplicate authorization authority, widened secret path, missing current revocation path, hidden new durable security record/module, unrouted material C-018 security blocker e contradição com 3A-R6. Se `Material Finding = NONE` e `remaining material 3I decision = 0`, o próximo candidato é `3I-R1 — Security / Authority Architecture Final Closure`; nenhum novo topic intermediário é justificado.
+Próxima ação:
 
-Depois de 3I, 3J–3O seguem integralmente, mas sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
+> **Abrir 3J — Deployment / Operations Architecture com um intake/decomposition independente da primeira topologia real sob 3A-R6.** Levantar todas as decisões materiais de first deployment, agrupá-las por owner/failure class, separar 3L/3M/Realization Planning, preservar DEDICATED physical topology e old-runtime drain como triggered defers e rejeitar future-scale machinery sem consumidor.
+
+Depois de 3J, 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

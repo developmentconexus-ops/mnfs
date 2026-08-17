@@ -995,3 +995,185 @@ later owner if deferred
 ```
 
 Do not modify the previous dialogue file, `LEDGER.md`, approved authority or product code. Append `Round 2 — Fable` to this R2 file and commit/push only this dialogue change.
+
+---
+
+# Round 2 — Fable
+
+**Role:** independent adversarial Senior/Staff/Principal Engineer + Software Architect.
+**Baseline:** authority chain re-checked (`AGENTS.md` → method → `DECISOES.md` → `LEDGER.md` → 3A-R5/3G-02/3G-03/3E/3F); Round 1 evidence V1–V12 carries; new load-bearing behavior re-verified this round as V13–V15.
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Nothing here approves 3H-01.
+
+---
+
+## 19. External evidence re-verified this round
+
+| ID | Verified fact | Source |
+|---|---|---|
+| V13 | `retryOnDead()` is **hardcoded**: exactly one retry, guarded by an internal `_isRetrying` flag; **no constructor option disables or limits it, and no callback/hook fires on recreation**. | `workspaces/e2b/src/sandbox/index.ts` (raw GitHub, main) |
+| V14 | The physical `sandboxId` **is reachable today** through the exposed underlying SDK instance (`sandbox.e2b` → E2B `Sandbox` object); no first-class getter exists on `E2BSandbox` itself. | same source |
+| V15 | `E2BSandboxOptions` = `{ id, template, timeout (default 300_000 ms), env, metadata, network, domain/apiUrl/apiKey/accessToken, instructions }`; `start()` uses lifecycle `{ onTimeout: 'pause' }` (idle timeout auto-pauses, consistent with V9); the generic `WorkspaceSandbox` contract additionally declares an optional `clone?()` member whose E2B support status is unverified. | same source + Context7 `/mastra-ai/mastra` `integrations/sandboxes/e2b.mdx`, `packages/core/src/workspace/sandbox/sandbox.ts` |
+
+V13 **falsifies one item in Round 2 — ChatGPT §5.4**: "adapter configuration that disables unsafe retry path" is not a currently existing realization option. Corrected below (FBL-R2-06).
+
+---
+
+## 20. Verdict up front
+
+1. The consolidation is faithful to Round 1 and to approved authority. **No material Finding against 3A-R5/3C/3D/3E/3F/3G. No reopen.**
+2. **ChatGPT's FAILED correction is right** and I withdraw my Round 1 default (§22 Q2): "positive admissible basis" is smaller and closes a reinterpretation channel my version left open — provided the basis is *admitted evidence*, never post-hoc reading of a bare terminal value (FBL-R2-02).
+3. `FRESH_BASE | CONTINUE_LINEAGE` as an immutable dispatch fact is the correct minimum — but the consolidation's own binding-order refinement (§5.2) opens an admission-vs-binding gap that must be closed explicitly: **an unrealizable `CONTINUE_LINEAGE` fails closed; it never silently degrades to `FRESH_BASE` mid-run** (FBL-R2-01).
+4. Quiescence needs one surface extension (deferred-execution facilities — cron/at/timers) and an explicit threat framing (accidental writers in scope; malicious guest belongs to the sandbox boundary + verification stack + 3I) (FBL-R2-03).
+5. Session-state prohibition holds; one sharpening: load-bearing thread-persisted settings are **unconditionally overwritten** at dispatch, not "useful local defaults", and `OM = OFF` joins the poisoned-thread fixture explicitly (FBL-R2-04).
+6. One hidden-authority hazard found and closed by a one-line law: stored runtime refs are expectations to re-verify, never current-state truth (FBL-R2-05).
+7. **Nothing over-accepted; no rule is overengineering** — every law traces to a verified current failure class (§28 Q26). Alternative D remains the Global Maximum (§28 Q30, quantified).
+8. Disposition: **CURRENT STRUCTURE CONFIRMED** for the consolidated candidate, with bounded refinements FBL-R2-01..06. One short Round 3 consolidation, then **ready for operator decision**.
+
+---
+
+## 21. Material findings and refinements
+
+### FBL-R2-01 — Source-lineage disposition is immutable; unrealizable `CONTINUE_LINEAGE` fails closed
+
+- **Claim challenged:** §6.1 makes the disposition an immutable dispatch fact, while §5.2 (correctly) moves incarnation binding to "before first write-capable sandbox operation". Together they create a window the consolidation does not close: continuity gates are *finally* confirmable only at binding time, **after** the admission that recorded `CONTINUE_LINEAGE`.
+- **Counterexample / failure class:** A2 admitted `CONTINUE_LINEAGE` (gates looked satisfiable); at binding, observed incarnation is E2 ≠ E1, or quiescence fails. If the runtime "helpfully" proceeds on a fresh base anyway, the immutable dispatch fact now **lies** — audit says A2 continued lineage; execution was fresh. Recovery reasoning about A2's scratch inheritance is corrupted at the root. §13.4's "reconstruct/re-admit safe runtime path" gestures at this but never forbids the silent flip.
+- **Authority affected:** none contradicted; realization law under 3G-03 (immutable dispatch/execution-context facts).
+- **Smallest correction:** freeze: *the disposition fact is written at admission and never mutates. If `CONTINUE_LINEAGE` cannot be realized when its gates are finally verified at binding, the attempt does not proceed under a different disposition: it terminates (typed cause) — or, when no execution has begun, the admission itself is aborted — and a successor attempt is admitted with `FRESH_BASE`.* Cheap: one refusal path, no new state.
+- **Global Maximum effect:** keeps the dispatch fact honest, which is its entire purpose; prevents the one channel through which "sandbox state decides" could re-enter disguised as resilience.
+- **Reopen:** no. **Later owner:** none; probe gains fixture P25 (below).
+
+### FBL-R2-02 — FAILED continuity basis = admitted evidence, never terminal-value reinterpretation
+
+- **Disposition on ChatGPT's correction: ACCEPT — it is correct, not over-conservative.** My Round 1 "mechanical/transient → default continue" made the *classification* implicit; ChatGPT's "positive Builder-admissible basis" forces it explicit. The delta matters in exactly one case — FAILED with undetermined cause (typical orphan) — where my default would have inherited scratch on no evidence. Fail-closed is right there.
+- **Sharpening:** the positive basis must be **evidence already admitted** — the typed operational cause recorded at guarded terminalization (3G-03 §8.2/§12.1), or later 3M-investigation evidence explicitly admitted. A bare `FAILED` read back at successor-dispatch time and *interpreted* as "probably transient" is not a basis; that would be the same stale-reinterpretation defect class as FBL-R2-05, one layer up.
+- **Q3 answered:** no taxonomy/policy engine needed — 3G-03 already permits non-frozen typed reasons/evidence at terminalization; the continuity gate *consumes* that as evidence. Unknown → `FRESH_BASE`. Zero new machinery.
+
+### FBL-R2-03 — Quiescence: extend the inspected surface to deferred execution; state the threat model
+
+- **Claim challenged:** §9.3 qualifies quiescence as tracked-kill + "sufficiently authoritative sandbox/process inspection", with recreate as fallback. Process inspection alone is falsifiable.
+- **Counterexample (Q17 answered):** A1's tooling installs a cron/`at`/systemd-timer entry (guest is root; E2B templates can run cron). A1 terminalizes; tracked processes killed; process inspection at time T shows a clean table — **nothing is running**. `CONTINUE_LINEAGE` admitted. At T+Δ the timer fires and mutates the tree mid-A2. If the mutated path lies inside A2's declared writeSet, delivery reconciliation cannot distinguish it from an agent edit — for a CANCELLED predecessor this resurrects deliberately stopped work through a channel the explicit-admission gate was built to close.
+- **Smallest correction:** the qualified inspection basis must cover **live processes and deferred-execution facilities** (cron/at/systemd timers and equivalent scheduling surfaces present in the qualified template); anything not inspectable in the qualified template ⇒ recreate/reset is the only admissible quiescence basis. Probe gains a planted-timer fixture proving the gate fires.
+- **Threat framing (Q16 answered), to be stated in 3H-01:** quiescence defends provenance against **accidental** residual writers from prior attempts. A *malicious* guest defeating inspection is out of quiescence's scope by construction — that adversary is contained by the sandbox boundary, the verification stack anchored to candidate identity, and 3I trust topology. Without this framing, Q16's logic pushes toward recreate-always paranoia — cost without a matching threat, i.e. overengineering via unstated adversary.
+- **Reopen:** no. **Later owner:** inspection mechanism and template surface inventory → `CX-BUILDER-MASTRA-01`/3L.
+
+### FBL-R2-04 — Load-bearing thread settings are unconditionally overwritten; OM joins the fixture
+
+- **Claim challenged:** §8.3 calls persisted thread settings "useful local defaults" that "never override" current context.
+- **Failure class:** "default + override when different" invites drift — an implementation that only overrides when it *notices* a difference will miss settings it doesn't model. V1 shows the persisted set includes **observational-memory settings** — and OM is `OFF` by ratified 3A-R5 authority. A thread whose OM was ever enabled (experiment, bug, future Mastra default flip) would silently re-enable it on every rebind.
+- **Smallest correction:** for the load-bearing set (model/provider/reasoning pin, mode, permission/tool surface, OM, subagent model selection), dispatch/rebind **unconditionally applies** the current-context value through the configuration API — no read-compare-maybe-write. Non-load-bearing display/preference residue may persist untouched. The poisoned-thread fixture (P3) explicitly includes **OM re-enable** and stale subagent model selection.
+- **Q24 answered** by the same partition: authority-bearing settings are overwritten, not consulted; cosmetic residue is ignored, not reset — full reset adds churn for no closed defect class.
+
+### FBL-R2-05 — Stored runtime refs are expectations to re-verify, never current-state truth
+
+- **Claim challenged / Q29:** §12 persists "current/last verified physical sandboxId" on `bld.coding_session`. Unqualified, this invites recovery logic to *trust* the stored value as the current incarnation — a stale mirror becoming authority, the exact §2 defect class in a correlation field.
+- **Smallest correction (one line):** *every runtime ref stored in `bld.*` (thread ref, logical sandbox ref, last-verified physical `sandboxId`, run refs) is a correlation fact and an **expectation to re-verify against live observation**, never authority over current runtime state.* This is the same pattern 3F-02 already freezes for `expectedGeneration`/`expectedRevision` — cite it, don't reinvent it. Whether the `coding_session` copy of last-verified `sandboxId` exists at all remains implementation (the `actor_run` binding is the authoritative dispatch fact).
+- **Reopen:** no.
+
+### FBL-R2-06 — Evidence correction to §5.4/§16: the retry-disable option does not exist; the wrapper trigger becomes concrete
+
+- **Claim challenged:** §5.4 lists "adapter configuration that disables unsafe retry path" among allowed realizations.
+- **Evidence:** V13 — retry is hardcoded (exactly one retry, `_isRetrying` internal, no option, no recreation callback). That realization option is currently **fiction** and must be struck; keeping it would let 3L "choose" a mechanism that does not exist and report the law satisfied.
+- **What remains real today:** V14 — the physical `sandboxId` is readable via `sandbox.e2b.sandboxId`. So the wrapper-free realization is **pre/post-operation incarnation comparison** at write-capable operation boundaries, plus binding-time observation. Under V13's semantics (one retry, whole-operation re-run on the fresh sandbox), a post-op comparison bounds exposure to **at most one** write-capable operation completing on an unacknowledged incarnation — and that operation ran on a template-fresh tree with egress deny-all (C-008), so governed effects cannot have ridden it. Quarantine of the attempt then satisfies §5.4's frozen property.
+- **Concrete wrapper trigger (Q6/Q7 answered):** the narrow guard becomes architecturally required **iff the probe shows a completed operation cannot be attributed to an incarnation** — i.e. pre/post comparison cannot establish *which* physical sandbox executed it (e.g. the adapter retries invisibly and the observable id has already moved on both sides of the op). Attribution possible ⇒ no wrapper; attribution impossible ⇒ smallest guard that surfaces recreation. This converts §16's "conditional wrapper" from vibes into a falsifiable criterion.
+- **Reopen:** no. **Later owner:** 3L (`CX-BUILDER-MASTRA-01`), with the forced dead-sandbox-mid-command fixture already required.
+
+---
+
+## 22. Block A — WT-B correctness (Q1–Q5)
+
+- **Q1 —** the explicit fact is the minimum. Deriving the disposition from surrounding facts (incarnation pins, quiescence evidence, timestamps) conflates *conditions permitting continuity* with *Builder admitting continuity* — derivation outputs can change retroactively when inputs are reinterpreted; the admission cannot. Recovery after a crash mid-A2 must know what was admitted without re-deriving it under post-crash conditions. Two values, no third `PARTIAL_RESET` mode, immutable — minimal and honest (with FBL-R2-01 closing the degrade channel).
+- **Q2 —** correct, not over-conservative; my Round 1 default withdrawn. Concrete consumer each way: npm-registry outage kills install → typed tooling-failure cause admitted at terminalization → `CONTINUE_LINEAGE` normal. Orphaned A1 with no determined cause → no basis → `FRESH_BASE`. Both outcomes are right, and the second is where my default was wrong.
+- **Q3 —** yes, without any taxonomy (FBL-R2-02): the basis is the already-admitted typed cause/evidence; the gate consumes evidence, it does not classify.
+- **Q4 —** the asymmetry is sufficient. Forcing fresh *cognition* on every cancel would destroy continuity for the most common human intervention while the thread's next dispatch reintroduces current authority anyway (§8.2). Cognitive freshness stays governed by 3A-R5 triggers (material revision, concrete contamination suspicion — a "wrong direction" cancel often *is* such a trigger, decided as such, not automatically).
+- **Q5 —** hardest schedule I could construct: A1 leaves an untracked stale artifact (generated file removed from git but present on disk); A2 `CONTINUE_LINEAGE`, all gates genuinely pass; A2's tests run in the dirty tree and pass **because** of the artifact; candidate X delivered; clean rebuild would fail the same test. Verdict: the schedule is real but **not a WT-B defect** — it is reachable *within a single ActorRun* (A1 poisoning its own verification) and under `FRESH_BASE` (self-poisoning during the run), so tree-resetting between attempts does not close it. The closing control is proof anchoring: for material rigor, assertion evidence must be anchored to (or reconciled against) a clean materialization of exact X — which is where C-014 compose-rebuild, C-016 frozen-lockfile determinism and the fresh verifier already sit. Consequence: **one probe line, no new 3H law** — add `P25: material-rigor assertion evidence derived only from a dirty inherited workspace, where clean materialization of X would fail, is detected (divergence surfaces at verifier/compose anchor) — control shown firing.` WT-B stands.
+
+---
+
+## 23. Block B — incarnation / TOCTOU (Q6–Q10)
+
+- **Q6 —** closed without a wrapper **today**, per V13/V14 analysis in FBL-R2-06: binding-time observation + per-write-op comparison bounds silent-continuation exposure to one operation, whose blast radius is bounded by template-fresh state + C-008 egress. Wrapper is not an architectural necessity now; it has a concrete falsifiable trigger (attribution impossibility).
+- **Q7 —** placement, not frequency: observation at binding; comparison at write-capable operation boundaries such that **no second write-capable operation is admitted after an unacknowledged incarnation change**. Read-only operations need no check. Intra-batch guarantees are a 3L question against the pinned version.
+- **Q8 —** under current documented E2B behavior, no: pause/resume preserves `sandboxId` (V9); no other id-mutation path exists in the current baseline (no fork/clone in use — `clone?()` support unverified, V15). And the failure mode is asymmetric-safe: if E2B ever changed resume semantics, the law produces a spurious reset (cost), never false continuity (corruption).
+- **Q9 —** yes, discarding is safe under current invariants: governed external effects cannot originate from raw guest shell (Gateway mediation + egress deny-all/allowlist, C-008); model calls are control-side (3A-R5). Residual exposure is allowlisted egress only — currently package-registry-class reads. Discipline for future allowlist widening is 3I's, and 3I should inherit this as a named check.
+- **Q10 —** no fencing. Authority is protected regardless of process overlap by per-Change serialization + write-once facts (3G-03 §17). The genuinely unclosed residue is **cognitive**: two live processes double-driving one thread interleave garbage into cognition, not authority. F1 single-host makes it a narrow restart-overlap corner; record it as an accepted residual with the existing 3J/multi-writer reopen trigger. Building fencing for a cognitive-integrity corner with no authority consequence would be overengineering.
+
+---
+
+## 24. Block C — custody / F5 (Q11–Q14)
+
+- **Q11 —** yes. Custodied content + write-once `producedOutputRef` + `agent_event` trail suffice. A crash between custody and ref-write leaves orphaned custody (GC-able, no authority — §4.2); a crash before custody leaves nothing, and re-presentation of the same identity is already idempotent (3G-03 §7.2). A durable handoff record would duplicate these three facts.
+- **Q12 —** yes. Hub quarantine/CAS/Hub-local Git custody all satisfy the law; C-008 SHARE/bundle is the existing path. §4.3's refusal to couple presentation to remote push is correct — remote Git remains Hub integration authority on its own schedule.
+- **Q13 —** no new architecture fact. Custody loss after ref-write is exactly 3G-03 §12.3: temporarily unresolvable → non-terminal, recovery attempts; proven permanent → explicit `FAILED`. One implementation note: custody verification must be against canonical content identity (digest/tree), not receipt-of-bytes — §4.1 already says "resolves mechanically to exact identity X"; keep that phrase in the final text.
+- **Q14 —** no. The law is role-generic because 3G-03 §7.3 already types output identity per role: verifier report → report/Evidence-candidate digest custody (C-013/CAS machinery); no-op proof → identities + oracle facts already Hub-side, custody trivially satisfied. Nothing code-centric remains.
+
+---
+
+## 25. Block D — quiescence (Q15–Q18)
+
+- **Q15 —** not too strong, because the property binds **unknown** activity, not all activity: tracked-kill + qualified inspection showing a clean surface *is* an admissible proof in the common case; recreate is the fallback, not the rule. With FBL-R2-03's framing (accidental writers only), the proof obligation stays cheap.
+- **Q16 —** for the accidental class: yes, guest-side enumeration (full process table + deferred-execution surfaces) is sufficient — an accidental daemon does not hide. Against a root-capable *malicious* guest no inspection from any vantage is sound, and recreate-always would still not protect A2's future work from a compromised template state — that adversary is 3I/sandbox-boundary/verification territory, not quiescence. So: do **not** collapse to recreate-only; qualify inspection for the accidental class and keep recreate as the unknown-fallback.
+- **Q17 —** constructed and answered in FBL-R2-03 (deferred-execution timer). With the surface extension, the schedule is caught at the gate; without it, it survives — which is why the extension is required.
+- **Q18 —** keep the frozen property scoped to **source-lineage mutation capability**. BuildValidationDatabase residue and stale port listeners affect *reliability of the next attempt's evidence*, not lineage provenance: BVD is resettable execution state (C-008) and its evidential use is anchored by proof requirements; a squatted port fails loud at bind time. Mounts are reconciled by the adapter (V6). Widening quiescence to "all mutable environment state" would smuggle in an environment-conformance subsystem — overengineering. One sentence in 3H-01 may note BVD/port hygiene as ordinary attempt-startup checks, not quiescence.
+
+---
+
+## 26. Block E — verifier independence (Q19–Q22)
+
+- **Q19 —** correct minimum, no overconstraint: the law triggers on **material** agentic verification (C-017); FAST/BOUNDED assertions decided by deterministic proof spawn no agentic verifier at all (3C-05 §18.1), so they never pay materialization cost. If someone proposes a casual agentic spot-check inside the implementer workspace, the answer is that such a check was not material — or it is, and pays for isolation.
+- **Q20 —** under the current baseline, execution-bearing material verification requires a **separate isolated execution environment with a write surface disjoint from the implementer lineage**. Same-sandbox "stronger materialization" fails mechanically: root shell defeats intra-sandbox read-only (chmod/remount), and implementer-side processes can race the verifier's copy. The law should stay mechanism-neutral exactly as consolidated ("fresh isolated materialization … or no sandbox when no execution is required") — whether that is a second E2B sandbox, `clone?()` if E2B supports it (unverified, V15), or another qualified environment is 3L's choice.
+- **Q21 —** closed without new facts: fresh materialization + frozen-lockfile deterministic install (C-016) close dependency/cache contamination; and the verifier **is an ActorRun**, so 3G-03 §6 already pins its execution context (runtime/template/model identities) into its facts/Evidence — environment pinning needs no new mechanism, just the statement that verifier runs inherit attempt-generic pinning. 
+- **Q22 —** yes. C-017's ratified amendment already demoted provider diversity to an experimental trigger; independence of **context** is the property, and fresh thread + fresh materialization delivers exactly that.
+
+---
+
+## 27. Block F — session-state restoration (Q23–Q25)
+
+- **Q23 —** none. Mastra task/todo/display state is UX residue reconstructible from Hub facts (C-013 checklist machinery is Hub-side authority already); local planning artifacts live in thread messages to the extent they matter cognitively. F1 ships with thread/messages + `bld.*` facts; losing display niceties at crash is an accepted cosmetic cost.
+- **Q24 —** answered in FBL-R2-04: authority-bearing settings unconditionally overwritten; cosmetic residue ignored; full reset rejected as churn.
+- **Q25 —** the boundary is correct. Mid-flight session serialization cannot capture the in-flight model/tool episode anyway (Alternative B was rejected for exactly this), so "lossier" restart fidelity is not a real degradation — the orphan/new-attempt path plus custody-before-presentation already preserve everything with authority value.
+
+---
+
+## 28. Block G — scope / Global Maximum (Q26–Q32)
+
+- **Q26 — over-accepted: none.** Each accepted law traces to a verified current failure class: custody→S3/V9-kill, incarnation→V8/V13, disposition→audit/recovery honesty, quiescence→V9-processes+timer schedule, verifier→root-shell mechanics, session-restore ban→V1/V4. None demotes to probe-only without losing an enforceable invariant.
+- **Q27 — deletable/demote-able:** (a) §13 schedules are illustration — keep in dialogue, exclude from the final 3H-01 text; (b) §12's `coding_session` copy of "current/last verified physical sandboxId" demotes to optional implementation projection under FBL-R2-05 (the `actor_run` binding is the fact); (c) §5.4's nonexistent retry-disable option is struck (FBL-R2-06). Nothing else is accidental complexity.
+- **Q28 —** yes, still independently justified: supersession lineage (1:N sessions per Change over time), verifier sessions (role-typed additional sessions), and authority direction at rebind (Builder fact imposed on runtime, never derived from substrate stores). Collapsing into `Change` would re-create the same columns under a worse owner.
+- **Q29 —** one hazard found and closed: FBL-R2-05 (stored refs as expectations, 3F-02 pattern). After it, no correlation field carries hidden authority.
+- **Q30 — strongest argument against D, stated and refuted:** "Corrected D now carries six guard laws; fresh-thread+fresh-sandbox-per-ActorRun (Alt C) deletes half of them and is simpler." Quantified: C moots the disposition fact, quiescence gate and continuity-continuation checks (3 of 6); it **keeps** custody, verifier materialization, mechanical config application and incarnation observability-for-correlation (the other 3, which exist independently of continuity). Its price: per-attempt rediscovery + token cost forever, destruction of the Change-scoped cognition 3A-R5 was *ratified* to buy, and contradiction of measured evidence (C-009: session continuity bought real cumulative understanding). Reopening 3A-R5 requires material evidence continuity is net-harmful; none exists. The three laws C deletes are cheap facts/checks; the value C deletes is the product's coding-quality core. **D stands as Global Maximum.**
+- **Q31 —** **`CURRENT STRUCTURE CONFIRMED`** — the consolidated candidate, amended by FBL-R2-01..06, is the smallest sustainable realization; no restructure, no transitional scaffold, no split prerequisite, no unsafe deferral detected.
+- **Q32 —** not yet, by one short step: ChatGPT should fold FBL-R2-01..06 into the final candidate text (all bounded, none structural) — including striking the V13-falsified option, adding P25 + planted-timer + OM-poisoning fixtures, and the threat-framing sentence. After that Round 3 consolidation, **3H-01 is ready for operator decision**. If ChatGPT contests any FBL-R2 item, that specific point needs one more adversarial pass; agreement, as always, ratifies nothing.
+
+---
+
+## 29. Proof-strategy additions requested
+
+Add to §15:
+
+```text
+P25 dirty-inherited-workspace evidence that clean materialization of X would falsify is detected at the verifier/compose anchor
+P26 planted deferred-execution task (cron/at/timer) from a terminal predecessor causes the quiescence gate to fire
+P27 poisoned thread with OM re-enabled and stale subagent model selection is mechanically overridden at dispatch
+P28 admitted CONTINUE_LINEAGE whose gates fail at binding terminates/aborts; it never silently proceeds as FRESH_BASE
+P29 completed sandbox operation is attributable to a physical incarnation (attribution impossible ⇒ wrapper trigger fires)
+```
+
+---
+
+## 30. Final disposition
+
+```text
+Material Finding against approved authority                     = NONE
+reopen required                                                 = NONE
+ChatGPT R2 FAILED correction                                    = ACCEPTED (Fable R1 default withdrawn)
+FRESH_BASE | CONTINUE_LINEAGE immutable dispatch fact           = CONFIRMED minimal + FBL-R2-01 fail-closed law
+overengineering detected in accepted laws                       = NONE (one fictional realization option struck, V13)
+Alternative D                                                   = REMAINS GLOBAL MAXIMUM
+refinements required                                            = FBL-R2-01..06 + P25..P29
+recommendation                                                  = CURRENT STRUCTURE CONFIRMED
+readiness                                                       = Round 3 consolidation, then READY FOR OPERATOR DECISION
+```
+
+This round approves nothing. Operator ratification remains the only path to authority.
+
+— Fable, Round 2

@@ -1538,3 +1538,134 @@ verdict = CURRENT STRUCTURE CONFIRMED — ready for consolidation and operator
           review; numbering as a 3I decision remains with the operator
 ```
 
+---
+
+## 24. Fable Round 2 — scoped corrections (operator-directed)
+
+**Scope:** exactly two points — the Postgres ↔ infra-backing consistency schedule left open by F-1, and a YAGNI re-attack on F-4's transient-token persistence pre-admission — plus one clarification of F-1's realization-class status. All other Round 1 findings (F-2, F-3, F-5, F-6, F-7, F-8) and the no-Material-Finding verdict are converged and are **not** reopened.
+
+### R2-1 — The cross-store failure schedule closes with a durable-before-visible publication order; no FSM, record, or outbox
+
+```text
+claim challenged      F-1 named the realization class (domain row in Postgres +
+                      ciphertext in infra backing) but left its consistency
+                      schedule unstated: `con.connection` and a filesystem-class
+                      object share no transaction. Crash between the two writes
+                      must not produce a NORMAL state where a visible
+                      credential_ref points at material that never became
+                      durable.
+failure schedules     create:  publish ref in domain row first, write object
+                               second, crash between
+                               → dangling LIVE ref: Connection appears
+                                 credentialed; decrypt fails at use. Fail-closed
+                                 catches it (§9.4), but a crash would ROUTINELY
+                                 manufacture this state — wrong shape.
+                      replace: in-place overwrite of the referenced object,
+                               crash mid-write
+                               → the ONLY copy of live material is now partial;
+                                 AEAD detects corruption but cannot restore it —
+                                 secret loss from a plain crash. Forbidden shape.
+smallest law          DURABLE-BEFORE-VISIBLE publication order:
+
+                      1. ciphertext objects are WRITE-ONCE and immutable; a new
+                         logical write always produces a NEW object under a NEW
+                         unique ref (never in-place mutation of a referenced
+                         object);
+                      2. the object is fully durable at the infra boundary
+                         (atomic publish of complete bytes — e.g. temp-write +
+                         fsync + atomic rename for a filesystem realization;
+                         the equivalent atomic-complete-publish property for
+                         any other admitted realization) BEFORE
+                      3. the single domain transaction that makes the ref
+                         visible commits — create sets credential_ref; replace
+                         swaps credential_ref under the existing 3I-01 guarded
+                         pre-state mutation; the old object merely becomes
+                         unreferenced;
+                      4. cleanup of unreferenced objects is DEFERRED hygiene:
+                         a sweep may remove an unreferenced object only after
+                         an age window safely longer than any in-flight
+                         create/replace, honoring the existing backup-safety
+                         pattern (C-015 GC precedent). At F1 volume this sweep
+                         may be trivial/manual; 3M owns repair policy if the
+                         realization can produce more than orphans.
+
+                      consequences, stated as law:
+                      - the ONLY crash residue this order can produce is an
+                        unreferenced infra-side object — reconcilable, never
+                        authority;
+                      - a visible credential_ref resolving to missing/partial/
+                        unauthenticatable material is therefore NOT a normal
+                        crash outcome: if observed, it is an integrity
+                        incident — fail closed per §9.4, surface as evidence,
+                        repair via 3M/recovery (§15) — never silently
+                        recreate or fall back.
+why no machinery      the domain row's credential_ref is already the single
+                      publication point; write-once objects have no states to
+                      track (no FSM), nothing propagates asynchronously (no
+                      outbox), and no new durable fact is needed (no record) —
+                      ordering + immutability replace all three. This is the
+                      same publish-after-durable discipline C-014/C-015 already
+                      use for CAS pointers and blobs, applied to a two-store
+                      seam.
+reopen prior authority?  NO
+later owner           decision text (the four-rule order + incident law);
+                      implementation (atomic-publish spelling); 3M (repair)
+```
+
+### R2-2 — F-4 re-attacked on YAGNI: memory-only becomes the frozen baseline; persistence returns to Decision Loop with its first real consumer
+
+```text
+claim challenged      Round 1 F-4 pre-admitted a persistence design ("if a
+                      provider forces persistence → CredentialBackend custody
+                      under an infra-level generation counter")
+YAGNI test            no current provider requires a durable transient-token
+                      cache: the one qualified F1 profile (C-007, Sankhya) is
+                      client_credentials + X-Token WITHOUT refresh —
+                      reacquisition is an ordinary /authenticate call inside
+                      the Gateway auth strategy, repeatable at will. Designing
+                      generation-counter storage semantics for a consumer that
+                      does not exist is exactly the speculative-capability
+                      shape the method deletes; Round 1 should not have
+                      sketched the mechanism.
+corrected law         F1 freezes: transient acquired tokens are MEMORY-ONLY.
+                      No durable transient-token cache exists in any store.
+                      What survives as BOUNDARY law (the seam, not the
+                      capability): any future persisted transient secret is
+                      secret-at-rest and therefore falls entirely inside this
+                      family's custody laws, is never a domain fact, never a
+                      ConnectionRevision input, never a qualification-identity
+                      input (3C-07-A). The persistence mechanism itself —
+                      including whether a generation counter is even the right
+                      shape — is decided by Decision Loop at the FIRST real
+                      provider whose reacquisition cost/rate-limit/lockout
+                      behavior proves the need. C-016's reserved
+                      key_version != refresh_generation distinction remains
+                      untouched, waiting for the rotating-refresh trigger.
+reopen prior authority?  NO — supersedes Round 1 F-4's second half only
+later owner           decision text (memory-only baseline + boundary law);
+                      Decision Loop (first persistence consumer)
+```
+
+### R2-3 — Clarification: filesystem is the existence proof and an admissible shape, not frozen technology
+
+Round 1 F-1 is to be read as follows, and the decision text should say it in one sentence: the filesystem-class backing is the **existence proof** that the realization class ("infra storage, opaque-ref addressed, FK-free, domain-opaque, write-once publishable per R2-1, recoverable per §15") can be satisfied with zero new domain records/schemas/databases — and it is an admissible shape, not a technology pin. Implementation may choose any equally narrow realization that satisfies the same class constraints and the R2-1 publication order without returning to Decision Loop; what still trips the Decision Loop tripwire is unchanged — any realization needing a new durable domain record, a new hub_control schema, a new database, domain-readable backing rows, or FKs into the backing.
+
+### R2 closing
+
+```text
+cross-store schedule        = CLOSED: durable-before-visible publication order;
+                              write-once objects; new-ref-then-swap replace;
+                              deferred age-windowed cleanup; dangling live ref
+                              = integrity incident, never normal state
+machinery added             = NONE (no FSM, no record, no outbox)
+F-4 second half             = WITHDRAWN; memory-only baseline frozen;
+                              persistence → Decision Loop on first real
+                              consumer; boundary law retained
+filesystem backing          = existence proof / admissible shape, not a
+                              technology pin; class constraints + tripwire
+                              unchanged
+converged findings          = F-2, F-3, F-5, F-6, F-7, F-8 stand unmodified
+Material Finding            = NONE (unchanged)
+```
+
+

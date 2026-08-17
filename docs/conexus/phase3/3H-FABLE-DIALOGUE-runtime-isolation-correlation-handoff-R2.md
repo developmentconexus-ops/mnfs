@@ -931,3 +931,165 @@ later owner if deferred
 ```
 
 Do not modify the original dialogue, `LEDGER.md`, approved authority or product code. Append `Round 2 — Fable` to this R2 file and commit/push only this dialogue change.
+
+---
+
+# Round 2 — Fable
+
+**Role:** independent adversarial Senior/Staff/Principal Software Engineer + Software Architect.
+**Baseline:** authority chain re-checked; Round 1 evidence F1–F7 carries; fresh verification this round as G1–G7.
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Nothing here approves 3H-03.
+
+---
+
+## 16. External evidence re-verified this round
+
+| ID | Verified fact | Source |
+|---|---|---|
+| G1 | **E2B OTLP push export is documented** at `docs.e2b.dev/sandbox/otel-telemetry-export`: metrics under `e2b.*` (CPU/memory), logs with `service_name: e2b` (sandbox start/stop and other actions); "Telemetry export is best effort… some metrics or logs may be delayed or dropped"; configuration happens **during enterprise onboarding** (OTLP endpoint + auth headers/bearer), with a BYOC variant. | docs.e2b.dev/sandbox/otel-telemetry-export (current) |
+| G2 | The exported page **does not specify any per-sandbox identity attribute** (no `sandbox_id`/team/metadata resource-attribute contract) on pushed metrics/logs. | same page |
+| G3 | `thread-stream-runtime.ts`: state is partitioned by `#statesByPubSub = new WeakMap<PubSub, AgentThreadRuntimeState>()`; each partition holds `threadRunsById`, `activeThreadRunIds`, `suspendedRunIds`, `approvalSuspendedRunIds`, `pendingSignalsByThread`, `pendingContinuationsByThread`, `preparedRunsById`, `abortedRunIds`, `leaseRenewalTimers` and more. Module-level `export let defaultAgentThreadPubSub = new EventEmitterPubSub()`; the runtime's `#getPubSub()` is `pubsub ?? defaultAgentThreadPubSub` — **callers that omit the pubsub parameter land in the module-default bucket**. | `packages/core/src/agent/thread-stream-runtime.ts` (raw, main) |
+| G4 | One source-reading discrepancy to resolve mechanically: ChatGPT quotes a module-level `export const agentThreadStreamRuntime = new AgentThreadStreamRuntime()`; my fetch summarized the file as exporting the class with the WeakMap as an instance field. Under **either** reading the operative hazard is identical — state is keyed by PubSub identity and a module-default PubSub exists — so the law below is reading-independent and the probe settles the file layout. | same source, both rounds |
+| G5 | `new Mastra({})` without `storage` falls back to **`InMemoryStore` with an explicit logged warning**: "In-memory storage is not durable: all data is lost on restart, and it is not safe for production." (`#storageExplicit` tracked internally.) | `packages/core/src/mastra/index.ts` (current) |
+| G6 | Mastra PubSub docs: workflow execution, scheduled workflows, background tasks, agent signaling and resumable streams **share the instance's one bus** — "the chosen backend configuration applies globally to all of them." External backends exist (e.g. `RedisStreamsPubSub({ keyPrefix })`). DurableAgent wrapping "occurs at registration within a Mastra instance; standalone agents… do not become durable." | `docs/server/pubsub.mdx`, `reference/agents/durable-agent.mdx`, `docs/capabilities/channels.mdx` |
+| G7 | One more **process-global mutable registry** found in the sweep: Observational Memory's operation registry — module-level `const activeOps = new Map<string, number>()` keyed `${recordId}:${op}`; OM's own prod-readiness notes admit single-process assumptions ("critical issues in horizontally-scaled… deployments"). OM is **OFF in the F1 baseline** (3A-R5/3H-02). | `packages/memory/src/processors/observational-memory/operation-registry.ts`, `…/explorations/prod-readiness.md` |
+
+---
+
+## 17. Verdict up front
+
+1. **Q1 conceded cleanly:** the E2B OTLP push page exists and says what C1 quotes (G1). My Round 1 statement "could not be verified at primary source" was a **search-coverage failure on my side** (I fetched `/sandbox/metrics` and two searches missed `/sandbox/otel-telemetry-export`), not a fact about the documentation. The principle survived intact — and the fresh page adds two facts that *sharpen* ChatGPT's dual-path law rather than weaken it (§18).
+2. **CGPT-R2-01 is a genuine material catch and I accept it**, with three refinements: PubSub isolation must be specified as **distinct instance (same-process) / distinct namespace-prefix (shared external broker)** (FBL-R2-03); the module-default PubSub fallback demands a **canary probe** proving no enabled F1 path ever lands in the default bucket (FBL-R2-04); and the standalone prohibition is now **evidence-backed by the InMemoryStore fallback** and gains an explicit-persistent-storage startup check (FBL-R2-06).
+3. Role attribution needs one sharpening: under a shared global OTel SDK (bridge realization), **resource/serviceName identity is per-process, not per-role** — the law must require per-signal role attributes in that realization (FBL-R2-02).
+4. Rebuild-on-resume must be **replace-whole, never merge** — merged rebuilds leave unknown stale keys alive (FBL-R2-05).
+5. Sweep result (Q8): one additional process-global registry found (OM `activeOps`, G7) — outside the F1 enabled set, named as a future qualification/split trigger exactly like the durable-agent registry. Nothing found that forces a process split now.
+6. Disposition: **CURRENT STRUCTURE CONFIRMED**; operator-ready after a Round 3 consolidation folds this round's refinements.
+
+---
+
+## 18. Block A — E2B evidence correction (Q1–Q4)
+
+- **Q1 —** conceded, as above. For the record: pull-by-`sandboxId` (F5/C2) and push (G1) are both verified current capabilities.
+- **Q2 —** yes, the dual-path law is globally superior and matches already-approved C-013 shape (per-run provider summaries + degradable operational enrichment). Two sharpenings from the fresh page:
+  1. **G2:** the documented push contract names **no per-sandbox identity attribute** — so today push data cannot even be *attributed* to a specific ActorRun's sandbox with documented guarantees;
+  2. **G1:** push is configured at **enterprise onboarding** — its availability is plan/config-dependent, one more reason it must never be a load-bearing evidence path.
+- **Q3 —** verified: **no**. Current docs expose no stable sandbox-identity attribute on exported metrics/logs (G2). Push cannot replace pull for exact ActorRun attribution on the documented contract; 3L may re-verify at version pin (the contract could grow attributes later).
+- **Q4 —** no, twice over: (a) best-effort delivery makes *absence* ambiguous (dropped vs. never happened), so an assertion *requiring* provider observation cannot anchor on push — missing push data must yield degraded observation, and required-but-missing becomes NOT_PROVEN only via the pull path's deterministic failure semantics; (b) even *arrived* push data currently lacks the attribution contract (Q3) to bind it to the run being judged. Push data that arrives and is independently correlated remains admissible `PROVIDER_OBSERVED` enrichment.
+
+---
+
+## 19. Block B — process-global state / isolation (Q5–Q10)
+
+- **Q5 —** attacked and it holds: the WeakMap keys on **PubSub object identity** (G3), so two Mastra instances with distinct PubSub objects (which is the constructor default — C4) resolve disjoint `AgentThreadRuntimeState` buckets containing exactly the role-sensitive surfaces ChatGPT listed (suspended/active/pending/abort/lease state, G3). The partition is mechanical, not conventional. G4's reading discrepancy (singleton instance vs. class export) does not alter this — under both readings state is PubSub-keyed — and P33/P34 settle the layout empirically.
+- **Q6 —** the real seam found this round: the runtime's own fallback is `pubsub ?? defaultAgentThreadPubSub` (G3). An **attached** Agent resolves its pubsub through `#pubsub ?? #inheritedPubSub ?? #mastra?.pubsub` (C5) and threads it through; the default bucket is reached by any caller that fails to pass a pubsub. I found no enabled-path evidence that an attached agent omits it — but absence of evidence is not proof, so this becomes a **canary obligation** (FBL-R2-04): during qualification, subscribe a canary to `defaultAgentThreadPubSub` and prove **zero role events** land there across the full Builder+PAR exercise set. Cheap, decisive, reading-independent.
+- **Q7 —** yes, role-local PubSub is the minimal correct law for the enabled set. The other known globals: hooks emitter (owner-tokened + P29), durable-agent `globalRunRegistry` (deferred capability, C6), OM `activeOps` (capability OFF, G7). None is enabled-F1 load-bearing; none forces a split.
+- **Q8 —** sweep executed beyond docs (source + exploration notes): found **OM `activeOps`** (G7) — add it beside the durable-agent registry in §4 as a *named future trigger*: if OM is ever enabled (3A-R5 eval-gated), its process-global registry and admitted single-process assumptions must pass multi-role/same-process qualification or trigger guard/split. Also re-confirmed: `storageWithInit` proxy caches init per storage object (benign, per-object); `InMemoryStore` fallback is config-time, not cross-role (G5). Residual unknowns remain a P5-sweep obligation at the pinned version — the sweep is a probe property precisely because absence cannot be proven from a dialogue.
+- **Q9 —** only observability/context coupling. No path was found where AsyncLocalStorage or the global OTel provider influences execution, tool resolution or permissions — they carry context and signals, not behavior. (The bridge's *log routing* to the global LoggerProvider is emission plumbing, same class.)
+- **Q10 —** reachable only through explicit misconfiguration: registering the *same* Agent/Memory object in both instances. No silent framework path was found that shares such objects across instances; the object's own `#mastra` binding makes dual registration visibly wrong. The R2 prohibition list plus a P34-style negative fixture (attempt dual registration → qualification rejects) covers the class.
+
+---
+
+## 20. Block C — standalone/ephemeral fallback (Q11–Q13)
+
+- **Q11 —** yes, and now with teeth: G5 shows the fallback substrate is an `InMemoryStore` whose own warning says "all data is lost on restart… not safe for production". The prohibition is not stylistic — it is the difference between a durable wait and a wait that evaporates.
+- **Q12 —** freeze the property, not the ceremony: *every governed Builder/PAR run resolves storage, PubSub and memory from its role Mastra instance; no governed execution may lazily create ephemeral substrate.* Registration/attachment is the **documented current mechanism** (G6: durable wrapping happens at registration; standalone agents don't get it), so the realization will likely register — but if 3L proves dependency injection yields the identical resolution, that is admissible. Add one startup qualification: role instances must have **explicitly configured persistent storage** (the `#storageExplicit` distinction G5 shows exists) — a role instance running on fallback storage refuses to serve governed runs.
+- **Q13 —** constructed, now source-backed: a Product Agent instantiated standalone (test harness path leaking into production wiring) lazily creates the ephemeral Mastra with `InMemoryStore`; a tool suspends for approval; everything *appears* to work — `listSuspendedRuns` on the ephemeral instance even returns the run; process restarts; the ephemeral store is gone (G5), `ParMastra.listSuspendedRuns` never knew the run, the ApprovalRequest dangles until expiry, and the human's ALLOW resumes nothing. Failure is invisible until the first restart — the worst kind. P35 covers; the storage-explicit check (Q12) closes the remaining corner where the *role instance itself* was misconfigured.
+
+---
+
+## 21. Block D — FBL corrections (Q14–Q18)
+
+- **Q14 —** yes, more is needed in one realization: with per-role `OtelExporter` providers, resource/serviceName identity per role suffices; **under the shared global-SDK bridge, resource identity is per-process** — both roles emit under one resource, and serviceName can no longer distinguish them. Sharpened law (amends FBL-R1-02): *mechanical role identity on every signal — realized as per-role resource identity where each role has its own provider, and as mandatory per-span/per-log `runtime_role` attributes wherever a shared global SDK/LoggerProvider is used.* P28 gains the bridge-mode variant.
+- **Q15 —** the mapping is semantically correct at the **trust-class** level: the class answers "may acceptance consume this?" — no for both Mastra runtime observations and E2B provider observations. The hub-process-Mastra vs. external-E2B distinction is real but belongs in the **versioned mapping / producer identity fields** C-013 already carries (producer_instance_id, source), not in a new or narrower top-level class. No change to the four classes.
+- **Q16 —** not too strong. I searched for a consumer and found none: in-process correlation needs no propagation; app-under-test association is launch-boundary-stamped (env/metadata/resource attributes), not baggage; cross-service hops inside the platform carry RequestContext. Every baggage use case collapses into a safer existing carrier. The 3I escape hatch (explicit decision + egress stripping) remains for a future genuine consumer.
+- **Q17 —** correct catch — **replace-whole, never merge** (this is the sharpening my Round 1 law needed): a rebuild that merges owner values *onto* the snapshot context preserves every stale key the owner doesn't explicitly own — unknown-key survival is exactly the resurrection channel we closed for known keys. Law: *the owner-constructed context object **replaces** the propagated/persisted context on resume; snapshot context remains accessible only as a separate diagnostic artifact.* Whether the runtime API allows supplying a fresh context at resume or the adapter must neutralize the restored one is a 3L mechanism question; P30 asserts the observable outcome **including deletion of stale keys** (fixture: plant a stale key the owner does not know about → it must be absent from the effective resumed context).
+- **Q18 —** yes, without any new class: a lexical closure created at dispatch *is* the opaque handle — it survives async chains by construction, and runtime-initiated retries re-enter through the same bound callback, hence the same identity. Only a new owner dispatch mints a new closure. The only place a handle "class" could be forced is out-of-process transport, where the equivalent is authenticated transport context — already routed 3I/3J.
+
+---
+
+## 22. Block E — process split (Q19–Q21)
+
+- **Q19 —** yes: §6's positive triggers (unpartitionable mutable cross-role state) and negative list (global OTel SDK, ALS, immutable singletons, same process per se) bound the decision from both sides; neither under-isolation nor speculative topology survives them.
+- **Q20 —** strongest current argument: the `defaultAgentThreadPubSub` fallback (G3) plus the same-PubSub misconfiguration path — a single wiring error silently merges the roles' entire thread/suspension/signal runtime namespace. Refuted as a *split* justification: per-instance PubSub is the constructor default (C4), the misconfiguration is prohibited and negatively probed (P34), and the default bucket gets a canary (FBL-R2-04). A process boundary would buy protection against a config error we can detect mechanically for the price of a permanent RPC/auth/supervision surface.
+- **Q21 —** strongest for co-location: 3C-01's ratified modular monolith + direct-call-first F5 (3D-R1) + zero internal transport/auth surface + single-operator F1 deployment reality. Both arguments stated; the trigger law arbitrates them on evidence, which is exactly where the decision belongs.
+
+---
+
+## 23. Block F — Verification Observability (Q22–Q25)
+
+- **Q22 —** yes: pull-by-pinned-`sandboxId` (exact provider evidence), hub-process Mastra observations, and guest app telemetry — classified by the existing four trust classes — cover the provider/guest distinction with zero new entities.
+- **Q23 —** the guest can poison anything the guest emits — attributes, claimed IDs, spans. Therefore verifier-load-bearing correlation is exclusively: platform-stamped launch association (Hub knows ActorRun↔sandbox↔invocation), provider pull keyed by the platform-pinned physical `sandboxId`, and hub-process Mastra spans. Guest-emitted correlation is cross-check/diagnostic (`GUEST_OBSERVED`), and a mismatch between guest claims and platform stamps is itself a signal worth surfacing.
+- **Q24 —** only the verification execution/segment: per-config capture (each role instance carries its own Observability configs) lets a verification-scoped config run always-capture while everything else samples. Platform-wide 100% is neither needed nor acceptable.
+- **Q25 —** keep as challenger: MCP-native local error/trace access for verifier agents (F6) is a real UX capability the OTel/OBS baseline doesn't automatically match, the probe is cheap, and 3C-13 already framed it. Drop it only on a null probe result, not by anticipation.
+
+---
+
+## 24. Block G — F5 handoff (Q26–Q28)
+
+- **Q26 —** worst same-process window: owner transaction commits (e.g. `producedOutputRef` or AgentRun terminal) and the process dies before the callback returns to the runtime/caller. On recovery the runtime re-presents/re-proposes; the owner's write-once fact returns the recorded decision idempotently. Pre-commit crash: no owner truth; every current proposal is re-derivable (output from Hub custody, completion from runtime state/orphan path, occurrence from scheduler redelivery). **No approved invariant requires an outbox**; an outbox would add a second place where proposal state lives, i.e. a second thing to reconcile.
+- **Q27 —** yes: Builder re-presentation is the 3G-03 §7.2 idempotent read-back; PAR duplicate completion hits terminal write-once (3G-05). Both proven-by-construction under existing laws; P12 (R1) demonstrates firing.
+- **Q28 —** not necessarily: narrow request/reply with the same idempotent owner guards preserves semantics across a process boundary **as long as proposals remain re-derivable from runtime-side state** — which all current ones are. A queue/outbox becomes justified only if a future transport carries proposals that are *not* re-derivable after loss; that is precisely the named reopen trigger in §21 (R1) and it stands.
+
+---
+
+## 25. Block H — YAGNI / Global Maximum (Q29–Q36)
+
+- **Q29 —** most deletable: §11's example metric-dimension list (the prohibition is the law; examples invite freezing) and §5's "same role registry object as convenience" line (subsumed by the same-Agent/same-Memory prohibitions).
+- **Q30 —** one wording fix, not complexity: "role-local PubSub identity/**namespace**" under-specifies. Precision (FBL-R2-03): *same-process realization → distinct PubSub **instances** (the WeakMap partitions by object identity, G3); shared external broker realization (e.g. Redis Streams) → additionally distinct **namespace/keyPrefix** per role (G6 shows `keyPrefix` exists for exactly this).* Without the second clause, two "distinct" PubSub client objects pointing at the same Redis topics would reunify the roles at the broker.
+- **Q31 —** no new authority or durable concept: every R2 addition is a configuration/resolution law on existing acts. Confirmed.
+- **Q32 —** a necessary 3H property: the *reason* is architectural — current process-global runtime state is keyed by PubSub identity (G3), so PubSub-per-role is what makes "role-isolated instances" true rather than aspirational. Exact wiring (instance construction, keyPrefix values) is 3L.
+- **Q33 —** no — the dual-path correction strengthens A (provider evidence gets a deterministic anchor plus an enrichment channel).
+- **Q34 —** no 3H-04: the R2 additions integrated cleanly into the same decision spine; nothing gained an independent failure-class family.
+- **Q35 —** **`CURRENT STRUCTURE CONFIRMED`** — Alternative A + R2 isolation contract + this round's refinements.
+- **Q36 —** ready for operator **after a Round 3 consolidation** folds: the E2B concession record with Q3's attribution gap; per-signal role attribution under shared-SDK realizations; PubSub instance-vs-namespace precision; replace-whole context rebuild; the default-PubSub canary and explicit-persistent-storage checks; OM `activeOps` added to the named future triggers. All bounded, none structural. No further adversarial round needed unless a refinement is contested.
+
+---
+
+## 26. Proof refinements
+
+```text
+P28 (extended) repeat in bridge/shared-global-SDK mode
+     → per-span/per-log runtime_role attributes present on every signal from both roles
+P30 (extended) plant a stale snapshot-context key the owner does not know about
+     → effective resumed context does not contain it (replace-whole, not merge)
+P33 (unchanged) distinct PubSub instances → role-isolated thread/suspend/signal state
+P34 (unchanged) same-PubSub negative fixture → qualification rejects shared role namespace
+P35 (extended) standalone/ephemeral fallback refused AND role instance without explicitly
+     configured persistent storage refuses governed runs at startup
+P36 (sharpened) E2B: (a) pull by pinned physical sandboxId resolves run-associated metrics;
+     (b) push exports e2b.* metrics/logs when enabled; (c) push outage degrades honestly;
+     (d) push data carries NO documented per-sandbox identity attribute at the pinned
+     version unless re-verified — attribution stays pull-anchored
+P38 (new) canary subscriber on defaultAgentThreadPubSub across the full Builder+PAR
+     qualification exercise set → zero role events land in the module-default bucket
+P39 (new) shared external PubSub broker realization (if chosen) → distinct per-role
+     namespace/keyPrefix proven to prevent cross-role delivery
+```
+
+---
+
+## 27. Final disposition
+
+```text
+Material Finding against approved authority          = NONE
+reopen required                                      = NONE
+E2B OTLP push evidence (Q1)                          = CONCEDED — documented; R1 statement was
+                                                       a search-coverage failure on Fable's side
+dual-path provider law                               = ACCEPTED + sharpened (no per-sandbox
+                                                       identity attribute documented; onboarding-
+                                                       dependent availability)
+CGPT-R2-01 (role-local PubSub + no standalone)       = ACCEPTED + refined (instance vs namespace,
+                                                       default-bucket canary, storage-explicit check)
+role attribution under shared global SDK             = SHARPENED to per-signal attributes
+RequestContext rebuild                               = SHARPENED to replace-whole, never merge
+additional process-global state found                = OM activeOps (OFF in F1) → named future trigger
+mandatory process split                              = STILL NOT JUSTIFIED
+Alternative A                                        = REMAINS GLOBAL MAXIMUM
+recommendation                                       = CURRENT STRUCTURE CONFIRMED
+readiness                                            = Round 3 consolidation, then READY FOR
+                                                       OPERATOR DECISION
+```
+
+This round approves nothing. Operator ratification remains the only path to authority.
+
+— Fable, Round 2

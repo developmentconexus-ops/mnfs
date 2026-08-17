@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J EM ANDAMENTO / 3J-01..3J-03 APROVADAS`  
-**Fase atual:** `3J — Deployment / Operations Architecture` — 3J-03 ratificada; `3J-04 = NOT JUSTIFIED candidate`; próxima ação = `3J-R1 — bounded final closure`  
+**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS`  
+**Fase atual:** `pre-3K — Global Platform Coherence Checkpoint` — 3J encerrada (3J-R1 ratificada em 2026-08-17); `3J-04 = NOT JUSTIFIED`; próxima ação = pre-3K global platform coherence checkpoint (ainda não 3K)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -68,6 +68,18 @@ C-000..C-017
 3I-R1
 → Security / Authority Architecture Final Closure
 
+3J-01
+→ First Production Topology, Placement & Ingress
+
+3J-02
+→ Operational State, Backup & Restore Architecture
+
+3J-03
+→ Platform Lifecycle, Secret Injection, Emergency Stop & Availability
+
+3J-R1
+→ Deployment / Operations Architecture Final Closure
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -101,8 +113,8 @@ Nenhuma conversa cria authority.
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
-| 3J — Deployment / Operations Architecture | **EM ANDAMENTO / 3J-01..3J-03 APROVADAS** | 3J-R1 — bounded final closure; `3J-04 = NOT JUSTIFIED candidate` |
-| 3K — Frontend / Product Architecture | NÃO INICIADA | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
+| 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
+| 3K — Frontend / Product Architecture | NÃO INICIADA | gated pelo pre-3K global platform coherence checkpoint; depois F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
@@ -875,15 +887,16 @@ Review provenance, non-authoritative:
 
 ---
 
-## 11. 3J — IN PROGRESS
+## 11. 3J — CLOSED / APPROVED
 
 | ID | Decisão | Documento |
 |---|---|---|
 | 3J-01 | First Production Topology, Placement & Ingress | [3J-01](3J-01-first-production-topology-placement-ingress.md) |
 | 3J-02 | Operational State, Backup & Restore Architecture | [3J-02](3J-02-operational-state-backup-restore-architecture.md) |
 | 3J-03 | Platform Lifecycle, Secret Injection, Emergency Stop & Availability | [3J-03](3J-03-platform-lifecycle-secret-injection-emergency-stop-availability.md) |
+| 3J-R1 | Deployment / Operations Architecture Final Closure | [3J-R1](3J-R1-deployment-operations-architecture-final-closure.md) |
 
-Ratificações pelo operador: **3J-01 / 3J-02 / 3J-03 — 2026-08-17**.
+Ratificações pelo operador: **3J-01 / 3J-02 / 3J-03 — 2026-08-17**; **3J-R1 — 2026-08-17**.
 
 ### 11.1 3J-01 — First production topology laws
 
@@ -937,16 +950,53 @@ whole-Hub emergency stop out-of-band derrota TODA camada de auto-start
 sem HA/zero-downtime/orchestrator/PlatformDeployment/EmergencyStop record
 ```
 
-`3J-04 = NOT JUSTIFIED candidate` — ownership 3A-R6 §7 completo em 3J-01/02/03; dois defers de 3A-R6 (DEDICATED physical; old-PAR drain) preservados com triggers. **C-001 permanece a product vision authority.**
+`3J-04 = NOT JUSTIFIED` — ownership 3A-R6 §7 completo em 3J-01/02/03; dois defers de 3A-R6 (DEDICATED physical; old-PAR drain) preservados com triggers. **C-001 permanece a product vision authority.**
 
-Próxima ação: `3J-R1 — bounded final closure` (ratificação final do operador).
+### 11.4 Final closure — 3J-R1
+
+O bounded independent closure review encontrou:
+
+```text
+Material Finding against 3J-01/02/03            = NONE
+missing material 3J decision                     = 0
+3J-04                                            = NOT JUSTIFIED
+unrouted material deployment/operations blocker  = 0
+prior phase reopen                               = NONE
+C-001 product guardrail preserved                = YES — installation-scoped
+Metal Nobre / Sankhya                            = first-deployment evidence /
+                                                   ordinary integration only
+DEDICATED physical + old-PAR drain               = still DEFER SAFELY with triggers
+3L/3M/3K/Realization boundaries preserved        = YES
+new module/record/engine required by closure     = 0
+verdict                                          = CLOSE 3J
+```
+
+Conteúdo ratificado do closure:
+
+1. **Pre-production gate family** consolidada por citação, sem nova obrigação: complete restore proof (3J-02) + whole-Hub emergency-stop drill (3I-01 §13 / 3J-03) — ambas exigidas antes de produção por authority já aprovada.
+2. **Única amendment de prior authority em 3J** confirmada bounded: C-015 §5 + C-016 §6 exposure realization, registrada em 3J-01; não reabre mais nada.
+3. **3A-R6 §7 coverage snapshot no fechamento** (binding):
+
+```text
+first Hub deployment shape / single-host+split trigger / monolith placement
+PG / hub_control / Project DB / Mastra store placement / E2B connectivity
+MANAGED serving / TLS-ingress                                    → 3J-01
+backup ownership + required set + restore-proof responsibility   → 3J-02
+secret injection/custody / startup-shutdown-restart / deploy
+sequence / whole-Hub emergency stop / minimum availability set   → 3J-03
+host-loss/restart honesty → 3J-01 failure domain / 3J-02 RPO-RTO / 3J-03 procedure
+```
+
+4. Defers/rejects preservados por citação; `3J-04 = NOT JUSTIFIED`.
+5. **3J fecha installation-scoped**: contrato de operações da primeira instalação; C-001 product vision authority intacta; Metal Nobre/Sankhya são first-deployment evidence/integração ordinária apenas.
 
 Review provenance, não-autoritativa:
 
 - `3J-FABLE-DIALOGUE-intake-decomposition.md`;
 - `3J-FABLE-DIALOGUE-first-production-topology-placement-ingress.md`;
 - `3J-FABLE-DIALOGUE-operational-state-backup-restore.md`;
-- `3J-FABLE-DIALOGUE-platform-lifecycle-secrets-stop-availability.md`.
+- `3J-FABLE-DIALOGUE-platform-lifecycle-secrets-stop-availability.md`;
+- `3J-FABLE-DIALOGUE-final-deployment-operations-closure.md`.
 
 ---
 
@@ -1261,11 +1311,12 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3I-06 = NOT JUSTIFIED
 3I-R1 = APPROVED / CLOSED
 
-3J = IN PROGRESS
+3J = CLOSED / APPROVED
 3J-01 = APPROVED
 3J-02 = APPROVED
 3J-03 = APPROVED
-3J-04 = NOT JUSTIFIED candidate
+3J-04 = NOT JUSTIFIED
+3J-R1 = APPROVED / CLOSED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1288,12 +1339,14 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3J-02 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela recovery set class-based (`hub_control`, production Project DBs, `mastra_par`, non-reconstructible digest bytes, CredentialBackend backing, Git bundle off-provider, recovery manifests), `mastra_builder` fora por default, off-host immutability contra host-credential compromise, independent path para recovery material não-regenerável, proibição de credenciais operacionais reemitíveis em backup, pre-production complete restore proof, `RPO <= 6h / RTO <= 8h` e rejeição de PITR/replication/second provider/backup platform. **C-001 permanece product vision authority.**
 
-3J-03 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela one Hub process + bounded operational job contexts, exclusão de backup/migrator/admin credentials do runtime, secrets owner-scoped fail-closed, `hub_control down => NOT READY`, restart supervisionado de durable authority, platform deploy com single target revision identity e checkpoint/proof fail-closed, emergency stop out-of-band derrotando toda camada de auto-start, e capability-local degradation sem availability orchestrator. `3J-04 = NOT JUSTIFIED candidate`. **C-001 permanece product vision authority.**
+3J-03 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela one Hub process + bounded operational job contexts, exclusão de backup/migrator/admin credentials do runtime, secrets owner-scoped fail-closed, `hub_control down => NOT READY`, restart supervisionado de durable authority, platform deploy com single target revision identity e checkpoint/proof fail-closed, emergency stop out-of-band derrotando toda camada de auto-start, e capability-local degradation sem availability orchestrator. `3J-04 = NOT JUSTIFIED`. **C-001 permanece product vision authority.**
+
+3J-R1 foi ratificada em **2026-08-17** após bounded independent closure review com `Material Finding = NONE`, `missing material 3J decision = 0`, `3J-04 = NOT JUSTIFIED`, `unrouted material deployment/operations blocker = 0`, `prior phase reopen = NONE` e `CLOSE 3J`; consolida a pre-production gate family por citação (complete restore proof 3J-02 + whole-Hub emergency-stop drill 3I-01 §13/3J-03), confirma a única prior-authority amendment de 3J (C-015 §5 + C-016 §6 exposure realization, registrada em 3J-01) como bounded, congela o 3A-R6 §7 coverage snapshot em [3J-R1](3J-R1-deployment-operations-architecture-final-closure.md) e fecha 3J **installation-scoped**, com **C-001 preservada como product vision authority**.
 
 Próxima ação:
 
-> **Executar `3J-R1 — Deployment / Operations Architecture Final Closure` (bounded)**: verificar ownership completo dos MUST de 3A-R6 §7 em 3J-01/02/03, coerência cross-package, defers preservados e ausência de material finding; fechamento de 3J fica com a ratificação final do operador.
+> **Executar o pre-3K Global Platform Coherence Checkpoint** (ainda não 3K): checkpoint adversarial da plataforma inteira — C-001/C-003 contra 3B..3J, requisitos órfãos, supersessions, complexidade essencial vs acidental — antes de abrir 3K. Não cria authority por si; findings materiais retornam ao Decision Loop aplicável.
 
-Depois de 3J, 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
+Depois do checkpoint, 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

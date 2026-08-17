@@ -556,3 +556,241 @@ verdict = ACCEPT CANDIDATE | RESTRUCTURE | STOP
 ```
 
 Append to this dialogue, commit/push. **Do not update LEDGER, do not create 3J-01 authority, do not touch product code.**
+
+---
+
+## 13. Fable independent review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Authority reconstructed independently on **2026-08-17** from `AGENTS.md → DOCUMENTATION-MAP → DECISOES.md → LEDGER.md → exact authorities`. Load-bearing texts read at source, not from this dialogue: C-015 §3/§4/§5 (session/cookie laws; declared same-origin trust zone with its subdomain triggers; **exposure binding**: loopback default, tailnet as explicit config opt-in with persistent banner + `agent_event`, boot refusal of public/routable bind without TLS), C-016 §6 (amendment to C-015 §5: remote browser access = HTTPS mandatory; ratified closed form **`localhost HTTP | tailnet HTTPS`**; `.ts.net` certificate as the then-current realization; banner/opt-in preserved), C-007 (Connector/Connection/Gateway; Sankhya = native-first connector profile, `client_credentials + X-Token`, sandbox×prod environments), C-012 (hub serves dist directly; reverse-proxy named trigger), C-006/C-014 (DEV recriável; environments; GitHub canonical; Promotion machinery), C-008/3I-02/3I-05 (E2B boundary; custody; crossings), 3H-03 (same-process; CX-RUNTIME-ISOLATION-01), 3A-R6 §7, the 3J intake + its review at `6aeacc3`. Canonical state matches §1.
+
+### 13.1 Verdict summary
+
+**ACCEPT CANDIDATE** with three Material Findings folded into consolidation — none is RESTRUCTURE-class and nothing approaches STOP. The placement is **GLOBAL MAXIMUM for the current operator environment** (13.3). Sankhya demotion is correct and already law (13.4). The VPN substitution is ratifiable inside 3J-01 — but only as an **explicit recorded amendment** to C-015 §5 / C-016 §6, not as the candidate's current "supersede the realization" framing, and it must carry the exposure laws it currently drops (F-1). Two silent assumptions must become stated evidence/preconditions: outbound egress integrity from the company network (F-2) and the clean-initialization rule for the workstation→server transition (F-3).
+
+### 13.2 F-1 — MATERIAL: the VPN substitution amends ratified text; it must say so, and it drops three laws it must carry
+
+```text
+claim attacked     §3 "preserve invariant, supersede Tailscale realization"
+                   can be ratified as-is in 3J-01
+what is actually   C-016 §6 did not freeze only an invariant. It ratified a
+frozen             closed final form — "localhost HTTP | tailnet HTTPS" —
+                   amending C-015 §5, whose exposure enumeration is itself
+                   ratified text (loopback default; tailnet = explicit
+                   config opt-in + persistent banner + agent_event record;
+                   public/routable bind without TLS refuses boot).
+                   Company-LAN/VPN-reachable bind is a THIRD exposure state
+                   not in that enumeration. Substituting it is therefore an
+                   AMENDMENT of ratified enumerated form — the same class of
+                   act as C-016 §6 amending C-015 §5, with ample program
+                   precedent (C-012→C-005, C-013→C-012, C-015→C-003).
+                   Calling it "reconciliation/supersession" without naming
+                   the amended authority would create silent drift on
+                   ratified text — exactly what the method forbids.
+ratifiable where   IN 3J-01, yes — no separate reopen. The amendment is
+                   narrow: C-015 §5 exposure enumeration + C-016 §6 final
+                   form gain the company-private-network state. C-016's
+                   supply-chain/egress/16-property baseline is untouched.
+what the candidate (a) exposure opt-in + agent_event: C-015 §5 makes
+currently DROPS        non-loopback exposure an EXPLICIT config opt-in
+                       recorded as agent_event. That law must carry to the
+                       LAN/VPN bind unchanged — exposure state remains
+                       deliberate, recorded, never a default.
+                   (b) banner translation: the C-015 banner marked a
+                       NON-SECURE context (tailnet HTTP era). Under
+                       VPN + HTTPS the secure context is real, so the
+                       banner's original predicate dies; the amendment must
+                       say the exposure opt-in/record law survives while
+                       the non-secure-context banner text retires — not
+                       leave both halves ambiguous.
+                   (c) trusted-certificate / secure-context property:
+                       `.ts.net` gave automatic browser-trusted certs.
+                       A company-network realization must state the
+                       property replacing that: the HTTPS certificate is
+                       VALIDLY TRUSTED by first-user browsers (company
+                       CA distribution or public cert on a company name);
+                       certificate-warning click-through is not an
+                       admissible normal state. With real TLS, C-015 §3's
+                       __Host-/Secure cookie form activates — the amendment
+                       should note this strengthening explicitly.
+                   Exact cert mechanism/DNS name → Realization Planning.
+smallest fix       one amendment clause in the 3J-01 decision text naming
+                   C-015 §5 and C-016 §6, adding the company-private-
+                   network exposure state under (a)/(b)/(c), preserving
+                   loopback-HTTP-only, remote-HTTPS-mandatory and
+                   public-sans-TLS boot refusal verbatim.
+```
+
+### 13.3 F-2 — MATERIAL: outbound egress reachability and TLS integrity from the company network are silently assumed
+
+```text
+claim attacked     §5.1 evidence list is sufficient to close placement
+gap                the candidate proves INBOUND viability (VPN, HTTPS) but
+                   says nothing about OUTBOUND. The intake evidence list
+                   (§15.6 item 7 of the intake review) asked precisely
+                   this and E1–E5 do not answer it. On-prem placement
+                   fails at birth if the company network cannot give the
+                   production VM direct HTTPS egress to: E2B control
+                   plane, model providers, GitHub, B2, Sankhya endpoint,
+                   admitted registries.
+sharper danger     corporate networks commonly run TLS-inspection proxies.
+                   A MITM proxy on Hub outbound flows would break custody
+                   and crossing assumptions materially: provider
+                   credentials and model traffic would transit a
+                   corporate interception CA — a crossing 3I-02/3I-05
+                   never admitted. This must be stated as a NEGATIVE
+                   property, not discovered during implementation.
+smallest fix       add to the 3J-01 decision text one evidence
+                   precondition + one property:
+                   "Production-VM outbound HTTPS to the named provider
+                   set is direct/end-to-end; no TLS-interception proxy
+                   sits on Hub platform-control or Gateway egress. If
+                   the company network cannot satisfy this, placement
+                   evidence is invalid and the decision reopens."
+                   Verification lands in the §9 proofs (13.6).
+```
+
+### 13.4 F-3 — MATERIAL: workstation→server transition must exclude silent durable-state carry-over
+
+```text
+claim attacked     §5.2 "deployment transition, not Promotion, not second
+                   topology family" fully closes the transition
+gap                it closes the TOPOLOGY question but not the DATA one.
+                   Proving on WSL2 will create real-looking durable state
+                   (accounts, projects, hub_control rows, registry
+                   payloads). The candidate never says whether that state
+                   may move to production. Left open, a coding actor
+                   "copies the dev database to prod" — manufacturing
+                   production authority from a development environment,
+                   against C-006's DEV-recriável class and the provenance
+                   discipline of every owner history.
+smallest fix       freeze in 3J-01: "First production starts from clean
+                   platform initialization; durable authority enters
+                   through normal platform operations on the production
+                   host. No workstation/proving durable state becomes
+                   production authority by copy. Any deliberate carry-over
+                   is a restore-class operation under 3J-02 semantics or
+                   an explicit Decision — never a file copy."
+proof              production hub_control provenance shows fresh
+                   initialization, not a workstation dump lineage (13.6).
+```
+
+### 13.5 Confirmations under attack (mandate items, compressed)
+
+```text
+1. on-prem closure     CONFIRMED as GLOBAL MAXIMUM for the current
+                       environment, conditional on F-2 facts. Every VPS/
+                       cloud alternative adds provider account/custody/
+                       tunnel/remote-state surfaces while satisfying no
+                       requirement the company host leaves unmet. The
+                       candidate correctly splits LAW (one accepted private
+                       failure domain + private HTTPS ingress) from
+                       SELECTION (this company server, evidence-based,
+                       reopenable) — §5.1's "not a universal law" line is
+                       the right scope and must survive into the decision
+                       text. E4 satisfies the intake F-3 acceptance
+                       condition explicitly. One honesty line to add: the
+                       Windows host may run other company workloads; they
+                       share the accepted failure domain (co-tenant load is
+                       covered by the accepted model, but say it).
+2. Sankhya demotion    CONFIRMED and already law — C-007 froze Sankhya as
+                       one native-first connector profile behind Connector/
+                       Connection/Gateway; E1 adds the operator's product
+                       correction. Nothing in the candidate gives any
+                       integration topology authority; §5.8's Decision Loop
+                       re-entry for a PROVEN future reachability constraint
+                       is the correct seam.
+4. WSL2 vs Linux VM    CONFIRMED. AGENTS.md itself makes WSL2 the canonical
+                       LOCAL host — development class. Production = dedicated
+                       Linux VM/guest with independent lifecycle. Hypervisor
+                       deferral is genuinely safe: Builder sandboxes run on
+                       E2B (external), so no nested-virtualization
+                       requirement exists on the company host — the one fact
+                       that could have made the hypervisor load-bearing.
+5. single VM/process/  CONFIRMED GLOBAL MAXIMUM under E4. Same test as the
+   co-location         intake review F-3: no current named requirement
+                       forces a second host/process or off-host store;
+                       3H-03 split trigger preserved (§5.3); 3I-05 logical
+                       isolation survives co-location explicitly (§5.4).
+7. MANAGED unit        CONFIRMED — §5.5 matches C-012 (hub serves dist
+                       directly; reverse proxy stays a named trigger, not
+                       pre-installed).
+8. VPN ≠ authority     CONFIRMED — §5.6 + proof 4 keep I&A/membership
+                       mandatory; network position never authenticates.
+                       Same-origin trust zone of C-015 §4 is preserved
+                       (one company hostname, subdomain triggers unfired);
+                       hostname/DNS = Realization.
+9. E2B wording         CONFIRMED — §5.7 freezes exactly the intake F-6
+                       negative property and leaves transport truth to 3L.
+10. admin seam         CONFIRMED sufficient — §7 freezes the prerequisite
+                       only; on-prem the Windows-host/hypervisor console is
+                       the natural out-of-band layer independent of the
+                       Linux VM, the Hub and the VPN path. Procedure = 3J-03.
+11. 3A-R6 coverage     CLEAN — all §7 topology-class items owned here;
+                       secret injection stays 3J-03 (intake F-1), backup
+                       3J-02, lifecycle 3J-03. Nothing pulled in, nothing
+                       omitted.
+12. smuggled machinery NONE found; §8 list stands. Add to it: no internal
+                       PKI SERVICE (cert path = smallest company-trusted
+                       mechanism, Realization) and no MDM/device-management
+                       requirement created by 3J-01.
+```
+
+### 13.6 Proof corrections (additions to §9)
+
+```text
+12. production-class execution: the §9 bind/ingress negatives (2,3,5) run
+    on the production Linux VM realization, not on WSL2 proving
+13. certificate trust: first-user browsers accept the Conexus HTTPS
+    certificate without warnings; __Host-/Secure session cookie form is
+    active and functioning under the company hostname
+14. egress integrity (F-2): from the production VM, HTTPS to E2B/model
+    providers/GitHub/B2/Sankhya succeeds end-to-end and the observed
+    certificate chains are the providers' — not a corporate interception CA
+15. clean initialization (F-3): production hub_control provenance is fresh
+    initialization; no workstation-era durable rows/dumps present
+16. exposure record: the LAN/VPN bind opt-in exists as explicit config +
+    agent_event, per the amended C-015 §5 law
+```
+
+### 13.7 Routing corrections
+
+```text
+certificate mechanism / private DNS / CA distribution → Realization Planning
+company-network egress/proxy facts (F-2)              → operator evidence NOW,
+                                                        before ratification
+carry-over of any proving-era state (F-3)             → 3J-02 restore class /
+                                                        explicit Decision only
+Windows-host administration/console detail            → 3J-03 + Realization
+everything else                                        → as §6/§7/§8 already route
+```
+
+### 13.8 Closing block
+
+```text
+Material Findings                = 3
+  F-1 VPN substitution = explicit amendment of C-015 §5 + C-016 §6
+      (closed form "localhost HTTP | tailnet HTTPS" → adds company-
+      private-network state), carrying opt-in/agent_event, banner
+      translation and trusted-cert/secure-context property
+  F-2 outbound egress reachability + no-TLS-interception property must
+      become stated evidence/precondition + proofs
+  F-3 clean-initialization rule for workstation→server transition
+reopen required                  = NONE beyond the F-1 bounded amendment,
+                                   ratifiable inside 3J-01 itself; C-016
+                                   baseline otherwise untouched
+Global Maximum verdict           = on-prem company server → dedicated Linux
+                                   VM → single Hub process → co-located
+                                   stores = GLOBAL MAXIMUM for the current
+                                   environment, conditional on F-2 evidence;
+                                   installation-scoped, not product law
+Sankhya                          = Connector/Connection/Gateway only —
+                                   CONFIRMED, already C-007 law
+new machinery                    = 0 (YAGNI list extended: no PKI service,
+                                   no MDM requirement)
+proof corrections                = 5 added (13.6)
+routing corrections              = 13.7
+
+verdict = ACCEPT CANDIDATE
+          with F-1/F-2/F-3 folded into the consolidated 3J-01 text before
+          operator ratification; ID and LEDGER remain with the operator
+```

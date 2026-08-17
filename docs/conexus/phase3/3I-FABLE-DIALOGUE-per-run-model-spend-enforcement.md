@@ -1207,3 +1207,354 @@ The next action is independent adversarial review. **Do not number or ratify thi
 ## 22. Fable independent adversarial review
 
 **Fable: reconstruct applicable authority from the repository and edit below this line only. Do not trust the candidate synthesis. Attack owner-local persistence, one-outstanding-call sufficiency, crash/unknown settlement, pre-call cost upper-bound honesty, Mastra retry/interception coverage, hidden model-bearing framework features, C-013/3H-R1 coherence, and whether Alternative B is actually the smaller global maximum. Use current primary sources/Context7 where behavior is live. Do not alter LEDGER, approved authority or product code and do not create `3I-03`.**
+
+---
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied. Authority reconstructed independently: C-008, C-010, C-013 (three accounting axes, versioned price, admission pattern), C-016 (`traffic_state` vocabulary), C-017/3G-03 (Builder budgets, serial F1), 3G-05/06, 3E-01/3E-02 (classes closed, columns open), 3H-02, 3H-R1 §8/§9. Live behavior researched against primary sources on **2026-08-17**: Mastra source at `main` commit `9cb49f2` cross-checked against published `@mastra/core` **1.59.0**, Vercel AI SDK `ai` **7.0.66**, Anthropic Messages API reference, and OpenAI's official SDK type definitions (rendered reference pages were auth-gated). All Mastra/AI SDK claims below carry file-path citations from that pass and must be re-verified by 3L at the exact pinned implementation version.
+
+## F.1 Verdict
+
+Alternative A survives, and the research makes it **stronger than the candidate could claim**: a real per-step, pre-provider, deny-capable seam exists in current Mastra (`processLLMRequest` + `abort()`/TripWire). But the same research converts two of the candidate's cautious UNKNOWNs into **confirmed live hazards** that the decision text must treat as first-class laws, not qualification residue: (1) Mastra strips `maxRetries` from model settings and wraps the provider call in its own p-retry with **default 2 retries that fire BELOW the interception hook and retry ANY non-`APICallError`** — so under defaults, one reservation lawfully becomes up to three provider attempts, and the hook never sees attempts two and three; (2) Mastra's aggregate usage output **zero-fills missing fields at two confirmed sites**, so a framework-reported zero is indistinguishable from missing data — settlement-down must key off provider-layer response evidence, never framework totals. With those two laws added, one-outstanding + conservative settlement closes every crash/retry/unknown schedule I could construct on the existing owner rows. **Material Finding against approved authority = NONE; reopen of C-008/C-010/C-013/C-017/3E/3G/3H/3I-01/3I-02 = NOT JUSTIFIED.** Alternative B is correctly rejected, with a sharper argument than the candidate gives (F-7). Method outcome: **CURRENT STRUCTURE CONFIRMED** with bounded corrections.
+
+## F.2 Findings
+
+### F-1 — Ownership confirmed; the exclusions hold exactly as frozen
+
+```text
+claim challenged      §21-Q1/Q14 — Builder/PAR ownership vs Gateway/OBS
+analysis              verified against 3G-06 (gw.* records are external-effect
+                      truth; model spend occurs with zero Gateway effect),
+                      C-013 (telemetry never owns lifecycle/authorization),
+                      C-017/3G-03 (Builder budgets are ActorRun facts),
+                      C-010/3G-05 (AgentRun budget semantics, Release-pinned),
+                      3H-R1 §8 (routes exactly this to 3I, forbids proxy/
+                      quota implication). No already-approved owner other than
+                      Builder/PAR can hold per-run model-spend authority
+                      without widening its frozen scope. Shared cost-envelope
+                      MATH as pure implementation does not create a shared
+                      owner (mechanism != authority).
+reopen prior authority?  NO
+```
+
+### F-2 — 3E durability: fits existing owner rows; crash schedule closes; post-terminal settlement is accounting completion, not a lifecycle transition
+
+```text
+claim challenged      §21-Q2/Q4/Q13
+analysis              the required facts (immutable cap, monotonic committed
+                      spend, monotonic call count, ONE outstanding reservation
+                      with generation/profile refs) are columns/fields on
+                      bld.actor_run / par.agent_run — and 3E deliberately left
+                      columns open ("3E-02 não deve desenhar colunas finais");
+                      no new durable class is needed while M5 holds. Crash
+                      walk-through: reservation commits before provider I/O
+                      (E3) → crash at any later point → restart reads the row,
+                      finds the outstanding reservation, conservatively
+                      settles (E4) before any next call — no state is lost
+                      because the ONLY billable liability is the one durably
+                      recorded. Two concurrent admissions are excluded by the
+                      same row-level one-outstanding guard (and F1 is serial
+                      anyway, 3G-03). Post-terminal settlement (§11.3) does
+                      not contradict 3G write-once semantics: terminal state
+                      is the write-once lifecycle fact; monotonic completion
+                      of an ALREADY-ADMITTED accounting liability neither
+                      revives execution authority nor alters terminal meaning
+                      — same discipline as C-013's never-overwritten cost
+                      columns. State this distinction in the decision text so
+                      an implementer cannot read "terminal row is frozen" as
+                      forbidding settlement.
+reopen prior authority?  NO
+later owner           decision text (distinction); implementation (fields/CAS)
+```
+
+### F-3 — CONFIRMED LIVE HAZARD: Mastra's own retry layer runs beneath the gate and defaults to 2; the decision must mandate retry neutralization as law, with the named mechanisms
+
+```text
+claim challenged      §21-Q3/Q9 — one-outstanding sufficiency and hidden retry
+research facts        (mastra @ 9cb49f2 / @mastra/core 1.59.0, 2026-08-17)
+                      - Mastra does NOT forward maxRetries to the AI SDK: it
+                        strips it from modelSettings and calls doStream/
+                        doGenerate directly wrapped in ITS OWN p-retry with
+                        retries = modelSettings?.maxRetries ?? 2
+                        (packages/core/src/stream/aisdk/v5/execute.ts L229–286)
+                        → default = up to THREE provider attempts per step;
+                      - isRetryableModelError returns error.isRetryable for
+                        APICallError but TRUE FOR ANY OTHER ERROR TYPE
+                        (execute.ts L32–37) — unknown/local/network errors are
+                        retried by default;
+                      - transport retries are NOT re-seen by processLLMRequest
+                        — the hook fires once per step, before the p-retry
+                        wrapper (runner.ts docstring; llm-execution-step.ts);
+                      - additional multiplying layers, all real in current
+                        source: errorProcessors configured → maxProcessorRetries
+                        DEFAULTS TO 10 (llm-execution-step.ts L1189);
+                        StreamErrorRetryProcessor (default 1 retry) is
+                        AUTO-INCLUDED in the built-in coding-agent
+                        (packages/core/src/coding-agent/index.ts L53) — i.e.
+                        the Builder-relevant harness ships a retry layer ON;
+                        per-model FALLBACK LISTS retry across models — a
+                        fallback model has a DIFFERENT pricing profile than
+                        the one the reservation was computed for;
+                      - AI SDK itself (if any path uses it) defaults
+                        maxRetries = 2, settable to 0
+                        (packages/ai/src/util/prepare-retries.ts L35).
+consequence           under framework defaults, M5/M7 are violated by
+                      construction: one reservation covers up to 3 billable
+                      attempts, invisible to the gate. A timeout after the
+                      provider began processing is billable; three of them
+                      under one reservation is 3× the reserved liability.
+smallest correction   promote from qualification residue to LAW in the
+                      decision text: governed model execution requires
+                      transport-level automatic retry DISABLED
+                      (maxRetries = 0 semantics) at every layer below the
+                      owner gate; every provider attempt — original or retry —
+                      re-enters the owner reservation gate as its own admitted
+                      call; the named mechanisms (Mastra p-retry, AI SDK
+                      maxRetries, errorProcessors retry default, coding-agent
+                      StreamErrorRetryProcessor, model fallback lists) are
+                      each explicitly OFF or individually re-admitted through
+                      the gate; a fallback/substitute model is a DIFFERENT
+                      cost profile and always requires a fresh reservation
+                      (this also strengthens §9.3). 3L proves each named
+                      mechanism is actually neutralized at the pinned version
+                      — the law names them so the proof has a checklist.
+reopen prior authority?  NO — realizes M7 with named live mechanisms
+later owner           decision text (law + named checklist); 3L (proof)
+```
+
+### F-4 — CONFIRMED LIVE HAZARD: framework usage zero-fills; settlement-down must key off provider-layer evidence, never framework totals
+
+```text
+claim challenged      §21-Q10 — usage trust / §7.4 settlement inputs
+research facts        - Mastra rewrites final usage with zero fallbacks:
+                        inputTokens: usageCount.inputTokens ?? 0 etc.
+                        (packages/core/src/stream/base/output.ts L967–983);
+                      - agentic-loop falls back to zero-valued usage when step
+                        usage is absent (loop/workflows/agentic-loop/index.ts
+                        L160: usage || { inputTokens: 0, ... });
+                      - AI SDK usage fields are number | undefined and stream
+                        fallback is all-undefined (not zero) — the zeroing is
+                        Mastra-layer;
+                      - provider ground truth: Anthropic Messages usage is a
+                        REQUIRED always-present field and "output_tokens will
+                        be non-zero, even for an empty string response";
+                        streaming final usage arrives cumulatively in
+                        message_delta. OpenAI: non-streaming usage on success;
+                        streaming usage ONLY with stream_options
+                        include_usage on the LAST chunk, and an interrupted/
+                        cancelled stream MAY NEVER DELIVER the usage chunk
+                        (official SDK/type-level caveat).
+consequence           a Mastra-reported zero is indistinguishable from
+                      missing data. If §7.4 accepts framework totals as the
+                      settlement calculator's input, "usage lost" quietly
+                      becomes "usage = 0" → calculation_state = CALCULATED on
+                      garbage → reservation settles to ~zero → capacity
+                      resurrected. That is exactly the C-013 unknown→zero
+                      violation, one layer up.
+smallest correction   law in §7.4/E5: downward settlement accepts ONLY
+                      provider-layer response evidence (the raw provider
+                      usage payload for the exact reservation's request) as
+                      the qualified calculator input; Mastra aggregate totals
+                      are diagnostics/cross-checks, never settlement inputs;
+                      a zero-valued or absent provider usage field settles
+                      CONSERVATIVELY unless the provider's contract makes
+                      zero impossible (Anthropic's non-zero guarantee) — in
+                      which case zero is evidence of a broken extraction, not
+                      of free work. Interrupted OpenAI streams settle
+                      conservatively by construction.
+reopen prior authority?  NO — applies C-013's MISSING != zero at the correct layer
+later owner           decision text; 3L (per-provider usage-extraction proof)
+```
+
+### F-5 — Optional bounded liveness refinement: reuse C-016 `traffic_state` for provably-never-sent requests; default remains burn-the-max
+
+```text
+claim challenged      §7.5's uniform "ambiguity burns reserved max" +
+                      UNKNOWN #6
+analysis              §7.5 is the correct default and I confirm it. One
+                      bounded refinement is available without weakening
+                      anything: C-016 already froze the trichotomy
+                      NOT_SENT | SENT_NO_RESPONSE | RESPONSE_RECEIVED for
+                      external traffic. A model-call attempt that provably
+                      never left the process (failure before request
+                      transmission — the NOT_SENT class) created no billable
+                      liability, and settling IT at zero is not an unknown→
+                      capacity conversion; it is a known-zero. Everything
+                      from first-byte-written onward remains SENT_NO_RESPONSE
+                      → burn the max. Adopt this ONLY as a 3L-defined
+                      mechanical class (local error strictly before
+                      transmission, with transport retries already
+                      neutralized per F-3); if 3L cannot define it crisply at
+                      the pinned stack, F1 ships without it and every
+                      non-CALCULATED outcome burns the max. Liveness benefit:
+                      transient local failures (DNS, connection refused) stop
+                      eating budget; risk added: none, because the class is
+                      proof-gated and fail-closed to burn-max.
+reopen prior authority?  NO — reuses frozen C-016 vocabulary
+later owner           decision text (optional class, proof-gated); 3L
+```
+
+### F-6 — The hard-cap promise must be stated as two tiers; the single-sentence "hard cap" overpromises across pricing drift
+
+```text
+claim challenged      §21-Q6/Q7 — upper-bound honesty and pricing drift
+analysis              two different guarantees are conflated by the phrase
+                      "hard cap", and only one of them is unconditional:
+                      TIER 1 (absolute, mechanical): the owner-accounting
+                      invariant M2 — committed + outstanding <= cap — holds
+                      against every schedule including crash/retry/unknown,
+                      because it is enforced entirely on owner-local durable
+                      facts. Nothing external can break it.
+                      TIER 2 (conditional): "actual provider invoice for the
+                      run <= cap" holds ONLY WHILE the qualified cost
+                      envelope correctly upper-bounds the provider's billing
+                      for the admitted request class. A provider that changes
+                      pricing/billing semantics after qualification can break
+                      tier 2 for calls already in flight; §7.7 handles
+                      detection/blocking, and the residual exposure is
+                      bounded by AT MOST the in-flight call(s) under the
+                      broken profile — with M5, exactly one call per run.
+                      The decision text must say this explicitly: 3I
+                      guarantees tier 1 absolutely and tier 2 conditionally
+                      with named detection, blocking, and a bounded residual.
+                      Anything stronger would be a false invoice guarantee
+                      the architecture cannot keep.
+reopen prior authority?  NO
+later owner           decision text (two-tier statement)
+```
+
+### F-7 — Alternative B rejected with the structural argument: permanent worst-case charging guts the cap's protective meaning
+
+```text
+claim challenged      §21-Q18 — is Alternative B the smaller global maximum?
+analysis              B deletes the settlement seam but forces cap inflation:
+                      a call's qualified worst case (finite output/reasoning
+                      ceiling at admitted max) is routinely 10–100× the
+                      typical actual cost, so under B a usable run cap must
+                      be sized to worst-case-sum — 10–100× the intended real
+                      spend. An actually-runaway run under that inflated cap
+                      can then REALLY spend the inflated amount before the
+                      cap bites. B therefore does not merely waste budget; it
+                      weakens the security property the cap exists for, by
+                      the same factor it wastes. B also deletes less than it
+                      appears to: the provider-usage extraction pipeline must
+                      exist anyway for C-013 accounting evidence — B removes
+                      only the downward-settle owner mutation, the smallest
+                      part. Verdict: A is the global maximum for the SECURITY
+                      goal, not just for utility. Two bounded uses of B
+                      survive inside A: (1) per-cost-profile degraded mode —
+                      a profile whose usage reporting 3L proves unreliable
+                      runs in never-settle-down mode without changing
+                      architecture; (2) fallback if implementation proves
+                      A's settlement seam materially unreliable overall, as
+                      the candidate already states. Make (1) explicit: the
+                      settlement mode is a property of the qualified cost
+                      profile, so one bad provider does not degrade the whole
+                      platform to B.
+reopen prior authority?  NO
+later owner           decision text (per-profile settlement mode)
+```
+
+### F-8 — Escape-hatch inventory grounded in current source: the M6/M10.x lists are confirmed and gain two named entries; C-013/3H-R1 coherence closes with one routing addition
+
+```text
+claim challenged      §21-Q15/Q17 — hidden model features; C-013 coherence
+research facts        current defaults (memoryDefaultOptions, memory.ts
+                      L82–101): generateTitle FALSE; semantic recall FALSE
+                      (throws without embedder; embedding calls on save AND
+                      on every recall query when enabled); working memory
+                      DISABLED (and its updates are tool calls INSIDE the
+                      main loop — covered by the gate when enabled);
+                      observational memory opt-in (Observer + Reflector are
+                      SEPARATE internal agents, parent processors NOT
+                      applied); moderation/PII/injection/language/scrubber/
+                      structured-output processors all opt-in with their own
+                      models; scorers opt-in; networks/subagents opt-in.
+                      Two facts need naming in the decision text:
+                      1. TITLE GENERATION IS UNGATED BY CONSTRUCTION when
+                         enabled — generateTitleFromUserMessage runs
+                         llm.stream() with NO input/llmRequest processors
+                         (agent.ts ~L3549–3649), so the spend gate cannot see
+                         it. Law: it remains disabled for governed F1 runs,
+                         and any future enablement requires routing its call
+                         through the owner gate or its own admitted budget —
+                         not a processor assumption.
+                      2. EMBEDDING CALLS ARE BILLABLE MODEL SPEND — M6's
+                         list must name them (semantic recall save/query
+                         embeddings), so a future enablement decision cannot
+                         classify them as free infrastructure.
+                      With defaults, every billable call in the F1 baseline
+                      flows through agentic-loop steps → the seam plus F-3's
+                      retry neutralization covers the baseline completely;
+                      AgentController coverage remains the open 3L item the
+                      candidate already routes.
+                      C-013/3H-R1 coherence: the reservation is the C-013
+                      persist-first/reserve/dispatch/honest-terminal PATTERN
+                      realized inside the existing owner records — no second
+                      admission ledger, no UniversalAttempt, OBS keeps
+                      projecting events without owning lifecycle. One routing
+                      addition: 3H-R1 §9 already sends ActorRun/AgentRun ↔
+                      C-013 admission coherence to 3N — the model-call
+                      reservation is part of those records and must be named
+                      IN that same 3N proof scope, not left implicit.
+reopen prior authority?  NO
+later owner           decision text (two named entries; 3N scope line); 3L
+```
+
+## F.3 Answers to the twenty questions
+
+1. Builder/PAR confirmed; no other approved owner fits without widening frozen scope (F-1).
+2. Yes — fits existing rows; columns are open by 3E's own text; no new class while M5 holds; crash closes on the durable one-outstanding reservation (F-2). No Material Finding.
+3. One-outstanding is the correct F1 baseline, but ONLY with F-3's law: under current Mastra defaults one reservation becomes up to three provider attempts below the hook. With retry neutralization + defaults-off features (F-8), no hidden parallelism remains in the baseline.
+4. Yes (F-2): reservation-before-I/O makes the owner row a complete crash ledger for exactly one liability.
+5. Safer and smaller — conservative burn preserves liveness (run continues while cap remains) and never resurrects capacity. The one refinement worth having is proof-gated NOT_SENT zero-settlement reusing C-016 vocabulary (F-5); its absence is acceptable, its presence costs nothing new.
+6. Yes, per qualified request class with finite ceilings (M11); anything unboundable is inadmissible. The envelope is per-provider/model/feature-set and is 3L's to prove — the architecture only requires that it EXISTS for admitted classes.
+7. Two-tier promise (F-6): absolute owner-accounting invariant; conditional invoice bound with detection, profile blocking, and a residual bounded to the in-flight call. No false invoice guarantee.
+8. `processLLMRequest` fires per agentic-loop step, pre-provider, with abort/deny — a real seam (cited). It does NOT see transport retries (F-3) nor title-generation/embedding/scorer/OM calls (F-8) — those are handled by law (disable or re-route), and AgentController coverage stays 3L.
+9. Yes — Mastra's OWN p-retry, default 2, retrying any non-APICallError, below the hook; plus errorProcessors(→10), coding-agent StreamErrorRetryProcessor, model fallback lists. Answer: interception via mandated neutralization + per-attempt re-admission (F-3); never multiply the reservation by a guessed count.
+10. Verified and worse than suspected: zero-fill at two sites. Framework totals are banned as settlement inputs; provider-layer evidence only (F-4).
+11. Keep `maxModelCalls` as an independent monotonic guard: with F-3, every provider attempt is its own admitted call, so the count is unambiguous by construction — retries and tool continuations each increment.
+12. Yes — cancellation never refunds outstanding liability; a still-streaming response settles by known complete provider usage or conservative max (M8/§11.2 confirmed; OpenAI interrupted-stream fact makes the conservative branch mandatory there).
+13. Yes — post-terminal settlement is monotonic accounting completion of an admitted fact, not a lifecycle transition; consistent with 3G write-once and C-013's never-overwritten cost columns (F-2).
+14. Confirmed — `gw.budget_counter` stays external-effect-only; reuse would widen Gateway into a universal cost service against 3G-06/3D (F-1).
+15. Pattern, not authority: the reservation realizes the C-013 admission property inside owner records; no UniversalAttempt; add the model-call reservation explicitly to the 3N coherence proof scope 3H-R1 §9 already created (F-8).
+16. Provider controls cannot bind Conexus run identity (org/workspace/project scope only, per the intake round's dated research) — defense in depth, never primary. Unchanged.
+17. Swept against current source with defaults verified (F-8): baseline-off for every model-bearing side feature; title generation named as ungated-by-construction; embeddings named as billable.
+18. No — B guts the cap's protective meaning by the same factor it wastes (F-7). Kept as per-profile degraded mode inside A, plus the global fallback the candidate already reserved.
+19. Yes — all proofs are satisfiable with owner-row facts + config-level neutralization + existing C-013 evidence. Zero new module/service/record/queue/proxy/broker.
+20. No reopen. Both live hazards (F-3, F-4) are closed by laws inside this decision's own scope; nothing contradicts C-008/C-010/C-013/C-017/3E/3G/3H/3I-01/3I-02. **Material Finding = NONE.**
+
+## F.4 Closing verdict
+
+```text
+Material Finding against approved authority   = NONE
+reopen required                                = NONE
+alternative A                                  = CONFIRMED / GLOBAL MAXIMUM
+alternative B                                  = rejected as default; retained as
+                                                 per-cost-profile degraded mode +
+                                                 global fallback (F-7)
+corrections to consolidate                     = F-2 (terminal-settlement distinction)
+                                                 F-3 (retry-neutralization LAW with the
+                                                      named mechanism checklist)
+                                                 F-4 (provider-layer-only settlement
+                                                      evidence; framework totals banned)
+                                                 F-5 (optional proof-gated NOT_SENT
+                                                      zero-settlement via C-016 vocab)
+                                                 F-6 (two-tier hard-cap promise)
+                                                 F-7 (per-profile settlement mode)
+                                                 F-8 (title-gen + embeddings named;
+                                                      3N proof scope line)
+new durable record class                       = 0
+model proxy / token broker / quota service     = 0
+per-run provider API key                       = 0
+parallel billable calls F1                     = 0
+technology product selected                    = 0
+version note                                   = Mastra/AI SDK facts pinned to
+                                                 @mastra/core 1.59.0 / ai 7.0.66 /
+                                                 main@9cb49f2 on 2026-08-17;
+                                                 3L re-proves at the implementation-
+                                                 pinned versions
+
+verdict = CURRENT STRUCTURE CONFIRMED — ready for consolidation and operator
+          review; numbering as a 3I decision remains with the operator
+```
+

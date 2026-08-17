@@ -863,3 +863,302 @@ Attack especially:
 No external research is required unless a load-bearing claim unexpectedly depends on current third-party behavior; this is primarily a repository-authority/method coherence review.
 
 Append below this section, commit/push. **Do not alter LEDGER, approved authority, product code or the DEDICATED dialogue. Do not create a new authority ID.**
+
+---
+
+## 22. Fable independent adversarial review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied. Authority reconstructed independently through the canonical read order: the method file itself (§1 governance/specialization law, §2 materiality/proportionality, §3 decision core, §4 outcomes incl. `DEFER SAFELY`, §5 global coherence), `DOCUMENTATION-MAP.md`, `DECISOES.md` C-000..C-017 (C-001 product vision/caso 1, C-006/C-007/C-008, C-012..C-017), current `LEDGER.md` at `3I-01..03 APROVADAS` including the full §11 open-items table, and the phase authorities cited by the candidate. No external research was run: no conclusion below depends on current third-party behavior — this is a repository-authority/method coherence review, and every technology-dependent claim the candidate touches is already carried by dated primary-source research recorded in the 3I dialogues.
+
+## F.1 Verdict
+
+The checkpoint is a **legitimate application of the method, not an amendment of it** (F-1), and 3A continuous reconciliation is the correct owner (F-2). The three-outcome classification, the phase-by-phase depth calls, and the post-C-018 realization gate all survive adversarial reading — the gate is necessary and is not a second architecture authority once its bootstrap character is stated (F-5). The candidate has **two real omissions and two misclassifications**: `F3B-R1` (canonical product repo/cutover) is missing from every MUST DECIDE list yet blocks the realization gate's first output; `job/v1` deterministic sync dispatch is a **conditional** MUST DECIDE the moment 3K's first vertical includes the Sankhya mirror — which is the likely case, since canonical C-001 already names caso 1; the DEDICATED **physical** boundary in 3J demotes to a triggered defer when first launch is MANAGED; and "old Product Agent runtime coexistence/drain/cutover" cannot be pre-C-018 work because no old runtime will exist at first production. With those four deltas plus a 3K anchor to C-001 and one method guard sentence, the checkpoint is the smallest rule that preserves rigor and materially shortens the path (F-6). **No Material Finding against approved authority; no reopen; the candidate does not weaken the no-implementation law (§3/§14 verified against LEDGER's own prohibition).** Method outcome: **CURRENT STRUCTURE CONFIRMED** with bounded corrections.
+
+## F.2 Findings
+
+### F-1 — Legitimate method application, with one guard sentence to make it un-abusable
+
+```text
+claim challenged      §21-Q1 — application vs disguised methodology change
+analysis              tested against the method's own text: MUST DECIDE /
+                      DEFER SAFELY / REJECT F1 are not a new taxonomy — they
+                      map one-to-one onto the method's existing vocabulary
+                      (material decision minimum; DEFER SAFELY outcome with
+                      trigger + later owner; YAGNI removal with Decision Loop
+                      re-entry). §2's claim that only DEPTH placement changes
+                      is verified: no correctness obligation is waived
+                      anywhere in §§5–17, and §17 explicitly forbids the
+                      abusive readings. The method itself commands this move:
+                      "Depth scales with materiality, irreversibility,
+                      uncertainty, and blast radius. Ceremony may shrink.
+                      Correctness obligations may not." and "Prepare the
+                      seam, not the entire future capability."
+                      one abuse channel remains open: a future reader citing
+                      this checkpoint to shrink the NON-DEGRADABLE MINIMUM of
+                      a MUST DECIDE item (citeable decision + invariant +
+                      proportional proof + reopen triggers). The checkpoint
+                      changes which questions get full depth, never what a
+                      material decision minimally contains.
+smallest correction   add one guard sentence to the ratified text: "This rule
+                      allocates depth; it never reduces the method's
+                      non-degradable minimum for any item classified
+                      MUST DECIDE."
+reopen prior authority?  NO
+```
+
+### F-2 — 3A is the correct owner; LEDGER-only and new-C-decision both fail
+
+```text
+claim challenged      §21-Q2
+analysis              LEDGER-only fails by the LEDGER's own charter: it is
+                      status/navigation authority and says normative detail
+                      lives in decision documents — a cross-phase depth LAW
+                      is normative. A new C-decision fails proportionality:
+                      C-numbers carry program-level product/architecture
+                      decisions; this is Phase-3-internal routing that dies
+                      at C-018. 3A is chartered as CONTINUOUS reconciliation
+                      "durante 3I–3O" and already owns exactly this shape —
+                      3A-R5 is the precedent of a ratified reconciliation
+                      authority. Ratify as the next 3A-R# in the existing
+                      series (numbering at ratification, not here), with a
+                      LEDGER pointer.
+reopen prior authority?  NO
+```
+
+### F-3 — Two omissions: `F3B-R1` blocks the realization gate, and `job/v1` is a conditional MUST DECIDE the candidate's own sequence would trip over
+
+```text
+claim challenged      §21-Q3/Q4/Q15 — completeness of MUST DECIDE
+omission 1            F3B-R1 — canonical product repo / cutover. LEDGER row:
+                      "3A / operador — antes de implementação". The
+                      realization gate's FIRST listed output is
+                      "repository/package/module map" (§15.1) — undecidable
+                      without knowing which repository the product lives in.
+                      Cheap, operator-owned, but BLOCKING for the gate.
+                      Classification: MUST DECIDE before the realization
+                      gate (not necessarily before C-018 closure itself).
+omission 2            job/v1 / deterministic sync dispatch. LEDGER row keeps
+                      C-007's "dispatch defer total" with the explicit note
+                      that the first Golden Path Sankhya mirror/sync is the
+                      LIKELY NEAR-TERM TRIGGER. Canonical C-001 names caso 1
+                      = replicar o Analisador de Orçamentos — a vertical that
+                      lives on mirrored Sankhya data (C-006 ETL
+                      cursor/overlap/staging/upsert). If 3K selects that
+                      vertical — the default under canonical objectives —
+                      the trigger FIRES during 3O/realization planning at the
+                      latest, and a coding actor would otherwise choose the
+                      execution substrate for sync (exactly the material
+                      choice §6-test-1 forbids). Classification: CONDITIONAL
+                      MUST DECIDE — "if the selected first vertical includes
+                      sync/mirror, the job/v1 Decision Loop runs before
+                      realization planning of that vertical; otherwise it
+                      stays deferred under C-007." The checkpoint must name
+                      this so §16's sequence cannot sail past it.
+reopen prior authority?  NO — both items already exist in LEDGER routing;
+                      this fixes their classification, not their content
+later owner           ratified checkpoint text (both lines)
+```
+
+### F-4 — Two demotions: DEDICATED physical boundary in 3J, and old-runtime drain/cutover, are not pre-C-018 work
+
+```text
+claim challenged      §21-Q3/Q5/Q15 — over-inclusion in MUST DECIDE
+demotion 1            §8 lists "DEDICATED external boundary sufficient for F1
+                      even if first launch is MANAGED" as MUST DECIDE. Split
+                      it: the TRUST boundary is 3I work (the exchange family,
+                      already converging — that part is genuinely MUST).
+                      The PHYSICAL deployment boundary (ingress, TLS
+                      termination for an external DEDICATED runtime, its
+                      network path) has no consumer when first launch is
+                      MANAGED, uses the already-designed seam (3F-06/3I
+                      exchange), and shapes no current durable data. It
+                      passes every §5-B test → DEFER SAFELY, trigger = first
+                      real DEDICATED deployment, owner = 3J. Keeping it MUST
+                      would design ingress topology for a runtime nobody
+                      deploys in F1.
+demotion 2            LEDGER row "old Product Agent runtime coexistence /
+                      drain / cutover → 3J": at first production there IS no
+                      old runtime; the item is unreachable until the first
+                      post-production upgrade. DEFER SAFELY, trigger = first
+                      runtime-affecting upgrade after production, owner = 3J.
+                      It must not sit inside the pre-C-018 3J package.
+reopen prior authority?  NO
+later owner           ratified checkpoint text (3J package edits)
+```
+
+### F-5 — The realization gate is necessary, not ceremony — because building Conexus is bootstrap work that C-017's machinery cannot govern yet
+
+```text
+claim challenged      §21-Q10/Q11/Q12 — C-018 before exact schema/API; gate
+                      necessity; second-authority risk
+analysis              C-018 closing without exact DDL/HTTP/file layout is not
+                      an innovation of this checkpoint — it is how every
+                      closed phase already behaves (3E froze classes, not
+                      columns; 3F froze families, not DTOs; LEDGER routes
+                      "exact wire/HTTP layout → implementation"). So Q10 = yes
+                      by existing precedent, PROVIDED the gap between
+                      architecture and code is owned. That gap owner cannot
+                      be C-017's work graph: C-017 governs work executed BY
+                      the Conexus platform on its products, and the platform
+                      does not exist yet — building Conexus itself is
+                      BOOTSTRAP work done by external coding actors under
+                      repo governance. Without the gate, the first coding
+                      actor would have to invent precisely the §15 outputs —
+                      schema spelling, API layout, migration order — i.e.,
+                      the material-choice leak §19-test-2 exists to catch.
+                      Therefore: necessary, not ceremony.
+                      second-authority risk is real and is closed by three
+                      properties the ratified text must state together:
+                      (1) gate outputs are DERIVED artifacts — they cite
+                      architecture, never restate it normatively;
+                      (2) any contradiction discovered is a Finding returning
+                      to the applicable Decision Loop — the gate cannot
+                      resolve architecture disputes locally;
+                      (3) the gate produces plans under the method's existing
+                      decision minimum — no new artifact taxonomy, no new
+                      phase family, no readiness scorecards (§17 already
+                      promises this; make it binding).
+                      With F-3's omissions fixed, the coding-actor sweep
+                      (Q12) closes: no material owner/boundary/durable/
+                      contract/trust/topology choice remains downstream of
+                      the gate — residual micro-questions (nullability,
+                      index spelling) are reversible implementation detail
+                      under the escalation rule.
+reopen prior authority?  NO
+later owner           ratified checkpoint text (three properties)
+```
+
+### F-6 — 3K needs one anchor, not more depth: canonical C-001 already names the first vertical candidate
+
+```text
+claim challenged      §21-Q6 — is 3K enough for coding actors not to invent
+                      the product?
+analysis              the §9 surface list is sufficient IN KIND — navigation,
+                      user-visible authority, required workflows — and the
+                      deferrals are safe (pixel/design-system depth changes
+                      no semantics; C-012 already froze the scaffold/UI-kit
+                      architecture those surfaces land on, so no retrofit).
+                      What §9 leaves weaker than it needs to be is the FIRST
+                      VERTICAL selection: it correctly refuses to invent the
+                      business case, but canonical authority already names
+                      one — C-001 ratified "caso 1 = replicar Analisador de
+                      Orçamentos (benchmark vs Mitra)". The checkpoint should
+                      anchor 3K's selection to start from C-001 caso 1
+                      unless the operator explicitly redirects — that makes
+                      the 3O proof target concrete on day one and removes
+                      the one place where 3K could stall on an open product
+                      question. Note the composition with F-3: caso 1 is
+                      data-heavy on mirrored Sankhya state, which is exactly
+                      what arms the job/v1 conditional trigger.
+reopen prior authority?  NO
+later owner           ratified checkpoint text (anchor line); operator
+                      (confirm or redirect vertical)
+```
+
+## F.3 Adversarial classification of current LEDGER §11 open items
+
+Grouped against `MUST DECIDE | DEFER SAFELY | REJECT F1`; deltas vs the candidate marked **Δ**.
+
+```text
+MUST DECIDE before C-018 (or before the realization gate where noted)
+  DEDICATED Trusted Exchange (finish; already converged)          3I
+  trust zones / Hub egress / OTel baggage-redaction package       3I
+  hub_control least-privilege role/isolation properties           3I
+  Δ F3B-R1 canonical product repo/cutover (gate-blocking)         3A/operator
+  first production topology set (§8 list, minus demotions)        3J
+  whole-Hub emergency-stop physical procedure (3I-01 dependency)  3J
+  backup ownership/required set/restore-proof responsibility      3J
+  3K product-surface package + first vertical (anchored C-001)    3K
+  Δ job/v1 sync substrate — CONDITIONAL on first vertical
+    including Sankhya mirror/sync (C-007 trigger fires)           Decision Loop
+  six load-bearing probe families (CX-SBX-E2B-01,
+    CX-BUILDER-MASTRA-01, CX-AGENT-MASTRA-01,
+    CX-RUNTIME-ISOLATION-01, 3I-03 interception/usage subset,
+    Verification-Observability evidence subset)                   3L
+  structural recovery sweep — "do existing durable facts
+    suffice?" over the §11 3M rows (Builder/PAR loss, spend
+    liability, OUTCOME_UNKNOWN boundary, Promotion partial,
+    custody partial, Hub restart, restore vs owner histories,
+    post-stop settlement/handoff)                                 3M
+  global coherence review incl. C-013 admission ↔ owner-local
+    realization + model-call reservation proof                    3N
+  vertical architecture proof contract                            3O
+
+DEFER SAFELY (trigger + owner already recorded or corrected here)
+  Δ DEDICATED physical deployment boundary — trigger: first real
+    DEDICATED deployment                                          3J
+  Δ old-PAR coexistence/drain/cutover — trigger: first
+    post-production runtime upgrade                               3J
+  mastra_par backup PROCEDURE detail; snapshot/schema upgrade
+    ops; E2B OTLP production exporter; PITR/HA beyond first RPO   3J/3L
+  orphan/GC/purge/retention refinements; repeated-quiescence
+    policy; repair UX                                             3M/3J/3K
+  exact wire/HTTP; mutation-serialization spelling; MANIFEST
+    diagnostics; binding source-file schema/DTOs; status
+    projections                                                    realization/impl
+  UX depth beyond first-vertical navigation (cards, rollback UI,
+    binding UI, Conversation/trigger UI as they enter verticals)  3K/realization
+  SemRecall/OM/Extractors/Durable Agent/multi-agent/Channels/
+    Skills-Goals-BackgroundTasks/Mastra Platform                  3L+consumer/DL
+  EVENT ingress (C-007), app-origin approvals, browser-direct
+    DEDICATED, DEDICATED durable record (exchange-proven only),
+    retirement lifecycle, duplicate Gateway custody, pools/
+    failover, break-glass, selective per-Project serving stop,
+    InceptionInvestigation shape, brn.binding_validation ref      Decision Loop
+  F3E01-R2 rebuild proof; guest-capability transport proof;
+    provider usage/cost-envelope proofs                           impl/3L (already owned)
+
+REJECT F1 (already rejected by the standing guardrail; nothing in
+the open table needs promotion)
+  fleet/multi-install machinery, Kubernetes/mesh/multi-region/
+  active-active/HA frameworks, external Vault/KMS absent trigger,
+  universal engines of any kind, DPoP/mTLS without trigger,
+  per-Release credentials, binary attestation                     guardrail §13
+```
+
+No open item was found that belongs in REJECT but sits classified as open work, and no REJECT item is being silently pulled forward. The four **Δ** rows are the only classification corrections required.
+
+## F.4 Answers to the sixteen instructions
+
+1. Legitimate application (F-1); one guard sentence added so it can never shrink the decision minimum.
+2. 3A reconciliation authority, ratified as next 3A-R# with LEDGER pointer; LEDGER-only and new-C both fail (F-2).
+3. No MUST DECIDE family is safely deferrable as a whole; one line inside 3J splits and demotes (F-4). DEDICATED (3I) stays MUST — converged, cheap to finish, and its Project-record facts would otherwise retrofit.
+4. Retrofit sweep found the deferrals sound except the two omissions (F-3) — both were classification errors, not new work. C-012/C-006/C-015 already froze the seams the 3K/3J deferrals rely on.
+5. Yes, with F-4's demotions — the §8 list minus DEDICATED-physical and old-runtime rows is the smallest safe first topology package, single-trusted-host-first.
+6. 3K's kind and depth are right; it needs the C-001 caso 1 anchor, not more architecture (F-6).
+7. All six probe families in §10.1 are genuine architecture blockers — each failure invalidates an approved decision (C-008, 3H-01, 3H-02, 3H-03, 3I-03, C-017 verification). The §10.2 consumer-gated list is correct, including DEDICATED mechanism libraries when first launch is MANAGED.
+8. Yes — "do existing durable facts suffice?" is exactly the method-shaped question; runbooks route to 3J/operations. Any new durable recovery state returns through 3E/Decision Loop (already stated).
+9. Yes — 3N as one independent global coherence review and 3O as contract-only are proportional; both lists already include the routed obligations (C-013 coherence, reservation proof, Verification Observability).
+10. Yes, by existing precedent — every closed phase already froze properties and routed spelling; the gate owns the gap (F-5).
+11. Necessary, not ceremony — bootstrap work has no other owner (C-017 governs the platform's own work graph, which cannot govern building the platform). Second-authority risk closed by the three stated properties (F-5).
+12. After F-3's fixes: no material choice remains for coding actors; residual micro-detail is reversible and escalation-ruled (F-5).
+13. No — §3/§14/§16 preserve the prohibition verbatim; probes remain the separately-sanctioned bounded class they always were.
+14. No ordering dependency — DEDICATED consolidation and checkpoint ratification are independent; do not serialize artificially. §16's listing of DEDICATED after ratification is sequencing convenience, not a dependency.
+15. Delivered in F.3 — four Δ corrections; everything else confirms the candidate's classification.
+16. The smallest corrected rule: the candidate as written **plus** — (a) F3B-R1 as gate-blocking MUST DECIDE; (b) the job/v1 conditional trigger named; (c) DEDICATED-physical and old-runtime rows demoted with triggers; (d) 3K anchored to C-001 caso 1 unless the operator redirects; (e) the F-1 guard sentence; (f) the F-5 three anti-second-authority properties — ratified as one 3A reconciliation authority with a LEDGER pointer. Nothing else changes.
+
+## F.5 Closing verdict
+
+```text
+Material Finding against approved authority   = NONE
+reopen required                                = NONE
+method amendment                               = NONE — application confirmed (F-1)
+owner                                          = 3A reconciliation authority,
+                                                 next 3A-R# at ratification (F-2)
+corrections to consolidate                     = F-1 guard sentence
+                                                 F-3 two omissions (F3B-R1;
+                                                      conditional job/v1)
+                                                 F-4 two demotions (DEDICATED
+                                                      physical; old-runtime drain)
+                                                 F-5 three gate properties
+                                                 F-6 3K anchor to C-001 caso 1
+classification deltas vs candidate             = 4 (F.3 Δ rows)
+new phase / process framework / artifact tax   = 0
+implementation before realization gate         = remains FORBIDDEN
+coding-actor material authority                = 0 after corrections
+
+verdict = CURRENT STRUCTURE CONFIRMED — ratify with the six corrections as
+          one 3A reconciliation/routing authority; numbering and LEDGER
+          pointer at operator ratification
+```
+

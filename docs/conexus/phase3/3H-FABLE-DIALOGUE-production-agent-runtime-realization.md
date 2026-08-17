@@ -1325,3 +1325,269 @@ later owner if deferred
 ```
 
 Do not modify earlier rounds, `LEDGER.md`, approved authority or product code. Append `Round 1 — Fable` to this dialogue file and commit/push only this dialogue change.
+
+---
+
+# Round 1 — Fable
+
+**Role:** independent adversarial Senior/Staff/Principal Software Engineer + Software Architect.
+**Authority reconstructed from:** `AGENTS.md` → method → `DECISOES.md` (C-000..C-017, esp. C-010/C-013/C-016) → `LEDGER.md` → 3C-10, 3C-R1, 3D-R1, 3E-01/3E-02, 3F-02/3F-03/3F-R1, 3G-01, 3G-02, 3G-03, 3G-05, 3G-06, 3G-R1, 3H-01 (approved). This dialogue treated as proposal only.
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Nothing here approves 3H-02.
+
+---
+
+## 37. External evidence verified this round
+
+Evidence IDs `V1..V9` are local to this dialogue (independent of the 3H-01 dialogue's numbering). All verified against Context7 `/mastra-ai/mastra` and raw current source; none from model memory.
+
+| ID | Verified fact | Source |
+|---|---|---|
+| V1 | `Agent.listSuspendedRuns()` survives restart with persistent storage; returns runs with `toolCalls [{toolCallId, toolName, args, requiresApproval, suspendPayload}]`; resume via `approveToolCall({runId, toolCallId})` (native approval) or `resumeStream(resumeData, {runId})` (generic `suspend()`). Exact tool-call identity and args are preserved in the snapshot. | `docs/agents/agent-approval.mdx`, `reference/agents/listSuspendedRuns.mdx` |
+| V2 | Generic tool suspension is first-class: `suspendSchema`/`resumeSchema` + `context.agent.suspend(payload)` / `context.agent.resumeData` (v1 API). | `reference/migrations/upgrade-to-v1/tools.mdx` |
+| V3 | Workflow `retryConfig {attempts, delay}` exists, but retry counts live in a **process-local Map** (`retryCounts`), as does `lastPersistedStatusByRun`; the code comment states "on a crash the map is empty". No distributed locking, no exactly-once. | `packages/core/src/workflows/default.ts` |
+| V4 | `createRestartExecutionParams` restarts runs with status `running`/`waiting` from the persisted snapshot, **re-using the same `runId` and replaying from stored state**. | `packages/core/src/workflows/utils.ts` |
+| V5 | **"When running the local Mastra server, all active workflow runs are restarted automatically upon server startup."** Durable agents add opt-in `recovery.durableAgents: 'auto'` boot recovery that "re-drives every orphaned running durable-agent run"; docs warn recovery **re-issues LLM and tool calls** and requires idempotent tools. | `docs/workflows/overview.mdx`, `reference/core/mastra-class.mdx`, `docs/long-running-agents/durable-agents.mdx` |
+| V6 | `mastra.schedules.create()` agent-target = `{id (normalized agent_<slug>), agentId, cron, prompt (required), timezone, threadId/resourceId, signalType, ifActive/ifIdle, status}`; workflow-target = `{id (schedule_<slug>), workflowId, cron, inputData, requestContext, initialState, status}`. Caller may supply a **stable schedule id**. `resumeSchedule` recomputes next fire from the current moment. Static `createWorkflow({schedule})` also exists, registered at boot. | `reference/schedules/overview.mdx`, `docs/workflows/scheduled-workflows.mdx` |
+| V7 | Schedule worker: threadless agent fire calls **`agent.generate()` directly** with the row's prompt; threaded fire sends a signal; `scheduleRunMeta {scheduleId, threadId?}` rides `providerOptions`; trigger info `{kind: cron|manual, firedAt}` is available **to hooks**, not to the agent; and a trigger-history row is persisted per fire: `store.recordTrigger({scheduleId, runId, scheduledFireAt, actualFireAt, outcome, error, triggerKind})` — **`scheduledFireAt` exists as a persisted per-fire fact**. | `packages/core/src/schedules/worker.ts` |
+| V8 | The schedule worker has **no overlap protection**: it dispatches each fire immediately without checking whether a prior run for the same schedule is still executing. | same source |
+| V9 | Stored Agents/Editor: `PATCH /api/stored/agents/<id>` creates a draft; `getAgentById({status | versionId})` resolves published/draft/exact versions; `activateVersion()` switches the active version; and **a published stored override of a code-defined agent takes precedence — only when no active override exists does resolution return "the original code-based agent"**. Generic stored resources may additionally **fall back to the latest snapshot** when no active version exists. | `docs/editor/overview.mdx`, `reference/client-js/agents.mdx`, `reference/editor/versioning.mdx` |
+
+Disposition on ChatGPT's M1–M6: **accurate**, with two material sharpenings — M3 (V7/V8: no substrate overlap guard; `scheduledFireAt` is available) and M5 (V9: the Editor is not merely an optional second authority; its override path **takes precedence over code-defined agents when active**, i.e. a live bypass channel).
+
+---
+
+## 38. Verdict up front
+
+1. **No material Finding against approved authority** (3C-10, 3C-R1, 3G-01/05/06, 3E, 3F, 3H-01). No reopen.
+2. **Alternative A (direct Agent + selective durable suspension + guarded PAR schedule ingress) is the Global Maximum.** Alternatives B/C/D/E correctly rejected/deferred — D and E now with direct source evidence (V7: agent-target fire goes straight to `agent.generate()`; V9: override precedence).
+3. Two candidate gaps are **material and evidence-backed**: substrate auto-restart/replay is *default* behavior, not a hypothesis, and needs a frozen boot-recovery law (FBL-R1-01); the Stored-Agent prohibition is unenforceable as written because override resolution takes precedence — it must become a mechanical resolution law (FBL-R1-02).
+4. Occurrence identity is **constructible today** (V7 `scheduledFireAt`); a trigger cursor + single-flight realizes dedupe with no new durable class (FBL-R1-03). Gateway idempotency alone is not sufficient (Q41).
+5. Single-flight-per-trigger is confirmed as the right F1 law — and it must be Conexus-side, because the substrate has none (V8).
+6. Owner-first cross-DB ordering (ApprovalRequest before runtime suspension) is confirmed globally superior; its worst crash window is honest and bounded (§44).
+7. Threadless-by-default SCHEDULE, memory-scope law (with one concretization, FBL-R1-07), EVENT/Signals exclusion, and the direct-Agent baseline all survive attack.
+8. Disposition: **CURRENT STRUCTURE CONFIRMED** with corrections FBL-R1-01..07; requires ChatGPT consolidation round; **not yet operator-ready**.
+
+---
+
+## 39. Material findings
+
+Format: claim challenged / counterexample / authority affected / evidence / smallest correction / Global Maximum effect / reopen / later owner.
+
+### FBL-R1-01 — Implicit replay is substrate default behavior; 3H-02 must freeze a boot-recovery law now
+
+- **Claim challenged:** §12.1 promises "no implicit same-run replay" for ordinary active runs, and §17.3 says workflow retry never owns effect replay — but the candidate treats crash-replay as something Conexus merely *doesn't promise*, routing recovery wholly to 3M.
+- **Counterexample / failure class:** V5 — the local Mastra server **automatically restarts all active workflow runs on startup**; V4 — restart re-uses the same `runId` and **replays from stored state**; V3 — retry/status guards are process-local and reset on crash. Durable-agent auto-recovery (`recovery.durableAgents: 'auto'`) re-issues **LLM and tool calls** on boot. Concrete schedule: the schedule-fire ingress workflow crashes after its dispatch step called PAR admission; host restarts; substrate replays the dispatch step → PAR receives the same fire again. Or: a PAR-related workflow/durable-agent run is auto-re-driven at boot with **no PAR admission**, re-issuing model/tool calls under a run PAR may have terminalized. This is not "recovery policy for 3M" — it is *default substrate behavior at every restart*.
+- **Authority affected:** realizes 3G-05 §4/§10 (checkpoint is not permission; late output cannot regain authority); no contradiction.
+- **Smallest correction — freeze three laws in 3H-02:**
+  1. *The PAR host runs with blanket substrate auto-restart/auto-recovery disabled or scoped such that no PAR-originated run (agent, durable agent, or adapter workflow) is re-driven at boot without re-entering PAR guards.*
+  2. *Any substrate-initiated restart/redelivery path that does fire (schedule redelivery, ingress-workflow step replay) must land on an idempotent PAR admission — verified-real at-least-once delivery, not hypothetical.*
+  3. *Boot recovery for suspended runs remains discovery (`listSuspendedRuns`) + guard-gated resume — never blanket re-drive.*
+- **Global Maximum effect:** converts the candidate's correct intentions into enforceable configuration/resolution laws at the exact substrate boundary where the default violates them.
+- **Reopen:** no. **Later owner:** exact deployer/server config surface → 3J/3L; orphan policy remains 3M. Probe: crash a plain active agent run mid-tool + restart with the qualified configuration → no re-drive without PAR admission; crash the ingress workflow post-admission → replay is an idempotent no-op (ties to FBL-R1-03).
+
+### FBL-R1-02 — Stored-Agent/Editor override takes precedence; the §8 prohibition must become a mechanical resolution law
+
+- **Claim challenged:** §8 prohibits resolving Production Agents from Editor/Stored state, and P2 tests that mutating stored state changes nothing. As written, this is aspiration: it assumes Conexus controls which resolution path runs.
+- **Counterexample / failure class:** V9 — when a **published stored override** exists for a code-defined agent id, `getAgentById` resolution **returns the override, not the code-defined agent**; and `/api/stored/agents/<id>` accepts a PATCH that creates such state. If the PAR host exposes the standard server surface and resolves agents through the registry lookup, one PATCH + activate silently replaces the Release-pinned Production Agent — a second authority not merely available but *winning by default*. The additional latest-snapshot fallback (V9) is the exact `latest`-drift class Conexus bans.
+- **Authority affected:** enforces 3C-10 REJECT list; no contradiction.
+- **Smallest correction — freeze:**
+  1. *PAR resolves a Production Agent exclusively by direct construction from the exact `RuntimeAgentProjection` — never through an override-capable stored/registry resolution path, and never through any `latest`/fallback resolution.*
+  2. *The stored-agent/editor API surface is not exposed by the PAR host* (surface enforcement mechanics → 3I/3J, but the resolution law is 3H-02's).
+  3. *P2 is strengthened: the probe must create and activate a published stored override for the same agent id and prove Production Agent execution still follows the Conexus projection.*
+- **Global Maximum effect:** the prohibition becomes falsifiable; the bypass channel is closed at the resolution point rather than by policy prose.
+- **Reopen:** no.
+
+### FBL-R1-03 — Occurrence identity: constructible today; cursor + single-flight realize dedupe; Gateway idempotency alone is insufficient
+
+- **Claim challenged:** §22 wishes for an occurrence identity "or a substrate-provided equivalent proven stable by 3L", leaving open whether it exists and whether dedupe is even required (Q41).
+- **Evidence:** V7 — the substrate persists `scheduledFireAt` (intended instant, distinct from `actualFireAt`) per fire in trigger history, and fire hooks receive `{kind, firedAt}`. The identity `(TriggerId, TriggerRevision, scheduledFireAt-or-equivalent)` is therefore constructible with current primitives; only the transport (hook vs. history read vs. run metadata) is 3L's choice. V5 makes dedupe **required**: ingress-workflow step replay after crash redelivers the same fire — a duplicate AgentRun would double model cost, run records and telemetry even when Gateway idempotency blocks the governed *effects*. Admission dedupe is an AgentRun-boundary obligation; Gateway dedupe only guards the effect boundary (Q41 answered).
+- **Smallest correction:** freeze the identity requirement with the verified substrate fact named; realize dedupe as **a current-occurrence cursor fact on `par.agent_trigger` + the single-flight law** — because fires for one trigger are serialized by single-flight, a cursor comparison at admission absorbs duplicate/redelivered fires without any `ScheduleOccurrence` durable class (Q45 answered: cursor suffices). Crash-window races (Q46/Q47): occurrence admitted then crash before runtime dispatch → redelivery is refused by cursor as already-admitted; the admitted run follows run-level dispatch recovery (3M), never a second admission. Admitted + dispatched + response lost → same: cursor holds, no second run.
+- **Reopen:** no. **Later owner:** transport mechanism → 3L (`CX-AGENT-MASTRA-01`).
+
+### FBL-R1-04 — Invocation-content authority: the schedule row never carries semantic content
+
+- **Claim challenged:** §19/§21 treat the schedule row as derived projection but do not state what the row may *contain*. The substrate's agent-target row **requires a `prompt` column** (V6) — a Mastra-persisted, mutable copy of invocation semantics.
+- **Failure class:** if the projection carries the prompt/input content, a stale or mutated row delivers stale semantic content even when trigger identity/revision checks pass — content drift beneath a valid correlation envelope. This is also an independent reason Alternative D (agent-target) is structurally wrong, beyond admission order.
+- **Smallest correction:** freeze: *the runtime schedule projection carries correlation only (trigger id/revision, transport needs). All semantic invocation content — prompt, input, agent composition — is resolved at PAR fire admission from current AgentTrigger + pinned Release authority.* The workflow-target projection with static correlation-only `inputData` satisfies this today (V6).
+- **Reopen:** no.
+
+### FBL-R1-05 — Effect identity is minted owner-side at proposal admission and carried opaquely across suspend/resume
+
+- **Claim challenged:** §16.3 asserts repeated resume "uses the same exact proposal/effect identity" but never says who mints it or where it lives — if the tool regenerates it at resume, dedupe silently breaks.
+- **Failure class (Q25/Q26):** resume re-executes tool code (V1/V2); a tool that recomputes an effect identity (new UUID, re-hashed payload with a timestamp) presents Gateway a *different* identity on each resume → `idempotency_claim` (3G-06) never matches → duplicate effect admission becomes possible under repeated resume.
+- **Smallest correction:** freeze: *the exact proposal/effect identity is minted and persisted owner-side (currentPendingProposal/ApprovalRequest binding) at proposal admission; the suspended tool carries it as an opaque ref; resume re-presents the same identity; the tool never re-mints.* This makes P11 enforceable rather than assumed.
+- **Reopen:** no.
+
+### FBL-R1-06 — `par.*` runtime refs inherit the 3H-01 expectation law explicitly
+
+3H-01 §8.1 already froze for `bld.*`: stored runtime refs are correlation/history facts and **expectations to be confronted with live observation, never current-runtime authority**. 3H-02 must state the same for `par.*` (thread refs, runtime run refs, schedule/fire refs, runtime kind/version) instead of leaving it implied. This also answers Q56 (stale current-state mirror risk) by construction. Zero new machinery — one sentence citing the 3H-01 precedent.
+
+### FBL-R1-07 — Memory scope law concretized with a constructed leak
+
+- **Claim challenged:** §26.3 requires scope to "include the exact Conexus isolation dimensions" — correct but abstract enough to fail in implementation.
+- **Constructed leak (Q10):** the same `agent/v1` artifact is bound in Project A and Project B. If the Mastra memory `resourceId` is keyed by agent identity alone, Working Memory accumulated under Project A's data surfaces inside Project B's runs — cross-Project leakage through a shared artifact, with no access-control event anywhere.
+- **Smallest correction:** freeze: *the memory resource key composes at minimum Workspace + Project + Agent identity (and subject/user where the memory class is subject-scoped); artifact identity alone is never a sufficient memory scope.* P4 is strengthened to test exactly the shared-artifact/two-Project construction.
+- **Reopen:** no.
+
+---
+
+## 40. Block A — scope / decomposition (Q1–Q3)
+
+- **Q1 —** one package is correct. Schedule realization shares the same root cause (substrate mechanics tempted into authority), the same substrate evidence base and the same owner seam (PAR ↔ Mastra); splitting would duplicate the evidence and interleave reopen triggers.
+- **Q2 —** demote to restatement (non-normative in the final 3H-02 text): §2 entirely, §11.1/§11.2's first halves (3G-05 restates), §16 (3G-05/3G-06 restate), §27's first line, §30's first half (3G-05 §7). The genuinely new decisions: projection/resolution laws, dispatch sequence placement, boot-recovery law, suspension mapping, cross-DB ordering, schedule ingress + occurrence/overlap laws, memory scope concretization, ref persistence discipline.
+- **Q3 —** one borderline pull: stored-agent API surface exposure (FBL-R1-02.2) touches 3I/3J server-surface territory — resolved by freezing the *resolution* law here and routing surface enforcement mechanics onward. Backup class (§29) correctly stays 3J. Nothing else leaked.
+
+---
+
+## 41. Block B — runtime projection / authoring (Q4–Q8)
+
+- **Q4 —** ephemeral projection is sufficient **only** with FBL-R1-02's resolution law; without it, V9's override precedence defeats the design regardless of how clean the projection is.
+- **Q5 —** no capability we need *requires* the Stored/Editor path today (agents are constructible from code/config, V6/V7 flows accept plain Agent instances); the risk is precedence, not necessity — closed by FBL-R1-02.
+- **Q6 —** key the projection by exact Release/composition identity (digest-bearing), so distinct Releases can never share a runtime identity; no revision model is created because the key is *derived from* Release identity, not stored as a new sequence. Exact string format → 3L.
+- **Q7 —** yes: Conversation is Conexus identity; each AgentRun pins its own Release and mechanically applies its own projection at dispatch (3H-01 precedent). Thread history read under a newer projection is cognition, not authority. The one guard: the projection application must be unconditional per run (3H-01's "unconditionally applied" law extends to PAR dispatch).
+- **Q8 —** V9's latest-snapshot fallback is exactly such surviving state; with FBL-R1-02 (never resolve through stored/override/fallback paths) no persisted Mastra definition state can alter execution. Probe P2-strengthened proves it.
+
+---
+
+## 42. Block C — Conversation / memory (Q9–Q13)
+
+- **Q9 —** threadless-by-default is correct. 3C-10's own product examples (Sales Agent daily report, Inventory Monitor) need no Conversation; delivery of output is an effect/artifact, not a thread. A consumer that wants "talk to the agent about its scheduled work" binds a Conversation explicitly via Decision Loop — the candidate already reserves this.
+- **Q10 —** leak constructed and closed: FBL-R1-07.
+- **Q11 —** explicit per-agent enablement is correct YAGNI and consistent with 3C-10's "ON quando consumidor justificar" — that phrase already means consumer-gated, not ambient default.
+- **Q12 —** no cleansing engine. Old messages describing old tools/permissions are cognition; the mechanical guard is that the current tool surface/config is **applied** per run (mechanical application law), so a model believing an old tool exists simply fails to call it. Prompt-level confusion is a quality concern for eval, not an authority hole.
+- **Q13 —** yes, sufficient: `mastra_par` sits in the stronger durability/backup class (§29, 3J-routed). A `hub_control` message mirror would duplicate storage and create the exact second-authority drift 3E rejected. Loss of `mastra_par` is a disaster-recovery event (3J/3M), not an architecture gap.
+
+---
+
+## 43. Block D — direct Agent vs Workflow/Durable Agent (Q14–Q18)
+
+- **Q14 —** verified V1/V2: generic `suspend()` (not only native approval) persists suspended runs discoverable by `listSuspendedRuns` after process death, with `suspendPayload` and tool-call identity intact, given persistent storage. The dialogue's M1 claim holds at source level.
+- **Q15 —** no such schedule found. Every 3G invariant I attacked (approval wait, non-effect resume outcomes, cancel-vs-claim races, pinning) is satisfiable with direct Agent + owner guards; the universal wrapper adds durable *step* semantics nobody consumes, plus V5's auto-restart exposure on every run — the wrapper makes the implicit-replay surface **larger**, not safer.
+- **Q16 —** no. `createDurableAgent()` solves reconnectable stream ownership (M4/V5 recovery semantics); the F1 correctness need (durable domain run + durable wait + guard-gated resume) is covered by direct Agent + PAR facts. Defer stands, with ChatGPT's named reopen trigger.
+- **Q17 —** yes — this was real, and it is exactly FBL-R1-01: with default local-server behavior, active workflow-backed runs are auto-restarted at boot; durable-agent 'auto' recovery re-issues LLM/tool calls. The law + qualified host configuration close it; the probe must crash-and-boot with the qualified config.
+- **Q18 —** yes: V3 shows retry counts and persisted-status guards are process-local; therefore the explicit-workflow allowance (§17.2) must carry the guard that **any effectful step remains Gateway-governed with owner-minted identity** (FBL-R1-05), because workflow-level `retryConfig` can rerun a step more times than any in-process count suggests after crashes. §17.3 already states the law; V3 confirms it is load-bearing, not theoretical.
+
+---
+
+## 44. Block E — approval / suspension (Q19–Q26)
+
+- **Q19 —** owner-first is globally superior. Inverse ordering (suspend first) can leave a durable suspended run whose wait has no ApprovalRequest — a wait nobody can ever satisfy, discoverable only by scanning substrate state: authority derived from substrate, the root-cause class of §4.
+- **Q20 — worst window:** ApprovalRequest + currentPendingProposal committed; crash before the runtime suspension snapshot persists. Result: a claimable ApprovalRequest whose run cannot resume (no snapshot). If the human approves: ALLOW_ONCE is recorded, resume finds no suspended run, **no claim is consumed** (FIRST_CLAIM happens at Gateway admission on the resumed effect path, not at the human decision — 3G-01), no effect executes. The run follows the orphan path; the approval expires naturally; a successor run mints a new proposal + new ApprovalRequest (3G-05 §5.2: approvals are never renewed/transferred). Honest, bounded, no false state. This asymmetry — *wait authority without runtime wait* is recoverable; *runtime wait without wait authority* is not — is the proof owner-first is the right order.
+- **Q21 —** yes: V1 shows `toolCallId`, `toolName`, `args` and `suspendPayload` persist in the snapshot and return through `listSuspendedRuns`; combined with FBL-R1-05 (owner-side identity), the same proposal is resumable after restart.
+- **Q22 —** yes: generic suspension's `resumeSchema` is exactly typed resume data (V2); DENY/EXPIRED/STALE resume as typed non-effect data the tool returns to the agent without entering the effect path. This is why generic suspension is the faithful baseline: the resume payload is *data*, not an approve/decline verb.
+- **Q23 —** native `approveToolCall/declineToolCall` is binary at the resume surface (V1). DENY could ride `declineToolCall`, but EXPIRED/STALE would have to masquerade as declines and ALLOW_ONCE's post-approval Gateway re-admission doesn't fit the native "approve = execute the tool now" shape without the wrapper intercepting anyway. The candidate's stance is right: native mechanics remain probe-eligible internals; generic suspension is the semantic baseline. Not unnecessary wrapper logic (Q63 same answer).
+- **Q24 —** answered inside Q20: ALLOW_ONCE recorded + permanent resume failure ⇒ no claim consumed, no effect, orphan path + natural expiry; recovery owner 3M. Nothing new required.
+- **Q25/Q26 —** the dangerous variant is the tool re-minting identity on re-execution — closed by FBL-R1-05. With owner-minted identity, repeated resume hits `idempotency_claim` dedupe (3G-06) and cannot double-execute.
+
+---
+
+## 45. Block F — AgentRun / process loss / cancellation (Q27–Q31)
+
+- **Q27 —** consistent. 3C-10's "durable agent" explicitly means long-lived logical actor + durable suspension + repeated runs — "não significa LLM process 24/7" — not mid-turn crash transparency. No contradiction.
+- **Q28 —** no current product requirement needs active-run crash recovery: scheduled monitors re-fire next occurrence; interactive chat users retry; report generation is re-runnable. Named absence, not oversight.
+- **Q29 —** no: PAR terminal write-once + completion guard (§11.1) refuses late completion; same proven pattern as 3G-03/3G-05. The only requirement is that the completion path actually re-checks non-terminal state inside the owner guard — P27 covers.
+- **Q30 —** for suspended runs, no interrupt is needed (nothing is executing; cancellation = guard refusal at any future resume). For active runs, the plain-Agent abort surface (abort signal / stream controller) must be verified by 3L; a missing physical abort is **not** a 3H blocker because authority-first cancel already voids late output — it is a cost/UX concern → 3L/3M. Candidate §27 stands.
+- **Q31 —** no: resume paths re-enter PAR guards (invariant 6); a different process resuming a cancelled run's snapshot hits the same guard refusal. P10 proves firing.
+
+---
+
+## 46. Block G — schedule authority / ingress (Q32–Q38)
+
+- **Q32 —** direct agent-target is confirmed structurally unsafe at source level: the worker calls `agent.generate()` immediately with the row's persisted prompt (V7) — there is no admission point, and the row itself carries semantic content (FBL-R1-04). Hooks receive `{kind, firedAt}` (V7); **if** a fire hook can fully gate/veto before any model execution, a hook-based ingress could be narrower than the workflow adapter — unverified depth, exactly what 3L should test. The candidate correctly freezes the property, not the mechanism.
+- **Q33 —** it is the smallest *verified* transport today; the hook alternative is the only candidate for smaller, and it is probe-gated. Keep both named.
+- **Q34 —** the ingress workflow is static host code registered at boot, not user/authored state; F3E02-R1 (`workflowDefinitions` never authoring authority) already covers the persisted-definition concern, and the workflow's only step is the PAR call — nothing semantic to bypass. One guard: its schedule row is workflow-target with correlation-only `inputData` (FBL-R1-04).
+- **Q35 —** one row per AgentTrigger, carrying the current revision in correlation metadata. Per-revision rows would accumulate stale live rows — each a live fire source that must then be raced-and-rejected; one mutable row minimizes the stale-fire surface. Revision checks at admission (§21) remain the correctness backstop either way.
+- **Q36 —** authority-commit first, projection reconcile after (candidate §20.1 confirmed): a missing row loses fires (availability, recoverable); a premature row gains fires (unauthorized execution attempts) — asymmetry decides. Enable follows the same order; update = commit new revision, then update row; stale-revision fires from the raced window are rejected (P20).
+- **Q37 —** yes, sufficient: every fire re-enters PAR admission, so a permanently unpausable row costs wasted fire→reject cycles (telemetry + ops annoyance), never unauthorized runs. Fail-closed holds without cross-DB atomicity.
+- **Q38 —** V6 supports caller-supplied stable schedule ids (`agent_<slug>`/`schedule_<slug>` normalization) — reconciliation must upsert by deterministic id derived from TriggerId, making restart reconciliation idempotent; probe should restart twice and count rows (extends P23).
+
+---
+
+## 47. Block H — occurrence identity / overlap (Q39–Q47)
+
+- **Q39 —** verified: yes — `scheduledFireAt` is persisted per fire in trigger history, distinct from `actualFireAt` (V7); hooks additionally see `firedAt`. Source-level confirmation the dialogue asked for.
+- **Q40 —** moot in the strong sense: no adapter needs to *create* an identity; the transport that carries the existing one into the PAR call is 3L's smallest-mechanism choice (workflow input, hook capture, or history read).
+- **Q41 —** dedupe is genuinely required at the AgentRun boundary: verified at-least-once redelivery (V5 replay) + Gateway idempotency guards only governed effects — a duplicate run still spends model budget, creates run/telemetry records and may take non-Gateway-governed actions (report composition, memory writes). FBL-R1-03.
+- **Q42 —** yes, at most one non-terminal trigger-origin run per SCHEDULE trigger is the correct F1 law: the substrate provides no overlap guard at all (V8), so *some* Conexus-side law is mandatory, and single-flight is the smallest deterministic one.
+- **Q43 —** attempted construction: an every-5-min incremental sync where each occurrence carries unique semantic work. But under cursor-based automation state (3C-10 Automation State), a skipped occurrence's work is absorbed by the next run's cursor scan — correctness lives in the cursor, not the occurrence count. I could not construct a *current* F1 consumer where skip-on-overlap loses correctness rather than latency. The reopen trigger (catch-up consumer) is correctly named.
+- **Q44 —** telemetry only (`agent_event` observation), plus the trigger cursor fact. A durable skipped-occurrence class would be a backlog in disguise — the exact thing §23 refuses. The product question "why didn't 08:00 run?" is answered by the OBS timeline (C-013), which is its job.
+- **Q45 —** cursor suffices; see FBL-R1-03. Crash between cursor advance and run admission is impossible to split because both are the same owner-local admission commit — order them inside one PAR transaction (cursor + `agent_run` row are both `par.*`).
+- **Q46 —** already-admitted no-op: cursor holds the occurrence; the crashed-before-dispatch run is a run-level orphan (dispatch recovery / 3M), never re-admitted as a second run.
+- **Q47 —** same mechanism: admission committed ⇒ redelivery refused by cursor regardless of dispatch/response fate. P21/P24 prove both orders.
+
+---
+
+## 48. Block I — Release/runtime evolution (Q48–Q51)
+
+- **Q48 —** yes: ArtifactRevision payloads are immutable in the Registry (C-005) and the pinned composition is recorded at admission (3G-05 §2) — the projection is rebuildable from durable Conexus facts alone, which is exactly why it can stay ephemeral.
+- **Q49 —** the old runtime kind/version (pinned on the run) must remain deployed/supported until non-terminal runs drain; that is 3J's drain/cutover obligation (3C-10 replaceability), plus storage-schema compatibility for old snapshots.
+- **Q50 —** no stricter seam needed in 3H-02: the law (old run → old runtime; new run → new runtime; no snapshot migration promise) is already frozen (3G-05 §7, 3C-10); 3H-02 adds only the projection-rebuild realization. Confirmed 3J.
+- **Q51 —** real risk, correctly out of 3H-02: Mastra storage migrations across versions are substrate-qualification facts — 3L must qualify upgrade paths for `mastra_par` (including suspended-run snapshot readability) before any version bump; name it as a `CX-AGENT-MASTRA-01`/3L upgrade-check item rather than new architecture.
+
+---
+
+## 49. Block J — Signals / EVENT (Q52–Q54)
+
+- **Q52 —** yes, correctly excluded. With threadless workflow-target schedules, no signal path is exercised in F1 (V7: signals ride only *threaded* schedule fires).
+- **Q53 —** no: `signalType`/`ifActive`/`ifIdle` belong to threaded schedules, which F1 does not use. If the 3L ingress realization internally uses a signal-like wake, it remains internal substrate mechanics with no external source authority — acceptable under 3C-R1 as long as no external ingress feeds it.
+- **Q54 —** a signal can steer only what can receive it; F1's runs are threadless and PAR-admitted, and no Conexus surface emits signals into PAR threads. The guard worth stating in consolidation: *no Conexus code path sends Mastra signals to Production Agent threads in F1* — one sentence, closes the class.
+
+---
+
+## 50. Block K — observability / storage (Q55–Q58)
+
+- **Q55 —** persist on `par.agent_run`: opaque runtime run ref, runtime kind/version, thread ref when a Conversation exists, occurrence ref for trigger-origin runs. On `par.agent_trigger`: schedule projection ref + occurrence cursor. On `par.conversation`: thread ref. Everything else (turn ids, toolCall ids, spans, provider request ids) is OBS telemetry.
+- **Q56 —** closed by FBL-R1-06 (3H-01 §8.1 expectation law extended to `par.*`).
+- **Q57 —** isolation holds: `mastra_builder` and `mastra_par` remain separate substrate stores (3E-R1) and both are behind their runtime boundaries; nothing in 3H-02 requires cross-substrate reads. The one temptation — reading `mastra_par` schedule/trigger-history rows from PAR domain code — is already banned by §19.1/§29; the trigger-history read, if chosen as the occurrence transport, must go through the runtime boundary, not SQL. Worth one sentence in consolidation.
+- **Q58 —** no new durable handoff record: runtime completion/suspension/fire events are F5 proposals into owner-specific paths (§31), each judged against owner facts; the durable trace is `agent_event` + owner records, which is the C-013 pattern.
+
+---
+
+## 51. Block L — YAGNI / Global Maximum (Q59–Q67)
+
+- **Q59 —** most deletable: §24 (manual invocation vs `.run()`) is operational guidance, not architecture — demote to a probe note. §20.3's reconciliation paragraph can compress to "idempotent upsert by deterministic id" (Q38).
+- **Q60 —** none found disguised as authority enforcement. Closest candidate is the occurrence cursor — but V5/V8 give it a verified current failure class (redelivery + no substrate overlap guard), so it is a seam, not ceremony (Q62 answered: necessary).
+- **Q61 —** pulled in by this round: the boot-recovery law (FBL-R1-01) — previously implicit in "3M recovery" but load-bearing for a realizable F1 because the substrate default violates it; and the resolution law (FBL-R1-02) — previously prose. Both are laws on existing acts, zero new machinery.
+- **Q63 —** justified adaptation (see Q23): the four-outcome resume semantics do not fit a binary approve/decline surface without the wrapper existing anyway.
+- **Q64 —** yes, still the Global Maximum. The workflow-universal baseline adds durable step semantics + larger auto-restart surface (V5) for no consumed benefit; the durable-agent baseline adds cache/pubsub/stream machinery for a UX property nobody named. Direct Agent + selective suspension + guarded ingress is the smallest structure that satisfies every frozen invariant with verified current APIs (V1/V2/V6/V7).
+- **Q65 — strongest argument against Alternative A, stated and refuted:** "A future EVENT consumer will force workflows/signals anyway; adopting the workflow baseline now avoids a second migration." Refuted: EVENT's shape (C-007 trust, ingress normalization, dedupe) is *not* the workflow-wrapper shape — adopting Alternative B today would not pre-build EVENT's actual needs, and 3G-05/3C-10 already isolate the pieces EVENT will reuse (trigger authority, admission guards, occurrence discipline). Speculative convergence is exactly what YAGNI §10 bans.
+- **Q66 —** **`CURRENT STRUCTURE CONFIRMED`** — with corrections FBL-R1-01..07 applied to the candidate text.
+- **Q67 —** requires one ChatGPT consolidation round folding FBL-R1-01..07 and the probe additions below; after that, ready for operator decision. If ChatGPT contests a finding, that point takes one more adversarial pass.
+
+---
+
+## 52. Proof-strategy additions
+
+Add to §32 (controls shown firing):
+
+```text
+P31 qualified host boot after mid-tool crash of an active PAR run → no substrate re-drive without PAR admission
+P32 ingress-workflow step replay after crash (verified at-least-once) → PAR admission is idempotent; no second AgentRun
+P33 published Stored-Agent override active for the same agent id → Production Agent execution unchanged (strengthens P2)
+P34 schedule projection row carries no semantic content; fire admission resolves prompt/input from AgentTrigger + pinned Release
+P35 tool re-minting an effect identity on resume → Gateway refuses/dedupes; owner-minted identity is the only admissible path
+P36 shared agent artifact across two Projects → no Working/Agent Memory leakage (strengthens P4)
+P37 double runtime-startup reconciliation → exactly one schedule row per enabled trigger (idempotent upsert)
+```
+
+---
+
+## 53. Final disposition
+
+```text
+Material Finding against approved authority                 = NONE
+reopen required                                             = NONE
+Alternative A (direct Agent + selective suspension
+  + guarded PAR schedule ingress)                           = CONFIRMED Global Maximum
+Alternative D (schedule→agent direct)                       = REJECTED with source evidence (V7)
+Alternative E (Stored Agents/Editor)                        = REJECTED; prohibition made mechanical (V9)
+material corrections to candidate                           = FBL-R1-01..07
+proof additions                                             = P31..P37
+recommendation                                              = CURRENT STRUCTURE CONFIRMED
+readiness                                                   = ChatGPT consolidation round required;
+                                                              not yet operator-ready
+```
+
+This round approves nothing. Operator ratification remains the only path to authority.
+
+— Fable, Round 1

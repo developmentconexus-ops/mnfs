@@ -737,7 +737,7 @@ NO Stored Agent/Editor as Product Agent authority
 NO ScheduleOccurrence table / hidden backlog in F1
 NO EVENT/Signal ingress before first trusted consumer
 NO Durable Agent cache/pubsub requirement without reconnectable-stream consumer
-NO semantic/observational memory enabled merely porque framework supports it
+NO semantic/observational memory enabled merely because framework supports it
 NO RuntimeBus / EventBus / UniversalRuntimeEvent / generic F5 envelope
 NO generic F5 outbox/queue without non-rederivable durable-delivery consumer
 NO mandatory Builder/PAR process split without isolation Finding

@@ -557,3 +557,246 @@ verdict = ACCEPT CANDIDATE | RESTRUCTURE | STOP
 ```
 
 Append below, commit/push. Do **not** update `LEDGER.md`, do not create `3J-02` authority and do not touch product code.
+
+---
+
+## 22. Fable independent review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Authority reconstructed independently on **2026-08-17** from `AGENTS.md → DOCUMENTATION-MAP → DECISOES.md → LEDGER.md → exact authorities`: C-005 (git-first, registry immutable payloads), C-006 (backup precedent: `pg_dump -Fc`, pre-migration dump, recovery manifest, encrypted B2, monthly restore-test, PITR-by-trigger, DEV recriável), C-013 (`agent_event` append-only in Hub Postgres; evidence classes), C-014 (repo per app GitHub private; Promotion never rebuilds; rollback re-points to existing digests), C-015 (storage/backup ordering: GC fence → `hub_control` first → enumerate from owner truth → blobs + manifest; restore-test validates whole manifest; Sankhya = authoritative fiscal archive, Conexus cache NON_AUTHORITATIVE), 3E-01/3E-02 (`mastra_par` MUST / `mastra_builder` lower durability; closed record inventory incl. `obs` classes in `hub_control`), 3G-05/3H-01/3H-02 (approval suspension continuation; FRESH_BASE rebind), 3I-02 (C4 compromise-path law; §12.2 two-sided recovery proof; write-once backing), 3I-05 (T11/T12), 3J-01 (accepted failure model; no-silent-copy adjudication), LEDGER post-3J-01. Dialogue treated as challenger input only. Canonical state matches §1.
+
+### 22.1 Verdict summary
+
+**ACCEPT CANDIDATE** with three Material Findings folded into consolidation and five adjudications closed below. The class rule (§5), required set R1–R8, honest non-atomic sequence (§9), immutability property (§8) and key-separation property (§7) survive attack. The findings: the restore proof must run **once, completely, before production activation** — not first at month one (F-1); the restore-proof environment handles **real secrets and personal data** and needs production-equivalent custody + destruction discipline (F-2); and the candidate never states the **regenerable-operational-secret class**, leaving a coding actor free to put provider credentials into backups by convenience (F-3). No RESTRUCTURE; nothing approaches STOP. The package designs Conexus platform recoverability, not Metal Nobre backup — confirmed at 22.4.
+
+### 22.2 Material Findings
+
+#### F-1 — MATERIAL: first full restore proof must gate production activation
+
+```text
+claim attacked     §13 "periodically retrieve... monthly baseline" suffices
+failure            monthly cadence starting AFTER go-live means the first
+                   production month runs on an unproven recovery path —
+                   exactly the "inferred from file existence" state the §3
+                   root invariant forbids. 3I-02 §12.2 already demands the
+                   two-sided recovery proof; 3J-01 demanded evidence before
+                   placement facts became architecture. Same discipline
+                   here: recoverability is a precondition of production,
+                   not a scheduled discovery.
+smallest fix       add to the decision text: "production activation
+                   requires one prior SUCCESSFUL complete restore proof of
+                   a real off-host generation (full §13 family, including
+                   independent recovery material). The monthly cadence is
+                   the ongoing baseline thereafter. A material change to
+                   backup mechanism/provider/key model re-triggers one full
+                   proof before it becomes the recovery contract."
+```
+
+#### F-2 — MATERIAL: restore-proof environment custody is unstated
+
+```text
+claim attacked     §13 proof family is complete
+failure            the proof restores REAL hub_control, REAL production
+                   Project DBs (personal data under LGPD; C-016 posture)
+                   and decrypts REAL Connection credentials with the real
+                   independent recovery material — into an "independent
+                   non-production environment" with NO stated custody
+                   class. As written, a coding actor could run monthly
+                   restores onto an unmanaged machine, creating a periodic
+                   uncontrolled copy of every secret and every personal
+                   record the platform holds — a new compromise path that
+                   3I-02/3I-05 never admitted.
+smallest fix       freeze the property: "the restore-proof environment is
+                   production-custody-equivalent for the duration of the
+                   proof: same access restriction class, no telemetry/log
+                   export of restored content, credential decryption
+                   verified without materializing plaintext beyond the
+                   check (§13 already says logs; extend to any output),
+                   and the restored dataset + any recovery-material copy
+                   are destroyed/wiped at proof completion. Proof evidence
+                   is metadata/checksums/assertion results — never data."
+                   Exact environment realization → Realization/3J-03.
+```
+
+#### F-3 — MATERIAL: the regenerable-operational-secret class is missing from the classification
+
+```text
+claim attacked     §6/§7/§16 cover all secret-adjacent classes
+failure            operational provider credentials — E2B API key, Git
+                   write credential, model-provider keys, B2 application
+                   key, host TLS material, Hub token-signing key — appear
+                   nowhere in the classification. Two silent failure modes:
+                   (a) an implementer includes them in the backup set "for
+                   completeness", violating 3I-02 owner-custody and C4
+                   (secrets riding the ordinary encrypted-data path);
+                   (b) the restore runbook has no stated path to working
+                   credentials on a replacement host.
+smallest fix       add the class: "REGENERABLE OPERATIONAL SECRETS — never
+                   members of any backup set; recovery path = re-issuance/
+                   re-provisioning under each owner's custody (provider
+                   consoles, key regeneration). Hub token-signing key is
+                   explicitly regenerable (outstanding short-TTL tokens die;
+                   DEDICATED clients re-authenticate — 3I-04 semantics
+                   unaffected)." Plus one custody line closing the account-
+                   level path of §8: "the B2 MASTER/account credential is
+                   operator-held off-host (independent-path family of §7);
+                   the production host holds only the restricted application
+                   key" — otherwise account takeover from the host defeats
+                   Object Lock at the account plane.
+```
+
+### 22.3 Adjudications requested by the mandate
+
+```text
+RPO/RTO (Q9)        ACCEPT <=6h / <=8h as RECORDED OPERATOR CONTRACT
+                    VALUES, not arbitrary over-specification. The
+                    architecture property is "loss and recovery bounded in
+                    explicitly recorded single-digit hours, with recovery
+                    posture visible when stale" — an unnumbered contract
+                    would let implementation drift to daily/24h silently,
+                    which E4's "some hours" acceptance does not cover.
+                    Changing the numbers is an operator CALIBRATION act
+                    recorded in the LEDGER, not a reopen; breaching the
+                    property class (days, or HA demands) reopens.
+                    Add one proof consequence: a full generation must
+                    complete + verify well inside the cadence window,
+                    else the 6h contract is fiction (22.5 item 5).
+
+Git-loss (Q5)       REQUIRED coverage via periodic git bundle — adjudicated
+                    against residual acceptance. C-005 makes Git the source
+                    authority of every artifact; residual acceptance would
+                    hang platform authority continuity on one external
+                    provider with zero mitigation, while the bundle rides
+                    the already-required off-host set at marginal cost.
+                    Add the enumeration rule the candidate omits: covered
+                    repos derive from owner truth (Project→repo inventory
+                    in the captured hub_control snapshot) PLUS the Conexus
+                    platform repo itself. No mirror service — §17 stands.
+
+Immutability (Q6)   B2 Object Lock as property-level answer is SUFFICIENT;
+                    mode/retention/app-key capabilities stay Realization/
+                    qualification with the §8 Decision-Loop return if the
+                    account model cannot satisfy it. With F-3's master-
+                    credential custody line, the account-plane hole closes.
+
+mastra_par /        CONFIRMED as drafted. PAR approval continuation (3G-05
+mastra_builder      suspensions lasting days) makes the PAR substrate part
+(Q2/Q3)             of approved continuation semantics → REQUIRED, with
+                    restored Mastra state never overriding PAR owner facts
+                    (already stated, keep). Builder loss forcing FRESH_BASE
+                    is exactly 3H-01's law — exclusion consistent; reopen
+                    condition already correct in R4.
+
+Release bytes (Q4)  CONFIRMED REQUIRED for active + retained admissible/
+                    rollback Releases until byte-identical rebuild is
+                    proven. C-014 forbids rebuild-on-promote and rollback
+                    re-points to EXISTING digests — losing those bytes
+                    silently deletes rollback capability and falsifies
+                    SERVED_VERIFIED. R5 as written captures this; keep the
+                    downgrade path as a named reopen only.
+
+Retention (Q10)     CUT the ladder from architecture. Freeze only the
+                    properties: (a) retained generations span >= the
+                    protected window with at least one provably-good
+                    generation always inside it; (b) pre-migration
+                    checkpoints retained until a superseding good
+                    generation exists; (c) immutability window covers every
+                    protected generation; (d) storage bounded. The
+                    48h/7d/4w ladder becomes the evidence-based Realization
+                    default (C-006 family), numbers = calibration.
+
+Sequence (Q8)       HONEST as drafted. GC fence (step 1) + write-once/
+                    never-overwrite laws (3I-02 E8) close the torn-capture
+                    holes: refs in the snapshot cannot lose their bytes
+                    mid-capture; newer orphan bytes are tolerable per R6.
+                    Post-restore simultaneity honesty correctly lands in 3M.
+
+obs/telemetry       PRECISION correction to §16: telemetry physically
+                    inside hub_control (obs schema — operational_event,
+                    audit_record are closed 3E-02 classes) RIDES the R1
+                    dump by default; excluding tables from dumps would be
+                    new machinery for negative value and would endanger the
+                    audit class. §16's exclusion applies only to telemetry
+                    living OUTSIDE the authority databases, if any is ever
+                    adopted (3L/3J exporters).
+
+Mirror data         guardrail holds (Q14) — one line worth adding: ERP-
+                    mirrored rows inside Project DBs are NOT downgraded to
+                    reconstructible even though a re-sync path exists;
+                    platform recovery must not depend on external-system
+                    availability/history retention (C-015 keeps Sankhya
+                    authoritative for its own fiscal archive; Conexus
+                    recovers its own cache and re-syncs freshness as a
+                    post-restore operational step, 3M/ops).
+
+proving→PROD (Q12)  CLOSED as drafted — governed family only, silent copy
+                    remains prohibited, first cutover procedure stays in
+                    Realization Planning. Consistent with the 3J-01
+                    adjudication that rejected mandatory clean-init as
+                    over-strong.
+
+Leaks (Q13)         NONE material. §11's "operations whose authority
+                    explicitly requires a fresh checkpoint" is the contract
+                    hook, not 3J-03 operations; alerting/timers/injection
+                    correctly sit in 3J-03; Mastra export behavior in 3L;
+                    settlement in 3M. §18 boundary table stands.
+```
+
+### 22.4 Metal Nobre guardrail check (Q14)
+
+No Sankhya-specific truth model found: every required class is platform-generic (owner truth, digest classes, substrate, custody backing, source authority); Metal Nobre appears only as the deployment whose evidence set the RPO/RTO acceptance. The one place ERP specificity could have leaked — treating mirrored ERP data as reconstructible via re-sync — is closed in the opposite, platform-protective direction (22.3 Mirror data). Guardrail HOLDS.
+
+### 22.5 Proof obligations (additions/corrections to §13)
+
+```text
+1. pre-activation gate (F-1): one successful complete restore proof from
+   the real off-host provider before first production serving
+2. custody drill (F-2): proof run demonstrates no plaintext/personal-data
+   residue after environment destruction; proof outputs are metadata only
+3. re-provisioning drill (F-3): replacement-host path reaches working
+   operational credentials by re-issuance alone — no secret recovered from
+   any backup artifact
+4. immutability negative test: every credential continuously present on
+   the production host, including the B2 application key, cannot delete or
+   shorten a protected generation; the master-credential path is off-host
+5. cadence feasibility: a full generation (capture → verify → upload →
+   SUCCESS) completes well inside the RPO window at realistic data volume
+6. git bundle proof: a covered repo restores to a working clone with refs/
+   checksums matching the manifest
+7. selective-restore honesty: restoring hub_control + Project DBs while
+   mastra_builder is absent yields a startable platform whose interrupted
+   Builder work settles per 3M — no fake continuation
+```
+
+### 22.6 DEFER SAFELY / REJECT F1
+
+DEFER SAFELY (owner/trigger named): PITR/WAL (C-006 RPO trigger), retention ladder values (Realization calibration), Mastra store export mechanics (3L where load-bearing), byte-identical rebuild downgrade (named reopen), intra-day cadence tuning (calibration inside RPO contract). REJECT F1 list of §17 CONFIRMED and extended by F-3's prohibition: no secret class ever enters a backup set; no backup-held credential escrow service.
+
+### 22.7 Closing block
+
+```text
+Material Findings                = 3
+  F-1 pre-activation full restore proof gates production
+  F-2 restore-proof environment custody + destruction discipline
+  F-3 regenerable-operational-secret class + B2 master-credential custody
+adjudications                    = RPO/RTO 6h/8h ACCEPTED as recorded
+                                   operator contract (calibration path
+                                   defined); Git bundle REQUIRED with
+                                   enumeration rule; B2 Object Lock
+                                   sufficient at property level;
+                                   mastra_par/mastra_builder CONFIRMED;
+                                   Release bytes REQUIRED until rebuild
+                                   proven; retention ladder → Realization;
+                                   obs-inside-hub_control precision;
+                                   mirror-data non-downgrade
+required-set corrections         = + regenerable-secret class (F-3);
+                                   + covered-repo enumeration rule;
+                                   §16 obs precision
+prior authority reopen           = NONE
+new module/record/machinery      = 0
+3J-03/3M/3L leakage              = none material
+
+verdict = ACCEPT CANDIDATE
+          with F-1/F-2/F-3 and the 22.3 adjudications folded into the
+          consolidated 3J-02 text before operator ratification; ID and
+          LEDGER remain with the operator
+```

@@ -180,7 +180,7 @@ Access / Admin     → membership/role/context mutations
 Diagnostics        → operator-authorized Run Timeline / deeper evidence
 ```
 
-The product may reuse typography, layout primitives, severity treatments, expandable evidence rows and decision affordances, but the projector and semantic source remain family-specific.
+The product may reuse typography, layout primitives, severity treatments, expandable evidence rows and decision affordances, but the projector and semantic source remain family-specific. This is a presentation consistency rule, not a requirement for a universal frontend component or framework.
 
 ### Alternative B — Central Trust / Governance Center
 
@@ -273,13 +273,21 @@ Capabilities are explanatory projection, never editable authority input.
 
 No universal ACL/policy editor is introduced.
 
-### 5.4 Product Agent / published conversational use
+### 5.4 Product Agent / approval entry
 
-When an AgentRun requires human approval, the approval appears in the active user context as the exact `ApprovalRequest` decision surface.
+When an AgentRun requires human approval, the product exposes the exact `ApprovalRequest` in the **owning Project/run context**.
 
-No F1 global approval inbox is required.
+```text
+interactive conversation origin
+→ approval may appear inline in that conversation
 
-A future real consumer needing cross-conversation pending-approval operations is a reopen trigger.
+trigger/non-interactive origin
+→ approval entry is reachable from the exact owning Project / AgentRun detail
+```
+
+Both are projections/navigation to the **same PAR-owned ApprovalRequest**. Neither creates a second waiting/approval status on AgentRun.
+
+No F1 global approval inbox is required. A future real consumer needing cross-conversation/cross-run pending-approval operations is a reopen trigger.
 
 ### 5.5 Diagnostics
 
@@ -356,7 +364,7 @@ stored editable approval card
 reusing approval as generic permission
 ```
 
-The card may appear conversationally, but conversation never owns it.
+The card may appear conversationally or through AgentRun detail, but neither conversation nor AgentRun owns approval state.
 
 ### D3 — Publish / rollback gate
 
@@ -701,7 +709,7 @@ Where compile/promote diagnostics are user-observable, show the closed public di
 
 ---
 
-## 10. Known limitations and degraded capability
+## 10. Known limitations, archive truth and degraded capability
 
 ### 10.1 Delivery limitation surface
 
@@ -721,7 +729,23 @@ not:
 “There are no limitations.”
 ```
 
-### 10.2 Capability-local degradation
+### 10.2 Archive / unpublish / trigger truth when surfaced
+
+If Package C or a later real consumer requires these actions, the UI must preserve the already-approved non-equivalence:
+
+```text
+ARCHIVE Project
+!= unpublish active Release
+!= stop serving
+!= cancel admitted AgentRuns
+!= disable pre-existing enabled triggers
+```
+
+Stopping automation remains an explicit trigger `DISABLE` action where applicable. Unpublish/serving changes remain their own owner semantics.
+
+No lifecycle console is created when the first vertical does not need these actions.
+
+### 10.3 Capability-local degradation
 
 A Connection/Brain/runtime capability that is unavailable or unhealthy is surfaced at the point where it affects the user's action.
 
@@ -752,6 +776,7 @@ BLOCKED / UNVERIFIED assertions
 SERVED_VERIFIED vs merely deployed/pointer-swapped
 maintenance-required serving impact
 rollback data/schema caveat
+archive != unpublish/stop automation when that lifecycle surface exists
 known limitations
 ```
 
@@ -763,19 +788,15 @@ The product may hide internal IDs/digests by default, but not the material meani
 
 Default surfaces optimize for the user decision, not implementation archaeology.
 
-### Level 1 — action truth
+Conceptually:
 
-What the user needs to decide or continue safely.
+```text
+action truth
+→ evidence / explanation when needed
+→ diagnostic detail when needed
+```
 
-### Level 2 — evidence / explanation
-
-Relevant assertions, diffs, receipts, findings, provenance, cost state, blockers.
-
-### Level 3 — diagnostic detail
-
-Owner IDs, revisions/digests, ActorRuns, effect attempts, raw safe event chronology, exact public diagnostics.
-
-This is a **presentation depth model only**. It is not a new status/authority taxonomy and does not require a generic framework.
+This is a presentation heuristic only. It creates no named cross-owner state, contract, durable taxonomy, component requirement or framework; Realization Planning may arrange the interaction differently while preserving the never-hide law.
 
 ---
 
@@ -871,15 +892,17 @@ Package B is falsified if any of these cannot be represented without changing ex
 1. a FAST Change can be approved compactly while still binding the exact current Change contract;
 2. a CONTROLLED Change can expose plan/discovery/evidence without creating a new approval engine;
 3. an `ALLOW_ONCE` effect card can be rendered mechanically from the sealed subject, with a large exact unit set inspectable before decision;
-4. a promotion with permission or dependency widening cannot proceed without that widening being visibly presented inside the existing human gate;
-5. `Release AVAILABLE`, `POINTER_SWAPPED` and `SERVED_VERIFIED` remain visibly distinguishable, so an old/incorrect served artifact cannot be labeled live;
-6. `OUTCOME_UNKNOWN` and `PARTIAL` survive product rendering without collapsing to failed/succeeded or automatic retry;
-7. missing/ambiguous model usage cannot appear as `$0` or restore budget capacity in the UI narrative;
-8. validator/runtime/provider observation can be useful without being visually upgraded to verified Hub evidence;
-9. an access mutation clearly names principal + scope/context + current/proposed state without letting the client manufacture capabilities;
-10. `NOT_SENT` / `SENT_NO_RESPONSE` cannot produce copy falsely blaming an external actor;
-11. known limitations can be disclosed without requiring a new durable limitations authority;
-12. ordinary users can follow the Golden Path without learning `ActorRun`, `EffectAttempt`, CAS generation or internal FSM names.
+4. a trigger-origin AgentRun can expose its pending ApprovalRequest through Project/AgentRun context without creating a global inbox or duplicate AgentRun approval state;
+5. a promotion with permission or dependency widening cannot proceed without that widening being visibly presented inside the existing human gate;
+6. `Release AVAILABLE`, `POINTER_SWAPPED` and `SERVED_VERIFIED` remain visibly distinguishable, so an old/incorrect served artifact cannot be labeled live;
+7. `OUTCOME_UNKNOWN` and `PARTIAL` survive product rendering without collapsing to failed/succeeded or automatic retry;
+8. missing/ambiguous model usage cannot appear as `$0` or restore budget capacity in the UI narrative;
+9. validator/runtime/provider observation can be useful without being visually upgraded to verified Hub evidence;
+10. an access mutation clearly names principal + scope/context + current/proposed state without letting the client manufacture capabilities;
+11. `NOT_SENT` / `SENT_NO_RESPONSE` cannot produce copy falsely blaming an external actor;
+12. when archive controls are present, the user can distinguish archive from unpublish/stop/trigger-disable;
+13. known limitations can be disclosed without requiring a new durable limitations authority;
+14. ordinary users can follow the Golden Path without learning `ActorRun`, `EffectAttempt`, CAS generation or internal FSM names.
 
 ---
 
@@ -893,6 +916,7 @@ Reopen Package B only on material evidence such as:
 - public/embed/external user journey requiring materially different trust presentation;
 - real billing/chargeback consumer requiring monetary authority beyond C-013 projections;
 - external notification consumer for approval/finding/incident;
+- a real cross-run pending-approval workload proving a global inbox materially useful;
 - a product-critical task cannot be completed without exposing currently progressive internal machinery;
 - implementation evidence proves family-specific projectors cannot share visual grammar without semantic drift;
 - new owner/state class from later Decision Loop requires a new user-observable distinction.

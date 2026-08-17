@@ -1552,3 +1552,270 @@ verdict = CURRENT STRUCTURE CONFIRMED — ready for consolidation and operator
           review as the final material 3I package; ID and LEDGER updates
           remain with the operator
 ```
+
+---
+
+## 28. Fable bounded 3I closure review — Round 2
+
+**Mandate:** the single bounded 3I closure review defined by 3A-R6 §6.4, executed against 3I-01..3I-04 (APPROVED) plus this candidate package (the would-be fifth 3I authority; ID allocation remains with the operator) taken **with** the Round-1 corrections F-2..F-5 as its consolidated shape. Attack the five authorities as one system — principal/authz, revocation, custody, model spend, DEDICATED, egress, guest/E2B, telemetry/audit, `hub_control` least privilege — and hunt specifically for any material security decision a coding actor would still have to invent before C-018.
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Authority reconstructed independently from `AGENTS.md → DOCUMENTATION-MAP → DECISOES.md → LEDGER.md → exact authorities` on **2026-08-17**: 3I-01..3I-04 full texts; this candidate + §27; 3A-R6 §6.4/§18; C-015 (Account authentication custody: Argon2id versioned, server-side session hash, cookie laws, setup credential, session revocation), C-016 (egress invariants, rate-limit families), C-013 (producer trust, admission ledger), 3C-R1/3D-R1/3D-R4 (EVENT ingress reserved + authn guard note), 3E-01/3E-02 (TxScope, closed atomicity set), 3G-05/3G-06, 3H-01..03/3H-R1. This review runs entirely on repo authority; no new external verification was required beyond the dated primary-source facts already recorded in §27.
+
+**Non-effects:** this round does not update `LEDGER.md`, does not alter approved authority, does not allocate a 3I ID, and does not create 3I-R1. It is review input for the operator's consolidation/ratification.
+
+### 28.1 The five 3A-R6 §6.4 closure questions
+
+```text
+1. missing trust boundary?                      NONE
+   sweep: every current actor class lands in exactly one zone with a
+   named crossing — browser (Z1, request-authenticity + C-016 egress),
+   trusted Hub (Z2, named adapters + F-2 destination law), E2B guest
+   (Z3, deny-by-default + C-008/3I-02 capability law covering EVERY
+   guest-readable capability, telemetry and control handles alike),
+   DEDICATED (Z4, 3I-04), external providers (Z5), storage (Z6, T11).
+   AgentTrigger EVENT ingress is NOT a hole: 3C-R1 keeps EVENT reserved
+   in F1 (SCHEDULE wakes inside PAR — no external ingress exists), and
+   the 3D-R1/3D-R4 guard note already binds EVENT activation to an
+   explicit authn/ingress boundary declaration. DEDICATED-originated
+   telemetry has no F1 surface; candidate reopen trigger 10 owns it.
+   Account authentication itself is closed prior authority (C-015),
+   not an unowned 3I gap: credential custody, hashing, session truth,
+   setup credential and full-session revocation are already frozen.
+
+2. duplicate authorization authority?           NONE
+   3I-04 token is proven non-snapshot (D5 + per-request generation
+   recheck composes with 3I-01 current authority, not beside it);
+   DB owner capabilities are physical enforcement of 3D/3E ownership,
+   with module public APIs still owning meaning (§15.1); producer-trust
+   classes are provenance, never authorization (3H-03/C-013);
+   request-authenticity is one boundary property layered on C-015's
+   cookie laws (F-3), not a second session model. No permission or
+   revocation meaning has two owners anywhere in the composed system.
+
+3. secret path widened?                         NONE
+   Connection plaintext appearances remain exactly two (3I-02 C2);
+   guest LLM key stays DELETED; the DEDICATED private key never enters
+   the Hub and the Hub signing key is an owner-specific operational
+   credential outside CredentialBackend (3I-04 §15); owner-scoped DB
+   credentials multiply credentials but each is strictly narrower than
+   the broad login they replace — no secret's exposure surface grew.
+   T5 + F-2 close the remaining channel (no model/caller/artifact-
+   selected destination can carry a credential to an attacker origin).
+
+4. current revocation path missing?             NONE
+   matrix swept: Account/session revoke (3I-01/C-015); membership/
+   grant (3I-01); Connection logical grant (3I-02, checked before
+   decrypt/use); AgentTrigger DISABLE, run cancel, Release rollback
+   (3I-01/3G); DEDICATED credentialGeneration advance + explicit
+   exchange disable (3I-04); guest capability server-side expiry/
+   revocation on every use surviving pause/resume (3I-02); root/KEK
+   rekey with crash-safe retire (3I-02 §11.3); DB runtime / migration
+   / backup / signing key rotation = operational custody routed to 3J.
+   Every mutable authority fact consumed anywhere has a current owner
+   that can narrow it prospectively at a named control point.
+
+5. new durable security record secretly required?  NONE
+   spend facts and DEDICATED verification facts are owner-row fields
+   on existing records (3E inventory closed; exact fields realization);
+   no jti ledger, no session/introspection/blacklist state, no CSRF
+   store beyond existing C-015 session substrate, no capability
+   record class, no audit ledger beyond obs.audit_record, no orphan-GC
+   FSM. The CR-1 correction below also requires zero durable state.
+```
+
+### 28.2 CR-1 — Material Finding: 3I-01 §7.2 authorization serialization is a third already-approved cross-owner atomicity class that the candidate's T8 exception enumeration missed
+
+```text
+claim attacked        candidate §15 claims owner-scoped sessions preserve
+                      "already-approved cross-owner atomicity" by enumerating
+                      the two domain cases (CreateProject prj+iam; effect
+                      admission gw+par) + the audit insert. That enumeration
+                      is INCOMPLETE against approved authority.
+approved law          3I-01 §7.2: for every security-sensitive Hub-control
+                      mutation, ALL consumed mutable authority facts must be
+                      serialized against concurrent revocation until mutation
+                      commit ("read A authority = ALLOW → concurrent revoke
+                      commits → mutation commits from stale pre-read" is
+                      forbidden; proof obligation 5 demands the negative test).
+collision             almost every security-sensitive mutation lives OUTSIDE
+                      iam while consuming iam authority facts: Project binding
+                      (prj), credential create/replace/revoke (con),
+                      AgentTrigger mutation + run cancel (par/bld), promote
+                      (rel). Under one broad hub_runtime login the "locking
+                      read" realization family named by 3I-01 just worked;
+                      under T8 an owner-A session cannot SELECT ... FOR SHARE
+                      iam rows — that realization family became inadmissible,
+                      and the candidate never says what replaces it. TxScope
+                      composition makes the collision concrete: iam public
+                      API executing under the mutation owner's session/
+                      capability is DENIED on iam schema by T8 itself.
+                      Note the two enumerated profiles never needed this:
+                      CreateProject includes iam by construction, and 3I-01
+                      §9 deliberately excludes approver-eligibility recheck
+                      from FIRST_CLAIM — so the gap is exactly the
+                      authorization-read class, nowhere else.
+why material          left unstated, a coding actor implementing ANY sensitive
+                      mutation must invent the composition: silently granting
+                      cross-owner reads (erodes T8), silently dropping the
+                      serialization (violates 3I-01), or silently minting a
+                      broad transaction role (rejected Alternative B/C by the
+                      back door). That is precisely the 3A-R6 §18.1 failure.
+jointly satisfiable   YES — no reopen. At least three realization families
+                      preserve both laws without new privileges or state:
+                      (a) iam-owned narrow SECURITY DEFINER locking-read
+                          helper (EXECUTE-granted) that takes FOR SHARE /
+                          FOR KEY SHARE locks on the exact consumed authority
+                          rows inside the SAME mutation transaction — the
+                          same shape class as F-5(b), one helper, NOT the
+                          rejected Alternative E authorization substrate;
+                      (b) transaction-scoped advisory locks keyed on the
+                          consumed authority facts, taken by both the
+                          revocation path and the consuming mutation —
+                          privilege-free by PostgreSQL construction;
+                      (c) enumerated narrow read+lock grants on the exact
+                          iam authority projection surfaces, stated as an
+                          explicit T8 exception row.
+smallest correction   one clause in the consolidated authority text:
+                      "The T8 exception set includes, besides the two domain
+                      transaction profiles and the audit insert, the 3I-01
+                      §7.2 authorization-serialization surface: a narrow,
+                      iam-owned (or equivalently owner-owned) mechanism by
+                      which a security-sensitive mutation transaction
+                      serializes the exact consumed authority facts against
+                      concurrent revocation, realizable as (a)/(b)/(c) above,
+                      selected at Realization Planning; it grants no general
+                      cross-owner read/query capability and creates no
+                      durable state." Plus: extend candidate reopen trigger 6
+                      to cover authorization-fact serialization, not only
+                      domain atomicity; add one proof obligation — "3I-01
+                      proof 5 (stale pre-read cannot commit) must pass under
+                      owner-scoped capabilities with T8's negative tests
+                      simultaneously green."
+reopen prior authority?  NO — 3I-01's law survives verbatim (its mechanism
+                      clause always admitted "equivalente que prove a
+                      propriedade"); 3E's closed domain-atomicity set is
+                      untouched (this is a concurrency guard, not domain
+                      atomicity, and adds no durable record); T8 survives
+                      with its exception enumeration corrected to match
+                      already-approved authority, which is what its own
+                      exception clause already promised.
+later owner           decision text (consolidation clause + trigger edit);
+                      Realization Planning (family selection);
+                      3N/3O + negative DB matrix (combined proof).
+```
+
+### 28.3 System attack sweep — the remaining dimensions hold
+
+```text
+principal/authz       closed two-principal set (Account, DAP) + explicit
+                      non-principals; every inbound surface authenticates as
+                      one of them or as a Hub-minted guest capability; C-015
+                      owns the Account ceremony end-to-end. No surface found
+                      where a coding actor must invent a principal. HOLDS.
+revocation × spend    cancel blocks new reservations, never refunds admitted
+                      liability (M8 = 3I-01 I7 applied to money); restart
+                      settles conservatively before new calls (M7/E4);
+                      revocation of model credential is ops replacement under
+                      3I-02 principles. No resurrection schedule found. HOLDS.
+custody × zones       every credential class maps to exactly one zone
+                      crossing with a named last mile; Z6 explicitly not one
+                      credential domain; T11 negative CONNECT matrix aligns
+                      with 3I-02 C3 owner-specificity. No credential without
+                      a custody owner; no custody owner without a revocation
+                      story. HOLDS.
+DEDICATED × system    token non-snapshot composes with 3I-01 at every
+                      Platform-Service admission; issuance path is read-only
+                      composition over prj/rel public APIs (no sensitive
+                      mutation → CR-1 class does not apply); anti-oracle
+                      behavior consistent with 3F-05; same-Project residual
+                      remains explicit and accepted. HOLDS.
+egress × spend        F-2's destination-selection law + 3I-03 pre-I/O gate
+                      compose: a compromised loop can neither widen spend nor
+                      steer a legitimate adapter off its pinned destination
+                      class. Gateway-only business egress not weakened by
+                      the platform-control class (disjoint by construction).
+                      HOLDS.
+guest/E2B             capability law (3I-02 §13.2) covers ALL guest-readable
+                      capabilities including control callbacks, not only
+                      telemetry ingest; deny-by-default outside guest; build
+                      registry access is admitted-destination realization
+                      under C-016 catalog pins, not a new authority. HOLDS.
+telemetry/audit       transport never upgrades trust; guest capability
+                      cannot mint AuditRecord; audit-required mutations keep
+                      3E-01 same-transaction fail-closed via the narrow
+                      insert (F-5); telemetry loss yields NOT_PROVEN, never
+                      authority. operational_event writes flow through OBS
+                      capability with no atomicity requirement (3C-13
+                      degradation) — no hidden cross-owner write. HOLDS.
+hub_control           F-4 stands (umbrella login fails T8 by documented PG
+                      construction; per-owner LOGIN capabilities are the
+                      known realization space); migration/backup custody
+                      separate; Mastra/Project/hub_control isolation is a
+                      property-level negative matrix. With CR-1's clause the
+                      privilege model is complete against every approved
+                      atomicity/consistency requirement that touches it.
+```
+
+### 28.4 Coding-actor sweep — decisions checked as NOT left to invention
+
+```text
+swept and found owned/routed (owner in parentheses):
+CSRF mechanism family (Realization; property frozen §9/F-3) ·
+CSP directive spelling (Realization/3K; invariant C-016) ·
+session/token TTL values (3L/Realization; short/bounded is frozen) ·
+Account bootstrap/first-admin (C-015 setup credential + 3J deploy) ·
+password hashing/versioning (C-015) · login rate limiting (C-016
+rate-limit families) · EVENT ingress authn (reserved + guard note) ·
+webhook/signals (rejected F1, 3H-02) · trigger-origin approval surface
+(3I-01 §8.2 owner-derived) · guest registry allowlist (C-016 pins +
+E2B policy, 3L) · OTel propagator/stripping (3L/Realization; law
+§12.3+F-2) · PG role/GRANT/pool spelling (Realization; property T8/F-4)
+· negative privilege matrix (Realization/3N/3O) · migration credential
+injection (3J) · backup set/custody (3J under C4/§12) · whole-Hub stop
+(3J, named 3I-01 obligation) · DEDICATED ingress (3J first-consumer) ·
+key provisioning (3J) · exact JWT/OAuth libraries (3L) · usage
+extraction/missingness (3L MUST QUALIFY) · E2B firewall syntax (3L
+CX-SBX-E2B-01) · Verification Observability evidence (3L/3N).
+
+found requiring invention                      = 1 (CR-1, corrected above)
+after CR-1 clause lands in consolidation       = 0
+```
+
+### 28.5 Routing / blocker verification
+
+Every §23 route re-checked against 3A-R6 outcomes: each row has a named owner and a MUST DECIDE / DEFER SAFELY / REJECT F1 classification; no route dangles into "someone later". The four 3L MUST-QUALIFY families that touch 3I (E2B network control, model-spend interception subset, usage missingness, Verification Observability) are all pre-C-018 blockers **by 3A-R6's own gate**, not by anything left open in 3I — a 3L failure reopens the falsified realization assumption, not these security semantics. 3J carries the two named operational obligations (whole-Hub stop proof; backup/recovery two-sided proof) with explicit fail-to-Decision-Loop paths already written into 3I-01/3I-02. CR-1's proof lands in the existing Realization/3N/3O negative-matrix route; it creates no new blocker class.
+
+```text
+unrouted blocker = NONE
+```
+
+### 28.6 Closing verdict
+
+```text
+Material Findings                       = 1 — CR-1 (candidate's T8 exception
+                                          enumeration incomplete vs approved
+                                          3I-01 §7.2; consolidation clause +
+                                          trigger edit + one proof obligation;
+                                          three admissible realization families;
+                                          zero new privilege breadth, zero new
+                                          durable state)
+reopen required                          = NONE — exact reopen IDs: none
+                                          (3I-01 law intact; 3E atomicity set
+                                          intact; T8 corrected pre-ratification)
+missing material 3I decision count       = 0 after CR-1 is incorporated
+                                          (1 consolidation amendment; no new
+                                          decision family, no new 3I ID needed
+                                          beyond the operator's package ID)
+five 3A-R6 §6.4 questions                = NONE / NONE / NONE / NONE / NONE
+unrouted blocker                         = NONE
+coding-actor inventions before C-018     = 0 after CR-1
+new module/record/database/engine/process = 0
+
+verdict = CLOSE 3I
+          conditional only on the operator consolidating the final package
+          with Round-1 F-2..F-5 + CR-1 and ratifying it; no restructure is
+          justified (one authority, two planes, plane-scoped triggers stands),
+          and nothing found warrants STOP. After that ratification, 3I has
+          zero remaining material decisions and closes under 3A-R6 §6.4
+          without manufacturing further security topics from generic catalogs.
+```

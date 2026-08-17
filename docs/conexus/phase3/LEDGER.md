@@ -1,7 +1,7 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-03 APROVADAS`  
+**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-03 APROVADAS`  
 **Fase atual:** `3I — Security / Authority Architecture` — 3I-03 ratificada; próxima decisão material = DEDICATED Trusted Exchange  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
@@ -16,6 +16,9 @@ Este arquivo é o **router/status authority** vivo da Fase 3. Detalhe normativo 
 ```text
 C-000..C-017
 → autoridade fundacional anterior
+
+3A-R6
+→ Phase 3 Critical Path & Implementation Readiness
 
 3B
 → System Context & Boundaries
@@ -80,7 +83,7 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 | aplicar findings materiais durante 3I–3O |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 APROVADA** | aplicar 3A-R6 durante 3I–3O; F3B-R1 antes do Realization Planning |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
@@ -89,12 +92,87 @@ Nenhuma conversa cria authority.
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-03 APROVADAS** | DEDICATED Trusted Exchange é a próxima decisão material |
-| 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
-| 3K — Frontend / Product Architecture | NÃO INICIADA | UX/scaffold/product surfaces |
-| 3L — Technology Qualification | NÃO INICIADA | probes/qualification |
-| 3M — Failure & Recovery Architecture | NÃO INICIADA | recovery/failure classes |
-| 3N — Architecture Verification | NÃO INICIADA | adversarial verification |
-| 3O — Vertical Architecture Proof Contract | NÃO INICIADA | end-to-end proof contract |
+| 3J — Deployment / Operations Architecture | NÃO INICIADA | primeira topologia real / backup / serving / stop; future-scale machinery deferred |
+| 3K — Frontend / Product Architecture | NÃO INICIADA | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
+| 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
+| 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
+| 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
+| 3O — Vertical Architecture Proof Contract | NÃO INICIADA | contract-only end-to-end proof target |
+
+### 2.1 3A-R6 — Critical Path & Implementation Readiness
+
+[3A-R6](3A-R6-phase3-critical-path-implementation-readiness.md) governa a **profundidade/routing** do restante da Fase 3. Não remove nenhuma fase e não altera a DevelopmentConexus Engineering Method.
+
+Outcomes permitidos para cada questão restante:
+
+```text
+MUST DECIDE BEFORE IMPLEMENTATION
+DEFER SAFELY
+REJECT F1
+```
+
+Regra:
+
+```text
+coding actor teria de escolher owner/authority/durable meaning/trust/public contract?
+OR escolha errada causa retrofit material?
+OR first product/first production depende da resposta?
+OR approved architecture depende de comportamento tecnológico ainda não provado?
+→ MUST DECIDE
+
+existing seam + no current consumer + no durable/current contract shaping
+→ DEFER SAFELY com trigger + later owner
+
+future optionality / generic machinery sem current consumer/failure class
+→ REJECT F1
+```
+
+**Esta classificação aloca profundidade; nunca reduz o mínimo não-degradável da metodologia para um MUST DECIDE.**
+
+Critical path ratificado:
+
+```text
+3I
+→ DEDICATED Trusted Exchange
+→ bounded Trust Zones/Crossings + hub_control least-privilege closure
+
+3J
+→ first production topology only
+→ DEDICATED physical deployment deferred until first real DEDICATED consumer
+→ old Product Agent runtime drain deferred until first post-production upgrade
+
+3K
+→ F1 product surfaces + first vertical
+→ start from C-001 caso 1 (Analisador de Orçamentos) unless operator redirects
+
+job/v1
+→ CONDITIONAL MUST DECIDE only if selected first vertical requires Sankhya mirror/sync
+
+3L
+→ load-bearing qualification probes only
+
+3M
+→ do existing durable facts suffice for recovery?
+
+3N
+→ one independent global coherence review
+
+3O
+→ contract-only vertical architecture proof
+```
+
+C-018 fecha Architecture & System Design, mas **não autoriza product code**:
+
+```text
+3I–3O complete
+→ C-018
+→ F3B-R1 canonical product repo/cutover gate satisfied
+→ post-C-018 Implementation Realization Planning Gate
+→ accepted executable implementation plan(s)
+→ only then product implementation by coding actors
+```
+
+Realization plans são **derived-only**; contradição material volta ao applicable Decision Loop; não nasce segunda architecture authority, nova metodologia, readiness framework ou phase family.
 
 ---
 
@@ -133,6 +211,7 @@ Detalhes adicionais:
 Builder runtime reconciliation relevante:
 
 - [3A-R5 — Builder / Coding Runtime Reassessment](3A-R5-builder-coding-runtime-reassessment.md)
+- [3A-R6 — Phase 3 Critical Path & Implementation Readiness](3A-R6-phase3-critical-path-implementation-readiness.md)
 
 ---
 
@@ -673,69 +752,69 @@ No `3I-04` ID is created by this ledger update.
 
 ## 11. Open findings / routed work after 3I-03
 
-Estes itens não reabrem fases anteriores automaticamente.
+Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quando cada item volta ao critical path.
 
 | Finding / questão | Owner posterior |
 |---|---|
-| F3B-R1 — repo canônico/cutover do produto | 3A / operador — antes de implementação |
-| F3B-R4 — browser/runtime physical trust zones | 3I/3J |
-| Builder runtime orphan/lost detection policy after 3H-01 liveness surface | 3M |
-| Production Agent admitted-but-undispatched / active-process-loss / missing-snapshot recovery policy | 3M |
-| InceptionInvestigation pre-Change agent execution shape, somente se realization futura provar necessidade | Decision Loop |
-| F3E01-R1 — `mastra_par` backup/restore procedure | 3J |
+| F3B-R1 — repo canônico/cutover do produto | **3A / operador — MUST DECIDE antes do post-C-018 Realization Planning Gate** |
+| F3B-R4 — browser/runtime physical trust zones | 3I/3J; 3I trust semantics MUST, physical deployment conforme first-consumer trigger |
+| Builder runtime orphan/lost detection policy after 3H-01 liveness surface | 3M structural recovery sweep |
+| Production Agent admitted-but-undispatched / active-process-loss / missing-snapshot recovery policy | 3M structural recovery sweep |
+| InceptionInvestigation pre-Change agent execution shape, somente se realization futura provar necessidade | Decision Loop / DEFER SAFELY |
+| F3E01-R1 — `mastra_par` backup/restore procedure | 3J; required backup set/restore responsibility MUST, procedure detail may defer |
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` never authoring authority | 3L probe / implementation enforcement under 3H-02 |
 | CredentialBackend exact encrypted backing primitive/path + host root-key custody | 3I-02 law closed; implementation/3J; no new record/schema/database silently |
 | guest telemetry capability pause/resume expiry/scope transport proof | implementation/3L under 3I-02 |
 | orphan encrypted backing cleanup/repair if selected realization can produce it | 3M/3J/implementation under 3I-02 |
-| Builder/PAR model-call pre-provider interception + retry/fallback neutralization | 3L/implementation under 3I-03 |
-| provider usage extraction preserving MISSING != ZERO | 3L under 3I-03 |
-| provider/model/request qualified cost-envelope proof | 3L under 3I-03 |
-| model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03 |
+| Builder/PAR model-call pre-provider interception + retry/fallback neutralization | 3L/implementation under 3I-03 — MUST QUALIFY |
+| provider usage extraction preserving MISSING != ZERO | 3L under 3I-03 — MUST QUALIFY |
+| provider/model/request qualified cost-envelope proof | 3L under 3I-03 — MUST QUALIFY |
+| model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03; current baseline features budgeted-or-disabled |
 | model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
-| Product Agent browser/workspace/code execution trust/egress if first consumer enables it | 3I / Decision Loop |
-| DEDICATED concrete trust/credential/delegation mechanism | **NEXT 3I material decision** |
-| whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | 3J; required before production by 3I-01 |
-| post-whole-Hub-stop settlement/recovery | 3M |
+| Product Agent browser/workspace/code execution trust/egress if first consumer enables it | Decision Loop / DEFER SAFELY until named consumer |
+| DEDICATED concrete trust/credential/delegation mechanism | **NEXT 3I material decision / MUST DECIDE** |
+| whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **3J MUST DECIDE before first production** |
+| post-whole-Hub-stop settlement/recovery | 3M structural recovery sweep |
 | selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely Release/MAR serving-admission owner |
-| DEDICATED egress/network policy | 3I/3J |
-| MANAGED/DEDICATED physical deployment topology | 3J |
-| Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J |
-| old Product Agent runtime coexistence / drain / cutover | 3J |
-| `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L |
-| physical Promotion/migration recovery and restore | 3M/3J |
-| `OUTCOME_UNKNOWN` reconciliation / settlement | 3M |
-| output/storage custody repair + orphan recovery | 3M |
-| repeated Builder quiescence/reconnect failure policy | 3M |
-| Project purge/retention/GC | 3M/3J |
-| archive/unpublish/trigger/recovery UX | 3K |
-| Release/Promotion/rollback UI | 3K |
+| DEDICATED egress/network policy | trust semantics 3I; **physical DEDICATED deployment DEFER SAFELY until first real DEDICATED deployment / 3J** |
+| MANAGED/DEDICATED physical deployment topology | **MANAGED first-production topology MUST in 3J; DEDICATED physical topology DEFER SAFELY until first real DEDICATED deployment** |
+| Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J; qualification-triggered |
+| old Product Agent runtime coexistence / drain / cutover | **DEFER SAFELY — trigger: first runtime-affecting upgrade after production / 3J** |
+| `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L; upgrade operation detail deferred until first relevant upgrade |
+| physical Promotion/migration recovery and restore | 3M structural semantics + 3J material operation boundary |
+| `OUTCOME_UNKNOWN` reconciliation / settlement | 3M structural recovery sweep |
+| output/storage custody repair + orphan recovery | 3M; only structural state requirement blocks C-018 |
+| repeated Builder quiescence/reconnect failure policy | 3M; detailed operational refinement may DEFER SAFELY |
+| Project purge/retention/GC | 3M/3J — DEFER SAFELY absent first-launch retention requirement |
+| archive/unpublish/trigger/recovery UX | 3K only where first vertical requires it; otherwise DEFER SAFELY |
+| Release/Promotion/rollback UI | 3K at journey level; detailed component spelling Realization Planning |
 | approval-card/display contracts | 3K + implementation |
-| Project binding Control Plane UI | 3K |
-| Product Agent Conversation/memory/trigger UI | 3K |
-| exact wire/HTTP layout | implementation + contract tests; 3L only if technology requires qualification |
-| exact `MANIFEST_INVALID` diagnostics | implementation + 3K |
-| authored Project binding source/file schema + exact mutation DTOs | implementation + 3K |
+| Project binding Control Plane UI | 3K where first vertical requires it |
+| Product Agent Conversation/memory/trigger UI | 3K where first vertical requires it |
+| exact wire/HTTP layout | post-C-018 Realization Planning + contract tests; 3L only if technology behavior is load-bearing |
+| exact `MANIFEST_INVALID` diagnostics | Realization Planning/implementation + 3K where user-observable |
+| authored Project binding source/file schema + exact mutation DTOs | post-C-018 Realization Planning + implementation |
 | exact `brn.binding_validation` ref if proof shows it load-bearing | Decision Loop / 3N |
-| exact security-sensitive mutation serialization spelling (`FOR UPDATE`/SERIALIZABLE/equivalent) | implementation verification; 3L only if pinned PostgreSQL behavior becomes load-bearing |
-| binding/Release/runtime end-to-end proof | 3N/3O |
-| exact Mastra telemetry role attributes / OTel Bridge/export realization | 3L |
-| Verification Observability capture/correlation qualification | 3L/3N |
-| C-013 admission-ledger ↔ ActorRun/AgentRun coherence; verify one owner-local attempt realization and no parallel `UniversalAttempt` FSM | 3N |
-| `CX-BUILDER-MASTRA-01` qualification | 3L |
-| `CX-AGENT-MASTRA-01` including stable occurrence transport, restart, memory isolation, upgrade | 3L |
-| `CX-RUNTIME-ISOLATION-01` cross-role qualification | 3L |
-| role-local PubSub/default-bucket/external-broker namespace probes | 3L |
-| E2B pull/OTLP exact pinned-version behavior | 3L; 3J if production exporter adopted |
-| OTel baggage/redaction/egress policy | 3I |
-| Semantic Recall / Observational Memory / Memory Extractors enablement | 3L eval + named Product consumer |
+| exact security-sensitive mutation serialization spelling (`FOR UPDATE`/SERIALIZABLE/equivalent) | Realization Planning/implementation verification; 3L only if pinned PostgreSQL behavior becomes load-bearing |
+| binding/Release/runtime end-to-end proof | 3N/3O — MUST |
+| exact Mastra telemetry role attributes / OTel Bridge/export realization | 3L only to the extent Verification Observability needs them; exporter topology can defer |
+| Verification Observability capture/correlation qualification | 3L/3N — MUST QUALIFY subset |
+| C-013 admission-ledger ↔ ActorRun/AgentRun coherence; verify one owner-local attempt realization and no parallel `UniversalAttempt` FSM | 3N — MUST |
+| `CX-BUILDER-MASTRA-01` qualification | **3L MUST QUALIFY** |
+| `CX-AGENT-MASTRA-01` including stable occurrence transport, restart, memory isolation, upgrade | **3L MUST QUALIFY applicable baseline** |
+| `CX-RUNTIME-ISOLATION-01` cross-role qualification | **3L MUST QUALIFY** |
+| role-local PubSub/default-bucket/external-broker namespace probes | 3L as part of runtime-isolation qualification |
+| E2B pull/OTLP exact pinned-version behavior | E2B control/evidence subset 3L; production exporter topology 3J only if adopted |
+| OTel baggage/redaction/egress policy | 3I Trust Zones/Crossings — MUST at property level |
+| Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval |
 | Durable Agent enablement and its process-global registry | Decision Loop + 3L on named consumer |
 | Observational Memory process-global `activeOps` if enabled | 3L on named consumer |
 | Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
-| Mastra Platform managed environments/workspaces/databases/regions | 3J/3L optional deployment qualification |
-| `job/v1` / deterministic sync dispatch | **Decision Loop before first concrete sync consumer; C-007 `dispatch defer total`; first Golden Path Sankhya mirror/sync is likely near-term trigger** |
-| async/attempt status projection for UI/query convenience | 3K/implementation; never second authority |
+| Mastra Platform managed environments/workspaces/databases/regions | DEFER SAFELY optional deployment qualification |
+| `job/v1` / deterministic sync dispatch | **CONDITIONAL MUST DECIDE: if 3K/3O first vertical requires Sankhya mirror/sync, run C-007 Decision Loop before its Realization Planning; otherwise remain deferred** |
+| async/attempt status projection for UI/query convenience | 3K/Realization Planning; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
 | Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
 | EVENT / Signals / Notification Inbox / Webhook Signals | C-007 / Decision Loop on first EVENT consumer |
@@ -745,14 +824,17 @@ Estes itens não reabrem fases anteriores automaticamente.
 | DEDICATED browser-direct Platform-Service authority | Decision Loop on named consumer |
 | DEDICATED durable credential/grant record | Decision Loop only if Trusted Exchange proves a real lifecycle need |
 | DEDICATED Release retirement/support lifecycle | Decision Loop when real install base requires |
-| DEDICATED multi-install/fleet management | DEFER |
+| DEDICATED multi-install/fleet management | REJECT F1 / Decision Loop on real install base |
 
-Technology qualification permanece:
+Technology qualification critical path per 3A-R6:
 
 ```text
+CX-SBX-E2B-01
 CX-BUILDER-MASTRA-01
 CX-AGENT-MASTRA-01
 CX-RUNTIME-ISOLATION-01
+3I-03 model-spend interception/retry/usage subset
+Verification Observability deciding-evidence subset
 ```
 
 3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
@@ -904,6 +986,8 @@ NO parallel billable model-call reservation machinery F1
 NO hidden automatic provider retry/fallback below owner spend gate
 NO model-call traffic FSM / NOT_SENT refund optimization F1
 NO post-invoice run-budget refund engine F1
+NO product implementation before C-018 + accepted post-C-018 Realization Planning
+NO Realization Planning as second architecture authority/readiness framework
 ```
 
 Expansion returns only through Decision Loop with named current consumer/failure class.
@@ -913,6 +997,9 @@ Expansion returns only through Decision Loop with named current consumer/failure
 ## 14. Regra de avanço
 
 ```text
+3A = CONTINUOUS until C-018
+3A-R6 = APPROVED
+
 3B = CLOSED / APPROVED
 3C = CLOSED / APPROVED
 3D = CLOSED / APPROVED
@@ -933,6 +1020,8 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3I-03 = APPROVED
 ```
 
+3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
+
 3H-01 foi ratificada após package intake, ChatGPT/Fable adversarial rounds e final consolidation sem Material Finding contra prior authority.
 
 3H-02 foi ratificada após rounds adversariais, evidence correction e auditoria adicional das capabilities atuais do Mastra, sem primitive material ausente.
@@ -951,6 +1040,8 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 Próxima ação dentro de 3I:
 
-> **DEDICATED Trusted Exchange** é a próxima decisão material. Ela deve realizar a semântica já congelada em 3F-06 consumindo 3I-01 current authority e 3I-02 custody, sem criar machine-identity framework ou durable credential/grant record sem lifecycle provado. Depois dela, **Trust Zones & Crossings** fecha egress/telemetry crossings; `hub_control` Least Privilege pode avançar em paralelo sem dirigir semantics. Não criar `3I-04` até a próxima decisão estar efetivamente definida.
+> **DEDICATED Trusted Exchange** continua a próxima decisão material e é `MUST DECIDE` por 3A-R6. Ela deve realizar a semântica já congelada em 3F-06 consumindo 3I-01 current authority e 3I-02 custody, sem criar machine-identity framework ou durable credential/grant record sem lifecycle provado. Depois dela, **Trust Zones & Crossings + `hub_control` Least Privilege** devem ser tratados como bounded 3I security-closure package se a evidence não exigir split.
+
+Depois de 3I, 3J–3O seguem integralmente, mas sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

@@ -1028,3 +1028,191 @@ later owner if deferred
 ```
 
 Do not alter the previous dialogue file, `LEDGER.md`, approved authority or product code. Append `Round 2 — Fable` to this R2 file and commit/push only this dialogue change.
+
+---
+
+# Round 2 — Fable
+
+**Role:** independent adversarial Senior/Staff/Principal Software Engineer + Software Architect.
+**Baseline:** authority chain re-checked; Round 1 evidence V1–V9 carries; new load-bearing behavior re-verified this round as V10–V15.
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Nothing here approves 3H-02.
+
+---
+
+## 24. External evidence re-verified this round
+
+| ID | Verified fact | Source |
+|---|---|---|
+| V10 | Plain `mastra.getAgentById(id)` (no version selector) is **registry-first**: it searches registered agents by `agent.id`, then falls back to `getAgent()` registry key, synchronously returning the **code-defined agent**; versioned/stored resolution requires an explicit `{versionId | status}` selector (async). The schedule worker resolves via a single `resolveAgentById(mastra, agentId)` helper (outcomes: error/missing/success). | `reference/core/getAgentById.mdx`, `packages/core/src/schedules/worker.ts` |
+| V11 | Editor override channels beyond direct lookup exist: the editor agent namespace "appl[ies] stored overrides, such as instructions or tools, to code-defined agents"; **sub-agent version overrides propagate through delegation and can be injected at Mastra-instance level, in server request bodies, or at direct generate/stream invocation** (precedence: invocation > request body > instance); unresolvable versions fall back to the code-defined agent with a warning. | `reference/editor/mastra-editor.mdx`, `reference/editor/versioning.mdx` |
+| V12 | `claimId` is generated **at fire time embedding wall-clock**: `` `sched_${existing.id}_${now}` `` / `` `manual_${existing.id}_${now}` `` — per-delivery, **not stable across redelivery**. `scheduledFireAt` is computed from the cron expression (`computeNextFireAt(cron, {timezone, after: now})`) — a true intended-slot instant, not wall-clock drift. | `packages/core/src/schedules/schedules.ts` |
+| V13 | Worker confirms: `recordTrigger` (with `scheduledFireAt`) runs **after** dispatch + ack; public hooks (`onFinish`/`onError`) receive actual `firedAt` only; the worker file handles **agent-target only** (`target: {type:'agent'}`) — workflow-target dispatch lives elsewhere. No public pre-admission surface for `scheduledFireAt` was found. | `packages/core/src/schedules/worker.ts` |
+| V14 | No catch-up/backfill was found in the scheduler: `computeNextFireAt(..., after: now)` is forward-looking; missed slots during downtime are skipped by the substrate, and no scheduler-level overlap guard exists. | same source |
+| V15 | Workflow auto-restart remains documented as unconditional local-server behavior ("all active workflow runs are restarted automatically upon server startup"); `CreateWorkflowParams` exposes **no recovery/restart flag**; no documented disable switch was found in the queried surface. | `docs/workflows/overview.mdx`, `packages/core/src/workflows/types.ts` |
+
+---
+
+## 25. Verdict up front
+
+1. **Both of ChatGPT's evidence corrections are right, and I concede them precisely** (§26 FBL-R2-01, FBL-R2-02): my V9 "override precedence" claim was broader than the plain-lookup path warrants, and "constructible today" overstated pre-admission availability of `scheduledFireAt`. Neither concession weakens any law — both laws survive with sharper evidence, and V11 adds a **new override channel** (sub-agent version injection) the resolution law must enumerate.
+2. `claimId` is now **verified unusable** for dedupe (per-delivery wall-clock, V12): logical occurrence identity must be intended-slot-based. ChatGPT's transport-or-adapter framing is correct; I add a third candidate realization (owner-side slot derivation/validation) and its one edge case (§27).
+3. The cursor law needs one sharpening: **scope the high-water cursor per (TriggerId, TriggerRevision)** — I construct a timezone-change counterexample where a single global cursor rejects a legitimate occurrence (FBL-R2-03).
+4. Occurrence validation against current cron/timezone (§7.2) is a **material control, not paranoia** — and the alternative "owner-minted projection digest/token" is **weaker and should be deleted**: a digest proves row provenance, not slot validity, and misses exactly the cron/timezone-drift class it was proposed for (§30 Q22).
+5. One resume-evasion schedule survives the consolidated text: changed args under the same `proposalRef`. Closed by one law line: the wrapper re-validates presented args against the sealed proposal subject (FBL-R2-04).
+6. Boot recovery: guarded-recovery (not recovery-never) is the right law shape — confirmed by V15 (no disable switch found, so a "disable everything" law might be unimplementable). One probe-critical **Unknown stays Unknown**: whether a crashed *active plain agent run* leaves a `running` workflow-storage row eligible for local-server auto-restart. P31 must resolve it; no architecture change either way (§28 Q3).
+7. **No new overengineering found**; the only deletion candidate is the digest/token alternative. Alternative A remains the Global Maximum. Disposition: **CURRENT STRUCTURE CONFIRMED**; ready for operator after a Round 3 consolidation folds FBL-R2-01..06.
+
+---
+
+## 26. Findings and concessions
+
+### FBL-R2-01 — Stored-Agent evidence re-scoped; resolution law extended to all override channels
+
+- **Concession (Q5):** ChatGPT is right. Plain `getAgentById(id)` is registry-first and returns the code-defined agent (V10); my R1 V9 statement described the *override-requesting* path (`{status}`/`{versionId}` selectors and editor override application), not every lookup. "Override wins universally" was too broad.
+- **What survives, strengthened:** the failure class is real on every override-capable path, and V11 reveals one my Round 1 missed — **sub-agent version overrides injectable at instance, server-request-body, or invocation level, propagating through delegation**. A Production Agent with sub-agents could have a sub-agent's config swapped by a request-level override without touching the parent's resolution at all.
+- **Smallest correction — the law enumerates the closed channels:** *Production Agent execution (a) constructs/uses the exact `RuntimeAgentProjection` instance directly; (b) never passes version selectors; (c) never applies editor overrides; (d) never sets instance/request/invocation-level sub-agent version overrides; (e) the PAR host exposes no stored-agent mutation surface (mechanics → 3I/3J).* Resume paths operate on the host-reconstructed projection instance, not on id-based re-resolution (Q7).
+- **Reopen:** no.
+
+### FBL-R2-02 — Occurrence transport: concession + third realization candidate
+
+- **Concession (Q9):** "constructible today" was correct about substrate internals and wrong as a pre-admission availability claim: `recordTrigger` fires after dispatch, public hooks see actual `firedAt` only (V13), and the workflow-target path shows no fire-metadata injection into the run (none found; Unknown). ChatGPT's §5.2 "prove transport or force smallest adapter" is the honest framing.
+- **New verified fact closing Q12:** `claimId` embeds fire-time wall-clock (V12) — **per-delivery, not per-occurrence; unusable for dedupe**. Intended-slot identity is the only admissible logical component.
+- **Third candidate realization (for 3L, beside transport-proof and narrow adapter):** *owner-side slot derivation/validation* — PAR computes, from the **authoritative** AgentTrigger cron/timezone definition, the intended slot at-or-before fire arrival and validates/consumes it against the cursor. This is the same computation §7.2 already requires for drift validation (slot-membership check), so it adds nothing new; no timers, no next-fire scheduling — not a second scheduler. **Named edge:** under extreme redelivery delay (arrival after the *next* slot has passed), a derived slot can alias to a newer slot the scheduler never fired. Mitigations are realization-level (arrival-window bound; substrate token as cross-check when obtainable); 3L must pick and prove. `P38` stands as written.
+- **Q13 answered:** yes — freeze only *stable occurrence key + pre-admission availability*; `scheduledFireAt` is 3L vocabulary, not architecture.
+
+### FBL-R2-03 — Cursor is scoped per (TriggerId, TriggerRevision)
+
+- **Counterexample (Q17):** trigger daily at 08:00 `America/Sao_Paulo`; high-water = today 08:00 BRT (11:00 UTC). Operator updates the trigger to 08:00 `America/New_York` (revision bump): the next legitimate slot instant may **precede** the stored high-water UTC instant → a single global cursor rejects a valid first occurrence of the new revision as "duplicate/late". Same shape under cron-cadence changes.
+- **Smallest correction:** the high-water/consumed cursor is scoped to `(TriggerId, TriggerRevision)`; a revision change rescopes/resets the cursor; old-revision fires are already rejected by the revision guard, so no ordering comparison ever crosses revisions. ChatGPT's §5.3 "within one trigger revision" said this implicitly — make it explicit, with this counterexample as the reason.
+- **DST note (Q17):** slot identity is the UTC instant produced by the timezone-aware computation (V12), so DST folds/gaps do not create ambiguous keys within a revision.
+
+### FBL-R2-04 — Resume args are validated against the sealed proposal subject
+
+- **Evasion schedule (Q30):** suspended tool resumes carrying the persisted `proposalRef` but presents **changed args** (model drift, prompt injection, or a buggy wrapper). If the wrapper forwards args while Gateway keys only on the proposal/idempotency identity, a semantically different effect could ride an approved identity.
+- **Smallest correction:** *on every resume, the Gateway wrapper re-validates the presented tool args against the sealed exact proposal subject (3F-03 sealed-subject semantics); mismatch fails closed — no effect, typed error, no re-mint.* Extends P35 with the changed-args fixture.
+- **Reopen:** no — this realizes 3F-03/3G-01 exact-subject law at the runtime boundary.
+
+### FBL-R2-05 — Runtime-ref taxonomy: pins vs expectations (Q35)
+
+The generalized expectation law needs the same split 3H-01 used: `par.*` runtime refs are either **(a) immutable pinned dispatch facts** (runtime kind/version, pinned composition — authority about what *was admitted*, never re-verified against live state) or **(b) current-state correlation refs** (thread ref, run ref, schedule row ref — expectations to re-verify, never current-state authority). No exception needed; just state the taxonomy so "expectation" is not misread as weakening pins.
+
+### FBL-R2-06 — Memory key: Workspace is the tenant; class discriminator required (Q33/Q34)
+
+- **Q33:** Workspace **is** the Conexus tenant dimension (dialogue protocol §12 of the base file; 3E). No separate organization pin exists to add.
+- **Q34 hazard:** Conversation threads and Agent/Working Memory both resolve through Mastra thread/resource identifiers. If the realization derives one `resourceId` string from the same dimensions for both purposes, thread-scoped and resource-scoped memory can alias. **Correction:** the derived key includes a memory-class/purpose discriminator (or the probe proves Mastra's thread-vs-resource mechanics keep them disjoint under identical resource keys). Folded into P36.
+
+---
+
+## 27. Block A — boot recovery (Q1–Q4)
+
+- **Q1 —** the refined law is not only sufficient — it is the **only implementable shape**: V15 found no disable switch for local-server workflow auto-restart, so "blanket disable" might be unenforceable as law. Guarded recovery (replay may occur; replay can never bypass idempotent PAR admission nor invoke the Production Agent) is robust to either substrate answer. If 3L finds the deployment topology avoids auto-restart entirely, better still — the law holds vacuously.
+- **Q2 —** no: the adapter's only step *is* the PAR admission call; there is no Production Agent invocation inside the workflow to replay (§8.3). Replay = repeat the admission call = cursor no-op. The consolidation should state the adapter's step-content prohibition as law: *the ingress workflow contains no model, tool, Gateway or Production Agent invocation — only the deterministic PAR submission.*
+- **Q3 —** `recovery.durableAgents` is durable-agent-specific and off (§3.4). The residual **Unknown**: whether a crashed *active plain agent run* leaves a `running` workflow-storage row that local-server boot restart would re-drive (the suspended path uses workflow snapshot storage; the active path's storage footprint is unverified). Per method, Unknown stays Unknown: P31 crashes an active plain run and boots the qualified host — if re-drive occurs, the qualified configuration/topology must prevent or guard it (the law already covers which); no architecture change either way.
+- **Q4 — worst boot race constructed:** A1 active, host dies; on boot, substrate re-drives A1 (worst-case assumption) concurrently with the operator committing `CANCELLED`. Sequence: re-drive checks PAR guards *before* new model/tool execution (the law) → A1 still non-terminal → re-drive proceeds → cancel commits → abort requested → late outputs refused. Outcome: bounded cost leak, zero authority corruption — identical to any cancel-vs-running race under 3G-05 §6.2/§10. The suspended variant (cancel then boot, stale snapshot resumed elsewhere) is refused at resume guards (P43). No new law needed.
+
+---
+
+## 28. Block B — Stored Agent / Editor (Q5–Q8)
+
+- **Q5 —** conceded and re-scoped: FBL-R2-01. The correction does not weaken the law; V11's sub-agent override channels strengthen the case for enumerating closed channels rather than naming one path.
+- **Q6 —** yes, with the enumeration: direct construction alone is insufficient if instance/request-level sub-agent version overrides remain settable — those bypass the parent's construction entirely. With channels (a)–(e) closed, Editor state is inert for Production Agents.
+- **Q7 —** direct use requires an instance, not registry resolution: suspended-run discovery and resume (`listSuspendedRuns`, `approveToolCall`, `resumeStream`) are methods on the agent instance the host holds; the host reconstructs the exact projection and resumes on it. Registration on a Mastra instance, if needed for plumbing, resolves registry-first (V10) — acceptable as long as no version selector is ever passed and no stored agent shares the id. The law's clause (b) covers it.
+- **Q8 —** best negative probe (refining P33): create **and activate** a published stored agent with the same semantic id **plus** attempt a request-level sub-agent version override; restart the host; then (i) dispatch a new run and (ii) resume a pre-existing suspended run; assert both execute with a projection-unique behavioral marker (e.g., a sentinel instruction string present only in the Conexus projection). Both the fresh-dispatch and post-restart-resume paths must be covered — resume is where hidden re-resolution would live.
+
+---
+
+## 29. Block C/D — occurrence transport, cursor, overlap (Q9–Q18)
+
+- **Q9–Q13 —** answered in FBL-R2-02 (concession, `claimId` verified unusable, third candidate, freeze-the-key-only).
+- **Q14 —** yes, per-revision high-water suffices: substrate does no catch-up (V14), so genuinely old slots arrive only as redelivery, which the high-water rejects; out-of-order *new* slots cannot be produced by a single forward-looking scheduler within one revision. Cross-revision ordering hazards are eliminated by FBL-R2-03's rescoping.
+- **Q15 —** necessary. Without consume-on-skip, a skipped occurrence's redelivery after the active run terminalizes would admit a late run — F1 silently becomes a backlog scheduler, the exact semantics §23 (R1) refused. No current correctness consumer loses anything: cursor-based Automation State absorbs the work in the next occurrence.
+- **Q16 —** yes: cursor and `agent_run` are both `par.*` owner facts; one owner-local transaction with the 3G-05 §6.1 conflicting-guard style. No new record.
+- **Q17 —** yes with the rescoping — see FBL-R2-03's eastward-timezone counterexample for why per-revision scoping is load-bearing, not pedantry.
+- **Q18 —** attempted constructions: (i) concurrent redelivery + new slot → serialized by the trigger-row lock/CAS; loser re-evaluates against advanced cursor; (ii) two scheduler processes firing the same slot → same serialization; (iii) crash between cursor advance and run creation → impossible, same transaction; (iv) fire racing trigger UPDATE → revision guard refuses the old-revision fire; new-revision fire starts a fresh cursor scope. **No two-run schedule found** under the consolidated algorithm with conflicting guards. The only reachable defect is refusal of a legitimate occurrence (availability), never duplication.
+
+---
+
+## 30. Block E/F — projection drift, transport choice (Q19–Q27)
+
+- **Q19 —** correct partition. Cron/timezone/status are *scheduling mechanics* the substrate cannot function without; prompt/composition/model/Release are *invocation authority* and never live in the row. This is the FBL-R1-04 line, correctly redrawn.
+- **Q20 —** yes — owner-side slot validation is the smallest control that actually covers the class: it rejects any wake whose instant is not a valid slot of the **authoritative** definition, regardless of how the row was mutated.
+- **Q21 —** admission validation, not a scheduler: it computes slot membership at arrival; it never computes next fires, holds timers, or competes with Mastra's cadence. Analogous to validating a normalized ingress claim — exactly as ChatGPT framed it.
+- **Q22 —** the digest/token alternative is **weaker and should be deleted** (also my Q40 answer): a row-provenance digest travels with the fire and still matches after cron/timezone mutation — it authenticates *where the row came from*, not *whether this instant is a legitimate occurrence*. It misses the only failure class it was proposed for. Slot validation subsumes it.
+- **Q23 —** operations (3J) + reconciliation repair + an OBS anomaly signal when rejected-wake rate is abnormal (C-013 machinery, no new rule). No semantic rule needed: rejected wakes are availability noise, not authority risk.
+- **Q24 —** yes: agent-target is disqualified (resolution + prompt semantics precede any admission point, V13/V10); the prepare-hook path lacks `scheduledFireAt` and runs after agent resolution (V13) — unproven at best; workflow-target remains the smallest **verified** transport.
+- **Q25 —** no, not today: prepare stages can skip a fire (`null`) but execute after agent resolution and see only actual `firedAt` — they can veto, but cannot be the admission boundary nor carry the stable key. Probe-only, as consolidated.
+- **Q26 —** no: auto-restart makes adapter replay *more frequent*, and the design already prices replay at zero (idempotent admission). A "narrow scheduler-event consumer" is not a public API today; adopting worker internals would couple to unstable substrate — worse than the adapter.
+- **Q27 —** yes: freeze the property contract (stable key pre-admission; no Production Agent execution before admission; no invocation authority in transport); adapter shape is 3L's.
+
+---
+
+## 31. Block G/H — approval identity, memory, refs (Q28–Q35)
+
+- **Q28 —** yes: `currentPendingProposalRef` + ApprovalRequest sealed subject/binding (3F-03/3G-01) + Gateway `idempotency_claim` (3G-06) is complete custody across resume/retry — provided FBL-R2-04's args re-validation closes the changed-args seam. No new record.
+- **Q29 —** correlation only. `toolCallId` persists in the snapshot (V1 of Round 1) and is useful for resume addressing, but authority lives in the owner-persisted proposal binding; a runtime id never becomes permission.
+- **Q30 —** constructed and closed: FBL-R2-04.
+- **Q31 —** yes, still superior: exact toolCall persistence helps both paths equally; only generic suspension carries four typed outcomes as resume *data* without overloading a binary approve/decline verb.
+- **Q32 —** yes: Workspace + Project + Agent (+ subject where subject-scoped) — confirmed as R1 FBL-R1-07, now with the class discriminator (FBL-R2-06).
+- **Q33 —** Workspace *is* the tenant; nothing separate to pin.
+- **Q34 —** real hazard; closed by the class/purpose discriminator in key derivation or probe-proven mechanism disjointness — FBL-R2-06, folded into P36.
+- **Q35 —** no exception; state the pins-vs-expectations taxonomy (FBL-R2-05) so immutable runtime kind/version pins are not misread as re-verifiable state.
+
+---
+
+## 32. Block I/J — signals, evolution, Global Maximum (Q36–Q47)
+
+- **Q36 —** yes: the one-line guard plus §15's internal-transport caveat covers the class; external sources still have no path into PAR admission.
+- **Q37 —** no: signals ride threaded schedule fires only (R1 V7); the threadless workflow-target baseline never touches them.
+- **Q38 —** yes: upgrade compatibility is a qualification/operations fact (P44 + 3J drain), not architecture.
+- **Q39 —** no new F5 durable record: proposals/observations enter existing owner paths; `agent_event` + owner records remain the durable trace.
+- **Q40 —** most deletable: the "owner-minted projection digest/token" alternative in §7.2 (weaker control, see Q22) — delete it so implementers cannot choose the ineffective option. Second: §6's illustrative `SKIPPED_BY_SINGLE_FLIGHT` label should be marked non-frozen vocabulary (it is, but say so).
+- **Q41 —** none: every Round 2 rule traces to a verified failure class (V10–V15).
+- **Q42 —** no new owner facts beyond fields on approved records: the occurrence cursor is a column-level fact on `par.agent_trigger` (3E: exact columns are implementation); `FRESH`-style dispatch facts on `par.agent_run` were already required by 3G-05 pinning. Consistent.
+- **Q43 —** material control: without slot validation, a mutated row cron (drift without revision change) manufactures wakes at instants the authority never defined, and cursor/revision checks alone would admit the first such wake as a "new occurrence". The counterexample is concrete; the control is one membership check.
+- **Q44 —** yes. The added controls are all guards on existing acts (admission, resume, resolution); none changes the topology. Alternative A remains the smallest structure satisfying every frozen invariant with verified current APIs.
+- **Q45 —** strongest remaining argument for universal Workflow/Durable Agent: "boot recovery and occurrence redelivery come for free since workflow runs already restart". Refuted: what restarts for free is **at-least-once transport**, which the design already absorbs at admission; wrapping the *agent* moves model/tool execution **inside** the replay surface (V15: unconditional restart; V3: process-local retry state) — converting free transport redelivery into paid, guard-heavy model/tool replay. The wrapper maximizes exposure to the exact behavior we must contain.
+- **Q46 —** **`CURRENT STRUCTURE CONFIRMED`** — consolidated candidate + FBL-R2-01..06.
+- **Q47 —** ready for operator **after a Round 3 consolidation** that folds: the concessions' re-scoped evidence (FBL-R2-01/02), per-revision cursor scoping, args re-validation, ref taxonomy, memory-class discriminator, deletion of the digest alternative, and probe refinements below. No further adversarial round needed unless ChatGPT contests a finding.
+
+---
+
+## 33. Proof refinements
+
+```text
+P31 (sharpened) crash an ACTIVE plain Production Agent run mid-tool; boot the qualified host with default
+    substrate behavior → determine whether a `running` storage row is re-driven; in either case prove no
+    model/tool execution occurs without re-entering PAR guards (resolves the named Unknown)
+P33 (sharpened) stored agent created AND activated with same semantic id + attempted request-level
+    sub-agent version override → fresh dispatch AND post-restart resume both execute the Conexus
+    projection (sentinel marker asserted)
+P35 (extended) resume presenting changed args under the same proposalRef → sealed-subject validation
+    fails closed; no effect, no re-mint
+P36 (extended) identical scope dimensions for Conversation thread and Agent/Working Memory → no aliasing
+    between memory classes (discriminator or proven mechanism disjointness)
+P38 (unchanged) stands: stable intended occurrence key available to PAR before admission, or smallest
+    adapter; actualFireAt-only transport insufficient
+P45 (new) trigger revision change with earlier-instant first slot (timezone moved east) → new revision's
+    first occurrence admitted; per-revision cursor scoping shown firing
+```
+
+---
+
+## 34. Final disposition
+
+```text
+Material Finding against approved authority              = NONE
+reopen required                                          = NONE
+ChatGPT R2 evidence corrections (resolution, transport)  = ACCEPTED / CONCEDED with precise re-scope
+claimId as dedupe key                                    = REFUTED at source (per-delivery wall-clock)
+cursor law                                               = SHARPENED to per-(TriggerId, TriggerRevision)
+digest/token alternative in §7.2                         = DELETE (weaker than slot validation)
+resume changed-args seam                                 = CLOSED (sealed-subject re-validation)
+overengineering detected                                 = NONE
+Alternative A                                            = REMAINS GLOBAL MAXIMUM
+recommendation                                           = CURRENT STRUCTURE CONFIRMED
+readiness                                                = Round 3 consolidation, then READY FOR OPERATOR DECISION
+```
+
+This round approves nothing. Operator ratification remains the only path to authority.
+
+— Fable, Round 2

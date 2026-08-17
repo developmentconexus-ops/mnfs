@@ -1125,3 +1125,233 @@ later owner if deferred
 46. State whether 3H-01 is ready for ChatGPT consolidation/operator review or requires another adversarial round.
 
 Do not modify earlier content, `LEDGER.md`, approved authority or product code. Append your round to this dialogue and commit/push only the dialogue change.
+
+---
+
+# Round 1 — Fable
+
+**Role:** independent Senior/Staff/Principal Software Engineer + Software Architect, adversarial reviewer.
+**Authority reconstructed from:** `AGENTS.md` → `docs/engineering/standards/root-cause-global-maximum-method.md` → `docs/DOCUMENTATION-MAP.md` routing → `docs/conexus/DECISOES.md` (C-000..C-017) → `docs/conexus/phase3/LEDGER.md` → 3A-R5, 3C-05, 3C-13, 3D-R1, 3E-01/3E-02, 3F-02/3F-R1, 3G-02, 3G-03, 3G-R1. This dialogue file itself was treated as proposal, not authority.
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied in full. Nothing in this round approves 3H-01; ChatGPT↔Fable agreement is not operator ratification.
+
+---
+
+## 25. External evidence verified this round
+
+All load-bearing Mastra/E2B claims were re-verified against current primary sources, not model memory. Evidence IDs `V1..V9` are cited throughout.
+
+| ID | Verified fact | Source |
+|---|---|---|
+| V1 | AgentController `Session` is an in-memory runtime object: event bus, arbitrary session state, permissions, approvals, suspensions and stream state do **not** survive process restart. With persistent storage configured, threads, messages, token usage, **thread settings, observational-memory settings and subagent model selections are preserved** across controller recreation. | Context7 `/mastra-ai/mastra`, `reference/agent-controller/session.mdx` "Persistence boundaries" |
+| V2 | `createSession({ resourceId, scope, threadId, id, ownerId, tags, workspace, browser, requestContext })` is get-or-create per `(resourceId, scope)`; supplying `threadId` switches the cached session to that thread or creates it; `workspace` is a documented per-session override; `id`/`ownerId` are **caller-supplied** stable identifiers defaulting to the controller id. | Context7 `/mastra-ai/mastra`, `reference/agent-controller/agent-controller-class.mdx` |
+| V3 | `session.abort()` aborts the active run and clears pending suspension display state. It is run control, nothing more. | Context7 `/mastra-ai/mastra`, `session.mdx` |
+| V4 | Session permission **rules** live in session state and "require host restoration of session state to persist"; in-memory session **grants** reset with the live session. | Context7 `/mastra-ai/mastra`, `session.mdx` "Permissions" |
+| V5 | Session identity (`session.identity.getId()`) is stable across resource switches but is caller-supplied configuration, not a provider-generated durable record; the durable unit is the stored thread. | Context7 `/mastra-ai/mastra` |
+| V6 | `@mastra/e2b` keeps a logical id (`mastra-sandbox-id` in E2B metadata, generated as `e2b-sandbox-{timestamp}-{random}`) distinct from the physical E2B `sandboxId`. `start()` runs `findExistingSandbox()` (metadata query over running/paused sandboxes) and `Sandbox.connect()` (auto-resumes paused); if none is found it **creates a new physical sandbox under the same logical id**. | `workspaces/e2b/src/sandbox/index.ts` (raw GitHub, main) |
+| V7 | `stop()` = `sandbox.pause()` (snapshot freeze; FUSE mounts unmounted first, reconciled on reconnect); `destroy()` = `kill()`. | same source |
+| V8 | Dead-sandbox retry: `isSandboxDeadError()` matches "sandbox was not found / not running / has been killed"; `retryOnDead()` is invoked by `E2BProcessManager` **during process spawn**; on dead detection `_sandbox = null`, mounts flip to `pending`, `ensureRunning()` → `start()` →可 creates a **fresh physical sandbox (new `sandboxId`, template-fresh filesystem)** and re-runs the spawn. **No lifecycle event is emitted on recreation**; callers can detect it only by comparing `sandboxId`. | same source |
+| V9 | E2B pause preserves filesystem **and memory and running processes**; resume restores "the same state it was in when you paused it"; **`sandboxId` remains unchanged across pause/resume**; auto-pause available via `onTimeout: 'pause'`; paused sandboxes are kept indefinitely; continuous-runtime limits reset after pause/resume. | docs.e2b.dev/sandbox/persistence |
+| V10 | Mastra Workspace exposes a process manager: `sandbox.processes.spawn/list/get/kill`, `list()` returns **tracked** processes with pid/running/exitCode; `mastra_workspace_kill_process` tool kills by PID. Tracking covers manager-spawned processes — a command that self-daemonizes can escape tracking. | Context7 `/mastra-ai/mastra`, `reference/workspace/process-manager.mdx`, `workspace-class.mdx` |
+| V11 | Workspace sandbox **resolvers** (dynamic per-request sandboxes) are currently **incompatible with `mounts`** (throws `INVALID_CONFIG`) **and with `lsp: true`** (LSP disabled with warning), because both require a static sandbox at workspace construction; resolver-returned sandboxes are not destroyed by `workspace.destroy()` — the application owns their lifecycle. Per-session `workspace` override (a full Workspace instance per session, V2) does not carry this limitation. | Context7 `/mastra-ai/mastra`, `docs/workspace/sandbox.mdx` "Multi-tenant sandboxes" |
+| V12 | `controller.listActiveThreadRuns()` lists in-flight runs **of the current controller process only**; session run engine emits structured `agent_start` / `agent_end` (reason: `complete | error | aborted | suspended`) and per-chunk events. After process loss there is no runtime-side authority record of the in-flight run. | Context7 `/mastra-ai/mastra`, `agent-controller-class.mdx`, `packages/core/src/agent-controller/session-run-engine.ts` |
+
+Disposition on ChatGPT's evidence section: **M1–M6 are accurate against current sources; no material deviation found.** V8 and V9 additionally sharpen M4/M5 in ways that matter below.
+
+---
+
+## 26. Verdict up front
+
+1. **No material Finding against approved authority.** 3A-R5, 3G-02, 3G-03, 3E-01/3E-02, 3F-02 survive every attack schedule S1–S13. No reopen of any approved decision is required.
+2. **Alternative D is the Global Maximum** for the realization; Alternatives A/B/C/E are correctly rejected (§34 below refutes the strongest pro-C and pro-E arguments).
+3. **WT-B is adopted over WT-A**, but ChatGPT's candidate law (§8) is **too weak in two places** and must be sharpened before consolidation (FBL-R1-03).
+4. Three further **material corrections to the candidate** are required: output custody before presentation (FBL-R1-01), mandatory physical-incarnation observability (FBL-R1-02), and a session-state-restoration prohibition (FBL-R1-05). One realization law for verifiers (FBL-R1-04) and one confirmation on quiescence placement (FBL-R1-06) complete the set.
+5. **3H-01 is not ready for operator review.** It needs a ChatGPT consolidation round incorporating FBL-R1-01..06. The corrections refine the un-frozen candidate; none reopens ratified authority.
+
+---
+
+## 27. Material findings
+
+Format per §24: claim challenged / counterexample / authority affected / evidence / smallest correction / Global Maximum effect / reopen / later owner.
+
+### FBL-R1-01 — Output custody must transfer to Hub-side durable storage before (or atomically with) presentation
+
+- **Claim challenged:** the candidate treats "exact produced output is durable/canonical before Builder records presentation" as probe item 11 (§21) rather than architecture law, and §16 describes F5 handoff without fixing where the exact bytes must live at presentation time.
+- **Counterexample / failure class:** A1 commits candidate X in the sandbox-local Git repo. F5 presentation is admitted; `A1.producedOutputRef = X` is written. The physical sandbox is then killed (not paused) — E2B `kill`, template expiry, or provider loss. X's identity exists in `hub_control`, but **no Hub-resolvable custody of the content exists anywhere**. 3G-03 §12.2's promise — crash after durable presentation resumes judgment of the same X without rerunning the agent — is unrealizable; 3G-03 §12.3 custody recovery has nothing to recover *from*. S3 silently degrades into "new ActorRun after all", which 3G-03 explicitly forbids treating as the normal path.
+- **Authority affected:** realization of 3G-03 §7.3/§12.2 and C-008 (SYNC/SHARE bundle mediation). No authority contradiction — the authority already implies this; the candidate under-freezes it.
+- **Evidence:** V6/V8/V9 — a sandbox lineage can terminate without warning at any moment; paused sandboxes persist indefinitely but killed ones are gone; E2B state is explicitly non-authoritative (3A-R5 §8.1, 3C-05 §30).
+- **Smallest correction:** freeze as 3H-01 law: *presentation admission of output identity X requires Hub-side durable custody of content resolving to X (SHARE bundle received/verified per C-008, or equivalent Hub-owned storage) before or atomically with the `producedOutputRef` write. A presentation whose content cannot be custody-verified is refused, not recorded.* Exact transport (bundle/fetch/CAS) remains implementation under C-008/3L.
+- **Global Maximum effect:** makes write-once presentation semantics real instead of aspirational; closes the S3 gap without any new record/engine.
+- **Reopen:** no. **Later owner:** custody *repair* after Hub-side loss remains 3M as already routed.
+
+### FBL-R1-02 — Physical-incarnation observability is a required capability, not "when available"
+
+- **Claim challenged:** §13 lists "sandbox logical + physical refs **when available**" and §10 defers the entire dead-sandbox-retry concern to a probe-gated wrapper.
+- **Counterexample / failure class:** verified V8: the current adapter, on a dead sandbox during process spawn, silently creates a **fresh physical sandbox with a template-fresh filesystem under the same logical id and re-runs the command**, emitting **no event**. Concrete schedule: A1 pauses; timeout kills E1; A2 is dispatched "continuing" the lineage; first spawn hits dead-sandbox retry; adapter creates E2; the command runs on an empty tree; the agent, seeing a valid shell, reconstructs state ad hoc; scratch lineage was silently severed and nobody recorded it. If the Hub cannot *read* the current physical `sandboxId`, invariant 7 (§5) is unenforceable — there is no mechanism that could ever fire.
+- **Authority affected:** candidate invariants 6/7/12; 3A-R5 §8.1 (recreated sandbox must not invent facts).
+- **Evidence:** V8 (no recreation event; retry reachable in current source), V9 (`sandboxId` is stable across pause/resume — therefore a *changed* `sandboxId` is a reliable incarnation-change detector, and comparing it is sufficient).
+- **Smallest correction:** promote to 3H-01 law: *(a) every write-capable-lineage ActorRun dispatch pins the expected physical `sandboxId`; (b) the CodingRuntime realization MUST expose the current physical `sandboxId` on demand; (c) observed mismatch, or inability to observe, voids any continuity assumption for that lineage — fail closed to reset/recreate/reconciliation, never silent continuation.* The §13 wording "when available" is deleted for the write-capable case. Whether enforcement needs a thin local guard around the adapter (vs. pin-and-compare at turn boundaries) stays probe-gated for `CX-BUILDER-MASTRA-01`/3L — but the *law* and the *observability requirement* are architecture now, because without them the probe has nothing to falsify.
+- **Global Maximum effect:** converts "logical id ≠ physical continuity" from prose into an enforceable control; no wrapper is prebuilt.
+- **Reopen:** no. **Later owner:** retry/guard mechanics 3L; recovery policy 3M.
+
+### FBL-R1-03 — WT-B adopted; inheritance becomes an explicit dispatch admission with a FAILED/CANCELLED asymmetry
+
+- **Claim challenged:** §8's candidate law lets a "compatible successor ActorRun inherit non-authoritative working state" but does not fix **who decides compatibility, when, or on what recorded basis** — and treats all predecessor terminals alike.
+- **Counterexample / failure class (weakness 1):** if inheritance is a runtime default ("sandbox still there → continue"), the decision that scratch crosses an attempt boundary is made implicitly by sandbox liveness — exactly the structural defect class of §4 (*runtime continuity carrying authority*). Under S6, nobody can later answer "did Builder admit A2 as lineage-continuing or fresh?" because no fact records it.
+- **Counterexample (weakness 2):** S7/Q15 — user cancels A1 ("stop — wrong direction"). WU remains current; the candidate law's gates (authority compatibility, quiescence) all pass; A2 silently continues scratch embodying the exact direction the human rejected. Cancellation motive is not machine-readable; a default-continue policy converts a deliberate human interruption into invisible continuity.
+- **Why WT-B over WT-A regardless (Q10–Q14):**
+  - C-017's commit matrix already fixes the canonical commit boundary at **Work Unit** level ("writeSet ≠ vazio ⇒ exatamente 1 commit canônico por Work Unit, nunca model turn"). **ActorRun was never an authorship/byte boundary in any approved authority** — it is an attempt/audit/budget boundary. WT-A defends a provenance fact no authority records or consumes; that is accidental complexity disguised as rigor (argument C confirmed).
+  - The false-success class WT-A claims to close — dirty environment making tests pass — is **reachable within a single ActorRun anyway** (A1 can poison its own verification with untracked artifacts). The approved closure for that class is proof anchoring, not tree resets: frozen-lockfile deterministic install (C-016), Hub-side reproduced build at compose (C-014), verifier operating on materialized candidate identity (FBL-R1-04), delivery-time set/byte reconciliation (C-017/3G-03 §11). WT-A pays continuity destruction — the exact value 3A-R5 was approved to capture — and buys a control we already own elsewhere.
+  - Q17 hidden-state honesty: `git diff`/writeSet reconciliation covers tracked source only; node_modules, caches, env mutations, installed packages, BuildValidationDatabase state are outside it. Conclusion stands because **judgment/verification is anchored to clean materialization of the candidate identity**, not to the sandbox that produced it. Inherited scratch can contaminate the *sandbox*; it cannot contaminate the *proof* unless verification is run inside the dirty workspace — which FBL-R1-04 forbids at material rigor.
+- **Smallest correction (sharpened WT-B law):**
+  1. Working-tree inheritance across ActorRuns is a **Builder dispatch-time admission, recorded as a dispatch fact of the successor ActorRun** (continue-lineage vs. fresh-base), never a runtime default.
+  2. Continue-lineage admission requires all of: same CodingSession/WU lineage or admitted successor-WU compatibility; physical-incarnation continuity verified (FBL-R1-02); quiescence established (FBL-R1-06); current contract/decomposition/authority compatibility per 3G-02/3G-03.
+  3. **Asymmetry:** after predecessor `FAILED` (mechanical/transient cause) continue-lineage may be the default when gates pass. After predecessor `CANCELLED`, continue-lineage requires **explicit admission by the applicable authority** (human or rule acting for it) — never default — because cancellation is deliberate and its motive is outside the machine-readable facts.
+  4. Material contract/decomposition change, authority narrowing, contamination evidence or unverifiable continuity forces reset/quarantine/reconstruction before new write authority (candidate law retained).
+  5. Scratch remains non-authoritative regardless; delivery still passes full canonical-identity + set reconciliation (candidate law retained).
+- **Global Maximum effect:** preserves 3A-R5's continuity value while making the one authority-relevant fact (was continuity admitted?) explicit and auditable; adds zero records — the admission is part of the ActorRun dispatch facts that 3G-03 already requires pinned.
+- **Reopen:** no. **Later owner:** reason-taxonomy for cancellation, if a consumer ever needs it → calibration/3K; not now.
+
+### FBL-R1-04 — Material verifier never executes inside the implementer's live mutable workspace
+
+- **Claim challenged:** §17.1 leaves shared-physical-sandbox verification admissible "if the realization can prove the verifier cannot mutate the judged candidate"; Q32 asks whether tool-level restriction suffices.
+- **Counterexample / failure class:** shell execution **is** a write primitive. Any verifier that can run tests (required for CONTROLLED-rigor verification) can mutate the filesystem; C-008 gives the guest root, so intra-sandbox user/permission enforcement is not a trust boundary. A "read-only tool surface" that includes `execute test command` is read-only in name only. Sharing the implementer's live sandbox therefore cannot yield the mechanical non-mutation proof C-017 requires at material rigor — and it additionally contaminates quiescence (verifier processes racing implementer lineage).
+- **Two-part resolution (smallest correction):**
+  1. The judged object is the **content-addressed candidate identity** (3G-03 §7.3). A verifier can never mutate an identity — only a materialization. Therefore the required mechanical proof is: *verifier report binds to exact candidate identity X; delivery/acceptance verify resolved content matches X* (3G-03 proof item 4 already covers the fail-closed check).
+  2. What remains protectable is the implementer workspace/lineage. Law: *a material verifier ActorRun operates on a fresh materialization of exact candidate identity X (separate sandbox, or no sandbox at all when verification requires no execution), never inside the implementer CodingSession's live mutable workspace.* This does **not** mandate "second VM by symmetry": a pure-read verification (report/document/diff review) needs no sandbox; only execution-bearing verification needs its own materialization. Shared dependency/build caches are an implementation optimization admissible only through read-only/copy mechanisms — 3L.
+- **Authority affected:** realizes C-017/3A-R5 §10.2 verifier independence; answers Q31–Q35. Fresh thread/session gives cognitive independence because the thread is the persistence unit (V1) — no implementer thread, no implementer cognition; OM is OFF (3A-R5).
+- **Reopen:** no. **Later owner:** cache-sharing mechanics and sandbox provisioning cost → 3L / `CX-BUILDER-MASTRA-01` (which must include the negative mutation test C-017 already demands).
+
+### FBL-R1-05 — Prohibition: serialized live-session state is never restored as an authority carrier
+
+- **Claim challenged:** §7.1's clean-restart recipe and §14/§15 do not close the tempting realization where the Hub snapshots/restores AgentController session state to "improve" restart fidelity.
+- **Counterexample / failure class:** V4 — permission *rules* persist only "when the host restores session state". If the Hub persists and restores session-state blobs, it resurrects stale permission rules, mode/model choices and approval residue from before a pin/authority change — a TOCTOU channel that bypasses §14's "current authority wins" law while appearing to be a faithful restart. Separately, V1 shows **persisted thread settings and subagent model selections survive restart by themselves** — so even without blob restoration, stale runtime settings will silently apply after rebinding unless dispatch *mechanically* overrides them.
+- **Smallest correction:** freeze two laws:
+  1. *Conexus never persists/restores AgentController live-session state as a carrier of permissions, approvals, grants, mode or model authority. Rebinding = recreate controller → `createSession` bound to the stored `threadId` (V2) → mechanically apply current Conexus authority.*
+  2. *At every ActorRun dispatch, load-bearing runtime configuration (model/provider pins, mode, permission/tool surface) is applied through the runtime API as configuration, not merely restated in prompt context. Prompt restatement is for knowledge; mechanical application is for authority.* (This answers Q9 with a crisp partition.)
+- **Proof consequence:** `CX-BUILDER-MASTRA-01` gains a mandatory negative fixture: poison the stored thread with stale settings (old model selection, permissive permission rule), dispatch with new pins, prove the stale setting is overridden mechanically — i.e., prove the control fires, per method.
+- **Reopen:** no.
+
+### FBL-R1-06 — Quiescence: 3H owns the property and the dispatch-gate placement; 3M owns the policy when it cannot be established
+
+- **Claim challenged:** §11.2 asks whether the property belongs in 3H, 3M or both.
+- **Evidence:** V9 — E2B pause preserves **running processes**. A cancelled A1's dev-server/watcher survives pause, resumes with the sandbox, and races A2's writes. This is a *current, reachable* failure class, not speculation.
+- **Disposition:** 3H freezes (a) the property (terminal A1 + successor A2 ⇒ no unknown write-capable activity in the same tree — candidate §11.2 confirmed), and (b) its **placement**: quiescence is a precondition of the continue-lineage dispatch admission (FBL-R1-03 gate 2). Mechanics (tracked-process kill, process inspection, reset, recreate) are implementation/probe; the fail-closed fallback (recreate/reset when quiescence cannot be established) is architecture. 3M owns recovery policy and calibration when establishment fails repeatedly. No lease/fencing: single-writer F1 + kill/inspect/recreate covers every schedule I could construct (D attack, §33 S7) — a lease would add a liveness authority with no consumer, and D's "quiescence is secretly a lease" collapses because recreate is always available as the safe exit.
+- **Feasibility + hard caveat (V10):** the current Workspace process manager supports the tracked path (`processes.list/kill`, pid/running/exitCode). But `list()` enumerates **tracked** processes; a shell command that self-daemonizes (`nohup`, forked server, detached watcher) can escape tracking, and E2B pause will faithfully preserve it (V9). Therefore *tracked-process termination alone can never be accepted as quiescence proof*. Quiescence basis = tracked-kill **plus** either sandbox-level process inspection showing no residual write-capable activity, or reset/recreate. `CX-BUILDER-MASTRA-01` gains a mandatory fixture: start an untracked daemon during A1, terminalize A1, prove the quiescence gate refuses continue-lineage until inspection/recreate resolves it — the control must be shown firing.
+- **Reopen:** no.
+
+---
+
+## 28. `bld.coding_session` — justified; exact owned fact stated (Q4, argument A)
+
+Attack attempted: fold CodingSession into `Change` + stored thread ref; declare the record redundant.
+
+It fails on three concrete facts only a Builder-owned record can hold:
+
+1. **Supersession lineage.** 3A-R5 fresh-session triggers (material semantic revision, contamination suspicion) create a *new* session for the *same* Change. Change:CodingSession is 1:N over time; a single thread-ref column on `change` cannot represent "which lineage is currently admitted" plus history without inventing exactly this record.
+2. **Verifier sessions.** §17 verifier realization creates additional independent sessions under the same Change — again 1:N, role-typed.
+3. **Authority direction.** Rebinding after restart must start from a Builder fact ("this Change's admitted lineage is thread T91 / logical sandbox L, expected physical E1") and *impose* it on the runtime. Deriving it by querying `mastra_builder` storage or E2B metadata would make substrate state the recovery authority — precisely the §4 defect class. V5 confirms the runtime offers no durable session record to lean on; the thread is storage, not authority.
+
+So the record owns: *the Builder-admitted runtime-continuity lineage of a Change (current + superseded), its role, and the opaque correlation refs (thread ref, logical sandbox id, last-verified physical sandboxId, live-session incarnation refs when useful)*. The candidate's exclusion list (§6.1 — no thread contents, task state, permissions, stream state) is confirmed and is the guard against overload. No new durable class; 3E-02 record as approved.
+
+---
+
+## 29. AgentController mapping (Q5–Q9)
+
+- **Q5 — verified.** Clean restart reconstruction is real: persistent storage preserves threads/messages/thread settings (V1); `createSession({threadId})` rebinds (V2). What is *lost* is exactly what must not matter: event bus, grants, approvals, suspensions, stream state. Hidden-loss check: pending Mastra approvals/suspensions do not survive — this is safe **by construction** only if no load-bearing approval ever lives solely in Mastra suspension state. That is already law (candidate §15, C-010/C-017: Mastra tool approval is never Conexus approval authority); the restart consequence is: a run waiting on a Mastra-internal approval at crash time simply cannot continue and follows the orphan path. No durable Conexus state needs to be added (Q7: **none beyond thread + `bld.coding_session` correlation facts**).
+- **Q6 — confirmed.** `CodingSession = Builder durable identity + thread ref + ephemeral live-Session incarnations` is the smallest correct mapping. The live registry key `(resourceId, scope)` and session `id` are caller-supplied (V2/V5) — the realization should derive them *from* the CodingSession identity, making the runtime carry Conexus identity rather than the reverse.
+- **Q8 — yes, real, and closed by FBL-R1-05.** Thread settings/model selections persist and would silently apply; mechanical reapplication at dispatch is the enforcement, with a firing-proof fixture.
+- **Q9 — partition frozen in FBL-R1-05:** authority → mechanical API application at dispatch; knowledge/context → prompt restatement.
+
+---
+
+## 30. Sandbox / E2B (Q18–Q24)
+
+- **Q18 — done, from source (V6–V8).** M4/M5 accurate.
+- **Q19 —** logical-id reattachment to a different physical sandbox **always** surfaces a new `sandboxId` (V9: pause/resume preserves it; only true recreation changes it). So `sandboxId` pin-and-compare is a sufficient detector — but only if recorded and read (FBL-R1-02). Residual: two overlapping Hub incarnations could create two physical sandboxes under one logical id (metadata collision); single-writer F1 makes this a restart-overlap corner; the incarnation pin already fails closed on it; no fencing (S13 confirmed, Q-refs §33).
+- **Q20 —** yes, the spawn path retries after uncertain execution (V8): a command that started, then died with the sandbox, can be re-run wholesale on a **fresh** filesystem. Exposure is bounded: external effects flow through typed Builder capabilities → Gateway (never raw guest shell to governed targets, C-008 egress deny-all), so replay of governed effects is out of this path by construction; the real hazards are false continuity (closed by FBL-R1-02) and command-outcome ambiguity, which stays runtime-local because local FS is non-authoritative and Evidence requires observed completion (§13 list). Probe must include a forced dead-sandbox-mid-command fixture.
+- **Q21 —** wrapper correctly probe-gated **after** FBL-R1-02's law lands; without that law, deferral would be untestable, i.e., architecture papering over the adapter (argument F resolved: the *guard law* is now, the *guard code* is evidence-gated).
+- **Q22 —** current consumer for one-lineage-per-CodingSession: working-tree continuity itself + F1 serial topology + cost; per-ActorRun lineages would reintroduce the rediscovery cost 3A-R5 removed; per-Change-many-lineages has no consumer. Confirmed.
+- **Q23 —** freeze only "execution workspace scope is CodingSession-determined, imposed by the Hub at session creation/rebind". Argument G is now **evidence-resolved, not open**: the alternative realization (static AgentController Workspace + dynamic sandbox **resolver** keyed by CodingSession) carries a verified current limitation — resolvers are incompatible with `mounts` (`INVALID_CONFIG`) and disable LSP, and resolver-returned sandboxes fall outside `workspace.destroy()` lifecycle (V11). Since 3A-R5 values LSP/smart-editing mechanics, the **per-session Workspace instance override (V2) is the favored current mechanism**; 3L must re-verify this constraint at qualification time (framework is beta; the limitation may move). Architecture still freezes only the scope law.
+- **Q24 —** pause preserving memory/processes has a 3I edge: an ephemeral guest-readable run capability (C-008) survives inside a paused VM's memory and can outlive its intended window if a sandbox resumes much later. This is safe only because expiry is enforced server-side (`expires_at`, fail-closed) — route as a named 3I check item: *server-side expiry must be the enforcement point; guest-held token lifetime is irrelevant.* Not a 3H blocker.
+
+---
+
+## 31. Liveness / interruption (Q25–Q30)
+
+- **Q25 —** candidate §13 list confirmed, with two hardenings: current physical `sandboxId` readable on demand (FBL-R1-02, no longer "when available"), and *enumerate/terminate runtime-tracked processes* (needed to realize quiescence). Everything else (heartbeat policy, timeout values, orphan enums) correctly stays 3M.
+- **Q26 —** after process loss, "can this run still produce output?" is answerable to the needed degree: thread + workspace persist (V1/V9), but in-flight run registry is process-local (`listActiveThreadRuns()` covers the current process only, V12) — after crash the runtime holds **no** authority record of the in-flight run, which confirms both that no transparent resurrection is possible and that orphan determination is necessarily Hub-side. Exactly what 3G-03 §12.1 already covers via explicit guarded terminalization; candidate §7.2 confirmed.
+- **Q27/Q28 —** yes without leases; recreate/reset is the fail-closed fallback (FBL-R1-06).
+- **Q29 —** ActorRun-scoped default confirmed. The only plausible CodingSession-scoped consumer (persistent preview/dev server across attempts) has no current product consumer — RunPreview is Hub-proxied and run-bound (C-008); admit longer-lived processes only by explicit future admission. No ProcessRegistry.
+- **Q30 —** commit-CANCELLED-first, then physical abort, is the correct normative order (matches 3G-03 §15). The inverse order (abort first) creates a physically-dead-but-domain-live window that only the orphan path can clean; nothing corrupts, but the candidate's ordering is strictly better and costs nothing. Confirmed as law; abort remains best-effort/retryable.
+
+---
+
+## 32. Handoff / observability (Q36–Q39)
+
+- **Q36 —** F5 presentation + `producedOutputRef` write-once + custody law (FBL-R1-01) is sufficient; a separate runtime handoff record would duplicate the F5 proposal + `agent_event` trail. Confirmed no new record.
+- **Q37 —** map Mastra structured events into `agent_event` under C-013 as `PROVIDER_OBSERVED` with a **versioned mapping** (same pattern as the OTel `gen_ai.*` mapping); Conexus ontology stays sovereign. No second ontology. Feasibility verified: the session run engine emits typed lifecycle events (`agent_start`, `agent_end` with reason `complete | error | aborted | suspended`, per-chunk tool/usage events) that carry exactly the correlation surface the mapping needs (V12). `agent_end reason=complete` maps to a runtime observation, never to any Builder terminal fact — the vocabulary distinction of 3F-01/3F-02 holds without adaptation.
+- **Q38 —** persist: on `coding_session` — thread ref, logical sandbox id, last-verified physical `sandboxId`, supersession facts; on `actor_run` — runtime run ref, physical `sandboxId` pinned at dispatch, continuity-admission fact (FBL-R1-03). Everything else — turn ids, toolCall ids, spans, PIDs, provider request ids — telemetry only.
+- **Q39 —** provider-reported `sandboxId` is trusted as **observation input to a Hub-owned comparison**, never as a continuity *claim*; the adapter's logical id is never continuity evidence (V8). Consistent with C-013 `producer_trust`.
+
+---
+
+## 33. Attack schedules S1–S13 — dispositions
+
+- **S1** — works via V1/V2. Rehydrate mechanically: current pins/permissions/tool surface (FBL-R1-05); reuse from thread: cognition only. Thread settings are never trusted as current authority.
+- **S2** — candidate §7.2 confirmed; smallest seam = §13 list + FBL-R1-02; terminalization stays explicit/guarded (3G-03 §12.1); policy 3M.
+- **S3** — realizable only with FBL-R1-01 (custody before presentation); with it, judgment of same X resumes Hub-side with zero new ActorRun.
+- **S4** — detectable and mandatory to detect: new physical = new `sandboxId` (V9); FBL-R1-02 pin/compare; silent adapter recreation (V8) is caught at the next comparison point; inherited-scratch assumptions void on mismatch.
+- **S5** — bounded per Q20; probe fixture required; no Builder-visible effect ambiguity because governed effects never ride guest shell.
+- **S6** — FBL-R1-03: A2 continues scratch only under recorded continue-lineage admission with all gates; otherwise reconstruct from admitted base. WT-A rejected.
+- **S7** — FBL-R1-06: cancelled-run processes surviving pause/resume (V9) are killed/inspected; unknown ⇒ recreate; CANCELLED predecessor additionally blocks default continuation (FBL-R1-03.3).
+- **S8** — 3A-R5 fresh-session trigger + WT reset law suffice; physical sandbox recreation is **conditional** (required only when quiescence/incarnation/contamination checks fail — caches are content-neutral, the working tree resets regardless). No blanket recreate.
+- **S9/S10** — already closed by 3G-03 §12.2/§15 write-once race semantics; runtime realization adds nothing and can rewrite nothing. Late output after terminal = telemetry/quarantine only. Confirmed.
+- **S11** — closed by FBL-R1-04: shared live sandbox is inadmissible at material rigor; tool-level restriction is insufficient because shell is a write primitive on a root guest.
+- **S12** — closed by FBL-R1-05 mechanical reapplication + mandatory poisoned-thread negative fixture.
+- **S13** — no new guard; single-writer F1 stands; restart-overlap corner degrades safely under incarnation pinning; multi-writer remains 3J/reopen (3G-03 §17 already reserves it).
+
+---
+
+## 34. Alternatives and strongest counterarguments (Q44)
+
+- **Strongest case against Alternative D:** "CodingSession + thread + lineage + incarnation machinery is ceremony; a fresh thread + fresh sandbox per ActorRun (Alt C) is dramatically simpler and needs none of FBL-R1-01..06." Refutation: (1) it deletes the continuity 3A-R5 was *ratified* to capture — reopening approved authority requires material evidence, and "simpler realization" is framework-preference territory the protocol forbids; (2) it does **not** actually remove FBL-R1-01 (custody), FBL-R1-04 (verifier), or S9/S10 — those exist even with fresh-everything; it removes only WT/quiescence/incarnation laws while paying rediscovery cost on every attempt and destroying the practical value of persistent cognition; (3) the Mitra probe evidence (C-009) showed session continuity buying real cumulative understanding — Alt C throws away measured value for unmeasured simplicity. Alt C remains rejected absent probe evidence that continuity is unachievable.
+- **Alt E (heavy wrapper):** rejected now; FBL-R1-02 deliberately freezes the smallest law that makes a later narrow guard testable instead of prebuilding it.
+- **Alt A/B:** rejected on V1 (identity-coupling to process-local state) and on second-session-engine grounds respectively — both confirmed.
+
+---
+
+## 35. YAGNI audit of this round (Q40–Q42)
+
+Added by FBL-R1-01..06: **zero** new modules, durable record classes, FKs, queues, leases, retry engines, snapshot managers, wrappers. Every correction lands as: a law on an existing act (presentation, dispatch), a required capability on the already-frozen liveness list, a prohibition, or a probe fixture.
+
+- **Q41 — delete/demote:** §2's restatements and §7.1's restart recipe are realization consequences of approved authority + V1/V2, not decisions — demote to consequence in consolidation. §9.3's "no blanket policy" prose can compress to the two laws it contains. Nothing else is speculative.
+- **Q42 — deferred items that are load-bearing and must be pulled into 3H-01:** (a) FBL-R1-01 custody-before-presentation; (b) FBL-R1-02 incarnation observability + pin law; (c) quiescence as dispatch gate (FBL-R1-06 placement); (d) verifier materialization law (FBL-R1-04). All were implicitly "later/probe" in the candidate; each has a current failure class shown above.
+- **Q43 — buildability:** yes with current substrate, verified: thread rebind (V2), per-session workspace (V2), abort (V3), metadata reconnect + pause/resume with stable `sandboxId` (V6/V7/V9), tracked-process enumeration/kill for the quiescence path (V10), structured runtime events for correlation (V12). The three real gaps — no recreation events (V8), tracked-only process visibility (V10), resolver×LSP/mounts limitation (V11) — are each either closed by an FBL-R1 law or steered around by the favored mechanism; none is an unsupported-API assumption papered over.
+
+---
+
+## 36. Answers to remaining scope questions (Q1–Q3)
+
+- **Q1 —** one package is correct. All twelve §1 items share one root cause (§4) and one owner seam (Builder ↔ CodingRuntime); splitting would scatter the WT/quiescence/incarnation laws that must be mutually consistent. Keep, with §2 demotions.
+- **Q2 —** demoted to realization consequence: everything in §2, §7.1, §15's classification table (restates 3A-R5 §5.1/C-010), §12's core law (restates 3G-03 §15). The genuinely new 3H-01 decisions are: CodingSession realization law, WT law (as sharpened), lineage/incarnation law, quiescence property+placement, cancel ordering, verifier materialization, liveness capability shape, dispatch reintroduction law, custody-at-presentation law.
+- **Q3 —** no candidate rule creates a second authority; FBL-R1-05 closes the one covert channel found (session-state restoration).
+
+---
+
+## 37. Final disposition (Q45–Q46)
+
+```text
+Material Finding against approved authority (3A-R5/3G-02/3G-03/3E/3F) = NONE
+reopen required                                                        = NONE
+Alternative D                                                          = CONFIRMED (Global Maximum)
+WT-B                                                                   = ADOPTED with FBL-R1-03 sharpening
+corrections required to candidate                                      = FBL-R1-01..06
+recommendation for the candidate                                       = CURRENT STRUCTURE CONFIRMED, bounded corrections
+3H-01 ready for operator review                                        = NOT YET
+next step                                                              = ChatGPT Round 2 consolidation incorporating FBL-R1-01..06,
+                                                                         then operator decision
+```
+
+This round approves nothing. Operator ratification remains the only path to authority.
+
+— Fable, Round 1

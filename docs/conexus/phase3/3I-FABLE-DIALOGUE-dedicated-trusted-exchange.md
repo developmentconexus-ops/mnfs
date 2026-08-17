@@ -923,3 +923,325 @@ Attack especially:
 ```
 
 Return Material Findings, corrected candidate, credible alternatives, proof obligations and reopen triggers. **Do not alter LEDGER, approved authority or product code. Do not create `3I-04`. Append below this section, commit and push.**
+
+---
+
+## 22. Fable independent adversarial review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied. Authority reconstructed independently: 3C-12, 3F-06 (full read: asserted-identity set, derivation laws, PRE-CONTRACT auth, §10 preserved-for-3I list), 3G-07/3G-08, 3I-01 (principal closure + no-cache law + emergency-stop deletion test), 3I-02 (custody reuse rule for platform operational credentials), 3E-01/3E-02 (classes closed, columns open), C-014/C-016. Standards state verified against primary sources in this session's dated sweep (2026-08-17, URLs recorded in the 3I intake dialogue): RFC 9700 (published BCP; §2.5 RECOMMENDS asymmetric client authentication; §2.2.1/4.10 sender-constrained access tokens as SHOULD via mTLS or DPoP), RFC 7523 (published; signed client assertion with iss/sub/aud/exp/jti), RFC 9449 (published; DPoP positioned for contexts where transport-layer sender-constraining "is not available or desirable" — SPAs/native apps — an application-layer alternative, not a server-to-server mandate), RFC 9068 (published; `at+jwt` shape), `draft-ietf-oauth-rfc7523bis` (IESG/RFC-Editor pipeline, NOT final — its single-issuer-audience tightening is adoptable on its merits without draft dependence, exactly as the candidate does), OAuth 2.1 (draft-15, not authority). No draft is treated as authority anywhere below.
+
+## F.1 Verdict
+
+The exchange shape survives: `private_key_jwt` client authentication, one current Project-scoped asymmetric credential with a monotonic generation, a short-lived self-contained access token, per-request current-generation/narrowing recheck, no refresh token, no durable auth state, SERVICE_SCOPED only. **One structural correction: DPoP does not survive the YAGNI test — Alternative C (short-lived bearer + per-request current recheck) is the F1 global maximum, and the candidate's own §10.1 half-guarantees are the tell (F-4).** Deleting DPoP also deletes the proof-replay cache/nonce residue and dissolves the same-key question. The same-Project Release-selection residual is acceptable and is not a Material Finding (F-5); Project — not I&A — is the correct owner of the verification facts (F-1); `credentialGeneration` is legitimate owner-local credential revocation, not a disguised kill-switch (F-2). **Material Finding against approved authority = NONE; reopen of 3F-06/3C-12/3G-07/3G-08/3I-01/3I-02/3E = NOT JUSTIFIED.** Method outcome: **CURRENT STRUCTURE CONFIRMED** with the Alternative C substitution and bounded sharpenings.
+
+## F.2 Findings
+
+### F-1 — One Project-scoped credential fits existing records, and Project (not I&A) is the correct owner; name the archive composition
+
+```text
+claim challenged      §21-Q1/Q2 — record fit and owner
+analysis              record fit: public verification material + generation +
+                      enabled-condition are CURRENT security facts, columns on
+                      the existing prj.project record — 3E closed classes, not
+                      columns. The public key is not secret material, so no
+                      custody conflict (3I-02's asymmetric consequence: the
+                      platform stores only public keys for this exchange). No
+                      new durable class while ONE current credential per
+                      Project holds; N-key/fleet lifecycles are the named
+                      Decision Loop trigger.
+                      owner: I&A's frozen scope is HUMAN identity — Account,
+                      credentials F1, sessions (3C-02); 3C-02's own trigger
+                      list treats machine/service identities as a FUTURE
+                      re-evaluation trigger, not current scope. 3F-06 §4.1
+                      froze DAP as "principal semântico derivado da authority
+                      existente de Project/Release". The credential is 1:1
+                      with Project, its lifecycle is Project lifecycle, and
+                      its mutation eligibility is already a 3I-01
+                      security-sensitive Project mutation. Placing the facts
+                      in I&A would drag machine identity into the human-auth
+                      module against its own triggers, for uniformity only.
+                      Project owns the FACTS; authorization composition
+                      (whether the authenticated principal reaches a service
+                      now) still runs through 3I-01/owner/Gateway laws — the
+                      Project row does not become an authorization engine.
+                      archive composition (unaddressed by the candidate):
+                      3G-07 — ARCHIVED freezes future authoring intent and is
+                      NOT unpublish/security stop. Therefore Project ARCHIVED
+                      does not, by itself, disable the DEDICATED exchange for
+                      in-horizon Releases; disabling the exchange is an
+                      EXPLICIT owner-local security mutation (the same
+                      allowed-narrowing shape as 3G-07's trigger DISABLE
+                      while archived). State this in the decision text so
+                      archive semantics are composed by citation, not
+                      re-derived at implementation.
+reopen prior authority?  NO
+later owner           decision text (owner argument + archive line)
+```
+
+### F-2 — `credentialGeneration` is credential revocation plus an explicit narrowing control — distinguish the two uses, and neither is the rejected kill-switch
+
+```text
+claim challenged      §21-Q3
+analysis              3I-01's emergency-stop deletion test rejected a NEW
+                      durable global/project stop ENTITY while keeping
+                      owner-local revoke/cancel/disable controls as the F1
+                      incident set. Generation advance is exactly that class:
+                      USE 1 — rotation: register replacement key + advance
+                      generation atomically → old key and all outstanding
+                      tokens die prospectively at the next admission. This is
+                      credential revocation, the same owner-local class as
+                      Connection credential revoke.
+                      USE 2 — exchange disable: advancing generation (or the
+                      enabled-condition) WITHOUT a replacement key is a
+                      deliberate, explicit, Project-scoped security narrowing
+                      of ONE exchange surface — analogous to trigger DISABLE,
+                      not a cross-owner hold. It stops new token issuance and
+                      new admissions; it does not touch Release history,
+                      serving, or other Projects.
+                      Both uses are 3I-01 security-sensitive mutations under
+                      pre-state authority. Neither creates a durable stop
+                      object; the facts already exist for USE 1. The decision
+                      text should name both uses so USE 2 is a documented
+                      control, not an accidental side effect.
+reopen prior authority?  NO
+later owner           decision text (name both uses)
+```
+
+### F-3 — `private_key_jwt` confirmed as the mechanism family; mTLS stays challenger; shared secret stays rejected
+
+```text
+claim challenged      §21-Q4
+analysis              for a vendor issuing credentials to CUSTOMER-DEPLOYED
+                      servers, published BCP (RFC 9700 §2.5) RECOMMENDS
+                      asymmetric client authentication precisely because the
+                      verifier retains no impersonation-capable secret — a
+                      Hub DB leak yields public keys only, which kills the
+                      candidate's own §5 "app API secret leaked from Hub DB"
+                      schedule by construction. mTLS (RFC 8705) is equally
+                      strong but imports PKI issuance, trust-chain, TLS
+                      termination and proxy-forwarding coupling into 3J
+                      before any consumer needs it — correctly DEFER with
+                      trigger 6. Shared secret fails the custody blast-radius
+                      law (3I-02) and is correctly rejected. The single-
+                      issuer audience for client assertions is adopted on its
+                      merits (kills cross-AS assertion replay); the 7523bis
+                      draft is only corroboration, not authority.
+reopen prior authority?  NO
+```
+
+### F-4 — DPoP fails the YAGNI test for F1: Alternative C is the global maximum; the candidate's own replay honesty is the tell
+
+```text
+claim challenged      §21-Q5/Q6/Q10/Q20 — is DPoP essential, and its residue
+analysis              what DPoP buys here: a stolen SHORT-LIVED access token
+                      alone becomes unusable without the private key. Examine
+                      what is actually at risk when a bearer leaks in this
+                      topology: a token whose lifetime is minutes, whose
+                      audience is one platform resource boundary, whose every
+                      request STILL passes per-request generation recheck,
+                      current owner/security narrowing, Release-composition
+                      admission, and — for anything effectful — the full
+                      Gateway approval/budget/idempotency stack. The
+                      unconstrained-bearer window is therefore minutes of
+                      SERVICE_SCOPED, composition-bounded, effect-gated
+                      access. Real, but narrow.
+                      what DPoP costs here: a proof on EVERY Platform-Service
+                      request generated by every customer integration
+                      (permanent DX tax on the exact surface 3F-06 §9 wants
+                      frictionless), Hub-side proof validation with
+                      htm/htu/ath/iat-window/jti semantics, and — decisive —
+                      the candidate's §10.1 already concedes the honest F1
+                      shape: no durable jti ledger, no nonce FSM, ephemeral
+                      replay memory lost on restart. That is DPoP with its
+                      replay half open: same-endpoint proof replay within the
+                      acceptance window remains possible anyway. F1 would
+                      carry the full mechanism cost for a HALF guarantee on
+                      top of an already minutes-bounded, recheck-bounded
+                      exposure.
+                      standards honesty: RFC 9700 sender-constraining is a
+                      SHOULD with feasibility framing, and RFC 9449 itself
+                      positions DPoP for contexts where transport-layer
+                      constraining is unavailable/undesirable (SPAs, native
+                      apps). A recorded, compensated deviation is
+                      BCP-conformant engineering; FAPI-grade mandates govern
+                      open-banking-class APIs, which this exchange is not.
+                      I also attacked the even-smaller shape to be sure C is
+                      the floor: per-request client assertions with NO access
+                      token at all (delete the token endpoint + Hub signing
+                      key). It fails: assertions without method/URI binding
+                      are replayable across endpoints inside their lifetime,
+                      and binding them re-invents DPoP as a custom protocol —
+                      Alternative E, already rejected. So the token-based
+                      shape stands and C is the smallest sound point.
+smallest correction   adopt Alternative C as the F1 baseline LAW: short-lived
+                      bearer `at+jwt` + per-request generation/narrowing
+                      recheck + TLS + the no-log laws + anti-oracle behavior,
+                      with the BCP deviation and its compensating controls
+                      RECORDED in the decision text. Delete DPoP from the
+                      baseline: §10 disappears entirely (proof validation,
+                      iat windows, jti caches, nonce questions, restart
+                      residue), and §21-Q6's same-key question dissolves —
+                      defer key-reuse hygiene to the future DPoP decision if
+                      its trigger ever fires. Keep the seam named: `cnf`-bound
+                      tokens are an additive claim, so DPoP (or mTLS binding)
+                      can be introduced later without changing domain
+                      contracts. Reopen triggers: real install base whose
+                      deployment hygiene cannot be assumed, a
+                      compliance/customer mandate, an actual bearer-replay
+                      incident, or 3L proving the marginal cost negligible
+                      at the pinned stack — any of these re-admits
+                      sender-constraining through Decision Loop.
+reopen prior authority?  NO — mechanism-level substitution inside this family
+later owner           decision text (C as baseline; deviation record; named
+                      seam + triggers); 3L (bearer path conformance only)
+```
+
+### F-5 — The same-Project Release-selection residual is acceptable and already governed; not a Material Finding
+
+```text
+claim challenged      §21-Q7/Q8 — Project key can assert any currently
+                      admissible Release of its Project
+analysis              measured against frozen law: 3F-06 makes ReleaseRef a
+                      compatibility/composition ATTESTATION, explicitly not
+                      authentication proof, and F1 claims no binary
+                      attestation for an externally operated runtime — a
+                      per-Release credential would not fix that (the binary
+                      still is not proven; the key just fragments). The
+                      attacker's gain from Release choice is the UNION of
+                      currently admissible compositions of ONE Project —
+                      and that union is already operator-controllable:
+                      3G-08 freezes that current security/owner policies may
+                      refuse particular operations/Releases immediately, and
+                      the support horizon bounds the set. So if one old
+                      Release's composition is dangerous, narrowing IT is
+                      existing law, not new machinery. Per-Release
+                      credentials would import a per-Release key lifecycle
+                      (issue/rotate/revoke × every Release) — the fleet-
+                      registry shape §17 rejects — for marginal gain over
+                      key compromise, which already yields the Project
+                      principal. The candidate's explicit blast-radius
+                      statement plus reopen trigger 3 is the honest form.
+                      Verdict: acceptable residual, consistent with
+                      3F-06 + 3G-08. NOT a Material Finding.
+reopen prior authority?  NO
+```
+
+### F-6 — TTL and generation are two different knobs; say so, because deleting DPoP makes TTL load-bearing
+
+```text
+claim challenged      §21-Q9/Q16 — does self-contained + recheck really
+                      eliminate blacklist/introspection/session?
+analysis              yes, and the mechanism is worth stating precisely:
+                      GENERATION bounds REVOCATION — compared against the
+                      current Project row on every admission, revocation
+                      latency for new requests is zero, which is why no
+                      blacklist/introspection/durable session is needed.
+                      This is also exactly 3I-01's no-cache law applied to
+                      this surface: the token is proof of recent
+                      authentication plus immutable pins; every mutable fact
+                      is re-read per request.
+                      TTL bounds BEARER REPLAY — under Alternative C the
+                      token lifetime is the exposure window for a stolen
+                      token, and nothing else caps it. Therefore TTL is not
+                      a tuning nicety; it is the load-bearing replay bound
+                      and its ceiling belongs in the decision text as a LAW
+                      ("short-lived" as a named bounded property), with the
+                      exact number calibrated by 3L/implementation.
+                      Client-assertion replay is separately bounded by
+                      assertion exp + single-issuer audience (F-3); the three
+                      replay classes (assertion, bearer, proof) reduce to
+                      two once DPoP is deleted, each with a named bound.
+reopen prior authority?  NO
+later owner           decision text (two-knob law); 3L (values)
+```
+
+### F-7 — Remaining confirmations: signing-key custody, anti-oracle, no refresh, USER_DELEGATED, routing
+
+```text
+signing key           §15 is correct and should cite 3I-02's reuse rule
+                      explicitly: Hub token-signing material is a platform
+                      OPERATIONAL credential — owner-specific custody, bound
+                      by the custody PRINCIPLES (no-leakage, fail-closed on
+                      missing, metadata-only audit) WITHOUT becoming a
+                      CredentialBackend consumer. No expansion.
+anti-oracle           §13 confirmed — uniform failure family pre-contract per
+                      3F-06; wire spelling implementation/3L. Response-shape
+                      indistinguishability is the architecture property;
+                      timing uniformity is a 3L note, not an architecture
+                      promise.
+no refresh token      confirmed — a confidential client holding a long-lived
+                      asymmetric credential re-authenticates; a refresh token
+                      would ADD a durable bearer-class secret and its
+                      rotation lifecycle for nothing. RFC-conformant and
+                      smaller.
+USER_DELEGATED        stays deleted; own-auth userId stays correlation-only
+                      (3F-06 §4.2). No symmetry construction.
+routing               clean after F-4: TTL/skew values → 3L; JWKS/signing-key
+                      deployment/rotation → 3J; token-endpoint HTTP spelling
+                      → implementation (PRE-CONTRACT per 3F-06); lost-key
+                      recovery = replace + generation advance, runbook 3J;
+                      the DPoP replay-cache 3L item is DELETED with DPoP.
+buildability          with C, the full surface is: one token endpoint
+                      (client_credentials + private_key_jwt verification),
+                      RFC 9068-shaped token signing, and per-request
+                      validation + generation/narrowing recheck — standard
+                      library territory, no registration/consent/scopes/
+                      introspection/revocation subsystems. OAuth stays a
+                      mechanism inside the Hub, not a product.
+```
+
+## F.3 Answers to the twenty attack points
+
+1. Fits — columns on `prj.project`, classes untouched; public key is not secret; one-credential baseline with named N-key trigger (F-1).
+2. Project owns the verification facts; I&A's human scope and its own machine-identity trigger say so; authorization composition unchanged (F-1).
+3. Legitimate — credential revocation (rotation) plus explicit Project-scoped exchange narrowing; both 3I-01-guarded mutations; no stop entity (F-2).
+4. `private_key_jwt` — BCP-recommended asymmetric family without mTLS's 3J coupling or a symmetric secret's blast radius (F-3).
+5. DPoP is NOT essential F1 — deleted from baseline; short-lived bearer + per-request recheck is the YAGNI maximum, with the BCP deviation recorded and the `cnf` seam + triggers named (F-4).
+6. Dissolved with F-4; decided at the future DPoP decision if triggered.
+7. Signed ReleaseRef binding is sufficient; a Release-specific credential adds a per-Release key lifecycle without proving the binary (F-5).
+8. Acceptable residual, not a Material Finding — the union is Project-bounded, horizon-bounded, and already narrowable per-Release by frozen 3G-08 law; trigger 3 stays (F-5).
+9. Yes — generation recheck gives zero-latency prospective revocation without any durable token state; the pattern IS 3I-01's no-cache law (F-6).
+10. Three classes reduce to two: assertion replay (exp + single-issuer audience) and bearer replay (TTL law); proof replay deleted with DPoP. No durable replay machinery anywhere (F-4/F-6).
+11. Correct — no refresh token; re-authentication with the long-lived asymmetric credential is strictly smaller (F-7).
+12. Preserved — audience stays a narrow server-minted resource identifier; service authorization = route/operation × Release composition × current gates; nothing caller-widenable (§9.1 confirmed).
+13. Verified against primary sources, dated: 9700/7523/9449/9068 published; 7523bis and OAuth 2.1 are drafts and are not load-bearing anywhere in the corrected candidate.
+14. Confirmed — uniform pre-contract failure family; internal metadata-only diagnostics (F-7).
+15. Stays deleted — no consumer, and the fabrication path is already frozen shut by 3F-06 (F-7).
+16. Confirmed — per-request generation + current narrowing recheck means the token never snapshots authorization; old-Release operations remain blockable at admission (F-6, 3G-08 composition).
+17. Owner-specific operational credential under 3I-02's reuse rule; CredentialBackend untouched (F-7).
+18. After F-4 the routing is clean: values → 3L, deployment → 3J, wire → implementation; nothing 3M-shaped remains (lost key = replace + generation, runbook 3J).
+19. Yes — token endpoint + token signing + per-request validation, standard libraries, no OAuth subsystems; and the smaller no-token shape was tested and fails on cross-endpoint assertion replay (F-4).
+20. Deleted: DPoP baseline, proof-replay cache/nonce residue, same-key question, the 3L DPoP-conformance item. Everything else in §17's non-construction list stands, with "DPoP" added to it carrying its named re-entry triggers.
+
+## F.4 Closing verdict
+
+```text
+Material Finding against approved authority   = NONE
+reopen required                                = NONE
+mechanism family                               = private_key_jwt client auth
+                                                 + short-lived signed access token
+                                                 + per-request generation/narrowing recheck
+                                                 (Alternative C baseline)
+DPoP                                           = DELETED from F1 baseline; named seam
+                                                 (cnf) + Decision Loop triggers recorded
+mTLS                                           = DEFER challenger (unchanged)
+shared secret / refresh token                  = REJECT (unchanged)
+corrections to consolidate                     = F-1 (owner argument + archive line)
+                                                 F-2 (two named generation uses)
+                                                 F-4 (C as baseline; deviation record;
+                                                      seam + triggers; §10 deleted)
+                                                 F-6 (TTL-vs-generation two-knob law;
+                                                      TTL ceiling as named property)
+                                                 F-7 (cite 3I-02 reuse rule in §15)
+new durable record class                       = 0
+durable token/session/introspection/blacklist  = 0
+DPoP jti ledger / nonce FSM                    = 0 (deleted with DPoP)
+PKI / registration / fleet / federation        = 0
+technology product selected                    = 0 (family + token shape only;
+                                                 libraries/algorithms/TTLs → 3L)
+
+verdict = CURRENT STRUCTURE CONFIRMED with the Alternative C substitution —
+          ready for consolidation and operator review; numbering as a 3I
+          decision remains with the operator
+```
+

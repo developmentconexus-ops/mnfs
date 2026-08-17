@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS`  
-**Fase atual:** `pre-3K — Global Platform Coherence Checkpoint` — 3J encerrada (3J-R1 ratificada em 2026-08-17); `3J-04 = NOT JUSTIFIED`; próxima ação = pre-3K global platform coherence checkpoint (ainda não 3K)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS`  
+**Fase atual:** `3K — Frontend / Product Architecture` — **NEXT / NÃO INICIADA**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -19,6 +19,9 @@ C-000..C-017
 
 3A-R6
 → Phase 3 Critical Path & Implementation Readiness
+
+3A-R7
+→ Platform Consultant Ownership Reconciliation
 
 3B
 → System Context & Boundaries
@@ -104,7 +107,7 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 APROVADA** | aplicar 3A-R6 durante 3J–3O; F3B-R1 antes do Realization Planning |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 + 3A-R7 APROVADAS** | aplicar 3A-R6 durante 3K–3O; F3B-R1 antes do Realization Planning |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
@@ -114,7 +117,7 @@ Nenhuma conversa cria authority.
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3K — Frontend / Product Architecture | NÃO INICIADA | gated pelo pre-3K global platform coherence checkpoint; depois F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
+| 3K — Frontend / Product Architecture | **NEXT / NÃO INICIADA** | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect; carrega guardrail de produto e AGT-4 surface de [3A-R7](3A-R7-platform-consultant-ownership-reconciliation.md) |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
@@ -195,6 +198,24 @@ C-018 fecha Architecture & System Design, mas **não autoriza product code**:
 ```
 
 Realization plans são **derived-only**; contradição material volta ao applicable Decision Loop; não nasce segunda architecture authority, nova metodologia, readiness framework ou phase family.
+
+### 2.2 3A-R7 + pre-3K Global Platform Coherence Checkpoint — CLOSED / POSITIVE
+
+[3A-R7 — Platform Consultant Ownership Reconciliation](3A-R7-platform-consultant-ownership-reconciliation.md) foi ratificada pelo operador em **2026-08-17** como bounded gap-fill e fecha o único finding material do pre-3K Global Platform Coherence Checkpoint.
+
+Resultado do checkpoint:
+
+```text
+pre-3K Global Platform Coherence Checkpoint = CLOSED / POSITIVE
+CURRENT STRUCTURE CONFIRMED
+único finding F-GPC-01 / AGT-4 = RESOLVED por 3A-R7
+C-003 F1 orphan requirements = 0
+reopen 3B–3J = NONE
+```
+
+Conteúdo essencial de 3A-R7 (não reabre 3B–3J): `AGT-4` = capability de assistência **owned pelo Builder e apresentada pelo Control Plane**; platform knowledge publicado/versionado/provenance-preserving/digest-pinned sob a pack discipline do Conexus, nunca Workspace Brain content; contexto tenant sempre derivado server-side do current authorized Workspace/Project; `new module / principal / PLATFORM-scoped agent artifact / hidden tenant / PAR lifecycle / cross-Workspace authority / global agent state = 0`; surface concreta → 3K; platform agent global persistente → Decision Loop com consumidor real. **C-001 permanece a product vision authority.**
+
+Review provenance, não-autoritativa: `3A-FABLE-DIALOGUE-pre-3K-global-platform-coherence-checkpoint.md`.
 
 ---
 
@@ -1011,7 +1032,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | Builder runtime orphan/lost detection policy after 3H-01 liveness surface | 3M structural recovery sweep |
 | Production Agent admitted-but-undispatched / active-process-loss / missing-snapshot recovery policy | 3M structural recovery sweep |
 | InceptionInvestigation pre-Change agent execution shape, somente se realization futura provar necessidade | Decision Loop / DEFER SAFELY |
-| F3E01-R1 — `mastra_par` backup/restore procedure | 3J; required backup set/restore responsibility MUST, procedure detail may defer |
+| F3E01-R1 — `mastra_par` backup/restore procedure | **RESOLVED by 3J-02** (required recovery set + restore proof); procedure detail → Realization |
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` never authoring authority | 3L probe / implementation enforcement under 3H-02 |
 | CredentialBackend exact encrypted backing primitive/path + host root-key custody | 3I-02 law closed; implementation/3J; no new record/schema/database silently |
@@ -1023,12 +1044,12 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03; current baseline features budgeted-or-disabled |
 | model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
 | Product Agent browser/workspace/code execution trust/egress if first consumer enables it | Decision Loop / DEFER SAFELY; 3I-05 pre-binds named-owner/destination-authority requirement |
-| whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **3J MUST DECIDE before first production** |
+| whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **RESOLVED by 3J-03**; pre-production drill permanece gate (3I-01/3J-03/3J-R1) |
 | post-whole-Hub-stop settlement/recovery | 3M structural recovery sweep |
 | selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely Release/MAR serving-admission owner |
 | DEDICATED trust/authentication semantics | **RESOLVED by 3I-04**; exact libraries/TTL/claim spelling → 3L/Realization Planning |
 | DEDICATED egress/network trust semantics | **RESOLVED by 3I-05 + 3I-04**; physical DEDICATED deployment → DEFER SAFELY to 3J until first real deployment |
-| MANAGED/DEDICATED physical deployment topology | **MANAGED first-production topology MUST in 3J; DEDICATED physical topology DEFER SAFELY until first real DEDICATED deployment** |
+| MANAGED/DEDICATED physical deployment topology | **MANAGED first-production topology RESOLVED by 3J-01**; DEDICATED physical topology DEFER SAFELY until first real DEDICATED deployment |
 | DEDICATED private-key provisioning / Hub token-signing deployment | 3J only when physical realization is current; owner/custody semantics fixed by 3I-04 |
 | DPoP / mTLS sender constraint | DEFER SAFELY / Decision Loop on 3I-04 reopen trigger |
 | USER_DELEGATED / federation | Decision Loop on named DEDICATED consumer |
@@ -1037,7 +1058,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | `hub_control` owner-capability negative privilege matrix | Realization Planning + 3N/3O proof under 3I-05 |
 | current-authority serialization × owner-isolation combined proof (3I-R1 CR-1) | **Realization Planning + 3N/3O**; broad cross-owner privilege/new authority state requirement → Decision Loop |
 | cross-owner transaction profiles / audit append mechanism | Realization Planning under closed 3E/3I-05 properties; third case → Decision Loop |
-| Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J; qualification-triggered |
+| Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3L qualification-triggered; one-process baseline fixado por 3J-01 |
 | old Product Agent runtime coexistence / drain / cutover | **DEFER SAFELY — trigger: first runtime-affecting upgrade after production / 3J** |
 | `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L; upgrade operation detail deferred until first relevant upgrade |
 | physical Promotion/migration recovery and restore | 3M structural semantics + 3J material operation boundary |
@@ -1293,6 +1314,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 ```text
 3A = CONTINUOUS until C-018
 3A-R6 = APPROVED
+3A-R7 = APPROVED
 
 3B = CLOSED / APPROVED
 3C = CLOSED / APPROVED
@@ -1317,6 +1339,14 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3J-03 = APPROVED
 3J-04 = NOT JUSTIFIED
 3J-R1 = APPROVED / CLOSED
+
+pre-3K Global Platform Coherence Checkpoint = CLOSED / POSITIVE
+CURRENT STRUCTURE CONFIRMED
+F-GPC-01 / AGT-4 = RESOLVED por 3A-R7
+C-003 F1 orphan requirements = 0
+reopen 3B–3J = NONE
+
+3K = NEXT / NOT STARTED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1343,10 +1373,12 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3J-R1 foi ratificada em **2026-08-17** após bounded independent closure review com `Material Finding = NONE`, `missing material 3J decision = 0`, `3J-04 = NOT JUSTIFIED`, `unrouted material deployment/operations blocker = 0`, `prior phase reopen = NONE` e `CLOSE 3J`; consolida a pre-production gate family por citação (complete restore proof 3J-02 + whole-Hub emergency-stop drill 3I-01 §13/3J-03), confirma a única prior-authority amendment de 3J (C-015 §5 + C-016 §6 exposure realization, registrada em 3J-01) como bounded, congela o 3A-R6 §7 coverage snapshot em [3J-R1](3J-R1-deployment-operations-architecture-final-closure.md) e fecha 3J **installation-scoped**, com **C-001 preservada como product vision authority**.
 
+O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE em 2026-08-17** com `CURRENT STRUCTURE CONFIRMED`: único finding material `F-GPC-01 / AGT-4` resolvido por 3A-R7, `C-003 F1 orphan requirements = 0`, `reopen 3B–3J = NONE`. 3A-R7 foi ratificada em **2026-08-17** como bounded gap-fill: Platform Consultant = Builder-owned / Control-Plane-presented assistance capability, platform knowledge publicado/digest-pinned sob a pack discipline (nunca Workspace Brain content), contexto tenant derivado server-side, zero novo module/principal/global agent artifact/hidden tenant/cross-Workspace authority; surface concreta → 3K; platform agent global persistente → Decision Loop. **C-001 permanece product vision authority.**
+
 Próxima ação:
 
-> **Executar o pre-3K Global Platform Coherence Checkpoint** (ainda não 3K): checkpoint adversarial da plataforma inteira — C-001/C-003 contra 3B..3J, requisitos órfãos, supersessions, complexidade essencial vs acidental — antes de abrir 3K. Não cria authority por si; findings materiais retornam ao Decision Loop aplicável.
+> **Iniciar `3K — Frontend / Product Architecture`**: F1 product surfaces + first vertical, partindo de C-001 caso 1 (Analisador de Orçamentos) salvo redirect explícito do operador; carrega o guardrail de produto e a AGT-4 surface de 3A-R7.
 
-Depois do checkpoint, 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
+3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

@@ -1229,3 +1229,333 @@ Fable should edit below this line only after reconstructing authority independen
 ## 21. Fable independent adversarial review
 
 **Fable: reconstruct the applicable authority from the repo, challenge the candidate above independently, research current primary security sources where load-bearing, and edit this same file with findings/corrections. Focus on authorization freshness, self-grant, approver eligibility/self-approval, post-approval revocation, Account-origin long-running runs, old-Release narrowing and the emergency-stop deletion test. Do not modify LEDGER, approved authority or product code.**
+
+---
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied. Authority reconstructed independently: 3C-02, C-015 (session/roles/permission manifest incl. `allowed_roles` closure), 3F-03, 3G-01, 3G-05..08, 3H-01..03, C-010 (`actorType=AGENT`, approvalFloor, budgets), C-011 (drift/health states), C-013 (admission ledger, producer trust), C-014 (conformance/maintenance), C-016, C-017. The candidate's §1 quotations were verified against these sources, not trusted. No claim in this round depends on live vendor behavior — the one concurrency finding rests on standard documented PostgreSQL transaction-isolation semantics — so no external research pass was needed; the candidate's NIST/OWASP citations were checked for what they are used for (contextual separation of duties, per-boundary recheck) and are used correctly.
+
+## F.1 Verdict
+
+Alternative B survives all eight attack targets. **No Material Finding against 3C..3H; no reopen of 3F-03, 3G-01, 3G-05..08 or any other approved authority is justified** — every schedule I constructed that looked like it needed a reopen is already closed by a composition of frozen laws once that composition is stated explicitly. The review returns six bounded refinements: one under-specified enforcement law (the pre-state guard's concurrency semantics), one open question the candidate itself flagged and which frozen 3H-01 law already answers (Account-origin long-running runs → re-entry control points), two classification sharpenings (§13 health/conformance facts; eligibility measured against the declared permission model), one composition that must be stated rather than implied (post-approval staleness = expiry + owner cancel/close, no recheck at claim), and one strengthening of the self-approval rationale that makes §10.4 structurally safe rather than merely proportionate. YAGNI holds: nothing below adds a policy engine, snapshot, revocation engine, durable record, approver role, or stop entity. Method outcome: **CURRENT STRUCTURE CONFIRMED** with bounded corrections.
+
+## F.2 Findings
+
+### F-1 — E4/proof 8 overclaims as written: the pre-state guard needs an explicit atomicity law, not a promised race loss
+
+```text
+claim challenged      §9/E4 "resolve current caller authority BEFORE proposed
+                      mutation takes effect ... apply conditional mutation/CAS"
+                      + proof 8 "losing a race with concurrent revocation causes
+                      guarded sensitive mutation to fail; stale pre-read cannot
+                      still commit"
+concrete failure schedule
+                      t0  admin A's authority rows are read (pre-state ALLOW)
+                      t1  demote(A) commits in a concurrent transaction
+                      t2  A's grant-admin-to-B mutation commits
+                      Under default READ COMMITTED, t2 commits fine: the
+                      pre-read at t0 and the write at t2 touch DIFFERENT rows
+                      (A's grants vs B's grants), so no conflict is detected —
+                      B becomes admin authorized by an already-revoked A.
+                      Proof 8 as phrased asserts this cannot happen, but
+                      nothing in E4 makes it true: "CAS mutation" guards the
+                      TARGET row, not the AUTHORITY rows the decision was
+                      read from. The proof would fail against the candidate's
+                      own enforcement.
+smallest correction   state the law E4 actually needs: for security-sensitive
+                      mutations, the pre-state authorization read and the
+                      mutation commit are ATOMIC — same transaction, with the
+                      authority facts the decision consumed serialized against
+                      concurrent revocation (locking read on those rows, or
+                      serializable isolation with failure treated as DENY/retry).
+                      This is one sentence of architecture law; the spelling
+                      (FOR UPDATE vs SERIALIZABLE vs guard re-read) is
+                      implementation. No engine, no epoch, no new record.
+                      Scope it honestly: this atomicity is required for
+                      security-sensitive MUTATIONS (§9.2 list); ordinary
+                      protected reads/admissions keep plain current-read
+                      semantics — their staleness is already bounded by the
+                      no-cache baseline.
+reopen prior authority?  NO — tightens the candidate's own E4/proof 8
+later owner           3I-01 text (law), implementation (spelling)
+```
+
+### F-2 — Account-origin long-running runs: the candidate's open question is already answered by frozen law — recheck happens at durable re-entry points
+
+```text
+claim challenged      §11.2 leaves as review target which Account facts must be
+                      re-resolved at later privileged boundaries of an admitted
+                      ActorRun/AgentRun
+analysis              the architecture already contains the answer; it only
+                      needs to be composed and stated:
+
+                      1. the run is not a prolonged human session. C-010 froze
+                         agent execution as its own actor (actorType=AGENT,
+                         stable actorId); 3G-05 froze caller/authority context
+                         as ADMISSION facts. The originating Account is a
+                         historical admission fact, not a live authority feed.
+                      2. every path by which the run re-enters privileged
+                         execution is ALREADY a defined current-authority gate:
+                           new Builder dispatch/rebind → 3H-01 law: "current
+                             Conexus authority/config is mechanically reapplied
+                             on every dispatch/rebind"
+                           trigger fire → guarded PAR admission (3H-02)
+                           dangerous effect → ALLOW_ONCE with CURRENT human
+                             eligibility (§10.2 of this candidate)
+                           external effect → Gateway current last-mile gates
+                             (3G-06, Connection/grant/budget/security)
+                           boot/recovery re-drive → re-enters owner guards
+                             (3H-02)
+                      3. session facts (login/logout/session expiry) are
+                         admission-only by construction: sessions authenticate
+                         interactive surfaces (C-015); durable work survives
+                         them. Logout must not cancel admitted work.
+                      4. Account platform facts (DISABLED, removed membership)
+                         take effect at every RE-ENTRY point in list 2 — a
+                         disabled Account cannot open new dispatches/rebinds,
+                         cannot be an eligible approver, cannot originate new
+                         protected requests — while the currently executing
+                         segment runs to its terminal under its admitted pins.
+                      5. the residual — an admitted segment of a
+                         now-disabled Account's run continuing non-approval
+                         effects until segment terminal — is bounded by
+                         budgets (C-010), Connection current state, Project
+                         scope, and is exactly what owner CANCEL is for
+                         (incident response cancels the runs of a compromised
+                         account; it does not need a new mechanism).
+smallest correction   replace §11.2's open paragraph with the re-entry-point
+                      law: "Account platform facts are rechecked at every
+                      durable re-entry control point (dispatch/rebind, trigger
+                      admission, approval decision, Gateway admission,
+                      recovery re-drive); session facts are admission-only;
+                      no continuous mid-segment re-resolution; incident
+                      response composes owner cancel/close."
+                      This avoids both failure modes the candidate feared:
+                      no stale eternal authority (every durable continuation
+                      passes a current gate) and no "logout kills durable
+                      work" (session is not one of the gated facts).
+reopen prior authority?  NO — composes 3H-01/3H-02/3G-05/3G-06/C-010 as frozen
+later owner           3I-01 text
+```
+
+### F-3 — Approver eligibility: measure against the declared permission model, and close two loose ends
+
+```text
+claim challenged      §10.2 "eligible only if the exact operation would be
+                      within that Account's current human authority"
+analysis + corrections
+                      (a) "would be authorized to cause" must be measured
+                      against the operation's DECLARED permission model, not
+                      presentation reachability. An agent-eligible action with
+                      no UI surface still has a total permission definition:
+                      C-015 froze `action sem allowed_roles = MANIFEST_INVALID`
+                      — every action carries allowed_roles (plus membership
+                      before role, plus admin_only). So eligibility is always
+                      well-defined: approver ∈ current members whose current
+                      role satisfies the exact pinned action's declared
+                      permission layer for that Project/surface. State this,
+                      or "human authority" invites a UI-reachability reading
+                      that would make agent-only actions unapprovable or —
+                      worse — eligibility undefined.
+                      (b) trigger-origin AgentRuns have no requesting human
+                      session; §10.2's "Project / origin surface from owner
+                      facts" must therefore be explicit that the approval
+                      surface mapping is an OWNER-DERIVED fact of the pinned
+                      Release/manifest (which surface's role model governs
+                      approval for this action), never undefined and never
+                      caller-chosen. No new policy object — the manifest/pins
+                      already carry the action's permission layer.
+                      (c) terminology: §10.3 says an undecided request remains
+                      "claimable for another eligible Account". In 3F-03,
+                      "claim" is the single effect-side claim of a committed
+                      ALLOW_ONCE. Use "decidable" for the human slot; reusing
+                      "claim" for both creates two meanings for a frozen term.
+reopen prior authority?  NO
+later owner           3I-01 text (a, b); editorial (c)
+```
+
+### F-4 — Post-approval authority loss: no recheck at claim; state the bounding composition explicitly
+
+```text
+claim challenged      §10.5 + challenge 4 — should eligibility be rechecked
+                      after ALLOW_ONCE before FIRST_CLAIM?
+concrete failure schedule examined
+                      admin approves malicious effect → org demotes/disables
+                      the approver → effect still pending NOT_SENT → dispatch
+                      proceeds under a decision whose approver is now revoked.
+analysis              rechecking eligibility at claim/dispatch would make the
+                      committed decision revocable-by-side-effect: it
+                      contradicts write-once + single-claim + permanent
+                      binding (3F-03/3G-01), imports live I&A facts into the
+                      Gateway claim guard (a second authorization model — the
+                      candidate's own challenge 9), and opens resurrection
+                      questions (role restored → re-eligible?). The schedule
+                      is already closed WITHOUT it, by composition:
+                        1. expiry (3G-01, derived) bounds how long any
+                           committed decision can wait unexecuted — this is
+                           the maximum approval-trust staleness, and it is a
+                           frozen owner law, not a new parameter;
+                        2. the incident action targets the EFFECT, not the
+                           history: owner cancel (AgentRun/ActorRun) and
+                           Gateway close-before-dispatch kill the pending
+                           attempt (3G-05/06);
+                        3. current last-mile gates (Connection/security) still
+                           apply at admission/dispatch regardless of approval
+                           history (3G-06).
+                      If you distrust the approver, you revoke their access
+                      (blocks all FUTURE decisions — F-2 re-entry law) and
+                      cancel/close their pending effects. History stays
+                      auditable.
+smallest correction   §10.5 must state this composition normatively — expiry
+                      as the staleness bound + cancel/close as the
+                      post-decision revocation path — instead of gesturing at
+                      "owner-local controls described below". No STALE
+                      expansion, no reopen of 3F-03/3G-01.
+reopen prior authority?  NO — the frozen semantics are exactly what makes the
+                      answer safe
+later owner           3I-01 text
+```
+
+### F-5 — §13 classification sharpening: owner-committed health/conformance states are current gates; raw telemetry is not — do not let one bullet blur the two
+
+```text
+claim challenged      §13 lists "telemetry says unhealthy" as not-a-revocation
+                      fact, while the evidenced current-facts list omits
+                      owner-committed operational gates
+concrete failure class a reader (or implementer) collapses "unhealthy" into
+                      one category and either (a) lets raw telemetry deny
+                      operations — violating the frozen "observability is
+                      never authorization authority" law — or (b) assumes NO
+                      health-shaped fact may gate anything, contradicting
+                      already-approved owner gates: C-011 froze drift/health
+                      states where SUSPECT blocks effectful Brain-backed
+                      operations (owner-committed state machine, runtime must
+                      respect it); C-014 froze EnvironmentConformance
+                      DRIFT => STOP and the maintenance serving-block
+                      (3G-08: it survives failed Promotion terminalization).
+smallest correction   split the vocabulary in §13: OWNER-COMMITTED operational
+                      state (Brain health states, EnvironmentConformance,
+                      maintenance/serving blocks, Connection eligibility) IS
+                      part of the evidenced current-narrowing facts — each
+                      owned, each already approved; RAW observation (metrics,
+                      traces, provider/guest self-report) remains never-
+                      authority (C-013 producer-trust discipline). The line
+                      is "who committed the fact", not "does it smell like
+                      health".
+reopen prior authority?  NO — aligns the candidate with C-011/C-013/C-014
+later owner           3I-01 text
+```
+
+### F-6 — Self-approval survives more strongly than argued: the eligibility law makes it a non-escalation by construction
+
+```text
+claim challenged      §10.4 defends F1 self-approval mainly on product
+                      proportionality (solo/small-team operation)
+analysis              the structural argument is stronger and should lead:
+                      given §10.2, the approver must already hold current
+                      authority to cause the exact operation directly.
+                      Therefore self-approval grants ZERO privilege the human
+                      does not already possess — approval is oversight of
+                      AGENT autonomy (a checkpoint that a human saw the exact
+                      sealed subject), not a second human control layer.
+                      Removing self-approval would not remove any capability
+                      from a malicious eligible human (they can perform the
+                      operation directly); it would only add an availability
+                      dependency on a second Account. Separation of duties
+                      is therefore genuinely orthogonal: it becomes material
+                      only when a workflow requires INDEPENDENT roles
+                      (financial dual control), which is the Decision Loop
+                      trigger the candidate already routes. The NIST AC-5
+                      citation supports exactly this contextual reading.
+smallest correction   lead §10.4 with the non-escalation composition;
+                      keep the product rationale as secondary. No behavioral
+                      change.
+reopen prior authority?  NO
+later owner           3I-01 text (rationale ordering only)
+```
+
+### F-7 — Emergency-stop deletion test: PASSES for F1; name the nearest future hold and its owner so the seam is real
+
+```text
+claim challenged      §14 — no new stop/hold entity; owner-local controls +
+                      whole-Hub operational stop suffice
+adversarial search    incident classes tested against the control set:
+                        compromised Account        → revoke + cancel runs (F-2)
+                        compromised Connection     → credential/grant revoke
+                        malicious trigger source   → trigger DISABLE
+                        runaway agent spend        → cancel + Family D caps
+                        unsafe Release, safe pred. → rollback Promotion
+                        actively-malicious served app, NO safe predecessor
+                                                   → the one class where
+                                                     owner-local controls are
+                                                     slow: Connection revoke
+                                                     kills external effects
+                                                     but the app keeps serving
+                                                     users; the remaining F1
+                                                     answer is the whole-Hub
+                                                     stop — acceptable at
+                                                     single-Hub/few-project
+                                                     scale, increasingly
+                                                     unacceptable as projects
+                                                     multiply.
+verdict               deletion test PASSES for F1: no durable stop/hold
+                      entity now. Two sharpenings make the deferral honest:
+                      (1) name the nearest future hold explicitly — a
+                      per-Project SERVING stop (halt serving admission for
+                      one Project without touching Release history or other
+                      projects) — as the likely first Decision Loop re-entry,
+                      with its owner pre-identified: serving admission
+                      (Release/MAR boundary), NOT I&A, NOT a new module, NOT
+                      a cross-owner kill-switch engine. This answers
+                      challenge 7 without creating anything.
+                      (2) the whole-Hub stop is load-bearing in this design:
+                      3J must deliver it as a PROVEN operational procedure
+                      (stop ingress/process safely, fail-closed semantics for
+                      in-flight work), not an assumption. Add that dependency
+                      to the routed work.
+reopen prior authority?  NO
+later owner           Decision Loop (per-Project serving stop, on proven
+                      incident class), 3J (whole-Hub stop procedure as a
+                      deliverable), 3M (post-stop settlement)
+```
+
+## F.3 Answers to the twelve challenges
+
+1. Keep the no-cache baseline, framed correctly: the LAW is zero cached staleness for mutable authority at protected boundaries (staleness bounded only by transaction visibility); the cache ban is the chosen F1 enforcement, with the candidate's measured-latency reopen + stated-max-staleness condition for any future cache. That is architecture stating a property plus its baseline enforcement — not implementation overreach.
+2. Sufficient — with F-3(a): eligibility measures against the exact action's declared permission model (total by C-015's `allowed_roles` closure), never UI reachability. No F1 case exists for approve-without-authority, and admitting one would turn approval into authority laundering — the exact §10.2 target.
+3. No real failure class (F-6): self-approval is non-escalating by construction under the eligibility law. Universal requester≠approver would be unsupported accidental complexity; contextual dual control returns via Decision Loop.
+4. No recheck between decision and claim (F-4). Write-once + derived expiry + owner cancel/close + current last-mile gates already close the failure schedule. A recheck would be a second authorization model and hidden resurrection semantics. No STALE expansion; no Material Finding.
+5. Answered by composition of frozen law (F-2): re-entry control points recheck Account platform facts; session facts are admission-only; no continuous mid-segment re-resolution; incident response = owner cancel. Neither stale eternal authority nor logout-kills-work.
+6. Sufficient for F1 (F-7), including the honest worst case (malicious served app without safe predecessor → whole-Hub stop at current scale). Deferral confirmed with a named reopen trigger.
+7. If proven: per-Project serving stop owned by the serving-admission boundary (Release/MAR) — not I&A, not Project lifecycle, not a new module. Not created now (F-7).
+8. Yes, one: §13's telemetry bullet must be split — owner-committed operational state (C-011 health states, C-014 conformance, maintenance/serving blocks) belongs in the evidenced current-narrowing facts; raw observation stays never-authority (F-5).
+9. No second authorization model found. The one place it could sneak in — approver eligibility as a parallel approver-policy store — is already avoided by reusing I&A resolution + the operation's declared permission layer; F-3 keeps it that way. F-4 blocks the other entry path (live I&A facts inside the Gateway claim guard).
+10. Yes, with F-1's atomicity law added: per-boundary current reads, transactionally-serialized guarded mutations, existing owner primitives. Zero new records, engines, buses, snapshots.
+11. Routing is clean: whole-Hub stop procedure = 3J (now an explicit deliverable per F-7); serialization spelling = implementation; settlement after stop/cancel = 3M. Nothing else misplaced.
+12. No reopen of 3F-03, 3G-01, 3G-05..08 or anything else. Every schedule that appeared to need one is closed by stated composition of frozen laws (F-2, F-4). **Material Finding = NONE.**
+
+## F.4 Closing verdict
+
+```text
+Material Finding against 3C..3H            = NONE
+reopen required                             = NONE
+alternative B                               = CONFIRMED / GLOBAL MAXIMUM
+corrections to consolidate                  = F-1 (E4 atomicity law)
+                                              F-2 (re-entry-point law replaces §11.2 open question)
+                                              F-3 (eligibility vs declared permission model;
+                                                   trigger-origin surface mapping; claim/decidable)
+                                              F-4 (state expiry + cancel/close composition; no recheck)
+                                              F-5 (owner-committed state vs raw observation in §13)
+                                              F-6 (lead self-approval with non-escalation argument)
+                                              F-7 (name per-Project serving stop + owner as the seam;
+                                                   whole-Hub stop becomes an explicit 3J deliverable)
+new policy/revocation engine                = 0
+new snapshot / cache / invalidation bus     = 0
+new durable record class                    = 0
+new approver role / four-eyes               = 0
+new stop/hold entity                        = 0
+technology mechanism selected               = 0
+
+verdict = CURRENT STRUCTURE CONFIRMED — ready for consolidation and
+          operator review as 3I-01 after the corrections above are folded in
+```
+

@@ -1216,3 +1216,325 @@ The next action is independent adversarial review. **Do not number or ratify thi
 ## 23. Fable independent adversarial review
 
 **Fable: reconstruct the applicable authority from the repository, challenge the candidate above independently, research current primary sources where a claim depends on live technology behavior, and edit below this line only. Focus especially on the 3E storage tension, CredentialBackend consumer boundary, logical-grant/key-version semantics, crash-safe rekey, backup/key separation, guest-capability consumers and Hub-process residual risk. Do not alter LEDGER, approved authority or product code.**
+
+---
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied. Authority reconstructed independently from the `AGENTS.md` chain with direct reads of 3C-07 (including the "Quem realiza external I/O da Qualification" section and Finding 3C-07-A), 3D-04 (infrastructure seam table and Gateway dependency rows), 3E-01 §10/§13, 3E-02 (Connections inventory + F3E02-R2 verbatim), 3I-01, and the C-006/C-007/C-008/C-013/C-015/C-016/3A-R5 records in `DECISOES.md` — the candidate's §2 synthesis was verified against these, not trusted. No new primary-source research pass was run this round: the only live-technology dependency in this family (E2B pause/resume persistence) already carries a dated primary-source citation in §3 that matches the independent research recorded in the 3I intake dialogue, and every other property rests on stable standards the candidate already cites. Nothing below selects a technology or numbers a decision.
+
+## F.1 Verdict
+
+Alternative A survives all ten attack targets, including the two designed to kill it. On the decisive question — the 3E storage tension — the answer is **NO Material Finding**, and not by charity: 3E-02's own F3E02-R2 explicitly states "3E-02 não congela secret table/provider/crypto storage layout" and routes physical secret custody to "3I / implementation of credential infrastructure". The inventory closure closed the **domain** record model; it deliberately left the CredentialBackend physical backing open, and a credible realization class exists that adds no record/schema/database (F-1). The consumer boundary holds as frozen (F-2), the plaintext two-appearance law is **complete** because frozen 3C-07 already places qualification's external I/O inside the Gateway (F-3), and the remaining findings are bounded sharpenings: transient-token custody (F-4), the rekey property's sufficiency argument (F-5), backup separation restated as compromise-path disjointness (F-6), guest-capability closure with the OTLP-push classification (F-7), and audit/residual-risk confirmation (F-8). **Material Finding against approved authority = NONE; reopen of C-007/C-008/3C-07/3D/3E/3I-01 = NOT JUSTIFIED.** Method outcome: **CURRENT STRUCTURE CONFIRMED** with bounded corrections.
+
+## F.2 Findings
+
+### F-1 — The 3E storage tension resolves with an existence proof, not a concession: physical backing is infra by 3E's own routing, and a no-new-record realization class exists
+
+```text
+claim challenged      §21-Q2 — does a Hub-local CredentialBackend require a
+                      durable record/schema/database that 3E-02 did not admit?
+analysis              three facts, all frozen, compose the answer:
+                      1. F3E02-R2 (verbatim): "con.* guarda somente credential
+                         backend/ref + logical grant/version facts necessários.
+                         Secret custody físico pertence à infra boundary
+                         CredentialBackend" — owner: "3I / implementation of
+                         credential infrastructure", and "3E-02 não congela
+                         secret table/provider/crypto storage layout."
+                         The inventory closure and this routing were written
+                         TOGETHER: the 46-class closure is a closure of domain
+                         record classes, with physical secret custody
+                         explicitly carved out — not an oversight this
+                         candidate must apologize for.
+                      2. the repo already has two precedents for durable
+                         non-domain storage referenced opaquely: C-015 blob
+                         custody (filesystem CAS + hub_control index) and the
+                         mastra_* substrate pattern (3E-01 §10: correlation by
+                         opaque runtime IDs, "Não existem FKs para tabelas
+                         Mastra").
+                      3. therefore at least one realization class satisfies
+                         every constraint with ZERO new domain
+                         record/schema/database: a Hub-filesystem encrypted
+                         backing addressed by the opaque `credential_ref`
+                         already stored in `con.connection`, with no FK, no
+                         domain read path, no domain lifecycle — infra storage
+                         in exactly the sense 3D froze the seam. Ciphertext is
+                         not rebuildable (unlike projections) but it is
+                         recoverable (§15), which is the correct durability
+                         class for secret material.
+                      what WOULD be a Material Finding — and must stay a
+                      tripwire, not be softened: a realization that needs
+                      domain semantics (FKs from domain records into the
+                      backing, domain reads of backing rows, a lifecycle other
+                      modules observe) or a new hub_control schema/database.
+                      §19's sentence "not implementation detail; must return
+                      to Decision Loop" is the correct guard — keep it
+                      verbatim in the decision text, and extend it explicitly:
+                      an in-database backing variant (new table/schema in
+                      hub_control) is NOT admitted silently by this decision
+                      either; it re-enters through the same tripwire because
+                      3E-01 closed hub_control's owner-schema topology.
+smallest correction   state the admitted realization CLASS (infra backing,
+                      opaque-ref, FK-free, domain-opaque, recoverable) and
+                      both precedents in the decision text, so implementation
+                      inherits a proven shape instead of re-deriving it — and
+                      keep the Decision Loop tripwire for anything heavier.
+reopen prior authority?  NO — 3E-02 routed this here by name
+later owner           implementation/3J within the stated class; Decision
+                      Loop for any in-DB/schema/record variant
+```
+
+### F-2 — Consumer boundary holds: `CredentialBackend = Connections + Gateway`; uniformity is not a failure class
+
+```text
+claim challenged      §21-Q1/Q13 — should Git/E2B/model/DB/backup credentials
+                      become CredentialBackend consumers?
+analysis              verified frozen: 3D-04 seam table reads "CredentialBackend
+                      → Connections + Gateway → secret material/custody
+                      substituível já é invariante". Searching for a real
+                      failure class that expansion would eliminate finds none:
+                      the platform credentials differ from Connection
+                      credentials on every axis that justified the backend —
+                      no dynamic per-Workspace/Project creation, no write-only
+                      admin ingress by end users, no qualification/grant
+                      versioning, no Release binding, no browser surface.
+                      Their real risks are already owned elsewhere: leakage
+                      laws (this family §8.2), host injection/rotation (3J),
+                      model spend (Family D), egress (Family F), DB privilege
+                      (Family G). Expansion would buy uniformity and pay with
+                      a 3D reopen plus a generic secret domain — Alternative B,
+                      correctly rejected. One sharpening: the decision text
+                      should state the REUSE RULE positively — platform
+                      credentials reuse the custody PRINCIPLES (no-leakage,
+                      least lifetime, fail-closed on missing, metadata-only
+                      audit) as laws applied at their own boundaries, so
+                      "not a CredentialBackend consumer" never gets misread as
+                      "exempt from custody law".
+reopen prior authority?  NO
+later owner           decision text (reuse rule); 3J/D/F/G as routed
+```
+
+### F-3 — The plaintext two-appearance law is complete — and it is complete because frozen 3C-07 already decided the near-miss
+
+```text
+claim challenged      §21-Q3 — is "write ingress + Gateway last-mile" complete,
+                      or does a third legitimate plaintext consumer exist?
+analysis              the one candidate for a third consumer is Connection
+                      Qualification: testConnection is semantically mandatory
+                      (C-007) and requires a REAL external probe with the
+                      credential. If Connections executed that probe, C2 would
+                      be broken by the platform's own qualification flow. But
+                      3C-07 already froze exactly this: "Connections owns o
+                      significado e o resultado de qualification, mas não abre
+                      socket arbitrário nem recebe segredo em plaintext" — the
+                      probe executes INSIDE Capability Gateway (resolve
+                      credential handle → enforce host/network policy → apply
+                      auth strategy → execute non-mutating probe(s) → sanitize
+                      result), and the dependency table reads "Capability
+                      Gateway → qualification execution". So qualification is
+                      a Gateway last-mile use, not a third appearance.
+                      Transient-token reacquisition (e.g., a provider
+                      /authenticate exchange) is likewise inside the Gateway
+                      auth strategy. No third consumer exists in frozen
+                      authority.
+smallest correction   cite 3C-07's qualification-I/O law explicitly in the C2
+                      section of the decision text. C2's completeness is
+                      load-bearing; it should rest on a citation, not on
+                      nobody-thought-of-it.
+reopen prior authority?  NO
+later owner           decision text
+```
+
+### F-4 — Version axes: close the one gap — where a transient acquired token LIVES
+
+```text
+claim challenged      §12 table + §21-Q6 — the axis table is correct but
+                      silent on custody of the transient token itself
+concrete failure class a Gateway auth strategy acquires a short-lived provider
+                      token (session token, exchanged access token). If the
+                      implementation caches it durably "for efficiency"
+                      outside CredentialBackend custody — a hub_control column,
+                      a Mastra memory, a runtime file — secret-at-rest escapes
+                      every law in this family through the side door of
+                      "it's only transient".
+smallest correction   add one rule to §12: a transient acquired token is
+                      memory-first; if a provider genuinely forces persistence
+                      (cost/rate-limit on reacquisition), it persists ONLY
+                      inside CredentialBackend custody under an infra-level
+                      generation counter — never a domain fact, never a
+                      ConnectionRevision input, never a qualification-identity
+                      input (Finding 3C-07-A already decouples qualification
+                      from key_version; the same decoupling applies to token
+                      generations), and C-016's reserved
+                      key_version != refresh_generation distinction stays
+                      untouched for the future rotating-refresh trigger.
+reopen prior authority?  NO
+later owner           decision text (§12 rule); implementation
+```
+
+### F-5 — Crash-safe rekey: the no-FSM claim is honest, because the durable state the property needs already exists
+
+```text
+claim challenged      §11.3 + §21-Q5 — is bounded old+new generation overlap
+                      enough without a rotation FSM/record?
+analysis              enumerate the state a crash-safe rekey actually needs:
+                      (a) which generation each ciphertext uses — already
+                      exists as the per-ciphertext key_version (C-007);
+                      (b) which root generations are decrypt-admitted — this
+                      is the presence of the key material itself at the host
+                      boundary (3J-owned), not a database fact;
+                      (c) migration progress — derivable at any time by
+                      scanning (a); a crash loses no information because both
+                      generations remain admitted until retirement.
+                      No additional durable state is required, therefore no
+                      FSM/record is hidden anywhere. Two hardenings make the
+                      property provable rather than asserted:
+                      1. retirement gate = a PROVABLE zero-references scan
+                         over (a) plus the §15 recovery-fixture proof under
+                         the new generation, both BEFORE old-key destruction;
+                      2. re-encryption must preserve the authenticated
+                         context binding (§9.3) byte-for-byte in meaning —
+                         a rekey that silently rewrites AAD/binding context
+                         would convert a crypto maintenance action into an
+                         unaudited semantic change. Add the negative proof:
+                         rekeyed ciphertext for credential A still fails
+                         substitution as credential B.
+reopen prior authority?  NO
+later owner           decision text (two hardenings); 3J (key material
+                      custody); implementation (scan/migration spelling)
+```
+
+### F-6 — Backup separation: restate as compromise-path disjointness, answering "too strong / too weak" exactly
+
+```text
+claim challenged      §15/§21-Q11 — "not the same backup object/location/
+                      credential path" — is that the right form?
+analysis              as worded it is simultaneously too weak (root key on the
+                      same HOST as ciphertext with one host credential
+                      satisfies the letter — one compromise still yields both;
+                      that residual is accepted ONLY via C8's honesty clause,
+                      and should be said there, not hidden in backup wording)
+                      and too strong if read as "multiply storage
+                      infrastructure until everything is separate".
+smallest correction   restate the property as the invariant it actually is:
+                      NO SINGLE credential, location, or access path outside
+                      the trusted Hub boundary may yield BOTH the credential
+                      ciphertext set AND the root/recovery key material.
+                      Backup storage compromise, backup-credential (e.g.
+                      rclone config) compromise, and offsite bucket compromise
+                      must each be insufficient alone. The Hub host itself
+                      remains the C8 exception, stated as accepted residual.
+                      This form is checkable (enumerate paths, prove each
+                      insufficient — §18 proofs 15–17 already do) and does not
+                      mandate extra infrastructure.
+reopen prior authority?  NO
+later owner           decision text; 3J (recovery custody realization + proof)
+```
+
+### F-7 — Guest-capability closure confirmed: one named class, and the OTLP-push realization is the SAME class, not a second one
+
+```text
+claim challenged      §21-Q9/Q10 — is telemetry ingest the only named guest
+                      capability after deleting the LLM key?
+analysis              swept current authority for guest-held capability:
+                      - C-013 sandbox telemetry ingest → the named class;
+                      - 3H-03 E2B OTLP push, if ever adopted, is sandbox-
+                        originated telemetry delivery to a Hub-controlled
+                        endpoint → same capability CLASS (ingest, hub-minted,
+                        scoped to run, server-expiring), not a new one —
+                        classify it so adoption cannot mint a second law;
+                      - Spotlight sidecar (C-013) is loopback-only inside the
+                        sandbox and carries no Hub capability;
+                      - BuildValidationDatabase credentials are synthetic and
+                        sandbox-local by construction (C-008: never "DEV") —
+                        worthless outside the guest, out of custody scope,
+                        and MUST remain synthetic (the proof obligation is
+                        already implied by C-008; keep it visible);
+                      - git SYNC/SHARE is hub-mediated bundles without guest
+                        credential (C-008);
+                      - RunPreview access is authenticated human traffic via
+                        Hub proxy, not a guest capability.
+                      Closure holds: ONE class. Server-side expiry/revocation
+                      on every use is not optional hardening but the only
+                      enforcement that exists — §3's E2B facts (pause preserves
+                      memory/filesystem; paused sandboxes retained
+                      indefinitely; runtime window resets on resume) make any
+                      client-side lifetime control unenforceable by
+                      construction. §13.3 is confirmed as written.
+reopen prior authority?  NO
+later owner           decision text (classify OTLP-push under the same class;
+                      keep synthetic-DB visibility); 3L (transport proof)
+```
+
+### F-8 — Audit and residual risk: confirmed as scoped; the per-use ledger stays dead and the honesty clause is the correct boundary
+
+```text
+claim challenged      §14/§16 + §21-Q8/Q12
+analysis              audit: the admin/rekey/recovery operation set in §14.1
+                      maps onto the existing fail-closed Audit Trail class
+                      (3E-01 §12) — audit-required, metadata-only; ordinary
+                      credential use is already attributable through Gateway
+                      effect/qualification/health observations, so a
+                      per-decrypt ledger would duplicate evidence that exists
+                      and create a second high-volume authority surface —
+                      correctly rejected; a future compliance per-decrypt
+                      requirement re-enters by Decision Loop as §14.2 says.
+                      residual risk: C8 is honest AND proportionate — the
+                      decisive test is that external KMS would NOT remove the
+                      accepted residual (a compromised Hub process authorized
+                      to request decryption abuses that authority regardless
+                      of where keys live; the candidate's Alt C says exactly
+                      this). What KMS/HSM would add — key non-exfiltration
+                      and independently controlled decrypt policy/audit —
+                      maps precisely onto the named reopen triggers (§20
+                      items 3–4). Nothing in the current product (single
+                      operator, single Hub, C-016's explicit
+                      no-Vault/KMS-without-trigger law) demands it now.
+reopen prior authority?  NO
+later owner           unchanged routing
+```
+
+## F.3 Answers to the fifteen questions
+
+1. Correct as frozen — 3D-04 verified verbatim. No expansion; no failure class found that expansion eliminates (F-2). Reuse rule stated positively so principles bind platform credentials without the port.
+2. No Material Finding — F3E02-R2 routed physical custody here with layout explicitly unfrozen; a no-new-record realization class exists (filesystem-class infra backing, opaque-ref, FK-free; C-015 CAS and mastra_* precedents); the Decision Loop tripwire stays for any record/schema/database variant, including in-DB backing (F-1).
+3. Complete — qualification's external I/O is already Gateway-executed by frozen 3C-07; transient-token reacquisition lives inside the Gateway auth strategy. Cite it in C2 (F-3).
+4. One versioned root/KEK suffices; no current selective-rekey or scale failure class pays for per-secret DEKs (C-007 already makes envelope a trigger). Confirmed.
+5. Yes — the property needs no durable state beyond per-ciphertext key_version plus host key-material presence; crash loses nothing while both generations stay admitted. Hardened with the provable zero-refs retirement gate and the binding-preservation negative proof (F-5).
+6. Tightened via F-4: re-encrypt moves only key_version; provider credential replacement moves logical grant version; transient reacquisition moves nothing domain-visible (memory-first; CredentialBackend-custody generation if persistence is forced); 3C-07-A keeps qualification off both crypto axes.
+7. Fail-closed eligibility at Connections/Gateway IS the revocation authority (frozen C-007/3C-07); synchronous ciphertext deletion would create a second revocation authority coupled to storage failure modes. Physical cleanup is hygiene — async, 3M/implementation.
+8. Audit-required set = §14.1 (create/replace/revoke, grant change, key generation introduce/retire, recovery/import, privileged failure) on the existing fail-closed Audit Trail. Per-use duplication rejected — Gateway evidence already attributes use (F-8).
+9. Yes — telemetry ingest is the only named class; OTLP-push, if adopted, is the same class by classification, not a new capability; Spotlight is loopback-only; BuildValidationDatabase secrets are synthetic by construction (F-7).
+10. No client-side control can satisfy expiry — E2B pause/resume preserves guest memory/filesystem indefinitely and resets runtime windows; server-side authority check on every use is the only enforcement point. Confirmed with primary-source facts already in §3.
+11. Sufficient once restated as compromise-path disjointness: no single non-Hub credential/location/path yields both ciphertext and key material; Hub-host co-residence is the C8 accepted residual, stated there (F-6).
+12. Honest and proportionate — KMS would not remove the residual; its real additions map onto the named reopen triggers. No current requirement demands process isolation (F-8).
+13. No stronger 3I laws now. Their remaining design belongs exactly where routed: host injection/rotation → 3J, model credential → Family D constraints, egress → Family F, DB roles → Family G. Custody principles bind them via F-2's reuse rule.
+14. Yes — existing `con.connection` grant facts + infra backing (F-1 class) + existing audit classes represent everything. No unavoidable lifecycle for a durable Secret/Credential/CapabilityToken record was found; any future one must arrive with its lifecycle proof through Decision Loop.
+15. No reopen of C-007, C-008, 3C-07, 3D, 3E or 3I-01. Every tension examined resolves inside frozen authority — the closest call (3E storage) resolves by 3E's own explicit routing. **Material Finding = NONE.**
+
+## F.4 Closing verdict
+
+```text
+Material Finding against approved authority   = NONE
+reopen required                                = NONE
+alternative A                                  = CONFIRMED / GLOBAL MAXIMUM
+corrections to consolidate                     = F-1 (state realization class + precedents;
+                                                      extend tripwire to in-DB variant)
+                                                 F-2 (positive reuse rule for platform credentials)
+                                                 F-3 (cite 3C-07 qualification-I/O law in C2)
+                                                 F-4 (transient-token custody rule in §12)
+                                                 F-5 (zero-refs retirement gate + binding-
+                                                      preservation negative proof)
+                                                 F-6 (compromise-path disjointness restatement)
+                                                 F-7 (OTLP-push same-class classification;
+                                                      synthetic-DB visibility)
+new durable record class                       = 0
+new database/schema                            = 0
+new CredentialBackend consumer                 = 0
+external Vault/KMS/HSM                         = 0 F1
+per-secret DEK/envelope                        = 0 F1
+guest LLM key                                  = deleted, stays deleted
+technology product selected                    = 0
+
+verdict = CURRENT STRUCTURE CONFIRMED — ready for consolidation and operator
+          review; numbering as a 3I decision remains with the operator
+```
+

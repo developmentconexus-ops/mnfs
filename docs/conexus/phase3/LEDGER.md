@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-04 APROVADAS`  
-**Fase atual:** `3I — Security / Authority Architecture` — 3I-04 ratificada; próxima ação = bounded security-closure package `Trust Zones & Crossings + hub_control Least Privilege`  
+**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-05 APROVADAS`  
+**Fase atual:** `3I — Security / Authority Architecture` — 3I-05 ratificada; próxima ação = bounded independent 3I closure review  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -62,6 +62,9 @@ C-000..C-017
 3I-04
 → DEDICATED Trusted Exchange
 
+3I-05
+→ Trust Zones, Crossings & hub_control Least Privilege
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -94,7 +97,7 @@ Nenhuma conversa cria authority.
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
-| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-04 APROVADAS** | bounded `Trust Zones & Crossings + hub_control Least Privilege` closure package |
+| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-05 APROVADAS** | bounded independent 3I closure review; close only if no Material Finding |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | primeira topologia real / backup / serving / stop; future-scale machinery deferred |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
@@ -137,7 +140,8 @@ Critical path ratificado:
 ```text
 3I
 → 3I-04 DEDICATED Trusted Exchange = APPROVED
-→ bounded Trust Zones/Crossings + hub_control least-privilege closure
+→ 3I-05 Trust Zones/Crossings + hub_control Least Privilege = APPROVED
+→ bounded independent 3I closure review
 
 3J
 → first production topology only
@@ -301,7 +305,7 @@ ReleaseManifest remains composition root
 | 3G-02 | Builder Change & Finding Lifecycle, Contract Revision & Closure Architecture | [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md) |
 | 3G-03 | Builder Work Unit & ActorRun Execution Lifecycle Architecture | [3G-03](3G-03-builder-work-unit-actor-run-execution-lifecycle-architecture.md) |
 | 3G-04 | Planning Depth & Rigor Composition Architecture | [3G-04](3G-04-planning-depth-rigor-composition-architecture.md) |
-| 3G-05 | Production AgentRun, Approval Continuation & Trigger Architecture | [3G-05](3G-05-production-agent-run-approval-trigger-continuation-architecture.md) |
+| 3G-05 | Production AgentRun, Approval Continuation & Trigger Architecture | [3G-05](3G-05-production-agentrun-approval-trigger-continuation-architecture.md) |
 | 3G-06 | Gateway EffectAttempt, Idempotency & Budget State Architecture | [3G-06](3G-06-gateway-effect-attempt-idempotency-budget-state-architecture.md) |
 | 3G-07 | Project Lifecycle & Binding Mutation Architecture | [3G-07](3G-07-project-lifecycle-binding-mutation-architecture.md) |
 | 3G-08 | Release, Promotion & Runtime Admissibility Architecture | [3G-08](3G-08-release-promotion-runtime-admissibility-architecture.md) |
@@ -582,8 +586,9 @@ mandatory process split = 0 unless qualification fires
 | 3I-02 | Credential & Capability Custody | [3I-02](3I-02-credential-capability-custody.md) |
 | 3I-03 | Per-ActorRun / Per-AgentRun Model Spend Enforcement | [3I-03](3I-03-per-run-model-spend-enforcement.md) |
 | 3I-04 | DEDICATED Trusted Exchange | [3I-04](3I-04-dedicated-trusted-exchange.md) |
+| 3I-05 | Trust Zones, Crossings & `hub_control` Least Privilege | [3I-05](3I-05-trust-zones-crossings-hub-control-least-privilege.md) |
 
-Ratificações pelo operador: **3I-01 / 3I-02 / 3I-03 / 3I-04 — 2026-08-17**.
+Ratificações pelo operador: **3I-01 / 3I-02 / 3I-03 / 3I-04 / 3I-05 — 2026-08-17**.
 
 ### 10.1 3I-01 — Current authorization / revocation laws
 
@@ -777,12 +782,49 @@ Review provenance, non-authoritative:
 
 - `3I-FABLE-DIALOGUE-dedicated-trusted-exchange.md`.
 
-Remaining 3I material families under 3A-R6:
+### 10.5 3I-05 — Trust Zones, Crossings & `hub_control` Least Privilege laws
 
 ```text
-Trust Zones & Crossings / Hub control-side egress / telemetry crossing
-hub_control Least-Privilege Realization
+one authority protects two enforcement planes: crossings + persistence capability
+six logical security zones do not imply six services/processes
+business/application external execution remains Gateway-owned
+platform-control egress uses only named owner-specific adapters
+privileged egress destination derives from owner-pinned configuration/authority, never model output/caller payload/artifact content
+browser request-authenticity and self-only/CSP laws are cited from C-015/C-016, not duplicated
+E2B remains untrusted/root-capable; no durable/ERP/Git-write/model-provider/Hub-DB credential enters guest
+transport never upgrades producer_trust; guest telemetry cannot mint AuditRecord/HUB_AUTHORITY
+credentials/PII/mutable authority/owner IDs do not ride OTel baggage by default
+normal hub_control persistence capability cannot reach another owner schema or SET ROLE into another owner
+ordinary broad hub_control runtime login is rejected
+normal runtime DB capability is non-owner, non-superuser, non-CREATEROLE/CREATEDB/BYPASSRLS
+cross-owner atomicity remains closed: CreateProject(prj+iam) + effect admission(gw+par)
+audit-required path gets append-only OBS capability only, not OBS read/update/delete authority
+hub_control / mastra_builder / mastra_par / Project DB credentials remain physically isolated capabilities
+separate DB capabilities do not force process split
+full trusted-Hub RCE containment is not claimed by DB least privilege
 ```
+
+3I-05 outcome:
+
+```text
+Material Finding against prior authority = NONE
+CURRENT STRUCTURE CONFIRMED
+package = ONE authority / TWO enforcement planes
+new Hub module = 0
+new durable record = 0
+new database = 0
+new process = 0
+service mesh / universal egress = 0
+RLS/policy engine = 0
+ordinary broad hub_control login = REJECT
+owner-scoped normal persistence capability = REQUIRED PROPERTY
+cross-owner domain transaction cases = CLOSED SET = 2
+remaining material 3I family on current evidence = 0
+```
+
+Review provenance, non-authoritative:
+
+- `3I-FABLE-DIALOGUE-trust-zones-crossings-hub-control-least-privilege.md`.
 
 Current dependency/closure shape:
 
@@ -791,24 +833,25 @@ Current dependency/closure shape:
 3I-02 = APPROVED
 3I-03 = APPROVED
 3I-04 = APPROVED
+3I-05 = APPROVED
         ↓
-bounded Trust Zones/Crossings + hub_control Least Privilege package = NEXT
+bounded independent 3I closure review = NEXT
         ↓
-bounded 3I closure review
+3I-R1 only if no Material Finding
 ```
 
-No additional 3I decision ID is allocated until the bounded package is decomposed and evidence shows whether it should be one authority or split.
+No additional material 3I topic is currently justified. The closure review may still surface a Material Finding and reopen only the implicated authority.
 
 ---
 
-## 11. Open findings / routed work after 3I-04
+## 11. Open findings / routed work after 3I-05
 
 Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quando cada item volta ao critical path.
 
 | Finding / questão | Owner posterior |
 |---|---|
 | F3B-R1 — repo canônico/cutover do produto | **3A / operador — MUST DECIDE antes do post-C-018 Realization Planning Gate** |
-| F3B-R4 — browser/runtime physical trust zones | **NEXT bounded 3I Trust Zones/Crossings package**; physical deployment conforme 3A-R6 first-consumer rules |
+| F3B-R4 — browser/runtime physical trust zones | **trust semantics RESOLVED by 3I-05**; physical placement/ingress → 3J according to first-production/first-consumer rules |
 | Builder runtime orphan/lost detection policy after 3H-01 liveness surface | 3M structural recovery sweep |
 | Production Agent admitted-but-undispatched / active-process-loss / missing-snapshot recovery policy | 3M structural recovery sweep |
 | InceptionInvestigation pre-Change agent execution shape, somente se realization futura provar necessidade | Decision Loop / DEFER SAFELY |
@@ -816,25 +859,27 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` never authoring authority | 3L probe / implementation enforcement under 3H-02 |
 | CredentialBackend exact encrypted backing primitive/path + host root-key custody | 3I-02 law closed; implementation/3J; no new record/schema/database silently |
-| guest telemetry capability pause/resume expiry/scope transport proof | implementation/3L under 3I-02 |
+| guest telemetry capability pause/resume expiry/scope transport proof | implementation/3L under 3I-02/3I-05 |
 | orphan encrypted backing cleanup/repair if selected realization can produce it | 3M/3J/implementation under 3I-02 |
 | Builder/PAR model-call pre-provider interception + retry/fallback neutralization | 3L/implementation under 3I-03 — MUST QUALIFY |
 | provider usage extraction preserving MISSING != ZERO | 3L under 3I-03 — MUST QUALIFY |
 | provider/model/request qualified cost-envelope proof | 3L under 3I-03 — MUST QUALIFY |
 | model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03; current baseline features budgeted-or-disabled |
 | model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
-| Product Agent browser/workspace/code execution trust/egress if first consumer enables it | Decision Loop / DEFER SAFELY until named consumer |
+| Product Agent browser/workspace/code execution trust/egress if first consumer enables it | Decision Loop / DEFER SAFELY; 3I-05 pre-binds named-owner/destination-authority requirement |
 | whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **3J MUST DECIDE before first production** |
 | post-whole-Hub-stop settlement/recovery | 3M structural recovery sweep |
 | selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely Release/MAR serving-admission owner |
 | DEDICATED trust/authentication semantics | **RESOLVED by 3I-04**; exact libraries/TTL/claim spelling → 3L/Realization Planning |
-| DEDICATED egress/network policy | trust semantics → NEXT 3I package; **physical DEDICATED deployment DEFER SAFELY until first real deployment / 3J** |
+| DEDICATED egress/network trust semantics | **RESOLVED by 3I-05 + 3I-04**; physical DEDICATED deployment → DEFER SAFELY to 3J until first real deployment |
 | MANAGED/DEDICATED physical deployment topology | **MANAGED first-production topology MUST in 3J; DEDICATED physical topology DEFER SAFELY until first real DEDICATED deployment** |
 | DEDICATED private-key provisioning / Hub token-signing deployment | 3J only when physical realization is current; owner/custody semantics fixed by 3I-04 |
 | DPoP / mTLS sender constraint | DEFER SAFELY / Decision Loop on 3I-04 reopen trigger |
 | USER_DELEGATED / federation | Decision Loop on named DEDICATED consumer |
 | fleet/per-install credential / per-Release credential / binary attestation | REJECT F1 / Decision Loop on real install-base/security requirement |
-| `hub_control` PostgreSQL role/isolation properties | **NEXT bounded 3I Least-Privilege package — MUST DECIDE at property level** |
+| `hub_control` PostgreSQL role/isolation properties | **RESOLVED by 3I-05 at property level**; exact LOGIN/role/GRANT/pool spelling → Realization Planning |
+| `hub_control` owner-capability negative privilege matrix | Realization Planning + 3N/3O proof under 3I-05 |
+| cross-owner transaction profiles / audit append mechanism | Realization Planning under closed 3E/3I-05 properties; third case → Decision Loop |
 | Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J; qualification-triggered |
 | old Product Agent runtime coexistence / drain / cutover | **DEFER SAFELY — trigger: first runtime-affecting upgrade after production / 3J** |
 | `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L; upgrade operation detail deferred until first relevant upgrade |
@@ -862,7 +907,8 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | `CX-RUNTIME-ISOLATION-01` cross-role qualification | **3L MUST QUALIFY** |
 | role-local PubSub/default-bucket/external-broker namespace probes | 3L as part of runtime-isolation qualification |
 | E2B pull/OTLP exact pinned-version behavior | E2B control/evidence subset 3L; production exporter topology 3J only if adopted |
-| OTel baggage/redaction/egress policy | **NEXT 3I Trust Zones/Crossings — MUST at property level** |
+| OTel baggage/redaction/egress policy | **RESOLVED by 3I-05 at property level**; exact propagator/header stripping → 3L/Realization Planning |
+| platform-control egress destination configuration | **3I-05 property fixed**; exact owner adapter endpoint/config wiring → Realization Planning/3J as applicable |
 | Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval |
 | Durable Agent enablement and its process-global registry | Decision Loop + 3L on named consumer |
 | Observational Memory process-global `activeOps` if enabled | 3L on named consumer |
@@ -897,7 +943,7 @@ Verification Observability deciding-evidence subset
 
 ---
 
-## 12. Resolved routed work through 3I-04
+## 12. Resolved routed work through 3I-05
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -978,6 +1024,16 @@ DEDICATED SERVICE_SCOPED-only F1                                 → 3I-04
 DEDICATED archive/revoke/disable composition                     → 3I-04
 DEDICATED no-session/no-refresh/no-blacklist baseline             → 3I-04
 DPoP/mTLS/fleet/per-Release credential/binary attestation         → 3I-04 explicit defer/reject triggers
+six logical trust zones / no topology split implication          → 3I-05
+business egress Gateway-only × platform-control owner egress     → 3I-05
+privileged egress destination anti-injection law                 → 3I-05
+telemetry transport cannot elevate producer_trust                 → 3I-05
+OTel baggage excludes authority/secrets/owner IDs by default     → 3I-05
+hub_control owner-scoped normal persistence capability           → 3I-05
+ordinary broad/SET-able umbrella DB login rejected               → 3I-05
+two narrow cross-owner atomic transaction capability classes     → 3I-05
+audit-required narrow append-only OBS path                        → 3I-05
+hub_control/Mastra/Project DB credential isolation                → 3I-05
 ```
 
 ---
@@ -1018,7 +1074,7 @@ NO semantic/observational memory enabled merely because framework supports it
 NO RuntimeBus / EventBus / UniversalRuntimeEvent / generic F5 envelope
 NO generic F5 outbox/queue without non-rederivable durable-delivery consumer
 NO mandatory Builder/PAR process split without isolation Finding
-NO mandatory OtelBridge / Collector / Sentry / Spotlight
+NO OtelBridge / Collector / Sentry / Spotlight mandatory by architecture
 NO owner IDs in OTel baggage by default
 NO high-cardinality run IDs as default metric dimensions
 NO Kafka/Kubernetes/Temporal/Inngest merely for optionality
@@ -1056,6 +1112,15 @@ NO DPoP proof/jti/nonce machinery F1 without trigger
 NO mTLS PKI / fleet-device identity / per-Release credential / binary attestation F1 without trigger
 NO generic machine-identity framework
 NO DEDICATED physical topology before first real DEDICATED deployment
+NO service mesh / SPIFFE-SPIRE F1
+NO UniversalEgressService / privileged generic fetch client F1
+NO network microsegmentation between in-process modules F1
+NO ordinary broad hub_control runtime login
+NO RLS/policy engine for module ownership F1
+NO generic cross-owner transaction/UnitOfWork engine
+NO dynamic DB credential broker / per-request ephemeral DB roles
+NO telemetry PKI / per-span authorization
+NO process split solely for owner DB credentials
 NO product implementation before C-018 + accepted post-C-018 Realization Planning
 NO Realization Planning as second architecture authority/readiness framework
 ```
@@ -1089,6 +1154,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3I-02 = APPROVED
 3I-03 = APPROVED
 3I-04 = APPROVED
+3I-05 = APPROVED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1111,9 +1177,11 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3I-04 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`; congela Project-owned one-current asymmetric DEDICATED credential, `private_key_jwt`, signed exact ReleaseRef binding, short-lived bearer access token, per-request current credential-generation/narrowing recheck e SERVICE_SCOPED-only F1, enquanto DPoP/mTLS/fleet/per-Release credential/binary attestation permanecem triggered defers/rejects.
 
+3I-05 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`; fecha trust-zone/crossing semantics, separa business egress de platform-control owner egress com anti-injection de destination authority, mantém producer trust não elevável por transport e torna `hub_control` ownership fisicamente enforçável por owner-scoped DB capabilities + somente duas narrow cross-owner transaction cases, sem novo module/record/database/process/security engine.
+
 Próxima ação dentro de 3I:
 
-> **Trust Zones & Crossings + `hub_control` Least Privilege** são o próximo bounded security-closure package sob 3A-R6. O package deve congelar apenas os crossings/credential/egress/telemetry properties e PostgreSQL role/isolation properties que um coding actor não pode escolher silenciosamente; exact firewall/proxy/GRANT/pool/exporter spelling permanece 3J/3L/Realization Planning conforme aplicável. Depois disso, executar um único bounded 3I closure review e fechar 3I se não houver Material Finding.
+> Executar **um único bounded independent 3I closure review** sobre 3I-01..3I-05 + routed work. O review deve verificar somente: missing trust boundary, duplicate authorization authority, widened secret path, missing current revocation path, hidden new durable security record/module, unrouted material C-018 security blocker e contradição com 3A-R6. Se `Material Finding = NONE` e `remaining material 3I decision = 0`, o próximo candidato é `3I-R1 — Security / Authority Architecture Final Closure`; nenhum novo topic intermediário é justificado.
 
 Depois de 3I, 3J–3O seguem integralmente, mas sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J NÃO INICIADA / NEXT`  
-**Fase atual:** `3J — Deployment / Operations Architecture` — NOT STARTED / NEXT; primeiro passo = intake/decomposition independente da primeira topologia real sob 3A-R6  
+**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J EM ANDAMENTO / 3J-01 APROVADA`  
+**Fase atual:** `3J — Deployment / Operations Architecture` — 3J-01 ratificada; próxima ação = `3J-02 — Operational State, Backup & Restore`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -101,7 +101,7 @@ Nenhuma conversa cria authority.
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
-| 3J — Deployment / Operations Architecture | **NÃO INICIADA / NEXT** | intake/decomposition da primeira topologia real / backup / serving / stop; future-scale machinery deferred |
+| 3J — Deployment / Operations Architecture | **EM ANDAMENTO / 3J-01 APROVADA** | 3J-02 — Operational State, Backup & Restore; depois 3J-03 lifecycle/stop/availability + 3J-R1 |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
@@ -875,7 +875,40 @@ Review provenance, non-authoritative:
 
 ---
 
-## 11. Open findings / routed work after 3I-R1
+## 11. 3J — IN PROGRESS
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3J-01 | First Production Topology, Placement & Ingress | [3J-01](3J-01-first-production-topology-placement-ingress.md) |
+
+Ratificação pelo operador: **3J-01 — 2026-08-17**.
+
+### 11.1 3J-01 — First production topology laws
+
+```text
+first production placement = existing company server / on-prem
+production execution class = one dedicated Linux VM/guest
+Hub application process baseline = one
+Postgres/Mastra/Blob/CredentialBackend = co-located same VM/failure domain
+public ingress = 0; private ingress = company LAN/VPN + HTTPS
+bounded amendment = C-015 §5 + C-016 §6 exposure realization only
+Sankhya topology authority = 0 — remains Connector/Connection/Gateway under C-007
+extra MANAGED deployment unit = 0
+E2B: no generic/public Hub inbound surface; transport truth = 3L
+```
+
+**Escopo:** 3J-01 é **installation-scoped** — primeira topologia de produção da instalação corrente, não deployment law universal do produto. **C-001 permanece a product vision authority.**
+
+Próxima decisão: `3J-02 — Operational State, Backup & Restore`; depois `3J-03` e `3J-R1` bounded closure.
+
+Review provenance, não-autoritativa:
+
+- `3J-FABLE-DIALOGUE-intake-decomposition.md`;
+- `3J-FABLE-DIALOGUE-first-production-topology-placement-ingress.md`.
+
+---
+
+## 12. Open findings / routed work after 3I-R1
 
 Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quando cada item volta ao critical path.
 
@@ -975,7 +1008,7 @@ Verification Observability deciding-evidence subset
 
 ---
 
-## 12. Resolved routed work through 3I-R1
+## 13. Resolved routed work through 3I-R1
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -1072,7 +1105,7 @@ current-authority serialization × owner isolation composition     → 3I-R1
 
 ---
 
-## 13. Anti-overengineering guardrail
+## 14. Anti-overengineering guardrail
 
 Normative anti-overengineering details live in the exact approved decisions. Global summary:
 
@@ -1163,7 +1196,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 ---
 
-## 14. Regra de avanço
+## 15. Regra de avanço
 
 ```text
 3A = CONTINUOUS until C-018
@@ -1186,7 +1219,8 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3I-06 = NOT JUSTIFIED
 3I-R1 = APPROVED / CLOSED
 
-3J = NOT STARTED / NEXT
+3J = IN PROGRESS
+3J-01 = APPROVED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1205,9 +1239,11 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3I-R1 foi ratificada em **2026-08-17** após bounded independent closure review com `Material Finding = NONE`, `missing material 3I decision = 0`, `3I-06 = NOT JUSTIFIED`, `reopen = NONE` e `CLOSE 3I`. O closure tornou explícita uma única composição: current-authority serialization de 3I-01 deve ser realizada e provada junto do owner-isolation de 3I-05, sem broad IAM SQL/umbrella role; exact conflict primitive permanece derived Realization Planning.
 
+3J-01 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela first production on-prem (company server → dedicated Linux VM), one Hub process, stores co-located no mesmo failure domain, private ingress company LAN/VPN + HTTPS com bounded amendment de C-015 §5 + C-016 §6 (exposure realization only), zero public ingress, Sankhya sem topology authority e E2B sem generic/public inbound. **Installation-scoped**: primeira topologia da instalação corrente, não deployment law universal do produto; **C-001 permanece product vision authority**.
+
 Próxima ação:
 
-> **Abrir 3J — Deployment / Operations Architecture com um intake/decomposition independente da primeira topologia real sob 3A-R6.** Levantar todas as decisões materiais de first deployment, agrupá-las por owner/failure class, separar 3L/3M/Realization Planning, preservar DEDICATED physical topology e old-runtime drain como triggered defers e rejeitar future-scale machinery sem consumidor.
+> **Avançar `3J-02 — Operational State, Backup & Restore`**: recovery set por classe, RPO/RTO first-launch, off-host immutability, Git-loss classification, restore proof e proving→PROD governed migration; depois `3J-03` e `3J-R1` bounded closure.
 
 Depois de 3J, 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

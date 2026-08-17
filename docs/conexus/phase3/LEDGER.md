@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS`  
-**Próxima fase:** `3I — Security / Authority Architecture` — intake/decomposition antes da primeira decisão material  
+**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01 APROVADA`  
+**Fase atual:** `3I — Security / Authority Architecture` — 3I-01 ratificada; próximas famílias materiais ainda sem ID: Credential/Capability Custody e Per-Run Model Spend podem avançar após 3I-01  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -47,6 +47,9 @@ C-000..C-017
 3H-R1
 → Runtime & Agent Architecture Final Closure
 
+3I-01
+→ Current Authorization, Approver Eligibility & Revocation
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -79,7 +82,7 @@ Nenhuma conversa cria authority.
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
-| 3I — Security / Authority Architecture | **NÃO INICIADA / NEXT** | intake/decomposition; trust/identity/egress/DB roles |
+| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01 APROVADA** | Credential/Capability Custody e Per-Run Model Spend são as próximas famílias independentes; IDs somente quando materializadas |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | UX/scaffold/product surfaces |
 | 3L — Technology Qualification | NÃO INICIADA | probes/qualification |
@@ -389,9 +392,9 @@ CX-AGENT-MASTRA-01 = mandatory before deploy
 
 Review provenance, non-authoritative:
 
-- `3H-FABLE-DIALOGUE-production-agent-runtime-realization.md`
-- `3H-FABLE-DIALOGUE-production-agent-runtime-realization-R2.md`
-- `3H-FABLE-DIALOGUE-production-agent-runtime-realization-R3.md`
+- `3H-FABLE-DIALOGUE-production-agent-runtime-realization.md`;
+- `3H-FABLE-DIALOGUE-production-agent-runtime-realization-R2.md`;
+- `3H-FABLE-DIALOGUE-production-agent-runtime-realization-R3.md`.
 
 Final result:
 
@@ -440,9 +443,9 @@ mandatory OtelBridge / Collector / Sentry / Spotlight = 0
 
 Review provenance, non-authoritative:
 
-- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff.md`
-- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff-R2.md`
-- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff-R3.md`
+- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff.md`;
+- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff-R2.md`;
+- `3H-FABLE-DIALOGUE-runtime-isolation-correlation-handoff-R3.md`.
 
 Final result:
 
@@ -483,7 +486,86 @@ mandatory process split = 0 unless qualification fires
 
 ---
 
-## 10. Open findings / routed work after 3H closure
+## 10. 3I — IN PROGRESS
+
+| ID | Decisão | Documento |
+|---|---|---|
+| 3I-01 | Current Authorization, Approver Eligibility & Revocation | [3I-01](3I-01-current-authorization-approver-eligibility-revocation.md) |
+
+Ratificação pelo operador: **2026-08-17**.
+
+### 10.1 3I-01 — Current authorization / revocation laws
+
+```text
+current mutable authorization is resolved at protected owner control points
+no cross-request cache of mutable I&A authority facts in F1
+CONTROL_PLANE != PREVIEW != PUBLISHED_APP authority
+security-sensitive mutation uses pre-state authority only
+consumed mutable authority facts must be serialized against concurrent revocation through mutation commit
+exact concurrency mechanism is implementation; stale pre-read cannot commit
+operation owner declares permission; I&A resolves current Account access; owner/Gateway apply remaining gates
+human ALLOW_ONCE requires currently eligible Account under exact action permission model on owner-derived surface
+self-approval is allowed F1 because approval adds no platform privilege beyond current eligibility
+committed approval remains immutable; no live approver-eligibility recheck inside FIRST_CLAIM
+approval staleness bounded by existing expiry; incidents use revoke + owner cancel / Gateway close + current last-mile gates
+interactive session lifetime != durable ActorRun/AgentRun lifetime
+current authority is reapplied at durable re-entry points appropriate to each path; no continuous mid-segment permission polling
+historical Release/run/approval facts remain immutable while current owner-committed facts may narrow new protected operations
+raw telemetry/provider/guest observation never becomes authorization; owner-committed health/conformance state remains applicable per prior authority
+no generic policy/revocation engine, auth snapshot/cache bus, universal four-eyes or security-stop entity
+whole-Hub emergency stop is a 3J proof obligation before production
+selective per-Project serving stop returns only by Decision Loop on proven incident class; likely owner seam = Release/MAR serving admission
+```
+
+3I-01 outcome:
+
+```text
+Material Finding against prior authority = NONE
+Alternative B = GLOBAL MAXIMUM
+CURRENT STRUCTURE CONFIRMED
+new module = 0
+new durable record class = 0
+new Tier-2 FK = 0
+new policy/revocation engine = 0
+new auth snapshot/cache invalidation bus = 0
+new approver role/four-eyes = 0
+new stop/hold entity = 0
+```
+
+Review provenance, non-authoritative:
+
+- `3I-FABLE-DIALOGUE-security-authority-intake-decomposition.md`;
+- `3I-FABLE-DIALOGUE-current-authorization-approver-revocation.md`.
+
+Remaining 3I material families from the approved intake, **not yet numbered**:
+
+```text
+Credential & Capability Custody
+Per-ActorRun / Per-AgentRun Model Spend Enforcement
+DEDICATED Trusted Exchange
+Trust Zones & Crossings / Hub control-side egress / telemetry crossing
+hub_control Least-Privilege Realization
+```
+
+Dependency shape remains:
+
+```text
+3I-01
+  ↓
+Credential/Custody  ∥  Model Spend
+  ↓
+DEDICATED Exchange
+  ↓
+Trust Zones/Crossings
+
+hub_control Least Privilege may advance after 3I-01 without driving authority semantics
+```
+
+No `3I-02` ID is created by this ledger update.
+
+---
+
+## 11. Open findings / routed work after 3I-01
 
 Estes itens não reabrem fases anteriores automaticamente.
 
@@ -498,11 +580,12 @@ Estes itens não reabrem fases anteriores automaticamente.
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
 | F3E02-R1 — Mastra `workflowDefinitions` never authoring authority | 3L probe / implementation enforcement under 3H-02 |
 | F3E02-R2 — physical CredentialBackend custody | 3I / infra implementation |
-| approver eligibility / post-admission cancellation / revocation authority | 3I |
 | guest-held capability after E2B pause/resume: server-side expiry must remain enforcement point | 3I |
 | Production Agent browser/workspace/code execution trust/egress if first consumer enables it | 3I / Decision Loop |
 | DEDICATED concrete trust/credential/delegation mechanism | 3I |
-| current security narrowing for old Releases / emergency stop | 3I/3J |
+| whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | 3J; required before production by 3I-01 |
+| post-whole-Hub-stop settlement/recovery | 3M |
+| selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely Release/MAR serving-admission owner |
 | DEDICATED egress/network policy | 3I/3J |
 | per-ActorRun / per-AgentRun model spend-cap enforcement point after control-side credential move | 3I + existing admission/budget/C-013 usage evidence |
 | MANAGED/DEDICATED physical deployment topology | 3J |
@@ -523,7 +606,7 @@ Estes itens não reabrem fases anteriores automaticamente.
 | exact `MANIFEST_INVALID` diagnostics | implementation + 3K |
 | authored Project binding source/file schema + exact mutation DTOs | implementation + 3K |
 | exact `brn.binding_validation` ref if proof shows it load-bearing | Decision Loop / 3N |
-| binding change permissions | 3I |
+| exact security-sensitive mutation serialization spelling (`FOR UPDATE`/SERIALIZABLE/equivalent) | implementation verification; 3L only if pinned PostgreSQL behavior becomes load-bearing |
 | binding/Release/runtime end-to-end proof | 3N/3O |
 | exact Mastra telemetry role attributes / OTel Bridge/export realization | 3L |
 | Verification Observability capture/correlation qualification | 3L/3N |
@@ -561,11 +644,11 @@ CX-AGENT-MASTRA-01
 CX-RUNTIME-ISOLATION-01
 ```
 
-3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automaticamente.
+3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
 
 ---
 
-## 11. Resolved routed work through 3H-R1
+## 12. Resolved routed work through 3I-01
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -609,11 +692,20 @@ producer_trust mapping for runtime/provider/guest observations → 3H-03
 Verification Observability Mastra+E2B+app realization          → 3H-03; qualification 3L/3N
 E2B pull anchor + OTLP enrichment semantics                    → 3H-03
 3H completeness / no remaining runtime decision                → 3H-R1
+current authorization freshness / no mutable auth cache F1     → 3I-01
+security-sensitive mutation pre-state + revocation atomicity   → 3I-01
+binding/credential/trigger/cancel mutation eligibility law     → 3I-01; custody mechanics remain later 3I
+ALLOW_ONCE current approver eligibility + self-approval         → 3I-01
+post-approval role loss / expiry + cancel/close composition     → 3I-01
+Account-origin durable-work authority re-entry                  → 3I-01
+old Release current owner/security narrowing                    → 3I-01
+owner-committed operational state vs raw observation            → 3I-01
+emergency-stop deletion test / no new stop entity               → 3I-01; whole-Hub procedure 3J, selective serving stop Decision Loop
 ```
 
 ---
 
-## 12. Anti-overengineering guardrail
+## 13. Anti-overengineering guardrail
 
 Normative anti-overengineering details live in the exact approved decisions. Global summary:
 
@@ -645,7 +737,7 @@ NO Stored Agent/Editor as Product Agent authority
 NO ScheduleOccurrence table / hidden backlog in F1
 NO EVENT/Signal ingress before first trusted consumer
 NO Durable Agent cache/pubsub requirement without reconnectable-stream consumer
-NO semantic/observational memory enabled merely because framework supports it
+NO semantic/observational memory enabled merely porque framework supports it
 NO RuntimeBus / EventBus / UniversalRuntimeEvent / generic F5 envelope
 NO generic F5 outbox/queue without non-rederivable durable-delivery consumer
 NO mandatory Builder/PAR process split without isolation Finding
@@ -654,13 +746,20 @@ NO owner IDs in OTel baggage by default
 NO high-cardinality run IDs as default metric dimensions
 NO Kafka/Kubernetes/Temporal/Inngest merely for optionality
 NO Mastra Platform dependency as architecture requirement
+NO cross-request mutable authorization cache in F1 before measured need
+NO AuthoritySnapshot / AuthorizationEpoch / auth invalidation bus
+NO generic RevocationEngine / SecurityCommandBus / CurrentSecurityPolicySnapshot
+NO ApproverRole / universal requester!=approver / 2-of-N approval engine
+NO continuous Account permission polling inside admitted runtime segment
+NO public generic EffectAttempt close/admin API
+NO EmergencyStop / SecurityHold / ProjectKillSwitch entity without proven incident class
 ```
 
 Expansion returns only through Decision Loop with named current consumer/failure class.
 
 ---
 
-## 13. Regra de avanço
+## 14. Regra de avanço
 
 ```text
 3B = CLOSED / APPROVED
@@ -677,7 +776,8 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3H-04 = NOT JUSTIFIED
 3H-R1 = APPROVED / CLOSED
 
-3I = NOT STARTED / NEXT
+3I = IN PROGRESS
+3I-01 = APPROVED
 ```
 
 3H-01 foi ratificada após package intake, ChatGPT/Fable adversarial rounds e final consolidation sem Material Finding contra prior authority.
@@ -688,8 +788,12 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3H-R1 foi ratificada em **2026-08-17** após closure review adversarial com `Material Finding = NONE`, `missing material 3H decision = NONE`, `3H-04 = NOT JUSTIFIED` e três correções não-materiais de routing/proof visibility incorporadas.
 
-Próxima fase:
+3I intake/decomposition foi concluído sem Material Finding contra 3B..3H. O principal-taxonomy candidate falhou materiality e virou somente preâmbulo de 3I-01; o decomposition restante preserva owner/failure-class boundaries sem numerar antecipadamente decisões.
 
-> **3I — Security / Authority Architecture.** Primeiro passo: intake/decomposition independente para identificar as decisões materiais de trust, identity, credential custody, authorization/revocation, egress, model-spend enforcement e DEDICATED authority, sem antecipar Deployment/Operations ou Technology Qualification.
+3I-01 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, incorporando atomicity contra concurrent revocation, durable re-entry current-authority law, exact approver eligibility, post-approval expiry+cancel/close composition, owner-committed-state vs raw-observation split e emergency-stop deletion test.
+
+Próxima ação dentro de 3I:
+
+> Avançar uma das duas famílias independentes habilitadas por 3I-01 — **Credential & Capability Custody** ou **Per-ActorRun / Per-AgentRun Model Spend Enforcement** — sem criar `3I-02` até a próxima decisão material estar efetivamente definida. DEDICATED Trusted Exchange consome custody; Trust Zones/Crossings vem depois; hub_control Least Privilege pode avançar em paralelo sem dirigir semantics.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

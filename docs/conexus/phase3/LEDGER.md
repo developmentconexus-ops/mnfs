@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-03 APROVADAS`  
-**Fase atual:** `3I — Security / Authority Architecture` — 3I-03 ratificada; próxima decisão material = DEDICATED Trusted Exchange  
+**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I EM ANDAMENTO / 3I-01..3I-04 APROVADAS`  
+**Fase atual:** `3I — Security / Authority Architecture` — 3I-04 ratificada; próxima ação = bounded security-closure package `Trust Zones & Crossings + hub_control Least Privilege`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -59,6 +59,9 @@ C-000..C-017
 3I-03
 → Per-ActorRun / Per-AgentRun Model Spend Enforcement
 
+3I-04
+→ DEDICATED Trusted Exchange
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -91,7 +94,7 @@ Nenhuma conversa cria authority.
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
-| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-03 APROVADAS** | DEDICATED Trusted Exchange é a próxima decisão material |
+| 3I — Security / Authority Architecture | **EM ANDAMENTO / 3I-01..3I-04 APROVADAS** | bounded `Trust Zones & Crossings + hub_control Least Privilege` closure package |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | primeira topologia real / backup / serving / stop; future-scale machinery deferred |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
@@ -133,7 +136,7 @@ Critical path ratificado:
 
 ```text
 3I
-→ DEDICATED Trusted Exchange
+→ 3I-04 DEDICATED Trusted Exchange = APPROVED
 → bounded Trust Zones/Crossings + hub_control least-privilege closure
 
 3J
@@ -578,8 +581,9 @@ mandatory process split = 0 unless qualification fires
 | 3I-01 | Current Authorization, Approver Eligibility & Revocation | [3I-01](3I-01-current-authorization-approver-eligibility-revocation.md) |
 | 3I-02 | Credential & Capability Custody | [3I-02](3I-02-credential-capability-custody.md) |
 | 3I-03 | Per-ActorRun / Per-AgentRun Model Spend Enforcement | [3I-03](3I-03-per-run-model-spend-enforcement.md) |
+| 3I-04 | DEDICATED Trusted Exchange | [3I-04](3I-04-dedicated-trusted-exchange.md) |
 
-Ratificações pelo operador: **3I-01 / 3I-02 / 3I-03 — 2026-08-17**.
+Ratificações pelo operador: **3I-01 / 3I-02 / 3I-03 / 3I-04 — 2026-08-17**.
 
 ### 10.1 3I-01 — Current authorization / revocation laws
 
@@ -724,40 +728,87 @@ Review provenance, non-authoritative:
 - `3I-FABLE-DIALOGUE-security-authority-intake-decomposition.md`;
 - `3I-FABLE-DIALOGUE-per-run-model-spend-enforcement.md`.
 
-Remaining 3I material families from the approved intake, **not yet numbered**:
+### 10.4 3I-04 — DEDICATED Trusted Exchange laws
 
 ```text
-DEDICATED Trusted Exchange
+DEDICATED Platform-Service authority remains server-to-platform only
+DedicatedApplicationPrincipal verification/revocation facts are Project-owned
+one current Project-scoped asymmetric credential is the F1 baseline
+Hub stores public verification material; DEDICATED server owns the private key
+client authentication family = private_key_jwt
+exact ReleaseRef is signed/bound inside the client assertion
+DAP(Project A) + Release(Project B) fails closed
+Hub issues short-lived signed bearer access token sealing DAP + exact ReleaseRef + credentialGeneration
+every Platform-Service request validates token then rechecks current Project generation/narrowing
+valid token is recent authentication + immutable Release assertion, never authorization snapshot
+service/audience/Project/Workspace/bindings are server-derived; caller cannot widen them
+SERVICE_SCOPED is the only F1 DEDICATED end-user semantic
+own-auth app-user refs remain correlation/audit only
+Project ARCHIVED does not implicitly disable DEDICATED exchange
+explicit Project-owned credential revoke/disable advances current generation/equivalent current fact
+access-token TTL bounds bearer-replay exposure; credentialGeneration bounds current revocation
+no refresh token; client re-authenticates with its asymmetric credential after expiry
+DPoP is DEFER SAFELY with explicit re-entry triggers; mTLS is deferred challenger
+same-Project compromised-key residual = union of currently admissible Releases of that Project; no binary attestation claim
+Hub token-signing key is owner-specific platform operational credential, not CredentialBackend expansion
+```
+
+3I-04 outcome:
+
+```text
+Material Finding against prior authority = NONE
+CURRENT STRUCTURE CONFIRMED
+owner of DAP verification facts = Project
+client authentication = private_key_jwt
+access token = short-lived signed bearer
+per-request current generation recheck = REQUIRED
+SERVICE_SCOPED = F1
+USER_DELEGATED = DEFER
+DPoP = DEFER SAFELY
+mTLS = DEFER SAFELY
+refresh token = REJECT F1
+new Hub module = 0
+new durable domain record = 0
+DedicatedSession/introspection/blacklist = 0
+fleet/per-Release credential/binary attestation = 0
+```
+
+Review provenance, non-authoritative:
+
+- `3I-FABLE-DIALOGUE-dedicated-trusted-exchange.md`.
+
+Remaining 3I material families under 3A-R6:
+
+```text
 Trust Zones & Crossings / Hub control-side egress / telemetry crossing
 hub_control Least-Privilege Realization
 ```
 
-Dependency shape now:
+Current dependency/closure shape:
 
 ```text
 3I-01 = APPROVED
-├── 3I-02 Credential/Custody = APPROVED
-└── 3I-03 Model Spend = APPROVED
+3I-02 = APPROVED
+3I-03 = APPROVED
+3I-04 = APPROVED
         ↓
-DEDICATED Trusted Exchange = NEXT
+bounded Trust Zones/Crossings + hub_control Least Privilege package = NEXT
         ↓
-Trust Zones/Crossings
-
-hub_control Least Privilege may advance after 3I-01 without driving authority semantics
+bounded 3I closure review
 ```
 
-No `3I-04` ID is created by this ledger update.
+No additional 3I decision ID is allocated until the bounded package is decomposed and evidence shows whether it should be one authority or split.
 
 ---
 
-## 11. Open findings / routed work after 3I-03
+## 11. Open findings / routed work after 3I-04
 
 Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quando cada item volta ao critical path.
 
 | Finding / questão | Owner posterior |
 |---|---|
 | F3B-R1 — repo canônico/cutover do produto | **3A / operador — MUST DECIDE antes do post-C-018 Realization Planning Gate** |
-| F3B-R4 — browser/runtime physical trust zones | 3I/3J; 3I trust semantics MUST, physical deployment conforme first-consumer trigger |
+| F3B-R4 — browser/runtime physical trust zones | **NEXT bounded 3I Trust Zones/Crossings package**; physical deployment conforme 3A-R6 first-consumer rules |
 | Builder runtime orphan/lost detection policy after 3H-01 liveness surface | 3M structural recovery sweep |
 | Production Agent admitted-but-undispatched / active-process-loss / missing-snapshot recovery policy | 3M structural recovery sweep |
 | InceptionInvestigation pre-Change agent execution shape, somente se realization futura provar necessidade | Decision Loop / DEFER SAFELY |
@@ -773,12 +824,17 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03; current baseline features budgeted-or-disabled |
 | model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
 | Product Agent browser/workspace/code execution trust/egress if first consumer enables it | Decision Loop / DEFER SAFELY until named consumer |
-| DEDICATED concrete trust/credential/delegation mechanism | **NEXT 3I material decision / MUST DECIDE** |
 | whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **3J MUST DECIDE before first production** |
 | post-whole-Hub-stop settlement/recovery | 3M structural recovery sweep |
 | selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely Release/MAR serving-admission owner |
-| DEDICATED egress/network policy | trust semantics 3I; **physical DEDICATED deployment DEFER SAFELY until first real DEDICATED deployment / 3J** |
+| DEDICATED trust/authentication semantics | **RESOLVED by 3I-04**; exact libraries/TTL/claim spelling → 3L/Realization Planning |
+| DEDICATED egress/network policy | trust semantics → NEXT 3I package; **physical DEDICATED deployment DEFER SAFELY until first real deployment / 3J** |
 | MANAGED/DEDICATED physical deployment topology | **MANAGED first-production topology MUST in 3J; DEDICATED physical topology DEFER SAFELY until first real DEDICATED deployment** |
+| DEDICATED private-key provisioning / Hub token-signing deployment | 3J only when physical realization is current; owner/custody semantics fixed by 3I-04 |
+| DPoP / mTLS sender constraint | DEFER SAFELY / Decision Loop on 3I-04 reopen trigger |
+| USER_DELEGATED / federation | Decision Loop on named DEDICATED consumer |
+| fleet/per-install credential / per-Release credential / binary attestation | REJECT F1 / Decision Loop on real install-base/security requirement |
+| `hub_control` PostgreSQL role/isolation properties | **NEXT bounded 3I Least-Privilege package — MUST DECIDE at property level** |
 | Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3J; qualification-triggered |
 | old Product Agent runtime coexistence / drain / cutover | **DEFER SAFELY — trigger: first runtime-affecting upgrade after production / 3J** |
 | `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L; upgrade operation detail deferred until first relevant upgrade |
@@ -806,7 +862,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | `CX-RUNTIME-ISOLATION-01` cross-role qualification | **3L MUST QUALIFY** |
 | role-local PubSub/default-bucket/external-broker namespace probes | 3L as part of runtime-isolation qualification |
 | E2B pull/OTLP exact pinned-version behavior | E2B control/evidence subset 3L; production exporter topology 3J only if adopted |
-| OTel baggage/redaction/egress policy | 3I Trust Zones/Crossings — MUST at property level |
+| OTel baggage/redaction/egress policy | **NEXT 3I Trust Zones/Crossings — MUST at property level** |
 | Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval |
 | Durable Agent enablement and its process-global registry | Decision Loop + 3L on named consumer |
 | Observational Memory process-global `activeOps` if enabled | 3L on named consumer |
@@ -822,7 +878,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | app-origin approvals / second approval consumer | Decision Loop on real consumer |
 | duplicate Gateway approval-subject custody | Decision Loop / 3J on real availability split |
 | DEDICATED browser-direct Platform-Service authority | Decision Loop on named consumer |
-| DEDICATED durable credential/grant record | Decision Loop only if Trusted Exchange proves a real lifecycle need |
+| DEDICATED durable credential/grant record | REJECT F1; Decision Loop only if one-current-Project-credential lifecycle proves insufficient |
 | DEDICATED Release retirement/support lifecycle | Decision Loop when real install base requires |
 | DEDICATED multi-install/fleet management | REJECT F1 / Decision Loop on real install base |
 
@@ -841,7 +897,7 @@ Verification Observability deciding-evidence subset
 
 ---
 
-## 12. Resolved routed work through 3I-03
+## 12. Resolved routed work through 3I-04
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -914,6 +970,14 @@ cancel/restart/resume cannot reset run spend                      → 3I-03
 qualified cost-envelope + broken-profile fail-closed             → 3I-03; exact proof 3L
 provider-native spend control = defense-in-depth only             → 3I-03
 model-call reservation included in owner-local C-013 coherence   → 3I-03; proof 3N
+DEDICATED application-principal credential owner                 → 3I-04 = Project
+DEDICATED asymmetric client authentication                       → 3I-04 = private_key_jwt
+DEDICATED exact ReleaseRef signed exchange binding               → 3I-04
+DEDICATED short-lived bearer token + current generation recheck  → 3I-04
+DEDICATED SERVICE_SCOPED-only F1                                 → 3I-04
+DEDICATED archive/revoke/disable composition                     → 3I-04
+DEDICATED no-session/no-refresh/no-blacklist baseline             → 3I-04
+DPoP/mTLS/fleet/per-Release credential/binary attestation         → 3I-04 explicit defer/reject triggers
 ```
 
 ---
@@ -986,6 +1050,12 @@ NO parallel billable model-call reservation machinery F1
 NO hidden automatic provider retry/fallback below owner spend gate
 NO model-call traffic FSM / NOT_SENT refund optimization F1
 NO post-invoice run-budget refund engine F1
+NO DedicatedApplication / DedicatedCredential / DedicatedAccessGrant / DedicatedSession durable class F1
+NO DEDICATED refresh-token/introspection/blacklist state F1
+NO DPoP proof/jti/nonce machinery F1 without trigger
+NO mTLS PKI / fleet-device identity / per-Release credential / binary attestation F1 without trigger
+NO generic machine-identity framework
+NO DEDICATED physical topology before first real DEDICATED deployment
 NO product implementation before C-018 + accepted post-C-018 Realization Planning
 NO Realization Planning as second architecture authority/readiness framework
 ```
@@ -1018,6 +1088,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3I-01 = APPROVED
 3I-02 = APPROVED
 3I-03 = APPROVED
+3I-04 = APPROVED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1038,9 +1109,11 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3I-03 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, owner-local ActorRun/AgentRun spend authority, one-outstanding liability, conservative unknown settlement, retry/fallback escape closure, qualified missingness-preserving usage settlement e cost-envelope honesty; a otimização `NOT_SENT` foi deliberadamente deferred por YAGNI.
 
+3I-04 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`; congela Project-owned one-current asymmetric DEDICATED credential, `private_key_jwt`, signed exact ReleaseRef binding, short-lived bearer access token, per-request current credential-generation/narrowing recheck e SERVICE_SCOPED-only F1, enquanto DPoP/mTLS/fleet/per-Release credential/binary attestation permanecem triggered defers/rejects.
+
 Próxima ação dentro de 3I:
 
-> **DEDICATED Trusted Exchange** continua a próxima decisão material e é `MUST DECIDE` por 3A-R6. Ela deve realizar a semântica já congelada em 3F-06 consumindo 3I-01 current authority e 3I-02 custody, sem criar machine-identity framework ou durable credential/grant record sem lifecycle provado. Depois dela, **Trust Zones & Crossings + `hub_control` Least Privilege** devem ser tratados como bounded 3I security-closure package se a evidence não exigir split.
+> **Trust Zones & Crossings + `hub_control` Least Privilege** são o próximo bounded security-closure package sob 3A-R6. O package deve congelar apenas os crossings/credential/egress/telemetry properties e PostgreSQL role/isolation properties que um coding actor não pode escolher silenciosamente; exact firewall/proxy/GRANT/pool/exporter spelling permanece 3J/3L/Realization Planning conforme aplicável. Depois disso, executar um único bounded 3I closure review e fechar 3I se não houver Material Finding.
 
 Depois de 3I, 3J–3O seguem integralmente, mas sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

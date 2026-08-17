@@ -970,3 +970,188 @@ STOP — product/architecture thesis materially inconsistent
 ```
 
 Do not create authority, update C-* decisions, close/reopen phases or touch product code in the review commit.
+
+---
+
+## 18. Fable adversarial review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0, executed as an adversarial whole-platform checkpoint, not a design round. Authority reconstructed independently on **2026-08-17** from `AGENTS.md → DOCUMENTATION-MAP → DECISOES.md → LEDGER.md → exact authorities`: C-000..C-017 full register, C-001/C-003 full texts, 3A-R5/3A-R6, condensed closed laws of 3B..3J including ratified 3J-R1, plus targeted full-text verification of 3C-03/3C-09/3C-10/3C-13/3A-R5 and C-010 §agent scope. Canonical state matches §2 (LEDGER projection of 3J-R1 was completed mechanically before this review). External verification performed against current official Factory docs (`missions/overview`, `cli/features/droid-control`) on 2026-08-17.
+
+### 18.1 Executive verdict
+
+The approved platform still realizes C-001. One material gap exists and it is the one this checkpoint candidate raised: **AGT-4 platform consultant has no owner in any approved authority** — verified by exhaustive search: `AGT-4`/`consultor`/`consultant` appears only in C-001, C-003 and this dialogue; no 3B..3J decision, no supersession, no explicit defer. Everything else in §5–§15 survived adversarial attack. No approved authority needs reopening; the finding is a **gap-fill**, not a contradiction.
+
+### 18.2 Material findings
+
+```text
+F-GPC-01 — AGT-4 owner/scope not explicit    = MATERIAL, CONFIRMED
+everything else                               = no material finding
+```
+
+Materiality basis: F1 requirement + user-observable capability + a coding actor left free to choose among tenancy/authority models A–E of §11, which differ in trust and module ownership. That is exactly the class of discretion Phase 3 exists to remove.
+
+### 18.3 C-001 pillar coverage verdict
+
+```text
+P1 Brain        PRESERVED — 3C-09 Workspace-scoped 0..1 canonical Brain;
+                KnowledgeProposal Brain-owned even when Project-originated;
+                cross-Project seam concrete (3B-15/3B-17 + ProjectBrainBinding
+                3F-04/3G-07 + digest pin C-011); G1 proof correctly deferred
+                to a real second Project — not manufactured
+P2 Engineering  PRESERVED — scaffold/gates (C-012/C-017) survived Phase 3 as
+                mechanics; PlanningDepth ⟂ Rigor (3G-04) keeps proportionality;
+                all added state machines are server-side, none user-facing forms
+P3 AI-first     PRESERVED for Builder + Product Agent; AGT-4 is the single hole
+C1 insight→ação STRUCTURAL — PAR+Gateway+ApprovalRequest+SCHEDULE F1;
+                EVENT gating is NOT silent narrowing: C-010 itself pre-ruled
+                "AGT-3 só fecha com consumidor real" and C-007 owns webhook
+                extension on first real provider
+C2 benchmark    ON PATH — QUA-1 via 3K case 1 + 3O proof contract
+C3 cost visible OWNED — C-013 cost states + 3I-03 authority; surface = 3K
+C4 dogfood      BLOCKED ON F-GPC-01 — see 18.9
+```
+
+### 18.4 C-003 requirement coverage exceptions
+
+Full sweep of HAR/REG/DAT/INT/CER/AGT/PUB/CIC/OBS/SEG/QUA against C-005..C-017 + 3B..3J found **no orphan beyond AGT-4**. Exceptions worth recording (all non-material, all for the C-018 supersession index, none needing amendment now):
+
+```text
+QUA-4  Worker Eval — mechanism pin "Pi × Claude Agent SDK challenger" is stale
+       after 3A-R5; the semantics (real-task suite comparing runtimes/models)
+       survive as 3L qualification + evidence tooling (Rubric/Datasets routed
+       3L/3N, never acceptance authority)
+HAR-11 provider-diverse validator — already explicitly downgraded by C-017
+       emenda; context-independence is the load-bearing property (3A-R5 §19)
+AGT-3  EVENT half — already consumer-gated by C-010 + C-007; SCHEDULE half
+       realized by 3H-02
+PUB-2 / PUB-4 / PUB-5 — explicitly rewritten/reinterpreted by C-015 with
+       recorded emendas; clean
+```
+
+### 18.5 Reference assimilation corrections
+
+```text
+Factory  VERIFIED against current official docs 2026-08-17:
+         Missions = production-usable collaborative planning / features /
+         milestones / QA orchestration; parallelization explicitly stated
+         by Factory itself as an open question; Droid Control = investigator
+         framing with CONFIRMED/REFUTED/INCONCLUSIVE evidence verdicts.
+         §7.2 claims are accurate. Conexus already owns the equivalents
+         (C-017 work graph + fresh validator reporting Findings; 3H-03
+         Verification Observability with NOT_PROVEN/INCONCLUSIVE).
+         New Factory capability creates ZERO requirement authority — YAGNI
+         holds; refresh of the research map is hygiene only.
+Mitra    directness preserved structurally (DIRECT depth + FAST rigor +
+         compact checkpoint); the only leak risk is 3K surface — correctly
+         a routed guardrail, not an architecture finding
+MNFS     C-000 boundary held; C-017 states "Mission/Milestone NÃO existem F1";
+FirstMate no kernel/lease/coordination machinery re-imported
+Mastra   substrate-not-authority is law, not intention: 3H-02 ADOPT/SELECTIVE/
+E2B      DEFER/REJECT classification + "REJECT as Product authority" list +
+         mandatory CX-*-01 probes before deploy; E2B remains untrusted guest
+         under 3I-02/3I-05 with 3L transport truth
+PG       17-floor claim consistent with official versioning (17 supported into
+         2029; 18 current stable); no reopen from version existence
+```
+
+### 18.6 Complexity / YAGNI cuts
+
+None. Attacked the tempting merges and each loses a named invariant:
+
+```text
+Attachments→Registry   loses distinct custody/GC/refcount/backup semantics (C-015)
+Release→Registry       loses promotion FSM vs immutable revision separation (3G-08)
+Workspace→I&A          3C-03 already adjudicated; god-module rejected with rationale
+46 records             closed inventory, closed 16-FK allowlist, every record has
+                       a named owner; the §14 anti-overengineering list is enforced
+```
+
+One factual correction to this dialogue: §8 says "15 domain/module boundaries" — the true count is **13 owner modules / 13 owner schemas** (3E-02); 3C-02..3C-15 are 14 boundary decisions of which 3C-12 is a profile axis, not a module. Non-material; correct at C-018 synthesis.
+
+### 18.7 Supersession contradictions
+
+None. All six high-risk transitions verified **explicit in the approved texts**, not inferred:
+
+```text
+C-004 → C-008                       "supersede C-004" in decision register
+C-002 Pi → Mastra Builder           3A-R5 §"C-002 — parcialmente superseded / SUPERSEDE"
+C-017 validator → fresh Mastra      3A-R5 preserves freshness law verbatim; §19 makes
+                                    context-independence the property
+C-010 AI SDK loop → Mastra PAR      3C-10: "rejeição categórica … SUPERSEDED para
+                                    Production Agents"; sovereignty retained
+C-013 agent_event → OBS             3C-13 §8 semantic generalization + 3E-02 closure
+Group → Workspace                   3B-01/3C-03: Group = technical name, Workspace =
+                                    product name — same sovereign root
+tailnet → company VPN               3J-01 recorded bounded amendment of C-015 §5/C-016 §6
+```
+
+The C-018 supersession index (§13) is confirmed as the right vehicle and should **additionally cover the C-003-level stale pins** listed in 18.4.
+
+### 18.8 3K..3O critical-path corrections
+
+None required. Verified specifically:
+
+```text
+first vertical proves platform  C-010 line 29: the case-1 agent "vive no app
+                                publicado" — Product Agent is existing case-1
+                                authority, not optional; §10 exercise list is
+                                already required by C-010/C-011/C-012/C-014/C-015
+3L                              probe families cover every load-bearing pin in
+                                LEDGER §12 (E2B, both Mastra roles, isolation,
+                                spend interception, verification evidence)
+3M                              owns all deferred semantic recovery items
+3N                              carries the real global proofs (C-013 admission
+                                coherence; 3I-R1 CR-1 composed serialization)
+3O                              contract-only proof of the composition above
+```
+
+Two ledger-hygiene notes, non-material: (a) LEDGER §12 rows still phrased "3J MUST DECIDE" for items 3J-01..03 resolved — stale wording after closure, fix at next mechanical touch or C-018; (b) 3J-R1 §8 says `NEXT = 3K` while the operator interposed this checkpoint — no contradiction: the checkpoint is a 3A-continuous act, 3K remains the next phase.
+
+### 18.9 F-GPC-01 exact adjudication
+
+```text
+verdict = RECONCILE AS BUILDER / CONTROL-PLANE ASSISTANCE (Candidate C)
+```
+
+Challenger questions answered:
+
+1. **Already resolved?** NO — exhaustive search of approved authority finds no owner.
+2. **Does C collapse a first-class platform agent into Builder improperly?** NO — C-001 P3's own text defines the consultant as an agent that "ajuda a construir"; assistance-at-the-building-surface is the original intent, not a demotion.
+3. **Defer by amending C-003?** NO — the capability is cheap under C precisely because its parts exist; deferring an F1 requirement that composition already satisfies would be amendment for its own sake.
+4. **Would a PLATFORM-scoped agent require Registry/3E/PAR ownership changes?** YES — agent artifacts and PAR lifecycle are Project-scoped (C-010's four objects, 3C-10); a platform principal would need new tenancy, registry scope and durable state with zero current consumer → REJECT F1. Option B (hidden platform Workspace) is worse: fake tenant + hidden cross-tenant surface = authority dishonesty.
+5. **Is "mecanismo do cérebro" literal Brain reuse?** Mechanism-level. C-001 C4 says "um só sistema de conhecimento, dois usos" — the system is the compiled/versioned/provenance pack discipline (BrainPack C-011 / Actor Pack standards[] C-017, hub-published, digest-pinned). Platform knowledge compiled under that discipline and pointed at Conexus docs satisfies C4 without any Workspace Brain content crossing tenants. Whether Realization literally reuses the `brain`-kind compiler for a platform-owned pack is a mechanism detail, free to choose later.
+6. **Smallest statement preventing invented authority:**
+
+```text
+AGT-4 owner              = existing Builder / Control-Plane application layer
+knowledge                = hub-published, versioned, digest-pinned platform
+                           context under the existing pack discipline
+tenant context           = only the currently authorized Workspace/Project
+NO new module / principal / PLATFORM-scoped agent artifact /
+   cross-Workspace access / global agent state / independent PAR lifecycle
+surface realization      → 3K
+persistent global platform agent → Decision Loop on named future consumer
+```
+
+### 18.10 Is a bounded 3A-R7 required?
+
+**YES.** The statement above changes no approved decision, but it allocates an owner for an F1 requirement — that is authority, and this dialogue cannot carry it. Folding it into 3K would put a module/tenancy/authority allocation inside a product-surface phase, which is exactly the discretion class Phase 3 removes from downstream actors. The correction is minimal:
+
+```text
+3A-R7 scope   ONE decision: ratify 18.9 (AGT-4 = Builder/Control-Plane
+              assistance, negatives, 3K routing, Decision Loop trigger)
+3A-R7 must NOT touch modules/records/FKs, reopen any phase, or expand
+              into a design round
+carried notes C-018 supersession index additionally covers 18.4 stale pins;
+              LEDGER §12 hygiene at next mechanical touch
+```
+
+No other verdict option applies: nothing justifies `REOPEN SPECIFIC APPROVED AUTHORITY` (no approved text is contradicted) and nothing approaches `STOP`.
+
+### 18.11 Final verdict
+
+```text
+CURRENT STRUCTURE CONFIRMED + BOUNDED 3A-R7 REQUIRED BEFORE 3K
+```
+
+Authority creation for 3A-R7 and its ratification remain with the operator. This review changes no authority.

@@ -561,7 +561,7 @@ CX-AGENT-MASTRA-01
 CX-RUNTIME-ISOLATION-01
 ```
 
-3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
+3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automaticamente.
 
 ---
 

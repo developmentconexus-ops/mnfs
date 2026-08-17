@@ -688,3 +688,387 @@ The next action after independent review should be:
 
 **Fable: edit below this line. Do not treat ChatGPT's seven-family hypothesis as the answer. Reconstruct authority independently, research current primary sources where a claim depends on live technology/security behavior, and return Material Findings, corrected decomposition/order/routing, YAGNI deletions, and the smallest justified first candidate. Do not edit LEDGER, approved authority, or product code.**
 
+---
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0 applied. Authority reconstructed independently from the `AGENTS.md` chain — `DECISOES.md` C-000..C-017, `LEDGER.md`, and direct reads of 3C-02, 3C-12, 3E-01 §13, 3F-03, 3F-06, 3G-08, 3A-R5 §8.2, 3H-01 and 3H-R1 — not from this intake's quotations. Primary-source research was run on 2026-08-17 for every claim that depends on live technology behavior: OpenTelemetry baggage propagation, E2B pause/resume persistence, Anthropic/OpenAI provider-side spend controls, current M2M authentication standards (RFC 9700, OAuth 2.1 draft, FAPI 2.0 Final, RFC 9449, RFC 8725), and PostgreSQL 15–18 privilege defaults. No mechanism is selected in this round.
+
+## F.1 Verdict
+
+I concur with the intake's central disposition: **no Material Finding against approved 3B..3H authority**; the quotations in §2 are faithful to the underlying decisions I re-read. Alternative 3 (boundary/failure-class families) survives against Alternatives 1 and 2, and the seven family **names** survive. The decomposition as drafted does not survive unchanged. The review finds: one owner-boundary defect (the same eligibility question lives in both B and C), one dependency-order error (D does not depend on C), one missing trust zone that no prior authority covers (Hub control-side egress after the 3A-R5 control-side move), one dead-machinery deletion candidate inside C (the C-008 per-run guest LLM key), and three families whose drafted question lists are substantially restatement of already-frozen authority (A, C, F) and must shrink to their genuinely open content before any of them becomes `3I-01`. Family count stays seven — no merge or split is justified by owner/failure-class evidence — but content moves. The smallest dependency-root candidate is a **rescoped Family A** (F.5).
+
+## F.2 Findings
+
+### F-1 — Family A is mostly restatement; the only new decision in it is the closure itself
+
+```text
+claim challenged      §6 Family A question list: principal semantics, authn/authz
+                      seam, session proofs per boundary, non-principal list
+concrete failure class none prevented by re-deciding what is already frozen;
+                      cost created: a "3I-01" that re-litigates 3C-02 (Account,
+                      I&A seam, ALLOW-continues-evaluation), C-015 (opaque
+                      session, HttpOnly, server-side authz), 3F-06 (Dedicated
+                      principal, two asserted identities) and 3H-01..03 (runtime
+                      IDs are correlation only) invites drift between two
+                      authorities for the same meaning — the exact defect class
+                      the method presumes wrong. Every constituent of A already
+                      has an owner. What NO prior authority states is the
+                      CLOSURE: that the F1 trust-subject set is COMPLETE with
+                      exactly {Account, DedicatedApplicationPrincipal}, that
+                      everything else is non-principal by construction, and that
+                      a new principal class re-enters only through Decision Loop.
+smallest correction   rescope A to closure-only content (F.5). Session
+                      mechanics stay C-015; DEDICATED proof stays Family E;
+                      in-process identity stays 3H-03 dispatch-closure law.
+                      A cites them by reference; it re-decides none of them.
+reopen prior authority?  NO
+later owner           A rescoped = first candidate decision (F.5)
+```
+
+### F-2 — Credential mutation eligibility appears in both B and C: owner-boundary defect
+
+```text
+claim challenged      §6 Family B asks "Who may mutate bindings / credentials /
+                      grants / triggers?"; Family C independently asks
+                      "credential create/replace/revoke eligibility by
+                      Workspace/Project scope"
+concrete failure class the same authorization question decided in two decisions
+                      = two authorities for one meaning; the answers WILL
+                      diverge (different review rounds, different reopen
+                      triggers), and the divergence surfaces exactly at the
+                      most privileged mutation on the platform
+smallest correction   B owns ALL "who may" questions, including credential
+                      create/replace/revoke/rotate eligibility. C owns custody
+                      MECHANICS only: where plaintext exists, decryption
+                      boundary, master-key custody, key-version vs grant-version,
+                      write-only ingress, no-echo, sanitization, guest-capability
+                      shape. C consumes B's eligibility output; it never
+                      restates it.
+reopen prior authority?  NO
+later owner           B (eligibility), C (custody)
+```
+
+### F-3 — Dependency-order error: D does not depend on C; corrected shape
+
+```text
+claim challenged      §7 places C strictly before the D/E fork ("custody before
+                      selecting machine-trust exchange"; D below C)
+concrete failure class false serialization. D's enforcement point is per-call
+                      admission against owner facts (ActorRun/AgentRun cap,
+                      reservation, cancellation-stops-spend). None of that
+                      needs the custody contract decided first — the model
+                      credential's storage location is irrelevant to WHERE the
+                      cap check fires. Serializing D behind C delays the one
+                      residue 3H-R1 explicitly ordered 3I to close (C-008
+                      spend-cap continuity) for no decision-quality gain.
+                      E, by contrast, genuinely consumes C: issuance/verification
+                      key custody must not become a second custody law inside E.
+smallest correction   A → B → { C ∥ D } → E → F, with G advanceable in
+                      parallel any time after A/B (G is realization; it must
+                      consume, never drive, principal/authorization semantics —
+                      the intake already says this).
+reopen prior authority?  NO
+later owner           §7 order hypothesis replaced by this shape
+```
+
+### F-4 — Family C contains dead machinery: the C-008 per-run guest LLM key fails the deletion test
+
+```text
+claim challenged      §6 Family C carries forward "E2B guest capability rule"
+                      with the C-008 ephemeral/scoped/bounded/revocable key as
+                      live machinery to re-secure
+concrete failure class preserving a guest-readable model credential mechanism
+                      that no longer has a consumer. C-008 designed the per-run
+                      guest LLM key for a model loop that ran INSIDE the guest.
+                      3A-R5 §8.2 moved the model loop control-side ("Com model
+                      loop control-side, a credencial durável do provider/modelo
+                      não precisa entrar no guest E2B") and 3H-01 realized the
+                      AgentController control-side. The realization permits it;
+                      therefore the guest LLM key is dead machinery, and every
+                      security question hanging off it (sentinel scan for that
+                      key, its TTL, its revocation reconciliation) deletes with
+                      it rather than being ceremonially re-secured.
+                      Answer to challenge 8: NOT zero capabilities — C-013's
+                      sandbox telemetry-ingest ephemeral capability remains a
+                      named current consumer, and any SHARE/preview mechanics
+                      3L proves to need one re-enter by name. The C-008 TEST
+                      (ephemeral + scoped + bounded + revocable, server-side)
+                      survives as the law for every SURVIVING capability; the
+                      LLM-key INSTANCE deletes.
+                      Primary-source confirmation that server-side expiry is the
+                      only real enforcement point: E2B pause snapshots
+                      filesystem AND memory; "Paused sandboxes are kept
+                      indefinitely; there is no automatic deletion or
+                      time-to-live limit"; resume restores processes and loaded
+                      variables intact; the continuous-runtime limit RESETS
+                      after resume (docs.e2b.dev/sandbox/persistence, accessed
+                      2026-08-17). Any secret in guest memory at pause time
+                      survives resume weeks later. Client-side TTL is
+                      unenforceable by construction.
+smallest correction   C's guest-capability section becomes: (1) enumerate
+                      surviving guest capabilities by named consumer (currently:
+                      telemetry ingest); (2) apply the C-008 test with
+                      server-side expiry/revocation as the enforcement point;
+                      (3) delete the per-run LLM key instance unless
+                      CX-BUILDER-MASTRA-01 proves a guest-side model call is
+                      unavoidable, which would be a 3L Finding, not a default.
+reopen prior authority?  NO — 3A-R5/3H-R1 already moved the placement; this
+                      completes their deletion test
+later owner           C (law), 3L (whether any realization forces a guest-side
+                      exception)
+```
+
+### F-5 — Family F is missing the one trust zone nobody froze: Hub control-side egress
+
+```text
+claim challenged      §6 Family F zone list covers browsers, Hub/runtimes as
+                      zones, Gateway, E2B, external systems — but its egress
+                      QUESTIONS only re-ask what C-008/C-016 already froze
+                      (guest deny-all + allowlist; app-server Gateway-only by
+                      construction; browser CSP self-only)
+concrete failure class the Hub process itself is now a first-class egress
+                      initiator and NO approved authority governs it. C-016's
+                      server egress law is scoped to generated app artifacts
+                      ("artefato sem primitiva de rede"); C-008 governs the
+                      guest. After 3A-R5/3H, the control-side Hub directly
+                      calls: model providers (Builder AND PAR loops), the E2B
+                      control API, an external broker if 3H-03's shared-broker
+                      option is exercised, and an OTel exporter backend if 3J/3L
+                      ever adopt one. A compromised or prompt-injected
+                      control-side loop exfiltrating via unrestricted Hub
+                      egress is precisely the C-009 lesson ("egresso governado")
+                      applied to the new topology. This is not a Material
+                      Finding against C-016 — nothing contradicts it — but it
+                      is mandatory NEW 3I scope, not restatement.
+smallest correction   F adds the Hub control-side zone with a closed egress
+                      destination-class list (model providers, E2B API,
+                      qualified broker, exporter-if-adopted, Gateway-mediated
+                      Connections) and the law that Hub egress destinations are
+                      configuration-derived, never model/caller-selected.
+                      Second correction, same family: for DEDICATED, general
+                      egress of a customer-deployed app is OUTSIDE Conexus
+                      authority — F must state this as an explicit non-guarantee
+                      (trust-boundary honesty), with the enforceable seam being
+                      only the inbound Platform-Service side. Writing an
+                      unenforceable "DEDICATED egress policy" law would be a
+                      control that cannot be shown to fire.
+reopen prior authority?  NO
+later owner           F (law), 3J (physical firewall/topology), 3L (proof the
+                      control fires)
+```
+
+### F-6 — Challenge 9 answered: one family, one zone matrix, two crossing classes — and the baggage law must be mechanical, not policy
+
+```text
+claim challenged      §6/§12-Q9 — whether network/egress and telemetry
+                      propagation are one or two decisions
+concrete failure class splitting them produces two decisions that must share
+                      one trust-zone taxonomy — a duplicate-authority seam for
+                      the zone definitions themselves. Egress (connect-out) and
+                      telemetry propagation (data-out) are two CROSSING CLASSES
+                      of the same matrix; both fail closed against the same
+                      zone set. Keep F merged, internally structured by
+                      crossing class.
+                      Primary sources force one sharpening: the frozen "baggage
+                      default OFF" is not self-executing. The OTel spec default
+                      for propagators is "tracecontext,baggage", and the JS
+                      NodeSDK/auto-instrumentation injects the `baggage` header
+                      on MOST outbound instrumented requests by default; the
+                      official docs warn baggage has "no built-in integrity
+                      checks" and is visible to anyone inspecting traffic.
+                      There is NO SDK-level baggage redaction: the only controls
+                      are propagator configuration or removing entries from
+                      context; the Collector redaction processor operates on
+                      span/log/metric ATTRIBUTES only and never touches the
+                      inter-service baggage header (opentelemetry.io baggage
+                      docs + spec env-var defaults + collector-contrib
+                      redactionprocessor README, accessed 2026-08-17).
+smallest correction   F's telemetry-crossing law must mandate the MECHANISM
+                      class: governed runtimes configure propagators WITHOUT
+                      baggage (or with an empty-on-egress strip proven by test),
+                      rather than relying on "we do not put owner IDs in
+                      baggage" as convention. The proof obligation is a
+                      negative wire test at the egress boundary, owned by 3L.
+reopen prior authority?  NO — realizes 3H-03's frozen default, does not change it
+later owner           F (law), 3L (exporter/propagator qualification)
+```
+
+### F-7 — Family D confirmed separate, with the provider question answered from sources: provider caps are defense-in-depth only
+
+```text
+claim challenged      §6 Family D questions + §12-Q7 ("Is provider-side spend
+                      cap sufficiently authoritative for any path?") + the
+                      implicit option of merging D into C
+concrete failure class merging D into C would couple a custody contract to
+                      budget mechanics under different primary owners
+                      (Connections/CredentialBackend vs Builder/PAR admission)
+                      with different failure classes (secret theft vs cost
+                      blast-radius without external effect) — reopen triggers
+                      become ambiguous. D stays separate. Its scope must stay
+                      narrow: 3I closes WHO owns the cap (ActorRun/AgentRun
+                      owner facts), WHERE it fires (control-side per-model-call
+                      admission, before dispatch), that cancellation/revocation
+                      stops future spend, and that usage-telemetry loss NEVER
+                      grants spend (fail closed, C-013 usage_state discipline).
+                      Provider research (2026-08-17): for raw Messages/Responses
+                      traffic there is NO per-run provider cap on either
+                      provider — Anthropic's smallest scope is workspace +
+                      calendar month, Console-only, no programmatic write
+                      (the Rate Limits Admin API is read-only); OpenAI's is
+                      project + month, dashboard-only, with official wording
+                      "Enforcement is not instantaneous". The single per-run
+                      mechanism that exists (Anthropic Managed Agents session
+                      budget, beta, hard USD cap enforced between requests)
+                      belongs to a provider-managed agent runtime that would
+                      displace the frozen Mastra/owner-authority architecture —
+                      inadmissible as primary enforcement. Conclusion: provider
+                      caps = coarse backstop only; the per-run invariant is
+                      enforceable ONLY control-side. `max_tokens` bounds tokens
+                      per call, not cost per run.
+smallest correction   keep D; pin its YAGNI edge: reservation/consumption
+                      persistence must reuse the C-013 admission-ledger family;
+                      any NEW durable record class exits 3I and returns through
+                      Decision Loop (3E-02's closed inventory already forces
+                      this). Exact Mastra/AI-SDK pre-call hook points → 3L.
+reopen prior authority?  NO
+later owner           D (law), 3L (hook/provider behavior proof),
+                      implementation (persistence spelling)
+```
+
+### F-8 — Smaller corrections: one missing B question, one dead E question, and G's cost drops on current PG facts
+
+```text
+B — missing question  separation of duties for ALLOW_ONCE: may the requesting
+                      principal approve their own effect? No approved authority
+                      answers it (3F-03 fixes single-claim mechanics and routes
+                      eligibility here; C-010 fixes claim atomicity). B must
+                      answer it explicitly — even if F1's answer is "one human,
+                      allowed, logged", it must be a decision, not an accident.
+E — dead question     delete "whether runtime instance identity matters at
+                      all": 3F-06 §3.2 already freezes instance IDs as
+                      correlation-only. Restatement.
+E — decision criteria current standards for the mechanism-family choice
+                      (recorded as inputs, NOT chosen here): RFC 9700 §2.5 and
+                      the OAuth 2.1 draft RECOMMEND asymmetric client
+                      authentication (private_key_jwt / mTLS RFC 8705) over
+                      shared secrets; FAPI 2.0 Final permits ONLY those two for
+                      high-security profiles; DPoP (RFC 9449) is the app-layer
+                      sender-constraining alternative where mTLS is impractical;
+                      rfc7523bis tightens JWT client-auth audience to the AS
+                      issuer identifier; key rotation via published key sets
+                      avoids out-of-band secret redistribution; revocation
+                      latency is bounded by short-lived tokens vs introspection
+                      (RFC 7662). For a vendor issuing credentials to
+                      CUSTOMER-DEPLOYED servers, asymmetric proof means Conexus
+                      stores only public keys — which also shrinks Family C's
+                      custody surface for this exchange. (All accessed
+                      2026-08-17.)
+G — cost drops        current PostgreSQL facts lower G's realization cost, they
+                      do not change its scope: PG15+ already revokes CREATE on
+                      schema public from PUBLIC (owner = pg_database_owner);
+                      predefined roles (pg_read_all_data, pg_monitor,
+                      pg_maintain, pg_checkpoint) cover diagnostics/maintenance
+                      without custom machinery; PG16 CREATEROLE now requires
+                      ADMIN OPTION for membership changes. Two sharpenings:
+                      (1) the read-only diagnostics role condition hardens from
+                      "if a real operational consumer exists" to Decision Loop
+                      on a NAMED consumer — do not pre-decide it in 3I;
+                      (2) pg_dump has no dedicated built-in backup role and
+                      needs read access to everything it dumps — whether
+                      pg_read_all_data suffices for the hub_control dump is an
+                      implementation-verification fact, not a 3I decision.
+                      (postgresql.org release-15/predefined-roles/pg_dump docs,
+                      accessed 2026-08-17.)
+```
+
+## F.3 Answers to the twelve challenges
+
+1. `DedicatedApplicationPrincipal` stays a narrow derived principal. No broader machine-identity architecture; no 3C-02 reopen — 3C-02's own triggers already name "machine/service identities tornam-se materialmente diferentes" as the Decision Loop re-entry.
+2. No. Same-process baseline + 3H-03's owner-created dispatch closures already bind in-process identity. Service principals only after a real process/trust split (3J trigger).
+3. Both, composed: I&A resolves the platform permission; the subject's owner supplies effect-family/scope eligibility facts. It is an instance of B's recomposition law at the APPROVE transition — not a separate decision. Plus the separation-of-duties gap (F-8).
+4. Test owner-local primitives first (intake INFERRED 7 is correct). Connection revoke + trigger DISABLE + Gateway close-before-dispatch + promotion/serving blocks cover most named classes; only an uncovered residue ("halt new admissions globally") would justify any stop object, decided in B.
+5. Not proven. Asymmetric verification stores public keys server-side; lifecycle (rotation overlap windows, revocation flags) may fit existing handle/config patterns. A durable credential/grant record enters only through Decision Loop with lifecycle evidence — E must run this deletion test, not assume the record.
+6. Yes — control-side per-call admission against owner facts, persistence via the C-013 admission-ledger family, concurrency/restart via existing reservation semantics. No proxy/quota subsystem. Hook-point existence → 3L (F-7).
+7. Answered from primary sources: defense-in-depth only, for every raw-API path (F-7).
+8. Not zero — telemetry ingest survives with a named consumer; the per-run guest LLM key deletes (F-4).
+9. One family, two crossing classes of one zone matrix (F-6).
+10. One `hub_control` runtime login role is acceptable F1 **provided** it structurally lacks DDL/ownership/CREATEROLE — ownership enforcement is already code/migrations by 3E-01, and a single role preserves sanctioned same-transaction cross-owner operations. Blast radius is bounded by what the role cannot do, not by role multiplication. More roles only via concrete failure class (G).
+11. Speculative. No named F1 consumer; 3F-06 already leaves delegation to independent establishment. E realizes SERVICE_SCOPED only; USER_DELEGATED stays a disabled/deferred law.
+12. Yes, several sub-questions are 3L in disguise and the routing matrix mostly catches them; the corrections are: E2B pause/TTL mechanics → 3L under C's law (F-4); provider budget behavior → 3L/implementation under D's law (F-7); exporter/propagator behavior → 3L under F's law (F-6); E's instance-identity question deletes (F-8).
+
+## F.4 Corrected decomposition and order
+
+Seven families, content moved per F-1/F-2/F-4/F-5/F-8:
+
+```text
+A — F1 Trust Subject & Authentication Boundary Closure   (rescoped, thin)
+        ↓
+B — Current Authorization, Approver Eligibility & Revocation
+    (owns ALL "who may" questions, incl. credential mutation eligibility;
+     emergency stop enters only by uncovered incident class)
+        ↓
+C — Credential & Capability Custody          ∥          D — Per-Run Model
+    (mechanics only; guest LLM key deleted;                Spend Enforcement
+     backup-custody separation added)                      (narrow; ledger reuse)
+        ↓
+E — DEDICATED Trusted Exchange (consumes A/B/C; SERVICE_SCOPED only)
+        ↓
+F — Trust Zones & Crossings (one matrix; + Hub control-side egress zone;
+    + DEDICATED non-guarantee; connect-out and data-out crossing classes)
+
+G — hub_control Least-Privilege Realization
+    (parallel any time after A/B; never drives semantics)
+```
+
+One addition to C beyond the intake's list: **backup custody ≠ key custody** — a `hub_control` dump (which contains encrypted credential rows) plus backup storage access must not yield plaintext; the master key never travels with the backup. This is a custody law (C); the backup procedure itself stays 3J.
+
+## F.5 Smallest dependency-root candidate
+
+Propose as the first candidate decision (naming `3I-01` stays with the operator):
+
+> **F1 Trust Subject & Authentication Boundary Closure** — one thin decision that: (1) closes the positive principal set at exactly `Account` (human) and `DedicatedApplicationPrincipal` (non-human, derived from Project/Release authority); (2) closes the negative list — `ActorRunId`/`AgentRunId`/`CodingSessionId`/`ConversationId`, Mastra/E2B/trace/provider refs, runtime roles (Builder/PAR/Gateway), `ReleaseRef`, own-auth app-user refs are never principals and never authenticate anything; (3) restates by reference (not re-decides) the authn/authz seam — I&A ALLOW only permits continued evaluation; (4) freezes "no internal service identities while same-process is baseline", with the 3J process-split trigger as the only re-entry; (5) maps each external boundary to its accepted proof by reference — MANAGED browser = C-015 opaque session; DEDICATED = the Family-E mechanism (placeholder, not chosen); internal in-process = 3H-03 owner dispatch closure, no authentication; (6) rules that any new principal class enters only through Decision Loop.
+>
+> Explicitly excluded: session mechanics, eligibility, custody, mechanism selection, spend, zones, DB roles.
+
+Why this is the root: every other family consumes the subject set, and the **closure** is the only content in A that no prior authority states. It is small enough to ratify fast and makes every later "who is acting?" question answerable by citation instead of reconstruction.
+
+## F.6 Additional proof obligations
+
+Append to §11 when decisions materialize:
+
+```text
+21. a hub_control dump plus backup-storage access cannot yield plaintext
+    credential material (master key custody separate from backup custody)
+22. DEDICATED authentication failure behavior is anti-oracle: it does not
+    reveal principal existence, key validity, or Release admissibility
+    before authentication completes
+23. a revoked DEDICATED credential loses effect within the bounded latency
+    the mechanism declares (token lifetime or introspection window) — the
+    latency is stated, tested, and not assumed zero
+24. no outbound request leaving a governed trust zone carries a baggage
+    header (or carries only what the exporter/propagator law explicitly
+    admits) — proven by negative wire test, not by convention
+```
+
+## F.7 Closing verdict
+
+```text
+Material Finding against 3B..3H          = NONE (concur, independently verified)
+reopen of approved architecture           = NOT JUSTIFIED
+family count                              = 7 (names confirmed)
+decomposition as drafted                  = CORRECTED, not accepted:
+  eligibility ownership B ← C             (F-2)
+  order A → B → {C ∥ D} → E → F, G ∥      (F-3)
+  guest LLM key                           = DELETE from C (F-4)
+  Hub control-side egress zone            = ADD to F (F-5)
+  DEDICATED egress non-guarantee          = ADD to F (F-5)
+  baggage law mechanical, not policy      (F-6)
+  provider spend caps                     = defense-in-depth only (F-7)
+  separation-of-duties question           = ADD to B (F-8)
+  E instance-identity question            = DELETE (F-8)
+technology mechanism frozen by this round = NONE
+new durable record admitted               = NONE
+first candidate decision                  = F.5 (rescoped Family A)
+```
+
+The intake may proceed to materialize the first candidate decision after consolidating these corrections.
+

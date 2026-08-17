@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J EM ANDAMENTO / 3J-01 APROVADA`  
-**Fase atual:** `3J — Deployment / Operations Architecture` — 3J-01 ratificada; próxima ação = `3J-02 — Operational State, Backup & Restore`  
+**Estado:** `3A CONTÍNUA / 3A-R6 APROVADA` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J EM ANDAMENTO / 3J-01..3J-02 APROVADAS`  
+**Fase atual:** `3J — Deployment / Operations Architecture` — 3J-02 ratificada; próxima ação = `3J-03 — Platform Lifecycle, Secret Injection, Emergency Stop & Availability`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -101,7 +101,7 @@ Nenhuma conversa cria authority.
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
-| 3J — Deployment / Operations Architecture | **EM ANDAMENTO / 3J-01 APROVADA** | 3J-02 — Operational State, Backup & Restore; depois 3J-03 lifecycle/stop/availability + 3J-R1 |
+| 3J — Deployment / Operations Architecture | **EM ANDAMENTO / 3J-01..3J-02 APROVADAS** | 3J-03 — Platform Lifecycle, Secret Injection, Emergency Stop & Availability; depois 3J-R1 |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
@@ -880,8 +880,9 @@ Review provenance, non-authoritative:
 | ID | Decisão | Documento |
 |---|---|---|
 | 3J-01 | First Production Topology, Placement & Ingress | [3J-01](3J-01-first-production-topology-placement-ingress.md) |
+| 3J-02 | Operational State, Backup & Restore Architecture | [3J-02](3J-02-operational-state-backup-restore-architecture.md) |
 
-Ratificação pelo operador: **3J-01 — 2026-08-17**.
+Ratificações pelo operador: **3J-01 / 3J-02 — 2026-08-17**.
 
 ### 11.1 3J-01 — First production topology laws
 
@@ -899,12 +900,31 @@ E2B: no generic/public Hub inbound surface; transport truth = 3L
 
 **Escopo:** 3J-01 é **installation-scoped** — primeira topologia de produção da instalação corrente, não deployment law universal do produto. **C-001 permanece a product vision authority.**
 
-Próxima decisão: `3J-02 — Operational State, Backup & Restore`; depois `3J-03` e `3J-R1` bounded closure.
+### 11.2 3J-02 — Operational state / backup / restore laws
+
+```text
+backup model = class-based recovery set, não checklist de arquivos
+REQUIRED: hub_control · production Project DBs · mastra_par ·
+          non-reconstructible digest bytes · CredentialBackend ciphertext
+          backing · canonical Git off-provider bundle · recovery manifests
+mastra_builder / ephemeral / reconstructible = NOT REQUIRED BY DEFAULT
+off-host generation immutable contra credenciais residentes no host
+non-regenerable recovery material = independent path REQUIRED
+reissuable operational credentials em backup = FORBIDDEN by default
+pre-production complete restore proof = REQUIRED; periodic proof = REQUIRED
+RPO <= 6h / RTO <= 8h; sem PITR/replication/second provider/backup platform
+cross-store atomic snapshot = REJECT
+```
+
+3J-02 protege a plataforma Conexus e seus Projects; Metal Nobre é somente first-deployment evidence e nenhum ERP/integration vira backup truth model. **C-001 permanece a product vision authority.**
+
+Próxima decisão: `3J-03 — Platform Lifecycle, Secret Injection, Emergency Stop & Availability`; depois `3J-R1` bounded closure.
 
 Review provenance, não-autoritativa:
 
 - `3J-FABLE-DIALOGUE-intake-decomposition.md`;
-- `3J-FABLE-DIALOGUE-first-production-topology-placement-ingress.md`.
+- `3J-FABLE-DIALOGUE-first-production-topology-placement-ingress.md`;
+- `3J-FABLE-DIALOGUE-operational-state-backup-restore.md`.
 
 ---
 
@@ -1221,6 +1241,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3J = IN PROGRESS
 3J-01 = APPROVED
+3J-02 = APPROVED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1241,9 +1262,11 @@ Expansion returns only through Decision Loop with named current consumer/failure
 
 3J-01 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela first production on-prem (company server → dedicated Linux VM), one Hub process, stores co-located no mesmo failure domain, private ingress company LAN/VPN + HTTPS com bounded amendment de C-015 §5 + C-016 §6 (exposure realization only), zero public ingress, Sankhya sem topology authority e E2B sem generic/public inbound. **Installation-scoped**: primeira topologia da instalação corrente, não deployment law universal do produto; **C-001 permanece product vision authority**.
 
+3J-02 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela recovery set class-based (`hub_control`, production Project DBs, `mastra_par`, non-reconstructible digest bytes, CredentialBackend backing, Git bundle off-provider, recovery manifests), `mastra_builder` fora por default, off-host immutability contra host-credential compromise, independent path para recovery material não-regenerável, proibição de credenciais operacionais reemitíveis em backup, pre-production complete restore proof, `RPO <= 6h / RTO <= 8h` e rejeição de PITR/replication/second provider/backup platform. **C-001 permanece product vision authority.**
+
 Próxima ação:
 
-> **Avançar `3J-02 — Operational State, Backup & Restore`**: recovery set por classe, RPO/RTO first-launch, off-host immutability, Git-loss classification, restore proof e proving→PROD governed migration; depois `3J-03` e `3J-R1` bounded closure.
+> **Avançar `3J-03 — Platform Lifecycle, Secret Injection, Emergency Stop & Availability`**: boot prerequisites/fail-closed set, secret injection/custody class, deploy sequence, platform deploy != Promotion, maintenance baseline, out-of-band emergency stop, host-loss procedure e minimum availability set; depois `3J-R1` bounded closure.
 
 Depois de 3J, 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

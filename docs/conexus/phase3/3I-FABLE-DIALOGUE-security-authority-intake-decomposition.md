@@ -1072,3 +1072,206 @@ first candidate decision                  = F.5 (rescoped Family A)
 
 The intake may proceed to materialize the first candidate decision after consolidating these corrections.
 
+---
+
+## 15. Fable Round 2 — scoped corrections (operator-directed)
+
+**Scope:** exactly two points — an adversarial re-test of my own F.5 Family-A candidate, and a correction of Family F's Hub-egress "closed destination list" — plus a retraction of provider-specific claims as load-bearing basis. Findings F-2, F-3, F-4, F-6 and F-8, and the F.1 concurrence (no Material Finding against 3B..3H), are converged and are **not** reopened here.
+
+### R2-1 — Family A fails its own materiality test: the closure is a preamble, not a decision; B is the first material decision
+
+```text
+claim challenged      my own F.5: a standalone thin decision "F1 Trust Subject
+                      & Authentication Boundary Closure" as dependency root
+test applied          the method's materiality floor: a decision earns standing
+                      only if it eliminates a failure class some concrete F1
+                      boundary can currently reach that no cited owner already
+                      denies. Enumerating the candidate classes the closure
+                      could claim:
+
+                      1. boundary authenticates a runtime identity
+                         (ActorRun/AgentRun/sandbox/trace as caller proof)
+                         → already denied: 3H-01..03 (runtime state/refs never
+                           authority; correlation only), 3C-08 (caller cannot
+                           self-declare identity/authority)
+                      2. own-auth app user becomes a Conexus principal
+                         → already denied: 3F-06 §4.2 (userId never creates
+                           Conexus user authority; fail closed)
+                      3. internal service principals minted for same-process
+                         modules
+                         → already denied: 3H-03 dispatch-closure law + C-017
+                           anti-entity rule; 3C-02 triggers name the re-entry
+                      4. a NEW principal class enters silently via E or
+                         implementation
+                         → already denied path-by-path: 3F-06 freezes
+                           DelegatedConexusPrincipal as "only if independently
+                           established"; C-017 requires consumer/failure class
+                           for any new entity; 3C-02 routes machine identities
+                           to Decision Loop
+                      5. an external boundary exists with no accepted-proof
+                         owner
+                         → none found: MANAGED browser = C-015; DEDICATED =
+                           Family E; internal in-process = 3H-03; platform
+                           routes = C-015 session; sandbox telemetry ingress =
+                           C-013 ephemeral capability
+
+                      Every class is already owned. What remains in A is
+                      vocabulary and an index — citation convenience, not a
+                      failure-class elimination. A standalone 3I-01 whose
+                      entire normative content is citations is exactly the
+                      restatement-decision defect F-1 attacked in the intake.
+                      The F.5 candidate does not survive its own test.
+concrete failure class of keeping A standalone: a ratified decision with no
+                      falsifiable content of its own becomes a second citation
+                      authority for meanings owned elsewhere — drift surface,
+                      zero decision-quality gain (method: ceremony may shrink;
+                      C-017: no entity/mechanism without failure class)
+smallest correction   demote A to the NORMATIVE PREAMBLE (§0) of Family B's
+                      decision. The preamble is ratified WITH B — it acquires
+                      authority without standalone ceremony — and contains:
+                      the closed inbound set, the negative list, the
+                      inbound/outbound axis distinction below, and the
+                      per-boundary accepted-proof map by reference.
+                      First material decision of 3I = B — Current
+                      Authorization, Approver Eligibility & Revocation.
+                      Falsifiability is preserved by a reopen guard: if any
+                      later 3I family or implementation finds a boundary that
+                      must authenticate a subject outside the closed set, that
+                      is a Material Finding against the preamble and returns
+                      to Decision Loop — the closure stays testable without
+                      being a decision.
+reopen prior authority?  NO — supersedes my own F.5 only
+later owner           B carries the preamble; corrected order:
+                      B(+preamble) → { C ∥ D } → E → F, G parallel after B
+```
+
+The distinction the preamble must state rigorously — this is the genuinely new vocabulary, and it is vocabulary, not law:
+
+```text
+INBOUND — Conexus authorization principals (CLOSED SET)
+  subjects Conexus AUTHENTICATES at its own boundaries and to which it
+  RESOLVES authorization/access context:
+    Account                        (human)
+    DedicatedApplicationPrincipal  (non-human, derived from Project/Release)
+  nothing else authenticates inbound; nothing else reaches authorization.
+
+OUTBOUND — technical credentials/identities (OPEN BY CONSUMER, NEVER PRINCIPALS)
+  identities the Hub PRESENTS as a client to external systems:
+    GitInfra → GitHub (repo credentials; hub sole holder, C-014)
+    CodingRuntime adapter → E2B control API
+    Builder/PAR control-side loops → model provider APIs
+    Hub → PostgreSQL login roles (C-006 / Family G)
+    backup path → offsite storage (C-006 B2/rclone)
+    dependency admission → package registry (C-016)
+  these are capabilities held in custody, not trust subjects: they never
+  appear in authorization decisions, never map to Account/permissions, and
+  their power is bounded by C (custody), F (crossing law), G (DB privilege).
+  the seam failure class — outbound identity drifting into pseudo-principal
+  (e.g., Git author identity or provider key identity treated as Conexus
+  actor authority) — is already denied per-path by C-013 provenance and
+  C-014 mechanical-history discipline; the preamble names the seam so the
+  denial is citeable in one place.
+```
+
+### R2-2 — Family F: closed destination list REJECTED; smallest owner-preserving egress law
+
+```text
+claim challenged      my own F-5 "smallest correction": a closed egress
+                      destination-class list for the Hub control-side zone
+                      (model providers, E2B API, qualified broker,
+                      exporter-if-adopted, Gateway-mediated Connections)
+concrete failure class proof of incompleteness by demonstration — one round,
+                      at least three legitimate egress classes missing:
+                        GitInfra → git remotes        (C-014: repo per app,
+                                                       hub sole credential holder)
+                        backup → offsite storage       (C-006: encrypted B2
+                                                       copy via rclone)
+                        supply chain → package registry(C-016: dependency
+                                                       admission, Renovate,
+                                                       OSV scan; plus
+                                                       quarantined E2B installs)
+                      a list that is wrong on arrival can only survive as a
+                      central registry every new consumer must amend — F would
+                      become the universal network authority, the same shape
+                      3C-08 explicitly rejected for the Gateway ("not a
+                      universal privileged-operation bus") and the LEDGER's
+                      anti-overengineering guardrail rejects as generic policy
+                      machinery. Centralizing all egress in one owner also
+                      breaks owner-preservation: each destination set is
+                      currently derived from authority that ALREADY has an
+                      owner (Connection hosts are Connection authority;
+                      git remotes are GitInfra/C-014 authority; registry pins
+                      are C-016 catalog authority).
+smallest correction   F owns a LAW and the zone/crossing matrix — never a
+                      destination registry. The law, smallest form:
+
+                      1. every Hub control-side outbound connection class has
+                         a NAMED OWNER (the module/infra boundary that
+                         legitimately initiates it);
+                      2. that owner's destination set is DERIVED from its own
+                         pinned configuration/authority (Connection host
+                         authority, GitInfra remote config, E2B endpoint
+                         config, provider endpoint config, backup target
+                         config, registry/catalog pins);
+                      3. no destination is ever selected by model output,
+                         caller payload, or artifact content;
+                      4. egress with no named owner and no config-derived
+                         destination = deny, fail closed;
+                      5. enforcement lives at each owner's boundary; no
+                         central egress broker/proxy is created, and the
+                         Gateway remains exactly the external-integration
+                         last-mile it already is (3C-08 preserved intact);
+                      6. a new legitimate egress consumer arrives WITH its
+                         owner and its config-derived destination authority —
+                         the law covers it without reopening F.
+
+                      The current owner inventory (Gateway→Connection hosts;
+                      GitInfra→git remotes; E2B adapter→E2B API; Builder/PAR
+                      loops→provider endpoints; backup→offsite target;
+                      dependency admission→registry; exporter-if-adopted→
+                      collector) enters F as NON-NORMATIVE EVIDENCE, explicitly
+                      non-exhaustive — it illustrates the law, it does not
+                      enumerate authority.
+
+                      Consequence for model-driven destinations: a capability
+                      whose purpose is model-chosen egress (e.g., Product
+                      Agent browsing, already consumer-gated SELECTIVE by
+                      3H-02 and routed 3I/Decision Loop by the LEDGER) can
+                      only enter as an OWNED capability whose owner declares
+                      its destination authority and trust zone — rule 3 is not
+                      violated by such a capability existing; it is violated
+                      by ownerless model-selected egress.
+reopen prior authority?  NO — F-5's finding (the zone exists and is mandatory
+                      3I scope) stands; only its "smallest correction" shape
+                      is replaced
+later owner           F (law + matrix), owners (destination sets),
+                      3J (physical placement), 3L (proof the deny fires)
+```
+
+### R2-3 — Retraction: provider-specific claims are demoted to non-normative research notes
+
+The F-7 **law** stands unchanged: per-run model-spend enforcement is Conexus control-side, at per-call admission against owner facts; any provider-side limit is optional defense-in-depth and never primary; telemetry loss never grants spend.
+
+Retracted as load-bearing: the provider-specific enumeration used to support that law — spend-limit scopes/windows, console-vs-API availability, enforcement-latency wording, and the Managed Agents session-budget mechanism. Those are dated observations (2026-08-17) of beta-flagged, changeable vendor surfaces; the law does not need them (it follows from owner-authority discipline alone: no external party can be the authority for a Conexus run invariant), and they are not durable enough to found authority. They remain in the Round 1 text as research provenance only. No 3I decision text may cite a provider scope, window, latency or budget feature as basis; **3L owns provider-behavior facts at qualification time, against then-current pinned docs.**
+
+### R2 closing
+
+```text
+A standalone decision       = WITHDRAWN; closure becomes normative preamble of B
+first material 3I decision  = B — Current Authorization, Approver Eligibility
+                              & Revocation (carrying the preamble)
+inbound/outbound taxonomy   = preamble vocabulary: closed principal set inbound;
+                              outbound technical credentials never principals
+F closed destination list   = REJECTED (incomplete by demonstration; universal-
+                              authority shape); owner-bound, config-derived,
+                              never-model/caller-selected, deny-by-default law
+                              adopted; Gateway scope per 3C-08 untouched
+provider-specific claims    = non-normative, dated; F-7 law unchanged; 3L owns
+                              provider facts
+converged findings          = F-2, F-3 (order now rooted at B), F-4, F-6, F-8
+                              stand unmodified
+technology mechanism frozen = NONE
+new durable record admitted = NONE
+```
+
+

@@ -290,3 +290,291 @@ closure verdict = CLOSE 3I | RESTRUCTURE | STOP
 If the verdict is `CLOSE 3I`, provide the minimal content that `3I-R1` must ratify and any proof/routing corrections that belong in the closure authority.
 
 Do not update `LEDGER.md`, do not create `3I-R1`, do not modify approved authority and do not touch product code. External research is unnecessary unless a conclusion truly depends on unstable third-party behavior; if used, use only primary sources.
+
+---
+
+## 7. Fable independent closure review
+
+**Method:** DevelopmentConexus Engineering Method v1.0.0. Authority reconstructed independently on **2026-08-17** from `AGENTS.md → DOCUMENTATION-MAP → DECISOES.md → LEDGER.md → exact authorities`: full texts of 3I-01..3I-05, 3A-R6 §6.4/§18, C-015/C-016 (browser/session/egress baselines cited by 3I-05 §12), C-013/3H-03 (producer trust), 3C-R1 + 3D-R1/3D-R4 (EVENT ingress reserved + authn guard note), 3E-01/3E-02 (TxScope, closed atomicity/record inventory), 3G-05/3G-06, 3H-01..3H-03/3H-R1, plus LEDGER §11/§12 post-3I-05 routing state. Canonical state verified from repo: `3A-R6 APPROVED; 3B..3H CLOSED; 3I-01..3I-05 APPROVED — 2026-08-17; remaining material 3I family on current evidence = 0`. Round-1 corrections F-2..F-5 are confirmed **incorporated in ratified 3I-05** (T5 destination anti-injection = F-2; §12 citation-only browser rules = F-3; §8.2/§8.5/§14.2 per-owner-login consequence + pool-budget honesty + fresh-session proof note = F-4; §10 dual audit-append realizations = F-5). No external research was needed: every conclusion rests on repo authority plus the dated primary-source facts already recorded in the 3I-05 dialogue.
+
+### 7.1 Global checks A–K
+
+```text
+A. principal/authz      COMPLETE. Closed two-principal set (Account, DAP) with
+                        explicit non-principals (3I-01 §3); every currently
+                        admitted caller authenticates as one of them or holds a
+                        Hub-minted guest capability governed by 3I-02 §13.2
+                        (which covers ALL guest-readable capabilities — control
+                        callbacks and telemetry alike, server-checked on every
+                        use). Account ceremony end-to-end = C-015 (Argon2id
+                        versioned, server-side session hash, setup credential,
+                        full-session revocation). SCHEDULE trigger wakes inside
+                        PAR — no external caller, no invented requesting
+                        Account (3I-01 §8.2); EVENT ingress stays reserved with
+                        the 3D-R1/3D-R4 authn guard note bound to activation.
+                        No caller found without a principal/authn path.
+B. surfaces             SEPARATE. CONTROL_PLANE != PREVIEW != PUBLISHED_APP
+                        (3I-01 I3, C-015 membership-before-role, 404
+                        indistinguishable); DEDICATED exchange is
+                        SERVICE_SCOPED-only with own-auth users as correlation
+                        only (3I-04 D7/§12). No surface inherits roles/
+                        memberships/tokens from another.
+C. custody              COMPLETE. All eleven listed classes have owner + use
+                        boundary + revocation story: session (C-015/iam),
+                        Connection (3I-02 C1/C2), root/recovery (C4 separate
+                        compromise path), Git write (GitInfra, never guest),
+                        E2B control (CodingRuntime), model provider (adapter +
+                        3I-03 gate, guest key DELETED), backup (operational,
+                        3J custody), telemetry-ingest capability (3I-02 §13),
+                        DEDICATED private key (DEDICATED host only, 3I-04
+                        §5.1), Hub signing key (operational credential, 3I-04
+                        §15, not CredentialBackend), PostgreSQL owner/
+                        migration/transaction capabilities (3I-05 §8, T11).
+                        No secret path reaches browser/guest/generated app/
+                        telemetry contrary to law.
+D. business egress      GATEWAY-OWNED, not weakened. The platform-control
+                        class is disjoint by construction (infrastructure
+                        mechanics, never Connection/business execution) and
+                        T5 closes the injection channel: no adapter accepts
+                        model/caller/artifact-derived destinations. No
+                        admitted bypass from Builder/PAR/MANAGED/DEDICATED to
+                        enterprise targets exists in any approved text.
+E. model spend          NO duplicate budget authority. M1 owner-local
+                        (bld.actor_run / par.agent_run); gw.budget_counter
+                        stays external-effect authority; OBS stays evidence;
+                        provider-native limits defense-in-depth. Remaining
+                        work is exactly the 3L MUST-QUALIFY subset — proof,
+                        not missing semantics.
+F. DEDICATED            COMPOSES. Token non-snapshot (D5) re-enters 3I-01
+                        current authority at every Platform-Service admission;
+                        issuance is read-only composition over prj/rel public
+                        APIs (no security-sensitive mutation on that path);
+                        Z4 does not contradict the accepted same-Project
+                        Release-selection residual (3I-05 leaves Release
+                        choice to 3I-04 §11 exactly as ratified); physical
+                        deployment stays first-consumer deferred.
+G. guest/E2B            HOLDS. Root-capable untrusted; never-receives list
+                        (Z3) matches 3I-02; deny-by-default outside guest;
+                        RunPreview behind authenticated Hub proxy; registry
+                        access during build is admitted-destination
+                        realization under C-016 pins. E2B behavior proof =
+                        3L, technology not reopened.
+H. telemetry/audit      HOLDS. Boundary-derived producer trust; guest
+                        capability writes Operational Telemetry only and
+                        cannot mint obs.audit_record; baggage excludes
+                        authority/secrets/owner IDs by default; required
+                        evidence missing → NOT_PROVEN, never PASS by absence.
+                        No place found where telemetry acts as authorization
+                        or terminal lifecycle truth.
+I. hub_control          COHERENT with 3D/3E, one composition correction for
+                        3I-R1 (CR-1, §7.3): the ratified exception set (two
+                        domain transaction cases + audit append) is complete
+                        for DOMAIN atomicity but the 3I-01 §7.2 authorization-
+                        serialization requirement is not reconciled in text.
+                        No third cross-schema SQL need found (Release reads
+                        Registry via public API; Gateway composes via APIs +
+                        own schema; OBS is a sink; reporting rolls up
+                        obs-owned tables) — the closed set stands.
+J. browser duplication  CLEAN. 3I-05 §12 cites C-015 (Origin + Sec-Fetch-Site
+                        on mutating methods, cookie laws) and C-016/C-012
+                        (self-only/CSP, platform-owned headers) without
+                        restating either normatively. No contradiction, no
+                        second CSRF/CSP law.
+K. routing              CLEAN. Every unresolved security-shaped item in
+                        3I-05 §15 + LEDGER §11 carries a named owner and
+                        classification (3J physical/stop/backup; 3L E2B/OTel/
+                        model-spend/Verification-Observability probes; 3M
+                        already-routed recovery only; 3N/3O negative matrix;
+                        Realization Planning roles/grants/pools/headers/
+                        adapters; Decision Loop consumer-gated items with
+                        3I-05 pre-binding the Product Agent browsing shape).
+                        Nothing dangles.
+```
+
+### 7.2 Closure proof questions — counterexample construction
+
+All eighteen attempted from approved architecture; none reachable. Governing authority cited per item:
+
+```text
+ 1. revoked Account new protected op        UNREACHABLE — 3I-01 I1/E2 (no
+    mutable-auth cache; current resolution); race variant is exactly the
+    §7.2 serialization law — proof composition carried by CR-1 (§7.3)
+ 2. stale RequestContext resurrection       UNREACHABLE — 3I-01 I8; 3H-01
+    rebuild on re-entry
+ 3. browser asserts Project/role/Release    UNREACHABLE — Z1 + C-015
+    server-derived identities; 3F-06
+ 4. guest reaches ERP / Hub DB              UNREACHABLE — Z3 never-receives
+    list + deny-by-default egress; 3I-02 C6
+ 5. model/app chooses privileged egress     UNREACHABLE — T5 destination
+    anti-injection law (owner-pinned config only)
+ 6. Connection secret escapes last mile     UNREACHABLE — 3I-02 C2/E4 +
+    prohibited-propagation list §6.2
+ 7. telemetry self-upgrades to HUB          UNREACHABLE — T7; 3H-03; C-013
+    acceptance consumes HUB/GATEWAY only
+ 8. guest telemetry satisfies audit         UNREACHABLE — 3I-05 §7.2; 3E-01
+    same-transaction fail-closed audit law
+ 9. Project A DAP → Project B Release       UNREACHABLE — 3I-04 D2 fail-closed
+10. old token survives generation change    UNREACHABLE — 3I-04 D4 per-request
+    generation recheck
+11. owner capability reads other schema     UNREACHABLE — T9 + §14.2 DENY
+    matrix (fresh-session proof discipline)
+12. SET ROLE into another owner             UNREACHABLE — §8.3 umbrella
+    rejection on documented PG semantics; T10
+13. transaction profile → third schema      UNREACHABLE — §9 closed set +
+    §14.3 negative proof
+14. runtime uses migration/backup cred      UNREACHABLE — T11; operational
+    custody separated
+15. Mastra credential → hub_control         UNREACHABLE — T12 + §11 negative
+    CONNECT matrix
+16. retry/fallback below spend gate         UNREACHABLE by law — 3I-03 §8/E6;
+    mechanical truth = 3L MUST QUALIFY (routed blocker by 3A-R6's own gate,
+    not an open 3I decision)
+17. authentication → unconditional exec     UNREACHABLE — 3I-01 I2; 3I-04 D5
+18. open LEDGER item needs 3I decision      NONE — LEDGER §11 swept row by
+    row: every item is RESOLVED-at-property, Realization/3L/3J/3N-routed, or
+    consumer-gated Decision Loop with named trigger
+```
+
+### 7.3 CR-1 — the one composition correction 3I-R1 must ratify
+
+```text
+finding class         latent composition ambiguity between two approved
+                      authorities; NOT a contradiction, NOT a missing
+                      decision, NOT a reopen
+the two laws          3I-01 §7.2: every security-sensitive mutation must
+                      serialize ALL consumed mutable authority facts against
+                      concurrent revocation until mutation commit (proof
+                      obligation 5: stale pre-read cannot commit).
+                      3I-05 T9/§9: a normal owner persistence capability
+                      cannot read/mutate/acquire another owner schema; the
+                      enumerated exceptions are the two domain transaction
+                      cases + the audit append.
+the unstated seam     almost every security-sensitive mutation lives OUTSIDE
+                      iam while consuming iam authority facts (binding SET →
+                      prj; credential replace → con; trigger mutation / run
+                      cancel → par/bld; promote → rel). Under the rejected
+                      broad login, 3I-01's named "locking read" realization
+                      just worked; under owner-scoped capabilities a
+                      cross-owner SELECT ... FOR SHARE is exactly what §14.2
+                      must DENY, and serializable isolation cannot span two
+                      sessions. Neither authority says out loud what replaces
+                      the inadmissible family. The two enumerated profiles
+                      never needed it (CreateProject contains iam by
+                      construction; FIRST_CLAIM deliberately excludes
+                      approver-eligibility recheck per 3I-01 §9) — the gap is
+                      exactly and only the authorization-fact class.
+why no reopen         the laws are jointly satisfiable TODAY under the
+                      ratified texts: a transaction-scoped advisory-lock /
+                      conflicting-guard realization (both the iam revocation
+                      path and the consuming mutation serialize on the exact
+                      authority-fact key) takes ZERO cross-owner schema
+                      authority — admissible under T9 as written, and already
+                      inside 3I-01's open mechanism clause ("fresh conflicting
+                      guard ou equivalente"). A second admissible family is an
+                      iam-owned narrow SECURITY DEFINER current-authority
+                      locking-read surface — the same admission shape 3I-05
+                      §10 already uses for the audit append (one owned helper,
+                      not the rejected authorization substrate). A third —
+                      enumerated narrow read+lock grants on exact iam
+                      authority projections — would require an explicit T9
+                      exception row and is the least preferred.
+why it must be said   left unstated, a coding actor implementing any
+                      sensitive mutation must choose among: silently granting
+                      cross-owner reads (erodes T9), silently dropping
+                      serialization (violates 3I-01 §7.2), or silently minting
+                      a broad transaction role (rejected Alternative by the
+                      back door). That is the exact 3A-R6 §18.1 failure class
+                      this closure review exists to catch — and it is the
+                      only instance of it found in the whole 3I system.
+minimal 3I-R1 text    (a) composition clause: "The 3I-01 §7.2 serialization
+                      property composes with 3I-05 T9 through realizations
+                      that take no cross-owner schema authority (transaction-
+                      scoped conflicting-guard/advisory-lock class, in which
+                      revocation and consuming mutation serialize on the same
+                      authority-fact key) or through a narrow iam-owned
+                      locking-read surface admitted the same way §10 admits
+                      the audit-append helper; cross-owner locking reads by
+                      broad grants and umbrella-role realizations remain
+                      inadmissible. Family selection is Realization Planning;
+                      no durable state, no new privilege breadth, no general
+                      cross-owner query capability arises."
+                      (b) combined proof obligation: "3I-01 proof 5 (stale
+                      pre-read cannot commit under concurrent revocation) and
+                      the 3I-05 §14.2 negative privilege matrix must pass
+                      SIMULTANEOUSLY on the same realization — one green
+                      without the other is a failed proof." Routed with the
+                      existing negative matrix to Realization Planning + 3N/3O.
+                      (c) reopen alignment: read 3I-05 DB-plane trigger 8
+                      as covering authorization-fact serialization, not only
+                      connection/performance economics.
+```
+
+### 7.4 3A-R6 classification of every residual
+
+```text
+MUST DECIDE — none remaining. All five 3I families are decided at property
+level; nothing left in 3I meets the §4.1/§5 tests.
+
+routed blockers (pre-C-018 by 3A-R6's own gates, not open 3I decisions):
+  3L MUST QUALIFY — E2B deny-by-default; model-spend interception/usage/
+  missingness/cost-envelope subset; Mastra probes; Verification Observability
+  deciding-evidence subset; OTel propagator behavior where load-bearing
+  3J obligations — whole-Hub stop proof (3I-01 §13), backup/recovery
+  two-sided proof (3I-02 §12.2), custody runbooks, first topology
+  3N/3O — negative privilege/crossing matrix incl. the CR-1 combined proof
+  F3B-R1 — repo/cutover operator gate before Realization Planning
+
+DEFER SAFELY (owner + trigger named): DEDICATED physical deployment (first
+real consumer / 3J); Product Agent browsing (named consumer; T5 pre-binds
+shape); EVENT ingress (first consumer; 3D-R1 authn guard note); new browser
+origin/embed (C-015/C-016 triggers); DPoP/mTLS/fleet/attestation (3I-04
+triggers); external KMS/HSM, per-secret DEK, transient-token persistence
+(3I-02 triggers); mutable-auth cache (measured scale + max-staleness proof);
+dual-control approval (named workflow); per-Project serving stop (proven
+incident class); process split for credential isolation (concrete Finding).
+
+REJECT F1 (standing, re-entry only via Decision Loop): service mesh /
+SPIFFE-SPIRE, UniversalEgressService / privileged generic fetch, RLS/policy
+engines, generic authorization/transaction engines, microsegmentation and
+per-module processes/databases, telemetry PKI, god transaction role,
+per-request ephemeral DB roles, external IdP absent trigger, refresh tokens
+for DEDICATED, new security/token/session records.
+
+new module/record/security engine required by closure = 0.
+```
+
+### 7.5 Required output
+
+```text
+Material Findings against approved authority   = NONE
+  (CR-1 is a latent composition ambiguity, jointly satisfiable under the
+   ratified texts; it enters 3I-R1 as a correction, exactly the 3H-R1
+   precedent of non-material corrections incorporated in closure authority —
+   it is also the ONLY invention-shaped choice left to a coding actor, and
+   3I-R1 ratifying clause 7.3(a)/(b)/(c) reduces that count to zero)
+missing material 3I decision count             = 0
+reopen required                                 = NO — exact IDs: none
+unrouted C-018 blocker                          = NONE
+new module / record / security engine required  = 0
+five 3A-R6 §6.4 questions                       = NONE / NONE / NONE / NONE / NONE
+coding-actor material inventions before C-018   = 1 → 0 with CR-1 in 3I-R1
+
+closure verdict = CLOSE 3I
+
+minimal content 3I-R1 must ratify:
+  1. the five §6.4 closure answers (NONE ×5) + unrouted-blocker = NONE, with
+     this review as non-authoritative provenance;
+  2. CR-1 composition clause + combined proof obligation + trigger reading
+     (§7.3 a/b/c) — the only correction this review adds;
+  3. confirmation that Round-1 F-2..F-5 are already carried inside ratified
+     3I-05 (no separate amendment needed);
+  4. the residual classification table of §7.4 as the binding routing
+     snapshot at 3I closure (3J/3L/3M/3N/3O/Realization/Decision Loop);
+  5. explicit statement that 3I closes with zero new modules, records,
+     databases, engines, processes, and that no generic threat catalog
+     creates further 3I work.
+
+RESTRUCTURE — not justified: one authority / two planes stands (Round-1 F-1);
+no duplicate or missing authority found anywhere in 3I-01..3I-05.
+STOP — nothing found approaching it.
+```

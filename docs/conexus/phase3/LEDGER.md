@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H IN PROGRESS / 3H-01 APROVADA`  
-**Próxima decisão:** `3H-02 — Production Agent Runtime Realization`  
+**Estado:** `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H IN PROGRESS / 3H-01 + 3H-02 APROVADAS`  
+**Próxima decisão:** `3H-03 — Runtime Isolation, Correlation & Handoff`  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -38,6 +38,9 @@ C-000..C-017
 3H-01
 → Builder Coding Runtime Realization & Session/Sandbox Mapping
 
+3H-02
+→ Production Agent Runtime Realization
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -69,7 +72,7 @@ Nenhuma conversa cria authority.
 | 3E — Data Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
-| 3H — Runtime & Agent Architecture | **IN PROGRESS / 3H-01 APROVADA** | 3H-02 — Production Agent Runtime Realization |
+| 3H — Runtime & Agent Architecture | **IN PROGRESS / 3H-01 + 3H-02 APROVADAS** | 3H-03 — Runtime Isolation, Correlation & Handoff |
 | 3I — Security / Authority Architecture | NÃO INICIADA | trust/identity/egress/DB roles |
 | 3J — Deployment / Operations Architecture | NÃO INICIADA | topology/backup/serving operations |
 | 3K — Frontend / Product Architecture | NÃO INICIADA | UX/scaffold/product surfaces |
@@ -293,8 +296,9 @@ PACKAGE CURRENT STRUCTURE CONFIRMED
 | ID | Decisão | Documento |
 |---|---|---|
 | 3H-01 | Builder Coding Runtime Realization & Session/Sandbox Mapping | [3H-01](3H-01-builder-coding-runtime-realization-session-sandbox-mapping.md) |
+| 3H-02 | Production Agent Runtime Realization | [3H-02](3H-02-production-agent-runtime-realization.md) |
 
-Ratificação pelo operador: **2026-08-16**.
+Ratificações pelo operador: **2026-08-16**.
 
 ### 9.1 3H-01 — Builder runtime laws
 
@@ -326,11 +330,57 @@ new workflow/queue/scheduler/lease/retry/checkpoint engine = 0
 mandatory E2B wrapper = 0 unless CX-BUILDER-MASTRA-01 proves attribution requires it
 ```
 
+### 9.2 3H-02 — Production Agent runtime laws
+
+```text
+Product Agent baseline = direct Mastra Agent
+RuntimeAgentProjection derives from exact Release/composition and is rebuildable/non-authoritative
+AgentRun admission/pins commit before any model/tool execution
+Editor/Stored Agent/latest/version override paths cannot alter Product execution
+ConversationId is Conexus identity; Mastra thread is substrate ref
+Working/Agent Memory is consumer-gated; Semantic Recall/OM/Extractors are eval-gated
+selective durable suspension realizes real waits; ApprovalRequest remains authority
+proposal/effect identity is owner-minted/sealed; resumed args must still match exact subject
+Gateway alone owns effect replay/idempotency
+boot/recovery re-drive must re-enter PAR guards
+AgentTrigger is authority; Mastra schedule row is derived timer mechanics
+schedule fire enters guarded PAR ingress before Product Agent execution
+occurrence identity = stable intended slot before admission; exact mechanism 3L
+occurrence cursor = owner-local per (TriggerId, TriggerRevision)
+F1 schedule single-flight; overlap occurrence is consumed SKIPPED, no backlog
+EVENT/Signals/Inbox external Product ingress remains disabled F1
+old non-terminal run resumes exact old Release/runtime projection
+Mastra traces/logs/metrics/hooks = Operational Telemetry / diagnostics, never terminal/correctness authority
+```
+
+3H-02 framework coverage audit additionally classifies current Mastra primitives instead of blindly enabling them:
+
+```text
+ADOPT: Agent, threads/messages, tools/hooks, selective suspend/resume, schedules mechanics, observability
+SELECTIVE: Workflows, Working Memory, Skills, Goals, Background Tasks, browser/workspace on explicit consumer
+DEFER/eval: Semantic Recall, Observational Memory, Memory Extractors, Durable Agents, multi-agent/network, A2A/ACP, Channels, Temporal/Inngest, Mastra Platform deployment options
+REJECT as Product authority: Editor/Stored/File-Based Agent SoT, latest resolution, native approval replacing Conexus approval, memory/goal/eval as business authority
+```
+
+3H-02 outcome:
+
+```text
+prior authority reopen = NONE
+Alternative A = GLOBAL MAXIMUM
+new module = 0
+new durable record class = 0
+new queue/scheduler/lease/recovery engine = 0
+universal Workflow = 0
+Durable Agent cache/pubsub requirement = 0
+EVENT ingress = 0
+CX-AGENT-MASTRA-01 = mandatory before deploy
+```
+
 Review provenance, non-authoritative:
 
-- `3H-FABLE-DIALOGUE-builder-coding-runtime-realization.md`
-- `3H-FABLE-DIALOGUE-builder-coding-runtime-realization-R2.md`
-- `3H-FABLE-DIALOGUE-builder-coding-runtime-realization-R3.md`
+- `3H-FABLE-DIALOGUE-production-agent-runtime-realization.md`
+- `3H-FABLE-DIALOGUE-production-agent-runtime-realization-R2.md`
+- `3H-FABLE-DIALOGUE-production-agent-runtime-realization-R3.md`
 
 Final result:
 
@@ -338,11 +388,11 @@ Final result:
 CURRENT STRUCTURE CONFIRMED
 ```
 
-**3H permanece aberta. Próxima decisão:** `3H-02 — Production Agent Runtime Realization`.
+**3H permanece aberta. Próxima decisão:** `3H-03 — Runtime Isolation, Correlation & Handoff`.
 
 ---
 
-## 10. Open findings / routed work after 3H-01
+## 10. Open findings / routed work after 3H-02
 
 Estes itens não reabrem fases anteriores automaticamente.
 
@@ -350,42 +400,52 @@ Estes itens não reabrem fases anteriores automaticamente.
 |---|---|
 | F3B-R1 — repo canônico/cutover do produto | 3A / operador — antes de implementação |
 | F3B-R4 — browser/runtime physical trust zones | 3I/3J |
-| runtime orphan/lost detection policy after 3H-01 liveness surface | 3M |
+| Builder runtime orphan/lost detection policy after 3H-01 liveness surface | 3M |
+| Production Agent admitted-but-undispatched / active-process-loss / missing-snapshot recovery policy | 3M |
 | InceptionInvestigation pre-Change agent execution shape, somente se realization provar necessidade | Decision Loop / later 3H |
-| Production Agent suspend/resume/wake/timer + schedule/signal realization | 3H-02/3L |
+| Production Agent cross-runtime isolation/correlation/F5 handoff | 3H-03 |
 | F3E01-R1 — `mastra_par` backup/restore procedure | 3J |
 | F3E01-R2 — `hub_control` rebuild 0..N em DB temporário | implementation verification |
-| F3E02-R1 — Mastra `workflowDefinitions` nunca vira authoring authority | 3H-02/3L probe |
+| F3E02-R1 — Mastra `workflowDefinitions` never authoring authority | 3L probe / implementation enforcement under 3H-02 |
 | F3E02-R2 — physical CredentialBackend custody | 3I / infra implementation |
 | approver eligibility / post-admission cancellation / revocation authority | 3I |
 | guest-held capability after E2B pause/resume: server-side expiry must remain enforcement point | 3I |
+| Production Agent browser/workspace/code execution trust/egress if first consumer enables it | 3I / Decision Loop |
 | DEDICATED concrete trust/credential/delegation mechanism | 3I |
 | current security narrowing for old Releases / emergency stop | 3I/3J |
 | DEDICATED egress/network policy | 3I/3J |
 | MANAGED/DEDICATED physical deployment topology | 3J |
+| old Product Agent runtime coexistence / drain / cutover | 3J |
+| `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L |
 | physical Promotion/migration recovery and restore | 3M/3J |
 | `OUTCOME_UNKNOWN` reconciliation / settlement | 3M |
 | output/storage custody repair + orphan recovery | 3M |
-| repeated quiescence/reconnect failure policy | 3M |
+| repeated Builder quiescence/reconnect failure policy | 3M |
 | Project purge/retention/GC | 3M/3J |
 | archive/unpublish/trigger/recovery UX | 3K |
 | Release/Promotion/rollback UI | 3K |
 | approval-card/display contracts | 3K + implementation |
 | Project binding Control Plane UI | 3K |
+| Product Agent Conversation/memory/trigger UI | 3K |
 | exact wire/HTTP layout | implementation + contract tests; 3L only if technology requires qualification |
 | exact `MANIFEST_INVALID` diagnostics | implementation + 3K |
 | authored Project binding source/file schema + exact mutation DTOs | implementation + 3K |
 | exact `brn.binding_validation` ref if proof shows it load-bearing | Decision Loop / 3N |
 | binding change permissions | 3I |
 | binding/Release/runtime end-to-end proof | 3N/3O |
-| Production/cross-runtime F5 handoff realization; Builder side resolved by 3H-01 | later 3H / implementation |
-| Mastra telemetry ↔ Conexus correlation beyond Builder-specific mapping | later 3H / 3L |
-| Verification Observability package realization beyond 3H-01 verifier isolation | later 3H / 3L / 3N |
-| `CX-BUILDER-MASTRA-01` P1..P29 qualification | 3L |
-| quiescence template/process/deferred-execution surface qualification | 3L |
-| `job/v1` queue/scheduler substrate | 3H/3L only on concrete need |
+| Mastra telemetry ↔ Conexus cross-runtime correlation | 3H-03 / 3L |
+| Verification Observability package realization beyond 3H-01 verifier isolation | 3H-03 / 3L / 3N |
+| `CX-BUILDER-MASTRA-01` qualification | 3L |
+| `CX-AGENT-MASTRA-01` including stable occurrence transport, restart, memory isolation, upgrade | 3L |
+| Semantic Recall / Observational Memory / Memory Extractors enablement | 3L eval + named Product consumer |
+| Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority |
+| Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
+| Mastra Platform managed environments/workspaces/databases/regions | 3J/3L optional deployment qualification |
+| `job/v1` queue/scheduler substrate | later 3H/3L only on concrete need |
 | async/attempt status projection for UI/query convenience | 3H/3K/implementation; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
+| Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
+| EVENT / Signals / Notification Inbox / Webhook Signals | C-007 / Decision Loop on first EVENT consumer |
 | break-glass binding/runtime override | Decision Loop on real incident failure class |
 | app-origin approvals / second approval consumer | Decision Loop on real consumer |
 | duplicate Gateway approval-subject custody | Decision Loop / 3J on real availability split |
@@ -401,11 +461,11 @@ CX-BUILDER-MASTRA-01
 CX-AGENT-MASTRA-01
 ```
 
-3L proves substrate behavior; failure material reopens substrate/realization, not domain semantics automatically.
+3L proves substrate behavior; material failure reopens substrate/realization, not domain semantics automatically.
 
 ---
 
-## 11. Resolved routed work through 3H-01
+## 11. Resolved routed work through 3H-02
 
 ```text
 ApprovalRequest exact contract + lifecycle                     → 3F-03 + 3G-01
@@ -429,13 +489,24 @@ Builder-side F5 output custody/presentation                     → 3H-01
 fresh verifier cognition/materialization isolation             → 3H-01; exact qualification 3L
 CodingRuntime liveness/control capability surface              → 3H-01; orphan/recovery policy 3M
 AgentController live-session state authority prohibition       → 3H-01
+Product Agent exact Release→RuntimeAgentProjection              → 3H-02
+Product Agent direct Agent baseline vs selective Workflow       → 3H-02
+Conversation / memory scope partition                           → 3H-02
+ApprovalRequest ↔ selective suspend/resume realization          → 3H-02
+owner-minted sealed effect identity across resume               → 3H-02
+Product Agent boot/re-drive guard law                           → 3H-02
+SCHEDULE projection/guarded ingress/single-flight               → 3H-02
+stable per-revision occurrence admission property               → 3H-02; exact transport 3L
+Stored Agent/Editor/version override exclusion                  → 3H-02
+EVENT/Signals operational exclusion F1                          → 3H-02; first consumer returns C-007
+Mastra capability coverage classification                       → 3H-02; optional features routed to 3L/3N/3J/Decision Loop
 ```
 
 ---
 
 ## 12. Anti-overengineering guardrail
 
-Normative anti-overengineering details live in the exact approved decisions. Global summary:
+Normative details live in exact approved decisions. Global summary:
 
 ```text
 NO microservices by default
@@ -458,11 +529,19 @@ NO exactly-once fiction for external effects
 NO Promotion queue/lease/fencing in single-writer F1
 NO Release latest-only retirement policy without install-base consumer
 NO SandboxPool / ProcessRegistry / RuntimeRegistry by default
-NO mandatory custom E2B wrapper unless qualification proves the concrete need
-NO Kafka/Kubernetes/Temporal merely for optionality
+NO mandatory custom E2B wrapper unless qualification proves concrete need
+NO universal Product Agent Workflow wrapper
+NO Product Agent schedule→agent direct bypass
+NO Stored Agent/Editor as Product Agent authority
+NO ScheduleOccurrence table / hidden backlog in F1
+NO EVENT/Signal ingress before first trusted consumer
+NO Durable Agent cache/pubsub requirement without reconnectable-stream consumer
+NO semantic/observational memory enabled merely because framework supports it
+NO Kafka/Kubernetes/Temporal/Inngest merely for optionality
+NO Mastra Platform dependency as architecture requirement
 ```
 
-Expansion returns only through the Decision Loop with a named current consumer/failure class.
+Expansion returns only through Decision Loop with named current consumer/failure class.
 
 ---
 
@@ -478,13 +557,16 @@ Expansion returns only through the Decision Loop with a named current consumer/f
 
 3H = IN PROGRESS
 3H-01 = APPROVED
-3H-02 = NEXT
+3H-02 = APPROVED
+3H-03 = NEXT
 ```
 
-3H-01 foi ratificada após package intake, ChatGPT Round 1, independent Fable Round 1, ChatGPT Round 2 consolidation, independent Fable Round 2 e final ChatGPT Round 3 consolidation, sem Material Finding contra prior authority.
+3H-01 foi ratificada após package intake, ChatGPT/Fable adversarial rounds e final consolidation sem Material Finding contra prior authority.
+
+3H-02 foi ratificada após ChatGPT Round 1, independent Fable Round 1, ChatGPT Round 2 evidence correction/consolidation, independent Fable Round 2 e final ChatGPT Round 3 consolidation; uma auditoria adicional das capabilities atuais do Mastra confirmou a classificação `ADOPT / SELECTIVE / DEFER / REJECT-as-authority` sem encontrar primitive material ausente.
 
 Próxima decisão:
 
-> **3H-02 — Production Agent Runtime Realization**, cobrindo Mastra Agent runtime projection, Conversation/AgentRun mapping, suspend/resume/checkpoint, ApprovalRequest continuation e F1 SCHEDULE realization sem promover Mastra mechanics a product authority.
+> **3H-03 — Runtime Isolation, Correlation & Handoff**, cobrindo isolamento Builder/PAR/runtime, cross-runtime correlation, F5 handoff/correlation e remaining Verification Observability realization sem criar nova authority.
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

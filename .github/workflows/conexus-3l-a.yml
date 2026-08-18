@@ -50,9 +50,12 @@ jobs:
       - name: Run physical-incarnation guard specification
         working-directory: spikes/conexus-3l-a
         run: node --test tests/physical-incarnation-guard.test.mjs
-      - name: Run A3 non-billable admission and fixture contracts
+      - name: Run A3 non-billable contracts
         working-directory: spikes/conexus-3l-a
-        run: node --test tests/a3-admission.test.mjs
+        run: >-
+          node --test
+          tests/a3-admission.test.mjs
+          tests/a3-runner-contract.test.mjs
 
   # A2 is already qualified. Replay the costly provider suite only when explicitly requested.
   e2b-live:

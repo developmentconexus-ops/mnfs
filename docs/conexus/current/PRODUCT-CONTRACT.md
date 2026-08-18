@@ -1,6 +1,6 @@
 # Conexus — Whole-Product Contract
 
-> **Status:** CANDIDATE / R11-C — ROUND-1 COHERENCE CORRECTED / NOT YET CURRENT AUTHORITY  
+> **Status:** CANDIDATE / R11-C — ROUND-3 CORRECTED / RE-COHERENCE PASS / NOT YET CURRENT AUTHORITY\
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
@@ -11,7 +11,7 @@ This candidate consolidates **what Conexus is, what users can do, which Product 
 
 It is derived from accepted Product/system authority, especially C-001/C-003, 3B, 3K and the owner/state/security boundaries of 3C–3J. It does not replace those detailed semantic homes and does not turn runtime/provider mechanics into Product authority.
 
-Until R11 Round-2 coherence, Fresh Actor review, independent Fable review, finding adjudication and final operator ratification are complete, this file remains a candidate projection.
+Round-3 correction, closure-keyed coherence and repeated Fresh Actor review are complete/pass. This file remains a candidate projection until explicit R11-H operator ratification.
 
 ---
 
@@ -186,6 +186,28 @@ A technical layer does not become another Project by default.
 
 F1 has one canonical source repo per Project; multi-repo is deferred until a real consumer.
 
+Every software-publishing Project fixes exactly one `ApplicationRuntimeProfile` in its approved Project Baseline:
+
+```text
+ApplicationRuntimeProfile = MANAGED | DEDICATED
+```
+
+This is a closed F1 union inside one Software Factory. `MANAGED` uses the Conexus-governed application runtime; `DEDICATED` is independently executable and may consume Conexus services only through explicit bindings/contracts. It is not a second Factory, and automatic profile conversion is not promised. Physical DEDICATED deployment remains deferred until the first real consumer.
+
+### 5.4.1 Archived Project
+
+Archive freezes ordinary authoring and future intent expansion. It is deliberately not a runtime stop:
+
+```text
+ARCHIVED
+-X-> unpublish
+-X-> stop current serving
+-X-> stop a pre-existing enabled Product-Agent trigger
+-X-> stop an existing managed recurrence by itself
+```
+
+While archived, trigger `CREATE`/`ENABLE`/semantic reconfiguration and ordinary new composition remain blocked; explicit trigger `DISABLE` remains allowed narrowing. Recovery may target only a Release previously activated for that Project that still passes current conformance. The Product must tell the operator plainly: **Archive does not stop automations and does not unpublish.**
+
 ## 5.5 Project Baseline
 
 Approved, versioned statement of Project architecture/Product meaning sufficient for current work.
@@ -241,7 +263,7 @@ worker/model proposes transition
 
 Worker death/interruption is represented honestly.
 
-`tasks.md` is durable **purpose/context memory** in Project Git — what is being built, why, what remains, known limitations and causes/corrections. It is not the authority for “is item X operationally complete?”. A structured status block may be mechanically checked against Hub plan state; free prose is not operational authority.
+`tasks.md` is durable **purpose/context memory** in Project Git — what is being built, why, what remains, known limitations and causes/corrections. It is not the authority for “is item X operationally complete?”. At SHARE, its fenced structured block **must** be mechanically checked against current Hub `planRevision` and item state; stale revision or incompatible `statusCode` blocks SHARE. Free prose is not operational authority.
 
 ## 5.9 Brain
 
@@ -263,6 +285,17 @@ EVIDENCE
 Brain is published/versioned and used through explicit `ProjectBrainBinding`.
 
 Brain is not agent memory, RAG/index, Project DB, telemetry store or security policy engine.
+
+Brain content is not a privileged instruction channel:
+
+```text
+real ERP data in Brain Git                              = FORBIDDEN
+sample/verified-query fixture source                    = enum | synthetic
+PII lint + secret scanning + human review               = REQUIRED
+custom_instructions command authorization/tools/
+  approvals/credentials/platform policy                = FORBIDDEN
+Brain widens grant/tool/data/platform authority         = NEVER
+```
 
 ## 5.10 Brain Discovery
 
@@ -298,6 +331,8 @@ agent/caller uses Brain semantic IDs
 One AnalyticQuery operates on one curated analytical dataset in v0. New join topology/physical SQL is not chosen freely by the LLM at runtime.
 
 Static registered Query remains the other read regime. The first Budget Analyzer is not forced to use AnalyticQuery merely to exercise infrastructure.
+
+AnalyticQuery being an admitted platform read regime does **not** automatically place it in a Product Agent `ToolProjection`. A named current consumer and exact Release/tool authority must explicitly admit that use.
 
 ## 5.12 Connection
 
@@ -402,7 +437,7 @@ AgentRun COMPLETED
 
 ## 5.25 ApprovalRequest
 
-Exact durable approval wait/subject in Product Agent runtime. Approval binds the exact sealed proposal; changed args/content require new authority.
+Exact durable approval wait/subject in the Production Agent Runtime (PAR). Approval binds the exact sealed proposal; changed args/content require new authority.
 
 ## 5.26 AgentTrigger
 
@@ -565,9 +600,21 @@ Expected percentage accuracy is never Product truth until measured; unsupported 
 Workspace authors/reviews Brain
 → immutable Brain revision AVAILABLE
 → Project explicitly ProjectBrainBinding exact revision
-→ local binding/conformance proof where required
+→ mandatory local binding/conformance proof
 → Release pins binding
 → runtime receives bounded effective Brain slice
+```
+
+For Brain-dependent Agent execution:
+
+```text
+AgentRun pins Brain health snapshot
+→ recheck critical dependency health before final response
+→ recheck again before any effect/approval execution
+→ critical health change invalidates continuation/approval and recomposes context
+
+Brain-dependent approval binds effectiveBrainSliceDigest
+critical SUSPECT/INVALID content blocks dependent use where current policy requires it
 ```
 
 Feedback:
@@ -700,12 +747,26 @@ Published App user
 Headless:
 
 ```text
-admitted SCHEDULE occurrence
-→ exact AgentRun admission
+SCHEDULE wake
+→ guarded PAR ingress
+→ validate current TriggerRevision/schedule
+→ stable intended-slot identity before AgentRun admission
+→ cursor per (TriggerId, TriggerRevision)
+→ single-flight admission
+→ exact current Release pin
 → direct Product Agent execution
 ```
 
 Scheduled runs are threadless by default.
+
+```text
+valid occurrence + active trigger-origin run
+→ consume occurrence as SKIPPED
+→ no AgentRun
+→ no catch-up/backlog from the skipped Product-Agent slot
+```
+
+Schedule fire never executes the Product Agent directly or borrows MAR sync catch-up semantics.
 
 Product Agent is product/context-aware by default, not source/host-aware. No automatic repo/shell/browser/raw-network/raw-DB/raw-secret/Builder-workspace authority.
 
@@ -751,11 +812,14 @@ Current F1 laws:
 
 ```text
 single-flight / coalesce
-one catch-up after downtime
+after downtime, at most one catch-up only if the current served Release still requires sync
+  and current freshness is behind
 not replay every missed slot
 no arbitrary privileged Project job code
 no workflow/scheduler business domain
 ```
+
+This is the MAR managed-sync profile, not a shared recurrence abstraction and not Product-Agent `SCHEDULE` behavior.
 
 ---
 
@@ -781,6 +845,8 @@ Connection bindings
 current external authorization
 runtime sessions/history
 ```
+
+The accepted C-014 base is no Project DB contents, credentials or Connection bindings. Excluding current external authorization and runtime sessions/history is a monotonic consequence of their separate owner authority, not a new copy domain.
 
 Destination must explicitly rebind Connections/Brain/environment authority according to its own current context.
 
@@ -912,6 +978,7 @@ Source/environment/freshness/coverage/provenance are visible when material.
 ```text
 model narration != Hub progress
 0 Findings != verified
+working != blocked != waiting-for-user != completed
 ```
 
 Plan/checklist/Evidence use owner facts.
@@ -920,7 +987,10 @@ Plan/checklist/Evidence use owner facts.
 
 ```text
 Preview ready != VERIFIED != AVAILABLE != live
+building next candidate != currently inspectable last-good Preview
 ```
+
+Building a new candidate must not require destroying/replacing the last usable Preview before the next one is ready.
 
 ## 23.4 Release
 
@@ -941,6 +1011,20 @@ OUTCOME_UNKNOWN != retry permission
 ```text
 runtime/provider/trace/telemetry observation != owner terminal/verified truth
 ```
+
+## 23.7 Contextual inspectability and progressive disclosure
+
+```text
+REAL PRODUCT RESOURCES
+→ directly inspectable: Data, Capabilities, Integrations, Agents, Brain binding/context,
+  Versions, Preview, Code/Diff and Activity/Evidence entry
+
+PLATFORM MACHINERY
+→ progressive detail: WorkUnit/ActorRun internals, Gateway/Registry/CAS mechanics,
+  Mastra/E2B refs, owner rows and technical digests unless material
+```
+
+`Ask Conexus about this` may pass the selected resource/context to the contextual assistant under current server-derived authorization. It grants no new authority, hidden capability or cross-Project access.
 
 ---
 
@@ -1115,6 +1199,12 @@ formal security deferred because “F1 is internal”
 32. Future capability preserves seam/trigger without empty F1 machinery.
 33. Selected architecture != qualified behavior.
 34. Honest empty/unsupported Product state is preferred to fake completeness.
+35. Project Archive freezes future intent; it neither unpublishes nor silently stops current serving/automations.
+36. Product-Agent skipped schedule slots never borrow MAR managed-sync catch-up semantics.
+37. Brain health/current effective slice is rechecked before dependent final response/effect/approval.
+38. Ordinary telemetry degradation, audit-required failure and verification-required missing Evidence remain distinct.
+39. Working, blocked, waiting-for-user and completed are distinct Product truths.
+40. A next candidate never silently destroys the last-good inspectable Preview.
 
 ---
 
@@ -1141,6 +1231,7 @@ formal security deferred because “F1 is internal”
 | Connection secret rotates compatibly | source/app need not change if logical authority remains compatible |
 | Connection unhealthy | honest unavailable/degraded state; no silent fallback |
 | Project needs provider operation | provider existence alone does not grant Project/Agent authority |
+| Archive Project with active serving/automation | authoring freezes; app remains published and pre-existing automation may continue until explicit owner action |
 | Publish candidate | verification/Release/Promotion/serving remain distinct |
 | Rollback | new governed Promotion; no automatic business-data rewind |
 | Business user can use app but not build | Published App access works independently |
@@ -1154,8 +1245,11 @@ formal security deferred because “F1 is internal”
 | Agent runtime retries | does not create duplicate effect authority |
 | provider acceptance ambiguous | OUTCOME_UNKNOWN; no blind replay |
 | scheduled Agent after restart | stable occurrence; no fake Conversation history by default |
+| scheduled Agent overlaps active trigger run | occurrence consumed SKIPPED; no AgentRun and no backlog/catch-up |
 | EVENT has no consumer | absent/deferred, not decorative switch |
 | managed sync misses slots | max one catch-up, no backlog replay |
+| critical Brain health changes before response/effect | continuation/approval invalidated; context recomposed; no silent use |
+| audit-required record cannot persist | operation FAIL CLOSED; ordinary telemetry degradation remains a separate class |
 | telemetry says success but owner fact absent | NOT_PROVEN/pending/unknown |
 | execution usage unavailable | UI says missing/unknown, never zero cost/tokens by invention |
 | dashboard query fails | failure, never successful empty |
@@ -1292,6 +1386,8 @@ C-014 lifecycle/duplication
 R11-A census
 R11-B corrected candidate reconciliation
 R11-E Round-1 findings
+R11-F Fresh Actor review
+R11-G independent Fable review + accepted FBL-01..17 adjudication
 ```
 
 Detailed accepted homes remain controlling until R11 final ratification rewires discovery.
@@ -1321,4 +1417,4 @@ technology qualification                          = not overstated
 new Product authority intentionally invented       = NO
 ```
 
-**Next:** correct/enrich `ARCHITECTURE-BASELINE.md`, then rerun R11-E Round 2 before Fresh Actor/Fable review.
+**Next:** present this corrected candidate at R11-H for explicit operator ratification. It is not current authority before that act; Package B remains paused/not opened.

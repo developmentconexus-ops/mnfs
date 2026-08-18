@@ -1,6 +1,6 @@
 # Conexus — Current Architecture Baseline
 
-> **Status:** CANDIDATE / R11-D — ROUND-1 COHERENCE CORRECTED / NOT YET CURRENT AUTHORITY  
+> **Status:** CANDIDATE / R11-D — ROUND-3 CORRECTED / RE-COHERENCE PASS / NOT YET CURRENT AUTHORITY\
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
 > **Product meaning:** [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) — candidate until R11 ratification  
 > **Decision routing:** [DECISION-RECONCILIATION.md](DECISION-RECONCILIATION.md) — candidate until R11 ratification  
@@ -19,7 +19,7 @@ This is a current-state architecture projection, not a second detailed architect
 
 # 1. Architecture in one sentence
 
-Conexus F1 is a **Node/TypeScript modular-monolith Hub with PostgreSQL-backed authoritative control state**, Project-owned Git/business-data/Release lifecycles, a separate Workspace Brain Git authority, Workspace-owned Connections, a Hub-owned Capability Gateway for governed data/effects/credential last-mile, a **Mastra AgentController + E2B Builder runtime** for Project Changes, a **direct Mastra Agent Product Agent Runtime** derived from exact Releases, a bounded Managed Application Runtime for Project apps/jobs, and an agent-first React/TypeScript/Vite/TanStack Product shell; every runtime/provider/storage mechanism remains subordinate to Conexus owner facts, current authorization and exact immutable composition.
+Conexus F1 is a **Node/TypeScript modular-monolith Hub with PostgreSQL-backed authoritative control state**, Project-owned Git/business-data/Release lifecycles, a separate Workspace Brain Git authority, Workspace-owned Connections, a Hub-owned Capability Gateway for governed data/effects/credential last-mile, a **Mastra AgentController + E2B Builder runtime** for Project Changes, a **direct Mastra Agent Production Agent Runtime (PAR)** derived from exact Releases, a bounded Managed Application Runtime for Project apps/jobs, and an agent-first React/TypeScript/Vite/TanStack Product shell; every runtime/provider/storage mechanism remains subordinate to Conexus owner facts, current authorization and exact immutable composition.
 
 ---
 
@@ -122,7 +122,7 @@ F1 is a modular monolith with explicit semantic owners:
 | **Identity & Access** | Account identity/auth/session, memberships, grants, role assignments, effective surface access context | domain preconditions, external effects, Release eligibility, business-data truth |
 | **Workspace** | Workspace, Area, organizational structure/lifecycle | Account identity, Project internals, Brain semantic content, Connection credentials |
 | **Project** | Project identity/lifecycle, Project Baseline, explicit Brain/Connection binding intent, Project-level composition intent | Workspace resources themselves, runtime implementation, external effect authority |
-| **Builder** | Change, Plan/current plan items, WorkUnit, Builder ActorRun, checkpoints/correctness coordination, Findings/routing, CodingSession relationship | Project business authority, Product Agent runtime truth, provider/runtime authority |
+| **Builder** | Change, Plan/current plan items, WorkUnit, Builder ActorRun, checkpoints/correctness coordination, Findings/routing, CodingSession relationship | Project business authority, PAR runtime truth, provider/runtime authority |
 | **Artifact Registry** | immutable compiled ArtifactRevision identity/digest/payload/availability | authored Git truth, active serving, business meaning of each artifact kind |
 | **Connections** | Connection logical identity/lifecycle, qualification/current logical credential relationship | plaintext/ciphertext secret-byte ownership, external effect execution |
 | **Capability Gateway** | governed Query/Action/Integration execution, effect admission/replay/idempotency, credential last-mile, execution receipts | Project/Brain meaning, Account identity, Product Agent lifecycle, model-spend authority |
@@ -250,6 +250,8 @@ Opaque encrypted secret-byte/crypto mechanism behind the narrow `CredentialBacke
 
 Connections owns logical credential handles/grant facts; Gateway receives plaintext only at trusted last-mile use. CredentialBackend is not a generic Secret domain.
 
+Outside the trusted Hub boundary, no single compromise path/location/credential may yield both the Connection ciphertext backup set and root/recovery-key material. F1 transient acquired tokens are memory-only; no durable transient-token cache is admitted.
+
 ## 5.9 Backup material
 
 Operational recovery state, not current application authority while the system is running. Recovery may reconstruct durable owner truth; it may not fabricate newer/cleaner semantic truth than recovered Evidence establishes.
@@ -278,7 +280,14 @@ owner A arbitrary SQL
 -X-> object-owner / superuser / BYPASSRLS authority
 ```
 
-Only explicitly justified owner-crossing atomicity/audit capabilities may cross normal boundaries.
+The F1 cross-owner domain atomicity set is closed:
+
+```text
+1. CreateProject     → prj + iam initial grant
+2. effect admission → gw + par approval claim
+```
+
+Audit-required same-transaction paths receive only the narrow append capability needed for `obs.audit_record`; they do not gain OBS read/update/delete authority. No generic cross-owner UnitOfWork exists.
 
 Migration/provisioning/backup credentials with broader operational power remain separate from normal request/runtime roles.
 
@@ -303,6 +312,17 @@ Project query/action/migrator role
 Physical co-location never weakens the matrix.
 
 RLS is not a universal Role/Area/permission engine. Canonical current authorization remains application/domain authority.
+
+## 6.4 CR-1 — current-authority serialization × owner isolation
+
+A security-sensitive mutation that consumes mutable authority owned elsewhere must conflict/serialize with concurrent revoke/narrow through the protected commit:
+
+```text
+stale authority pre-read + concurrent revoke/narrow
+-X-> protected mutation commits
+```
+
+The same realization must preserve owner-scoped persistence: the consuming owner cannot directly read/write/lock unrelated `iam` state, `SET ROLE` into another owner or use a broad umbrella role. 3N/3O must prove both sides together; the exact primitive remains derived Realization Planning.
 
 ---
 
@@ -344,6 +364,14 @@ Project
 ```
 
 F1 = one canonical source repo per Project.
+
+For every software-publishing Project, the approved Baseline carries the closed F1 fact:
+
+```text
+ApplicationRuntimeProfile = MANAGED | DEDICATED
+```
+
+Both profiles share Project/Change/Builder/verification/Release and semantic contracts inside one Factory. `MANAGED` is realized by the Managed Application Runtime; `DEDICATED` remains independently executable and crosses into Conexus only through explicit admitted contracts. Profile choice is material Baseline authority; there is no automatic conversion, plugin registry or second Factory. Physical DEDICATED topology remains deferred to its first real consumer.
 
 ## 7.3 Project Baseline
 
@@ -429,7 +457,7 @@ root-cause/correction notes
 
 It is not operational state authority.
 
-A structured status block may be checked mechanically against the Hub-owned Plan revision/state; contradictory/stale structured status fails closed. Free prose remains context, not state authority.
+At SHARE, a fenced structured status block **must** be checked mechanically against the Hub-owned `planRevision` and current item state. A stale revision or incompatible `statusCode` fails closed. Free prose remains context, not state authority.
 
 ## 8.4 Acceptance completeness
 
@@ -509,6 +537,31 @@ FRESH_BASE
 CONTINUE_LINEAGE
 ```
 
+### 9.4.1 Immutable lineage admission
+
+Every write-capable ActorRun receives one immutable admission disposition. `CONTINUE_LINEAGE` requires current compatibility, verified physical continuity, established quiescence and no material contamination:
+
+```text
+FAILED alone                         -X-> authorize reuse
+FAILED + positively admitted basis   → continuation may be admitted
+CANCELLED predecessor                → explicit applicable-authority admission required
+unknown/orphan basis                 → FRESH_BASE
+```
+
+If an admitted continuation later fails binding/quiescence/continuity gates, that ActorRun aborts or terminalizes with the typed basis; it never silently downgrades to `FRESH_BASE`. A later successor may receive a fresh admission.
+
+### 9.4.2 Output custody and cancellation truth
+
+```text
+runtime output X
+→ Hub-side durable custody + exact identity verification
+→ only then producedOutputRef/presentation authority
+
+Builder commits ActorRun CANCELLED
+→ best-effort physical abort/inspection
+→ late output/snapshot is telemetry/quarantine only and never regains authority
+```
+
 ## 9.5 E2B substrate
 
 ```text
@@ -557,6 +610,21 @@ DEDICATED private key
 ```
 
 Model-provider calls are control-side. Historical guest LLM provider key is deleted.
+
+Any guest-readable capability is Hub-minted, bound to exact Project/ActorRun/consumer/scope, bounded, server-expiring and server-revocable with current validation on every use. The guest cannot mint, refresh or widen it; E2B pause/resume never preserves authority after server expiry/revocation.
+
+## 9.7 Material verifier independence
+
+Material verification requires both fresh cognition and fresh candidate materialization:
+
+```text
+exact candidate X under Hub custody
+→ fresh verifier context
++ fresh independent materialization of X
+→ verifier report binds exact X
+```
+
+The verifier cannot run against the implementer's live mutable lineage or mutate it.
 
 ---
 
@@ -694,6 +762,23 @@ real serving path GET/read
 
 HTTP 200 from stale content is not success.
 
+## 12.6 Current proof and Promotion concurrency
+
+```text
+change_acceptance/current proof
+→ rechecked at ComposeRelease
+→ rechecked immediately before material Promotion steps
+→ stale/inadmissible proof refuses progression without rewriting history
+```
+
+F1 admits at most one non-terminal Promotion per `(Project, PROD)`. Admission must use a conflicting Release-owner guard; the concurrent loser performs zero DDL, drain or other material step. This is refusal, not a Promotion queue/lease.
+
+## 12.7 Maintenance and post-serving truth
+
+Once a maintenance-required transition makes old serving incompatible, its serving-block survives Promotion failure/terminalization. Closing a Promotion never silently re-enables the old Release; exit remains forward-fix, validated restore or safe recovery Promotion.
+
+Governance/proof drift after `SERVED_VERIFIED` does not automatically deactivate or rewrite the active pointer. Current security/health/owner gates may still narrow individual operations, and future Promotion uses current proof.
+
 ---
 
 # 13. Environment architecture
@@ -713,7 +798,7 @@ No permanent generic staging environment F1.
 
 PROD is the same Project under separate environment/database/current Release authority.
 
-A production Project DB is isolated from DEV by connection/roles and is created/admitted according to the Release lifecycle, historically lazy on first Promotion where applicable.
+A production Project DB is isolated from DEV by connection/roles and is provisioned lazily on the first Promotion under the C-014 `PROVISIONING → READY | PROVISION_FAILED` semantics; partial/orphan provisioning is reconciled rather than treated as ready.
 
 ## 13.2 Environment ↔ Connection binding
 
@@ -734,7 +819,7 @@ owner grants / least privilege
 migration ledger + checksums
 schemaFingerprint real target
 required config bindings resolvable
-exact qualified Connection revision for target environment
+exact pinned Connection revision == exact active revision in target environment
 current Release pointer / expected generation
 served digest after switch
 ```
@@ -779,6 +864,16 @@ Conformance verifies required references/resolvability, never logs secret plaint
 # 16. Migration architecture
 
 Every production schema change remains a governed Release/migration transition with real validation, not a post-fact log.
+
+For every migration, the universal proof order is:
+
+```text
+QA-DB-1 → QA-DB-2 → QA-DB-3
+```
+
+The migration class changes fixture/rehearsal depth, never removes the gate. A periodic live-database × migration-ledger drift check remains required between builds.
+
+Promotion never rebuilds/recompiles a candidate under the same Release identity. Config/proof drift makes the candidate `STALE` and requires revalidation; it never silently produces different bytes under the same Release.
 
 Current F1 uses two semantic branches:
 
@@ -839,6 +934,8 @@ Connection bindings
 current external authorization
 runtime sessions/history
 ```
+
+The accepted C-014 base is no Project DB contents, credentials or Connection bindings. Excluding current external authorization and runtime sessions/history is a monotonic consequence of their separate owner authority, not a new copy authority.
 
 Destination must explicitly establish its own current Brain/Connection/environment/access bindings.
 
@@ -918,7 +1015,17 @@ Release source authority
 model-spend authority
 ```
 
-## 19.3 Retry law
+## 19.3 Caller surfaces and the 3A-R9 amendment
+
+Gateway caller context is surface-specific. Current callers include the bounded explicit:
+
+```text
+MANAGED_JOB
+```
+
+This is the 3A-R9 amendment to the older 3D-02 caller list. The Hub derives exact `JobRun`, Project/environment, Release, Job ArtifactRevision and admitted input/occurrence identity server-side; the caller cannot select arbitrary Project, Connection, Release, revision or environment. Package D must prove this context cannot widen authority.
+
+## 19.4 Retry law
 
 ```text
 runtime retry != effect retry permission
@@ -960,6 +1067,8 @@ Builder/PAR              → bounded final context composition
 
 `BrainRevision` is the semantic view of exact immutable `ArtifactRevision(kind=brain)`, not duplicate revision authority.
 
+Every admitted `ProjectBrainBinding` must carry/pass the accepted local conformance proof, including required grain/uniqueness assertions; inheriting semantic meaning is not proof that the Project realizes it correctly.
+
 ## 20.3 Brain is not memory/RAG
 
 ```text
@@ -990,7 +1099,7 @@ No live inheritance.
 
 ## 20.5 Effective Brain context identity
 
-Current Brain/context proof can distinguish at least:
+Every relevant Brain runtime trace records all four identities:
 
 ```text
 brainDigest
@@ -1006,6 +1115,20 @@ A health/state change can alter the effective slice without mutating the immutab
 Brain delivery remains deterministic/bounded. Current architecture preserves hard limits such as `maxBrainTokens` / stable-context budget semantics at compile/deployment time.
 
 Dependency closure matters: a metric must not be injected without the critical caveat/binding/definition needed to interpret it safely. If the required bundle does not fit, fail compilation or omit the capability rather than silently drop the caveat.
+
+## 20.7 Content-security boundary
+
+```text
+real ERP data in Brain Git                              = FORBIDDEN
+sample_values / verified-query fixtures                 = enum | synthetic only
+sampleSource                                             = REQUIRED
+PII lint + secret scanning + human review               = REQUIRED
+custom_instructions command authorization/tools/
+  approvals/credentials/platform policy                 = FORBIDDEN
+Brain creates/widens grant, tool, data or platform scope = NEVER
+```
+
+Brain content is knowledge under the authority lattice, not a privileged control channel.
 
 ---
 
@@ -1023,7 +1146,7 @@ source dictionary/catalog metadata
 → published authority only after human Brain decision
 ```
 
-For Sankhya, native data dictionary/catalog sources can be used where available; profiling is targeted audit, not indiscriminate full-ERP scanning.
+For the current Sankhya consumer, Discovery is TDD*-first: native TDD dictionary/catalog plus PostgreSQL catalog precede directed profiling; profiling is targeted audit, not indiscriminate full-ERP scanning.
 
 Discovery source access occurs through trusted Hub/Gateway read-only authority. ERP credentials do not enter E2B merely for Brain semantic discovery.
 
@@ -1080,7 +1203,9 @@ CHECK_ERROR
 
 Health is an operational overlay; it never rewrites Git/immutable BrainPack.
 
-Critical numeric/effectful semantics marked SUSPECT/INVALID can block dependent capability use according to current severity/type policy rather than being silently consumed.
+Critical numeric/effectful semantics marked `SUSPECT`/`INVALID` **block** dependent use under the accepted severity/type policy rather than being silently consumed.
+
+Every Brain-dependent AgentRun pins a health snapshot. Before final response and before any effect/approval execution, critical dependency health is rechecked; critical change invalidates continuation/approval and recomposes context. Brain-dependent approval binds `effectiveBrainSliceDigest`.
 
 ---
 
@@ -1171,9 +1296,33 @@ proposalRef + args
 
 Mismatch to the sealed subject fails closed. Mastra `toolCallId` is correlation only.
 
+## 24.7 Product-Agent `SCHEDULE`
+
+Product-Agent recurrence is PAR-owned and distinct from MAR managed-sync catch-up:
+
+```text
+schedule wake
+→ guarded PAR schedule-fire ingress
+→ validate current trigger/revision/schedule
+→ stable intended-slot identity before AgentRun admission
+→ consume cursor scoped by (TriggerId, TriggerRevision)
+→ enforce single-flight
+→ resolve/pin exact current Release
+→ admit AgentRun
+```
+
+```text
+valid occurrence + active trigger-origin AgentRun
+→ consume occurrence as SKIPPED
+→ no AgentRun
+→ no hidden backlog/catch-up
+```
+
+Schedule fire never executes the Product Agent directly. Exact transport remains Package-B proof.
+
 ---
 
-# 25. Builder ↔ Product Agent runtime isolation
+# 25. Builder ↔ Production Agent Runtime isolation
 
 ## 25.1 Role-specific Mastra
 
@@ -1257,9 +1406,10 @@ ToolProjection compiles exact admitted owner resources such as:
 Project Query
 Project Action
 Integration Operation
-AnalyticQuery surface where admitted
 explicit platform-native tool with real consumer
 ```
+
+AnalyticQuery remains an admitted Brain read regime, but it is **not** an automatic Product-Agent ToolProjection source. A named current consumer plus exact Release/tool authority must explicitly admit that use.
 
 No `execute(anySlug, anyInput)` capability primitive is exposed to the model.
 
@@ -1297,9 +1447,12 @@ Current laws:
 ```text
 manual + fixed interval
 single-flight + coalesce
-one catch-up after downtime
+after downtime, at most one catch-up only when the current served Release still requires
+  sync and current freshness is behind
 not N missed-slot replay
 ```
+
+This is the bounded MAR managed-sync profile. It is not a shared recurrence abstraction and does not apply to Product-Agent `SCHEDULE` skipped slots.
 
 Rejected:
 
@@ -1346,6 +1499,8 @@ outstandingModelLiabilityUsd
 
 At most one unsettled billable liability per run in F1 baseline.
 
+An admitted run cap is immutable upward: there is no in-place mid-run top-up. Materially more authority requires a fresh owner admission path.
+
 ## 28.2 Pre-provider gate
 
 Before every physical billable model attempt:
@@ -1361,6 +1516,8 @@ run current/admissible
 → commit
 → only then provider I/O
 ```
+
+Streaming follows the same gate: reserve the full qualified maximum liability before the stream/provider attempt starts.
 
 ## 28.3 Retry/fallback
 
@@ -1411,6 +1568,13 @@ runtime
 ```
 
 Producer-supplied run ID = cross-check only. Effective target identity comes from the owner dispatch closure/opaque handle.
+
+```text
+owner dispatch target identity != producer payload identity
+→ refuse proposal
+→ diagnostic/Finding as applicable
+-X-> terminalize or mutate another run
+```
 
 ## 29.2 Duplicate/lost response
 
@@ -1471,7 +1635,18 @@ Domain run may span `0..N` traces.
 
 OpenTelemetry is preferred vendor-neutral observation plumbing where useful, not correctness authority.
 
-A perfect one-tree trace is not required. High-cardinality owner IDs belong mainly in traces/logs/correlation records, not default metric dimensions. OTel baggage is not current authority and is not used by default for sensitive owner IDs.
+A perfect one-tree trace is not required. High-cardinality owner IDs belong mainly in traces/logs/correlation records, not default metric dimensions.
+
+OTel baggage excludes by default:
+
+```text
+credentials
+security decisions / mutable authority facts
+PII / secrets
+all Conexus owner IDs
+```
+
+Baggage is cleared/omitted before external or untrusted egress unless a future explicitly admitted crossing says otherwise. Trace context remains correlation only.
 
 ## 30.4 Producer trust classes
 
@@ -1514,7 +1689,23 @@ sandbox wall-clock monetary cost separately from LLM cost
 
 Rollup can aggregate by turn/run/conversation/Project/period without creating aggregate tables as new business authority.
 
-## 30.6 Required Evidence
+## 30.6 Three degradation classes
+
+```text
+ordinary Operational Telemetry missing
+→ degraded/MISSING; domain work may continue where telemetry is not required
+
+audit-required durable AuditRecord unavailable
+→ FAIL CLOSED
+
+verification-required Evidence missing
+→ NOT_PROVEN / INCONCLUSIVE
+-X-> PASS
+```
+
+Audit Trail and Operational Telemetry remain distinct meanings inside the Observability & Audit owner.
+
+## 30.7 Required Evidence
 
 If an assertion requires a class of runtime evidence:
 
@@ -1713,9 +1904,32 @@ Project navigation
 
 No second IDE/editor mutation authority.
 
+Load-bearing projection laws:
+
+```text
+working != blocked != waiting-for-user != completed
+building next candidate != currently inspectable last-good Preview
+```
+
+Building the next candidate must not require destroying/replacing the last usable Preview before the new candidate is ready.
+
 ## 33.7 Honest client projection
 
 Frontend/cache is projection only. It preserves loading/empty/failure/partial, source/freshness/coverage/provenance, exact approval subject and Release/serving distinctions.
+
+## 33.8 Contextual inspectability / progressive disclosure
+
+```text
+REAL PRODUCT RESOURCES
+→ directly inspectable: Data, Capabilities, Integrations, Product Agents, Brain binding,
+  Versions, Preview, Code/Diff and Activity/Evidence entry
+
+PLATFORM MACHINERY
+→ progressive detail: WorkUnit/ActorRun internals, Gateway/Registry/CAS mechanics,
+  Mastra/E2B refs, owner rows and technical digests unless material
+```
+
+`Ask Conexus about this` passes selected resource/context to the contextual assistant under current server-derived authorization. It grants no new authority, capability or cross-Project access.
 
 ---
 
@@ -1794,7 +2008,7 @@ one Node/TS Hub application process
 ├── Managed Application Runtime
 ├── Capability Gateway
 ├── Builder control-side runtime
-└── Product Agent Runtime
+└── Production Agent Runtime
 
 PostgreSQL cluster
 ├── hub_control
@@ -1826,11 +2040,15 @@ remote plaintext HTTP = DENY
 
 VPN is reachability, never authorization.
 
+Remote production HTTPS must be normally trusted by first-user browsers; certificate-warning click-through is not a normal production state. Placement must also preserve an out-of-band infrastructure/host path to administer or stop ingress/application independently from the served Conexus web path.
+
 ## 35.5 MANAGED serving
 
 Hub/MAR serves exact active-Release bytes directly in the baseline. No standalone MAR service/CDN/load balancer/reverse-proxy architecture is required for optionality.
 
 Concrete hypervisor, Linux distro, VM sizing, hostname/DNS/TLS termination, service manager, ports/firewall/storage paths belong derived Realization Planning/activation proof.
+
+Development/proving state can never silently become PROD authority. Activation requires explicit production identity/configuration and proof; failure blocks activation rather than relabeling the proving environment.
 
 ---
 
@@ -2046,6 +2264,17 @@ first vertical live-source/read-model reconciliation
 Golden benchmark / Worker Eval integration into engineering system
 ```
 
+Named proof routing remains explicit:
+
+```text
+CX-BUILDER-MASTRA-01   = Package-A deciding proof / COMPLETE for tested properties
+CX-BRAIN-V0-01         = before first Brain-backed deploy
+CX-BRAIN-DISCOVERY-01  = before Brain Discovery implementation/activation
+CX-BRAIN-FEEDBACK-01   = before Brain feedback implementation/activation
+```
+
+The Brain identities are current downstream obligations, not already-qualified results.
+
 A future Realization Plan must compile these into the first slice that can actually falsify the property; it may not delete them because they were not executed in 3L.
 
 ---
@@ -2077,6 +2306,8 @@ SSO/SCIM/passkeys
 public/embed Published Apps
 richer app roles/data scoping
 Brain vector/RAG index
+Brain G2 Graph projection for measured traversal/impact/dependency reasoning
+Brain G4 Advanced knowledge governance for a real ontology/DMN-BPMN/temporal/formal-rule consumer
 broader Project export/import/clone workflows
 ```
 
@@ -2246,6 +2477,8 @@ R11-A census/completion
 R11-B corrected Decision Reconciliation candidate
 R11-C corrected Product Contract candidate
 R11-E Round-1 coherence findings
+R11-F Fresh Actor review
+R11-G independent Fable review + accepted FBL-01..17 adjudication
 ```
 
 Detailed accepted homes remain controlling until R11 final ratification rewires discovery.
@@ -2254,4 +2487,4 @@ Detailed accepted homes remain controlling until R11 final ratification rewires 
 
 # 50. Exact next action
 
-> **R11-E Round 2 — cold whole-product contradiction/completeness pass across Product Contract, Architecture Baseline and Decision Reconciliation. Verify all 14 Round-1 findings are actually corrected, no stale mechanism reappears, ownership remains singular, future seams remain non-dormant and qualification strength remains honest. If clean, create the current README/router candidate and perform R11-F Fresh Actor review before Fable.**
+> **Present this corrected candidate at R11-H for explicit operator ratification. It is not current authority before that act; do not open Package B.**

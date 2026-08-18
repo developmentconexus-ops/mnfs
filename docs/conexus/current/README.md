@@ -1,6 +1,6 @@
 # Conexus — Current Product & Architecture Entrypoint
 
-> **Status:** CANDIDATE / R11-F INPUT — NOT YET CURRENT AUTHORITY  
+> **Status:** CANDIDATE / R11 ROUND-3 CORRECTIONS VERIFIED / RE-COHERENCE PASS — NOT YET CURRENT AUTHORITY\
 > **Whole-product checkpoint:** 3A-R11 ACTIVE  
 > **Phase 3:** IN PROGRESS  
 > **Technology Qualification:** 3L IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE  
@@ -11,7 +11,7 @@
 
 This page is the intended short entrypoint to the **current Conexus Product and architecture** after R11 final ratification.
 
-During R11 it remains a candidate. Detailed accepted authority still controls if any current-tree projection disagrees with its semantic home.
+During R11 it remains a candidate. Detailed accepted authority still controls if any current-tree projection disagrees with its semantic home; only explicit R11-H operator ratification can promote this tree.
 
 ---
 
@@ -74,7 +74,7 @@ persistence authorities
 Builder / E2B
 Brain / Connections / Gateway
 Registry / Release / Promotion
-Product Agent Runtime
+Production Agent Runtime (PAR)
 Builder ↔ PAR isolation
 managed execution
 model spend
@@ -115,7 +115,7 @@ docs/conexus/phase3/LEDGER.md
 → exact accepted 3A/3B/3C/... authority named for the question
 ```
 
-During R11, the operator-approved activation record supersedes the stale `Package B NEXT` wording for execution routing:
+During R11, the live Phase-3 router and operator-approved activation record require:
 
 ```text
 3A-R11 = ACTIVE
@@ -148,7 +148,7 @@ Trusted Conexus Hub
 ├── PostgreSQL authoritative owner state
 ├── Capability Gateway
 ├── Builder control runtime
-├── Product Agent Runtime
+├── Production Agent Runtime (PAR)
 └── Managed Application Runtime
 
 Builder
@@ -181,12 +181,19 @@ Change != WorkUnit != Builder ActorRun
 Builder ActorRun != Product AgentRun != Gateway EffectAttempt != Promotion
 Project Git != Workspace Brain Git != hub_control != Project DB != Registry/CAS
 Workspace owns Brain/Connections; Project owns explicit typed binding intent
+Project ARCHIVED freezes ordinary authoring/future intent expansion; it does not unpublish,
+stop current serving, stop pre-existing enabled Product-Agent triggers or stop existing
+managed recurrence by itself; explicit trigger DISABLE remains allowed narrowing
 Control Plane != Preview != Published App authorization
 administer != use
 approval binds one exact sealed subject
 OUTCOME_UNKNOWN != safe retry
 Release is exact immutable composition; no mutable latest
 telemetry/trace != owner F5/terminal truth
+Product-Agent SCHEDULE overlap is consumed SKIPPED with no backlog/catch-up;
+MAR managed-sync downtime may admit at most one catch-up when freshness is behind
+ordinary telemetry missing may degrade; audit-required persistence failure is FAIL CLOSED;
+verification-required Evidence missing is NOT_PROVEN/INCONCLUSIVE
 Brain != agent/runtime memory
 future seam != dormant implementation
 selected architecture != qualified behavior
@@ -283,6 +290,7 @@ Platform Consultant / contextual Conexus assistant
 Brain assisted Discovery — machine propose / human decide
 Brain health/drift/conformance
 static Query + restricted AnalyticQuery read regimes
+closed ApplicationRuntimeProfile = MANAGED | DEDICATED inside one Factory
 Project duplication — no data/credentials/bindings by default
 private-by-default attachment/blob access
 Golden Budget Analyzer benchmark
@@ -379,23 +387,27 @@ R11 itself:
 
 ```text
 R11-A Authority Census             COMPLETE
-R11-B Decision Reconciliation      CANDIDATE / Round-1 corrected
-R11-C Product Contract             CANDIDATE / Round-1 corrected
-R11-D Architecture Baseline        CANDIDATE / Round-1 corrected
+R11-B Decision Reconciliation      CANDIDATE / ROUND-3 CORRECTED
+R11-C Product Contract             CANDIDATE / ROUND-3 CORRECTED
+R11-D Architecture Baseline        CANDIDATE / ROUND-3 CORRECTED
 R11-E Coherence Round 1            COMPLETE / 14 projection findings
 R11-E Coherence Round 2            COMPLETE / 14 closed / 0 material findings
-R11-F Fresh Actor review           NEXT
-R11-G independent Fable review     NOT RUN
-R11-H operator ratification        NOT RUN
+R11-F Fresh Actor review           COMPLETE / PASS
+R11-G independent Fable review     COMPLETE / BOUNDED CORRECTION REQUIRED
+Fable finding adjudication         COMPLETE / FBL-01..17 ACCEPTED
+Round-3 corrections                COMPLETE / VERIFIED
+Round-3 closure-keyed coherence    COMPLETE / PASS
+Round-3 Fresh Actor re-review      COMPLETE / PASS
+R11-H operator ratification        NEXT / EXPLICIT OPERATOR ACT REQUIRED
 ```
 
 ---
 
 ## 12. Exact next action
 
-> **Perform R11-F Fresh Actor review of this four-file current tree. If a fresh reader can reconstruct the same Product, architecture, status, qualification boundaries and next action without relying on conversation/history, prepare the independent Fable whole-product review.**
+> **Present the corrected whole-product contract/baseline/reconciliation at R11-H for explicit operator ratification. Do not treat this candidate tree as current authority before that act.**
 
-Package B remains paused until R11 passes Fable/adjudication and receives final explicit operator ratification.
+Package B remains paused and not opened until R11-H receives final explicit operator ratification.
 
 ---
 

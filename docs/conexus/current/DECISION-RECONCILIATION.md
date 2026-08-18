@@ -1,6 +1,6 @@
 # Conexus — Decision Reconciliation Registry
 
-> **Status:** CANDIDATE / R11-B — ROUND-1 COHERENCE CORRECTED / NOT YET CURRENT AUTHORITY  
+> **Status:** CANDIDATE / R11-B — ROUND-3 CORRECTED / RE-COHERENCE PASS / NOT YET CURRENT AUTHORITY\
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
@@ -10,7 +10,7 @@ This registry answers one question:
 
 > **Which generation of a Conexus decision is current, where does its detailed meaning live, what survives from older decisions, what must not be resurrected, and what remains genuinely deferred/open?**
 
-Until R11 passes Round-2 coherence, Fresh Actor review, independent Fable review, finding adjudication and final operator ratification, this file remains a candidate routing projection.
+Round-3 correction, closure-keyed coherence and repeated Fresh Actor review are complete/pass. This file remains a candidate routing projection until explicit R11-H operator ratification.
 
 ---
 
@@ -83,7 +83,7 @@ Module ownership
 → 3C-01..3C-15 + 3C-R1
 
 Dependencies / orchestration
-→ 3D-01..3D-04 + 3D-R1
+→ 3D-01..3D-04 + 3D-R1, amended by 3A-R9 for MANAGED_JOB Gateway caller surface
 
 Data ownership / durable meaning
 → 3E-01..3E-02 + 3E-R1
@@ -94,7 +94,7 @@ Contracts / API semantics
 Behavioral / state semantics
 → 3G-01..3G-08 + 3G-R1
 
-Builder / Product Agent runtime realization
+Builder / Production Agent Runtime realization
 → 3A-R5 + 3H-01..03 + 3H-R1
 
 Security / authorization / credentials / spend / trust
@@ -167,7 +167,7 @@ review finding != requirement authority
 | **C-008** | **PARTIALLY_SUPERSEDED / SUBSTRATE QUALIFIED WITH GUARD** | E2B Builder substrate; full-machine agency; durable privileged secrets outside guest; Hub-mediated Git/result custody; governed egress; BuildValidationDatabase distinction. | Pi realization, guest LLM provider key, historical hard session-cutoff doctrine, stock write retry across unseen physical recreation. | 3A-R5, 3H-01, 3I-02, 3L-A |
 | **C-009** | **PRESERVE AS RATIONALE/EVIDENCE** | Mechanical invariants beat model goodwill; maintenance must be fixed by class; live credential/egress honesty; orphan/guarantee-break detection; unknown remains unknown. | Mitra-specific runtime/tool/session behavior is not Conexus architecture. | C-009 as Evidence; later authority owns mechanisms |
 | **C-010** | **PARTIALLY_SUPERSEDED** | Product Agent as Project-owned git-first artifact; immutable revision/projection; Conversation/AgentRun/ApprovalRequest; bounded tools; Gateway effects; budgets/model identity; mechanical HITL. | Vercel AI SDK light loop, current `ModelProviderAdapter` realization, “Mastra rejected” premise, old continuation mechanics. | 3C-10, 3F-03, 3G-05/06, 3H-02, 3I-03, 3A-R10 |
-| **C-011** | **REFINED / CORE PRESERVED** | Workspace Brain; SEMANTIC/KNOWLEDGE/EVIDENCE; own Git source; immutable Registry revision; explicit ProjectBrainBinding; assisted Discovery; KnowledgeProposal; health/drift; AnalyticQuery; hard context budgets. | Brain != RAG/memory; `BrainRevision` is semantic view of exact ArtifactRevision; live inheritance rejected. | 3B-15, 3C-09, 3A-R7/R10 |
+| **C-011** | **REFINED / CORE PRESERVED** | Workspace Brain; SEMANTIC/KNOWLEDGE/EVIDENCE; Brain != RAG/memory; own Git source; immutable Registry revision; explicit ProjectBrainBinding; live inheritance rejected; assisted Discovery; KnowledgeProposal; health/drift; AnalyticQuery; hard context budgets. | Early case-1 read-only Agent v0 is superseded by 3K-03: the first vertical requires no Product Agent. AnalyticQuery does not automatically enter a Product Agent ToolProjection. `BrainRevision` is the semantic view of exact ArtifactRevision. | 3B-15, 3C-09, 3K-03/04, 3A-R7/R10 |
 | **C-012** | **REFINED / CORE PRESERVED** | Versioned reproducible scaffold; rich infrastructure/poor Product features; Generated vs Platform-Contract vs App-Owned; React/TS/Vite/TanStack; fail-closed generated contracts; honest UI; first-build conformance. | 3K owns current Product shell; exact implementation probes remain downstream, not pre-proven by architecture. | 3K, 3A-R10 |
 | **C-013** | **REFINED / CORE PRESERVED** | Causal observation; producer trust; usage/cost states; live checklist; tasks-purpose memory; unknown != zero; no blind ambiguous retry; completion ladder through SERVED_VERIFIED. | Pi-specific telemetry adapter and generic `agent_event` durable-table/owner wording do not survive current 3E/OBS inventory; F5 owner control is separate from telemetry. | 3C-13, 3E, 3H-03, 3K-02, Package E |
 | **C-014** | **REFINED / CORE PRESERVED** | Immutable ReleaseManifest composition; branch/Change Git model; exact environments/config; migration gates; EnvironmentConformance; Promotion/CAS/served verification; Project duplication semantics. | Early owner labels/state spellings refine through 3G/3J; managed schedule semantics moved to 3A-R9. | 3C-11, 3G-08, 3J, 3K, 3A-R9 |
@@ -188,7 +188,7 @@ C-003 remains a Product requirement source, but these historical phrases must **
 | REG-4 `list → update | create` mutable registry provisioning | git-first source + compilation/Release path; no mutable registration API as authoring authority |
 | REG-5 one response envelope | **SUPERSEDED:** 3F owner-specific contracts; no `UniversalEnvelope` |
 | CER-1 Brain inherited live by every Project | **REFINED:** Workspace Brain + explicit pinned ProjectBrainBinding; live inheritance rejected |
-| AGT-3 cron/webhook + service identity | headless Product Agent survives; `SCHEDULE` admitted; `EVENT` deferred; Product Agent runtime identity is not authorization principal |
+| AGT-3 cron/webhook + service identity | headless Product Agent survives; `SCHEDULE` admitted; `EVENT` deferred; Production Agent Runtime identity is not authorization principal |
 | AGT-4 Platform Consultant “uses Brain mechanism” | Platform Consultant survives as Builder-owned Control Plane capability; platform knowledge is not Workspace Brain content |
 | AGT-5 historical `AgentTaskSession` transport | interactive Product Agent intent survives through Conversation/AgentRun + Project-designed surface; exact historical transport not authority |
 | PUB-2 URL-fragment bearer/token flow | **SUPERSEDED:** server-side session/opaque cookie authority under C-015/3I |
@@ -246,11 +246,19 @@ Managed Application Runtime
 
 Semantic owners do not imply separate services/processes/databases.
 
+3C-R1 also preserves one closed cross-cutting Project fact:
+
+```text
+ApplicationRuntimeProfile = MANAGED | DEDICATED
+```
+
+Both profiles remain one Factory; profile selection is material Project Baseline authority. `DEDICATED` physical topology and automatic profile conversion are not implied.
+
 ## 3D — Dependency Architecture
 
 **Disposition:** `CURRENT`.
 
-Modular monolith; typed/direct-call-first owner ports; no cross-owner table/internal access; Gateway last-mile; runtimes receive exact owner projections; no generic orchestrator by convenience.
+Modular monolith; typed/direct-call-first owner ports; no cross-owner table/internal access; Gateway last-mile; runtimes receive exact owner projections; no generic orchestrator by convenience. Readers of the older 3D-02 caller list must apply the bounded 3A-R9 amendment adding explicit `MANAGED_JOB` without authority widening.
 
 ## 3E — Data Architecture
 
@@ -392,6 +400,8 @@ Package A does not qualify Product Agent, model economics, managed execution or 
 | generic `agent_event` table/owner | current 3E/OBS owner-specific durable inventory; old type/table wording must not resurrect |
 | telemetry/trace = successful owner result | prohibited; owner F5/write-once truth only |
 | memory/RAG framework as Brain | explicitly rejected; Brain remains Conexus semantic authority |
+| C-011 early case-1 read-only Agent | superseded by 3K-03; Budget Analyzer has no Product Agent requirement |
+| AnalyticQuery exists, therefore every Product Agent can use it | false; only an explicitly admitted named consumer/Release/tool projection may expose it |
 | perfect one-tree distributed trace required for correctness | not required; Conexus owner IDs span 0..N trace segments |
 | universal ResourceBinding | rejected; typed ProjectBrainBinding + ProjectConnectionBinding |
 | direct cross-Project DB/runtime reuse | rejected; explicit Platform/Brain/Connection reuse seams only |
@@ -430,6 +440,8 @@ SSO/SCIM/passkeys
 public/embed serving
 richer Published App roles/data scoping
 Brain vector/RAG index
+Brain G2 Graph projection on measured traversal/impact/dependency need
+Brain G4 Advanced knowledge governance on a real ontology/DMN-BPMN/temporal/formal-rule consumer
 Project clone/export beyond current bounded duplicate semantics
 ```
 
@@ -490,10 +502,17 @@ REJECTED F1
 
 # 12. R11 status
 
-R11-A found no irreconcilable accepted-authority conflict.
+```text
+R11-A census                         COMPLETE
+R11-E coherence rounds 1/2          COMPLETE
+R11-F Fresh Actor review            COMPLETE / PASS
+R11-G independent Fable review      COMPLETE / BOUNDED CORRECTION REQUIRED
+FBL-01..17 adjudication             COMPLETE / CORRECT_PROJECTION
+Round-3 corrections                 COMPLETE / VERIFIED
+Round-3 closure-keyed coherence     COMPLETE / PASS
+Round-3 Fresh Actor re-review       COMPLETE / PASS
+R11-H operator ratification         NEXT / EXPLICIT OPERATOR ACT REQUIRED
+Package B                           PAUSED / NOT OPENED
+```
 
-R11-E Round 1 found **14 candidate-projection defects but 0 material Product/architecture findings**. This corrected registry addresses the reconciliation-specific findings, especially trust-zone count and stale C-003/C-013 mechanism routing.
-
-It must still pass R11-E Round 2, R11-F Fresh Actor review and independent Fable review before ratification.
-
-**Next:** correct/enrich Product Contract and Architecture Baseline, then rerun whole-product coherence.
+No irreconcilable accepted-authority conflict or architecture reopen was found. **Next:** present the corrected candidate at R11-H for explicit operator ratification; do not treat it as current authority beforehand.

@@ -18,7 +18,7 @@
 ```text
 3L                                  = OPEN / IN PROGRESS
 Q0 Qualification Manifest           = APPROVED / COMPLETE
-Package A                           = NEXT / NOT STARTED
+Package A                           = IN PROGRESS / A1+A2 ADJUDICATED / A3 NEXT
 Packages B–E                        = NOT STARTED
 product implementation              = BLOCKED
 C-018                               = NOT YET RATIFIED
@@ -123,34 +123,39 @@ PG18 merely newer → NOT a qualification reason
 Current stable candidate set for 3L:
 
 ```text
-@mastra/core   = 1.55.0
-@mastra/memory = 1.24.0   # Package A OM candidate path only
-@mastra/pg     = 1.18.1
-@mastra/e2b    = 0.7.0
+@mastra/code-sdk = 1.1.2   # A3 native Codex OAuth surface
+@mastra/core     = 1.56.0
+@mastra/memory   = 1.25.0   # Package A OM candidate path only
+@mastra/pg       = 1.19.0
+@mastra/e2b      = 0.8.0
 ```
 
 Source-level compatibility facts checked at Q0:
 
 ```text
-@mastra/core 1.55.0
-→ exports ./agent-controller
+@mastra/core 1.56.0
+→ exports ./agent-controller and ./coding-agent
 
-@mastra/memory 1.24.0
+@mastra/memory 1.25.0
 → peer @mastra/core >=1.4.1-0 <2.0.0-0
 → Node >=22.13.0
 
-@mastra/pg 1.18.1
-→ peer @mastra/core >=1.51.0-0 <2.0.0-0
+@mastra/pg 1.19.0
+→ peer @mastra/core >=1.53.0-0 <2.0.0-0
 → Node >=22.13.0
 
-@mastra/e2b 0.7.0
-→ peer @mastra/core >=1.12.0-0 <2.0.0-0
+@mastra/e2b 0.8.0
+→ peer @mastra/core >=1.55.0-0 <2.0.0-0
 → depends on e2b ^2.29.1
 → Node >=22.13.0
-→ includes networking + snapshot-stop/resume + detached lifecycle surfaces needed by current Builder assumptions
+→ 0.8.0 changes the stale peer floor + Code Mode tool-name reuse, not the qualified lifecycle/network contract
+
+@mastra/code-sdk 1.1.2
+→ same stable release family as core 1.56.0
+→ exposes native openai-codex device OAuth/AuthStorage/provider surfaces used by A3
 ```
 
-`@mastra/e2b 0.7.0` is deliberately a stable known candidate, not a `latest` preference. A newer adapter enters only through an explicit Q0 pin revision before Package A and must rerun the criteria whose behavior changed.
+The Package A candidate family was explicitly repinned before A3 live execution to the current mutually compatible **stable** Mastra release family above. This is not a follow-`latest` policy: alpha/prerelease builds remain excluded, exact versions are frozen in the package lock, and any later version drift must rerun only criteria whose behavior may have changed.
 
 ### 5.2 Transitive lock closure
 
@@ -164,6 +169,20 @@ lockfile digest
 ```
 
 A semver range in an upstream package is **not** deciding identity.
+
+Current Package A latest-stable closure after approved repin:
+
+```text
+@mastra/code-sdk = 1.1.2
+@mastra/core     = 1.56.0
+@mastra/e2b      = 0.8.0
+@mastra/memory   = 1.25.0
+@mastra/pg       = 1.19.0
+e2b SDK          = 2.40.0
+package-lock SHA-256 = 7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5
+```
+
+The physical E2B SDK remained `2.40.0` across the repin. Package A requalifies changed Mastra surfaces separately from historical provider-live evidence rather than relabeling old evidence as new bytes.
 
 ---
 
@@ -246,7 +265,7 @@ A0 = persistent Change-scoped thread + OM OFF
 A1 = same shape + OM ON
 ```
 
-For A1, `@mastra/memory 1.24.0` is the candidate package pin.
+For A1, `@mastra/memory 1.25.0` is the current candidate package pin after the approved latest-stable repin.
 
 Current OM surfaces include model-bearing observer/reflector work, persisted observational state and async/buffering controls. Therefore OM cannot be enabled by a pure quality score alone.
 
@@ -457,7 +476,7 @@ The candidate versions above are **qualification identities**, not permanent pro
 ```text
 3L-Q0 = APPROVED / COMPLETE
 3L = OPEN / IN PROGRESS
-next = Package A — Builder Substrate + Cognition
+current = Package A — Builder Substrate + Cognition / IN PROGRESS / A3 NEXT
 
 Package A executes:
   CX-SBX-E2B-01 compiled against current authority

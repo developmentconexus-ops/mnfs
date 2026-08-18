@@ -33,7 +33,7 @@ No momento desta atualização:
 3A-R10 = APPROVED
 3L — Technology Qualification = IN PROGRESS
 3L-Q0 = APPROVED / COMPLETE
-Package A — Builder Substrate + Cognition = NEXT / NOT STARTED
+Package A — Builder Substrate + Cognition = IN PROGRESS / A1+A2 COMPLETE / A3 CODEX OAUTH SMOKE NEXT
 C-018 = NOT YET RATIFIED
 product implementation = BLOCKED
 PR #40 merge = explicit operator authorization required
@@ -184,7 +184,7 @@ ApplicationRuntimeProfile = MANAGED | DEDICATED
 3A-R10 checkpoint
 → 3L Technology Qualification
    Q0 COMPLETE
-   Package A NEXT
+   Package A IN PROGRESS — A3 CODEX OAUTH SMOKE NEXT
 → 3M Failure & Recovery
 → 3N Architecture Verification
 → 3O Vertical Architecture Proof Contract

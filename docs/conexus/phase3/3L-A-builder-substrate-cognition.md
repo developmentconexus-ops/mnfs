@@ -15,23 +15,25 @@ Package A bootstrap commit          = 15fa4de06423e8942f472a4878d80287b7a72b91
 A1/A2 lock materialization commit   = 2e096b82661bf44a8396b5e6169a07b7fad0e8b4
 A1/A2 deciding authority commit     = e2c245809ccc55e7437a61fe6438d58e6bce8791
 A3 Codex OAuth realignment commit   = 99d12284d3b09948ea13b9f14fe41b4838996e56
-A3 lock materialization commit      = 8f5ff76e27ed39db99e1e2612a19fd0523e447ae
+latest-stable repin commit          = 01ef4e0128b69d27136c3e426eab82af89605566
+latest-stable lock commit           = ce204d587a221c755c0eab8c302c78c4ec2cad4a
+A3 current-lock binding commit      = 3a82aaef064e4fa3fb443e8f6392ef884d110cf3
 Node                                = 24.18.0
 npm                                 = 11.16.0
 spike lockfileVersion               = 3
-A1/A2 package-lock SHA-256          = 6b506f505567d82dd94653fca14bb5bc6b7b5b2d5138f83b34123d02e93cb0ce
-A3 package-lock SHA-256             = 4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7
-@mastra/code-sdk                    = 1.1.1
-@mastra/core                        = 1.55.0
-@mastra/e2b                         = 0.7.0
-@mastra/memory                      = 1.24.0
-@mastra/pg                          = 1.18.1
+A1/A2 original package-lock SHA-256 = 6b506f505567d82dd94653fca14bb5bc6b7b5b2d5138f83b34123d02e93cb0ce
+current package-lock SHA-256        = 7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5
+@mastra/code-sdk                    = 1.1.2
+@mastra/core                        = 1.56.0
+@mastra/e2b                         = 0.8.0
+@mastra/memory                      = 1.25.0
+@mastra/pg                          = 1.19.0
 e2b SDK resolved transitively       = 2.40.0
 supply-chain Q0 deny-set            = PASS
 package lifecycle scripts at lock   = DISABLED
 ```
 
-Evidence remains bound to the exact bytes that produced it. The A3 Codex OAuth repin does not reinterpret A1/A2 evidence against a new lock.
+Evidence remains bound to the exact bytes that produced it. Historical A1/A2 deciding/live evidence keeps its original lock identity; the approved latest-stable repin is a separate affected-surface requalification and does not relabel old live evidence as new bytes.
 
 ## 2. Compiled Package A scope and proportionality
 
@@ -81,13 +83,20 @@ current dispatch set(...)
 
 This behavior is compatible with the current authority-currentness invariant. No architecture correction is required.
 
-Latest deciding A1 execution:
+Original deciding A1 execution:
 
 ```text
 6 tests / 6 pass / 0 fail
 ```
 
-A1 proves persistent cognition/runtime mechanics only. It does not borrow E2B physical behavior or model-bearing Builder quality from A2/A3.
+Latest-stable regression on `@mastra/core 1.56.0` + `@mastra/pg 1.19.0` under the current lock:
+
+```text
+P1/P4 + P2 + P3 + P21 + P27a + P27b = 6 / 6 PASS
+regression finding                     = NONE
+```
+
+The same six persisted-runtime invariants therefore remain qualified on the current stable family. A1 proves persistent cognition/runtime mechanics only. It does not borrow E2B physical behavior or model-bearing Builder quality from A2/A3.
 
 ---
 
@@ -155,6 +164,18 @@ E2BProcessManager.spawn(...)
    OR create a replacement physical sandbox
 → repeat the original operation once
 ```
+
+Latest-stable affected-surface regression on `@mastra/e2b 0.8.0`:
+
+```text
+adapter retry characterization = 3 / 3 PASS
+physical-incarnation guard     = 5 / 5 PASS
+transitive e2b SDK             = 2.40.0 / UNCHANGED
+0.8.0 release delta            = peer-floor + Code Mode tool-name reuse
+lifecycle/retry/network delta  = NONE IDENTIFIED in 0.8.0 release record
+```
+
+Therefore the expensive provider-live suite is not replayed merely because the wrapper package version changed. Historical A2 live evidence remains explicitly bound to its original adapter bytes; the changed wrapper surfaces that could affect the confirmed reincarnation finding/guard were requalified on 0.8.0, while the physical E2B SDK and previously qualified provider-side lifecycle/network substrate stayed unchanged.
 
 #### F-3L-A-01 — automatic write retry can cross physical incarnation
 
@@ -284,13 +305,16 @@ Owner metadata + provider inventory are therefore sufficient substrate mechanics
 Latest deciding suite:
 
 ```text
-A2 live tests          = 10 / 10 PASS
-A1 local runtime tests = PASS
-adapter contract tests = PASS
-physical guard tests   = PASS
-Package A workflow     = SUCCESS
-lock bootstrap         = SUCCESS
-Documentation          = SUCCESS
+historical A2 live tests                  = 10 / 10 PASS
+current A1 latest-stable regression       = 6 / 6 PASS
+current @mastra/e2b 0.8 adapter regression= 3 / 3 PASS
+current physical-incarnation guard        = 5 / 5 PASS
+current A3 non-billable contracts         = 12 / 12 PASS
+current Codex OAuth imports               = PASS
+current live-script syntax checks         = PASS
+Package A workflow                        = SUCCESS
+lock bootstrap                            = SUCCESS
+Documentation / npm run verify            = SUCCESS
 ```
 
 A2 outcome:
@@ -331,7 +355,7 @@ A3 may qualify OM as a candidate; it cannot enable OM by itself.
 The earlier A3 preparation used an OpenRouter + Anthropic/Google path only as a qualification realization candidate. Before any model-bearing A3 call occurred, source inspection of the exact Mastra Code family established that the selected Builder substrate already contains native ChatGPT/Codex subscription OAuth:
 
 ```text
-@mastra/code-sdk 1.1.1
+@mastra/code-sdk 1.1.2
 → openai-codex OAuth provider
 → device-code start/poll
 → AuthStorage / CredentialStore
@@ -355,11 +379,11 @@ Q0 already requires the package record to freeze the actual provider/model/adapt
 ```text
 credential path             = ChatGPT/Codex subscription OAuth
 OAuth implementation        = native Mastra Code openai-codex
-@mastra/code-sdk            = 1.1.1
+@mastra/code-sdk            = 1.1.2
 Actor                       = openai/gpt-5.6-sol
 OM Observer + Reflector     = openai/gpt-5.6-luna
 reasoning/thinking level    = medium
-A3 lock SHA-256             = 4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7
+A3 lock SHA-256             = 7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5
 E2B qualified template ID   = 7ezun152y8jtqxf7llpl
 primary Actor runs          = exactly 4
 OAuth smoke                 = Sol + Luna before the four primary runs
@@ -465,7 +489,7 @@ Per-call USD cost is not asserted for this subscription path. If exact token/cre
 
 ### 5.8 F-3L-A-02 — OM hidden retries
 
-Source inspection of the pinned `@mastra/memory 1.24.0` established that Observer/Reflector have retry behavior not controlled by the main Agent's `maxRetries=0`.
+Historical source inspection of `@mastra/memory 1.24.0` established that Observer/Reflector had retry behavior not controlled by the main Agent's `maxRetries=0`. Package A is now pinned to `@mastra/memory 1.25.0`; Package C must re-inspect/requalify the exact 1.25.0 attempt/admission surface rather than inheriting the old mechanism claim. A3 does not require that retry shape to remain unchanged.
 
 This matters, but **Package A will not build a generic model gateway/proxy to solve it**.
 
@@ -506,7 +530,7 @@ No A3 result creates a memory service, reopens domain semantics or triggers a ge
 ### 5.10 Current A3 state
 
 ```text
-exact Codex OAuth dependency closure = COMPLETE / PASS
+exact latest-stable Codex OAuth dependency closure = COMPLETE / PASS
 non-billable fixture contracts       = PREPARED
 model-bearing calls on old path      = 0
 Codex OAuth smoke                     = NOT STARTED
@@ -540,10 +564,10 @@ operator + ChatGPT Package A verdict
 
 | Track | State | Deciding evidence |
 |---|---|---|
-| Lock / supply-chain identity | **PASS** | exact committed locks + supply-chain gate |
-| A1 Mastra/Postgres runtime | **PASS** | 6/6 pinned-package local/persistent probes |
+| Lock / supply-chain identity | **PASS** | latest-stable exact lock `7f61c6c7…` + supply-chain gate |
+| A1 Mastra/Postgres runtime | **PASS** | original 6/6 + latest-stable 1.56/1.19 regression 6/6 |
 | A2 stock E2B adapter write reincarnation | **FAIL AS-IS / FINDING CONFIRMED** | source + contract + live physical replacement write |
-| A2 narrow physical-incarnation guard | **PASS / REQUIRED** | RED→GREEN local + live provider proof |
+| A2 narrow physical-incarnation guard | **PASS / REQUIRED** | original RED→GREEN + live proof; 0.8 regression 5/5 |
 | A2 E2B Builder substrate overall | **PASS WITH REQUIRED GUARD + KNOWN DNS EXCEPTION** | 10/10 live suite + exact template/resource/network/DB/custody evidence |
 | A3 Codex OAuth path | **ADMITTED / NOT_PROVEN LIVE** | native pinned surface + exact lock; device smoke still required |
 | A3 OM cognition | **ADMITTED / NOT_PROVEN** | Sol Actor + Luna OM fixtures prepared; four real paired runs still required |

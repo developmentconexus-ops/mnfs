@@ -90,6 +90,16 @@ jobs:
         if: github.event_name == 'pull_request' && hashFiles('spikes/conexus-3l-a/reconcile-latest-stable-authority.py') != ''
         run: |
           python spikes/conexus-3l-a/reconcile-latest-stable-authority.py
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('docs/conexus/phase3/LEDGER.md')
+          lines = p.read_text().splitlines(keepends=True)
+          assert lines[3].startswith('**Estado:**'), lines[3][:80]
+          assert lines[4].startswith('**Fase atual:**'), lines[4][:80]
+          for i in (3, 4):
+              lines[i] = lines[i].rstrip(' \r\n') + '\n'
+          p.write_text(''.join(lines))
+          PY
           rm spikes/conexus-3l-a/reconcile-latest-stable-authority.py
           rm -f .github/workflows/conexus-3l-reconcile-stable.yml
           git config user.name 'github-actions[bot]'

@@ -1,33 +1,33 @@
 # Conexus — Decision Reconciliation Registry
 
-> **Status:** CANDIDATE / R11-B — NOT YET CURRENT AUTHORITY  
+> **Status:** CANDIDATE / R11-B — ROUND-1 COHERENCE CORRECTED / NOT YET CURRENT AUTHORITY  
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **Package B:** PAUSED / NOT OPENED  
 
-This candidate exists to answer one question:
+This registry answers one question:
 
-> **Which generation of a Conexus decision is current, where does its detailed semantic meaning live, what older mechanism must not be implemented by inheritance, what survives from the older decision, and what remains genuinely deferred/open?**
+> **Which generation of a Conexus decision is current, where does its detailed meaning live, what survives from older decisions, what must not be resurrected, and what remains genuinely deferred/open?**
 
-Until R11 passes whole-product coherence, independent Fable review, finding adjudication and final operator ratification, this file is a **candidate reconciliation projection**, not a replacement for accepted detailed authority.
+Until R11 passes Round-2 coherence, Fresh Actor review, independent Fable review, finding adjudication and final operator ratification, this file remains a candidate routing projection.
 
 ---
 
-# 1. Role and non-role
+# 1. Role
 
-This registry owns only **decision-generation reconciliation/routing** once ratified.
+Once ratified, this registry owns **decision-generation reconciliation/routing only**.
 
 It does not:
 
 - replace detailed semantic authority in C-/3A–3K documents;
 - create new Product semantics by summarization;
-- make a technology qualified because architecture selected it;
-- make historical Evidence disappear;
-- authorize implementation, C-018 or merge;
-- convert a Future seam into dormant F1 machinery.
+- turn technology selection into qualification;
+- erase historical rationale/Evidence;
+- authorize implementation, C-018 or PR #40 merge;
+- turn Future seams into dormant F1 machinery.
 
-If this registry conflicts with an accepted detailed semantic home, **the registry is defective and must be corrected** unless a material Finding explicitly reopens that authority.
+If this registry disagrees with an accepted detailed semantic home, **this registry is defective** unless a material Finding explicitly reopens that authority.
 
 Absence from this registry is never permission to contradict accepted authority.
 
@@ -43,8 +43,8 @@ PRESERVE
   Earlier decision remains coherent and has no material current counterexample.
 
 REFINED
-  Essential meaning/invariant survives but later authority sharpened owner, boundary,
-  state semantics or realization.
+  Essential meaning/invariant survives but later authority sharpened owner,
+  boundary, state semantics or realization.
 
 PARTIALLY_SUPERSEDED
   Identified parts survive and identified parts must not be inherited.
@@ -53,7 +53,8 @@ SUPERSEDED
   Current accepted authority replaced the old target meaning/realization.
 
 DEFERRED
-  Real future capability/decision with explicit seam/trigger; no dormant F1 machinery.
+  Real future capability/decision with an explicit seam/trigger;
+  no dormant F1 machinery.
 
 REJECTED_F1
   Deliberately not part of F1; historical existence is not a reopen trigger.
@@ -63,17 +64,17 @@ REOPEN
   return to the smallest implicated Decision Loop.
 ```
 
-A single source decision may be `PARTIALLY_SUPERSEDED` because a mechanism changed while its invariant survived.
+A single historical decision may be `PARTIALLY_SUPERSEDED`: the invariant can survive while the mechanism does not.
 
 ---
 
 # 3. Current authority-generation routing
 
-For a current Product/architecture question, route by scope:
+For current questions, route by scope:
 
 ```text
 Product vision / objectives
-→ C-001 + accepted product-facing 3K authority
+→ C-001 + accepted Product-facing 3K authority
 
 System context / boundaries
 → 3B-01..3B-17
@@ -93,10 +94,10 @@ Contracts / API semantics
 Behavioral / state semantics
 → 3G-01..3G-08 + 3G-R1
 
-Builder/Product Agent runtime realization
+Builder / Product Agent runtime realization
 → 3A-R5 + 3H-01..03 + 3H-R1
 
-Security / authorization / credential / spend / trust
+Security / authorization / credentials / spend / trust
 → 3I-01..05 + 3I-R1
 
 First-installation deployment / operations
@@ -112,39 +113,37 @@ Completed Builder substrate deciding Evidence
 → 3L-A
 
 Whole-product current-generation reconciliation
-→ 3A-R11 once finally ratified
+→ 3A-R11 only after final ratification
 ```
 
-More specific later accepted authority controls only its exact scope. Recency alone is not authority.
+More specific accepted authority controls its exact scope. Recency alone is not authority.
 
 ---
 
 # 4. Cross-cutting current laws
-
-The following laws are repeatedly preserved across the accepted corpus and must not be silently re-decided by realization convenience:
 
 ```text
 one semantic authority per meaning
 mechanism != authority
 Workspace = sovereign isolation root
 Project = independent software/product lifecycle unit
-Change != WorkUnit != ActorRun
+Change != WorkUnit != Builder ActorRun
 Builder ActorRun != Product AgentRun != Gateway EffectAttempt != Promotion
-Git authoring/content != Hub operational authority != Project business DB != Registry/CAS serving output
-Workspace owns Brain/Connection; Project owns explicit typed binding
+Git authoring != Hub control truth != Project business DB != Registry/CAS serving output
+Workspace owns Brain/Connection; Project owns explicit typed binding intent
 same Workspace membership != resource-use authority
 same bytes/digest != same authorization authority
 Control Plane != Preview != Published App authorization
 administer != use
 current authorization is server-derived and rechecked at protected control points
 runtime/provider/trace/telemetry identity != Conexus principal/owner truth
-Gateway = sole external-effect/credential last-mile/replay authority
+Gateway = business/application effect + credential-last-mile/replay authority
 approval binds one exact sealed subject and never widens it
 unknown/missing/partial != zero/success
 OUTCOME_UNKNOWN never grants blind automatic replay
-Release/composition is immutable and never resolved by `latest`
+Release/composition is immutable and never resolved by mutable latest
 AVAILABLE != PROMOTED != SERVED_VERIFIED
-telemetry/observation != F5/terminal owner truth
+telemetry/observation != owner F5/terminal truth
 Brain != agent/runtime memory
 future capability preserves seam/trigger without dormant machinery
 technology selected != technology qualified
@@ -153,596 +152,75 @@ review finding != requirement authority
 
 ---
 
-# 5. Foundational decision dispositions — C-000..C-017
+# 5. Foundational decisions — current disposition
 
-## C-000 — Conexus as new product / relationship to MNFS
-
-**Disposition:** `PARTIALLY_SUPERSEDED`
-
-### Survives
-
-- Conexus is a new product rather than MNFS M2 continuation.
-- MNFS is reference/provenance for selected patterns, not target-product authority by inheritance.
-- Reuse is selective and meaning-preserving; old governance/runtime machinery does not transfer automatically.
-
-### Superseded/refined
-
-The early repo-timing statement is not current cutover authority.
-
-Current program law:
-
-```text
-3L–3O complete
-→ C-018
-→ F3B-R1 canonical product repo/cutover gate
-→ post-C-018 derived Realization Planning
-→ accepted executable plan(s)
-→ implementation
-```
-
-### Do not resurrect
-
-- MNFS Mission/Milestone/lease/governance architecture merely because it existed;
-- early “move repo after topics 3+4” timing as current execution authorization.
-
-**Current homes:** C-000; 3A-R6; 3A-R10; future F3B-R1.
+| Decision | Disposition | Current meaning that survives | Superseded/refined portion | Current semantic home |
+|---|---|---|---|---|
+| **C-000** | **PARTIALLY_SUPERSEDED** | Conexus is a new Product; MNFS is selective reference/provenance, not inherited target authority. | Early repo-timing/cutover wording. Current route is 3L–3O → C-018 → F3B-R1 → derived Realization Planning. | C-000, 3A-R6/R10, future F3B-R1 |
+| **C-001** | **CURRENT / PRESERVE** | Unified AI-first enterprise platform; Builder/Harness, Brain, Applications and Product Agents; internal-first with later SaaS direction; Budget Analyzer first vertical. | Technology examples inside vision never select realization. | C-001, 3A-R7, 3K |
+| **C-002** | **PARTIALLY_SUPERSEDED** | Sovereign Hub; Node/TS+Postgres control direction; narrow coding-runtime seam; runtime identity != model; mechanical gates; fresh independent verification when material. | Pi primary Builder, forced fresh cognitive reset per WU, Mastra-outside premise, pg-boss as already-selected authority, old model/auth mechanisms. | 3A-R5, 3H, 3I, 3A-R9/R10, 3L |
+| **C-003** | **REFINED / REQUIREMENT INTENT PRESERVED** | Ratified Product/F1 obligations remain traceability authority unless specifically superseded. | Mechanism/phase wording must be read through later accepted architecture; explicit stale cases are routed below. | C-003 + 3A-R7/R8/R10 + exact 3B–3K homes |
+| **C-004** | **SUPERSEDED** | Historical sandbox rationale/probe only. | Local Pi+SRT F1 sandbox. | C-008, 3A-R5, 3H-01, 3L-A |
+| **C-005** | **REFINED / CORE PRESERVED** | Git-first artifact authoring; stable semantic reference; immutable revision/digest; real binds/roles; exact Release composition; no mutable latest serving. | Kind set/owners/lifecycle expanded and refined; mutable registration/provisioning API is not current authoring authority; `job/v1` narrowed by 3A-R9. | 3C-06/11/15, 3D–3G, 3A-R9 |
+| **C-006** | **REFINED / CORE PRESERVED** | PG17; Hub control != Project business DB; real least-privilege roles; migration/validation/drift/restore correctness. | Early physical placement/backup wording is not current deployment authority. | 3B-16, 3E, 3J, 3L-Q0 |
+| **C-007** | **REFINED / CORE PRESERVED** | Narrow declarative connectors; Workspace Connection; explicit qualification/environment/revision; opaque credential relation; fail-closed effects. | Gateway/3I now own effect, custody/trust and replay properties; no free-form hook runtime by inheritance. | 3B-15, 3C-07/08, 3D-02, 3G-06, 3I |
+| **C-008** | **PARTIALLY_SUPERSEDED / SUBSTRATE QUALIFIED WITH GUARD** | E2B Builder substrate; full-machine agency; durable privileged secrets outside guest; Hub-mediated Git/result custody; governed egress; BuildValidationDatabase distinction. | Pi realization, guest LLM provider key, historical hard session-cutoff doctrine, stock write retry across unseen physical recreation. | 3A-R5, 3H-01, 3I-02, 3L-A |
+| **C-009** | **PRESERVE AS RATIONALE/EVIDENCE** | Mechanical invariants beat model goodwill; maintenance must be fixed by class; live credential/egress honesty; orphan/guarantee-break detection; unknown remains unknown. | Mitra-specific runtime/tool/session behavior is not Conexus architecture. | C-009 as Evidence; later authority owns mechanisms |
+| **C-010** | **PARTIALLY_SUPERSEDED** | Product Agent as Project-owned git-first artifact; immutable revision/projection; Conversation/AgentRun/ApprovalRequest; bounded tools; Gateway effects; budgets/model identity; mechanical HITL. | Vercel AI SDK light loop, current `ModelProviderAdapter` realization, “Mastra rejected” premise, old continuation mechanics. | 3C-10, 3F-03, 3G-05/06, 3H-02, 3I-03, 3A-R10 |
+| **C-011** | **REFINED / CORE PRESERVED** | Workspace Brain; SEMANTIC/KNOWLEDGE/EVIDENCE; own Git source; immutable Registry revision; explicit ProjectBrainBinding; assisted Discovery; KnowledgeProposal; health/drift; AnalyticQuery; hard context budgets. | Brain != RAG/memory; `BrainRevision` is semantic view of exact ArtifactRevision; live inheritance rejected. | 3B-15, 3C-09, 3A-R7/R10 |
+| **C-012** | **REFINED / CORE PRESERVED** | Versioned reproducible scaffold; rich infrastructure/poor Product features; Generated vs Platform-Contract vs App-Owned; React/TS/Vite/TanStack; fail-closed generated contracts; honest UI; first-build conformance. | 3K owns current Product shell; exact implementation probes remain downstream, not pre-proven by architecture. | 3K, 3A-R10 |
+| **C-013** | **REFINED / CORE PRESERVED** | Causal observation; producer trust; usage/cost states; live checklist; tasks-purpose memory; unknown != zero; no blind ambiguous retry; completion ladder through SERVED_VERIFIED. | Pi-specific telemetry adapter and generic `agent_event` durable-table/owner wording do not survive current 3E/OBS inventory; F5 owner control is separate from telemetry. | 3C-13, 3E, 3H-03, 3K-02, Package E |
+| **C-014** | **REFINED / CORE PRESERVED** | Immutable ReleaseManifest composition; branch/Change Git model; exact environments/config; migration gates; EnvironmentConformance; Promotion/CAS/served verification; Project duplication semantics. | Early owner labels/state spellings refine through 3G/3J; managed schedule semantics moved to 3A-R9. | 3C-11, 3G-08, 3J, 3K, 3A-R9 |
+| **C-015** | **PARTIALLY_SUPERSEDED** | One Account; server-side opaque session; no durable browser bearer; deny-by-absence; Published App authority independent from Builder; closed F1 app roles `{admin, member}`. | Ambiguous combined `ProjectMembership`; local/tailnet exposure wording; current auth freshness and first-production topology are later authority. | 3B-10..14, 3C-02/12/15, 3I-01, 3J |
+| **C-016** | **REFINED / CORE PRESERVED** | Fail-closed supply-chain/security; no secret in client/repo/chat/guest; Gateway business egress; owner-pinned control egress; sanitization/redaction; data minimization; no speculative security platform. | Current authorization/credential/trust/topology mechanics decomposed by 3I/3J. | 3I, 3J, Package C/E + downstream probes |
+| **C-017** | **REFINED / CORE PRESERVED** | Project→Change→WorkUnit→ActorRun engineering graph; correctness/acceptance before decomposition; Findings/Evidence owner-routed; proportional rigor; serial baseline; independent verifier; no Mission/Milestone/workflow engine. | Pi/fresh-runtime realization and retry/spend mechanics. | 3B-03/04/07, 3A-R8, 3G-02/03/04, 3H-01, 3I-03, 3L-A |
 
 ---
 
-## C-001 — Product vision
+# 6. C-003 requirement-generation corrections
 
-**Disposition:** `CURRENT / PRESERVE`
+C-003 remains a Product requirement source, but these historical phrases must **not** be implemented literally after later accepted authority:
 
-Current product vision remains:
+| Historical requirement wording | Current generation |
+|---|---|
+| HAR-1/10 fresh worker / disposable cognitive runtime per unit | bounded WU/ActorRun survives; Change-scoped persistent CodingSession is current; fresh independent verifier remains when material |
+| HAR-1 “one commit/turn” | one canonical result commit per bounded WorkUnit; worker may have temporary local commits; no cognitive reset implied |
+| REG-4 `list → update | create` mutable registry provisioning | git-first source + compilation/Release path; no mutable registration API as authoring authority |
+| REG-5 one response envelope | **SUPERSEDED:** 3F owner-specific contracts; no `UniversalEnvelope` |
+| CER-1 Brain inherited live by every Project | **REFINED:** Workspace Brain + explicit pinned ProjectBrainBinding; live inheritance rejected |
+| AGT-3 cron/webhook + service identity | headless Product Agent survives; `SCHEDULE` admitted; `EVENT` deferred; Product Agent runtime identity is not authorization principal |
+| AGT-4 Platform Consultant “uses Brain mechanism” | Platform Consultant survives as Builder-owned Control Plane capability; platform knowledge is not Workspace Brain content |
+| AGT-5 historical `AgentTaskSession` transport | interactive Product Agent intent survives through Conversation/AgentRun + Project-designed surface; exact historical transport not authority |
+| PUB-2 URL-fragment bearer/token flow | **SUPERSEDED:** server-side session/opaque cookie authority under C-015/3I |
+| PUB-4 exact postMessage chat handshake | historical embed mechanism; current interaction surface is Project-designed and no universal widget is mandatory |
+| CIC-2 PROD = forked logical Project | **SUPERSEDED WORDING:** PROD is isolated environment/database of the same Project |
+| SEG-3 explicit privilege delayed to F2 | promoted/strengthened: current authorization is F1/first-production authority in 3I |
+| SEG-4 “no formal security/threat architecture F1” | **SUPERSEDED:** 3I current security/trust architecture is binding |
+| QUA-4 Pi × Claude challenger pair | Worker Eval intent survives; concrete runtime/model candidates follow current primary/challenger authority |
 
-- unified AI-first enterprise platform over ERPs/business systems;
-- Conexus Harness/Builder as governed software-engineering capability;
-- Brain as reusable enterprise knowledge/semantic capability;
-- applications and Product Agents as first-class product outputs/capabilities;
-- internal/company-first proof with future SaaS evolution;
-- first vertical anchored in the Budget Analyzer unless operator redirects.
-
-3A-R7 explicitly preserves C-001 as product vision authority.
-
-Technology examples inside old vision text are not technology-selection authority.
-
-**Current homes:** C-001; 3A-R7; 3K.
-
----
-
-## C-002 — Sovereign Hub + original Pi runtime
-
-**Disposition:** `PARTIALLY_SUPERSEDED`
-
-### Preserved
-
-```text
-sovereign Hub authority
-Node/TypeScript + PostgreSQL control-plane direction
-narrow CodingWorkerRuntime replaceability boundary
-runtime identity != model identity
-mechanical human gates
-current authority supplied by Hub
-fresh independent verification when material
-```
-
-### Superseded
-
-```text
-Pi = primary F1 Builder runtime
-fresh cognitive reset per WorkUnit/ActorRun
-Mastra outside Builder baseline
-pg-boss = already-selected permanent queue authority
-old model/auth realization assumptions
-```
-
-Current Builder line:
-
-```text
-Builder
-→ CodingWorkerRuntime boundary
-→ Mastra AgentController
-→ Change-scoped persistent CodingSession
-→ Mastra Workspace
-→ E2B
-```
-
-Queue/schedule technology remains Package-D qualification, not an architectural owner.
-
-**Current homes:** 3A-R5; 3H-01/03/R1; 3I-02/03; 3A-R9/10; 3L.
+C-003 F2 `INT-6 managed tunnel` preserves a future **SaaS↔private/on-prem reachability requirement class**, not a mandatory tunnel technology. Reopen mechanism/topology when the SaaS installation and private target are real.
 
 ---
 
-## C-003 — Ratified Product/F1 requirements
-
-**Disposition:** `REFINED / REQUIREMENT INTENT PRESERVED`
-
-C-003 remains a requirement/traceability source. Later architecture owns how those requirements are realized.
-
-Current rules:
-
-- mechanism-specific wording is read through later accepted owner/runtime decisions;
-- a requirement cannot resurrect Pi, Mission/Milestone, old topology or another superseded mechanism;
-- pre-3K coherence found `C-003 F1 orphan requirements = 0` after 3A-R7 closure;
-- future Product Contract must preserve the actual user/product obligations, not every historical implementation phrase.
-
-**Current homes:** C-003; 3A-R7/8/10; exact 3B–3K owner authorities.
-
----
-
-## C-004 — Local Pi/SRT sandbox
-
-**Disposition:** `SUPERSEDED`
-
-Historical probe/rationale only.
-
-Explicitly superseded by C-008 and later Builder runtime authority.
-
-**Current homes:** C-008; 3A-R5; 3H-01; 3L-A.
-
----
-
-## C-005 — Artifact Registry / compiled executable artifacts
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-### Preserved
-
-- git-first authoring;
-- immutable compiled revision identity/digest;
-- registry is compiled/served revision authority, not mutable authoring;
-- typed artifact kinds and executor semantics;
-- validated input/output contracts and real SQL binds/roles;
-- Release/deployment composition must be exact and fail closed;
-- active serving is selected by governed pointer/composition, never mutable source/latest.
-
-### Refined
-
-- artifact kinds were extended by later product decisions (`agent`, `brain`, etc.);
-- exact owner boundaries are now 3C/3D;
-- data/durable records are 3E;
-- contract/error semantics are 3F;
-- Release/Promotion behavior is 3G;
-- `job/v1` first F1 consumer is narrowed by 3A-R9 to governed managed sync.
-
-### Do not resurrect
-
-A universal registry/business owner or generic execution envelope that erases kind/owner semantics.
-
-**Current homes:** 3C-06/11/15; 3D; 3E; 3F; 3G-08; 3A-R9.
-
----
-
-## C-006 — PostgreSQL/data baseline
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-### Preserved
-
-```text
-PostgreSQL major 17 architecture baseline
-hub_control != Project business database
-real least-privilege roles
-Project/environment data isolation
-clean validation DB when proof requires it
-migration reproducibility/drift correctness
-honest backup/restore proof
-```
-
-### Refined
-
-- 3B-16 separates authoring/control/business-data/serving responsibilities;
-- 3E owns current durable-record/data semantics;
-- 3J owns first-installation placement/backup/restore operations;
-- exact current PG17 minor is qualification/realization pin, not product semantics.
-
-### Do not resurrect
-
-- permanent TEST DB per Project;
-- DB-per-gate/temp DB for every Change;
-- PG18 migration merely because newer;
-- Project DB as Hub/control authority.
-
-**Current homes:** 3B-16; 3E; 3J; 3L-Q0.
-
----
-
-## C-007 — External integrations / connector model
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-### Preserved
-
-- narrow declarative connector contract;
-- native/provider-specific semantics where needed rather than fake universal model;
-- Workspace Connection identity/lifecycle;
-- explicit qualification/environment/revision;
-- credential indirection and write-only secret administration;
-- fail-closed unknown/ambiguous effects;
-- no arbitrary hook runtime without real provider consumer.
-
-### Refined
-
-```text
-Workspace owns Connection
-Project owns ProjectConnectionBinding
-Gateway owns execution/effects/credential last-mile
-CredentialBackend owns opaque secret mechanics
-3I owns current custody/trust/security laws
-```
-
-**Current homes:** 3B-15; 3C-07/08; 3D-02; 3G-06; 3I.
-
----
-
-## C-008 — E2B Builder sandbox
-
-**Disposition:** `PARTIALLY_SUPERSEDED / SUBSTRATE QUALIFIED WITH GUARD`
-
-### Preserved/current
-
-- E2B is selected Builder execution substrate;
-- full-machine agency is intentional;
-- durable ERP/Vault/Git/Hub credentials never enter guest;
-- Hub-mediated remote Git/result custody;
-- governed external network boundary;
-- BuildValidationDatabase is not the Project DEV authority;
-- E2B behavior must be proven, not assumed.
-
-### Superseded
-
-```text
-Pi worker realization
-old guest-readable LLM provider key
-historical hard session cutoff as architecture
-stock E2B write retry across unobserved physical recreation
-```
-
-### Qualification outcome
-
-Package A proved E2B candidate with one mandatory correction:
-
-> write execution must be bound to the observed physical sandbox incarnation; if that incarnation dies, no silent write replay on a replacement physical sandbox is admissible.
-
-Current result:
-
-```text
-E2B = QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD
-```
-
-**Current homes:** 3A-R5; 3H-01; 3I-02; 3L-A.
-
----
-
-## C-009 — Mitra maintenance probe
-
-**Disposition:** `PRESERVE AS RATIONALE/EVIDENCE`
-
-Preserved architectural lessons include:
-
-- platform floor is the worst mechanically allowed behavior, not the model's best voluntary behavior;
-- correctness must be enforced by class, not prompt goodwill;
-- content/proof matters more than merely checking the channel;
-- orphan/unused writer-reader relationships are useful guarantee-break detectors;
-- real Connections require live credential state + governed egress;
-- Unknown must remain honest;
-- a smart agent discovering/fixing a flaw does not remove the need for a mechanical invariant.
-
-Mitra-specific tool/session behavior is Evidence, not Conexus target realization.
-
----
-
-## C-010 — First-class Product Agent
-
-**Disposition:** `PARTIALLY_SUPERSEDED`
-
-### Preserved
-
-```text
-Product Agent = git-first Project artifact
-immutable agent revision/projection
-Conversation
-AgentRun
-ApprovalRequest
-constrained ToolProjection/capability surface
-Gateway-owned effect execution/replay safety
-exact approval subject
-model/budget/pin truth
-mechanical HITL semantics
-```
-
-### Superseded realization
-
-```text
-Vercel AI SDK light loop as current Product Agent runtime
-ModelProviderAdapter as current primary runtime boundary
-“Mastra rejected as agent foundation”
-framework-specific old continuation mechanics
-```
-
-Current realization:
-
-```text
-exact Release
-→ exact RuntimeAgentProjection
-→ direct Mastra Agent
-```
-
-Stored Agent/Editor/latest are not Product authority. Universal Workflow and `createDurableAgent()` are not baseline.
-
-**Current homes:** 3C-10; 3F-03; 3G-05/06; 3H-02/R1; 3I-03; 3A-R10; Package B/C.
-
----
-
-## C-011 — Brain
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-Current preserved meaning:
-
-```text
-Workspace-scoped canonical Brain
-SEMANTIC | KNOWLEDGE | EVIDENCE classes
-Git published source
-Registry immutable revision/payload
-Brain semantic authority
-ProjectBrainBinding explicit/pinned
-publish != Project adoption/promotion
-human-governed KnowledgeProposal
-health/conformance honesty
-analytic semantic query regime
-```
-
-Critical refinements:
-
-- `BrainRevision` is semantic view of exact `ArtifactRevision(kind=brain)`, not duplicate revision authority;
-- Brain meaning != physical implementation;
-- Brain != RAG/index;
-- Brain != agent memory;
-- Builder/platform-assistant knowledge does not become Workspace Brain automatically;
-- implementation-dependent Brain discovery/feedback/v0 probes remain downstream.
-
-**Current homes:** 3B-15; 3C-09; 3A-R7/10; downstream Brain probes.
-
----
-
-## C-012 — Scaffold + frontend paved road
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-### Preserved
-
-- reproducible/versioned scaffold;
-- rich infrastructure, poor in Product features;
-- Generated vs Platform-Contract vs App-Owned distinction;
-- React + TypeScript + Vite + TanStack paved road;
-- Hub-owned/generated contracts and fail-closed output shapes;
-- honest UI (`unknown != zero`, partial/coverage/provenance explicit);
-- frontend permission/display is not authorization authority;
-- platform security-critical scaffold surfaces cannot be silently bypassed;
-- first-build scaffold conformance is mandatory.
-
-### Refined
-
-3K owns current Product shell/navigation/Build/Agent/Application surfaces. Many exact scaffold packages/CSP/codegen/serving checks remain implementation-dependent first-build proof, not already-qualified 3L substrate facts.
-
-**Current homes:** 3K; 3A-R10 downstream proof map.
-
----
-
-## C-013 — Observability / evidence plumbing
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-### Preserved
-
-- structured causal observations;
-- producer provenance/trust;
-- telemetry never authorization/acceptance authority;
-- missing usage/evidence never becomes zero/PASS;
-- `OUTCOME_UNKNOWN` has no blind automatic retry;
-- domain facts/ledgers survive telemetry GC;
-- verification must bind Evidence/provenance rather than model narration;
-- truthful completion ladder culminating in `SERVED_VERIFIED`.
-
-### Refined
-
-- Pi-specific adapter/telemetry wording is historical;
-- current Builder observations are Mastra/E2B/app-under-test paths;
-- owner-control F5 is explicitly separate from Operational Telemetry;
-- trace/provider/runtime identity is correlation only;
-- exact deciding-evidence qualification belongs Package E/downstream proofs.
-
-**Current homes:** 3C-13; 3H-03; 3K-02; 3A-R10; Package E.
-
----
-
-## C-014 — Release / promotion / environment lifecycle
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-Current meaning:
-
-- immutable ReleaseManifest/composition root;
-- no governed schema/artifact/config transition outside Release path;
-- candidate availability != Promotion != serving verification;
-- environment conformance is fail-closed;
-- promotion uses expected/current generation safeguards;
-- pointer swap alone is not `SERVED_VERIFIED`;
-- rollback is a new governed Promotion and does not pretend to roll back business data;
-- no `latest` resolution for governed runtime composition.
-
-Later authorities own exact state vocabulary, first-installation operations and managed-job scheduling.
-
-**Current homes:** 3C-11; 3G-08; 3J; 3K-02; 3A-R9/10.
-
----
-
-## C-015 — Published runtime / app access
-
-**Disposition:** `PARTIALLY_SUPERSEDED`
-
-### Preserved
-
-```text
-one central Account identity
-server-side session/access authority
-opaque cookie / no durable browser bearer
-server-derived Project/app/surface identity
-fail-closed membership/role checks
-Published App access independent from Builder internals
-closed F1 published-app roles = {admin, member}
-permission manifest cannot weaken effect/approval laws
-administer access != use business capability
-```
-
-### Superseded/refined
-
-- combined/ambiguous `ProjectMembership` wording is split by 3B-14/3C-02 into Control Plane access vs Published App access;
-- `PROJECT_ADMIN` never implies app admin/user automatically;
-- local/tailnet serving wording is superseded by 3J's explicit first-installation ingress contract;
-- current authorization freshness/revocation is 3I-01;
-- first-production topology is 3J.
-
-### Important preservation
-
-3B cross-review explicitly says illustrative app-role names in 3B-14 do **not** replace C-015's F1 `{admin, member}` role set.
-
-**Current homes:** 3B-10..14; 3C-02/12/15; 3I-01; 3J; 3K.
-
----
-
-## C-016 — Proportional F1 security
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-Preserved security properties include:
-
-- deterministic dependency/supply-chain admission;
-- no secret in project source/browser/model/guest;
-- external effects only through governed Gateway path;
-- explicit egress origin/destination rules;
-- fail-closed credential/error behavior;
-- durable limits for consequential effect classes where restart must not reset safety;
-- sanitization/redaction and traffic-state honesty;
-- data minimization/LGPD obligations;
-- no generic OPA/FGA/Vault/KMS/security platform absent a real failure class.
-
-3I/3J now own current authorization, credential custody, model spend, DEDICATED trust and operational trust-zone realization. Package C/E and downstream security probes own remaining technology proof.
-
-**Current homes:** 3I; 3J; 3L Package C/E; downstream security conformance.
-
----
-
-## C-017 — Engineering / correctness model
-
-**Disposition:** `REFINED / CORE PRESERVED`
-
-### Preserved
-
-```text
-Hub authority; agent tactical freedom
-Project → Change → WorkUnit → ActorRun Builder graph
-correctness/assertions before decomposition
-contract revision/digest pinning
-Evidence is not agent self-assertion
-Finding is durable/owner-routed, not worker-owned closure
-proportional planning/rigor
-serial baseline
-human checkpoints where authority requires
-fresh independent verifier when material
-NO_CHANGE_REQUIRED is valid when proven
-Mission/Milestone/fleet/workflow engine rejected F1
-```
-
-### Superseded/refined
-
-- Pi-specific implementer/verifier realization;
-- “fresh runtime every execution” where it conflicts with persistent Change-scoped CodingSession;
-- exact retry/spend/runtime details now belong 3G/3H/3I/3L.
-
-**Current homes:** 3B-03/04/07; 3A-R8; 3G-02/03/04; 3H-01; 3I-03; 3L-A.
-
----
-
-# 6. Phase 3 decision-family dispositions
+# 7. Phase 3 current disposition
 
 ## 3A — Architecture Reconciliation
 
-### 3A-R5
-
-**Disposition:** `CURRENT` for Builder runtime realization.
-
-Current Builder = Mastra AgentController + persistent Change-scoped CodingSession + E2B; Pi fallback/challenger only on structural qualification failure.
-
-### 3A-R6
-
-**Disposition:** `CURRENT` critical-path/routing law.
-
 ```text
-MUST DECIDE BEFORE IMPLEMENTATION
-DEFER SAFELY
-REJECT F1
+3A-R5  CURRENT — Builder runtime realization
+3A-R6  CURRENT — critical path / MUST DECIDE vs DEFER vs REJECT routing
+3A-R7  CURRENT — Platform Consultant ownership correction
+3A-R8  CURRENT — SPEC-ANCHORED/LIVING/INCREMENTAL Project Baseline
+3A-R9  CURRENT — managed sync/job semantics; scheduler/queue as mechanics
+3A-R10 CURRENT — pre-implementation supersession + qualification routing
+3A-R11 ACTIVE — whole-product rebaseline; not final current authority until its gates close
 ```
-
-allocates decision depth; it never weakens Method correctness obligations.
-
-### 3A-R7
-
-**Disposition:** `CURRENT` bounded ownership correction.
-
-Platform assistant capability is Builder-owned/presented by Control Plane; platform knowledge is not Workspace Brain; no global persistent platform agent without real consumer.
-
-### 3A-R8
-
-**Disposition:** `CURRENT` Project Baseline/Change law.
-
-Project Baseline is `SPEC-ANCHORED / LIVING / INCREMENTAL`; sufficient for the current Change, not complete for imagined future; material Project-level meaning change returns before coding crosses the boundary.
-
-### 3A-R9
-
-**Disposition:** `CURRENT` managed-job law.
-
-First F1 `job/v1` consumer = governed managed sync; MAR owns runtime semantics; Release owns future occurrence composition; `mar.job_run` is sufficient durable occurrence record; queue/scheduler are mechanics; arbitrary privileged Project job code/generic workflow runtime rejected F1.
-
-### 3A-R10
-
-**Disposition:** `CURRENT` pre-implementation supersession + qualification routing law.
-
-Historical probes must be recompiled against current authority. Product Agent advanced memory remains gated. Technology selected != qualified. Post-C-018 Realization Planning is required and derived-only.
-
-### 3A-R11
-
-**Disposition:** `ACTIVE CHECKPOINT / NOT YET FINAL CURRENT AUTHORITY`.
-
-It becomes the whole-product current-generation reconciliation authority only after its own Fable/adjudication/operator-ratification gates close.
-
----
 
 ## 3B — System Context & Boundaries
 
-**Disposition:** `CURRENT`, with more specific later phases governing detailed ownership/state/security/realization.
+**Disposition:** `CURRENT`.
 
-Current core:
-
-- Workspace sovereign isolation root;
-- Project independent lifecycle unit;
-- Change bounded/verifiable evolution;
-- Builder strategy isolated/replaceable, no generic workflow DSL;
-- approved Project Baseline before initial construction and materially revised Baseline when required;
-- planning depth independent of execution rigor;
-- Baseline content in Git, approved digest in Hub;
-- one canonical source repo per Project F1;
-- explicit limited Control Plane access graph;
-- Area is organizational, not software/technical binding;
-- Control Plane / Preview / Published App authorization are independent;
-- Workspace owns Brain/Connections, Project owns typed bindings;
-- Project-internal durable resources remain Project-scoped;
-- no direct cross-Project mutable storage; explicit reuse only.
-
-No known 3B material reopen is active.
-
----
+Current core: Workspace sovereign root; Project independent unit; Change bounded evolution; Project Baseline; proportional planning; one repo per Project F1; separate Control Plane/Preview/Published App authority; Workspace Brain/Connections + typed Project bindings; no direct cross-Project mutable reach.
 
 ## 3C — Domain / Module Architecture
 
@@ -766,41 +244,31 @@ Attachments & Blob
 Managed Application Runtime
 ```
 
-These semantic modules do not imply separate services/processes/databases.
-
----
+Semantic owners do not imply separate services/processes/databases.
 
 ## 3D — Dependency Architecture
 
 **Disposition:** `CURRENT`.
 
-Current laws include modular monolith, acyclic/typed direct-call-first boundaries, no cross-module internals/table access, Gateway-only effects/credentials, exact owner projections into runtimes and no generic orchestration/queue authority by convenience.
-
----
+Modular monolith; typed/direct-call-first owner ports; no cross-owner table/internal access; Gateway last-mile; runtimes receive exact owner projections; no generic orchestrator by convenience.
 
 ## 3E — Data Architecture
 
 **Disposition:** `CURRENT`.
 
-`hub_control` PostgreSQL remains Hub operational truth with module-owned logical schemas; Project business databases remain separate business-data authorities; Registry/CAS/BlobStore remain owner-specific output/byte mechanisms; no shared/common schema or plaintext secret authority.
+`hub_control` owner truth, Project business DBs, Builder/PAR Mastra stores and byte/credential backings remain distinct authority/capability domains. Current durable inventory supersedes generic historical `agent_event` table ownership.
 
-Exact physical schema spelling belongs later derived realization, not this registry.
-
----
-
-## 3F — Contracts & API Architecture
+## 3F — Contracts/API Architecture
 
 **Disposition:** `CURRENT`.
 
-Current laws: owner-specific contracts, INTERNAL vs INDEPENDENT surfaces, no UniversalEnvelope, exact approval subject, concrete Project bindings, stable public failure keys only where needed and ReleaseManifest as exact composition root.
+Owner-specific payloads; INTERNAL vs INDEPENDENT surfaces; exact approval subject; concrete bindings; stable public failure semantics where justified; no UniversalEnvelope.
 
----
-
-## 3G — Behavioral / State Architecture
+## 3G — Behavioral/State Architecture
 
 **Disposition:** `CURRENT`.
 
-Owner-local machines remain distinct. In particular:
+Owner-local state machines remain distinct:
 
 ```text
 Builder ActorRun
@@ -809,222 +277,187 @@ Builder ActorRun
 != Promotion
 ```
 
-Terminal truth is durable/write-once where applicable; stale/duplicate/ambiguous resume/replay cannot manufacture success; Project archive, Release, approval and effect states remain owner-specific.
+No generic lifecycle/state engine.
 
----
-
-## 3H — Runtime & Agent Architecture
+## 3H — Runtime/Agent Architecture
 
 **Disposition:** `CURRENT ARCHITECTURE / PARTIALLY QUALIFICATION-PENDING`.
 
-### Builder
-
-Current architecture and Package-A result:
+Builder:
 
 ```text
-persistent Change-scoped CodingSession
+Change-scoped persistent CodingSession
 → Mastra AgentController
-→ role-specific Mastra runtime/store
+→ BuilderMastra/mastra_builder
 → Workspace/E2B
-
-E2B = QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD
-Builder OM = KEEP OFF
 ```
 
-### Product Agent
-
-Current architecture:
+Product Agent:
 
 ```text
 exact RuntimeAgentProjection
+→ ParMastra/mastra_par
 → direct Mastra Agent
 ```
-
-But Product Agent substrate/cross-runtime behavior is **not yet Package-B-qualified**.
-
-### Runtime isolation
 
 ```text
 BuilderMastra != ParMastra
 ```
 
-same-process baseline is conditional on proving enabled F1 process-global mutable state can be partitioned/fenced. Package B owns that deciding Evidence.
+Same-process isolation remains Package-B proof, not yet a qualified fact.
 
----
-
-## 3I — Security / Authority Architecture
+## 3I — Security/Authority Architecture
 
 **Disposition:** `CURRENT ARCHITECTURE / SOME TECHNOLOGY PROOF PENDING`.
 
-Current laws include:
-
-- current server-derived authorization at protected control points;
-- pre-state authorization for security-sensitive mutations;
-- immutable history + prospective current narrowing;
-- Connection secret plaintext only write-only ingress + Gateway last-mile;
-- model-provider credential control-side;
-- guest cannot mint/widen/refresh bounded capability;
-- one owner-local outstanding model-spend liability per run semantics;
-- DEDICATED trust remains owner-preserving;
-- five trust zones and least-privilege Hub control;
-- runtime/trace/provider refs never principals.
-
-Package C and later first-build probes still owe technology-specific proof.
-
----
-
-## 3J — Deployment / Operations Architecture
-
-**Disposition:** `CURRENT` for first installation, not universal SaaS topology.
-
-Current first-installation baseline:
+Current laws include current server-derived authorization, pre-state security checks, control-side credentials/model calls, owner-local spend reservation, Gateway effect authority and **six logical trust-zone classifications**:
 
 ```text
-on-prem / single-host realization
-company LAN / existing corporate VPN + HTTPS
-no public Internet ingress F1
+Z1 Browser / Client
+Z2 Trusted Hub Control
+Z3 Guest Execution
+Z4 DEDICATED External Application
+Z5 External Provider / Enterprise
+Z6 Trusted Data / Storage Infrastructure
 ```
 
-This is Metal Nobre/first-deployment evidence, **not** universal product law.
+These zones are security classifications, not mandated deployment units.
 
-3J also owns backup/restore, operational secret injection, lifecycle, whole-Hub emergency stop and availability proof boundaries.
+## 3J — Deployment/Operations Architecture
 
-Deferred by trigger:
+**Disposition:** `CURRENT FOR FIRST INSTALLATION`, not universal SaaS topology.
 
 ```text
-DEDICATED physical deployment
-old Product Agent runtime coexistence/drain
-PITR/HA where required
-external SLA monitoring
-future deployment scaling machinery
+existing company physical server
+→ Windows host
+→ dedicated Linux production guest
+→ one Node/TS Hub application process
+→ co-located but capability-isolated PostgreSQL/Mastra/backings
+
+private ingress = LAN / existing corporate VPN + HTTPS
+public Internet ingress F1 = none
 ```
 
----
-
-## 3K — Frontend / Product Architecture
+## 3K — Frontend/Product Architecture
 
 **Disposition:** `CURRENT`.
 
-Current Product surfaces include Project list/shell, Data, Functions, Applications, Agents, Connections, Brain, Builds, Releases, Changes and one Terminal surface.
+Agent-first, simple-by-default, inspectable-by-design Workspace/Project shell; truthful Build/Data/Capabilities/Integrations/Agents/Brain/Versions/Activity surfaces; UI never manufactures owner truth.
 
-Current Product truth law:
-
-```text
-UI projects owner truth
--X-> UI/model/telemetry manufactures truth
-```
-
-Build/Preview/Release/served/effect/data/access states remain semantically honest and inspectable.
-
----
-
-## 3L-Q0 — Qualification manifest
+## 3L-Q0
 
 **Disposition:** `CURRENT QUALIFICATION ROUTER`.
 
-Q0 pins deciding Evidence identity and serial Package order; it does not permanently select every technology version.
+Exact deciding Evidence identity; serial Package A→B→C→D→E. Historical mechanism-specific probes are recompiled against current authority.
 
-```text
-A → B → C → D → E
-```
-
-Historical mechanism-specific checklists cannot execute verbatim after later authority supersession.
-
----
-
-## 3L Package A — Builder Substrate + Cognition
+## 3L Package A
 
 **Disposition:** `CURRENT DECIDING EVIDENCE / COMPLETE`.
 
 ```text
-A1 Mastra/PostgreSQL persistent runtime = PASS
-A2 E2B substrate = PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD
-A3 native Codex OAuth = PASS
-A3 Builder OM = EVALUATED / NOT_PROVEN FOR ENABLEMENT / KEEP OFF
-Package A = COMPLETE
+A1 Mastra/PostgreSQL persistence          PASS
+A2 E2B                                   PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD
+native Codex OAuth                       PASS for tested A3 path
+Builder Observational Memory             EVALUATED / NOT_PROVEN / KEEP OFF
+Package A                                COMPLETE
 ```
 
-Package-A Evidence does not qualify Product Agent, model economics, managed jobs or deciding-evidence paths owned by Packages B–E.
+Package A does not qualify Product Agent, model economics, managed execution or deciding-evidence paths.
 
 ---
 
-# 7. Historical idea → current semantic home
+# 8. Historical/stale idea → current home
 
-| Historical / stale idea | Current routing |
+| Historical idea/mechanism | Current routing / instruction |
 |---|---|
-| MNFS Mission/Milestone/Feature as Conexus work graph | C-017/3B/3G: Change/WorkUnit/ActorRun; Mission/Milestone rejected F1. |
-| Pi primary Builder | 3A-R5 + 3H-01 + 3L-A: Mastra AgentController/CodingSession/E2B. |
-| fresh cognitive reset every WU/run | persistent Change-scoped CodingSession; fresh verifier/new Change when material. |
-| local Pi+SRT sandbox | C-008/3H/3L-A E2B. |
-| guest LLM provider key | 3I-02 deleted; model provider is control-side. |
-| Vercel AI SDK Product Agent loop | 3H-02 direct Mastra Agent from exact projection. |
-| Stored Agent/latest/Editor Product authority | rejected; exact Release/RuntimeAgentProjection. |
-| pg-boss as schedule authority | 3A-R9 + Q0 Package D candidate only. |
-| generic job/workflow/scheduler domain | rejected F1; MAR-managed sync + Release schedule semantics. |
-| ProjectMembership as both builder/control and app access | 3B-14/3C-02 split Control Plane vs Published App relationships. |
-| illustrative app roles replacing `{admin,member}` | rejected by 3B cross-review; C-015 set remains until explicit later decision. |
-| telemetry/trace = successful run/result | 3H-03/3K-02 prohibit; owner F5/write-once truth only. |
-| memory/RAG framework as Brain | 3C-09 explicitly rejects; Brain remains Conexus semantic authority. |
-| one perfect distributed trace required for correctness | Conexus owner IDs span 0..N trace segments; trace continuity not domain continuity. |
-| universal resource-binding engine | rejected; ProjectBrainBinding + ProjectConnectionBinding typed. |
-| cross-Project direct DB/runtime reuse | rejected; explicit Platform/Brain/Connection reuse only. |
-| public Internet first-installation ingress | rejected F1; LAN/corporate VPN + HTTPS. |
-| DEDICATED physical stack built now | deferred until real DEDICATED consumer. |
-| advanced Product Agent memory on by default | deferred/eval-gated. |
-| implementation-dependent probes pulled into 3L | rejected; remain mandatory on first slice that can actually instantiate them. |
-| C-018 directly authorizes coding | false; F3B-R1 + accepted derived Realization Plan still required. |
+| MNFS Mission/Milestone/Feature as Conexus work graph | Change/WorkUnit/ActorRun; Mission/Milestone rejected F1 |
+| Pi primary Builder | Mastra AgentController + Change-scoped CodingSession + E2B |
+| forced fresh cognitive reset per WorkUnit | persistent Change session; fresh verifier/new Change only for material reason |
+| local Pi+SRT sandbox | E2B qualification path |
+| guest LLM provider key | deleted by 3I-02; model credential control-side |
+| Vercel AI SDK Product Agent loop | direct Mastra Agent from exact RuntimeAgentProjection |
+| Stored Agent / Editor / latest Agent authority | rejected; exact Release projection only |
+| pg-boss as schedule authority | Package-D candidate only; scheduler/queue reconstructible mechanics |
+| generic Workflow/Scheduler/Automation domain | rejected F1; MAR managed sync/job owner semantics |
+| C-003 one response envelope | superseded by 3F owner-specific contracts; no UniversalEnvelope |
+| C-003 mutable list/update/create artifact registration | git-first authoring + immutable compilation/Release |
+| C-003 webhook/EVENT mandatory F1 | headless preserved; SCHEDULE current; EVENT deferred |
+| Product Agent as service authorization principal | rejected; Agent runtime identity != current authorization principal |
+| C-003 URL-fragment token | superseded by server-side opaque session/cookie authority |
+| C-003 exact chat postMessage handshake | historical mechanism; Project-designed Product Agent interaction surface |
+| `ProjectMembership` as both Control Plane and Published App access | split by 3B-14/3C-02 |
+| illustrative 3B app roles replacing `{admin, member}` | rejected; C-015 closed app-role set survives until explicit later decision |
+| PROD as forked logical Project | same Project, isolated PROD environment/database |
+| C-003 “no formal security/threat architecture F1” | superseded by 3I security/trust architecture |
+| generic `agent_event` table/owner | current 3E/OBS owner-specific durable inventory; old type/table wording must not resurrect |
+| telemetry/trace = successful owner result | prohibited; owner F5/write-once truth only |
+| memory/RAG framework as Brain | explicitly rejected; Brain remains Conexus semantic authority |
+| perfect one-tree distributed trace required for correctness | not required; Conexus owner IDs span 0..N trace segments |
+| universal ResourceBinding | rejected; typed ProjectBrainBinding + ProjectConnectionBinding |
+| direct cross-Project DB/runtime reuse | rejected; explicit Platform/Brain/Connection reuse seams only |
+| public Internet first-installation ingress | rejected F1; LAN/corporate VPN + HTTPS |
+| DEDICATED physical stack now | deferred until first real DEDICATED consumer |
+| Product Agent advanced memory on by default | deferred/eval-gated |
+| implementation-dependent product probes executed artificially in 3L | rejected; first real slice that can falsify them owns conformance |
+| C-018 directly authorizes coding | false; F3B-R1 + accepted derived Realization Plan still required |
 
 ---
 
-# 8. Current Deferred / Rejected-F1 classes
+# 9. Current deferred / future seams
 
-The following are preserved deliberately without dormant realization machinery:
-
-## Deferred / trigger-based
+Preserve the seam/trigger; create no dormant module/table/service/framework:
 
 ```text
-DEDICATED physical deployment
+SaaS self-service/billing/customer operations
+SaaS↔private/on-prem authenticated reachability
 multi-repo Project
-cross-Workspace sharing/export/import/exchange
-Product Agent Working/Agent Memory beyond named consumer
-Product Agent Semantic Recall
+cross-Workspace Brain/Connection/package exchange
+DEDICATED physical deployment
+stronger HA/PITR/multi-host topology
+external SLA monitoring/paging
+Product Agent Working/Agent Memory
+Semantic Recall
 Product Agent Observational Memory
 Memory Extractors
-createDurableAgent reconnectable same-stream semantics
-EVENT Product Agent trigger
-external Vault/KMS/HSM
-per-secret envelope/DEK hierarchy
+Durable Agent reconnect-to-same-stream
+EVENT Product Agent triggers
+Agent-as-tool/subagents/networks
+MCP/A2A/external Agent clients
+Product Agent browser/source/workspace access
 Connection pools/failover
-public/embed/self-signup
+external Vault/KMS/HSM / per-secret DEK
 SSO/SCIM/passkeys
-PITR/HA until recovery/availability need pays for it
-external monitoring/paging until SLA consumer
-process split Builder/PAR unless Package B proves unpartitionable global mutable state
+public/embed serving
+richer Published App roles/data scoping
+Brain vector/RAG index
+Project clone/export beyond current bounded duplicate semantics
 ```
 
-## Rejected F1 absent new material evidence
+---
+
+# 10. Current REJECTED_F1 inheritance
 
 ```text
 generic workflow engine
-generic scheduler/automation domain
+generic scheduler/automation business owner
 universal resource-binding engine
 universal status/FSM/envelope
-shared mutable cross-Project database/runtime state
+generic Secret/Budget/Tool authority
+shared mutable cross-Project DB/runtime state
 Mission/Milestone/fleet machinery
 memory framework as Brain authority
 Stored Agent/latest Product authority
 browser/frontend authorization authority
 guest durable/model-provider credentials
 arbitrary privileged Project job code
+public Internet first-installation ingress
+multiple coding runtimes purely for optionality
+forced cognitive reset per WorkUnit
 ```
-
-A future item reopens only on a named consumer, changed requirement/ownership/scale, newly reachable failure mode or external change that materially invalidates current assumptions.
 
 ---
 
-# 9. Technology state — do not collapse these labels
-
-The final Architecture Baseline must preserve distinctions like:
+# 11. Technology state — do not collapse labels
 
 ```text
 ARCHITECTURE CURRENT
@@ -1037,62 +470,30 @@ DEFERRED
 REJECTED F1
 ```
 
-Current examples:
-
 | Surface | Current state |
 |---|---|
 | Node/TS modular-monolith Hub | ARCHITECTURE CURRENT |
-| PostgreSQL 17 major | ARCHITECTURE CURRENT; Q0 probes use exact 17.10 |
-| Mastra Builder harness | QUALIFIED within Package-A tested properties |
+| PostgreSQL major 17 | ARCHITECTURE CURRENT; Q0 tested exact 17.10 |
+| Mastra Builder harness | QUALIFIED for Package-A tested properties |
 | E2B Builder substrate | QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD |
-| native Codex OAuth path | QUALIFIED for Package-A smoke/experiment path |
+| native Codex OAuth | QUALIFIED for Package-A tested path |
 | Builder Observational Memory | EVALUATED / KEEP OFF |
-| direct Mastra Product Agent | ARCHITECTURE CURRENT / PACKAGE B NOT YET QUALIFIED |
-| BuilderMastra/ParMastra same-process isolation | ARCHITECTURE CURRENT / PACKAGE B NOT YET QUALIFIED |
-| model-spend interception/enforcement | ARCHITECTURE CURRENT OBLIGATION / PACKAGE C NOT YET QUALIFIED |
-| pg-boss 12.26.3 | PACKAGE D CANDIDATE, NOT AUTHORITY |
-| deciding observability surfaces | ARCHITECTURE CURRENT SHAPE / PACKAGE E NOT YET QUALIFIED |
+| direct Mastra Product Agent | ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED |
+| BuilderMastra/ParMastra same-process isolation | ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED |
+| owner-local model-spend enforcement | ARCHITECTURE CURRENT OBLIGATION / PACKAGE C NOT QUALIFIED |
+| pg-boss 12.26.3 | PACKAGE D CANDIDATE / NOT AUTHORITY |
+| deciding observability/F5 surfaces | ARCHITECTURE CURRENT SHAPE / PACKAGE E NOT QUALIFIED |
+| React/TS/Vite/TanStack paved road | ARCHITECTURE CURRENT / first-build conformance pending |
+| first-production Linux guest/private ingress topology | ARCHITECTURE CURRENT FOR FIRST INSTALLATION / activation proofs pending |
 
 ---
 
-# 10. No current material reopen from R11-A
+# 12. R11 status
 
-R11-A checked the highest-risk supersession families:
+R11-A found no irreconcilable accepted-authority conflict.
 
-```text
-Builder runtime
-model credential custody
-Product Agent runtime
-queue/scheduler authority
-Published App access
-observability/F5
-Brain/runtime memory
-future seams/YAGNI
-```
+R11-E Round 1 found **14 candidate-projection defects but 0 material Product/architecture findings**. This corrected registry addresses the reconciliation-specific findings, especially trust-zone count and stale C-003/C-013 mechanism routing.
 
-Result:
+It must still pass R11-E Round 2, R11-F Fresh Actor review and independent Fable review before ratification.
 
-```text
-irreconcilable accepted-authority conflict = NONE FOUND
-material REOPEN required                   = NONE
-```
-
-This registry must still pass R11 whole-product Product Contract/Architecture Baseline coherence and independent Fable challenge before ratification.
-
----
-
-# 11. R11-B candidate verdict and next step
-
-Candidate reconciliation outcome:
-
-```text
-historical corpus preserved                     = YES
-stale mechanisms explicitly routed              = YES
-current detailed semantic homes identified      = YES
-technology selection vs qualification separated = YES
-Deferred/Rejected-F1 seams preserved             = YES
-new Product semantics introduced                 = NO INTENT
-material Decision Loop reopen                    = NONE
-```
-
-**Next:** derive `PRODUCT-CONTRACT.md` from the reconciled current meaning, then derive `ARCHITECTURE-BASELINE.md` from Product Contract + current detailed architecture + qualification evidence. Neither becomes final authority before R11 E–H gates close.
+**Next:** correct/enrich Product Contract and Architecture Baseline, then rerun whole-product coherence.

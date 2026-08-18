@@ -98,8 +98,7 @@ jobs:
                   docs/conexus/phase3/3L-A-builder-substrate-cognition.md \
                   docs/conexus/phase3/LEDGER.md \
                   docs/conexus/phase3/README.md \
-                  spikes/conexus-3l-a/reconcile-latest-stable-authority.py \
-                  .github/workflows/conexus-3l-reconcile-stable.yml
+                  spikes/conexus-3l-a/reconcile-latest-stable-authority.py
           git diff --cached --check
           git commit -m 'docs(conexus): reconcile Package A latest-stable qualification'
           git push origin HEAD:${{ github.head_ref }}

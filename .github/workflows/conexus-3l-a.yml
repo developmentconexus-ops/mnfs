@@ -56,6 +56,7 @@ jobs:
           node --test
           tests/a3-admission.test.mjs
           tests/a3-runner-contract.test.mjs
+          tests/a3-live-runner.test.mjs
 
   # A2 is already qualified. Replay the costly provider suite only when explicitly requested.
   e2b-live:

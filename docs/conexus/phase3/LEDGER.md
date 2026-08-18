@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L NEXT / NÃO INICIADA`  
-**Fase atual:** `3L — Technology Qualification` — **NEXT / NÃO INICIADA**; `3K — Frontend / Product Architecture` = **CLOSED / APPROVED por 3K-R1** após internal closure `Material Finding = 0` + único independent Fable challenge `Material Finding = 0 / CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`; as 5 correções não-materiais foram adjudicadas em 3K-R1; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L NEXT / NÃO INICIADA`  
+**Fase atual:** `3L — Technology Qualification` — **NEXT / NÃO INICIADA**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**; `3K — Frontend / Product Architecture` = **CLOSED / APPROVED por 3K-R1** após internal closure `Material Finding = 0` + único independent Fable challenge `Material Finding = 0 / CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`; as 5 correções não-materiais foram adjudicadas em 3K-R1; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -28,6 +28,9 @@ C-000..C-017
 
 3A-R9
 → Managed Job / Deterministic Sync Dispatch Reconciliation
+
+3A-R10
+→ Pre-Implementation Convergence & Realization Routing
 
 3B
 → System Context & Boundaries
@@ -128,7 +131,7 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 APROVADAS** | aplicar 3A-R6 + [3A-R8](3A-R8-project-baseline-change-engineering-coherence.md) + [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md) durante 3L–3O; F3B-R1 antes do Realization Planning |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS** | aplicar 3A-R6 + [3A-R8](3A-R8-project-baseline-change-engineering-coherence.md) + [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md) + [3A-R10](3A-R10-pre-implementation-convergence-realization-routing.md) durante 3L–3O; F3B-R1 antes do Realization Planning |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
@@ -139,7 +142,7 @@ Nenhuma conversa cria authority.
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3K — Frontend / Product Architecture | **CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS** | [3K-R1](3K-R1-frontend-product-architecture-final-closure.md); reabrir apenas por Finding material |
-| 3L — Technology Qualification | **NÃO INICIADA / NEXT** | somente probes load-bearing definidos por 3A-R6 + `CX-MANAGED-JOB-01` de 3A-R9; iniciar intake/probe ordering de 3L |
+| 3L — Technology Qualification | **NÃO INICIADA / NEXT** | seguir 3A-R10: Q0 Qualification Manifest + Packages A–E; somente probes load-bearing/current-authority compiled |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
 | 3O — Vertical Architecture Proof Contract | NÃO INICIADA | contract-only end-to-end proof target |
@@ -201,6 +204,7 @@ job/v1
 → NEXT
 → load-bearing qualification probes only
 → includes CX-MANAGED-JOB-01 from 3A-R9
+→ routing refined by 3A-R10
 
 3M
 → do existing durable facts suffice for recovery?
@@ -292,6 +296,44 @@ Lei essencial:
 
 3A-R9 adiciona somente a bounded surface `MANAGED_JOB` a 3D-02 e a qualification `CX-MANAGED-JOB-01` ao 3L; não reabre 3C/3E nem cria novo domain.
 
+### 2.5 3A-R10 — Pre-Implementation Convergence & Realization Routing — APPROVED
+
+[3A-R10 — Pre-Implementation Convergence & Realization Routing](3A-R10-pre-implementation-convergence-realization-routing.md) foi ratificada pelo operador em **2026-08-18** antes da execução de 3L.
+
+Resultado:
+
+```text
+CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION
+prior structural phase reopen = NONE
+new module / record / DB / workflow = 0
+architecture/readiness framework = 0
+product implementation = BLOCKED
+
+technology selected != technology qualified
+historical probe != executable verbatim after later authority supersession
+Builder Observational Memory / long-context = MUST EVALUATE, NOT MUST ENABLE
+CX-BUILDER-COGNITION-01 = 3L deciding-evidence identifier
+Product Agent OM / Semantic Recall / Extractors = remain consumer/eval-gated
+first-build implementation-dependent probes = mandatory downstream, not pulled into 3L
+post-C-018 Realization Planning = REQUIRED / DERIVED-ONLY
+```
+
+3L passa a executar cinco packages:
+
+```text
+A — Builder Substrate + Cognition
+B — Product Agent + Cross-Runtime
+C — Model Economics / Enforcement
+D — Managed Execution
+E — Deciding Evidence
+```
+
+Regra essencial:
+
+> Um probe histórico deve primeiro identificar o invariant protegido, aplicar a current authority, apagar criteria de mechanism explicitamente superseded, pinar a stack exata e só então executar. Um mechanism antigo não pode ser ressuscitado por fixture histórica.
+
+3A-R10 também torna explícito o downstream proof map (`CX-BRAIN-V0-01`, `CX-BRAIN-DISCOVERY-01`, `CX-BRAIN-FEEDBACK-01`, `CX-SCAFFOLD-V0-01`, `CX-OBS-V0-01`, `CX-PUB-V0-01`, `CX-REL-V0-01`, QA-DB e Security conformance): estes probes continuam obrigatórios nos slices que implementam suas capabilities, mas não pertencem a 3L quando exigem product bytes para existir.
+
 ---
 
 ## 3. 3B — CLOSED / APPROVED
@@ -330,6 +372,7 @@ Builder runtime reconciliation relevante:
 
 - [3A-R5 — Builder / Coding Runtime Reassessment](3A-R5-builder-coding-runtime-reassessment.md)
 - [3A-R6 — Phase 3 Critical Path & Implementation Readiness](3A-R6-phase3-critical-path-implementation-readiness.md)
+- [3A-R10 — Pre-Implementation Convergence & Realization Routing](3A-R10-pre-implementation-convergence-realization-routing.md)
 
 ---
 
@@ -1098,7 +1141,7 @@ Review provenance, não-autoritativa:
 
 ## 12. Open findings / routed work after 3I-R1
 
-Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quando cada item volta ao critical path.
+Estes itens não reabrem fases anteriores automaticamente. 3A-R6 + 3A-R10 classificam quando cada item volta ao critical path.
 
 | Finding / questão | Owner posterior |
 |---|---|
@@ -1117,6 +1160,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | provider usage extraction preserving MISSING != ZERO | 3L under 3I-03 — MUST QUALIFY |
 | provider/model/request qualified cost-envelope proof | 3L under 3I-03 — MUST QUALIFY |
 | model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03; current baseline features budgeted-or-disabled |
+| Builder long-context / Observational Memory ON×OFF evaluation | **3L Package A — `CX-BUILDER-COGNITION-01` MUST EVALUATE; enablement only on deciding evidence** |
 | model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
 | Product Agent browser/workspace/code execution trust/egress if first consumer enables it | **3K-04 confirms REJECT/DEFER by default; Decision Loop / 3I-05 / 3L on first named consumer** |
 | whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **RESOLVED by 3J-03**; pre-production drill permanece gate (3I-01/3J-03/3J-R1) |
@@ -1162,9 +1206,9 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | E2B pull/OTLP exact pinned-version behavior | E2B control/evidence subset 3L; production exporter topology 3J only if adopted |
 | OTel baggage/redaction/egress policy | **RESOLVED by 3I-05 at property level**; exact propagator/header stripping → 3L/Realization Planning |
 | platform-control egress destination configuration | **3I-05 property fixed**; exact owner adapter endpoint/config wiring → Realization Planning/3J as applicable |
-| Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval; 3K-04 exposes only admitted regimes |
+| Product Agent Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval; 3K-04 exposes only admitted regimes |
 | Durable Agent enablement and its process-global registry | Decision Loop + 3L on named consumer |
-| Observational Memory process-global `activeOps` if enabled | 3L on named consumer |
+| Observational Memory process-global `activeOps` if enabled in Builder | **3L under `CX-BUILDER-COGNITION-01` + `CX-RUNTIME-ISOLATION-01`** |
 | Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority; 3K-04 keeps them out of baseline F1 authoring |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | DEFER SAFELY optional deployment qualification |
@@ -1181,19 +1225,33 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | DEDICATED Release retirement/support lifecycle | Decision Loop when real install base requires |
 | DEDICATED multi-install/fleet management | REJECT F1 / Decision Loop on real install base |
 
-Technology qualification critical path per 3A-R6:
+Technology qualification critical path after 3A-R10:
 
 ```text
-CX-SBX-E2B-01
-CX-BUILDER-MASTRA-01
-CX-AGENT-MASTRA-01
-CX-RUNTIME-ISOLATION-01
-CX-MANAGED-JOB-01
-3I-03 model-spend interception/retry/usage subset
-Verification Observability deciding-evidence subset
+Package A — Builder Substrate + Cognition
+  CX-SBX-E2B-01
+  CX-BUILDER-MASTRA-01
+  CX-BUILDER-COGNITION-01
+
+Package B — Product Agent + Cross-Runtime
+  CX-AGENT-MASTRA-01
+  CX-RUNTIME-ISOLATION-01
+
+Package C — Model Economics / Enforcement
+  3I-03 pre-provider interception
+  retry/fallback/hidden-call neutralization
+  usage/missingness + streaming settlement
+  finite cost-envelope subset
+  OM Observer/Reflector accounting if Builder OM candidate is enabled for evaluation
+
+Package D — Managed Execution
+  CX-MANAGED-JOB-01
+
+Package E — Deciding Evidence
+  Verification Observability deciding-evidence subset
 ```
 
-3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
+Before execution: **Q0 Qualification Manifest** pins exact versions/configuration. Historical probe criteria are compiled against current authority first. 3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
 
 ---
 
@@ -1409,6 +1467,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3A-R7 = APPROVED
 3A-R8 = APPROVED
 3A-R9 = APPROVED
+3A-R10 = APPROVED
 
 3B = CLOSED / APPROVED
 3C = CLOSED / APPROVED
@@ -1454,6 +1513,7 @@ F3K-IC-01 Product Agent authoring/management/use = RESOLVED BY 3K-04
 
 job/v1 / deterministic sync dispatch = RESOLVED BY 3A-R9
 CX-MANAGED-JOB-01 = MUST QUALIFY in 3L
+CX-BUILDER-COGNITION-01 = MUST EVALUATE in 3L / NOT MUST ENABLE
 
 3L = NEXT / NOT STARTED
 ```
@@ -1487,6 +1547,8 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 3A-R8 foi ratificada pelo operador em **2026-08-18** após coherence sweep interno e pesquisa externa adversarial. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: Project Baseline permanece Project-owned e passa a ser explicitamente `spec-anchored / living / incremental`; sua suficiência é proporcional ao Change atual; todo Change pina a Baseline aprovada exata; decisão material requerida pelo Change não pode ser delegada silenciosamente ao coding actor; late architecture discovery retorna por Finding/Replan/Handoff antes de atravessar a boundary; `ProjectBaselineDigest` participa explicitamente da execution/proof identity; big-design-up-front, ArchitectureEngine, novo record/DB/workflow e global invalidation por qualquer mudança de digest são rejeitados. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
 
 3A-R9 foi ratificada pelo operador em **2026-08-18** após 3K-03 disparar o primeiro consumidor real de mirror/sync. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: `job/v1` permanece artifact Project-scoped e MAR-owned no runtime; primeira realization = governed sync capability-driven; `MANAGED_JOB` vira surface explícita do Gateway; schedule é derivado da exact active served Release; `mar.job_run` permanece record suficiente; fixed interval/manual, single-flight/coalesce e one-catch-up fecham o primeiro consumer; arbitrary privileged Project job code, Workflow/Automation/Scheduler domain e generic calendar DSL são rejeitados F1; `CX-MANAGED-JOB-01` entra no 3L. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
+
+3A-R10 foi ratificada pelo operador em **2026-08-18** como checkpoint bounded de convergência antes de 3L. `CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION`: compila supersessões de realization sem apagar invariantes históricos; congela `technology selected != technology qualified`; proíbe executar probe histórico literalmente quando authority posterior mudou o mechanism; promove Builder long-context/Observational Memory para `CX-BUILDER-COGNITION-01 MUST EVALUATE / NOT MUST ENABLE`; preserva Product Agent OM/Semantic Recall/Extractors consumer-gated; organiza 3L em Packages A–E com Q0 exact-version Qualification Manifest; preserva mandatory downstream first-build probes sem trazê-los para 3L; e explicita o post-C-018 Implementation Realization Planning Gate como derived-only. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
 
 3K-01 foi ratificada pelo operador em **2026-08-17** e abriu formalmente 3K. Congela Workspace shell ≠ Project shell; Project-scoped navigation; Build agent-first com Preview como work surface dominante e Conexus contextual/retrátil; Data/Capabilities/Integrations/Agents/Brain/Versions/Activity diretamente inspecionáveis; Code/Diff como Build lenses; machinery interna apenas progressive detail; `Product`/`Resources` artificiais rejeitados; exact visual/component/streaming realization deferred. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
@@ -1527,8 +1589,8 @@ O único independent final Fable challenge de 3K foi executado em **2026-08-18**
 
 Próxima ação:
 
-> **Abrir `3L — Technology Qualification`** e executar somente probes capazes de falsificar assumptions tecnológicas load-bearing já aprovadas. Current required families: `CX-SBX-E2B-01`, `CX-BUILDER-MASTRA-01`, `CX-AGENT-MASTRA-01`, `CX-RUNTIME-ISOLATION-01`, `CX-MANAGED-JOB-01`, subset de model-spend de 3I-03 e Verification Observability deciding-evidence subset. Não transformar 3L em framework exploration genérico; failure material reabre primeiro a menor substrate/realization assumption falsificada.
+> **Abrir `3L — Technology Qualification` sob [3A-R10](3A-R10-pre-implementation-convergence-realization-routing.md).** Primeiro materializar Q0 Qualification Manifest com exact versions/config; depois executar os cinco packages atuais: A Builder Substrate+Cognition (`CX-SBX-E2B-01`, `CX-BUILDER-MASTRA-01`, `CX-BUILDER-COGNITION-01`), B Product Agent+Cross-Runtime (`CX-AGENT-MASTRA-01`, `CX-RUNTIME-ISOLATION-01`), C 3I-03 model economics/enforcement subset, D `CX-MANAGED-JOB-01`, E Verification Observability deciding-evidence subset. Não transformar 3L em framework exploration genérico; failure material reabre primeiro a menor substrate/realization assumption falsificada.
 
-3L–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
+3L–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9 + 3A-R10. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + F3B-R1 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

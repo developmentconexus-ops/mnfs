@@ -1,0 +1,256 @@
+from pathlib import Path
+from textwrap import dedent
+
+
+def replace_once(path: str, old: str, new: str) -> None:
+    p = Path(path)
+    text = p.read_text()
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f"{path}: expected exactly one match, found {count}: {old[:120]!r}")
+    p.write_text(text.replace(old, new, 1))
+
+
+def replace_n(path: str, old: str, new: str, expected: int) -> None:
+    p = Path(path)
+    text = p.read_text()
+    count = text.count(old)
+    if count != expected:
+        raise SystemExit(f"{path}: expected {expected} matches, found {count}: {old[:120]!r}")
+    p.write_text(text.replace(old, new))
+
+
+q0 = "docs/conexus/phase3/3L-Q0-qualification-manifest.md"
+replace_once(q0,
+    "Package A                           = NEXT / NOT STARTED",
+    "Package A                           = IN PROGRESS / A1+A2 ADJUDICATED / A3 NEXT")
+replace_once(q0, dedent("""\
+@mastra/core   = 1.55.0
+@mastra/memory = 1.24.0   # Package A OM candidate path only
+@mastra/pg     = 1.18.1
+@mastra/e2b    = 0.7.0"""), dedent("""\
+@mastra/code-sdk = 1.1.2   # A3 native Codex OAuth surface
+@mastra/core     = 1.56.0
+@mastra/memory   = 1.25.0   # Package A OM candidate path only
+@mastra/pg       = 1.19.0
+@mastra/e2b      = 0.8.0"""))
+replace_once(q0, dedent("""\
+@mastra/core 1.55.0
+→ exports ./agent-controller
+
+@mastra/memory 1.24.0
+→ peer @mastra/core >=1.4.1-0 <2.0.0-0
+→ Node >=22.13.0
+
+@mastra/pg 1.18.1
+→ peer @mastra/core >=1.51.0-0 <2.0.0-0
+→ Node >=22.13.0
+
+@mastra/e2b 0.7.0
+→ peer @mastra/core >=1.12.0-0 <2.0.0-0
+→ depends on e2b ^2.29.1
+→ Node >=22.13.0
+→ includes networking + snapshot-stop/resume + detached lifecycle surfaces needed by current Builder assumptions"""), dedent("""\
+@mastra/core 1.56.0
+→ exports ./agent-controller and ./coding-agent
+
+@mastra/memory 1.25.0
+→ peer @mastra/core >=1.4.1-0 <2.0.0-0
+→ Node >=22.13.0
+
+@mastra/pg 1.19.0
+→ peer @mastra/core >=1.53.0-0 <2.0.0-0
+→ Node >=22.13.0
+
+@mastra/e2b 0.8.0
+→ peer @mastra/core >=1.55.0-0 <2.0.0-0
+→ depends on e2b ^2.29.1
+→ Node >=22.13.0
+→ 0.8.0 changes the stale peer floor + Code Mode tool-name reuse, not the qualified lifecycle/network contract
+
+@mastra/code-sdk 1.1.2
+→ same stable release family as core 1.56.0
+→ exposes native openai-codex device OAuth/AuthStorage/provider surfaces used by A3"""))
+replace_once(q0,
+    "`@mastra/e2b 0.7.0` is deliberately a stable known candidate, not a `latest` preference. A newer adapter enters only through an explicit Q0 pin revision before Package A and must rerun the criteria whose behavior changed.",
+    "The Package A candidate family was explicitly repinned before A3 live execution to the current mutually compatible **stable** Mastra release family above. This is not a follow-`latest` policy: alpha/prerelease builds remain excluded, exact versions are frozen in the package lock, and any later version drift must rerun only criteria whose behavior may have changed.")
+replace_once(q0,
+    "A semver range in an upstream package is **not** deciding identity.",
+    dedent("""\
+A semver range in an upstream package is **not** deciding identity.
+
+Current Package A latest-stable closure after approved repin:
+
+```text
+@mastra/code-sdk = 1.1.2
+@mastra/core     = 1.56.0
+@mastra/e2b      = 0.8.0
+@mastra/memory   = 1.25.0
+@mastra/pg       = 1.19.0
+e2b SDK          = 2.40.0
+package-lock SHA-256 = 7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5
+```
+
+The physical E2B SDK remained `2.40.0` across the repin. Package A requalifies changed Mastra surfaces separately from historical provider-live evidence rather than relabeling old evidence as new bytes."""))
+replace_once(q0,
+    "For A1, `@mastra/memory 1.24.0` is the candidate package pin.",
+    "For A1, `@mastra/memory 1.25.0` is the current candidate package pin after the approved latest-stable repin.")
+replace_once(q0,
+    "next = Package A — Builder Substrate + Cognition",
+    "current = Package A — Builder Substrate + Cognition / IN PROGRESS / A3 NEXT")
+
+
+a = "docs/conexus/phase3/3L-A-builder-substrate-cognition.md"
+replace_once(a, dedent("""\
+A3 Codex OAuth realignment commit   = 99d12284d3b09948ea13b9f14fe41b4838996e56
+A3 lock materialization commit      = 8f5ff76e27ed39db99e1e2612a19fd0523e447ae
+Node                                = 24.18.0
+npm                                 = 11.16.0
+spike lockfileVersion               = 3
+A1/A2 package-lock SHA-256          = 6b506f505567d82dd94653fca14bb5bc6b7b5b2d5138f83b34123d02e93cb0ce
+A3 package-lock SHA-256             = 4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7
+@mastra/code-sdk                    = 1.1.1
+@mastra/core                        = 1.55.0
+@mastra/e2b                         = 0.7.0
+@mastra/memory                      = 1.24.0
+@mastra/pg                          = 1.18.1
+e2b SDK resolved transitively       = 2.40.0
+supply-chain Q0 deny-set            = PASS
+package lifecycle scripts at lock   = DISABLED"""), dedent("""\
+A3 Codex OAuth realignment commit   = 99d12284d3b09948ea13b9f14fe41b4838996e56
+latest-stable repin commit          = 01ef4e0128b69d27136c3e426eab82af89605566
+latest-stable lock commit           = ce204d587a221c755c0eab8c302c78c4ec2cad4a
+A3 current-lock binding commit      = 3a82aaef064e4fa3fb443e8f6392ef884d110cf3
+Node                                = 24.18.0
+npm                                 = 11.16.0
+spike lockfileVersion               = 3
+A1/A2 original package-lock SHA-256 = 6b506f505567d82dd94653fca14bb5bc6b7b5b2d5138f83b34123d02e93cb0ce
+current package-lock SHA-256        = 7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5
+@mastra/code-sdk                    = 1.1.2
+@mastra/core                        = 1.56.0
+@mastra/e2b                         = 0.8.0
+@mastra/memory                      = 1.25.0
+@mastra/pg                          = 1.19.0
+e2b SDK resolved transitively       = 2.40.0
+supply-chain Q0 deny-set            = PASS
+package lifecycle scripts at lock   = DISABLED"""))
+replace_once(a,
+    "Evidence remains bound to the exact bytes that produced it. The A3 Codex OAuth repin does not reinterpret A1/A2 evidence against a new lock.",
+    "Evidence remains bound to the exact bytes that produced it. Historical A1/A2 deciding/live evidence keeps its original lock identity; the approved latest-stable repin is a separate affected-surface requalification and does not relabel old live evidence as new bytes.")
+replace_once(a, dedent("""\
+Latest deciding A1 execution:
+
+```text
+6 tests / 6 pass / 0 fail
+```
+
+A1 proves persistent cognition/runtime mechanics only."""), dedent("""\
+Original deciding A1 execution:
+
+```text
+6 tests / 6 pass / 0 fail
+```
+
+Latest-stable regression on `@mastra/core 1.56.0` + `@mastra/pg 1.19.0` under the current lock:
+
+```text
+P1/P4 + P2 + P3 + P21 + P27a + P27b = 6 / 6 PASS
+regression finding                     = NONE
+```
+
+The same six persisted-runtime invariants therefore remain qualified on the current stable family. A1 proves persistent cognition/runtime mechanics only."""))
+replace_once(a, dedent("""\
+→ repeat the original operation once
+```
+
+#### F-3L-A-01"""), dedent("""\
+→ repeat the original operation once
+```
+
+Latest-stable affected-surface regression on `@mastra/e2b 0.8.0`:
+
+```text
+adapter retry characterization = 3 / 3 PASS
+physical-incarnation guard     = 5 / 5 PASS
+transitive e2b SDK             = 2.40.0 / UNCHANGED
+0.8.0 release delta            = peer-floor + Code Mode tool-name reuse
+lifecycle/retry/network delta  = NONE IDENTIFIED in 0.8.0 release record
+```
+
+Therefore the expensive provider-live suite is not replayed merely because the wrapper package version changed. Historical A2 live evidence remains explicitly bound to its original adapter bytes; the changed wrapper surfaces that could affect the confirmed reincarnation finding/guard were requalified on 0.8.0, while the physical E2B SDK and previously qualified provider-side lifecycle/network substrate stayed unchanged.
+
+#### F-3L-A-01"""))
+replace_once(a, dedent("""\
+A2 live tests          = 10 / 10 PASS
+A1 local runtime tests = PASS
+adapter contract tests = PASS
+physical guard tests   = PASS
+Package A workflow     = SUCCESS
+lock bootstrap         = SUCCESS
+Documentation          = SUCCESS"""), dedent("""\
+historical A2 live tests                  = 10 / 10 PASS
+current A1 latest-stable regression       = 6 / 6 PASS
+current @mastra/e2b 0.8 adapter regression= 3 / 3 PASS
+current physical-incarnation guard        = 5 / 5 PASS
+current A3 non-billable contracts         = 12 / 12 PASS
+current Codex OAuth imports               = PASS
+current live-script syntax checks         = PASS
+Package A workflow                        = SUCCESS
+lock bootstrap                            = SUCCESS
+Documentation / npm run verify            = SUCCESS"""))
+replace_n(a, "@mastra/code-sdk 1.1.1", "@mastra/code-sdk 1.1.2", 1)
+replace_once(a, "@mastra/code-sdk            = 1.1.1", "@mastra/code-sdk            = 1.1.2")
+replace_once(a,
+    "A3 lock SHA-256             = 4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7",
+    "A3 lock SHA-256             = 7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5")
+replace_once(a,
+    "Source inspection of the pinned `@mastra/memory 1.24.0` established that Observer/Reflector have retry behavior not controlled by the main Agent's `maxRetries=0`.",
+    "Historical source inspection of `@mastra/memory 1.24.0` established that Observer/Reflector had retry behavior not controlled by the main Agent's `maxRetries=0`. Package A is now pinned to `@mastra/memory 1.25.0`; Package C must re-inspect/requalify the exact 1.25.0 attempt/admission surface rather than inheriting the old mechanism claim. A3 does not require that retry shape to remain unchanged.")
+replace_once(a,
+    "exact Codex OAuth dependency closure = COMPLETE / PASS",
+    "exact latest-stable Codex OAuth dependency closure = COMPLETE / PASS")
+replace_once(a,
+    "| Lock / supply-chain identity | **PASS** | exact committed locks + supply-chain gate |",
+    "| Lock / supply-chain identity | **PASS** | latest-stable exact lock `7f61c6c7…` + supply-chain gate |")
+replace_once(a,
+    "| A1 Mastra/Postgres runtime | **PASS** | 6/6 pinned-package local/persistent probes |",
+    "| A1 Mastra/Postgres runtime | **PASS** | original 6/6 + latest-stable 1.56/1.19 regression 6/6 |")
+replace_once(a,
+    "| A2 narrow physical-incarnation guard | **PASS / REQUIRED** | RED→GREEN local + live provider proof |",
+    "| A2 narrow physical-incarnation guard | **PASS / REQUIRED** | original RED→GREEN + live proof; 0.8 regression 5/5 |")
+
+
+ledger = "docs/conexus/phase3/LEDGER.md"
+replace_once(ledger,
+    "`3L IN PROGRESS / Q0 APPROVED-COMPLETE / PACKAGE A NEXT`",
+    "`3L IN PROGRESS / Q0 APPROVED-COMPLETE / PACKAGE A IN PROGRESS / A1+A2 COMPLETE / A3 NEXT`")
+replace_once(ledger,
+    "**IN PROGRESS / Q0 COMPLETE / PACKAGE A NEXT**",
+    "**IN PROGRESS / Q0 COMPLETE / PACKAGE A IN PROGRESS / A3 CODEX OAUTH SMOKE NEXT**")
+replace_n(ledger,
+    "Package A = NEXT / NOT STARTED",
+    "Package A = IN PROGRESS / A1+A2 COMPLETE / A3 CODEX OAUTH SMOKE NEXT",
+    2)
+replace_once(ledger,
+    "| 3L — Technology Qualification | **IN PROGRESS / Q0 COMPLETE** | [3L-Q0](3L-Q0-qualification-manifest.md); next = Package A — Builder Substrate + Cognition |",
+    "| 3L — Technology Qualification | **IN PROGRESS / Q0 COMPLETE / PACKAGE A IN PROGRESS** | [3L-Q0](3L-Q0-qualification-manifest.md); A1+A2 complete; next = A3 Codex OAuth smoke |")
+replace_once(ledger,
+    "→ Package A — Builder Substrate + Cognition = NEXT / NOT STARTED",
+    "→ Package A — Builder Substrate + Cognition = IN PROGRESS / A1+A2 COMPLETE / A3 CODEX OAUTH SMOKE NEXT")
+replace_once(ledger,
+    "3L-Q0 foi ratificada pelo operador em **2026-08-18** como manifesto de admissão/reprodutibilidade da Technology Qualification. `Q0 = APPROVED / COMPLETE`: fixa a qualification stack/candidate identities, supply-chain gates, historical-probe compilation, model/provider pin law, E2B live-run identity requirements, pg-boss incumbent candidate e ordem serial `A → B → C → D → E`; não instala dependências, não implementa harness de probe e não executa Package A. `3L = IN PROGRESS`; implementação permanece bloqueada.",
+    "3L-Q0 foi ratificada pelo operador em **2026-08-18** como manifesto de admissão/reprodutibilidade da Technology Qualification. `Q0 = APPROVED / COMPLETE`: fixa a qualification stack/candidate identities, supply-chain gates, historical-probe compilation, model/provider pin law, E2B live-run identity requirements, pg-boss incumbent candidate e ordem serial `A → B → C → D → E`; não instala dependências, não implementa harness de probe e não executa Package A. Durante Package A, antes de qualquer A3 model-bearing call, o operador aprovou uma latest-stable reconciliation: `core 1.56.0 / memory 1.25.0 / pg 1.19.0 / e2b 0.8.0 / code-sdk 1.1.2`, lock `7f61c6c7…`; A1 6/6, adapter 3/3, incarnation guard 5/5 e A3 contracts 12/12 passaram no novo lock, sem rerodar provider-live surfaces cujo E2B SDK `2.40.0` e release behavior relevante não mudaram. `3L = IN PROGRESS`; implementação permanece bloqueada.")
+replace_once(ledger,
+    "> **Executar Package A — Builder Substrate + Cognition sob [3L-Q0](3L-Q0-qualification-manifest.md).** Compilar e executar `CX-SBX-E2B-01` contra current Mastra/E2B authority + `CX-BUILDER-MASTRA-01` + `CX-BUILDER-COGNITION-01`; registrar exact lock/provider/E2B live identities na admission do Package A; adjudicar toda Evidence antes de iniciar Package B. Não transformar 3L em framework exploration genérico; failure material reabre primeiro a menor substrate/realization assumption falsificada.",
+    "> **Continuar Package A pelo A3 — Builder Cognition.** A1 está COMPLETE/PASS e A2 está COMPLETE/PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD; a latest-stable Mastra family já passou a affected-surface regression. Próximo gate: native Codex device OAuth smoke com `gpt-5.6-sol` Actor + `gpt-5.6-luna` Observer/Reflector; somente se ambos forem admitidos pela assinatura executar `A0 → A1 → B0 → B1`, adjudicar `CX-BUILDER-COGNITION-01` e então fazer completeness/deletion check do Package A antes de Package B.")
+
+
+readme = "docs/conexus/phase3/README.md"
+replace_once(readme,
+    "Package A — Builder Substrate + Cognition = NEXT / NOT STARTED",
+    "Package A — Builder Substrate + Cognition = IN PROGRESS / A1+A2 COMPLETE / A3 CODEX OAUTH SMOKE NEXT")
+replace_once(readme,
+    "   Package A NEXT",
+    "   Package A IN PROGRESS — A3 CODEX OAUTH SMOKE NEXT")
+
+print("AUTHORITY_RECONCILIATION=READY")

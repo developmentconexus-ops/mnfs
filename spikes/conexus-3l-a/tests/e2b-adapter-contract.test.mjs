@@ -13,6 +13,10 @@ test('F-3L-A-01: E2B process spawn is routed through retryOnDead', async () => {
   let retryBoundaryCalls = 0;
   const sentinelHandle = { kind: 'sentinel-process-handle' };
 
+  // SandboxProcessManager wraps every subclass spawn() with ensureRunning().
+  // Neutralize only that outer lifecycle wrapper so this fixture isolates the
+  // E2BProcessManager internal routing without asking the real provider to start.
+  sandbox.ensureRunning = async () => {};
   sandbox.retryOnDead = async () => {
     retryBoundaryCalls += 1;
     return sentinelHandle;

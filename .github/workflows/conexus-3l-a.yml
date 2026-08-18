@@ -5,7 +5,6 @@ on:
     paths:
       - 'spikes/conexus-3l-a/**'
       - 'docs/conexus/phase3/3L-A-builder-substrate-cognition.md'
-      - 'docs/conexus/phase3/3L-A3-builder-cognition-admission.md'
       - '.github/workflows/conexus-3l-a.yml'
   workflow_dispatch:
 
@@ -88,19 +87,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: E2B_API_KEY
     steps:
-      - name: Report external evidence availability without exposing secrets
+      - name: Report only credentials needed by the current Package A path
         env:
           E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           node - <<'NODE'
-          const names = ['E2B_API_KEY', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY'];
-          const availability = Object.fromEntries(names.map(name => [name, Boolean(process.env[name])]));
+          const availability = {
+            E2B_API_KEY: Boolean(process.env.E2B_API_KEY),
+            OPENROUTER_API_KEY: Boolean(process.env.OPENROUTER_API_KEY),
+          };
           console.log(JSON.stringify(availability, null, 2));
           if (!availability.E2B_API_KEY) console.log('A2_E2B_LIVE=NOT_PROVEN_NO_APPROVED_CREDENTIAL');
-          if (!availability.ANTHROPIC_API_KEY && !availability.OPENAI_API_KEY && !availability.OPENROUTER_API_KEY) {
-            console.log('A3_OM_COGNITION=NOT_PROVEN_NO_APPROVED_MODEL_CREDENTIAL');
-          }
+          if (!availability.OPENROUTER_API_KEY) console.log('A3_OM_COGNITION=NOT_PROVEN_NO_APPROVED_MODEL_CREDENTIAL');
           NODE

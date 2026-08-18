@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { Agent } from '@mastra/core/agent';
 import { AgentController } from '@mastra/core/agent-controller';
-import { Workspace } from '@mastra/core/workspace';
 import { PostgresStore } from '@mastra/pg';
 
 const connectionString = process.env.TEST_DATABASE_URL;
@@ -31,7 +30,6 @@ async function createController(storage, { controllerId = 'builder-controller', 
     id: controllerId,
     agent,
     storage,
-    workspace: new Workspace({ id: 'builder-probe-workspace' }),
     defaultModeId: 'build',
     modes: [
       { id: 'build', name: 'Build', defaultModelId, metadata: { default: true } },

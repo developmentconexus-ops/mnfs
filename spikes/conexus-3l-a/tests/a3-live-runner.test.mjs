@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildConditionRuntimeConfig, buildMemoryOptions, scoreA3Condition } from '../src/a3-live.mjs';
+import * as live from '../src/a3-live.mjs';
+
+const { buildConditionRuntimeConfig, buildMemoryOptions, scoreA3Condition } = live;
 
 const authorityPass = {
   pass: true,
@@ -66,4 +68,37 @@ test('A3 scoring requires correctness and a successful Observer cycle only on OM
   });
   assert.equal(onWithoutObservation.admissible, false);
   assert.equal(onWithoutObservation.reason, 'OM_DID_NOT_FIRE');
+});
+
+test('A3 Codex smoke consumes the model through streaming and never uses generate', async () => {
+  assert.equal(
+    typeof live.smokeCodexModel,
+    'function',
+    'smokeCodexModel must exist so the Codex smoke can enforce stream-only transport',
+  );
+
+  const marker = 'CODEX_SMOKE_OK';
+  let streamCalls = 0;
+  let generateCalls = 0;
+  const agent = {
+    async generate() {
+      generateCalls += 1;
+      throw new Error('generate must not be used for the Codex backend');
+    },
+    async stream(prompt) {
+      streamCalls += 1;
+      assert.equal(prompt, `Reply with exactly ${marker} and nothing else.`);
+      return {
+        textStream: (async function* () {
+          yield 'CODEX_';
+          yield 'SMOKE_OK';
+        })(),
+      };
+    },
+  };
+
+  const text = await live.smokeCodexModel(agent, marker);
+  assert.equal(text, marker);
+  assert.equal(streamCalls, 1);
+  assert.equal(generateCalls, 0);
 });

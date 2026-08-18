@@ -1,6 +1,6 @@
 # 3L-A — Builder Substrate + Cognition Qualification
 
-**Status:** IN PROGRESS / A1 COMPLETE-PASS / A2 COMPLETE-PASS WITH REQUIRED GUARD / A3 RE-ADMITTED-PREPARED ON NATIVE CODEX OAUTH / LIVE RUNS NOT STARTED  
+**Status:** COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — NOT_PROVEN FOR OM ENABLEMENT / KEEP OM OFF
 **Fase:** 3L — Technology Qualification  
 **Package:** A — Builder Substrate + Cognition  
 **Authority:** 3A-R10 + 3L-Q0 + current 3H-01/3H-03/3I authority  
@@ -18,6 +18,10 @@ A3 Codex OAuth realignment commit   = 99d12284d3b09948ea13b9f14fe41b4838996e56
 latest-stable repin commit          = 01ef4e0128b69d27136c3e426eab82af89605566
 latest-stable lock commit           = ce204d587a221c755c0eab8c302c78c4ec2cad4a
 A3 current-lock binding commit      = 3a82aaef064e4fa3fb443e8f6392ef884d110cf3
+A3 harness RED commit               = 5c54f28e
+A3 harness GREEN commit             = 9b5788a7
+A3 live-source commit               = aa1b1fea
+A3 manual-only workflow commit      = a543bf1
 Node                                = 24.18.0
 npm                                 = 11.16.0
 spike lockfileVersion               = 3
@@ -43,7 +47,7 @@ A2 — CX-SBX-E2B-01 compiled against current Mastra Builder authority
 A3 — CX-BUILDER-COGNITION-01 (persistent thread OM OFF × OM ON)
 ```
 
-A1 and A2 are adjudicated. A3 is admitted and its non-billable fixtures/contracts are prepared; OAuth smoke and the four model-bearing runs have not started.
+A1, A2 and A3 are adjudicated. The native Codex OAuth smoke passed for both exact model IDs and the four model-bearing conditions ran exactly once in the fixed order `A0 → A1 → B0 → B1`. A3 did not prove material net benefit from OM, so the Package A baseline remains `OM = OFF`.
 
 Package A follows the already-approved proportional-security/YAGNI posture:
 
@@ -309,7 +313,7 @@ historical A2 live tests                  = 10 / 10 PASS
 current A1 latest-stable regression       = 6 / 6 PASS
 current @mastra/e2b 0.8 adapter regression= 3 / 3 PASS
 current physical-incarnation guard        = 5 / 5 PASS
-current A3 non-billable contracts         = 12 / 12 PASS
+current A3 non-billable contracts         = 15 / 15 PASS
 current Codex OAuth imports               = PASS
 current live-script syntax checks         = PASS
 Package A workflow                        = SUCCESS
@@ -332,7 +336,7 @@ A2 does not prove Builder effectiveness, OM benefit, full model-spend enforcemen
 
 ---
 
-## 5. A3 — Builder cognition / Observational Memory — RE-ADMITTED / CODEX OAUTH PREPARED
+## 5. A3 — Builder cognition / Observational Memory — COMPLETE / KEEP OM OFF
 
 ### 5.1 Question being decided
 
@@ -389,7 +393,7 @@ primary Actor runs          = exactly 4
 OAuth smoke                 = Sol + Luna before the four primary runs
 ```
 
-Current primary-source evidence observed at admission time states that GPT-5.6 Sol and Luna are available in Codex for eligible paid ChatGPT plans and that Luna is the fastest / lowest-cost GPT-5.6 tier. That vendor statement is **candidate evidence only**; the device OAuth smoke must still prove that the operator's actual subscription admits both exact model IDs before A3 proceeds.
+Primary-source evidence observed at admission time stated that GPT-5.6 Sol and Luna were available in Codex for eligible paid ChatGPT plans and that Luna was the fastest / lowest-cost GPT-5.6 tier. That vendor statement remained candidate evidence until the deciding device OAuth smoke admitted both exact model IDs for the operator's actual subscription.
 
 A3 intentionally uses:
 
@@ -527,16 +531,73 @@ missing/interrupted deciding evidence
 
 No A3 result creates a memory service, reopens domain semantics or triggers a generic framework comparison.
 
-### 5.10 Current A3 state
+### 5.10 Harness RED → GREEN and exact-head verification
+
+The first one-shot attempt was correctly stopped before OAuth/model execution by two admission defects:
 
 ```text
-exact latest-stable Codex OAuth dependency closure = COMPLETE / PASS
-non-billable fixture contracts       = PREPARED
-model-bearing calls on old path      = 0
-Codex OAuth smoke                     = NOT STARTED
-four primary runs                     = NOT STARTED
-OM baseline                           = OFF
+RED workflow run / job = 32183161901 / 95860710246
+answer-only Workspace  = missing; AgentController requires a valid Workspace
+OM model settings      = emitted unsupported maxOutputTokens
 ```
+
+The smallest correction added a local skills-only Mastra `Workspace` for answer-only conditions, kept coding conditions on E2B, and removed only the unsupported OM field. Tasks, fixtures, thresholds, ordering and deciding criteria did not change.
+
+```text
+GREEN workflow run / job       = 32183719481 / 95862460416
+exact current-head run / job   = 32183918352 / 95863079100
+A1 current-lock regression     = 6 / 6 PASS
+A2 adapter regression          = 3 / 3 PASS
+physical-incarnation guard     = 5 / 5 PASS
+A3 non-billable contracts      = 15 / 15 PASS
+OAuth imports + syntax checks  = PASS
+```
+
+The exact CI environment used Node `24.18.0`, npm `11.16.0` and PostgreSQL `17.10`. Local Node 26 checks were supplementary only; exact CI is deciding.
+
+### 5.11 OAuth smoke and four primary runs
+
+```text
+live workflow run / job        = 32183868645 / 95863091782
+live source commit             = aa1b1feaf45bc9933c48e58d7d667dce56019b60
+Codex OAuth smoke — Sol        = PASS
+Codex OAuth smoke — Luna       = PASS
+primary execution order        = A0 → A1 → B0 → B1
+primary conditions completed   = 4 / 4, exactly once
+selective replay               = NONE
+```
+
+| Condition | Correctness | Admissibility | Actor usage | Tools | Wall time | OM evidence |
+|---|---:|---:|---:|---:|---:|---|
+| A0 — authority, OM OFF | PASS | PASS | 23,414 total tokens | 0 | 2,709 ms | none expected |
+| A1 — authority, OM ON | PASS | **FAIL — `OM_DID_NOT_FIRE`** | 23,414 total tokens | 0 | 32,464 ms | zero observation/reflection events |
+| B0 — coding, OM OFF | PASS | PASS | 72,685 total tokens | 3 | 15,607 ms | none expected |
+| B1 — coding, OM ON | PASS | PASS | 50,938 total tokens | 3 | 29,605 ms | one observation cycle; no reflection |
+
+Both authority conditions returned exactly the four required current-authority lines with no stale-authority violation. Both coding conditions changed only `src/budget.mjs`, preserved `unknown != zero` and passed the independent verifier with zero tool errors. B1 used fewer Actor tokens than B0, but took about 90% longer; Observer/Reflector usage remained `MISSING`, never zero. A1 produced no OM cycle or measurable benefit. The live job therefore ended non-success on the explicit A1 admissibility rule, not because OAuth, transport or the harness failed.
+
+Deciding artifact:
+
+```text
+artifact name                 = conexus-3l-a3-cognition
+GitHub artifact ID            = 9342196774
+artifact archive digest       = sha256:e1b21fe164478f46543f8431729b188fbdae4df4616699befb04ce53b41ac55b
+a3-cognition-result.json SHA  = 03aee81e06374964e16a2519a063d591acb2ef913e39292ecb3c9adbea65a232
+```
+
+### 5.12 A3 adjudication
+
+```text
+CX-BUILDER-COGNITION-01       = EVALUATED
+current OM realization        = NOT COGNITIVELY QUALIFIED
+material net benefit          = NOT_PROVEN
+current-authority regression  = NONE
+OM baseline                   = KEEP OFF
+Package C OM carry-forward    = NONE unless a later Decision Loop re-admits it
+architecture reopen           = NONE
+```
+
+`MUST EVALUATE` is satisfied; it never meant `MUST ENABLE`. The mixed B-pair signal cannot outweigh A1 inadmissibility, materially higher latency and missing OM-model usage evidence. No repeat was performed to manufacture a preferred result.
 
 ---
 
@@ -549,13 +610,15 @@ A1 Mastra/Postgres runtime mechanics = COMPLETE / PASS
 ↓
 A2 E2B Builder substrate             = COMPLETE / PASS WITH REQUIRED GUARD
 ↓
-A3 native Codex OAuth smoke          = NEXT
-↓ if Sol + Luna PASS
-A3 OM cognition comparison           = A0 → A1 → B0 → B1
-↓ adjudicate
-Package A internal completeness/deletion check
+A3 native Codex OAuth smoke          = COMPLETE / SOL + LUNA PASS
 ↓
-operator + ChatGPT Package A verdict
+A3 OM cognition comparison           = COMPLETE / A0 → A1 → B0 → B1 ONCE
+↓
+A3 adjudication                      = NOT_PROVEN FOR ENABLEMENT / KEEP OM OFF
+↓
+Package A completeness/deletion check= COMPLETE / PASS
+↓
+Package A verdict                    = COMPLETE
 ```
 
 ---
@@ -569,11 +632,33 @@ operator + ChatGPT Package A verdict
 | A2 stock E2B adapter write reincarnation | **FAIL AS-IS / FINDING CONFIRMED** | source + contract + live physical replacement write |
 | A2 narrow physical-incarnation guard | **PASS / REQUIRED** | original RED→GREEN + live proof; 0.8 regression 5/5 |
 | A2 E2B Builder substrate overall | **PASS WITH REQUIRED GUARD + KNOWN DNS EXCEPTION** | 10/10 live suite + exact template/resource/network/DB/custody evidence |
-| A3 Codex OAuth path | **ADMITTED / NOT_PROVEN LIVE** | native pinned surface + exact lock; device smoke still required |
-| A3 OM cognition | **ADMITTED / NOT_PROVEN** | Sol Actor + Luna OM fixtures prepared; four real paired runs still required |
-| Package A overall | **IN PROGRESS** | A3 remains before package verdict |
+| A3 Codex OAuth path | **PASS** | native pinned surface; device smoke admitted exact Sol + Luna IDs |
+| A3 OM cognition | **EVALUATED / NOT_PROVEN FOR ENABLEMENT / KEEP OFF** | four fixed-order conditions exactly once; A1 `OM_DID_NOT_FIRE`; no current-authority regression |
+| Package A overall | **COMPLETE** | A1 PASS; A2 PASS WITH REQUIRED GUARD; A3 KEEP OM OFF |
 
-## 8. Guardrails
+## 8. Package A completeness/deletion check
+
+```text
+A1 criteria accounted                              = YES
+A2 criteria accounted                              = YES
+A3 MUST EVALUATE accounted                         = YES
+OM product code/config/dependency authority added  = 0
+new domain/module/durable record/database/workflow = 0
+product implementation                             = 0
+required physical-incarnation guard preserved      = YES
+superseded OpenRouter realization retained         = NO
+one-shot workflow left auto-triggered               = NO / manual-only restored
+selective model-bearing replay                      = 0
+Material Finding against approved architecture      = NONE
+prior architecture reopen                           = NONE
+Package A verdict                                   = COMPLETE
+```
+
+The narrow physical-incarnation guard remains a required future realization constraint, not product code from this package. The current OM realization is deleted from the F1 candidate path by keeping the already-approved baseline OFF; no OM subsystem is carried forward by implication.
+
+---
+
+## 9. Guardrails
 
 ```text
 prove first useful V1, not theoretical maximum hardening

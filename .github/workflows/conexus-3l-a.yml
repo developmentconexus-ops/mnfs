@@ -78,6 +78,7 @@ jobs:
           tests/e2b-live.test.mjs
           tests/e2b-envelope-live.test.mjs
           tests/e2b-controls-live.test.mjs
+          tests/e2b-db-reconcile-live.test.mjs
 
   external-credential-admission:
     runs-on: ubuntu-latest

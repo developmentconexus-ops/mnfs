@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 APROVADA`  
-**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 APROVADA**; próxima decisão = Package B — Trust, Decision & Observable Truth; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 APROVADAS`  
+**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 APROVADAS**; próxima decisão = Package C — First Vertical Composition & Data Path; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -86,6 +86,9 @@ C-000..C-017
 3K-01
 → Product Model, Project Shell, Build Workspace & Inspectability
 
+3K-02
+→ Trust, Decision & Observable Truth
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -120,7 +123,7 @@ Nenhuma conversa cria authority.
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 APROVADA** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md); próximo Package B — Trust, Decision & Observable Truth; final independent adversarial review somente após packages internos coerentes |
+| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md); próximo Package C — First Vertical Composition & Data Path; final independent adversarial review somente após packages internos coerentes |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
@@ -1049,7 +1052,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | Product Agent browser/workspace/code execution trust/egress if first consumer enables it | Decision Loop / DEFER SAFELY; 3I-05 pre-binds named-owner/destination-authority requirement |
 | whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **RESOLVED by 3J-03**; pre-production drill permanece gate (3I-01/3J-03/3J-R1) |
 | post-whole-Hub-stop settlement/recovery | 3M structural recovery sweep |
-| selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely Release/MAR serving-admission owner |
+| selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely owner seam = Release/MAR serving-admission owner |
 | DEDICATED trust/authentication semantics | **RESOLVED by 3I-04**; exact libraries/TTL/claim spelling → 3L/Realization Planning |
 | DEDICATED egress/network trust semantics | **RESOLVED by 3I-05 + 3I-04**; physical DEDICATED deployment → DEFER SAFELY to 3J until first real deployment |
 | MANAGED/DEDICATED physical deployment topology | **MANAGED first-production topology RESOLVED by 3J-01**; DEDICATED physical topology DEFER SAFELY until first real DEDICATED deployment |
@@ -1070,8 +1073,8 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | repeated Builder quiescence/reconnect failure policy | 3M; detailed operational refinement may DEFER SAFELY |
 | Project purge/retention/GC | 3M/3J — DEFER SAFELY absent first-launch retention requirement |
 | archive/unpublish/trigger/recovery UX | 3K only where first vertical requires it; otherwise DEFER SAFELY |
-| Release/Promotion/rollback UI | 3K at journey level; detailed component spelling Realization Planning |
-| approval-card/display contracts | 3K + implementation |
+| Release/Promotion/rollback UI | 3K journey/truth laws RESOLVED by 3K-01/3K-02; detailed component spelling → Realization Planning |
+| approval-card/display contracts | 3K product law RESOLVED by 3K-02 over 3F-03; exact component realization → implementation |
 | Project binding Control Plane UI | 3K where first vertical requires it |
 | Product Agent Conversation/memory/trigger UI | 3K where first vertical requires it |
 | exact wire/HTTP layout | post-C-018 Realization Planning + contract tests; 3L only if technology behavior is load-bearing |
@@ -1097,7 +1100,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | DEFER SAFELY optional deployment qualification |
 | `job/v1` / deterministic sync dispatch | **CONDITIONAL MUST DECIDE: if 3K/3O first vertical requires Sankhya mirror/sync, run C-007 Decision Loop before its Realization Planning; otherwise remain deferred** |
-| async/attempt status projection for UI/query convenience | 3K/Realization Planning; never second authority |
+| async/attempt status projection for UI/query convenience | 3K-02 truth law closed; exact projection realization → Realization Planning; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
 | Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
 | EVENT / Signals / Notification Inbox / Webhook Signals | C-007 / Decision Loop on first EVENT consumer |
@@ -1349,8 +1352,9 @@ F-GPC-01 / AGT-4 = RESOLVED por 3A-R7
 C-003 F1 orphan requirements = 0
 reopen 3B–3J = NONE
 
-3K = IN PROGRESS / 3K-01 APPROVED
+3K = IN PROGRESS / 3K-01 + 3K-02 APPROVED
 3K-01 = APPROVED
+3K-02 = APPROVED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1381,9 +1385,11 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 
 3K-01 foi ratificada pelo operador em **2026-08-17** e abre formalmente 3K. Congela Workspace shell ≠ Project shell; Project-scoped navigation; Build agent-first com Preview como work surface dominante e Conexus contextual/retrátil; Data/Capabilities/Integrations/Agents/Brain/Versions/Activity diretamente inspecionáveis; Code/Diff como Build lenses; machinery interna apenas progressive detail; `Product`/`Resources` artificiais rejeitados; exact visual/component/streaming realization deferred. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
+3K-02 foi ratificada pelo operador em **2026-08-17**. Congela context-local truth + progressive Evidence; UI como projection, nunca authority; separation entre observed/verified, empty/loading/failed/partial, AgentRun/effect outcome e completion ladder até SERVED_VERIFIED; exact ApprovalRequest presentation, context-local Change/Effect/Publish/Access decisions, permission/dependency widening never-hide, cost missingness, known limitations e Activity causal; `Trust Center`, universal status/approval, truth score e generic retry over uncertainty rejeitados. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
+
 Próxima ação:
 
-> **Continuar `3K — Frontend / Product Architecture` com Package B — Trust, Decision & Observable Truth**: decidir como authority, Evidence, approvals, status, failures, cost e known limitations aparecem dentro das surfaces já ratificadas por 3K-01. O review adversarial independente de 3K fica reservado ao fechamento global da fase, salvo novo finding material de trust/authority/reopen que exija challenge antecipado pelo método.
+> **Continuar `3K — Frontend / Product Architecture` com Package C — First Vertical Composition & Data Path**: provar 3K-01/3K-02 contra o caso 1 do Analisador de Orçamentos; decidir live Gateway read vs mirror/sync, o trigger `job/v1` somente se necessário, quais Data/Capabilities/Integrations/Brain surfaces o vertical realmente exerce, benchmark comparability e quais lifecycle/Agent surfaces têm consumidor F1 real. O review adversarial independente de 3K permanece reservado ao fechamento global da fase, salvo novo finding material que obrigue reopen/challenge antecipado pela metodologia.
 
 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

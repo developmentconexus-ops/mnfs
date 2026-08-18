@@ -59,28 +59,36 @@ test('A3 provider metadata extraction is best-effort and never invents a provide
   );
 });
 
-test('A3 scoring requires correctness and OM firing only on OM-enabled arms while preserving missing spend', () => {
+test('A3 scoring requires correctness and a successful Observer cycle only on OM-enabled arms while preserving missing spend', () => {
   const off = scoreA3Condition({
     condition: { id: 'A0', omEnabled: false },
     correctness: authorityPass,
-    eventSummary: { observationEnds: 0, observationFailures: 0 },
+    eventSummary: { observationEnds: 0, bufferedObservationEnds: 0, observationFailures: 0, bufferedObservationFailures: 0 },
     spendDeltaUsd: null,
   });
   assert.equal(off.admissible, true);
   assert.equal(off.spendDeltaUsd, null);
 
-  const on = scoreA3Condition({
+  const synchronousOn = scoreA3Condition({
     condition: { id: 'A1', omEnabled: true },
     correctness: authorityPass,
-    eventSummary: { observationEnds: 1, observationFailures: 0 },
+    eventSummary: { observationEnds: 1, bufferedObservationEnds: 0, observationFailures: 0, bufferedObservationFailures: 0 },
     spendDeltaUsd: 0.15,
   });
-  assert.equal(on.admissible, true);
+  assert.equal(synchronousOn.admissible, true);
+
+  const bufferedOn = scoreA3Condition({
+    condition: { id: 'B1', omEnabled: true },
+    correctness: codingPass,
+    eventSummary: { observationEnds: 0, bufferedObservationEnds: 1, observationFailures: 0, bufferedObservationFailures: 0 },
+    spendDeltaUsd: 0.2,
+  });
+  assert.equal(bufferedOn.admissible, true);
 
   const onWithoutObservation = scoreA3Condition({
     condition: { id: 'B1', omEnabled: true },
     correctness: codingPass,
-    eventSummary: { observationEnds: 0, observationFailures: 0 },
+    eventSummary: { observationEnds: 0, bufferedObservationEnds: 0, observationFailures: 0, bufferedObservationFailures: 0 },
     spendDeltaUsd: 0.2,
   });
   assert.equal(onWithoutObservation.admissible, false);

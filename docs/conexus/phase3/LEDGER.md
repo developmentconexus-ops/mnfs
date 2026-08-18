@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 APROVADAS`  
-**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 APROVADAS**; próxima decisão = Package C — First Vertical Composition & Data Path; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 APROVADAS`  
+**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 APROVADAS**; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; próxima decisão = Package C — First Vertical Composition & Data Path; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -22,6 +22,9 @@ C-000..C-017
 
 3A-R7
 → Platform Consultant Ownership Reconciliation
+
+3A-R8
+→ Project Baseline & Change Engineering Coherence
 
 3B
 → System Context & Boundaries
@@ -113,7 +116,7 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 + 3A-R7 APROVADAS** | aplicar 3A-R6 durante 3K–3O; F3B-R1 antes do Realization Planning |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 + 3A-R7 + 3A-R8 APROVADAS** | aplicar 3A-R6 + [3A-R8](3A-R8-project-baseline-change-engineering-coherence.md) durante 3K–3O; F3B-R1 antes do Realization Planning |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
@@ -123,7 +126,7 @@ Nenhuma conversa cria authority.
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md); próximo Package C — First Vertical Composition & Data Path; final independent adversarial review somente após packages internos coerentes |
+| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md); próximo Package C — First Vertical Composition & Data Path sob 3A-R8; final independent adversarial review somente após packages internos coerentes |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
@@ -222,6 +225,26 @@ reopen 3B–3J = NONE
 Conteúdo essencial de 3A-R7 (não reabre 3B–3J): `AGT-4` = capability de assistência **owned pelo Builder e apresentada pelo Control Plane**; platform knowledge publicado/versionado/provenance-preserving/digest-pinned sob a pack discipline do Conexus, nunca Workspace Brain content; contexto tenant sempre derivado server-side do current authorized Workspace/Project; `new module / principal / PLATFORM-scoped agent artifact / hidden tenant / PAR lifecycle / cross-Workspace authority / global agent state = 0`; surface concreta → 3K; platform agent global persistente → Decision Loop com consumidor real. **C-001 permanece a product vision authority.**
 
 Review provenance, não-autoritativa: `3A-FABLE-DIALOGUE-pre-3K-global-platform-coherence-checkpoint.md`.
+
+### 2.3 3A-R8 — Project Baseline & Change Engineering Coherence — APPROVED
+
+[3A-R8 — Project Baseline & Change Engineering Coherence](3A-R8-project-baseline-change-engineering-coherence.md) foi ratificada pelo operador em **2026-08-18** após coherence sweep interno + pesquisa externa adversarial.
+
+Resultado:
+
+```text
+CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED
+Project architecture = SPEC-ANCHORED / LIVING / INCREMENTAL
+big-design-up-front = REJECT
+new module / record / DB / workflow = 0
+prior phase structural reopen = NONE
+```
+
+Lei essencial:
+
+> O Project Baseline aprovado deve ser suficiente para o `Change` atual, não completo para toda capacidade futura. Antes de coding dispatch, nenhuma decisão material requerida por aquele Change pode ser delegada implicitamente ao coding actor. Todo Change pina a Baseline exata; descoberta que exige alterar Project-level meaning interrompe antes de cruzar a boundary, retorna por Finding/Replan/Handoff e só prossegue contra revisão de Baseline explicitamente aprovada. `ProjectBaselineDigest` passa a participar explicitamente da identidade de execução/prova.
+
+3A-R8 preserva C-005/C-006/C-007/C-012 como paved roads: platform mechanics devem continuar mecanizados; Baseline governa Project-specific meaning e não vira manual duplicado de SDK/scaffold.
 
 ---
 
@@ -349,7 +372,7 @@ ReleaseManifest remains composition root
 | 3G-04 | Planning Depth & Rigor Composition Architecture | [3G-04](3G-04-planning-depth-rigor-composition-architecture.md) |
 | 3G-05 | Production AgentRun, Approval Continuation & Trigger Architecture | [3G-05](3G-05-production-agent-run-approval-trigger-continuation-architecture.md) |
 | 3G-06 | Gateway EffectAttempt, Idempotency & Budget State Architecture | [3G-06](3G-06-gateway-effect-attempt-idempotency-budget-state-architecture.md) |
-| 3G-07 | Project Lifecycle & Binding Mutation Architecture | [3G-07](3G-07-project-binding-mutation-architecture.md) |
+| 3G-07 | Project Lifecycle & Binding Mutation Architecture | [3G-07](3G-07-project-lifecycle-binding-mutation-architecture.md) |
 | 3G-08 | Release, Promotion & Runtime Admissibility Architecture | [3G-08](3G-08-release-promotion-runtime-admissibility-architecture.md) |
 | 3G-R1 | Behavioral / State Architecture Final Closure | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 
@@ -699,7 +722,7 @@ old root generation remains decrypt-capable until zero live refs + recovery proo
 no KeyRotation FSM/domain record
 sandbox telemetry ingest is the one current guest-readable capability class; OTLP push if adopted is same class
 guest capability authority is Hub-minted, scoped, server-expiring, server-revocable on every use
-guest ActorRun LLM-provider key remains deleted after control-side model-loop move
+guest ActorRun LLM key remains deleted after control-side model-loop move
 secret administration/rekey/recovery audit is metadata-only; no default per-use/decrypt ledger
 full trusted-Hub-process compromise remains an explicit accepted F1 residual risk
 ```
@@ -830,8 +853,7 @@ Review provenance, non-authoritative:
 ```text
 one authority protects two enforcement planes: crossings + persistence capability
 six logical security zones do not imply six services/processes
-business/application external execution remains Gateway-owned
-platform-control egress uses only named owner-specific adapters
+business egress Gateway-only × platform-control owner egress
 privileged egress destination derives from owner-pinned configuration/authority, never model output/caller payload/artifact content
 browser request-authenticity and self-only/CSP laws are cited from C-015/C-016, not duplicated
 E2B remains untrusted/root-capable; no durable/ERP/Git-write/model-provider/Hub-DB credential enters guest
@@ -1307,6 +1329,9 @@ NO generic cross-owner transaction/UnitOfWork engine
 NO dynamic DB credential broker / per-request ephemeral DB roles
 NO telemetry PKI / per-span authorization
 NO process split solely for owner DB credentials
+NO ArchitectureEngine / ArchitectureService / ArchitectureDecision domain/table
+NO Baseline FSM / readiness score / universal architecture checklist
+NO big-design-up-front requirement merely because Project Baseline exists
 NO product implementation before C-018 + accepted post-C-018 Realization Planning
 NO Realization Planning as second architecture authority/readiness framework
 ```
@@ -1321,6 +1346,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3A = CONTINUOUS until C-018
 3A-R6 = APPROVED
 3A-R7 = APPROVED
+3A-R8 = APPROVED
 
 3B = CLOSED / APPROVED
 3C = CLOSED / APPROVED
@@ -1383,14 +1409,16 @@ reopen 3B–3J = NONE
 
 O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE em 2026-08-17** com `CURRENT STRUCTURE CONFIRMED`: único finding material `F-GPC-01 / AGT-4` resolvido por 3A-R7, `C-003 F1 orphan requirements = 0`, `reopen 3B–3J = NONE`. 3A-R7 foi ratificada em **2026-08-17** como bounded gap-fill: Platform Consultant = Builder-owned / Control-Plane-presented assistance capability, platform knowledge publicado/digest-pinned sob a pack discipline (nunca Workspace Brain content), contexto tenant derivado server-side, zero novo module/principal/global agent artifact/hidden tenant/cross-Workspace authority; surface concreta → 3K; platform agent global persistente → Decision Loop. **C-001 permanece product vision authority.**
 
+3A-R8 foi ratificada pelo operador em **2026-08-18** após coherence sweep interno e pesquisa externa adversarial. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: Project Baseline permanece Project-owned e passa a ser explicitamente `spec-anchored / living / incremental`; sua suficiência é proporcional ao Change atual; todo Change pina a Baseline aprovada exata; decisão material requerida pelo Change não pode ser delegada silenciosamente ao coding actor; late architecture discovery retorna por Finding/Replan/Handoff antes de atravessar a boundary; `ProjectBaselineDigest` participa explicitamente da execution/proof identity; big-design-up-front, ArchitectureEngine, novo record/DB/workflow e global invalidation por qualquer mudança de digest são rejeitados. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
+
 3K-01 foi ratificada pelo operador em **2026-08-17** e abre formalmente 3K. Congela Workspace shell ≠ Project shell; Project-scoped navigation; Build agent-first com Preview como work surface dominante e Conexus contextual/retrátil; Data/Capabilities/Integrations/Agents/Brain/Versions/Activity diretamente inspecionáveis; Code/Diff como Build lenses; machinery interna apenas progressive detail; `Product`/`Resources` artificiais rejeitados; exact visual/component/streaming realization deferred. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
 3K-02 foi ratificada pelo operador em **2026-08-17**. Congela context-local truth + progressive Evidence; UI como projection, nunca authority; separation entre observed/verified, empty/loading/failed/partial, AgentRun/effect outcome e completion ladder até SERVED_VERIFIED; exact ApprovalRequest presentation, context-local Change/Effect/Publish/Access decisions, permission/dependency widening never-hide, cost missingness, known limitations e Activity causal; `Trust Center`, universal status/approval, truth score e generic retry over uncertainty rejeitados. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
 Próxima ação:
 
-> **Continuar `3K — Frontend / Product Architecture` com Package C — First Vertical Composition & Data Path**: provar 3K-01/3K-02 contra o caso 1 do Analisador de Orçamentos; decidir live Gateway read vs mirror/sync, o trigger `job/v1` somente se necessário, quais Data/Capabilities/Integrations/Brain surfaces o vertical realmente exerce, benchmark comparability e quais lifecycle/Agent surfaces têm consumidor F1 real. O review adversarial independente de 3K permanece reservado ao fechamento global da fase, salvo novo finding material que obrigue reopen/challenge antecipado pela metodologia.
+> **Continuar `3K — Frontend / Product Architecture` com Package C — First Vertical Composition & Data Path sob 3A-R8**: provar 3K-01/3K-02 contra o caso 1 do Analisador de Orçamentos sem promover Sankhya-specific choices a leis universais; decidir live Gateway read vs mirror/sync vs hybrid como Project/vertical decision evidence-based, sob Baseline suficiente para o slice; disparar `job/v1` somente se o vertical realmente exigir sync; exercitar Data/Capabilities/Integrations/Brain surfaces, benchmark comparability e lifecycle/Agent surfaces apenas onde houver consumidor F1 real. O review adversarial independente de 3K permanece reservado ao fechamento global da fase, salvo novo finding material que obrigue reopen/challenge antecipado pela metodologia.
 
-3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
+3K–3O seguem integralmente sob 3A-R6 + 3A-R8. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

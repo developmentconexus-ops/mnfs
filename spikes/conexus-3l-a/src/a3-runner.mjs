@@ -49,9 +49,15 @@ export function summarizeA3Events(events) {
     observationStarts: 0,
     observationEnds: 0,
     observationFailures: 0,
+    bufferedObservationStarts: 0,
+    bufferedObservationEnds: 0,
+    bufferedObservationFailures: 0,
     reflectionStarts: 0,
     reflectionEnds: 0,
     reflectionFailures: 0,
+    bufferedReflectionStarts: 0,
+    bufferedReflectionEnds: 0,
+    bufferedReflectionFailures: 0,
     lastUsage: null,
   };
 
@@ -80,6 +86,18 @@ export function summarizeA3Events(events) {
         break;
       case 'om_reflection_failed':
         summary.reflectionFailures += 1;
+        break;
+      case 'om_buffering_start':
+        if (event.operationType === 'observation') summary.bufferedObservationStarts += 1;
+        if (event.operationType === 'reflection') summary.bufferedReflectionStarts += 1;
+        break;
+      case 'om_buffering_end':
+        if (event.operationType === 'observation') summary.bufferedObservationEnds += 1;
+        if (event.operationType === 'reflection') summary.bufferedReflectionEnds += 1;
+        break;
+      case 'om_buffering_failed':
+        if (event.operationType === 'observation') summary.bufferedObservationFailures += 1;
+        if (event.operationType === 'reflection') summary.bufferedReflectionFailures += 1;
         break;
       case 'usage_update':
         summary.lastUsage = event.usage ?? null;

@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS`  
-**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS**; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; próxima decisão = bounded C-007 Decision Loop para `job/v1` / deterministic sync dispatch, disparado por 3K-03; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS`  
+**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS**; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; próxima ação = fechamento interno de 3K sobre 3K-01..03 + 3A-R8/R9 e, depois, um único independent Fable challenge antes da ratificação final de 3K; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -25,6 +25,9 @@ C-000..C-017
 
 3A-R8
 → Project Baseline & Change Engineering Coherence
+
+3A-R9
+→ Managed Job / Deterministic Sync Dispatch Reconciliation
 
 3B
 → System Context & Boundaries
@@ -119,7 +122,7 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 + 3A-R7 + 3A-R8 APROVADAS** | aplicar 3A-R6 + [3A-R8](3A-R8-project-baseline-change-engineering-coherence.md) durante 3K–3O; F3B-R1 antes do Realization Planning |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 APROVADAS** | aplicar 3A-R6 + [3A-R8](3A-R8-project-baseline-change-engineering-coherence.md) + [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md) durante 3K–3O; F3B-R1 antes do Realization Planning |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
@@ -129,8 +132,8 @@ Nenhuma conversa cria authority.
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md) + [3K-03](3K-03-first-vertical-composition-data-path.md); próximo bounded C-007 Decision Loop para `job/v1`; final independent adversarial review somente após packages internos coerentes |
-| 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
+| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md) + [3K-03](3K-03-first-vertical-composition-data-path.md); bounded sync follow-up RESOLVED por [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md); próximo fechamento interno + único independent Fable challenge antes da ratificação final |
+| 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 + `CX-MANAGED-JOB-01` de 3A-R9 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
 | 3O — Vertical Architecture Proof Contract | NÃO INICIADA | contract-only end-to-end proof target |
@@ -183,11 +186,12 @@ Critical path ratificado:
 → start from C-001 caso 1 (Analisador de Orçamentos) unless operator redirects
 
 job/v1
-→ ACTIVE MUST DECIDE: 3K-03 approved a first-vertical mirror/sync consumer
-→ run bounded C-007 Decision Loop before 3K internal closure / applicable Realization Planning
+→ RESOLVED FOR FIRST VERTICAL by 3A-R9
+→ managed sync only; MANAGED_JOB Gateway surface; Release-derived schedule; no generic automation/workflow runtime
 
 3L
 → load-bearing qualification probes only
+→ includes CX-MANAGED-JOB-01 from 3A-R9
 
 3M
 → do existing durable facts suffice for recovery?
@@ -249,6 +253,35 @@ Lei essencial:
 > O Project Baseline aprovado deve ser suficiente para o `Change` atual, não completo para toda capacidade futura. Antes de coding dispatch, nenhuma decisão material requerida por aquele Change pode ser delegada implicitamente ao coding actor. Todo Change pina a Baseline exata; descoberta que exige alterar Project-level meaning interrompe antes de cruzar a boundary, retorna por Finding/Replan/Handoff e só prossegue contra revisão de Baseline explicitamente aprovada. `ProjectBaselineDigest` passa a participar explicitamente da identidade de execução/prova.
 
 3A-R8 preserva C-005/C-006/C-007/C-012 como paved roads: platform mechanics devem continuar mecanizados; Baseline governa Project-specific meaning e não vira manual duplicado de SDK/scaffold.
+
+### 2.4 3A-R9 — Managed Job / Deterministic Sync Dispatch — APPROVED
+
+[3A-R9 — Managed Job / Deterministic Sync Dispatch Reconciliation](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md) foi ratificada pelo operador em **2026-08-18** após o trigger de 3K-03.
+
+Resultado:
+
+```text
+CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED
+job/v1 first consumer = governed managed sync
+Managed Application Runtime owner = preserved
+mar.job_run = sufficient durable occurrence record
+MANAGED_JOB Gateway surface = explicit
+schedule authority = exact active served Release composition
+scheduler/queue = reconstructible mechanics
+manual + fixed interval = F1
+single-flight + coalesce = F1
+one catch-up after downtime = F1
+arbitrary privileged Project job code = REJECT F1
+workflow/automation/scheduler domain = REJECT F1
+new module / record / DB = 0
+CX-MANAGED-JOB-01 = MUST QUALIFY in 3L
+```
+
+Lei essencial:
+
+> `job/v1` não é um mini workflow engine nem arbitrary Project code executando dentro do Hub. O primeiro profile admitido coordena sync por capabilities governadas; credentials/network/DB authority permanecem no Gateway/owners. A Release pinada governa o que pode produzir ocorrências futuras e o scheduler é projeção reconstruível. Cada `job_run` pina exact Release/job revision, single-flight evita overlap e downtime gera no máximo um catch-up do sync, nunca replay de todos os slots perdidos.
+
+3A-R9 adiciona somente a bounded surface `MANAGED_JOB` a 3D-02 e a qualification `CX-MANAGED-JOB-01` ao 3L; não reabre 3C/3E nem cria novo domain.
 
 ---
 
@@ -1125,7 +1158,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | DEFER SAFELY optional deployment qualification |
-| `job/v1` / deterministic sync dispatch | **ACTIVE MUST DECIDE — trigger fired by [3K-03](3K-03-first-vertical-composition-data-path.md); bounded C-007 Decision Loop next, before 3K internal closure / applicable Realization Planning** |
+| `job/v1` / deterministic sync dispatch | **RESOLVED by [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md) for first vertical; `CX-MANAGED-JOB-01` → 3L; future background-work classes re-enter Decision Loop on named consumer** |
 | async/attempt status projection for UI/query convenience | 3K-02 truth law closed; exact projection realization → Realization Planning; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
 | Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
@@ -1145,6 +1178,7 @@ CX-SBX-E2B-01
 CX-BUILDER-MASTRA-01
 CX-AGENT-MASTRA-01
 CX-RUNTIME-ISOLATION-01
+CX-MANAGED-JOB-01
 3I-03 model-spend interception/retry/usage subset
 Verification Observability deciding-evidence subset
 ```
@@ -1336,6 +1370,10 @@ NO process split solely for owner DB credentials
 NO ArchitectureEngine / ArchitectureService / ArchitectureDecision domain/table
 NO Baseline FSM / readiness score / universal architecture checklist
 NO big-design-up-front requirement merely because Project Baseline exists
+NO JobModule / SchedulerModule / AutomationModule for first sync consumer
+NO JobSchedule authority table / generic schedule DSL
+NO arbitrary Project-authored privileged job code inside Hub
+NO per-tick sync backlog / replay of every missed interval
 NO product implementation before C-018 + accepted post-C-018 Realization Planning
 NO Realization Planning as second architecture authority/readiness framework
 ```
@@ -1351,6 +1389,7 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3A-R6 = APPROVED
 3A-R7 = APPROVED
 3A-R8 = APPROVED
+3A-R9 = APPROVED
 
 3B = CLOSED / APPROVED
 3C = CLOSED / APPROVED
@@ -1387,7 +1426,8 @@ reopen 3B–3J = NONE
 3K-02 = APPROVED
 3K-03 = APPROVED
 
-job/v1 / deterministic sync dispatch = ACTIVE MUST DECIDE / trigger fired by 3K-03
+job/v1 / deterministic sync dispatch = RESOLVED BY 3A-R9
+CX-MANAGED-JOB-01 = MUST QUALIFY in 3L
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1418,16 +1458,18 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 
 3A-R8 foi ratificada pelo operador em **2026-08-18** após coherence sweep interno e pesquisa externa adversarial. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: Project Baseline permanece Project-owned e passa a ser explicitamente `spec-anchored / living / incremental`; sua suficiência é proporcional ao Change atual; todo Change pina a Baseline aprovada exata; decisão material requerida pelo Change não pode ser delegada silenciosamente ao coding actor; late architecture discovery retorna por Finding/Replan/Handoff antes de atravessar a boundary; `ProjectBaselineDigest` participa explicitamente da execution/proof identity; big-design-up-front, ArchitectureEngine, novo record/DB/workflow e global invalidation por qualquer mudança de digest são rejeitados. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
 
+3A-R9 foi ratificada pelo operador em **2026-08-18** após 3K-03 disparar o primeiro consumidor real de mirror/sync. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: `job/v1` permanece artifact Project-scoped e MAR-owned no runtime; primeira realization = governed sync capability-driven; `MANAGED_JOB` vira surface explícita do Gateway; schedule é derivado da exact active served Release; `mar.job_run` permanece record suficiente; fixed interval/manual, single-flight/coalesce e one-catch-up fecham o primeiro consumer; arbitrary privileged Project job code, Workflow/Automation/Scheduler domain e generic calendar DSL são rejeitados F1; `CX-MANAGED-JOB-01` entra no 3L. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
+
 3K-01 foi ratificada pelo operador em **2026-08-17** e abre formalmente 3K. Congela Workspace shell ≠ Project shell; Project-scoped navigation; Build agent-first com Preview como work surface dominante e Conexus contextual/retrátil; Data/Capabilities/Integrations/Agents/Brain/Versions/Activity diretamente inspecionáveis; Code/Diff como Build lenses; machinery interna apenas progressive detail; `Product`/`Resources` artificiais rejeitados; exact visual/component/streaming realization deferred. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
 3K-02 foi ratificada pelo operador em **2026-08-17**. Congela context-local truth + progressive Evidence; UI como projection, nunca authority; separation entre observed/verified, empty/loading/failed/partial, AgentRun/effect outcome e completion ladder até SERVED_VERIFIED; exact ApprovalRequest presentation, context-local Change/Effect/Publish/Access decisions, permission/dependency widening never-hide, cost missingness, known limitations e Activity causal; `Trust Center`, universal status/approval, truth score e generic retry over uncertainty rejeitados. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
-3K-03 foi ratificada pelo operador em **2026-08-18**. Congela que Conexus não possui default universal `live|mirror|hybrid`; Connector declara source capabilities e Project Baseline decide o data path do slice. Para o caso 1, aprova read-only analytics com Project analytical read model derivado, sync governado, live Gateway reads como source anchor para Discovery/qualification/reconciliation/verification/Evidence, registered read-only queries para a UI, Brain semantic binding, zero Product Agent/WRITE/business effect e separação entre historical Golden benchmark e current operational truth. O trigger `job/v1` previsto por 3A-R6/C-007 está **FIRED / ACTIVE MUST DECIDE**. Sankhya permanece first-vertical evidence, nunca product-wide topology/ERP law.
+3K-03 foi ratificada pelo operador em **2026-08-18**. Congela que Conexus não possui default universal `live|mirror|hybrid`; Connector declara source capabilities e Project Baseline decide o data path do slice. Para o caso 1, aprova read-only analytics com Project analytical read model derivado, sync governado, live Gateway reads como source anchor para Discovery/qualification/reconciliation/verification/Evidence, registered read-only queries para a UI, Brain semantic binding, zero Product Agent/WRITE/business effect e separação entre historical Golden benchmark e current operational truth. O trigger `job/v1` previsto por 3A-R6/C-007 foi disparado e está **RESOLVED por 3A-R9**. Sankhya permanece first-vertical evidence, nunca product-wide topology/ERP law.
 
 Próxima ação:
 
-> **Abrir bounded C-007 Decision Loop para `job/v1` / deterministic sync dispatch**: decidir somente a menor mecânica/contract necessários para manter o read model comprovadamente requerido por 3K-03, preservando C-006 ETL semantics e as boundaries de MAR/Registry/Gateway/Release já aprovadas. Não criar Jobs sidebar, workflow engine, Automation Builder, Schedule DSL ou nova queue infra sem consumer/failure class. Após esse bounded follow-up, retornar ao fechamento interno de 3K; o independent adversarial reviewer externo permanece reservado ao fechamento global da fase.
+> **Executar o fechamento interno de `3K — Frontend / Product Architecture`** sobre `3K-01 + 3K-02 + 3K-03`, verificando coerência com `3A-R8` e `3A-R9`, ausência de decisão material de produto ainda órfã e fronteiras corretas para 3L/3M/3N/3O/Realization Planning. Se o pacote interno estiver coerente, usar **Fable exatamente uma vez** como independent adversarial challenger de 3K inteiro; confrontar os findings contra authority e materializar apenas findings sobreviventes antes da ratificação/closure final de 3K. Nenhum Fable intermediário adicional.
 
-3K–3O seguem integralmente sob 3A-R6 + 3A-R8. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
+3K–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

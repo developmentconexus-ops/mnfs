@@ -58,12 +58,11 @@ test('A3 OM probe config is thread-scoped, bounded and excludes deferred memory 
   assert.equal('vector' in A3_OM_CONFIG, false);
 });
 
-test('A3 key gate accepts only the dedicated exact hard-limit/no-reset/short-lived inference key', () => {
+test('A3 key gate accepts only a non-privileged BYOK-counted exact hard-limit/no-reset/short-lived inference key', () => {
   const now = Date.parse('2026-08-18T16:00:00.000Z');
   const accepted = validateOpenRouterKeyMetadata(
     {
       data: {
-        label: 'conexus-3l-a3',
         is_management_key: false,
         is_provisioning_key: false,
         include_byok_in_limit: true,
@@ -78,14 +77,13 @@ test('A3 key gate accepts only the dedicated exact hard-limit/no-reset/short-liv
   assert.equal(accepted.limit, A3_KEY_POLICY.hardLimitUsd);
 
   const invalid = [
-    { label: 'wrong-key', is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
-    { label: 'conexus-3l-a3', is_management_key: true, is_provisioning_key: false, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
-    { label: 'conexus-3l-a3', is_management_key: false, is_provisioning_key: true, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
-    { label: 'conexus-3l-a3', is_management_key: false, is_provisioning_key: false, include_byok_in_limit: false, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
-    { label: 'conexus-3l-a3', is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: null, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
-    { label: 'conexus-3l-a3', is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: 11, limit_remaining: 11, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
-    { label: 'conexus-3l-a3', is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: 'daily', expires_at: '2026-08-19T15:00:00Z' },
-    { label: 'conexus-3l-a3', is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-20T16:00:01Z' },
+    { is_management_key: true, is_provisioning_key: false, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
+    { is_management_key: false, is_provisioning_key: true, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
+    { is_management_key: false, is_provisioning_key: false, include_byok_in_limit: false, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
+    { is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: null, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
+    { is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: 11, limit_remaining: 11, limit_reset: null, expires_at: '2026-08-19T15:00:00Z' },
+    { is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: 'daily', expires_at: '2026-08-19T15:00:00Z' },
+    { is_management_key: false, is_provisioning_key: false, include_byok_in_limit: true, limit: 10, limit_remaining: 10, limit_reset: null, expires_at: '2026-08-20T16:00:01Z' },
   ];
   for (const metadata of invalid) {
     assert.throws(() => validateOpenRouterKeyMetadata({ data: metadata }, { now }));

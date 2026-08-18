@@ -66,11 +66,16 @@ export function scoreA3Condition({ condition, correctness, eventSummary, spendDe
     return Object.freeze({ admissible: false, reason: 'CORRECTNESS_FAILED', spendDeltaUsd });
   }
 
-  if (condition?.omEnabled && (eventSummary?.observationFailures ?? 0) > 0) {
+  if (
+    condition?.omEnabled &&
+    ((eventSummary?.observationFailures ?? 0) + (eventSummary?.bufferedObservationFailures ?? 0)) > 0
+  ) {
     return Object.freeze({ admissible: false, reason: 'OM_OBSERVATION_FAILED', spendDeltaUsd });
   }
 
-  if (condition?.omEnabled && (eventSummary?.observationEnds ?? 0) < 1) {
+  const successfulObserverCycles =
+    (eventSummary?.observationEnds ?? 0) + (eventSummary?.bufferedObservationEnds ?? 0);
+  if (condition?.omEnabled && successfulObserverCycles < 1) {
     return Object.freeze({ admissible: false, reason: 'OM_DID_NOT_FIRE', spendDeltaUsd });
   }
 

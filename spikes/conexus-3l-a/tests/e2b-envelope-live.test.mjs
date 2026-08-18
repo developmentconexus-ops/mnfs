@@ -138,6 +138,7 @@ test('A2-ENVELOPE-01: exact custom Builder template provisions the required 2vCP
         "runuser -u postgres -- /usr/lib/postgresql/17/bin/initdb -D /tmp/conexus-pgdata -A trust >/tmp/conexus-initdb.log",
         "runuser -u postgres -- /usr/lib/postgresql/17/bin/pg_ctl -D /tmp/conexus-pgdata -l /tmp/conexus-postgres.log -o '-h 127.0.0.1 -p 55432' -w start",
       ].join(' && '),
+      { user: 'root' },
     );
     assert.equal(pgStart.exitCode, 0, pgStart.stderr);
     pgStarted = true;
@@ -196,7 +197,9 @@ test('A2-ENVELOPE-01: exact custom Builder template provisions the required 2vCP
   } finally {
     if (sandbox && pgStarted) {
       await sandbox.commands
-        .run("runuser -u postgres -- /usr/lib/postgresql/17/bin/pg_ctl -D /tmp/conexus-pgdata -m fast -w stop")
+        .run("runuser -u postgres -- /usr/lib/postgresql/17/bin/pg_ctl -D /tmp/conexus-pgdata -m fast -w stop", {
+          user: 'root',
+        })
         .catch(() => undefined);
     }
     if (sandbox) await sandbox.kill().catch(() => undefined);

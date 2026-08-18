@@ -23,7 +23,7 @@ import {
 } from '../src/a3-fixtures.mjs';
 
 test('A3 Codex admission pins exact closure, Sol actor, Luna OM and exactly four paired primary runs', () => {
-  assert.equal(A3_LOCK_SHA256, '4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7');
+  assert.equal(A3_LOCK_SHA256, '7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5');
   assert.equal(QUALIFIED_E2B_TEMPLATE_ID, '7ezun152y8jtqxf7llpl');
   assert.equal(CODEX_AUTH_PROVIDER, 'openai-codex');
   assert.equal(ACTOR_MODEL, 'openai/gpt-5.6-sol');

@@ -59,7 +59,7 @@ test('A3 result extraction returns the latest assistant text without treating da
   assert.equal(extractLatestAssistantText(messages), 'line one\nline two');
 });
 
-test('A3 event summary counts only observable Builder/OM execution evidence', () => {
+test('A3 event summary counts synchronous and async-buffered OM cycles as observable evidence', () => {
   const events = [
     { type: 'tool_start', toolCallId: '1', toolName: 'execute_command' },
     { type: 'tool_end', toolCallId: '1', isError: false },
@@ -67,6 +67,10 @@ test('A3 event summary counts only observable Builder/OM execution evidence', ()
     { type: 'tool_end', toolCallId: '2', isError: true },
     { type: 'om_observation_start', cycleId: 'obs-1' },
     { type: 'om_observation_end', cycleId: 'obs-1', durationMs: 120, tokensObserved: 9000, observationTokens: 600 },
+    { type: 'om_buffering_start', cycleId: 'buf-obs-1', operationType: 'observation', tokensToBuffer: 1800 },
+    { type: 'om_buffering_end', cycleId: 'buf-obs-1', operationType: 'observation', tokensBuffered: 1800, bufferedTokens: 220 },
+    { type: 'om_buffering_start', cycleId: 'buf-ref-1', operationType: 'reflection', tokensToBuffer: 1200 },
+    { type: 'om_buffering_failed', cycleId: 'buf-ref-1', operationType: 'reflection', error: 'failed' },
     { type: 'om_reflection_start', cycleId: 'ref-1' },
     { type: 'om_reflection_failed', cycleId: 'ref-1', error: 'failed', durationMs: 50 },
     { type: 'usage_update', usage: { promptTokens: 100, completionTokens: 20, totalTokens: 120 } },
@@ -78,9 +82,15 @@ test('A3 event summary counts only observable Builder/OM execution evidence', ()
     observationStarts: 1,
     observationEnds: 1,
     observationFailures: 0,
+    bufferedObservationStarts: 1,
+    bufferedObservationEnds: 1,
+    bufferedObservationFailures: 0,
     reflectionStarts: 1,
     reflectionEnds: 0,
     reflectionFailures: 1,
+    bufferedReflectionStarts: 1,
+    bufferedReflectionEnds: 0,
+    bufferedReflectionFailures: 1,
     lastUsage: { promptTokens: 100, completionTokens: 20, totalTokens: 120 },
   });
 });

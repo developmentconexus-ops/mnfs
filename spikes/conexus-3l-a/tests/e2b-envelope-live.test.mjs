@@ -9,6 +9,7 @@ if (!apiKey) throw new Error('E2B_API_KEY is required for A2 envelope qualificat
 
 const timeoutMs = 180_000;
 const allocation = Object.freeze({ cpuCount: 2, memoryMB: 4096 });
+const postgresqlDebVersion = '17.10-1.pgdg12+1';
 const buildPackages = Object.freeze([
   'ca-certificates',
   'curl',
@@ -27,11 +28,14 @@ function builderTemplate() {
       [
         'install -d -m 0755 /usr/share/postgresql-common/pgdg',
         'curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc',
-        'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list',
+        'echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt-archive.postgresql.org/pub/repos/apt bookworm-pgdg-archive main" > /etc/apt/sources.list.d/pgdg.list',
       ],
       { user: 'root' },
     )
-    .aptInstall(['postgresql-17', 'postgresql-client-17'], { noInstallRecommends: true });
+    .aptInstall(
+      [`postgresql-17=${postgresqlDebVersion}`, `postgresql-client-17=${postgresqlDebVersion}`],
+      { noInstallRecommends: true },
+    );
 }
 
 async function providerInfo(sandboxId) {
@@ -186,6 +190,7 @@ test('A2-ENVELOPE-01: exact custom Builder template provisions the required 2vCP
         gitVersion,
         chromiumVersion,
         pgVersion,
+        postgresqlDebVersion,
         envdVersion: info.envdVersion,
         cpuCount: info.cpuCount,
         memoryMB: info.memoryMB,

@@ -10,6 +10,7 @@ import {
   CODEX_AUTH_PROVIDER,
   OM_MODEL_SLUG,
 } from './a3-admission.mjs';
+import { smokeCodexModel } from './a3-live.mjs';
 
 const pendingPath = process.env.CODEX_DEVICE_PENDING_PATH ?? path.resolve('a3-codex-device-pending.json');
 const authPath = process.env.CODEX_AUTH_PATH ?? '/tmp/conexus-a3-codex-auth.json';
@@ -43,8 +44,7 @@ async function smoke(modelId, marker) {
     maxRetries: 0,
   });
 
-  const response = await agent.generate(`Reply with exactly ${marker} and nothing else.`);
-  const text = response.text?.trim() ?? '';
+  const text = await smokeCodexModel(agent, marker);
   if (text !== marker) throw new Error(`${modelId} OAuth smoke returned unexpected text: ${JSON.stringify(text)}`);
   console.log(`CODEX_OAUTH_SMOKE_${modelId.toUpperCase().replaceAll(/[^A-Z0-9]+/g, '_')}=PASS`);
 }

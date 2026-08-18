@@ -19,13 +19,11 @@ export const A3_OM_CONFIG = Object.freeze({
     previousObserverTokens: 1000,
     blockAfter: 2,
     threadTitle: true,
-    modelSettings: Object.freeze({ maxOutputTokens: 2048 }),
   }),
   reflection: Object.freeze({
     observationTokens: 2000,
     bufferActivation: 0.5,
     blockAfter: 1.1,
-    modelSettings: Object.freeze({ maxOutputTokens: 2048 }),
   }),
 });
 

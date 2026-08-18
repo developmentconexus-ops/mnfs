@@ -1496,7 +1496,30 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 
 3K-04 foi ratificada pelo operador em **2026-08-18** após pesquisa externa + decomposição adversarial do finding `F3K-IC-01`. Product Agents permanecem Project-owned/git-first/Release-pinned sob canonical `agent/v1`; Agent Builder = specialized Builder experience, nunca segundo module/DB/authority; structured/manual + natural-language authoring convergem para a mesma Change/candidate; missing Capabilities podem ser propostas apenas como expansão explícita da Change; runtime tools continuam compiled `ToolProjection` sobre owners existentes, sem UniversalTool; Workspace ganha `Agents` como access-filtered cross-Project catalog/projection sem Agent fleet ownership; Builder é source-aware, Product Agent é product/context-aware e não recebe repo/source/shell/filesystem/browser por default; interactive/headless permanecem o mesmo Product Agent concept; Mastra Editor/Stored Agent nunca substitui Registry/Release authority. `F3K-IC-01 = RESOLVED`, `new module/record/DB = 0`.
 
-O **3K internal closure completeness/deletion check** foi executado após 3K-04 e encontrou `Material Finding = 0`, `prior structural phase reopen = NONE`, `new module / durable record / database from closure = 0` e `verdict = INTERNALLY CONVERGED`.
+O **3K internal closure completeness/deletion check** foi executado após 3K-04. Resultado:
+
+```text
+Workspace / Project selection + creation                    → COVERED 3K-01
+Inception / Project Baseline                                → COVERED 3K-01 + 3A-R8
+Change / correctness / progress                             → COVERED 3K-01 + 3K-02
+Finding / Evidence / verifier feedback                      → COVERED 3K-02
+human decision families                                     → COVERED 3K-02
+Connections administration/use/qualification journey        → COVERED 3K-01 + 3K-03
+Brain binding/use                                            → COVERED 3K-01 + 3K-03
+Preview / review                                             → COVERED 3K-01 + 3K-02
+Release / Promotion / rollback                              → COVERED 3K-01 + 3K-02
+Production Agent definition/use                             → COVERED 3K-04
+MANAGED application access/serving                          → COVERED 3K-01 + 3K-02
+runtime/operational timeline                                → COVERED 3K-01 + 3K-02
+permissions/access-management                               → COVERED 3K-01 + 3K-02 + C-015
+first vertical / data path                                  → COVERED 3K-03 + 3A-R9
+CIC-4 Project duplication semantics                         → ALREADY CLOSED C-014; UI placement = Realization
+Workspace Agents catalog dependency                         → direct read/public projection under 3D-03; no eighth L7 use case
+Material Finding                                            = 0
+prior structural phase reopen                               = NONE
+new module / durable record / database from closure         = 0
+verdict                                                     = INTERNALLY CONVERGED
+```
 
 O único independent final Fable challenge de 3K foi executado em **2026-08-18** e registrado como evidence não-autoritativa em `3K-FABLE-DIALOGUE-final-product-architecture-review.md`. Verdict: `CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`, `Material findings = NONE`, `reopen 3B–3J = NONE`, `new module/record/database = 0`. As cinco correções não-materiais foram adjudicadas em [3K-R1](3K-R1-frontend-product-architecture-final-closure.md): três restaurações de links/wording do LEDGER + duas clarificações bounded de 3K-04 (Workspace Agent attention é discovery projection, nunca decision surface; structured Agent edit sem LLM continua no Change/work graph + C-014/C-017 commit matrix).
 

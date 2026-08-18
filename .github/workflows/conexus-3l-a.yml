@@ -47,6 +47,9 @@ jobs:
       - name: Run A2 pinned-adapter contract probes without provider I/O
         working-directory: spikes/conexus-3l-a
         run: node --test tests/e2b-adapter-contract.test.mjs
+      - name: Run physical-incarnation guard specification
+        working-directory: spikes/conexus-3l-a
+        run: node --test tests/physical-incarnation-guard.test.mjs
 
   e2b-live:
     runs-on: ubuntu-latest

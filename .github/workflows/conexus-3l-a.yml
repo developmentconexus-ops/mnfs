@@ -44,6 +44,9 @@ jobs:
       - name: Run A1 Mastra/Postgres qualification probes
         working-directory: spikes/conexus-3l-a
         run: node --test tests/mastra-runtime.test.mjs
+      - name: Run A2 pinned-adapter contract probes without provider I/O
+        working-directory: spikes/conexus-3l-a
+        run: node --test tests/e2b-adapter-contract.test.mjs
 
   external-credential-admission:
     runs-on: ubuntu-latest

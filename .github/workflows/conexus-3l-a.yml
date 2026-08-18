@@ -7,6 +7,15 @@ on:
       - 'docs/conexus/phase3/3L-A-builder-substrate-cognition.md'
       - '.github/workflows/conexus-3l-a.yml'
   workflow_dispatch:
+    inputs:
+      target:
+        description: Qualification track to run live
+        required: true
+        default: a3
+        type: choice
+        options:
+          - a3
+          - a2
 
 permissions:
   contents: read
@@ -57,10 +66,13 @@ jobs:
           tests/a3-admission.test.mjs
           tests/a3-runner-contract.test.mjs
           tests/a3-live-runner.test.mjs
+      - name: Syntax-check A3 live executor without provider calls
+        working-directory: spikes/conexus-3l-a
+        run: node --check src/a3-live-execute.mjs
 
-  # A2 is already qualified. Replay the costly provider suite only when explicitly requested.
+  # A2 is already qualified. Replay its provider suite only when explicitly selected.
   e2b-live:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'a2'
     runs-on: ubuntu-latest
     environment: E2B_API_KEY
     timeout-minutes: 20
@@ -88,6 +100,63 @@ jobs:
           tests/e2b-envelope-live.test.mjs
           tests/e2b-controls-live.test.mjs
           tests/e2b-db-reconcile-live.test.mjs
+
+  a3-live:
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'a3'
+    runs-on: ubuntu-latest
+    environment: E2B_API_KEY
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17.10-bookworm
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: conexus_probe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d conexus_probe"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/conexus_probe
+      E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      A3_RESULT_PATH: a3-cognition-result.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Require only credentials needed by A3
+        run: |
+          if [ -z "$E2B_API_KEY" ]; then
+            echo 'A3=NOT_PROVEN_NO_E2B_CREDENTIAL'
+            exit 1
+          fi
+          if [ -z "$OPENROUTER_API_KEY" ]; then
+            echo 'A3=NOT_PROVEN_NO_OPENROUTER_CREDENTIAL'
+            exit 1
+          fi
+      - name: Install exact spike lock without lifecycle scripts
+        working-directory: spikes/conexus-3l-a
+        run: npm ci --ignore-scripts --audit=false --fund=false
+      - name: Confirm PostgreSQL exact minor
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d conexus_probe -Atc 'show server_version;'
+      - name: Execute the admitted four-run OM OFF x ON experiment
+        working-directory: spikes/conexus-3l-a
+        run: node src/a3-live-execute.mjs
+      - name: Preserve A3 deciding evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conexus-3l-a3-cognition
+          path: spikes/conexus-3l-a/a3-cognition-result.json
+          if-no-files-found: warn
+          retention-days: 14
 
   external-credential-admission:
     runs-on: ubuntu-latest

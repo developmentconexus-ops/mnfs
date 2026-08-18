@@ -1,4 +1,4 @@
-export const A3_LOCK_SHA256 = null; // populated after the Codex OAuth dependency closure is materialized
+export const A3_LOCK_SHA256 = '4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7';
 export const QUALIFIED_E2B_TEMPLATE_ID = '7ezun152y8jtqxf7llpl';
 
 export const CODEX_AUTH_PROVIDER = 'openai-codex';

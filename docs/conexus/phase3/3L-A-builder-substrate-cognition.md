@@ -1,6 +1,6 @@
 # 3L-A — Builder Substrate + Cognition Qualification
 
-**Status:** IN PROGRESS / A1 COMPLETE-PASS / A2 COMPLETE-PASS WITH REQUIRED GUARD / A3 ADMITTED-PREPARED / BILLABLE RUNS NOT STARTED  
+**Status:** IN PROGRESS / A1 COMPLETE-PASS / A2 COMPLETE-PASS WITH REQUIRED GUARD / A3 RE-ADMITTED-PREPARED ON NATIVE CODEX OAUTH / LIVE RUNS NOT STARTED  
 **Fase:** 3L — Technology Qualification  
 **Package:** A — Builder Substrate + Cognition  
 **Authority:** 3A-R10 + 3L-Q0 + current 3H-01/3H-03/3I authority  
@@ -14,24 +14,24 @@ Q0 authority commit                 = 176da36992ecb4dd5fc56e76f603ec33ca0c74c8
 Package A bootstrap commit          = 15fa4de06423e8942f472a4878d80287b7a72b91
 A1/A2 lock materialization commit   = 2e096b82661bf44a8396b5e6169a07b7fad0e8b4
 A1/A2 deciding authority commit     = e2c245809ccc55e7437a61fe6438d58e6bce8791
-A3 adapter-pin commit               = 8fe34aaca753574f8873587822307bec1852727f
-A3 lock materialization commit      = f86f7bddab7640192538b97008a7a4f3ba194fbf
+A3 Codex OAuth realignment commit   = 99d12284d3b09948ea13b9f14fe41b4838996e56
+A3 lock materialization commit      = 8f5ff76e27ed39db99e1e2612a19fd0523e447ae
 Node                                = 24.18.0
 npm                                 = 11.16.0
 spike lockfileVersion               = 3
 A1/A2 package-lock SHA-256          = 6b506f505567d82dd94653fca14bb5bc6b7b5b2d5138f83b34123d02e93cb0ce
-A3 package-lock SHA-256             = 70975a4b3aadc453959bd36835c1c4ad3edc320c862a9ebfb6ace7feb4fd1864
+A3 package-lock SHA-256             = 4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7
+@mastra/code-sdk                    = 1.1.1
 @mastra/core                        = 1.55.0
 @mastra/e2b                         = 0.7.0
 @mastra/memory                      = 1.24.0
 @mastra/pg                          = 1.18.1
 e2b SDK resolved transitively       = 2.40.0
-@openrouter/ai-sdk-provider-v6      = npm:@openrouter/ai-sdk-provider@2.10.0
 supply-chain Q0 deny-set            = PASS
 package lifecycle scripts at lock   = DISABLED
 ```
 
-Evidence remains bound to the exact bytes that produced it. A3's additional OpenRouter adapter does not reinterpret A1/A2 evidence against a new lock.
+Evidence remains bound to the exact bytes that produced it. The A3 Codex OAuth repin does not reinterpret A1/A2 evidence against a new lock.
 
 ## 2. Compiled Package A scope and proportionality
 
@@ -41,7 +41,7 @@ A2 — CX-SBX-E2B-01 compiled against current Mastra Builder authority
 A3 — CX-BUILDER-COGNITION-01 (persistent thread OM OFF × OM ON)
 ```
 
-A1 and A2 are adjudicated. A3 is admitted and its non-billable fixtures/contracts are prepared; the four model-bearing runs have not started.
+A1 and A2 are adjudicated. A3 is admitted and its non-billable fixtures/contracts are prepared; OAuth smoke and the four model-bearing runs have not started.
 
 Package A follows the already-approved proportional-security/YAGNI posture:
 
@@ -127,7 +127,7 @@ No P95 claim is made from this bounded qualification sample and the historical 4
 
 ### 4.2 Durable-secret custody — PASS
 
-Live guest inspection confirmed that runner/provider credentials do not enter the sandbox environment, including:
+Live guest inspection confirmed that runner/provider credentials present during A2 did not enter the sandbox environment, including:
 
 ```text
 E2B_API_KEY
@@ -137,7 +137,7 @@ OPENROUTER_API_KEY
 GITHUB_TOKEN
 ```
 
-Model-provider credentials are not part of A2 and remain control-side under current 3I authority.
+The OpenRouter name above is historical A2 negative evidence only; OpenRouter is no longer part of the admitted A3 realization. Model-provider credentials remain control-side under current 3I authority.
 
 ### 4.3 Physical continuity and attribution — PASS WITH REQUIRED GUARD
 
@@ -308,7 +308,7 @@ A2 does not prove Builder effectiveness, OM benefit, full model-spend enforcemen
 
 ---
 
-## 5. A3 — Builder cognition / Observational Memory — ADMITTED / PREPARED
+## 5. A3 — Builder cognition / Observational Memory — RE-ADMITTED / CODEX OAUTH PREPARED
 
 ### 5.1 Question being decided
 
@@ -316,7 +316,7 @@ A3 exists to answer one bounded product question:
 
 > **Does Observational Memory materially improve the long-running Change-scoped Builder enough to justify carrying it into F1?**
 
-It is not a memory-framework benchmark and it is not a security exercise.
+It is not a memory-framework benchmark, provider bake-off or security exercise.
 
 Current baseline remains:
 
@@ -326,25 +326,77 @@ OM = OFF
 
 A3 may qualify OM as a candidate; it cannot enable OM by itself.
 
-### 5.2 Exact experiment identity
+### 5.2 Realization reconciliation — OpenRouter removed
+
+The earlier A3 preparation used an OpenRouter + Anthropic/Google path only as a qualification realization candidate. Before any model-bearing A3 call occurred, source inspection of the exact Mastra Code family established that the selected Builder substrate already contains native ChatGPT/Codex subscription OAuth:
 
 ```text
-Actor                       = openrouter/anthropic/claude-sonnet-5
-Actor route                 = Anthropic only / provider fallback disabled
-OM Observer + Reflector     = openrouter/google/gemini-3.5-flash
-OM route                    = Google AI Studio only / provider fallback disabled
-OpenRouter adapter          = 2.10.0
-A3 lock SHA-256             = 70975a4b3aadc453959bd36835c1c4ad3edc320c862a9ebfb6ace7feb4fd1864
-E2B qualified template ID   = 7ezun152y8jtqxf7llpl
-primary Actor runs          = exactly 4
-qualification spend ceiling = finite, <= USD 10.00
+@mastra/code-sdk 1.1.1
+→ openai-codex OAuth provider
+→ device-code start/poll
+→ AuthStorage / CredentialStore
+→ auto-refresh
+→ openaiCodexProvider(...)
+→ ChatGPT Codex backend
 ```
 
-The spend ceiling is a **probe-cost guard**, not product security architecture and not a substitute for Package C.
+No A3 billable/model call was executed on the superseded OpenRouter path. Therefore:
 
-No additional key-shape, account-security or production credential-hardening requirement is introduced by A3. Those concerns remain where they were already routed.
+```text
+OpenRouter A3 realization = DELETED BEFORE DECIDING EXECUTION
+architecture reopen       = NONE
+Q0 reopen                 = NONE
+```
 
-### 5.3 Paired fixtures
+Q0 already requires the package record to freeze the actual provider/model/adapter path; this section is the Package A repin required by that law.
+
+### 5.3 Exact current experiment identity
+
+```text
+credential path             = ChatGPT/Codex subscription OAuth
+OAuth implementation        = native Mastra Code openai-codex
+@mastra/code-sdk            = 1.1.1
+Actor                       = openai/gpt-5.6-sol
+OM Observer + Reflector     = openai/gpt-5.6-luna
+reasoning/thinking level    = medium
+A3 lock SHA-256             = 4aa2642476117f9c68751c1a45660cdce3f0d1355fd3fa6c34467abe5458cbe7
+E2B qualified template ID   = 7ezun152y8jtqxf7llpl
+primary Actor runs          = exactly 4
+OAuth smoke                 = Sol + Luna before the four primary runs
+```
+
+Current primary-source evidence observed at admission time states that GPT-5.6 Sol and Luna are available in Codex for eligible paid ChatGPT plans and that Luna is the fastest / lowest-cost GPT-5.6 tier. That vendor statement is **candidate evidence only**; the device OAuth smoke must still prove that the operator's actual subscription admits both exact model IDs before A3 proceeds.
+
+A3 intentionally uses:
+
+```text
+Sol  → main Builder actor, where coding/current-authority capability is decisive
+Luna → Observer/Reflector, where speed and lower subscription-credit consumption are preferred
+```
+
+No model winner is promoted beyond this package by naming it here.
+
+### 5.4 OAuth execution shape
+
+A3 uses the native device flow and does not require the operator to copy an access/refresh token into chat or GitHub secrets.
+
+```text
+startCodexDeviceLogin()
+→ URL + one-time code
+→ operator signs in/approves
+→ pollCodexDeviceLogin()
+→ temporary OAuth credential in runner AuthStorage
+→ smoke Sol
+→ smoke Luna
+→ A0 → A1 → B0 → B1
+→ runner ends; qualification credential disappears
+```
+
+The OAuth credential remains control-side and never enters E2B.
+
+Persistent/multi-user credential custody for product realization remains governed by 3I-02 and is not implemented by this spike.
+
+### 5.5 Paired fixtures
 
 ```text
 Fixture A — long-context authority-currentness
@@ -356,7 +408,7 @@ Fixture B — deterministic coding effectiveness
   B1 = OM ON
 ```
 
-The same Actor model/provider class, task, current authority and starting fixture are used inside each pair. We do not repeat samples until a preferred result appears.
+The same Actor model, task, current authority and starting fixture are used inside each pair. We do not repeat samples until a preferred result appears. OM ON differs only by enabling the admitted OM path with Luna Observer/Reflector.
 
 Fixture A contains substantial earlier context plus an explicit supersession:
 
@@ -368,9 +420,9 @@ required outcome      = Y wins
 
 Following stale `X` is a correctness failure regardless of token savings.
 
-Fixture B is a synthetic TypeScript repository with a red deterministic baseline. Only the authorized implementation path may change, and the final candidate must pass the independent test command while preserving the current authority (`unknown != zero`).
+Fixture B is a synthetic repository with a red deterministic baseline. Only the authorized implementation path may change, and the final candidate must pass the independent test command while preserving the current authority (`unknown != zero`).
 
-### 5.4 OM shape under test
+### 5.6 OM shape under test
 
 A3 uses the pinned Mastra Code semantic shape with lower thresholds only so OM actually fires in this bounded experiment:
 
@@ -393,26 +445,25 @@ working-memory expansion             = OFF
 
 These thresholds are qualification mechanics, not future production defaults.
 
-### 5.5 Deciding evidence
+### 5.7 Deciding evidence
 
 A3 records only dimensions useful to the V1 decision:
 
 ```text
 correctness / current-authority adherence
 forgotten requirements
-rediscovery/repeated reads
+rediscovery/repeated reads when observable
 coding verifier result and unexpected changed paths
-rework / failed-test cycles
+rework / failed-test cycles when observable
 tool-call count
-Actor token usage
-Observer/Reflector usage
+Actor token usage when exposed
+Observer/Reflector cycles/errors
 wall-clock latency
-OM cycles/errors
 ```
 
-Missing evidence remains `NOT_PROVEN`; it is never converted to zero or PASS.
+Per-call USD cost is not asserted for this subscription path. If exact token/credit usage is not exposed by the admitted surface, it remains `MISSING`; it is never converted to zero.
 
-### 5.6 F-3L-A-02 — OM hidden retries
+### 5.8 F-3L-A-02 — OM hidden retries
 
 Source inspection of the pinned `@mastra/memory 1.24.0` established that Observer/Reflector have retry behavior not controlled by the main Agent's `maxRetries=0`.
 
@@ -429,9 +480,9 @@ Therefore a positive A3 result means only:
 COGNITIVELY QUALIFIED CANDIDATE
 ```
 
-If Package C cannot gate/account the OM billable path with the smallest sustainable mechanism, OM remains OFF for F1.
+If Package C cannot gate/account the OM model-bearing path with the smallest sustainable mechanism, OM remains OFF for F1.
 
-### 5.7 A3 decision rule
+### 5.9 A3 decision rule
 
 ```text
 material benefit + no current-authority regression
@@ -443,21 +494,24 @@ no material benefit
 stale-authority regression
 → REJECT current OM realization for F1
 
+OAuth/model unavailable for actual subscription
+→ NOT_PROVEN for current realization; adjudicate smallest repin only
+
 missing/interrupted deciding evidence
 → NOT_PROVEN
 ```
 
 No A3 result creates a memory service, reopens domain semantics or triggers a generic framework comparison.
 
-### 5.8 Current A3 state
+### 5.10 Current A3 state
 
 ```text
-exact dependency closure      = COMPLETE
-non-billable fixture contracts= COMPLETE / under CI
-billable model calls           = 0
-OpenRouter qualification key   = NOT YET PRESENT
-four primary runs              = NOT STARTED
-OM baseline                    = OFF
+exact Codex OAuth dependency closure = COMPLETE / PASS
+non-billable fixture contracts       = PREPARED
+model-bearing calls on old path      = 0
+Codex OAuth smoke                     = NOT STARTED
+four primary runs                     = NOT STARTED
+OM baseline                           = OFF
 ```
 
 ---
@@ -471,7 +525,9 @@ A1 Mastra/Postgres runtime mechanics = COMPLETE / PASS
 ↓
 A2 E2B Builder substrate             = COMPLETE / PASS WITH REQUIRED GUARD
 ↓
-A3 OM cognition comparison           = ADMITTED / PREPARED / BILLABLE RUNS NEXT
+A3 native Codex OAuth smoke          = NEXT
+↓ if Sol + Luna PASS
+A3 OM cognition comparison           = A0 → A1 → B0 → B1
 ↓ adjudicate
 Package A internal completeness/deletion check
 ↓
@@ -489,7 +545,8 @@ operator + ChatGPT Package A verdict
 | A2 stock E2B adapter write reincarnation | **FAIL AS-IS / FINDING CONFIRMED** | source + contract + live physical replacement write |
 | A2 narrow physical-incarnation guard | **PASS / REQUIRED** | RED→GREEN local + live provider proof |
 | A2 E2B Builder substrate overall | **PASS WITH REQUIRED GUARD + KNOWN DNS EXCEPTION** | 10/10 live suite + exact template/resource/network/DB/custody evidence |
-| A3 OM cognition | **ADMITTED / NOT_PROVEN** | non-billable fixtures ready; four real paired runs still required |
+| A3 Codex OAuth path | **ADMITTED / NOT_PROVEN LIVE** | native pinned surface + exact lock; device smoke still required |
+| A3 OM cognition | **ADMITTED / NOT_PROVEN** | Sol Actor + Luna OM fixtures prepared; four real paired runs still required |
 | Package A overall | **IN PROGRESS** | A3 remains before package verdict |
 
 ## 8. Guardrails
@@ -499,7 +556,9 @@ prove first useful V1, not theoretical maximum hardening
 no product code
 spike guard != product implementation
 no Pi revival as parallel harness
-no generic sandbox/framework benchmark
+Pi/source references are challenger/evidence only
+no generic sandbox/framework/provider benchmark
+no OpenRouter fallback hidden behind Codex OAuth
 no OM enablement by enthusiasm
 no mock/fake PASS for model-bearing cognition
 no new security subsystem without a fired F1 failure class

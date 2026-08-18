@@ -26,7 +26,12 @@ import {
   scoreCodingResult,
 } from './a3-fixtures.mjs';
 import { buildMastraHistoryMessages, extractLatestAssistantText, summarizeA3Events } from './a3-runner.mjs';
-import { buildConditionRuntimeConfig, buildMemoryOptions, scoreA3Condition } from './a3-live.mjs';
+import {
+  buildConditionRuntimeConfig,
+  buildMemoryOptions,
+  createAnswerOnlyWorkspace,
+  scoreA3Condition,
+} from './a3-live.mjs';
 import { ConexusWriteE2BSandbox } from './physical-incarnation-guard.mjs';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -59,7 +64,9 @@ function createModels() {
 }
 
 function createWorkspace(condition) {
-  if (!condition.requiresE2B) return { workspace: undefined, sandbox: undefined };
+  if (!condition.requiresE2B) {
+    return { workspace: createAnswerOnlyWorkspace(condition.id), sandbox: undefined };
+  }
 
   const sandbox = new ConexusWriteE2BSandbox({
     id: `conexus-a3-${condition.id.toLowerCase()}-${crypto.randomUUID().slice(0, 8)}`,

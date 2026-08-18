@@ -125,7 +125,7 @@ test('A2-NET-01: allowlist fires, redirect and non-DNS non-HTTP escape fail clos
   let source;
 
   const tcp853Probe =
-    "python3 - <<'PY'\nimport socket\ns=socket.create_connection(('1.1.1.1',853),timeout=3)\nprint('tcp853-open')\ns.close()\nPY";
+    "python3 - <<'PY'\nimport socket,ssl,struct\nq=b'\\x12\\x34\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00'+b'\\x07example\\x03com\\x00'+b'\\x00\\x01\\x00\\x01'\nraw=socket.create_connection(('1.1.1.1',853),timeout=3)\nctx=ssl._create_unverified_context()\ns=ctx.wrap_socket(raw,server_hostname='1.1.1.1')\ns.settimeout(3)\ns.sendall(struct.pack('!H',len(q))+q)\nh=s.recv(2)\nif len(h)!=2: raise RuntimeError('no DNS-over-TLS length response')\nn=struct.unpack('!H',h)[0]\nbody=b''\nwhile len(body)<n:\n    chunk=s.recv(n-len(body))\n    if not chunk: break\n    body+=chunk\nif len(body)!=n: raise RuntimeError('incomplete DNS-over-TLS response')\nprint('tcp853-open')\ns.close()\nPY";
   const publicDnsProbe =
     "python3 - <<'PY'\nimport socket,struct\nq=b'\\x12\\x34\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00'+b'\\x07example\\x03com\\x00'+b'\\x00\\x01\\x00\\x01'\ns=socket.create_connection(('8.8.8.8',53),timeout=2)\ns.sendall(struct.pack('!H',len(q))+q)\ns.settimeout(2)\nif not s.recv(2): raise RuntimeError('no DNS response')\nprint('public-dns-exception-observed')\ns.close()\nPY";
 

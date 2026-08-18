@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS`  
-**Fase atual:** `3K — Frontend / Product Architecture` — **NEXT / NÃO INICIADA**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 APROVADA`  
+**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 APROVADA**; próxima decisão = Package B — Trust, Decision & Observable Truth; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -83,6 +83,9 @@ C-000..C-017
 3J-R1
 → Deployment / Operations Architecture Final Closure
 
+3K-01
+→ Product Model, Project Shell, Build Workspace & Inspectability
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -117,7 +120,7 @@ Nenhuma conversa cria authority.
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3K — Frontend / Product Architecture | **NEXT / NÃO INICIADA** | F1 product surfaces + first vertical, partindo de C-001 caso 1 salvo redirect; carrega guardrail de produto e AGT-4 surface de [3A-R7](3A-R7-platform-consultant-ownership-reconciliation.md) |
+| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 APROVADA** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md); próximo Package B — Trust, Decision & Observable Truth; final independent adversarial review somente após packages internos coerentes |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
@@ -343,7 +346,7 @@ ReleaseManifest remains composition root
 | 3G-04 | Planning Depth & Rigor Composition Architecture | [3G-04](3G-04-planning-depth-rigor-composition-architecture.md) |
 | 3G-05 | Production AgentRun, Approval Continuation & Trigger Architecture | [3G-05](3G-05-production-agent-run-approval-trigger-continuation-architecture.md) |
 | 3G-06 | Gateway EffectAttempt, Idempotency & Budget State Architecture | [3G-06](3G-06-gateway-effect-attempt-idempotency-budget-state-architecture.md) |
-| 3G-07 | Project Lifecycle & Binding Mutation Architecture | [3G-07](3G-07-project-lifecycle-binding-mutation-architecture.md) |
+| 3G-07 | Project Lifecycle & Binding Mutation Architecture | [3G-07](3G-07-project-binding-mutation-architecture.md) |
 | 3G-08 | Release, Promotion & Runtime Admissibility Architecture | [3G-08](3G-08-release-promotion-runtime-admissibility-architecture.md) |
 | 3G-R1 | Behavioral / State Architecture Final Closure | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 
@@ -412,7 +415,7 @@ Release immutable; acceptance/current rigor rechecked at compose and promote
 max one non-terminal Promotion per Project/PROD
 maintenance serving-block survives failed Promotion terminalization
 rollback = new Promotion + current conformance
-DEDICATED old exact Release is not invalid merely because newer exists
+DEDICATED old exact Release is not invalid merely porque newer exists
 ```
 
 Review provenance, non-authoritative:
@@ -1346,7 +1349,8 @@ F-GPC-01 / AGT-4 = RESOLVED por 3A-R7
 C-003 F1 orphan requirements = 0
 reopen 3B–3J = NONE
 
-3K = NEXT / NOT STARTED
+3K = IN PROGRESS / 3K-01 APPROVED
+3K-01 = APPROVED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1375,9 +1379,11 @@ reopen 3B–3J = NONE
 
 O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE em 2026-08-17** com `CURRENT STRUCTURE CONFIRMED`: único finding material `F-GPC-01 / AGT-4` resolvido por 3A-R7, `C-003 F1 orphan requirements = 0`, `reopen 3B–3J = NONE`. 3A-R7 foi ratificada em **2026-08-17** como bounded gap-fill: Platform Consultant = Builder-owned / Control-Plane-presented assistance capability, platform knowledge publicado/digest-pinned sob a pack discipline (nunca Workspace Brain content), contexto tenant derivado server-side, zero novo module/principal/global agent artifact/hidden tenant/cross-Workspace authority; surface concreta → 3K; platform agent global persistente → Decision Loop. **C-001 permanece product vision authority.**
 
+3K-01 foi ratificada pelo operador em **2026-08-17** e abre formalmente 3K. Congela Workspace shell ≠ Project shell; Project-scoped navigation; Build agent-first com Preview como work surface dominante e Conexus contextual/retrátil; Data/Capabilities/Integrations/Agents/Brain/Versions/Activity diretamente inspecionáveis; Code/Diff como Build lenses; machinery interna apenas progressive detail; `Product`/`Resources` artificiais rejeitados; exact visual/component/streaming realization deferred. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
+
 Próxima ação:
 
-> **Iniciar `3K — Frontend / Product Architecture`**: F1 product surfaces + first vertical, partindo de C-001 caso 1 (Analisador de Orçamentos) salvo redirect explícito do operador; carrega o guardrail de produto e a AGT-4 surface de 3A-R7.
+> **Continuar `3K — Frontend / Product Architecture` com Package B — Trust, Decision & Observable Truth**: decidir como authority, Evidence, approvals, status, failures, cost e known limitations aparecem dentro das surfaces já ratificadas por 3K-01. O review adversarial independente de 3K fica reservado ao fechamento global da fase, salvo novo finding material de trust/authority/reopen que exija challenge antecipado pelo método.
 
 3K–3O seguem integralmente sob 3A-R6. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

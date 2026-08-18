@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS`  
-**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS**; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; próxima ação = fechamento interno de 3K sobre 3K-01..03 + 3A-R8/R9 e, depois, um único independent Fable challenge antes da ratificação final de 3K; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 + 3K-03 + 3K-04 APROVADAS / INTERNALLY CONVERGED`  
+**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / INTERNALLY CONVERGED / READY FOR FINAL INDEPENDENT ADVERSARIAL REVIEW**; `3K-01..3K-04` = **APPROVED**; `F3K-IC-01 Product Agent authoring/management/use` = **RESOLVED por 3K-04**; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; internal closure = **Material Finding 0**; próxima ação = **um único independent Fable challenge de 3K inteiro antes da ratificação/closure final**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -98,6 +98,9 @@ C-000..C-017
 3K-03
 → First Vertical Composition & Data Path
 
+3K-04
+→ Product Agent Authoring, Management & Use Journey
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -132,7 +135,7 @@ Nenhuma conversa cria authority.
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md) + [3K-03](3K-03-first-vertical-composition-data-path.md); bounded sync follow-up RESOLVED por [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md); próximo fechamento interno + único independent Fable challenge antes da ratificação final |
+| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01..3K-04 APROVADAS / INTERNALLY CONVERGED** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md) + [3K-03](3K-03-first-vertical-composition-data-path.md) + [3K-04](3K-04-product-agent-authoring-management-use-journey.md); bounded sync follow-up RESOLVED por [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md); internal closure `Material Finding = 0`; próximo = único independent Fable challenge antes da ratificação final |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 + `CX-MANAGED-JOB-01` de 3A-R9 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
@@ -184,6 +187,7 @@ Critical path ratificado:
 3K
 → F1 product surfaces + first vertical
 → start from C-001 caso 1 (Analisador de Orçamentos) unless operator redirects
+→ 3K-01..3K-04 internally converged; final independent adversarial review remains
 
 job/v1
 → RESOLVED FOR FIRST VERTICAL by 3A-R9
@@ -627,7 +631,7 @@ required verification evidence missing => NOT_PROVEN/INCONCLUSIVE
 ```text
 prior authority reopen = NONE
 Alternative A = GLOBAL MAXIMUM
-new module = 0
+new Hub module = 0
 new durable record class = 0
 new runtime bus / queue / generic outbox = 0
 mandatory process split = 0 unless CX-RUNTIME-ISOLATION-01 proves it necessary
@@ -978,7 +982,7 @@ Review provenance, non-authoritative:
 | ID | Decisão | Documento |
 |---|---|---|
 | 3J-01 | First Production Topology, Placement & Ingress | [3J-01](3J-01-first-production-topology-placement-ingress.md) |
-| 3J-02 | Operational State, Backup & Restore Architecture | [3J-02](3J-02-operational-state-backup-restore-architecture.md) |
+| 3J-02 | Operational State, Backup & Restore Architecture | [3J-02](3J-02-operational-state-backup-restore.md) |
 | 3J-03 | Platform Lifecycle, Secret Injection, Emergency Stop & Availability | [3J-03](3J-03-platform-lifecycle-secret-injection-emergency-stop-availability.md) |
 | 3J-R1 | Deployment / Operations Architecture Final Closure | [3J-R1](3J-R1-deployment-operations-architecture-final-closure.md) |
 
@@ -1108,7 +1112,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | provider/model/request qualified cost-envelope proof | 3L under 3I-03 — MUST QUALIFY |
 | model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03; current baseline features budgeted-or-disabled |
 | model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
-| Product Agent browser/workspace/code execution trust/egress if first consumer enables it | Decision Loop / DEFER SAFELY; 3I-05 pre-binds named-owner/destination-authority requirement |
+| Product Agent browser/workspace/code execution trust/egress if first consumer enables it | **3K-04 confirms REJECT/DEFER by default; Decision Loop / 3I-05 / 3L on first named consumer** |
 | whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **RESOLVED by 3J-03**; pre-production drill permanece gate (3I-01/3J-03/3J-R1) |
 | post-whole-Hub-stop settlement/recovery | 3M structural recovery sweep |
 | selective per-Project serving stop | Decision Loop only if real incident proves owner-local controls + whole-Hub stop unacceptable; likely owner seam = Release/MAR serving-admission owner |
@@ -1134,8 +1138,8 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | archive/unpublish/trigger/recovery UX | 3K only where first vertical requires it; otherwise DEFER SAFELY |
 | Release/Promotion/rollback UI | 3K journey/truth laws RESOLVED by 3K-01/3K-02; detailed component spelling → Realization Planning |
 | approval-card/display contracts | 3K product law RESOLVED by 3K-02 over 3F-03; exact component realization → implementation |
-| Project binding Control Plane UI | 3K where first vertical requires it |
-| Product Agent Conversation/memory/trigger UI | 3K where first vertical requires it |
+| Project binding Control Plane UI | **RESOLVED at product-architecture level by 3K-01/3K-03**; exact forms/DTOs → Realization Planning |
+| Product Agent authoring/management/use + Conversation/memory/trigger product UI | **RESOLVED by 3K-04**; exact transport/components and gated feature realization → Realization/3L as applicable |
 | exact wire/HTTP layout | post-C-018 Realization Planning + contract tests; 3L only if technology behavior is load-bearing |
 | exact `MANIFEST_INVALID` diagnostics | Realization Planning/implementation + 3K where user-observable |
 | authored Project binding source/file schema + exact mutation DTOs | post-C-018 Realization Planning + implementation |
@@ -1152,17 +1156,17 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | E2B pull/OTLP exact pinned-version behavior | E2B control/evidence subset 3L; production exporter topology 3J only if adopted |
 | OTel baggage/redaction/egress policy | **RESOLVED by 3I-05 at property level**; exact propagator/header stripping → 3L/Realization Planning |
 | platform-control egress destination configuration | **3I-05 property fixed**; exact owner adapter endpoint/config wiring → Realization Planning/3J as applicable |
-| Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval |
+| Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval; 3K-04 exposes only admitted regimes |
 | Durable Agent enablement and its process-global registry | Decision Loop + 3L on named consumer |
 | Observational Memory process-global `activeOps` if enabled | 3L on named consumer |
-| Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority |
+| Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority; 3K-04 keeps them out of baseline F1 authoring |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | DEFER SAFELY optional deployment qualification |
 | `job/v1` / deterministic sync dispatch | **RESOLVED by [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md) for first vertical; `CX-MANAGED-JOB-01` → 3L; future background-work classes re-enter Decision Loop on named consumer** |
 | async/attempt status projection for UI/query convenience | 3K-02 truth law closed; exact projection realization → Realization Planning; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
-| Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
-| EVENT / Signals / Notification Inbox / Webhook Signals | C-007 / Decision Loop on first EVENT consumer |
+| Product multi-agent/subagents/Agent Network | Decision Loop on real consumer; 3K-04 keeps them out of F1 Agent Builder baseline |
+| EVENT / Signals / Notification Inbox / Webhook Signals | C-007 / Decision Loop on first EVENT consumer; 3K-04 does not expose unsupported EVENT controls |
 | break-glass binding/runtime override | Decision Loop on real incident failure class |
 | app-origin approvals / second approval consumer | Decision Loop on real consumer |
 | duplicate Gateway approval-subject custody | Decision Loop / 3J on real availability split |
@@ -1313,6 +1317,14 @@ NO mandatory custom E2B wrapper unless qualification proves concrete need
 NO universal Product Agent Workflow wrapper
 NO Product Agent schedule→agent direct bypass
 NO Stored Agent/Editor as Product Agent authority
+NO second Agent authoring database / AgentBuilderModule / AgentBuilderRuntime
+NO Workspace-owned Product Agent fleet/runtime authority
+NO UniversalTool domain competing with Capability/Integration owners
+NO generic execute(anySlug) exposed to Product Agent
+NO hidden capability/permission/effect creation while authoring Agent
+NO Product Agent repo/source/shell/filesystem/browser power by default
+NO mandatory universal chat widget in every app
+NO unsupported EVENT/memory/multi-agent feature merely because Mastra supports it
 NO ScheduleOccurrence table / hidden backlog in F1
 NO EVENT/Signal ingress before first trusted consumer
 NO Durable Agent cache/pubsub requirement without reconnectable-stream consumer
@@ -1421,10 +1433,14 @@ F-GPC-01 / AGT-4 = RESOLVED por 3A-R7
 C-003 F1 orphan requirements = 0
 reopen 3B–3J = NONE
 
-3K = IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APPROVED
+3K = IN PROGRESS / 3K-01 + 3K-02 + 3K-03 + 3K-04 APPROVED / INTERNALLY CONVERGED
 3K-01 = APPROVED
 3K-02 = APPROVED
 3K-03 = APPROVED
+3K-04 = APPROVED
+F3K-IC-01 Product Agent authoring/management/use = RESOLVED BY 3K-04
+3K internal closure Material Finding = 0
+3K final independent adversarial review = NEXT / REQUIRED ONCE
 
 job/v1 / deterministic sync dispatch = RESOLVED BY 3A-R9
 CX-MANAGED-JOB-01 = MUST QUALIFY in 3L
@@ -1466,9 +1482,36 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 
 3K-03 foi ratificada pelo operador em **2026-08-18**. Congela que Conexus não possui default universal `live|mirror|hybrid`; Connector declara source capabilities e Project Baseline decide o data path do slice. Para o caso 1, aprova read-only analytics com Project analytical read model derivado, sync governado, live Gateway reads como source anchor para Discovery/qualification/reconciliation/verification/Evidence, registered read-only queries para a UI, Brain semantic binding, zero Product Agent/WRITE/business effect e separação entre historical Golden benchmark e current operational truth. O trigger `job/v1` previsto por 3A-R6/C-007 foi disparado e está **RESOLVED por 3A-R9**. Sankhya permanece first-vertical evidence, nunca product-wide topology/ERP law.
 
+3K-04 foi ratificada pelo operador em **2026-08-18** após pesquisa externa + decomposição adversarial do finding `F3K-IC-01`. Product Agents permanecem Project-owned/git-first/Release-pinned sob canonical `agent/v1`; Agent Builder = specialized Builder experience, nunca segundo module/DB/authority; structured/manual + natural-language authoring convergem para a mesma Change/candidate; missing Capabilities podem ser propostas apenas como expansão explícita da Change; runtime tools continuam compiled `ToolProjection` sobre owners existentes, sem UniversalTool; Workspace ganha `Agents` como access-filtered cross-Project catalog/projection sem Agent fleet ownership; Builder é source-aware, Product Agent é product/context-aware e não recebe repo/source/shell/filesystem/browser por default; interactive/headless permanecem o mesmo Product Agent concept; Mastra Editor/Stored Agent nunca substitui Registry/Release authority. `F3K-IC-01 = RESOLVED`, `new module/record/DB = 0`.
+
+O **3K internal closure completeness/deletion check** foi executado após 3K-04. Resultado:
+
+```text
+Workspace / Project selection + creation                    → COVERED 3K-01
+Inception / Project Baseline                                → COVERED 3K-01 + 3A-R8
+Change / correctness / progress                             → COVERED 3K-01 + 3K-02
+Finding / Evidence / verifier feedback                      → COVERED 3K-02
+human decision families                                     → COVERED 3K-02
+Connections administration/use/qualification journey        → COVERED 3K-01 + 3K-03
+Brain binding/use                                            → COVERED 3K-01 + 3K-03
+Preview / review                                             → COVERED 3K-01 + 3K-02
+Release / Promotion / rollback                              → COVERED 3K-01 + 3K-02
+Production Agent definition/use                             → COVERED 3K-04
+MANAGED application access/serving                          → COVERED 3K-01 + 3K-02
+runtime/operational timeline                                → COVERED 3K-01 + 3K-02
+permissions/access-management                               → COVERED 3K-01 + 3K-02 + C-015
+first vertical / data path                                  → COVERED 3K-03 + 3A-R9
+CIC-4 Project duplication semantics                         → ALREADY CLOSED C-014; UI placement = Realization
+Workspace Agents catalog dependency                         → direct read/public projection under 3D-03; no eighth L7 use case
+Material Finding                                            = 0
+prior structural phase reopen                               = NONE
+new module / durable record / database from closure         = 0
+verdict                                                     = INTERNALLY CONVERGED
+```
+
 Próxima ação:
 
-> **Executar o fechamento interno de `3K — Frontend / Product Architecture`** sobre `3K-01 + 3K-02 + 3K-03`, verificando coerência com `3A-R8` e `3A-R9`, ausência de decisão material de produto ainda órfã e fronteiras corretas para 3L/3M/3N/3O/Realization Planning. Se o pacote interno estiver coerente, usar **Fable exatamente uma vez** como independent adversarial challenger de 3K inteiro; confrontar os findings contra authority e materializar apenas findings sobreviventes antes da ratificação/closure final de 3K. Nenhum Fable intermediário adicional.
+> **Executar exatamente um independent Fable challenge sobre `3K-01 + 3K-02 + 3K-03 + 3K-04`, composto com `3A-R8` e `3A-R9`, contra C-001/C-003/3A-R6 e prior authority.** O challenger deve procurar material gaps, contradictions, owner/authority leaks, hidden second truth, Product-Agent/tool/catalog overreach, first-vertical distortion e missing F1 journey. Review output continua evidence, não authority; apenas findings materiais sobreviventes à adjudicação entram em Decision Loop. Se `Material Finding = 0`, materializar closure/ratificação final de 3K. Nenhum Fable intermediário adicional.
 
 3K–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

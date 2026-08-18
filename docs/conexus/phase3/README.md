@@ -21,16 +21,19 @@ Conversa, review, dialogue e pesquisa continuam evidence/input; não viram autho
 
 ## Current orientation
 
-Consulte sempre o [LEDGER](LEDGER.md) para o estado exato. O checkpoint atual ratificado é:
+Consulte sempre o [LEDGER](LEDGER.md) para o estado exato. Os checkpoints/current task authorities relevantes são:
 
 - [3A-R10 — Pre-Implementation Convergence & Realization Routing](3A-R10-pre-implementation-convergence-realization-routing.md).
+- [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md).
 
 No momento desta atualização:
 
 ```text
 3B–3K = CLOSED / APPROVED
 3A-R10 = APPROVED
-3L — Technology Qualification = NEXT / NOT STARTED
+3L — Technology Qualification = IN PROGRESS
+3L-Q0 = APPROVED / COMPLETE
+Package A — Builder Substrate + Cognition = NEXT / NOT STARTED
 C-018 = NOT YET RATIFIED
 product implementation = BLOCKED
 PR #40 merge = explicit operator authorization required
@@ -100,28 +103,32 @@ Historical/detail authority: `../24-arquitetura-system-design.md` plus `3B-*` de
 - `3K-01..3K-04`
 - [3K-R1 — Final Closure](3K-R1-frontend-product-architecture-final-closure.md)
 
-## 3L routing after 3A-R10
+## 3L routing after 3A-R10 + Q0
 
-3L is **Technology Qualification**, not framework exploration. Before execution, Q0 must pin exact versions/configuration and historical probe criteria must be compiled against current authority.
+3L is **Technology Qualification**, not framework exploration. [3L-Q0](3L-Q0-qualification-manifest.md) is **APPROVED / COMPLETE** and binds deciding evidence to exact versions/configuration. Historical probe criteria must be compiled against current authority before execution.
+
+Execution is intentionally serial to avoid branch divergence:
 
 ```text
 Package A — Builder Substrate + Cognition
   CX-SBX-E2B-01
   CX-BUILDER-MASTRA-01
   CX-BUILDER-COGNITION-01
-
+↓ adjudication
 Package B — Product Agent + Cross-Runtime
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
-
+↓ adjudication
 Package C — Model Economics / Enforcement
   3I-03 technology-dependent interception/retry/usage/cost-envelope subset
-
+↓ adjudication
 Package D — Managed Execution
   CX-MANAGED-JOB-01
-
+↓ adjudication
 Package E — Deciding Evidence
   Verification Observability deciding-evidence subset
+↓ internal completeness/deletion check
+ONE final independent Fable review of complete 3L
 ```
 
 Builder Observational Memory is **MUST EVALUATE / NOT MUST ENABLE**. Product Agent OM, Semantic Recall and Memory Extractors remain consumer/eval-gated unless a later accepted decision says otherwise.
@@ -176,6 +183,8 @@ ApplicationRuntimeProfile = MANAGED | DEDICATED
 ```text
 3A-R10 checkpoint
 → 3L Technology Qualification
+   Q0 COMPLETE
+   Package A NEXT
 → 3M Failure & Recovery
 → 3N Architecture Verification
 → 3O Vertical Architecture Proof Contract

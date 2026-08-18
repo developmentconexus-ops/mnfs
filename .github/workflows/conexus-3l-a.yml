@@ -73,7 +73,11 @@ jobs:
         run: npm ci --ignore-scripts --audit=false --fund=false
       - name: Run A2 live E2B qualification probes serially
         working-directory: spikes/conexus-3l-a
-        run: node --test --test-concurrency=1 tests/e2b-live.test.mjs tests/e2b-envelope-live.test.mjs
+        run: >-
+          node --test --test-concurrency=1
+          tests/e2b-live.test.mjs
+          tests/e2b-envelope-live.test.mjs
+          tests/e2b-controls-live.test.mjs
 
   external-credential-admission:
     runs-on: ubuntu-latest

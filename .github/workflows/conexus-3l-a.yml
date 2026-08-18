@@ -109,7 +109,7 @@ jobs:
           tests/e2b-db-reconcile-live.test.mjs
 
   codex-device-start:
-    if: github.event_name == 'workflow_dispatch' && inputs.target == 'a3'
+    if: (github.event_name == 'workflow_dispatch' && inputs.target == 'a3') || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -132,7 +132,7 @@ jobs:
           retention-days: 1
 
   a3-live:
-    if: github.event_name == 'workflow_dispatch' && inputs.target == 'a3'
+    if: (github.event_name == 'workflow_dispatch' && inputs.target == 'a3') || github.event_name == 'pull_request'
     needs: codex-device-start
     runs-on: ubuntu-latest
     environment: E2B_API_KEY

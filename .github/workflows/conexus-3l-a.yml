@@ -1,0 +1,66 @@
+name: Conexus 3L Package A
+
+on:
+  pull_request:
+    paths:
+      - 'spikes/conexus-3l-a/**'
+      - 'docs/conexus/phase3/3L-A-builder-substrate-cognition.md'
+      - '.github/workflows/conexus-3l-a.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mastra-persistent-runtime:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.10-bookworm
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: conexus_probe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d conexus_probe"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/conexus_probe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Install exact spike lock without lifecycle scripts
+        working-directory: spikes/conexus-3l-a
+        run: npm ci --ignore-scripts --audit=false --fund=false
+      - name: Confirm PostgreSQL exact minor
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d conexus_probe -Atc 'show server_version;'
+      - name: Run A1 Mastra/Postgres qualification probes
+        working-directory: spikes/conexus-3l-a
+        run: node --test tests/mastra-runtime.test.mjs
+
+  external-credential-admission:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report external evidence availability without exposing secrets
+        env:
+          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          node - <<'NODE'
+          const names = ['E2B_API_KEY', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY'];
+          const availability = Object.fromEntries(names.map(name => [name, Boolean(process.env[name])]));
+          console.log(JSON.stringify(availability, null, 2));
+          if (!availability.E2B_API_KEY) console.log('A2_E2B_LIVE=NOT_PROVEN_NO_APPROVED_CREDENTIAL');
+          if (!availability.ANTHROPIC_API_KEY && !availability.OPENAI_API_KEY && !availability.OPENROUTER_API_KEY) {
+            console.log('A3_OM_COGNITION=NOT_PROVEN_NO_APPROVED_MODEL_CREDENTIAL');
+          }
+          NODE

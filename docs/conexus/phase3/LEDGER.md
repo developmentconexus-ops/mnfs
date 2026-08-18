@@ -831,7 +831,7 @@ BudgetService/Runtime = 0
 model proxy/token broker = 0
 quota engine = 0
 per-run provider API key = 0
-parallel billable model-call machinery = 0
+parallel billable-call machinery = 0
 NOT_SENT refund optimization = DEFERRED
 ```
 
@@ -1020,7 +1020,7 @@ RPO <= 6h / RTO <= 8h; sem PITR/replication/second provider/backup platform
 cross-store atomic snapshot = REJECT
 ```
 
-3J-02 protege a plataforma Conexus e seus Projects; Metal Nobre é somente first-deployment evidence e nenhum ERP/integration vira backup truth model. **C-001 permanece a product vision authority.**
+3J-02 protege a plataforma Conexus e seus Projects; Metal Nobre é somente first-deployment evidence e nenhum ERP/integration vira backup truth model. **C-001 permanece product vision authority.**
 
 ### 11.3 3J-03 — Platform lifecycle / secrets / stop / availability laws
 
@@ -1464,7 +1464,7 @@ CX-MANAGED-JOB-01 = MUST QUALIFY in 3L
 
 3J-01 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela first production on-prem (company server → dedicated Linux VM), one Hub process, stores co-located no mesmo failure domain, private ingress company LAN/VPN + HTTPS com bounded amendment de C-015 §5 + C-016 §6 (exposure realization only), zero public ingress, Sankhya sem topology authority e E2B sem generic/public inbound. **Installation-scoped**: primeira topologia da instalação corrente, não deployment law universal do produto; **C-001 permanece product vision authority**.
 
-3J-02 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela recovery set class-based (`hub_control`, production Project DBs, `mastra_par`, non-reconstructible digest bytes`, CredentialBackend backing, Git bundle off-provider, recovery manifests), `mastra_builder` fora por default, off-host immutability contra host-credential compromise, independent path para recovery material não-regenerável, proibição de credenciais operacionais reemitíveis em backup, pre-production complete restore proof, `RPO <= 6h / RTO <= 8h` e rejeição de PITR/replication/second provider/backup platform. **C-001 permanece product vision authority.**
+3J-02 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela recovery set class-based (`hub_control`, production Project DBs, `mastra_par`, non-reconstructible digest bytes, CredentialBackend backing, Git bundle off-provider, recovery manifests), `mastra_builder` fora por default, off-host immutability contra host-credential compromise, independent path para recovery material não-regenerável, proibição de credenciais operacionais reemitíveis em backup, pre-production complete restore proof, `RPO <= 6h / RTO <= 8h` e rejeição de PITR/replication/second provider/backup platform. **C-001 permanece product vision authority.**
 
 3J-03 foi ratificada em **2026-08-17** após independent Fable challenge com `ACCEPT CANDIDATE`; congela one Hub process + bounded operational job contexts, exclusão de backup/migrator/admin credentials do runtime, secrets owner-scoped fail-closed, `hub_control down => NOT READY`, restart supervisionado de durable authority, platform deploy com single target revision identity e checkpoint/proof fail-closed, emergency stop out-of-band derrotando toda camada de auto-start, e capability-local degradation sem availability orchestrator. `3J-04 = NOT JUSTIFIED`. **C-001 permanece product vision authority.**
 

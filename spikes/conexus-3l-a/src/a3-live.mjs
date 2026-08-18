@@ -1,3 +1,4 @@
+import { Workspace } from '@mastra/core/workspace';
 import { A3_OM_CONFIG, A3_RUN_MATRIX, ACTOR_MODEL, OM_MODEL } from './a3-admission.mjs';
 
 export function buildConditionRuntimeConfig(id) {
@@ -11,6 +12,13 @@ export function buildConditionRuntimeConfig(id) {
     requiresE2B: condition.fixture === 'coding-effectiveness',
     actorModel: ACTOR_MODEL,
     omModel: OM_MODEL,
+  });
+}
+
+export function createAnswerOnlyWorkspace(conditionId) {
+  return new Workspace({
+    id: `a3-answer-only-${conditionId.toLowerCase()}`,
+    skills: ['/tmp/conexus-a3-answer-only-skills'],
   });
 }
 

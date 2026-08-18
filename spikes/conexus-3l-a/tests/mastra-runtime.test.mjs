@@ -226,7 +226,7 @@ test('P2: live session grants are ephemeral and do not survive clean controller 
   await secondStore.close();
 });
 
-test('P27-subset: stale subagent model selection is restored but mechanically replaceable', async () => {
+test('P27-subset: persisted stale subagent setting is not reactivated and current dispatch overwrites it', async () => {
   const schema = schemaName('p27subagent');
   const sessionArgs = {
     id: 'runtime-session-subagent',
@@ -240,15 +240,24 @@ test('P27-subset: stale subagent model selection is restored but mechanically re
   const firstSession = await firstController.createSession(sessionArgs);
   await firstSession.subagents.model.set({ modelId: 'probe/stale-subagent' });
   assert.equal(firstSession.subagents.model.get({}), 'probe/stale-subagent');
+  assert.equal(await firstSession.thread.getSetting({ key: 'subagentModelId' }), 'probe/stale-subagent');
   await firstStore.close();
 
   const secondStore = await createStore(schema, 'builder-store-subagent-current');
   const secondController = await createController(secondStore);
   const rebound = await secondController.createSession(sessionArgs);
 
-  assert.equal(rebound.subagents.model.get({}), 'probe/stale-subagent');
+  // Mastra 1.55.0 persists the setting in thread metadata but loadMetadata()
+  // does not rehydrate subagentModelId into live session state. The stale value
+  // therefore exists as residue but does not regain active runtime authority.
+  assert.equal(await rebound.thread.getSetting({ key: 'subagentModelId' }), 'probe/stale-subagent');
+  assert.equal(rebound.subagents.model.get({}), null);
+
+  // Current Conexus dispatch can set the active value and replace the stale
+  // persisted setting through the pinned public API.
   await rebound.subagents.model.set({ modelId: 'probe/current-subagent' });
   assert.equal(rebound.subagents.model.get({}), 'probe/current-subagent');
+  assert.equal(await rebound.thread.getSetting({ key: 'subagentModelId' }), 'probe/current-subagent');
 
   await secondStore.close();
 });

@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 APROVADAS`  
-**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 APROVADAS**; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; próxima decisão = Package C — First Vertical Composition & Data Path; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 APROVADAS` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS`  
+**Fase atual:** `3K — Frontend / Product Architecture` — **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS**; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; próxima decisão = bounded C-007 Decision Loop para `job/v1` / deterministic sync dispatch, disparado por 3K-03; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)  
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -92,6 +92,9 @@ C-000..C-017
 3K-02
 → Trust, Decision & Observable Truth
 
+3K-03
+→ First Vertical Composition & Data Path
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -126,7 +129,7 @@ Nenhuma conversa cria authority.
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md); próximo Package C — First Vertical Composition & Data Path sob 3A-R8; final independent adversarial review somente após packages internos coerentes |
+| 3K — Frontend / Product Architecture | **IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APROVADAS** | [3K-01](3K-01-product-model-project-shell-build-workspace-inspectability.md) + [3K-02](3K-02-trust-decision-observable-truth.md) + [3K-03](3K-03-first-vertical-composition-data-path.md); próximo bounded C-007 Decision Loop para `job/v1`; final independent adversarial review somente após packages internos coerentes |
 | 3L — Technology Qualification | NÃO INICIADA | somente probes load-bearing definidos por 3A-R6 |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
@@ -180,7 +183,8 @@ Critical path ratificado:
 → start from C-001 caso 1 (Analisador de Orçamentos) unless operator redirects
 
 job/v1
-→ CONDITIONAL MUST DECIDE only if selected first vertical requires Sankhya mirror/sync
+→ ACTIVE MUST DECIDE: 3K-03 approved a first-vertical mirror/sync consumer
+→ run bounded C-007 Decision Loop before 3K internal closure / applicable Realization Planning
 
 3L
 → load-bearing qualification probes only
@@ -366,11 +370,11 @@ ReleaseManifest remains composition root
 
 | ID | Decisão | Documento |
 |---|---|---|
-| 3G-01 | ApprovalRequest Lifecycle & Claim-Binding State Architecture | [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) |
+| 3G-01 | ApprovalRequest Lifecycle & Claim-Binding State Architecture | [3G-01](3G-01-approval-claim-binding-state-architecture.md) |
 | 3G-02 | Builder Change & Finding Lifecycle, Contract Revision & Closure Architecture | [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md) |
 | 3G-03 | Builder Work Unit & ActorRun Execution Lifecycle Architecture | [3G-03](3G-03-builder-work-unit-actor-run-execution-lifecycle-architecture.md) |
 | 3G-04 | Planning Depth & Rigor Composition Architecture | [3G-04](3G-04-planning-depth-rigor-composition-architecture.md) |
-| 3G-05 | Production AgentRun, Approval Continuation & Trigger Architecture | [3G-05](3G-05-production-agent-run-approval-trigger-continuation-architecture.md) |
+| 3G-05 | Production AgentRun, Approval Continuation & Trigger Architecture | [3G-05](3G-05-production-agentrun-approval-trigger-continuation-architecture.md) |
 | 3G-06 | Gateway EffectAttempt, Idempotency & Budget State Architecture | [3G-06](3G-06-gateway-effect-attempt-idempotency-budget-state-architecture.md) |
 | 3G-07 | Project Lifecycle & Binding Mutation Architecture | [3G-07](3G-07-project-lifecycle-binding-mutation-architecture.md) |
 | 3G-08 | Release, Promotion & Runtime Admissibility Architecture | [3G-08](3G-08-release-promotion-runtime-admissibility-architecture.md) |
@@ -1121,7 +1125,7 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 classifica quan
 | Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | DEFER SAFELY optional deployment qualification |
-| `job/v1` / deterministic sync dispatch | **CONDITIONAL MUST DECIDE: if 3K/3O first vertical requires Sankhya mirror/sync, run C-007 Decision Loop before its Realization Planning; otherwise remain deferred** |
+| `job/v1` / deterministic sync dispatch | **ACTIVE MUST DECIDE — trigger fired by [3K-03](3K-03-first-vertical-composition-data-path.md); bounded C-007 Decision Loop next, before 3K internal closure / applicable Realization Planning** |
 | async/attempt status projection for UI/query convenience | 3K-02 truth law closed; exact projection realization → Realization Planning; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
 | Product multi-agent/subagents/Agent Network | Decision Loop on real consumer |
@@ -1378,9 +1382,12 @@ F-GPC-01 / AGT-4 = RESOLVED por 3A-R7
 C-003 F1 orphan requirements = 0
 reopen 3B–3J = NONE
 
-3K = IN PROGRESS / 3K-01 + 3K-02 APPROVED
+3K = IN PROGRESS / 3K-01 + 3K-02 + 3K-03 APPROVED
 3K-01 = APPROVED
 3K-02 = APPROVED
+3K-03 = APPROVED
+
+job/v1 / deterministic sync dispatch = ACTIVE MUST DECIDE / trigger fired by 3K-03
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1415,9 +1422,11 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 
 3K-02 foi ratificada pelo operador em **2026-08-17**. Congela context-local truth + progressive Evidence; UI como projection, nunca authority; separation entre observed/verified, empty/loading/failed/partial, AgentRun/effect outcome e completion ladder até SERVED_VERIFIED; exact ApprovalRequest presentation, context-local Change/Effect/Publish/Access decisions, permission/dependency widening never-hide, cost missingness, known limitations e Activity causal; `Trust Center`, universal status/approval, truth score e generic retry over uncertainty rejeitados. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
+3K-03 foi ratificada pelo operador em **2026-08-18**. Congela que Conexus não possui default universal `live|mirror|hybrid`; Connector declara source capabilities e Project Baseline decide o data path do slice. Para o caso 1, aprova read-only analytics com Project analytical read model derivado, sync governado, live Gateway reads como source anchor para Discovery/qualification/reconciliation/verification/Evidence, registered read-only queries para a UI, Brain semantic binding, zero Product Agent/WRITE/business effect e separação entre historical Golden benchmark e current operational truth. O trigger `job/v1` previsto por 3A-R6/C-007 está **FIRED / ACTIVE MUST DECIDE**. Sankhya permanece first-vertical evidence, nunca product-wide topology/ERP law.
+
 Próxima ação:
 
-> **Continuar `3K — Frontend / Product Architecture` com Package C — First Vertical Composition & Data Path sob 3A-R8**: provar 3K-01/3K-02 contra o caso 1 do Analisador de Orçamentos sem promover Sankhya-specific choices a leis universais; decidir live Gateway read vs mirror/sync vs hybrid como Project/vertical decision evidence-based, sob Baseline suficiente para o slice; disparar `job/v1` somente se o vertical realmente exigir sync; exercitar Data/Capabilities/Integrations/Brain surfaces, benchmark comparability e lifecycle/Agent surfaces apenas onde houver consumidor F1 real. O review adversarial independente de 3K permanece reservado ao fechamento global da fase, salvo novo finding material que obrigue reopen/challenge antecipado pela metodologia.
+> **Abrir bounded C-007 Decision Loop para `job/v1` / deterministic sync dispatch**: decidir somente a menor mecânica/contract necessários para manter o read model comprovadamente requerido por 3K-03, preservando C-006 ETL semantics e as boundaries de MAR/Registry/Gateway/Release já aprovadas. Não criar Jobs sidebar, workflow engine, Automation Builder, Schedule DSL ou nova queue infra sem consumer/failure class. Após esse bounded follow-up, retornar ao fechamento interno de 3K; o independent adversarial reviewer externo permanece reservado ao fechamento global da fase.
 
 3K–3O seguem integralmente sob 3A-R6 + 3A-R8. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + accepted derived realization plan(s).
 

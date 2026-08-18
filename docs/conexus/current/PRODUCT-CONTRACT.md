@@ -1,17 +1,17 @@
 # Conexus — Whole-Product Contract
 
-> **Status:** CANDIDATE / R11-C — NOT YET CURRENT AUTHORITY  
+> **Status:** CANDIDATE / R11-C — ROUND-1 COHERENCE CORRECTED / NOT YET CURRENT AUTHORITY  
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
 > **Package B:** PAUSED / NOT OPENED  
 
-This candidate consolidates **what the Conexus product is, what it must mean, what users can do with it, which whole-product journeys must compose correctly, and which future capabilities are deliberately not part of the F1 baseline**.
+This candidate consolidates **what Conexus is, what users can do, which Product meanings and whole-product journeys must remain true, and which future capabilities are deliberately preserved without becoming F1 machinery**.
 
-It is derived from accepted product/system authority, especially C-001/C-003, 3B, 3K and the owner/state/security boundaries of 3C–3J. It does **not** replace those detailed semantic homes and does not turn runtime/provider mechanics into Product authority.
+It is derived from accepted Product/system authority, especially C-001/C-003, 3B, 3K and the owner/state/security boundaries of 3C–3J. It does not replace those detailed semantic homes and does not turn runtime/provider mechanics into Product authority.
 
-Until R11 whole-product coherence, independent Fable review, finding adjudication and final operator ratification are complete, this file remains a candidate projection.
+Until R11 Round-2 coherence, Fresh Actor review, independent Fable review, finding adjudication and final operator ratification are complete, this file remains a candidate projection.
 
 ---
 
@@ -19,7 +19,7 @@ Until R11 whole-product coherence, independent Fable review, finding adjudicatio
 
 > **Conexus is an AI-first enterprise software platform that helps people build, evolve and operate business applications and Product Agents over real enterprise systems and data, while preserving explicit business knowledge, governed authority, verifiable engineering and truthful operational evidence.**
 
-The platform combines four product strengths that must remain coherent rather than becoming four separate products:
+Conexus combines four strengths that must remain coherent rather than becoming four unrelated products:
 
 ```text
 1. Conexus Builder / Harness
@@ -35,7 +35,7 @@ The platform combines four product strengths that must remain coherent rather th
    → Project-owned AI capabilities that reason and act only through governed product context/tools
 ```
 
-The user experience is:
+The Product experience is:
 
 ```text
 agent-first
@@ -47,36 +47,25 @@ inspectable by design
 authority-preserving
 ```
 
-The operator should normally describe business intent and inspect the result, without being forced to operate runtime internals. When trust, debugging, review or risk demands more depth, the product exposes the real resources, changes, proofs and technical detail needed to understand what happened.
+A user should normally describe business intent and inspect the result rather than operate infrastructure. When trust, debugging, review or risk demands depth, Conexus exposes the real Plan, Change, Data, Capabilities, bindings, diff, Findings, Evidence, cost and runtime observations needed to understand what happened.
 
 ---
 
-# 2. Product strategy and first proof
+# 2. Product strategy
 
 ## 2.1 F1 — internal/company-first platform
 
 F1 is the first complete usable Conexus platform operated internally to build and deliver real business software.
 
-It is not an open self-service SaaS launch. There is no F1 requirement for public self-signup or billing merely because those capabilities may exist later.
-
-The architecture must not create a dead end for the explicit later SaaS objective, but F1 pays only for capabilities with current product value or an accepted safety/architecture need.
+It is not an open self-service SaaS launch. There is no F1 requirement for public signup, billing or marketplace machinery merely because those may exist later.
 
 ## 2.2 Later SaaS direction
 
-Opening Conexus as a SaaS platform remains an accepted Product direction from C-001.
+Opening Conexus as a SaaS offering remains an accepted Product direction from C-001.
 
-That direction does **not** authorize today:
+That direction does not authorize speculative F1 infrastructure. When SaaS is actually selected, the Product must deliberately decide onboarding, billing/customer operations, isolation/economics and **authenticated reachability to private/on-prem enterprise systems when a real customer source requires it**.
 
-```text
-self-signup
-billing platform
-marketplace/ecosystem
-pooled customer policy complexity
-universal plugin framework
-speculative cross-customer sharing
-```
-
-Those capabilities require their own consumers, requirements and decisions when the SaaS transition is actually pursued.
+The old phrase “managed tunnel” is not a permanently selected technology; the future requirement class is private/on-prem reachability with correct identity, custody and policy.
 
 ## 2.3 First vertical
 
@@ -84,12 +73,9 @@ The first vertical remains:
 
 > **Analisador Inteligente de Orçamentos — Sankhya**
 
-It is both:
+It is both a useful business application and a permanent Builder benchmark against the known Mitra result and later Conexus versions.
 
-- a useful real business application; and
-- a permanent Builder quality benchmark against the known Mitra result and later Conexus versions.
-
-The first vertical is intentionally **read-only analytics**. It does not require a Product Agent, external write or business automation merely to exercise infrastructure.
+The first vertical is intentionally **read-only analytics**. It does not require a Product Agent, external write or automation just to exercise infrastructure.
 
 ---
 
@@ -114,118 +100,95 @@ a native-mobile-first product
 an unrestricted autonomous-agent platform
 ```
 
-Mechanisms may be reused internally where justified, but shared machinery must never absorb Product/business authority by convenience.
+Shared mechanics may exist internally; they never absorb Product/business authority by convenience.
 
 ---
 
 # 4. Primary users and actors
 
-The Product does not require every installation to use the same job titles, but F1 must support these meaningful user classes.
-
 ## 4.1 Workspace owner / platform operator
 
-A trusted human who can establish and administer a Workspace, create/authorize Projects, manage Workspace resources and oversee the software being built and served.
+Trusted human who can establish/administer a Workspace, create/authorize Projects, manage Workspace resources and oversee software being built and served.
 
-Administrative authority never means automatic right to consume every business capability/data set in every Published Application.
+Administrative authority never implies automatic business access to every Published Application.
 
-## 4.2 Project administrator / builder operator
+## 4.2 Project administrator / Builder operator
 
-A person authorized to create/evolve a Project, manage its Baseline, Changes, bindings, access, candidate verification and Releases according to current permissions/gates.
-
-The normal Product path is agent-assisted; source/code/diff remain inspectable where useful.
+Authorized to create/evolve a Project, manage its Baseline/Changes/bindings/access and drive candidate verification/Release according to current gates.
 
 ## 4.3 Project contributor / reviewer
 
-A person who may participate in Project evolution, inspect Change/Preview/Evidence and take only the actions their current authority permits.
+Participates in Project evolution, Plan/Change review, Preview/Evidence inspection and only the actions currently permitted.
 
 ## 4.4 Published Application user
 
-A business user who consumes the application/capabilities delivered by a Project.
-
-Published Application access is independent from Control Plane/Builder access.
-
-A business user may legitimately use an application without seeing source, Changes, Builder internals or Releases.
+Consumes a business application/capability delivered by a Project without necessarily receiving source/Builder access.
 
 ## 4.5 Product Agent user
 
-A Published Application or admitted headless consumer that interacts with an exact active Project-owned Product Agent under the Published App/runtime authority applicable to that invocation.
+A Published Application or admitted headless consumer that interacts with an exact active Project-owned Product Agent under the applicable runtime/app authority.
 
 ## 4.6 Approver / decision maker
 
-A current eligible human principal presented with one **exact** decision subject — for example a Change checkpoint, effect approval, Promotion or access mutation — in the owner context that actually governs that decision.
+A currently eligible principal shown one **exact** owner-specific decision subject — for example a Change checkpoint, effect proposal, Promotion or access mutation.
 
 There is no universal Approval Center that flattens all decision meanings.
 
 ## 4.7 Auditor / technical investigator
 
-A person with authority to inspect history, Evidence, provenance, Findings, runs, receipts and diagnostic detail without turning observations/logs into current-state authority.
+Inspects history, Evidence, provenance, Findings, run/tool observations, cost and receipts without turning telemetry into current-state authority.
 
 ---
 
-# 5. Core Product model
+# 5. Core Product concepts
 
 ## 5.1 Account
 
-One global Conexus human identity.
-
-An Account may participate in multiple Workspaces. Shared Account membership never creates cross-Workspace data/resource authority.
+One global human identity. An Account may participate in multiple Workspaces; shared identity never creates cross-Workspace authority.
 
 ## 5.2 Workspace
 
-The sovereign Product isolation/organization root presented to the user.
+Sovereign Product isolation/organization root.
 
-A Workspace may represent a company, customer, laboratory or personal initiative.
-
-Workspace-owned resources include at least:
+Workspace-owned visible resources include:
 
 ```text
 Projects
+access-filtered Agent catalog
 Brain
 Connections
-organizational Areas/membership context
-access-filtered cross-Project Agent catalog
+Areas/membership context
+administration/settings
 ```
-
-A Workspace does not own every Project-internal artifact/runtime record merely because the Project belongs to it.
 
 ## 5.3 Area
 
-Optional organizational grouping of people inside a Workspace.
-
-Area is not software and does not own Project lifecycle, source, data, Release, Brain revision or Connection binding.
-
-Organizational access and technical dependency/binding are separate graphs.
+Optional organizational grouping of people inside a Workspace. Area is not a software/dependency owner.
 
 ## 5.4 Project
 
-The independent unit of software/product lifecycle inside a Workspace.
+Independent unit of software/Product lifecycle inside a Workspace.
 
 A Project may contain:
 
 ```text
-frontend/application surfaces
+application/frontend surfaces
 business data/read models
 Queries / Actions
-integrations/bindings
+integration bindings
 Product Agents
 managed jobs when needed
 artifacts
 Releases
 ```
 
-These are not separate Projects merely because their technology/runtime differs.
+A technical layer does not become another Project by default.
 
-A new Project is justified by independent product evolution, Release/data ownership or lifecycle — not by technical layer count.
-
-F1 has one canonical source repository per Project. Multi-repo Project support is deferred until a real consumer makes it necessary.
+F1 has one canonical source repo per Project; multi-repo is deferred until a real consumer.
 
 ## 5.5 Project Baseline
 
-The approved, versioned statement of the Project's current intended architecture/product meaning sufficient for the work being undertaken.
-
-The readable specification lives in Project Git; the Hub records which exact revision/digest is approved.
-
-The Baseline is:
+Approved, versioned statement of Project architecture/Product meaning sufficient for current work.
 
 ```text
 SPEC-ANCHORED
@@ -233,63 +196,118 @@ LIVING
 INCREMENTAL
 ```
 
-It is not Big Design Up Front. It must be sufficient for the current Change, not complete for every possible future feature.
+Readable source lives in Project Git; the Hub pins the exact approved revision/digest.
 
-A coding actor must never be forced to invent a material Project-level architecture decision because the current Baseline omitted something required by the Change.
+The Baseline is sufficient for the current Change, not every imagined future. A coding actor must not be forced to invent a material Project-level decision because the Baseline omitted something the Change requires.
 
 ## 5.6 Change
 
-A bounded, verifiable unit of Project evolution describing **what must become true**.
-
-Change owns current intent/correctness/checkpoint semantics. It is distinct from:
+Bounded/verifiable Project evolution describing **what must become true**.
 
 ```text
-Work Unit   → bounded work decomposition
-ActorRun    → concrete Builder execution episode
+Change
+!= Work Unit
+!= Builder ActorRun
 ```
 
-These internals can be progressively inspected without becoming the normal Product vocabulary for every user.
+## 5.7 Plan
 
-## 5.7 Brain
+When Change complexity/uncertainty warrants explicit planning, Conexus produces an approvable **visual Plan** derived from current accepted intent.
 
-The Workspace-scoped canonical source of reusable business meaning and governed knowledge.
+The Plan may expose:
 
-The Brain can contain closed content classes:
+```text
+work items / Work Units
+dependency graph
+acceptance/assertion links
+known blockers/unknowns
+current progress
+```
+
+Planning depth is proportional: a tiny safe Change may use a lighter/direct route without losing applicable correctness/authority.
+
+The Hub owns accepted Plan/current plan-item state. Model/worker narration cannot mark work complete by itself.
+
+## 5.8 Live execution checklist and `tasks.md`
+
+The live checklist is Hub-owned operational progress projected to the UI.
+
+```text
+worker/model proposes transition
+→ Hub validates/current-state applies transition
+→ durable current progress
+→ UI projects it
+```
+
+Worker death/interruption is represented honestly.
+
+`tasks.md` is durable **purpose/context memory** in Project Git — what is being built, why, what remains, known limitations and causes/corrections. It is not the authority for “is item X operationally complete?”. A structured status block may be mechanically checked against Hub plan state; free prose is not operational authority.
+
+## 5.9 Brain
+
+Workspace-scoped canonical reusable business meaning/knowledge.
+
+Closed content classes:
 
 ```text
 SEMANTIC
 → datasets, entities, dimensions, measures, metrics, grain, relationships
 
 KNOWLEDGE
-→ glossary, business rules, caveats, processes, policies/context
+→ glossary, rules, caveats, processes, campaigns/policies/context
 
 EVIDENCE
 → provenance specifications, assertions, verification requirements, golden cases
 ```
 
-Brain is not:
+Brain is published/versioned and used through explicit `ProjectBrainBinding`.
+
+Brain is not agent memory, RAG/index, Project DB, telemetry store or security policy engine.
+
+## 5.10 Brain Discovery
+
+F1 capability for **machine-propose / human-decide** semantic discovery against real enterprise data/source metadata.
+
+Current shape:
 
 ```text
-agent memory
-RAG/vector index
-Project DB
-telemetry store
-security policy engine
+source dictionary/catalog + directed profiling
+→ candidate semantic mappings
+→ provenance/hypothesis state
+→ machine proposes
+→ human interview resolves what cannot be inferred
+→ reviewed publication becomes Brain authority
 ```
 
-The Brain is published/versioned. A Project uses it through an explicit `ProjectBrainBinding`; a new Brain revision never silently changes a Project or active Release.
+The Product must visibly distinguish inferred/proposed from confirmed knowledge.
 
-## 5.8 Connection
+## 5.11 AnalyticQuery
 
-A Workspace-owned concrete relationship to an external system/environment using a versioned Connector definition, qualification facts and an opaque credential relationship.
+Second governed read regime for semantic/analytical questions that should be expressed through Brain meaning rather than static pre-authored Query slugs.
 
-Project use requires explicit typed `ProjectConnectionBinding`.
+Current v0 intent:
 
-A Project never receives the durable credential material. It refers to logical bindings; trusted platform owners resolve actual secret/material and external destination at the permitted boundary.
+```text
+agent/caller uses Brain semantic IDs
+→ validate against exact Brain + Project binding
+→ restricted semantic plan/AST
+→ SELECT-only proof
+→ Project read-only authority
+```
 
-## 5.9 Capability
+One AnalyticQuery operates on one curated analytical dataset in v0. New join topology/physical SQL is not chosen freely by the LLM at runtime.
 
-A real Project capability that software/users/Agents can invoke through the governed platform.
+Static registered Query remains the other read regime. The first Budget Analyzer is not forced to use AnalyticQuery merely to exercise infrastructure.
+
+## 5.12 Connection
+
+Workspace-owned concrete relationship to an external system/environment using a versioned Connector, qualification facts and opaque credential relationship.
+
+Project use requires explicit `ProjectConnectionBinding`.
+
+## 5.13 Capability
+
+Real Project capability users/software/Agents can invoke through governed platform contracts.
 
 F1 Product vocabulary includes at least:
 
@@ -298,29 +316,19 @@ Query
 Action
 ```
 
-Capabilities have explicit input/output/effect/access meaning and are implemented from immutable registered revisions/Release composition.
+Capability does not erase owner-specific Integration Operation/AnalyticQuery semantics.
 
-Capability is not a universal object that erases the owners of Integration Operations or other future tool families.
+## 5.14 Integration
 
-## 5.10 Integration
+Project view/use of explicitly bound external-system capability. Workspace owns Connection; Project owns binding/use; Gateway owns last-mile execution/effect safety.
 
-The Project view of explicitly bound external-system capability.
+## 5.15 Artifact / immutable revision
 
-Workspace owns Connection; Project owns the binding/use. Connector/provider protocol remains mechanism; business meaning remains with the consumer/Project/Brain owners that use it.
+Git contains authored source; Registry contains immutable compiled revisions/digests/availability. Availability is not active production use.
 
-## 5.11 Artifact / immutable revision
+## 5.16 Release
 
-Git contains authored source; the Artifact Registry contains immutable compiled revisions/digests/availability needed for governed composition.
-
-An artifact's existence/availability does not make it active in production.
-
-## 5.12 Release
-
-The immutable exact composition of Project outputs/bindings/configuration/runtime facts eligible to be served.
-
-A Release is never resolved by mutable `latest` semantics for governed execution.
-
-Key distinction:
+Immutable exact composition of Project outputs/bindings/config/runtime facts eligible to be served.
 
 ```text
 candidate verified
@@ -330,495 +338,412 @@ candidate verified
 != SERVED_VERIFIED
 ```
 
-## 5.13 Promotion
+No governed execution resolves through mutable `latest`.
 
-The governed act/process of moving an exact Release toward the target serving environment under current conformance/authorization/gates.
+## 5.17 Promotion
 
-Rollback is another governed Promotion to an eligible prior composition. It does not pretend to rewind business data automatically.
+Governed movement of an exact Release toward a target environment with current authorization/conformance/gates. Rollback is another governed Promotion, never an implicit business-data rewind.
 
-## 5.14 Build
+## 5.18 Build
 
-The primary Project construction workspace.
-
-Product hierarchy:
+Primary Project construction surface:
 
 ```text
 Project navigation
-+
-Preview-dominant work surface
-+
-contextual/retractable Conexus Builder assistance
-+
-Preview | Code | Diff lenses
++ Preview-dominant workspace
++ contextual/retractable Conexus assistance
++ Preview | Code | Diff lenses
++ Plan/progress/Evidence detail when needed
 ```
 
-Build is agent-first, not agent-only.
+Agent-first, not agent-only.
 
-## 5.15 RunPreview
+## 5.19 Platform Consultant / contextual Conexus assistant
 
-An exact candidate/result surface for controlled inspection before production serving.
+Builder-owned Control Plane capability that helps the operator understand/use Conexus, its SDK/paved roads/patterns/current Project context and next safe action.
+
+Its platform knowledge is published/versioned/provenance-preserving according to Builder/platform pack discipline. It is **not Workspace Brain content** and does not create a global Product Agent/tenant authority.
+
+## 5.20 RunPreview
+
+Controlled candidate/result serving for inspection before production.
 
 ```text
 Preview ready
-!= verified
-!= active Release
-!= Published App
+!= VERIFIED
+!= Release AVAILABLE
+!= Published App live
 ```
 
-Preview belongs to the construction/Control Plane authority context and never silently reuses production credentials/audience/data authority.
+## 5.21 Published Application
 
-## 5.16 Published Application
+Business runtime served from an exact active Project Release under an authorization context independent from Control Plane/Builder access.
 
-The product/business runtime served from an exact active Project Release.
+## 5.22 Product Agent
 
-Its access/roles/business capabilities are independent from Control Plane/Builder access.
+Project-owned, git-first, Release-pinned AI Product resource whose canonical authoring contract is `agent/v1`.
 
-`Open App` is an explicit transition from the Control Plane into the Published Application authority context.
+It includes purpose/instructions/model policy/bounded tools/Brain context/admitted memory/interactions/policies/approvals/budgets/verification/known limitations.
 
-## 5.17 Product Agent
+Manual/structured and natural-language authoring converge on the **same Change, candidate, diff, proof and Release path**.
 
-A Project-owned, git-first, Release-pinned AI product resource whose canonical authoring contract is the Conexus Agent definition (`agent/v1`).
+## 5.23 Conversation
 
-Product Agent semantics include:
+Conexus identity for a user-facing Product Agent conversation. Not a provider thread/session identity and not authorization by existence.
 
-```text
-identity / purpose
-instructions / behavioral intent
-model policy
-bounded tools/capabilities
-Brain/context relationship
-admitted memory policy
-interaction mode/surface intent
-policies / approvals / budgets
-verification / known limitations
-```
+## 5.24 Product AgentRun
 
-Manual/structured authoring and natural-language authoring must converge on the **same Change, same candidate definition and same Release path**.
-
-There is no independent runtime/editor Agent authority.
-
-## 5.18 Conversation
-
-Conexus identity for a user-facing Product Agent conversation when a conversational interaction exists.
-
-Conversation is not a provider session/thread identifier and does not imply authority beyond the active Project/Agent/user context.
-
-## 5.19 Product AgentRun
-
-One admitted, exact-pinned Product Agent execution.
-
-It is distinct from Builder ActorRun and from a Gateway external EffectAttempt.
+One admitted exact-pinned Product Agent execution.
 
 ```text
 AgentRun COMPLETED
 != every external effect succeeded
 ```
 
-## 5.20 ApprovalRequest
+## 5.25 ApprovalRequest
 
-The exact durable approval wait/subject owned by the appropriate Product Agent/owner path.
+Exact durable approval wait/subject in Product Agent runtime. Approval binds the exact sealed proposal; changed args/content require new authority.
 
-Approval always binds the exact sealed proposal subject. Approval never authorizes changed arguments, a newer proposal or a different effect merely because the user had approved something similar.
+## 5.26 AgentTrigger
 
-## 5.21 AgentTrigger
+Owner-managed headless Product Agent trigger semantics.
 
-Owner-managed trigger semantics for headless Product Agent execution.
+Current F1 admitted trigger = bounded `SCHEDULE` where used. `EVENT`/webhook remains deferred until a real consumer/contract exists.
 
-Current F1 admitted trigger family is bounded; `SCHEDULE` is accepted where used. `EVENT` remains deferred until a real consumer/contract exists.
+Interactive and headless remain one Product Agent concept.
 
-Interactive and headless Agents remain the same Product Agent concept rather than separate `ChatAgent`/`AutomationAgent` domains.
+## 5.27 Managed Job / job run
 
-## 5.22 Managed Job / job run
+Project-scoped deterministic background capability. First F1 `job/v1` consumer = governed sync, not arbitrary privileged Project code.
 
-A Project-scoped managed-execution capability used when a deterministic/background function is a real Project requirement.
+Queue/scheduler technology is mechanism, not Product authority.
 
-The first F1 `job/v1` consumer is governed sync, not arbitrary privileged Project code.
+## 5.28 Finding
 
-A job run is a durable Project occurrence; queue/scheduler technology is reconstructible mechanism, not Product authority.
+Durable Project/Change problem/contradiction that survives the discovering runtime when needed. A worker can originate it; owner authority accepts/closes it.
 
-## 5.23 Finding
+## 5.29 Evidence
 
-Durable Project/Change problem or contradiction that survives the runtime/actor that discovered it where needed.
+Provenance-preserving proof over facts/results/receipts/tests/decisions supporting a claim. Agent prose, green badges or telemetry alone are not sufficient Evidence by existence.
 
-A worker/model can originate a Finding; it does not own acceptance/closure authority merely because it discovered the issue.
+## 5.30 Environment
 
-## 5.24 Evidence
+Explicit Project environments such as DEV and PROD where present. Validation DB is ephemeral proof; Preview is candidate serving, not a third persistent business environment.
 
-Bound, provenance-preserving proof over facts/results/receipts/tests/decisions needed to support a claim.
+## 5.31 Private attachment/blob capability
 
-Agent prose, absence of a Finding, a green UI badge or a telemetry trace alone is never sufficient Evidence merely by existence.
+Project/app features may store/download bytes through owner-specific attachment/storage contracts.
 
-## 5.25 Environment
+Current Product property:
 
-Project software/business data is realized in explicit environments such as DEV and PROD when present.
+```text
+private by default
+owner/current authorization controls access
+public exposure only through explicit admitted Product policy
+```
 
-Validation databases are temporary proof fixtures, not a mandatory permanent TEST environment.
-
-Preview is a candidate-serving concept, not a third persistent business environment.
+Storage provider/path/object key/prefix never becomes semantic identity or authorization authority.
 
 ---
 
-# 6. Ownership map users may rely on
+# 6. Ownership map
 
-| Meaning | Product owner / authority |
+| Meaning | Owner / authority |
 |---|---|
-| global human identity/session/access relationships | Identity & Access |
-| Workspace/Area organizational identity/lifecycle | Workspace |
-| Project identity/lifecycle/Baseline/binding intent | Project |
-| Change/WorkUnit/Builder execution/Findings | Builder |
-| authored source | Project Git |
-| immutable compiled artifact revision | Artifact Registry |
+| global human identity/session/access | Identity & Access |
+| Workspace/Area lifecycle | Workspace |
+| Project identity/Baseline/binding intent | Project |
+| Change/Plan/WorkUnit/Builder ActorRun/Findings | Builder |
+| authored Project source | Project Git |
+| published canonical Brain source | Workspace/Brain Git boundary |
+| immutable compiled revision | Artifact Registry |
 | reusable enterprise meaning/knowledge | Brain |
-| external-system account/environment relationship | Connections |
-| external effect / credential last-mile / replay safety | Capability Gateway |
+| external account/environment relationship | Connections |
+| external effect/credential last-mile/replay | Capability Gateway |
 | Product Agent Conversation/AgentRun/Approval/Trigger | Production Agent Runtime |
-| active Project composition/version | Release + Promotion/serving authority |
-| Published Application business data | Project Database / external source according to declared Product semantics |
-| managed background Project occurrence | Managed Application Runtime |
+| active Project composition | Release / Promotion/serving authority |
+| Project business data | Project DB / declared external source semantics |
+| managed background occurrence | Managed Application Runtime |
 | operational observation/audit projection | Observability & Audit, never business-state replacement |
-| exact attachment authority | owner record; shared bytes/storage never create cross-owner access |
+| exact attachment semantics | owning record/module; shared storage does not transfer authority |
 
-Visual composition of several meanings on one screen never merges these owners.
+Visual composition never merges owners.
 
 ---
 
-# 7. Whole-Product journey A — first access and Workspace
+# 7. Journey A — first access / Workspace
 
 ```text
 trusted operator provisions Account
-→ user establishes authenticated session
-→ current authority resolves available Workspace context
-→ user enters or creates an authorized Workspace
-→ Workspace shell exposes Projects / Agents catalog / Brain / Connections / administration
+→ authenticated session
+→ current authority resolves Workspace context
+→ user enters/creates authorized Workspace
+→ Projects / Agent catalog / Brain / Connections / administration
 ```
 
-Product laws:
-
-- no public self-signup F1;
-- Workspace membership does not reveal every Project/Agent automatically;
-- Workspace Agent catalog is access-filtered server-side;
-- Workspace Agent catalog is discovery/attention projection, not a fleet owner or Approval Center;
-- Brain/Connections are Workspace-owned; Project mutation still occurs in the owning Project.
+No public signup F1. Workspace membership does not imply every Project/Agent/resource. Agent catalog is filtered projection, not fleet owner/Approval Center.
 
 ---
 
-# 8. Whole-Product journey B — new Project / Inception / Baseline
+# 8. Journey B — Project Inception / Baseline
 
 ```text
 Workspace
-→ Create Project
-→ establish/associate canonical Project source repository
+→ Create/Import Project
+→ establish/associate canonical source repo
 → Inception / Discovery
-→ inspect business objective, users, constraints, source systems, real data when relevant
-→ propose Project Baseline
+→ inspect objective/users/constraints/source systems/real data where relevant
+→ propose sufficient Project Baseline
 → human checkpoint: “this is what we are building”
-→ approved Baseline digest becomes the current Project authority
-→ initial Changes may begin
+→ approved Baseline digest
+→ initial Change
 ```
 
-For brownfield software, Discovery includes current code/contracts/architecture/data reality.
+Brownfield Discovery includes current source/contracts/architecture/data reality.
 
-Product laws:
-
-- Inception is not a fake Change merely to fit a lifecycle;
-- investigation may precede final Baseline meaning;
-- material assumptions stay explicit;
-- the approved Baseline is incremental and may evolve through later governed revision;
-- future completeness is not a prerequisite for first useful Change.
+Inception is not a fake Change. Baseline is incremental and can later be revised through governed Project authority.
 
 ---
 
-# 9. Whole-Product journey C — build/evolve a Project
+# 9. Journey C — Plan / build / verify / publish
 
 ```text
-user states business/product intent
-→ Conexus establishes or updates a Change
-→ current Baseline + relevant authority are pinned
+user states intent
+→ Change
+→ current Baseline/authority pinned
 → discovery/planning proportional to risk/uncertainty
-→ user checkpoint when required
-→ Builder executes bounded Work Units/ActorRuns
-→ code/data/capability/integration/agent candidates evolve inside approved scope
-→ mechanical tests + runtime observation + assertions/Evidence
-→ material verifier independent from implementer when required
-→ candidate becomes honestly VERIFIED or remains failed/blocked/unverified
-→ RunPreview permits controlled review
-→ exact Release can be composed
-→ governed Promotion
+→ visual Plan/checkpoint when warranted
+→ Hub-owned live checklist / Work Units
+→ Builder executes bounded ActorRuns
+→ code/data/capability/integration/Agent candidates evolve
+→ mechanical tests + runtime observations + assertions/Evidence
+→ independent material verifier when required
+→ known limitations + accepted criteria checked item-by-item
+→ candidate VERIFIED or honestly failed/blocked/unverified
+→ RunPreview
+→ exact Release
+→ Promotion
 → serving verification
 → SERVED_VERIFIED
 ```
 
-Important distinctions:
-
 ```text
-model says done                 != Change accepted
-Work Unit completed             != Change verified
-Preview ready                   != verified
-Release AVAILABLE               != live
-pointer switched                != served verified
-0 Findings                      != verified
+model says done      != Change accepted
+item says completed  != verified
+0 Findings           != verified
+Preview ready        != verified/live
+Release AVAILABLE    != live
+pointer switched     != SERVED_VERIFIED
 ```
 
-When runtime discovery reveals a material Project-architecture change, the Builder must stop before silently crossing the current Baseline boundary and return through Finding/Replan/Handoff/checkpoint.
+Material Project-level discovery returns to Baseline/decision before coding silently crosses the boundary.
 
 ---
 
-# 10. Whole-Product journey D — Brain lifecycle and reuse
+# 10. Journey D — Brain assisted Discovery
 
 ```text
-Workspace establishes/publishes Brain meaning
-→ exact immutable Brain revision is compiled/available
-→ Project explicitly binds one revision through ProjectBrainBinding
-→ Project proves local realization/conformance where required
-→ Release pins exact binding/composition
-→ runtime receives only the effective bounded Brain slice it needs
+Project/source-system discovery need
+→ current Connector/Connection + Hub/Gateway read-only discovery authority
+→ source dictionary/catalog + directed profiling
+→ machine proposes semantic candidates
+→ provenance badge / unresolved uncertainty shown
+→ prioritized human interview
+→ reviewed candidate Brain changes
+→ publish only through Brain owner/human authority
 ```
 
-When new knowledge is discovered:
+ERP credentials never go to E2B simply to perform Brain Discovery.
+
+Expected percentage accuracy is never Product truth until measured; unsupported semantic mapping remains hypothesis.
+
+---
+
+# 11. Journey E — Brain publish / bind / feedback
 
 ```text
-Project / Builder / Product Agent / human
+Workspace authors/reviews Brain
+→ immutable Brain revision AVAILABLE
+→ Project explicitly ProjectBrainBinding exact revision
+→ local binding/conformance proof where required
+→ Release pins binding
+→ runtime receives bounded effective Brain slice
+```
+
+Feedback:
+
+```text
+Project / Builder / Product Agent / human discovery
 → KnowledgeProposal
-→ Brain owner review
-→ human publish decision
-→ new Brain revision AVAILABLE
-→ existing Projects see UPDATE_AVAILABLE
-→ each Project independently evaluates/rebinds/revalidates/promotes
+→ Brain owner human review
+→ new published revision
+→ UPDATE_AVAILABLE
+→ each Project independently revalidates/rebinds/promotes
 ```
 
-Never:
-
-```text
-agent memory → silently writes Brain
-a new Brain revision → silently changes every Project
-RAG result → becomes published truth
-Project-local implementation → becomes company semantic truth without review
-```
+No memory self-publish; no live inheritance.
 
 ---
 
-# 11. Whole-Product journey E — Connection / Integration
+# 12. Journey F — Connection / Integration
 
 ```text
-Workspace chooses/configures a Connector-backed Connection
-→ secret is entered through dedicated write-only administration path
-→ Connection is semantically qualified against the real external environment
-→ Project explicitly binds Connection/environment through ProjectConnectionBinding
-→ Release pins the exact Project binding/composition
-→ Project capability/Agent/job invokes only admitted operation through the Gateway
-→ Gateway resolves current binding, permission/policy/effect/credential and external destination
-→ result/receipt/provenance returns to owning Product flow
+Workspace configures Connector-backed Connection
+→ secret entered through write-only trusted path
+→ Connection qualified against real environment
+→ Project explicitly binds Connection/environment
+→ Release pins binding
+→ Project capability/Agent/job calls admitted operation
+→ Gateway resolves current binding/access/effect/credential/destination
+→ receipt/result/provenance returns to owner
 ```
 
-Product laws:
-
 ```text
-Connection configured != qualified
+configured != qualified
 qualified != bound
-bound != currently healthy
-healthy != current caller authorized
+bound != healthy
+healthy != caller authorized
 ```
 
-No secret is pasted into chat, stored in Project Git, exposed to browser or delivered as durable provider credential to a Builder/Product Agent guest.
-
-A broken Connection blocks/represents its real state. The platform never silently selects another “similar” Connection.
+No credential in chat/Project Git/browser/guest.
 
 ---
 
-# 12. Whole-Product journey F — Data and Capabilities
+# 13. Journey G — Data / static Query / AnalyticQuery
 
-A Project may consume external facts, own Project-native data or create derived/read-model data according to its approved Baseline.
+A Project chooses the minimum data path its accepted Product slice needs; there is no universal LIVE/MIRROR/HYBRID setting.
 
-No universal integration data path exists.
+Static read:
 
 ```text
-LIVE
-DERIVED / MIRRORED
-HYBRID
+registered Query
+→ exact input contract
+→ governed read-only execution
 ```
 
-are architectural composition families, not a global Product setting/FSM.
+Semantic analytical read where admitted:
 
-The Project Baseline selects the minimum data path needed by the current product slice based on source capabilities, latency/freshness/history/volume/consistency/cost/proof needs.
+```text
+AnalyticQuery semantic IDs
+→ exact Brain + binding
+→ restricted plan/AST
+→ SELECT-only proof
+→ Project read-only role
+```
 
-Business access occurs through governed typed Capabilities rather than unrestricted browser/Agent SQL/network access.
-
-Data inspectability is a Product capability; ad-hoc authority-bypassing mutation is not.
+A new arbitrary join/physical expression is Builder work, not a runtime LLM decision.
 
 ---
 
-# 13. Whole-Product journey G — Publish and use a business application
+# 14. Journey H — Publish and use business application
 
 ```text
 verified candidate
-→ Release composition
-→ required current approvals/conformance
+→ exact Release
+→ current approval/conformance
 → Promotion
-→ target serving pointer changes when safe
-→ served content is independently checked
+→ active pointer
+→ real-path byte/runtime proof
 → SERVED_VERIFIED
-→ Published Application is available under its own access authority
+→ Published Application under independent app authority
 ```
 
-Published Application user:
-
-```text
-authenticates as one Account
-→ Published App access is resolved independently from Project/Control Plane access
-→ user invokes only current permitted business capabilities
-→ backend/Gateway applies actual domain/policy/effect rules
-```
-
-A Project administrator can administer Published App access without automatically receiving all business data/capabilities.
-
-A Published App user can use business software without receiving source/Builder access.
+Project admin can manage app access without receiving all business data/capabilities. App user can use software without Builder/source access.
 
 ---
 
-# 14. Whole-Product journey H — create/evolve a Product Agent
-
-Product Agent authoring is Project evolution, not a parallel platform.
+# 15. Journey I — create/evolve Product Agent
 
 Entry points may include:
 
 ```text
 Project → Agents → New Agent
 Project → Agent → Change with Conexus
-Project → Build → “I want an agent that…”
+Project → Build → natural-language Agent intent
 ```
 
-All converge:
+They converge:
 
 ```text
-intent
-→ same Change lifecycle
+same Change
 → dependency analysis
-→ existing Capabilities/Integrations/Brain identified
-→ missing dependencies made explicit
-→ material scope widening shown at checkpoint
-→ structured/manual and natural-language changes create same candidate Agent definition
-→ candidate diff/verification/test
-→ exact immutable revision
+→ missing dependencies explicit
+→ material capability/effect widening shown before build
+→ structured/manual OR natural-language edits
+→ same candidate agent/v1
+→ diff/verification/limitations
+→ immutable revision
 → Release
 → Promotion
-→ active Product Agent only when serving authority says so
 ```
 
-There is no:
-
-```text
-ManualAgentDefinition
-AIAgentDefinition
-MastraStoredAgent authority
-AgentBuilder database
-Agent-specific Publish authority
-```
-
-Structured edits that do not need a coding-model call still stay inside the same Change/work graph, diff/proof/commit/Release laws.
+No `ManualAgentDefinition`, `AIAgentDefinition`, second Agent authoring DB or Mastra Stored Agent authority.
 
 ---
 
-# 15. Whole-Product journey I — use a Product Agent
+# 16. Journey J — use Product Agent
 
-## 15.1 Interactive
+Interactive:
 
 ```text
 Published App user
-→ Project-designed Agent interaction surface
-→ bounded typed app context/refs
+→ Project-designed Agent surface
+→ typed app context refs
 → Conversation
-→ admitted exact-pinned AgentRun
-→ active Product Agent reasons with admitted context + ToolProjection
-→ current facts resolved through governed capabilities
-→ response/effect receipts shown truthfully
+→ exact-pinned AgentRun
+→ admitted Product Agent
+→ bounded ToolProjection
+→ owner capabilities/Gateway
+→ truthful response/receipts
 ```
 
-Browser/app context is a hint/ref, not business truth. Material facts are resolved through owners/capabilities.
-
-## 15.2 Headless / scheduled
+Headless:
 
 ```text
-admitted AgentTrigger
-→ stable intended occurrence
-→ AgentRun admission/pinning
+admitted SCHEDULE occurrence
+→ exact AgentRun admission
 → direct Product Agent execution
 ```
 
-Scheduled runs are threadless by default unless a real conversation/memory requirement exists.
+Scheduled runs are threadless by default.
 
-`EVENT` triggers remain absent from F1 until a real consumer/contract is accepted.
-
-## 15.3 Product Agent default authority surface
-
-Product Agent is **product/context-aware**, not source/host-aware by default.
-
-It does not automatically receive:
-
-```text
-Project repository/source
-shell/filesystem
-browser/computer-use
-raw network
-raw database access
-raw credentials
-Builder workspace
-platform internals
-```
-
-Those capabilities require a named Product consumer and applicable trust/qualification decision.
+Product Agent is product/context-aware by default, not source/host-aware. No automatic repo/shell/browser/raw-network/raw-DB/raw-secret/Builder-workspace authority.
 
 ---
 
-# 16. Whole-Product journey J — exact effect approval
-
-When a Product Agent proposes an action that requires human approval:
+# 17. Journey K — exact effect approval
 
 ```text
-Agent produces exact governed proposal
-→ owner persists exact sealed subject
-→ ApprovalRequest waits
-→ eligible current human sees exactly what is being authorized
-→ ALLOW_ONCE or DENY/expiry/stale outcome
+Agent proposes exact governed effect
+→ owner persists sealed subject
+→ ApprovalRequest
+→ eligible current human sees exact subject
+→ ALLOW_ONCE | DENY | EXPIRED | STALE
 ```
 
 On `ALLOW_ONCE`:
 
 ```text
-same exact proposal/args
-→ current authority/gates rechecked
-→ Gateway effect admission
-→ exact idempotency/effect identity
-→ one external effect attempt under owner safety
+same exact proposal + args
+→ current authorization/policy/budget rechecked
+→ Gateway admission
+→ exact effect/idempotency identity
+→ external attempt
 ```
 
-Never:
-
-```text
-approve proposal A
-→ execute changed proposal B
-
-runtime retry
-→ effect retry authority
-
-provider/trace says success
-→ owner manufactures success without required receipt/current facts
-```
-
-`OUTCOME_UNKNOWN` remains an honest state requiring reconciliation rather than blind replay.
+Changed proposal requires new authority. Runtime retry is not effect retry authority. Ambiguous acceptance = `OUTCOME_UNKNOWN` + reconciliation, not blind replay.
 
 ---
 
-# 17. Whole-Product journey K — managed sync/job
-
-The first F1 managed-job consumer is source sync needed by a real Project, not a generic automation platform.
+# 18. Journey L — managed sync/job
 
 ```text
-exact active Release contains admitted job/v1 composition
-→ schedule projection is derived
-→ manual or fixed-interval occurrence
-→ Managed Application Runtime admits job run
-→ job coordinates only governed Project/Gateway capabilities
-→ Project read model/state updated according to its Baseline
+active Release contains admitted job/v1
+→ schedule derived
+→ manual/fixed interval occurrence
+→ MAR job run
+→ governed Gateway/Project capabilities
+→ Project state/read model updated
 → occurrence/result/provenance recorded
 ```
 
@@ -828,549 +753,572 @@ Current F1 laws:
 single-flight / coalesce
 one catch-up after downtime
 not replay every missed slot
-no arbitrary privileged Project code
+no arbitrary privileged Project job code
 no workflow/scheduler business domain
 ```
 
-Exact queue/scheduler technology remains qualification/realization mechanics.
+---
+
+# 19. Journey M — duplicate Project
+
+F1 Project duplication preserves source/config intent without cloning hidden authority:
+
+```text
+Duplicate Project
+→ copy code
+→ copy config schema/contracts
+→ copy declarations/source artifacts as applicable
+→ ask whether business data should be copied
+→ default = NO DATA
+```
+
+Never copy automatically:
+
+```text
+Project database contents
+credentials
+Connection bindings
+current external authorization
+runtime sessions/history
+```
+
+Destination must explicitly rebind Connections/Brain/environment authority according to its own current context.
 
 ---
 
-# 18. Whole-Product journey L — first vertical Budget Analyzer
-
-The first vertical concretely composes the platform without forcing every subsystem into the demo.
+# 20. Journey N — first vertical Budget Analyzer
 
 ```text
 Workspace: Metal Nobre
-│
-├── Brain
-│   └── budget/pending/conversion definitions + caveats
-│
-├── Connection
-│   └── Sankhya environment
-│
+├── Brain: budget/pending/conversion definitions + caveats
+├── Connection: Sankhya
 └── Project: Budget Analyzer
-    ├── Project Baseline
-    ├── ProjectBrainBinding
-    ├── ProjectConnectionBinding
+    ├── Baseline
+    ├── Brain binding
+    ├── Connection binding
     ├── governed sync
     ├── Project analytical read model
-    ├── registered read-only Query Capabilities
+    ├── registered read-only Queries
     ├── frontend dashboard
-    └── Release / Published Application
+    └── Release / Published App
 ```
 
-Approved data path for this Project:
+Data path:
 
 ```text
 Sankhya
-→ Gateway live reads for Discovery / qualification / reconciliation / verification / Evidence
+→ Gateway live reads
+→ Discovery / qualification / reconciliation / verification / Evidence
 
 Sankhya
 → governed sync
-→ Project Database derived analytical read model
-→ registered read-only Queries
-→ dashboard runtime
+→ Project DB analytical read model
+→ registered Queries
+→ dashboard
 ```
-
-Truth laws:
 
 ```text
 Project DB != Sankhya source authority
 Project DB != Brain semantic authority
-read model existence != proof of sync completeness
+read model existence != proof of completeness
 historical benchmark != current operational truth
 ```
 
-The product must reject/fence unsupported semantics rather than fabricate a KPI. The known cost/margin caveat from the benchmark is an example of the behavior expected: if the source/Brain cannot support the claim, Conexus says so.
+Unsupported margin/source semantics are omitted/blocked/qualified honestly, never fabricated.
 
 For this vertical:
 
 ```text
-Product Agent required       = NO
-external/business WRITE      = NO
-business automation          = NO
+Product Agent required  = NO
+external/business write = NO
+automation              = NO
 ```
 
-The `Agents` surface may honestly be empty.
+Agents surface may honestly be empty.
 
 ---
 
-# 19. Whole-Product journey M — maintenance and iterative evolution
-
-After a Project is live:
+# 21. Journey O — maintenance and reusable learning
 
 ```text
-new business request / bug / source change / Finding / Brain update
-→ create Change
-→ pin current Baseline + Release-relevant context
-→ investigate current reality
-→ update Baseline only if material Project meaning changed
-→ build/verify candidate
+new request / bug / source change / Finding / Brain update
+→ Change
+→ pin current Baseline/Release-relevant context
+→ investigate
+→ revise Baseline only if Project meaning materially changes
+→ build/verify
 → Release/Promotion
 → served verification
 ```
 
-Learnings that deserve broader company reuse do not stay trapped in invisible session memory:
+Reusable company learning follows KnowledgeProposal→Brain review rather than invisible memory inheritance.
 
-```text
-Project discovery
-→ explicit KnowledgeProposal when appropriate
-→ Brain review/publication
-→ other Projects receive update availability
-→ each independently evaluates adoption
-```
-
-The same rule applies to platform engineering improvements: a repeated failure class may improve scaffold/gates/platform seams, but one local workaround never becomes universal framework by convenience.
+Repeated platform failure classes can improve scaffold/gates/runtime seams; one local workaround does not become universal framework automatically.
 
 ---
 
-# 20. Product truth and inspectability laws
+# 22. Cost, usage and execution transparency
 
-The UI may simplify words and layout; it must not simplify away material semantics.
+F1 must make agentic execution economics observable without inventing false certainty.
 
-## 20.1 Request/data truth
-
-```text
-loading
-!= successful empty
-!= failed
-!= partial
-```
-
-Where interpretation depends on it, expose current source/environment/freshness/coverage/provenance.
-
-## 20.2 Build truth
+Where the source exposes the facts, user-facing execution detail supports:
 
 ```text
-model narration
-!= Hub-owned progress
+per turn / run / ActorRun / AgentRun:
+  model/provider identity
+  input/output/cache/reasoning token classes where available
+  LLM cost state / USD where calculable
+  duration
+  tool/runtime observations
 
-0 Findings
-!= verified
+rollup:
+  conversation/session/run
+  Project
+  period
 ```
 
-## 20.3 Preview truth
+Builder sandbox wall-clock cost is a separate monetary class from LLM spend when available.
+
+Usage/cost states remain explicit:
 
 ```text
-Preview ready
-!= VERIFIED
-!= Release AVAILABLE
-!= active production
+REPORTED | INFERRED | MISSING
+CALCULATED | MISSING_USAGE | MISSING_PRICE | UNSUPPORTED
+provider/reconciled states where available
 ```
-
-## 20.4 Release truth
 
 ```text
-AVAILABLE
-!= Promotion approved
-!= pointer swapped
-!= SERVED_VERIFIED
+missing != zero
+inferred != reported
+calculated != provider-reported != reconciled
 ```
 
-The Product says `Live`/`Served` only when the owner has actually reached the applicable served-verification fact.
-
-## 20.5 Product Agent/effect truth
-
-```text
-AgentRun completed
-!= every effect succeeded
-
-SENT_NO_RESPONSE
-!= external actor definitively failed
-
-missing spend/usage
-!= zero
-
-OUTCOME_UNKNOWN
-!= safe retry
-```
-
-## 20.6 Observation truth
-
-```text
-runtime/provider/trace/telemetry observation
-!= owner verification/terminal truth
-```
-
-Evidence drill-down may include these observations with their provenance; they never become authority because they are visually persuasive.
+UI may summarize; drill-down preserves provenance/state.
 
 ---
 
-# 21. Authorization and trust laws visible at Product level
+# 23. Product truth / inspectability laws
 
-1. One Account identity can participate in multiple Workspaces.
+## 23.1 Request/data
+
+```text
+loading != successful empty != failed != partial
+```
+
+Source/environment/freshness/coverage/provenance are visible when material.
+
+## 23.2 Build
+
+```text
+model narration != Hub progress
+0 Findings != verified
+```
+
+Plan/checklist/Evidence use owner facts.
+
+## 23.3 Preview
+
+```text
+Preview ready != VERIFIED != AVAILABLE != live
+```
+
+## 23.4 Release
+
+```text
+AVAILABLE != Promotion approved != pointer swapped != SERVED_VERIFIED
+```
+
+## 23.5 Agent/effect
+
+```text
+AgentRun completed != every effect succeeded
+SENT_NO_RESPONSE != definitive external failure
+OUTCOME_UNKNOWN != retry permission
+```
+
+## 23.6 Observation
+
+```text
+runtime/provider/trace/telemetry observation != owner terminal/verified truth
+```
+
+---
+
+# 24. Authorization/security Product laws
+
+1. One Account may participate in multiple Workspaces; authority never crosses automatically.
 2. Workspace is deny-by-default isolation root.
-3. Same Workspace does not imply every Project/Brain/Connection/Agent can be used.
-4. Control Plane, Preview and Published Application authority are independent.
-5. Project admin does not automatically become application business user/admin.
-6. Published App user does not automatically gain Project/Builder access.
-7. Managing access does not imply exercising all business access.
+3. Same Workspace does not imply Project/Brain/Connection/Agent use.
+4. Control Plane, Preview and Published App authorization are independent.
+5. Project admin does not become app user/admin automatically.
+6. Published App user does not gain Project/Builder authority.
+7. Managing access does not imply exercising all business capabilities.
 8. Client/browser/model-provided IDs/roles/approval state never create authority.
-9. Current mutable authority is rechecked server-side at the real control point.
-10. Historical Release/run/approval facts remain immutable but do not resurrect revoked current authority.
-11. Product Agent/runtime identity is not a Conexus authorization principal.
-12. Durable credentials remain with trusted owners; Project/browser/Agent guest gets no durable secret by inheritance.
+9. Current mutable authority is rechecked server-side at protected control points.
+10. Runtime/provider identity is not a Conexus principal.
+11. Durable privileged credentials stay with trusted owners.
+12. Attachment/blob access is private by default and follows owning Product authority.
 
-The F1 Published Application role set remains the accepted closed set `{admin, member}` unless a later material Product decision explicitly changes it. It is separate from Control Plane role/grant semantics.
+Current F1 Published App role set remains `{admin, member}` until a later material decision explicitly changes it.
 
 ---
 
-# 22. F1 / CURRENT Product scope
+# 25. F1 / CURRENT Product scope
 
-F1 includes the following Product capabilities as current target Product scope even when some technology-specific qualification is still pending:
+F1 target Product scope includes, even where technology-specific proof remains pending:
 
 ```text
-Account/session/current access authority
+Account/session/current access
 Workspace + optional Areas
-Project lifecycle
-Project Inception / Baseline approval
-Change-based governed evolution
+Project lifecycle + Inception/Baseline
+Change + proportional visual Plan/checklist
 agent-first Build workspace
-Preview / Code / Diff inspectability
+Platform Consultant/contextual Conexus assistance
+Preview / Code / Diff / Plan / progress inspectability
 Data inspectability
 Query / Action Capabilities
-Artifact Registry / exact Release composition
+Brain Discovery + Brain publication/binding/feedback
+AnalyticQuery second read regime
+Artifact Registry / exact Release
 Connections + explicit Project bindings
 Capability Gateway / governed external effects
-Workspace Brain + ProjectBrainBinding
 Product Agent authoring/management/use
 Workspace access-filtered Agent catalog
 Conversation / AgentRun / exact ApprovalRequest
-manual/SCHEDULE Product Agent invocation when applicable
-Managed Application Runtime for admitted managed jobs/sync
+manual/SCHEDULE Product Agent invocation
+Managed Application Runtime for admitted jobs/sync
 Versions / Promotion / rollback / served verification
-Activity / Findings / Evidence / causal diagnostics
-Published Application serving and independent app access
-attachments/private storage where Product needs them
+Activity / Findings / Evidence / cost-tokens-duration transparency
+Published App serving + independent app access
+private attachment/storage capability where Product needs bytes
+Project duplication with no-data default
 first-installation backup/restore/emergency-stop correctness
 first vertical Budget Analyzer
-per-run/model/spend truth and enforcement obligations
-honest operational/data/verification presentation
+model-spend truth/enforcement obligations
+Golden benchmark + Builder quality evaluation obligations
+honest data/verification/operational presentation
 ```
 
-F1 Product scope does **not** mean every item is required by the first Budget Analyzer Project. The first vertical deliberately exercises only the capabilities its Product needs.
+F1 Product scope does not mean the first Budget Analyzer must instantiate every capability.
 
 ---
 
-# 23. NEXT / ADMITTED Product direction
+# 26. NEXT / admitted Product directions
 
-These are real accepted directions/consumers but are not permission to build speculative infrastructure ahead of the current gates.
+## 26.1 SaaS opening
 
-## 23.1 SaaS opening
+Accepted direction, not current F1 implementation. When selected, decide onboarding/billing/customer operations/isolation and private/on-prem source reachability from real topology.
 
-Conexus is intended to evolve from the internal/company-first platform into a SaaS offering.
+## 26.2 Product Agent expansion
 
-The future SaaS transition may require explicit decisions around onboarding, billing, customer operations, deployment/isolation/economics and support. None are inferred automatically from the F1 internal deployment.
+Product Agent is already F1. Broader use in purchasing/pricing/CRM/sales/operations occurs through named Projects, not generic fleet expansion.
 
-## 23.2 Product Agent expansion across real Projects
+## 26.3 Brain incremental growth
 
-F1 already supports the Product Agent concept. Broader Agent use across purchasing, pricing, CRM, sales, operations and other real Projects is an admitted Product direction **only through named Project consumers**, not a generic Agent fleet mandate.
-
-## 23.3 Brain growth by real company use
-
-Brain is designed to grow incrementally as Projects discover/publish reusable business meaning. Broader namespaces/domains come from actual business consumers, not prebuilt ontology completeness.
+Broader company domains/namespaces grow from actual Project discovery and publication, not prebuilt ontology completeness.
 
 ---
 
-# 24. FUTURE / DEFERRED capabilities and seams
+# 27. FUTURE / DEFERRED capability seams
 
-These capabilities are deliberately visible so the platform does not forget them, but F1 creates no dormant machinery merely to reserve optionality.
-
-| Future capability | Current seam / reopen trigger |
+| Future capability | Reopen seam/trigger |
 |---|---|
-| public SaaS self-signup/billing | explicit Phase-2 Product objective; reopen when SaaS program is selected |
-| multi-repo Project | Project/repository boundary already isolated; reopen on real Project requiring independent repos |
-| cross-Workspace Brain/Connection/package sharing | current same-Workspace boundary; reopen on named exchange consumer + consent/provenance/policy requirement |
-| DEDICATED physical deployment | runtime profile seam exists; reopen on first real DEDICATED deployment consumer |
-| stronger HA/PITR/multi-host topology | current backup/restore boundaries; reopen on measured RPO/RTO/availability requirement |
-| external SLA monitoring/paging | observability/ops seam; reopen on real SLA/on-call consumer |
-| Product Agent Working/Agent Memory | PAR memory-policy seam; reopen on named consumer + eval |
-| Product Agent Semantic Recall | memory seam; reopen on eval/consumer proving value and safety |
-| Product Agent Observational Memory | memory seam; reopen on eval/consumer; Builder OM result does not auto-enable Product Agent OM |
-| Memory Extractors | memory seam; reopen on named durable consumer/authority-safe workflow |
-| Durable Agent reconnect-to-same-stream | direct Agent runtime boundary; reopen when real UX requires reattachment to same in-flight stream |
-| EVENT Product Agent triggers | AgentTrigger/connector seam; reopen on concrete event source/consumer/failure semantics |
-| Agent-as-tool / subagents / agent networks | ToolProjection seam; reopen on named product composition need + isolation/effect proof |
-| MCP/A2A/external Agent clients | owner APIs/capabilities are addressable; add adapter only when client exists |
-| Product Agent browser/computer-use/workspace/source access | runtime trust/tool seam; reopen on named Agent needing it + security/qualification |
-| Connection pools/failover | explicit binding/Connection lifecycle; reopen on measured availability/throughput need |
-| external Vault/KMS/HSM / per-secret DEK | CredentialBackend seam; reopen on compliance/host-compromise/selective-rekey requirement |
-| SSO / SCIM / passkeys | Identity boundary; reopen on customer/enterprise requirement |
-| public/embed user flows | Published App ingress/auth seam; reopen on named external/public consumer |
-| richer app roles/data-scoping | Published App access owner; reopen on real business role/audience need beyond current closed F1 set |
-| vector/RAG index for Brain | derived-index seam; reopen when deterministic selection no longer satisfies measured retrieval need |
-| generic Project cloning/export | Project/resource boundaries; reopen on named portability/copy workflow |
-| external/cross-company Brain federation | Brain publication/binding seam; reopen on explicit trust/ownership consumer |
+| SaaS signup/billing/customer operations | Phase-2 Product program selected |
+| SaaS→private/on-prem reachability | SaaS installation + real private enterprise target |
+| multi-repo Project | real Project requiring independently evolving repos |
+| cross-Workspace Brain/Connection/package exchange | named consumer + consent/provenance/policy |
+| DEDICATED physical deployment | first real DEDICATED consumer |
+| stronger HA/PITR/multi-host | measured RPO/RTO/availability need |
+| external SLA monitoring/paging | real SLA/on-call consumer |
+| Product Agent Working/Agent Memory | named consumer + eval |
+| Semantic Recall | measured consumer/eval benefit |
+| Product Agent Observational Memory | measured consumer/eval; Builder result does not auto-enable it |
+| Memory Extractors | named durable consumer/authority-safe workflow |
+| Durable Agent reconnect-to-same-stream | real UX requiring reattachment to in-flight stream |
+| EVENT triggers | real event source/consumer/failure contract |
+| Agent-as-tool/subagents/networks | named Product composition + isolation/effect proof |
+| MCP/A2A/external Agent clients | real client over existing owner API/capabilities |
+| Product Agent browser/source/workspace access | named Agent need + security/qualification |
+| Connection pools/failover | measured availability/throughput need |
+| external Vault/KMS/HSM/per-secret DEK | compliance/host-compromise/selective-rekey need |
+| SSO/SCIM/passkeys | enterprise/customer requirement |
+| public/embed audience | named public/external Published App consumer |
+| richer app roles/data scope | real business audience beyond current closed set |
+| Brain vector/RAG index | deterministic selection no longer satisfies measured retrieval need |
+| broader clone/export/import | named portability/copy workflow |
 
-Deferred means **not now**, not “never”.
+Deferred = not now, not never.
 
 ---
 
-# 25. REJECTED / SUPERSEDED F1 inheritance
-
-The following must not appear in F1 just because they exist in historical documents/frameworks:
+# 28. REJECTED / SUPERSEDED F1 inheritance
 
 ```text
 Pi as primary Builder runtime
-guest Product/Builder model-provider key
-fresh cognitive reset for every Builder Work Unit
-Vercel AI SDK light loop as current Product Agent authority
+guest model-provider key
+fresh cognitive reset every WorkUnit
+Vercel AI SDK Product Agent loop as current authority
 Mastra Stored/Editor/latest Agent authority
 Mission/Milestone/Fleet work model
 generic workflow engine
 generic scheduler/automation business domain
 arbitrary privileged Project job code
-universal ResourceBinding engine
-universal Tool domain / execute(anySlug)
-universal Status/FSM/Envelope
+universal ResourceBinding/Tool/Status/Envelope
 shared mutable cross-Project DB/runtime state
 memory/RAG framework as Brain authority
 browser/frontend authorization authority
-mandatory Agent/chat widget in every app
+URL-fragment auth token as current Published App contract
+mandatory universal chat widget/postMessage state machine
 Product Agent repo/shell/browser/raw-network access by default
-public Internet ingress for the first F1 installation
-a Product Agent added artificially to the Budget Analyzer
-an analytical mirror forced on every future Project/ERP
-a global Agent fleet owner at Workspace level
+public Internet ingress first installation
+Product Agent added artificially to Budget Analyzer
+one analytical mirror strategy forced on every Project
+Workspace Agent catalog as fleet owner
+formal security deferred because “F1 is internal”
 ```
 
-Reintroduction requires material Evidence and the smallest applicable Decision Loop; framework popularity or historical presence is not enough.
+---
+
+# 29. Product invariants
+
+1. Workspace is sovereign isolation root; shared Account identity never transfers authority.
+2. Project owns one coherent Product/software lifecycle; technical layers do not automatically split Projects.
+3. Material Project intent is pinned by approved Baseline.
+4. Change describes what must become true; WorkUnit/ActorRun do not replace Change authority.
+5. Plan/current checklist state is Hub-owned; model narration cannot close work.
+6. `tasks.md` preserves purpose/context but never operational status authority.
+7. Mechanism/framework/storage/provider never gains Product authority by convenience.
+8. Project Git != Hub control truth != Project DB != Registry/CAS serving output.
+9. Workspace Brain/Connections are used only through explicit typed Project bindings.
+10. Direct mutable cross-Project data/runtime reach is denied.
+11. Brain is published business meaning, not memory/RAG/Project implementation.
+12. Brain Discovery proposals remain hypotheses until human-reviewed publication.
+13. New Brain revision never live-inherits into an active Project.
+14. AnalyticQuery uses semantic IDs/restricted plan, never free runtime LLM SQL/join topology.
+15. Durable privileged credentials never become browser/chat/Project/Agent guest data.
+16. Gateway owns governed external-effect replay/credential last-mile.
+17. Human approval binds exact sealed subject only.
+18. Current mutable authorization is rechecked at real control point.
+19. Control Plane, Preview and Published App authority remain separate.
+20. Administer != business use.
+21. Product Agent authoring modes converge to one Change/candidate/Release authority.
+22. Product Agent tools come from exact Release-derived bounded projection.
+23. Product Agent is product/context-aware, not host/source-aware by default.
+24. Release runtime composition is exact/immutable; no mutable latest.
+25. Build/Preview/AVAILABLE/pointer-swapped never masquerade as SERVED_VERIFIED.
+26. Runtime/provider/telemetry observations never manufacture owner terminal truth.
+27. Missing/partial/ambiguous usage/cost/data/effect outcome never becomes zero/success.
+28. Derived read model never proves its own completeness/correctness.
+29. Project duplication never silently copies DB/credentials/Connection bindings; data default = no copy.
+30. Attachments/storage are private by default and owner-authorized.
+31. First vertical composition does not become universal ERP/data-path doctrine.
+32. Future capability preserves seam/trigger without empty F1 machinery.
+33. Selected architecture != qualified behavior.
+34. Honest empty/unsupported Product state is preferred to fake completeness.
 
 ---
 
-# 26. Product invariants
+# 30. Whole-Product scenario gate
 
-1. **Workspace isolation:** a Workspace is a sovereign isolation root; common Account identity never creates cross-Workspace authority.
-2. **Project independence:** a Project owns one coherent product/software lifecycle; technical layers do not automatically become separate Projects.
-3. **Baseline authority:** material Project intent is pinned by an approved Baseline; a coding actor never silently invents missing material architecture.
-4. **Change truth:** Change describes what must become true; Work Unit and ActorRun do not replace that meaning.
-5. **Mechanism ≠ authority:** runtime/framework/storage/provider mechanics never gain Product ownership merely because they persist state.
-6. **Git ≠ runtime state:** Git authors content; Hub owns operational authority; Project DB owns business data; Registry/CAS owns immutable outputs/bytes according to owner boundaries.
-7. **Explicit reuse:** Workspace Brain/Connections are shared only through explicit typed Project bindings; no same-Workspace implicit use.
-8. **No cross-Project mutable reach:** one Project does not directly query/mutate another Project's DB/source/runtime internals.
-9. **Brain truth:** Brain is canonical published business meaning, not agent memory, RAG result or Project-local implementation.
-10. **No live inheritance:** new Brain/Connection/config source change never silently changes an active Project Release.
-11. **Credentials stay trusted:** durable secrets never become Project/browser/chat/Agent guest data.
-12. **Gateway effects:** all governed external effects cross Gateway current authority; runtime retry never grants effect retry authority.
-13. **Exact approval:** human approval binds one exact subject/proposal; changed content requires new authority.
-14. **Current authorization:** current mutable authorization is rechecked at protected control points; historical pins never resurrect revoked authority.
-15. **Surface isolation:** Control Plane, Preview and Published App permissions are separate.
-16. **Administer ≠ use:** administrative access does not automatically confer business data/capability use.
-17. **Immutable Product Agent authoring:** Product Agent source/manual/AI authoring converges to one candidate/revision/Release authority.
-18. **Bounded Product Agent tools:** Product Agents receive an exact Release-derived ToolProjection, never generic hidden capability power.
-19. **Product Agent runtime context:** Product Agent is product/context-aware by default, not source/host-aware.
-20. **Release exactness:** governed execution is based on exact immutable Release composition, never mutable `latest`.
-21. **Truthful serving:** Build/Preview/AVAILABLE/pointer-swapped states never masquerade as `SERVED_VERIFIED`.
-22. **Observation ≠ verification:** model narration, runtime/provider traces and telemetry cannot manufacture terminal/verified Product truth.
-23. **Unknown stays unknown:** missing/partial/ambiguous data, usage, cost or effect outcomes never become zero/success by convenience.
-24. **Derived data honesty:** a Project read model never becomes its own source/correctness proof.
-25. **First vertical does not become platform doctrine:** Sankhya/sync/read-model choices for Budget Analyzer do not dictate every ERP/Project.
-26. **Future seams without dormant machinery:** an evidenced future capability preserves its boundary/trigger without empty F1 modules/tables/services/frameworks.
-27. **Selected ≠ qualified:** Product architecture may select a technology path, but the Product may not claim load-bearing behavior proven until deciding Evidence exists.
-28. **No fake completeness:** a Product surface may honestly be empty/unsupported; infrastructure is never exercised with fake Product features solely to make a demo look complete.
-
----
-
-# 27. Whole-Product scenario gate
-
-Any Architecture Baseline, Realization Plan or implementation must be able to explain these scenarios without contradictory owners/truth.
-
-| Scenario | Required Product truth |
+| Scenario | Required truth |
 |---|---|
-| Account belongs to two Workspaces | identities may be shared; resources/data/authority do not cross by implication |
-| Workspace member has no Project grant | Project/resources remain undiscoverable/unusable according to current access rules |
-| Create greenfield Project | empty Project → Discovery → Baseline candidate → human approval → initial Change |
-| Import brownfield Project | current repo/system reality is discovered before target meaning is assumed |
-| Tiny safe Change | proportional DIRECT/LIGHT path may avoid needless planning but never bypass applicable authority/proof |
-| Material architecture discovery during coding | stop before crossing Baseline boundary → Finding/Replan/Handoff/checkpoint |
-| Builder session survives several Work Units | cognitive continuity may survive; each ActorRun remains bounded/auditable; session history never authority |
-| Builder physical sandbox dies | no silent write replay onto a different unobserved physical incarnation |
-| New Brain revision published | existing Project remains on old pinned binding until explicit adoption/revalidation/Release |
-| Project discovers reusable business rule | KnowledgeProposal → human Brain review; no memory self-publish |
-| Same Workspace has several Connections | Project uses only explicitly bound compatible Connection/environment |
-| Connection secret rotates compatibly | secret can rotate without source/app rewrite; semantics/identity remain stable if current authority says compatible |
-| Connection becomes unhealthy | capability becomes honestly unavailable/degraded; no silent fallback to another Connection |
-| Project needs new external operation | Connector/Connection/Project binding/Release/policy must admit it; existence at provider does not grant authority |
-| Publish candidate | verification/Release/Promotion/serving states remain distinct until SERVED_VERIFIED |
-| Rollback | new governed Promotion to eligible old composition; no promise to reverse business data automatically |
-| Business user uses app but cannot build | Published App access works without Control Plane/Project access |
-| Project admin manages app users but lacks business role | administration can proceed without silently granting business data/capability use |
-| Create Product Agent manually | structured edit remains same Change/diff/proof/Release path |
-| Create Product Agent by natural language | same canonical Agent definition and Release path; no hidden AI-only authority |
-| Agent intent needs missing Action | Builder exposes scope/permission/effect widening before adding it to Change |
-| Agent uses page context | page supplies typed refs/hints; material fact is re-resolved through governed tools |
-| Agent asks to execute unprojected capability | fail closed; generic `execute(anySlug)` does not exist |
-| Agent proposes effect requiring approval | exact proposal is sealed; ALLOW_ONCE applies only to exact same subject/args after current rechecks |
-| Duplicate/restarted Agent runtime | runtime retry cannot manufacture duplicate effect authority |
-| Provider acceptance is ambiguous | `OUTCOME_UNKNOWN`; no blind automatic replay |
-| Scheduled Agent fires after restart | stable intended occurrence is admitted; no fake Conversation history by default |
-| EVENT trigger has no accepted consumer | absent/unsupported, not a decorative switch |
-| Managed sync misses downtime slots | at most one catch-up according to current law; no missed-slot backlog replay |
-| Telemetry says success but owner fact missing | Product remains NOT_PROVEN/pending/unknown according to owner semantics |
-| Dashboard query fails | UI shows failure, never “0 results/no data” |
-| Read model covers only part of source | coverage/partiality remains visible; derived count is not presented as universal total |
-| Budget Analyzer has unsupported margin source | omit/block/qualify metric honestly; never fabricate a number to match benchmark |
-| First vertical has no Product Agent | Agents surface may show honest empty state; no fake Agent is created |
-| Future DEDICATED customer appears | reopen physical deployment decision through existing profile seam; no prebuilt unused stack assumed |
-| SaaS transition begins | reopen onboarding/billing/deployment/customer-ops requirements without rewriting F1 Product meaning by accident |
+| Account in two Workspaces | identity can be shared; authority/resources do not cross |
+| Workspace member lacks Project grant | Project remains undiscoverable/unusable under current access rules |
+| Create greenfield Project | Discovery → Baseline candidate → approval → initial Change |
+| Import brownfield | current code/contracts/data reality discovered before target assumptions |
+| Tiny safe Change | lighter route allowed; applicable authority/proof not bypassed |
+| Material Change | visual Plan/checkpoint/progress visible and owner-held where required |
+| Worker dies mid-plan | current item becomes honest interrupted/recoverable state; prose cannot say done |
+| `tasks.md` says done but Hub does not | structured mismatch fails/checks; Hub state wins |
+| Material architecture discovery during coding | stop → Finding/Replan/Baseline checkpoint |
+| Builder session spans WorkUnits | cognitive continuity okay; ActorRuns stay bounded/auditable |
+| physical E2B sandbox dies | no silent cross-incarnation write replay |
+| New Brain revision | Project remains pinned until explicit rebind/revalidation/Release |
+| Brain Discovery infers relationship | remains provenance-tagged hypothesis until human publication |
+| AnalyticQuery asks unsupported cross-dataset join | fail closed; Builder creates approved analytical source/model if needed |
+| Project discovers reusable rule | KnowledgeProposal→human Brain review |
+| Same Workspace has several Connections | only explicit compatible binding can be used |
+| Connection secret rotates compatibly | source/app need not change if logical authority remains compatible |
+| Connection unhealthy | honest unavailable/degraded state; no silent fallback |
+| Project needs provider operation | provider existence alone does not grant Project/Agent authority |
+| Publish candidate | verification/Release/Promotion/serving remain distinct |
+| Rollback | new governed Promotion; no automatic business-data rewind |
+| Business user can use app but not build | Published App access works independently |
+| Project admin manages app access without business role | administer != use |
+| Create Agent manually | same Change/diff/proof/Release |
+| Create Agent by natural language | same canonical Agent definition; no AI-only authority |
+| Agent needs missing Action | scope/effect/permission widening shown before build |
+| Agent uses page context | refs/hints only; material fact re-resolved through owners |
+| Agent asks unprojected capability | fail closed; no generic execute(anySlug) |
+| exact effect needs approval | sealed proposal + current rechecks + Gateway |
+| Agent runtime retries | does not create duplicate effect authority |
+| provider acceptance ambiguous | OUTCOME_UNKNOWN; no blind replay |
+| scheduled Agent after restart | stable occurrence; no fake Conversation history by default |
+| EVENT has no consumer | absent/deferred, not decorative switch |
+| managed sync misses slots | max one catch-up, no backlog replay |
+| telemetry says success but owner fact absent | NOT_PROVEN/pending/unknown |
+| execution usage unavailable | UI says missing/unknown, never zero cost/tokens by invention |
+| dashboard query fails | failure, never successful empty |
+| read model partial | coverage visible; derived total not universal total |
+| unsupported margin | omit/block/qualify; never fabricate |
+| Budget Analyzer has no Agent | Agents can honestly be empty |
+| Duplicate Project | copies source/config/declarations; no DB/credential/binding; default no data |
+| Blob owner not authorized | storage key possession does not grant read; deny |
+| first DEDICATED consumer | reopen physical deployment through seam |
+| SaaS needs private ERP | decide authenticated private reachability; no F1 tunnel assumed |
 
-A proposed Product concept/module/service with no justification from these scenarios, another accepted invariant or a named real consumer is presumptively YAGNI.
+A new Product concept/module/service with no scenario/invariant/named-consumer justification is presumptively YAGNI.
 
 ---
 
-# 28. F1 success criterion
+# 31. F1 success criterion
 
-Conexus F1 is Product-complete when a real operator/company can, under accepted technical/operational proof:
+F1 is Product-complete when a real operator/company can, under accepted technical/operational proof:
 
 ```text
-establish Workspace and controlled access
-→ create or connect a Project
+establish Workspace/access
+→ create/import Project
 → perform Discovery/Inception
-→ approve a sufficient Project Baseline
-→ ask Conexus to build/evolve a real business product
-→ inspect Preview / Data / Capabilities / Integrations / Brain / Agents / Versions / Activity
-→ use real enterprise knowledge through a governed Brain binding
-→ use real external systems through qualified Connections + explicit Project bindings
-→ verify changes against mechanical/runtime/business evidence
-→ create exact immutable Releases
+→ approve sufficient Baseline
+→ formulate/approve Plan when needed
+→ ask Conexus to build/evolve real business software
+→ inspect Preview/Code/Diff/Plan/progress/Data/Capabilities/Integrations/Brain/Agents/Versions/Activity
+→ see truthful token/cost/duration/provenance/limitations
+→ discover/publish/bind reusable Brain meaning with human authority
+→ use real external systems through qualified Connections + explicit bindings
+→ verify changes against mechanical/runtime/business Evidence
+→ create exact Release
 → promote and prove what is actually served
-→ let business users access the Published Application independently from Builder access
-→ create/evolve a Project-owned Product Agent through the same Change/Release lifecycle
-→ let that Agent reason through bounded governed tools and exact approvals when needed
-→ run admitted background sync/job work without inventing a workflow platform
-→ observe truthful cost/state/provenance/failures without false-green UI
-→ restore/recover the first installation without fabricating business authority
-→ reproduce the Budget Analyzer vertical with real Sankhya-derived data and honest semantic limitations
+→ let business users use Published App independently from Builder access
+→ create/evolve/use Project-owned Product Agents through same Change/Release laws
+→ approve exact Agent effects where needed
+→ run admitted managed sync/job without workflow platform
+→ duplicate a Project without silently copying data/credentials/bindings
+→ store/serve Product bytes privately by default
+→ restore/recover without fabricating authority
+→ reproduce Budget Analyzer with real Sankhya-derived data and honest semantic limitations
 ```
 
-without requiring:
-
-```text
-open SaaS signup/billing
-cross-Workspace sharing
-multi-repo Projects
-DEDICATED physical deployment
-generic workflow engine
-advanced Agent memory
-EVENT triggers
-generic Agent fleet
-external Vault/KMS
-public/embed runtime
-SSO/SCIM
-universal plugin/tool/resource frameworks
-```
+without requiring open SaaS signup/billing, cross-Workspace sharing, multi-repo, DEDICATED physical deployment, generic workflow engine, advanced memory, EVENT trigger, generic Agent fleet, external Vault/KMS, public/embed runtime, SSO/SCIM or universal plugin/tool/resource frameworks.
 
 ---
 
-# 29. Qualification-state boundary
+# 32. Quality/evaluation obligations
 
-This Product Contract states **required Product meaning**, not proof that every chosen substrate already works.
+The Product/engineering system preserves two separate quality anchors:
 
-Current deciding status at R11-C:
+## Golden benchmark
 
-```text
-3L Q0                                      = COMPLETE
-Package A Builder Substrate + Cognition    = COMPLETE
-Mastra Builder persistence                 = PASS for tested properties
-E2B Builder substrate                      = PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD
-native Codex OAuth                         = PASS for tested Package-A path
-Builder Observational Memory               = EVALUATED / KEEP OFF
+Budget Analyzer remains reproducible benchmark: same accepted spec/inputs → compare Conexus output against known benchmark and prior Conexus versions without treating exact visual similarity as sole correctness.
 
-Package B Product Agent + Cross-Runtime    = PAUSED / NOT OPENED by R11
-Package C Model Economics/Enforcement      = NOT STARTED
-Package D Managed Execution                = NOT STARTED
-Package E Deciding Evidence                = NOT STARTED
-3M/3N/3O                                   = NOT STARTED
-```
+## Conexus Worker Eval
 
-Therefore the Product Contract may say Product Agents, model-spend enforcement, managed jobs and deciding Evidence are F1 Product/architecture obligations, while the Architecture Baseline must still label their technology-specific realization as qualification-pending where applicable.
+A real-task evaluation suite remains an F1 engineering capability for comparing coding-runtime/model candidates across representative work such as backend feature, migration, React page, complex bug, Sankhya integration and recovery.
+
+It gates a challenger/reconsideration when current primary runtime/model is materially questioned. Historical `Pi × Claude Agent SDK` is not the permanent candidate pair; current comparisons follow current runtime/model authority.
 
 ---
 
-# 30. Reopen triggers
+# 33. Qualification-state boundary
 
-Reopen only the smallest implicated Product/architecture decision when material Evidence shows, for example:
+This Product Contract states required Product meaning, not proof that every substrate already works.
+
+```text
+3L Q0                                   = COMPLETE
+Package A                               = COMPLETE
+Mastra Builder tested properties        = PASS
+E2B                                      = PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD
+native Codex OAuth                       = PASS for tested A3 path
+Builder Observational Memory             = EVALUATED / KEEP OFF
+
+Package B Product Agent/Cross-Runtime    = PAUSED / NOT OPENED by R11
+Package C Model Economics/Enforcement   = NOT STARTED
+Package D Managed Execution             = NOT STARTED
+Package E Deciding Evidence             = NOT STARTED
+3M / 3N / 3O                            = NOT STARTED
+```
+
+Product Agents/model spend/managed jobs/Evidence can be F1 Product obligations while their exact technology-specific realization remains qualification-pending.
+
+---
+
+# 34. Reopen triggers
+
+Reopen only the smallest implicated Product/architecture decision on material Evidence such as:
 
 ```text
 changed Product requirement/ownership
-named new Product consumer that current F1 cannot represent
-current module/owner cannot represent a required meaning without duplication
-new trust/authority boundary
-new irreversible/external effect class
-real scale/availability/compliance constraint invalidates current seam
-provider/framework behavior falsifies a load-bearing assumption
-first implementation proves current boundary structurally unworkable
-SaaS transition creates concrete onboarding/billing/customer-isolation needs
+new named consumer current F1 cannot represent
+new trust/irreversible/external-effect class
+real scale/availability/compliance constraint
+provider/framework behavior falsifies load-bearing assumption
+implementation proves boundary structurally unworkable
+SaaS transition creates concrete onboarding/billing/private-source needs
 cross-Workspace or multi-repo requirement becomes real
-Product Agent requires browser/source/workspace/advanced-memory capability with real consumer
-DEDICATED deployment receives first real consumer
+Product Agent needs advanced memory/browser/source/workspace capability
+first real DEDICATED consumer
 ```
 
-Do not reopen for:
-
-```text
-framework popularity
-newer package/major version alone
-reviewer preference
-hypothetical enterprise features
-“future-proofing” without consumer
-an old historical decision still existing in Git
-```
+Do not reopen for framework popularity, newer version alone, reviewer preference, hypothetical enterprise feature or mere historical presence.
 
 ---
 
-# 31. Authority provenance
+# 35. Authority provenance
 
-This candidate is primarily derived from:
+Primary derivation:
 
 ```text
-C-001 — Product vision / scope
-C-003 — ratified Product/F1 requirements
-3B-01..17 — System Context & Boundaries
-3A-R7/R8/R9/R10 — current cross-phase reconciliation
-3C-R1 — module/owner closure
-3D-R1 — dependency closure
-3E-R1 — data authority closure
-3F-R1 — contracts/API closure
-3G-R1 — behavioral/state closure
-3H-R1 — runtime/agent closure
-3I-R1 — security/authority closure
-3J-R1 — first-installation deployment/operations closure
-3K-01 — Project/Build/inspectability Product model
-3K-02 — truth/Evidence Product laws
-3K-03 — first vertical/data path
-3K-04 — Product Agent authoring/use/catalog journey
-3K-R1 — final Product Architecture closure
-3L-Q0 + 3L-A — current qualification routing/evidence
-R11-A census + R11-B candidate reconciliation
+C-001 Product vision
+C-003 Product/F1 requirements
+C-011 Brain
+C-013 observability/checklist/cost
+C-014 lifecycle/duplication
+3A-R7/R8/R9/R10 reconciliation
+3B System Context
+3C-R1 owners
+3D-R1 dependencies
+3E-R1 data
+3F-R1 contracts
+3G-R1 state
+3H-R1 runtime
+3I-R1 security
+3J-R1 deployment/operations
+3K-01 Project/Build Product model
+3K-02 truth laws
+3K-03 first vertical
+3K-04 Product Agent journey
+3K-R1 Product closure
+3L-Q0 + 3L-A qualification
+R11-A census
+R11-B corrected candidate reconciliation
+R11-E Round-1 findings
 ```
 
-Detailed semantic authority remains in those homes until and unless R11 final ratification explicitly changes the repository discovery path.
+Detailed accepted homes remain controlling until R11 final ratification rewires discovery.
 
 ---
 
-# 32. R11-C candidate verdict
+# 36. Candidate verdict
 
 ```text
-Product North Star explicit                         = YES
-Product/system non-boundary explicit                = YES
-users/actors represented                            = YES
-core Product concepts represented                   = YES
-major capabilities represented                      = YES
-Builder whole journey represented                   = YES
-Brain whole journey represented                     = YES
-Connection/Integration whole journey represented    = YES
-Published Application journey represented           = YES
-Product Agent authoring/use/approval represented    = YES
-managed sync/job journey represented                = YES
-first vertical represented                          = YES
-maintenance/feedback loop represented               = YES
-F1/NEXT/FUTURE/REJECTED separated                   = YES
-Product invariants explicit                         = YES
-whole-product scenario gate present                 = YES
-technology qualification not overstated             = YES
-new Product authority invented intentionally         = NO
+North Star / product boundary                     = represented
+users/actors                                      = represented
+Project/Builder/Plan/checklist                     = represented
+Brain/Discovery/AnalyticQuery/feedback             = represented
+Connections/Data/Capabilities                      = represented
+Release/Published App                              = represented
+Product Agent authoring/use/approval               = represented
+managed jobs                                       = represented
+Project duplication                                = represented
+cost/tokens/duration visibility                     = represented
+private storage                                    = represented
+Platform Consultant                               = represented
+first vertical                                     = represented
+F1/NEXT/FUTURE/REJECTED                            = separated
+Product invariants                                = explicit
+whole-product scenario gate                        = present
+technology qualification                          = not overstated
+new Product authority intentionally invented       = NO
 ```
 
-**Next:** derive `ARCHITECTURE-BASELINE.md` from this Product Contract + accepted 3B–3J semantic authority + R11-B decision reconciliation + current 3L Evidence. The Architecture Baseline must state how the current Product is structurally realized **without promoting unqualified technology assumptions to fact**.
+**Next:** correct/enrich `ARCHITECTURE-BASELINE.md`, then rerun R11-E Round 2 before Fresh Actor/Fable review.

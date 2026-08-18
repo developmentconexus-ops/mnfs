@@ -3,6 +3,13 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import { CommandExitError, Sandbox } from 'e2b';
 import { E2BSandbox } from '@mastra/e2b';
+import {
+  ConexusWriteE2BSandbox,
+  PhysicalIncarnationGuard,
+  PhysicalIncarnationLostError,
+  PhysicalIncarnationMismatchError,
+  LineageQuarantinedError,
+} from '../src/physical-incarnation-guard.mjs';
 
 const apiKey = process.env.E2B_API_KEY;
 if (!apiKey) {
@@ -126,5 +133,72 @@ test('A2-LIVE-02: pinned Mastra E2B adapter can silently retry one write-capable
     await adapter._destroy().catch(() => undefined);
     await killPhysical(firstPhysicalId);
     if (secondPhysicalId && secondPhysicalId !== firstPhysicalId) await killPhysical(secondPhysicalId);
+  }
+});
+
+test('A2-LIVE-03: narrow guard blocks silent reincarnation and CONTINUE_LINEAGE mismatch before another write', async () => {
+  const logicalId = `conexus-3l-a-guard-${runTag}`;
+  const adapterOptions = {
+    id: logicalId,
+    template: 'base',
+    apiKey,
+    timeout: timeoutMs,
+    network: {
+      allowPublicTraffic: false,
+      denyOut: ['0.0.0.0/0'],
+    },
+  };
+  const guardedAdapter = new ConexusWriteE2BSandbox(adapterOptions);
+  const guard = new PhysicalIncarnationGuard({ sandbox: guardedAdapter });
+
+  let firstPhysicalId;
+  let replacementPhysicalId;
+  let replacement;
+
+  try {
+    firstPhysicalId = await guard.bind();
+    assert.ok(firstPhysicalId);
+
+    // Provider-side loss occurs after owner binding but before a write.
+    await guardedAdapter.e2b.kill();
+
+    await assert.rejects(
+      guard.spawnWrite("printf 'must-not-replay' > /tmp/conexus-guard-blocked.txt"),
+      PhysicalIncarnationLostError,
+    );
+    assert.equal(guard.quarantined, true);
+
+    // No second write may touch the poisoned lineage after loss is observed.
+    await assert.rejects(
+      guard.spawnWrite("printf 'second' > /tmp/conexus-guard-second.txt"),
+      LineageQuarantinedError,
+    );
+
+    // A fresh runtime object may materialize a replacement physical VM, but an
+    // admitted CONTINUE_LINEAGE expectation for the old physical id must fail
+    // before any write is issued on that replacement.
+    replacement = new ConexusWriteE2BSandbox(adapterOptions);
+    const continuation = new PhysicalIncarnationGuard({
+      sandbox: replacement,
+      expectedPhysicalId: firstPhysicalId,
+    });
+
+    await assert.rejects(continuation.bind(), PhysicalIncarnationMismatchError);
+    replacementPhysicalId = replacement.e2b.sandboxId;
+    assert.ok(replacementPhysicalId);
+    assert.notEqual(replacementPhysicalId, firstPhysicalId);
+    assert.equal(continuation.quarantined, true);
+
+    const noWrite = await replacement.e2b.commands.run(
+      'test ! -e /tmp/conexus-guard-blocked.txt && test ! -e /tmp/conexus-guard-second.txt',
+    );
+    assert.equal(noWrite.exitCode, 0, 'replacement must contain no write from the rejected continuation');
+  } finally {
+    await guardedAdapter._destroy().catch(() => undefined);
+    if (replacement) await replacement._destroy().catch(() => undefined);
+    await killPhysical(firstPhysicalId);
+    if (replacementPhysicalId && replacementPhysicalId !== firstPhysicalId) {
+      await killPhysical(replacementPhysicalId);
+    }
   }
 });

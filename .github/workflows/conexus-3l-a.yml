@@ -50,6 +50,7 @@ jobs:
 
   e2b-live:
     runs-on: ubuntu-latest
+    environment: E2B_API_KEY
     timeout-minutes: 10
     env:
       E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
@@ -73,6 +74,7 @@ jobs:
 
   external-credential-admission:
     runs-on: ubuntu-latest
+    environment: E2B_API_KEY
     steps:
       - name: Report external evidence availability without exposing secrets
         env:

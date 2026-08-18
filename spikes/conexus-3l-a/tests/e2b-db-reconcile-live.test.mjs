@@ -121,11 +121,11 @@ test('A2-DB-01: BuildValidationDatabase substrate preserves PG17.10, builtin C.U
     assert.equal(roleSafety.length, 4);
     for (const row of roleSafety) {
       const [name, superuser, createdb, createrole, canlogin] = row.split('|');
-      assert.equal(superuser, 'false', `${name} must not be superuser`);
-      assert.equal(createdb, 'false', `${name} must not create databases`);
-      assert.equal(createrole, 'false', `${name} must not create roles`);
-      if (name === 'conexus_probe_owner') assert.equal(canlogin, 'false', 'owner must be NOLOGIN');
-      else assert.equal(canlogin, 'true', `${name} must be a login role for this conformance fixture`);
+      assert.equal(superuser, 'f', `${name} must not be superuser`);
+      assert.equal(createdb, 'f', `${name} must not create databases`);
+      assert.equal(createrole, 'f', `${name} must not create roles`);
+      if (name === 'conexus_probe_owner') assert.equal(canlogin, 'f', 'owner must be NOLOGIN');
+      else assert.equal(canlogin, 't', `${name} must be a login role for this conformance fixture`);
     }
 
     const actionInsert = await sandbox.commands.run(

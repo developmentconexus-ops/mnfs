@@ -1,51 +1,149 @@
 # Fase 3 — Detailed Decision Index
 
-Este diretório contém as decisões detalhadas da Fase 3.
+Este diretório contém as decisões detalhadas da Fase 3 — Architecture & System Design do Conexus.
 
-**Live status / navigation authority:** [LEDGER.md](LEDGER.md)  
-**3B historical/detail authority:** `../24-arquitetura-system-design.md` + `3B-*` docs  
-**Estado atual:** 3B–3G fechadas/aprovadas; **3H — Runtime & Agent Architecture é NEXT**. A Fase 3 completa continua em andamento e ainda não constitui C-018.
+> **Status/navigation authority:** [LEDGER.md](LEDGER.md).  
+> Este README é somente um índice de descoberta. Não duplica o live status para evitar que um summary secundário se torne stale ou concorra com o LEDGER.
 
-## Status
-
-| ID | Decisão | Status | Documento |
-|---|---|---|---|
-| 3B-01..3B-15 | System Context & Boundaries | APROVADO | `../24-arquitetura-system-design.md` |
-| 3B-16 | Project-Internal Resource Ownership | APROVADO | [3B-16](3B-16-project-internal-resource-ownership.md) |
-| 3B-17 | Project Isolation and Explicit Reuse | APROVADO | `../24-arquitetura-system-design.md` |
-| 3A-R5 | Builder / Coding Runtime Reassessment | APROVADO | [3A-R5](3A-R5-builder-coding-runtime-reassessment.md) |
-| 3C-01..3C-15 | Domain / Module Architecture decisions | APROVADAS | [LEDGER §4](LEDGER.md#4-3c--closed--approved) |
-| 3C-R1 | Domain / Module Architecture closure | APROVADO / CLOSED | [3C-R1](3C-R1-cross-review-closure.md) |
-| 3D-01..3D-04 | Dependency Architecture decisions | APROVADAS | [LEDGER §5](LEDGER.md#5-3d--closed--approved) |
-| 3D-R1 | Dependency Architecture closure | APROVADO / CLOSED | [3D-R1](3D-R1-dependency-architecture-final-closure.md) |
-| 3E-01..3E-02 | Data Architecture decisions | APROVADAS | [LEDGER §6](LEDGER.md#6-3e--closed--approved) |
-| 3E-R1 | Data Architecture closure | APROVADO / CLOSED | [3E-R1](3E-R1-data-architecture-final-closure.md) |
-| 3F-01..3F-06 | Contracts & API Architecture decisions | APROVADAS | [LEDGER §7](LEDGER.md#7-3f--closed--approved) |
-| 3F-R1 | Contracts & API Architecture closure | APROVADO / CLOSED | [3F-R1](3F-R1-contracts-api-architecture-final-closure.md) |
-| 3G-01 | ApprovalRequest Lifecycle & Claim-Binding State Architecture | APROVADO | [3G-01](3G-01-approval-request-lifecycle-claim-binding-state-architecture.md) |
-| 3G-02 | Builder Change & Finding Lifecycle, Contract Revision & Closure Architecture | APROVADO | [3G-02](3G-02-builder-change-finding-lifecycle-contract-revision-closure-architecture.md) |
-| 3G-03 | Builder Work Unit & ActorRun Execution Lifecycle Architecture | APROVADO | [3G-03](3G-03-builder-work-unit-actor-run-execution-lifecycle-architecture.md) |
-| 3G-04 | Planning Depth & Rigor Composition Architecture | APROVADO | [3G-04](3G-04-planning-depth-rigor-composition-architecture.md) |
-| 3G-05 | Production AgentRun, Approval Continuation & Trigger Architecture | APROVADO | [3G-05](3G-05-production-agent-run-approval-trigger-continuation-architecture.md) |
-| 3G-06 | Gateway EffectAttempt, Idempotency & Budget State Architecture | APROVADO | [3G-06](3G-06-gateway-effect-attempt-idempotency-budget-state-architecture.md) |
-| 3G-07 | Project Lifecycle & Binding Mutation Architecture | APROVADO | [3G-07](3G-07-project-lifecycle-binding-mutation-architecture.md) |
-| 3G-08 | Release, Promotion & Runtime Admissibility Architecture | APROVADO | [3G-08](3G-08-release-promotion-runtime-admissibility-architecture.md) |
-| 3G-R1 | Behavioral / State Architecture Final Closure | APROVADO / CLOSED | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
-
-## Estado atual
+## Read path
 
 ```text
-3A — Architecture Reconciliation: transversal / contínua até C-018
-3B — System Context & Boundaries: CLOSED / APROVADA
-3C — Domain / Module Architecture: CLOSED / APROVADA
-3D — Dependency Architecture: CLOSED / APROVADA
-3E — Data Architecture: CLOSED / APROVADA
-3F — Contracts & API Architecture: CLOSED / APROVADA
-3G — Behavioral / State Architecture: CLOSED / APROVADA
-3H — Runtime & Agent Architecture: NOT STARTED / NEXT
+AGENTS.md
+→ docs/engineering/standards/root-cause-global-maximum-method.md
+→ docs/DOCUMENTATION-MAP.md
+→ docs/conexus/DECISOES.md
+→ docs/conexus/phase3/LEDGER.md
+→ exact accepted phase/task authority
+→ supporting evidence/current implementation when material
 ```
 
-## Mapa estrutural preservado
+Conversa, review, dialogue e pesquisa continuam evidence/input; não viram authority sem ratificação explícita.
+
+## Current orientation
+
+Consulte sempre o [LEDGER](LEDGER.md) para o estado exato. O checkpoint atual ratificado é:
+
+- [3A-R10 — Pre-Implementation Convergence & Realization Routing](3A-R10-pre-implementation-convergence-realization-routing.md).
+
+No momento desta atualização:
+
+```text
+3B–3K = CLOSED / APPROVED
+3A-R10 = APPROVED
+3L — Technology Qualification = NEXT / NOT STARTED
+C-018 = NOT YET RATIFIED
+product implementation = BLOCKED
+PR #40 merge = explicit operator authorization required
+```
+
+Se este snapshot divergir do LEDGER, **o LEDGER vence**.
+
+## Decision families
+
+### Architecture Reconciliation
+
+- [3A-R5 — Builder / Coding Runtime Reassessment](3A-R5-builder-coding-runtime-reassessment.md)
+- [3A-R6 — Phase 3 Critical Path & Implementation Readiness](3A-R6-phase3-critical-path-implementation-readiness.md)
+- [3A-R7 — Platform Consultant Ownership Reconciliation](3A-R7-platform-consultant-ownership-reconciliation.md)
+- [3A-R8 — Project Baseline & Change Engineering Coherence](3A-R8-project-baseline-change-engineering-coherence.md)
+- [3A-R9 — Managed Job / Deterministic Sync Dispatch Reconciliation](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md)
+- [3A-R10 — Pre-Implementation Convergence & Realization Routing](3A-R10-pre-implementation-convergence-realization-routing.md)
+
+### 3B — System Context & Boundaries
+
+Historical/detail authority: `../24-arquitetura-system-design.md` plus `3B-*` decisions.
+
+### 3C — Domain / Module Architecture
+
+- `3C-01..3C-15`
+- [3C-R1 — Cross-review Closure](3C-R1-cross-review-closure.md)
+
+### 3D — Dependency Architecture
+
+- `3D-01..3D-04`
+- [3D-R1 — Final Closure](3D-R1-dependency-architecture-final-closure.md)
+
+### 3E — Data Architecture
+
+- `3E-01..3E-02`
+- [3E-R1 — Final Closure](3E-R1-data-architecture-final-closure.md)
+
+### 3F — Contracts & API Architecture
+
+- `3F-01..3F-06`
+- [3F-R1 — Final Closure](3F-R1-contracts-api-architecture-final-closure.md)
+
+### 3G — Behavioral / State Architecture
+
+- `3G-01..3G-08`
+- [3G-R1 — Final Closure](3G-R1-behavioral-state-architecture-final-closure.md)
+
+### 3H — Runtime & Agent Architecture
+
+- [3H-01 — Builder Coding Runtime Realization](3H-01-builder-coding-runtime-realization-session-sandbox-mapping.md)
+- [3H-02 — Production Agent Runtime Realization](3H-02-production-agent-runtime-realization.md)
+- [3H-03 — Runtime Isolation, Correlation & Handoff](3H-03-runtime-isolation-correlation-handoff.md)
+- [3H-R1 — Final Closure](3H-R1-runtime-agent-architecture-final-closure.md)
+
+### 3I — Security / Authority Architecture
+
+- `3I-01..3I-05`
+- [3I-R1 — Final Closure](3I-R1-security-authority-architecture-final-closure.md)
+
+### 3J — Deployment / Operations Architecture
+
+- `3J-01..3J-03`
+- [3J-R1 — Final Closure](3J-R1-deployment-operations-architecture-final-closure.md)
+
+### 3K — Frontend / Product Architecture
+
+- `3K-01..3K-04`
+- [3K-R1 — Final Closure](3K-R1-frontend-product-architecture-final-closure.md)
+
+## 3L routing after 3A-R10
+
+3L is **Technology Qualification**, not framework exploration. Before execution, Q0 must pin exact versions/configuration and historical probe criteria must be compiled against current authority.
+
+```text
+Package A — Builder Substrate + Cognition
+  CX-SBX-E2B-01
+  CX-BUILDER-MASTRA-01
+  CX-BUILDER-COGNITION-01
+
+Package B — Product Agent + Cross-Runtime
+  CX-AGENT-MASTRA-01
+  CX-RUNTIME-ISOLATION-01
+
+Package C — Model Economics / Enforcement
+  3I-03 technology-dependent interception/retry/usage/cost-envelope subset
+
+Package D — Managed Execution
+  CX-MANAGED-JOB-01
+
+Package E — Deciding Evidence
+  Verification Observability deciding-evidence subset
+```
+
+Builder Observational Memory is **MUST EVALUATE / NOT MUST ENABLE**. Product Agent OM, Semantic Recall and Memory Extractors remain consumer/eval-gated unless a later accepted decision says otherwise.
+
+## Downstream first-build proof map
+
+These proof obligations are intentionally **not pulled into 3L** when they require implemented Conexus bytes to exist. They remain mandatory in the implementing slices and must be placed by post-C-018 Realization Planning:
+
+```text
+CX-BRAIN-V0-01
+CX-BRAIN-DISCOVERY-01
+CX-BRAIN-FEEDBACK-01
+CX-SCAFFOLD-V0-01
+CX-OBS-V0-01           ← compile historical Pi-specific criteria to current Mastra authority
+CX-PUB-V0-01
+CX-REL-V0-01
+QA-DB-1 / QA-DB-2 / QA-DB-3
+C-016 F1 Security Baseline conformance
+C-003 QUA-1 Golden benchmark / QUA-4 Worker Eval as applicable
+```
+
+## Structural map preserved
 
 ```text
 Conexus Hub — modular monolith
@@ -65,92 +163,30 @@ Observability & Audit
 Attachments
 ```
 
-Decisão transversal:
+Transversal application runtime profile remains:
 
 ```text
 ApplicationRuntimeProfile = MANAGED | DEDICATED
 ```
 
-`DEDICATED Application Runtime` é output/runtime de Project, não módulo do Hub.
+`DEDICATED Application Runtime` is a Project output/runtime, not a Hub module.
 
-## Fechamentos principais
-
-### 3F
-
-[3F-R1](3F-R1-contracts-api-architecture-final-closure.md) fecha Contracts & API Architecture preservando:
+## Program route
 
 ```text
-ReleaseManifest as composition root
-current Project intent != runtime composition
-exact approval subject + single claim
-concrete Project bindings
-stable public failure behavior keys
-DEDICATED server-to-platform under exact ReleaseRef
+3A-R10 checkpoint
+→ 3L Technology Qualification
+→ 3M Failure & Recovery
+→ 3N Architecture Verification
+→ 3O Vertical Architecture Proof Contract
+→ C-018
+→ F3B-R1 canonical product repo/cutover gate
+→ post-C-018 Implementation Realization Planning Gate
+→ accepted executable implementation plan(s)
+→ product implementation
+→ slice-owned first-build conformance probes
+→ Golden Budget Analyzer
+→ SERVED_VERIFIED
 ```
 
-### 3G
-
-[3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) fecha Behavioral / State Architecture com state spaces owner-local e sem engine universal.
-
-Global non-unification:
-
-```text
-Builder ActorRun
-!= Production AgentRun
-!= Gateway effect_attempt
-!= Promotion
-```
-
-E:
-
-```text
-Change ACCEPTED
-!= WorkUnit acceptedDelivery
-!= Builder ActorRun DELIVERED
-!= Production AgentRun COMPLETED
-!= effect SUCCEEDED
-!= Release AVAILABLE
-!= active pointer swapped
-!= SERVED_VERIFIED
-```
-
-3G concluiu:
-
-```text
-remaining material 3G decision = 0
-3G-09 = NOT JUSTIFIED
-new module / durable class / Tier-2 FK = 0
-new workflow engine / queue / scheduler / lease = 0
-```
-
-Os reviews package-level permanecem evidence não-autoritativa:
-
-- `3G-FABLE-PACKAGE-remaining-behavioral-state-architecture.md`
-- `3G-FABLE-PACKAGE-remaining-behavioral-state-architecture-R2.md`
-
-Final review: `PACKAGE CURRENT STRUCTURE CONFIRMED`.
-
-## Routed work
-
-A lista atual completa de work ainda aberto e seus owners está em [LEDGER §9](LEDGER.md#9-open-findings--routed-work-after-3g).
-
-Principais próximos owners:
-
-```text
-3H → Mastra/AgentController/CodingSession/Workspace/E2B/runtime realization
-3I → trust/authority/revocation/DEDICATED credentials
-3J → physical deployment/operations/backup/serving
-3K → product UX / archive / trigger / Release / approval surfaces
-3L → technology probes, including CX-BUILDER-MASTRA-01 and CX-AGENT-MASTRA-01
-3M → crash/reconciliation/custody/migration recovery/GC
-3N → adversarial architecture verification
-3O → vertical architecture proof contract
-```
-
-## Regra de avanço
-
-A próxima etapa é **3H — Runtime & Agent Architecture**.
-
-3H deve começar por intake/decomposition do pacote de realization, usando as authorities 3C/3D/3E/3F/3G como constraints, e só deve depender de comportamento atual do Mastra/E2B após verificação por fontes primárias/Context7 quando material.
-
-A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este índice, e PR #40 não deve ser mergeado sem autorização explícita do operador.
+No product implementation is authorized by this index, and PR #40 must not be merged without explicit operator authorization.

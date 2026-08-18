@@ -48,10 +48,12 @@ async function providerInfo(sandboxId) {
 }
 
 async function metricsEventually(sandboxId) {
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  // Mirror the provider SDK's own conformance window: collection is bucketed
+  // and the upstream test allows up to 60 × 500 ms for the first sample.
+  for (let attempt = 0; attempt < 60; attempt += 1) {
     const metrics = await Sandbox.getMetrics(sandboxId, { apiKey });
     if (metrics.length > 0) return metrics;
-    await new Promise(resolve => setTimeout(resolve, 1_000));
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
   return [];
 }

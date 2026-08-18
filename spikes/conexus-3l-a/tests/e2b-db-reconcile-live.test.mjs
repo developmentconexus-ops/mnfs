@@ -73,7 +73,7 @@ test('A2-DB-01: BuildValidationDatabase substrate preserves PG17.10, builtin C.U
     const dbIdentity = (
       await sandbox.commands.run(
         psql(
-          "SELECT datlocprovider || '|' || pg_encoding_to_char(encoding) || '|' || datlocale FROM pg_database WHERE datname = current_database();",
+          "SELECT concat_ws('|', datlocprovider, pg_encoding_to_char(encoding), datlocale) FROM pg_database WHERE datname = current_database();",
         ),
       )
     ).stdout.trim();
@@ -106,7 +106,7 @@ test('A2-DB-01: BuildValidationDatabase substrate preserves PG17.10, builtin C.U
 
     const collation = (
       await sandbox.commands.run(
-        psql("SELECT collprovider || '|' || colllocale FROM pg_collation WHERE collname = 'conexus_pt_br';"),
+        psql("SELECT concat_ws('|', collprovider, colllocale) FROM pg_collation WHERE collname = 'conexus_pt_br';"),
       )
     ).stdout.trim();
     assert.match(collation, /^i\|.+/);
@@ -114,18 +114,18 @@ test('A2-DB-01: BuildValidationDatabase substrate preserves PG17.10, builtin C.U
     const roleSafety = (
       await sandbox.commands.run(
         psql(
-          "SELECT rolname || '|' || rolsuper || '|' || rolcreatedb || '|' || rolcreaterole || '|' || rolcanlogin FROM pg_roles WHERE rolname IN ('conexus_probe_owner','conexus_probe_migrator','conexus_probe_query','conexus_probe_action') ORDER BY rolname;",
+          "SELECT concat_ws('|', rolname, rolsuper, rolcreatedb, rolcreaterole, rolcanlogin) FROM pg_roles WHERE rolname IN ('conexus_probe_owner','conexus_probe_migrator','conexus_probe_query','conexus_probe_action') ORDER BY rolname;",
         ),
       )
     ).stdout.trim().split('\n');
     assert.equal(roleSafety.length, 4);
     for (const row of roleSafety) {
       const [name, superuser, createdb, createrole, canlogin] = row.split('|');
-      assert.equal(superuser, 'f', `${name} must not be superuser`);
-      assert.equal(createdb, 'f', `${name} must not create databases`);
-      assert.equal(createrole, 'f', `${name} must not create roles`);
-      if (name === 'conexus_probe_owner') assert.equal(canlogin, 'f', 'owner must be NOLOGIN');
-      else assert.equal(canlogin, 't', `${name} must be a login role for this conformance fixture`);
+      assert.equal(superuser, 'false', `${name} must not be superuser`);
+      assert.equal(createdb, 'false', `${name} must not create databases`);
+      assert.equal(createrole, 'false', `${name} must not create roles`);
+      if (name === 'conexus_probe_owner') assert.equal(canlogin, 'false', 'owner must be NOLOGIN');
+      else assert.equal(canlogin, 'true', `${name} must be a login role for this conformance fixture`);
     }
 
     const actionInsert = await sandbox.commands.run(
@@ -134,7 +134,7 @@ test('A2-DB-01: BuildValidationDatabase substrate preserves PG17.10, builtin C.U
     assert.equal(actionInsert.exitCode, 0, actionInsert.stderr);
 
     const queryRead = (
-      await sandbox.commands.run(psql('SELECT id || \'|\' || name FROM app.items;', { role: 'conexus_probe_query' }))
+      await sandbox.commands.run(psql("SELECT concat_ws('|', id, name) FROM app.items;", { role: 'conexus_probe_query' }))
     ).stdout.trim();
     assert.equal(queryRead, '1|Água');
 

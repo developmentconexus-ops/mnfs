@@ -319,7 +319,7 @@ Detalhes adicionais:
 | 3C-13 | Observability & Audit | [3C-13](3C-13-observability-audit-module-boundary.md) |
 | 3C-14 | Attachments / Storage | [3C-14](3C-14-attachments-storage-boundary.md) |
 | 3C-15 | Managed Application Runtime | [3C-15](3C-15-managed-application-runtime-boundary.md) |
-| 3C-R1 | Cross-review Closure | [3C-R1](3C-R1-cross-review-closure.md) |
+| 3C-R1 | Cross-review Closure | [3C-R1](3C-R1-dependency-architecture-final-closure.md) |
 
 Builder runtime reconciliation relevante:
 
@@ -744,7 +744,7 @@ Review provenance, non-authoritative:
 
 ```text
 Connections owns CredentialHandle/logical-grant facts; secret bytes stay in CredentialBackend infrastructure
-CredentialBackend F1 consumers remain exatamente Connections + Gateway
+CredentialBackend F1 consumers remain exactly Connections + Gateway
 Connection plaintext appears only at write-only administration ingress + trusted Gateway last-mile use
 Qualification uses Gateway external I/O and does not create a third plaintext consumer
 platform Git/E2B/model/DB/backup credentials reuse custody principles but remain owner-specific

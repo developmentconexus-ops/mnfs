@@ -86,29 +86,3 @@ jobs:
           git add package-lock.json
           git commit -m 'spike(conexus): lock 3L Package A dependencies'
           git push origin HEAD:${{ github.head_ref }}
-      - name: One-shot reconcile latest-stable 3L authority
-        if: github.event_name == 'pull_request' && hashFiles('spikes/conexus-3l-a/reconcile-latest-stable-authority.py') != ''
-        run: |
-          python spikes/conexus-3l-a/reconcile-latest-stable-authority.py
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('docs/conexus/phase3/LEDGER.md')
-          lines = p.read_text().splitlines(keepends=True)
-          assert lines[3].startswith('**Estado:**'), lines[3][:80]
-          assert lines[4].startswith('**Fase atual:**'), lines[4][:80]
-          for i in (3, 4):
-              lines[i] = lines[i].rstrip(' \r\n') + '\n'
-          p.write_text(''.join(lines))
-          PY
-          rm spikes/conexus-3l-a/reconcile-latest-stable-authority.py
-          rm -f .github/workflows/conexus-3l-reconcile-stable.yml
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/conexus/phase3/3L-Q0-qualification-manifest.md \
-                  docs/conexus/phase3/3L-A-builder-substrate-cognition.md \
-                  docs/conexus/phase3/LEDGER.md \
-                  docs/conexus/phase3/README.md \
-                  spikes/conexus-3l-a/reconcile-latest-stable-authority.py
-          git diff --cached --check
-          git commit -m 'docs(conexus): reconcile Package A latest-stable qualification'
-          git push origin HEAD:${{ github.head_ref }}

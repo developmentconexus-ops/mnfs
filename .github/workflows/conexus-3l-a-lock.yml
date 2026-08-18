@@ -33,11 +33,11 @@ jobs:
           const raw = fs.readFileSync('package-lock.json');
           const lock = JSON.parse(raw);
           const expected = {
-            '@mastra/code-sdk': '1.1.1',
-            '@mastra/core': '1.55.0',
-            '@mastra/e2b': '0.7.0',
-            '@mastra/memory': '1.24.0',
-            '@mastra/pg': '1.18.1',
+            '@mastra/code-sdk': '1.1.2',
+            '@mastra/core': '1.56.0',
+            '@mastra/e2b': '0.8.0',
+            '@mastra/memory': '1.25.0',
+            '@mastra/pg': '1.19.0',
           };
           const denied = new Map([
             ['@mastra/core', new Set(['1.42.1'])],

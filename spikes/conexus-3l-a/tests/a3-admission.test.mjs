@@ -42,9 +42,9 @@ test('A3 OM probe config is thread-scoped, bounded and excludes deferred memory 
   assert.equal(A3_OM_CONFIG.observation.messageTokens, 8000);
   assert.equal(A3_OM_CONFIG.observation.bufferTokens, 0.2);
   assert.equal(A3_OM_CONFIG.observation.previousObserverTokens, 1000);
-  assert.equal(A3_OM_CONFIG.observation.modelSettings.maxOutputTokens, 2048);
+  assert.equal('modelSettings' in A3_OM_CONFIG.observation, false);
   assert.equal(A3_OM_CONFIG.reflection.observationTokens, 2000);
-  assert.equal(A3_OM_CONFIG.reflection.modelSettings.maxOutputTokens, 2048);
+  assert.equal('modelSettings' in A3_OM_CONFIG.reflection, false);
   assert.equal('extract' in A3_OM_CONFIG.observation, false);
   assert.equal('workingMemory' in A3_OM_CONFIG, false);
   assert.equal('vector' in A3_OM_CONFIG, false);

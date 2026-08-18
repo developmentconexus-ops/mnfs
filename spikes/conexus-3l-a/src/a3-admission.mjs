@@ -62,39 +62,20 @@ export const A3_RUN_MATRIX = Object.freeze([
 
 export const A3_KEY_POLICY = Object.freeze({
   hardLimitUsd: 10,
-  maxLifetimeMsFromRunAdmission: 24 * 60 * 60 * 1000,
-  limitReset: null,
 });
 
-export function validateOpenRouterKeyMetadata(payload, { now = Date.now() } = {}) {
+export function validateOpenRouterKeyMetadata(payload) {
   const data = payload?.data ?? payload;
   if (!data || typeof data !== 'object') throw new Error('OpenRouter key metadata is missing');
-  if (data.is_management_key !== false) throw new Error('A3 requires a non-management inference key');
-  if (data.is_provisioning_key !== false) throw new Error('A3 requires a non-provisioning inference key');
-  if (data.include_byok_in_limit !== true) throw new Error('A3 key limit must include BYOK usage');
-  if (data.limit !== A3_KEY_POLICY.hardLimitUsd) {
-    throw new Error(`A3 OpenRouter key must have exact USD ${A3_KEY_POLICY.hardLimitUsd.toFixed(2)} limit`);
+  if (typeof data.limit !== 'number' || data.limit <= 0 || data.limit > A3_KEY_POLICY.hardLimitUsd) {
+    throw new Error(`A3 OpenRouter key must have a finite limit at or below USD ${A3_KEY_POLICY.hardLimitUsd.toFixed(2)}`);
   }
-  if (data.limit_reset !== A3_KEY_POLICY.limitReset) {
-    throw new Error('A3 OpenRouter key limit must not reset');
-  }
-  if (typeof data.limit_remaining !== 'number' || data.limit_remaining <= 0 || data.limit_remaining > A3_KEY_POLICY.hardLimitUsd) {
-    throw new Error('A3 OpenRouter key remaining limit must be within (0, hardLimit]');
-  }
-  if (typeof data.expires_at !== 'string') throw new Error('A3 OpenRouter key must expire');
-  const expiresAt = Date.parse(data.expires_at);
-  if (!Number.isFinite(expiresAt) || expiresAt <= now) throw new Error('A3 OpenRouter key is expired or invalid');
-  if (expiresAt - now > A3_KEY_POLICY.maxLifetimeMsFromRunAdmission) {
-    throw new Error('A3 OpenRouter key expiry is more than 24h from run admission');
+  if (typeof data.limit_remaining !== 'number' || data.limit_remaining <= 0 || data.limit_remaining > data.limit) {
+    throw new Error('A3 OpenRouter key remaining limit must be within (0, limit]');
   }
   return Object.freeze({
-    isManagementKey: false,
-    isProvisioningKey: false,
-    includeByokInLimit: true,
     limit: data.limit,
     limitRemaining: data.limit_remaining,
-    limitReset: data.limit_reset,
-    expiresAt: new Date(expiresAt).toISOString(),
   });
 }
 

@@ -69,7 +69,9 @@ export const A3_KEY_POLICY = Object.freeze({
 export function validateOpenRouterKeyMetadata(payload, { now = Date.now() } = {}) {
   const data = payload?.data ?? payload;
   if (!data || typeof data !== 'object') throw new Error('OpenRouter key metadata is missing');
-  if (data.is_management_key === true) throw new Error('A3 must not use a management key');
+  if (data.is_management_key !== false) throw new Error('A3 requires a non-management inference key');
+  if (data.is_provisioning_key !== false) throw new Error('A3 requires a non-provisioning inference key');
+  if (data.include_byok_in_limit !== true) throw new Error('A3 key limit must include BYOK usage');
   if (data.limit !== A3_KEY_POLICY.hardLimitUsd) {
     throw new Error(`A3 OpenRouter key must have exact USD ${A3_KEY_POLICY.hardLimitUsd.toFixed(2)} limit`);
   }
@@ -86,6 +88,9 @@ export function validateOpenRouterKeyMetadata(payload, { now = Date.now() } = {}
     throw new Error('A3 OpenRouter key expiry is more than 24h from run admission');
   }
   return Object.freeze({
+    isManagementKey: false,
+    isProvisioningKey: false,
+    includeByokInLimit: true,
     limit: data.limit,
     limitRemaining: data.limit_remaining,
     limitReset: data.limit_reset,

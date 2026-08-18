@@ -1,0 +1,15 @@
+{
+  "name": "@developmentconexus/conexus-3l-package-a",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.18.0"
+  },
+  "dependencies": {
+    "@mastra/core": "1.55.0",
+    "@mastra/e2b": "0.7.0",
+    "@mastra/memory": "1.24.0",
+    "@mastra/pg": "1.18.1"
+  }
+}

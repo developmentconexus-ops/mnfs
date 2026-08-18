@@ -54,7 +54,7 @@ jobs:
   e2b-live:
     runs-on: ubuntu-latest
     environment: E2B_API_KEY
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
       E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
     steps:
@@ -71,9 +71,9 @@ jobs:
       - name: Install exact spike lock without lifecycle scripts
         working-directory: spikes/conexus-3l-a
         run: npm ci --ignore-scripts --audit=false --fund=false
-      - name: Run A2 live E2B qualification probes
+      - name: Run A2 live E2B qualification probes serially
         working-directory: spikes/conexus-3l-a
-        run: node --test tests/e2b-live.test.mjs
+        run: node --test --test-concurrency=1 tests/e2b-live.test.mjs tests/e2b-envelope-live.test.mjs
 
   external-credential-admission:
     runs-on: ubuntu-latest

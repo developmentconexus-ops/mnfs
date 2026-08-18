@@ -131,3 +131,71 @@ test('P3: persisted stale mode/model survives restart but current dispatch can o
 
   await secondStore.close();
 });
+
+test('P21/P2-subset: a fresh AgentController Session identity can rebind the same cognitive thread', async () => {
+  const schema = schemaName('p21');
+  const shared = {
+    ownerId: 'builder-owner',
+    resourceId: 'coding-session-domain-1',
+    threadId: 'coding-thread-domain-1',
+  };
+
+  const firstStore = await createStore(schema, 'builder-store-session-a');
+  const firstController = await createController(firstStore, { controllerId: 'builder-controller-a' });
+  const firstSession = await firstController.createSession({ id: 'runtime-session-a', ...shared });
+  assert.equal(firstSession.identity.getId(), 'runtime-session-a');
+  assert.equal(firstSession.thread.getId(), shared.threadId);
+
+  const memory = await firstStore.getStore('memory');
+  assert.ok(memory, 'Mastra memory store must be available');
+  await memory.saveMessages({ messages: [persistedMessage(shared)] });
+  await firstStore.close();
+
+  const secondStore = await createStore(schema, 'builder-store-session-b');
+  const secondController = await createController(secondStore, { controllerId: 'builder-controller-b' });
+  const secondSession = await secondController.createSession({ id: 'runtime-session-b', ...shared });
+
+  assert.equal(secondSession.identity.getId(), 'runtime-session-b');
+  assert.notEqual(secondSession.identity.getId(), firstSession.identity.getId());
+  assert.equal(secondSession.thread.getId(), shared.threadId);
+  const messages = await secondSession.thread.listActiveMessages();
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0].content.parts[0].text, 'persistent-cognition-marker');
+
+  await secondStore.close();
+});
+
+test('P27-subset: stale OM observer/reflector selections are restored but mechanically replaceable', async () => {
+  const schema = schemaName('p27');
+  const sessionArgs = {
+    id: 'runtime-session-om',
+    ownerId: 'builder-owner',
+    resourceId: 'coding-session-om',
+    threadId: 'coding-thread-om',
+  };
+
+  const firstStore = await createStore(schema, 'builder-store-om-poison');
+  const firstController = await createController(firstStore);
+  const firstSession = await firstController.createSession(sessionArgs);
+  await firstSession.om.observer.switchModel({ modelId: 'probe/stale-observer' });
+  await firstSession.om.reflector.switchModel({ modelId: 'probe/stale-reflector' });
+  assert.equal(firstSession.om.observer.modelId(), 'probe/stale-observer');
+  assert.equal(firstSession.om.reflector.modelId(), 'probe/stale-reflector');
+  await firstStore.close();
+
+  const secondStore = await createStore(schema, 'builder-store-om-current');
+  const secondController = await createController(secondStore);
+  const rebound = await secondController.createSession(sessionArgs);
+
+  // Poisoned thread settings survive clean controller/store recreation.
+  assert.equal(rebound.om.observer.modelId(), 'probe/stale-observer');
+  assert.equal(rebound.om.reflector.modelId(), 'probe/stale-reflector');
+
+  // Current dispatch can replace both selections through the pinned public API.
+  await rebound.om.observer.switchModel({ modelId: 'probe/current-observer' });
+  await rebound.om.reflector.switchModel({ modelId: 'probe/current-reflector' });
+  assert.equal(rebound.om.observer.modelId(), 'probe/current-observer');
+  assert.equal(rebound.om.reflector.modelId(), 'probe/current-reflector');
+
+  await secondStore.close();
+});

@@ -31,6 +31,19 @@ test('A3 live runtime keeps the four admitted conditions comparable and uses E2B
   assert.equal(configs[0].omModel, 'openai/gpt-5.6-luna');
 });
 
+test('A3 answer-only conditions still receive a valid local Workspace without E2B', async () => {
+  assert.equal(
+    typeof live.createAnswerOnlyWorkspace,
+    'function',
+    'answer-only AgentController sessions still require a valid Workspace instance',
+  );
+
+  const workspace = live.createAnswerOnlyWorkspace('A0');
+  assert.ok(workspace);
+  assert.equal(typeof workspace.init, 'function');
+  await workspace.init();
+});
+
 test('A3 memory keeps full persistent history in both arms and only toggles observational memory', () => {
   const off = buildMemoryOptions({ omEnabled: false, omModel: 'fake-luna-model' });
   const on = buildMemoryOptions({ omEnabled: true, omModel: 'fake-luna-model' });
@@ -44,6 +57,13 @@ test('A3 memory keeps full persistent history in both arms and only toggles obse
   assert.equal(on.observationalMemory.scope, 'thread');
   assert.equal(on.observationalMemory.observation.model, 'fake-luna-model');
   assert.equal(on.observationalMemory.reflection.model, 'fake-luna-model');
+});
+
+test('A3 Codex OM config does not emit unsupported maxOutputTokens', () => {
+  const on = buildMemoryOptions({ omEnabled: true, omModel: 'openai/gpt-5.6-luna' });
+
+  assert.equal(on.observationalMemory.observation.modelSettings?.maxOutputTokens, undefined);
+  assert.equal(on.observationalMemory.reflection.modelSettings?.maxOutputTokens, undefined);
 });
 
 test('A3 scoring requires correctness and a successful Observer cycle only on OM-enabled arms', () => {

@@ -744,7 +744,7 @@ Review provenance, non-authoritative:
 
 ```text
 Connections owns CredentialHandle/logical-grant facts; secret bytes stay in CredentialBackend infrastructure
-CredentialBackend F1 consumers remain exactly Connections + Gateway
+CredentialBackend F1 consumers remain exatamente Connections + Gateway
 Connection plaintext appears only at write-only administration ingress + trusted Gateway last-mile use
 Qualification uses Gateway external I/O and does not create a third plaintext consumer
 platform Git/E2B/model/DB/backup credentials reuse custody principles but remain owner-specific
@@ -1020,7 +1020,7 @@ RPO <= 6h / RTO <= 8h; sem PITR/replication/second provider/backup platform
 cross-store atomic snapshot = REJECT
 ```
 
-3J-02 protege a plataforma Conexus e seus Projects; Metal Nobre é somente first-deployment evidence e nenhum ERP/integration vira backup truth model. **C-001 permanece product vision authority.**
+3J-02 protege a plataforma Conexus e seus Projects; Metal Nobre é somente first-deployment evidence e nenhum ERP/integration vira backup truth model. **C-001 permanece a product vision authority.**
 
 ### 11.3 3J-03 — Platform lifecycle / secrets / stop / availability laws
 

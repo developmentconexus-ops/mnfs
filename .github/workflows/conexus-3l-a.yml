@@ -108,10 +108,8 @@ jobs:
           tests/e2b-controls-live.test.mjs
           tests/e2b-db-reconcile-live.test.mjs
 
-  # One-shot PR admission is enabled only long enough to mint this A3 device code;
-  # the workflow is restored to manual-only immediately after the run starts.
   codex-device-start:
-    if: (github.event_name == 'workflow_dispatch' && inputs.target == 'a3') || github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'a3'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -134,7 +132,7 @@ jobs:
           retention-days: 1
 
   a3-live:
-    if: (github.event_name == 'workflow_dispatch' && inputs.target == 'a3') || github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'a3'
     needs: codex-device-start
     runs-on: ubuntu-latest
     environment: E2B_API_KEY

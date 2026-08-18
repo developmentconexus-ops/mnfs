@@ -119,9 +119,15 @@ async function waitProviderGone(sandboxId) {
   return false;
 }
 
-test('A2-NET-01: deny-all plus one private allowlisted host fires; redirects and non-HTTP escape attempts remain blocked', async () => {
+test('A2-NET-01: allowlist fires, redirect and non-DNS non-HTTP escape fail closed, while the known public-DNS exception is characterized', async () => {
   let redirector;
+  let baseline;
   let source;
+
+  const tcp853Probe =
+    "python3 - <<'PY'\nimport socket\ns=socket.create_connection(('1.1.1.1',853),timeout=3)\nprint('tcp853-open')\ns.close()\nPY";
+  const publicDnsProbe =
+    "python3 - <<'PY'\nimport socket,struct\nq=b'\\x12\\x34\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00'+b'\\x07example\\x03com\\x00'+b'\\x00\\x01\\x00\\x01'\ns=socket.create_connection(('8.8.8.8',53),timeout=2)\ns.sendall(struct.pack('!H',len(q))+q)\ns.settimeout(2)\nif not s.recv(2): raise RuntimeError('no DNS response')\nprint('public-dns-exception-observed')\ns.close()\nPY";
 
   try {
     redirector = await createQualified({
@@ -139,6 +145,16 @@ test('A2-NET-01: deny-all plus one private allowlisted host fires; redirects and
     await redirector.commands.run('node /tmp/conexus-redirect-server.cjs', { background: true });
     const redirectHost = redirector.getHost(8080);
     await waitForPrivateHttp(redirectHost, redirector.trafficAccessToken);
+
+    // Control: prove the chosen non-HTTP target is genuinely reachable from an
+    // unrestricted E2B sandbox before using it as a policy-negative fixture.
+    baseline = await createQualified({
+      allowInternetAccess: true,
+      network: { allowPublicTraffic: false },
+      metadata: { 'conexus-probe': '3l-a-non-http-baseline' },
+    });
+    const baselineTcp853 = await baseline.commands.run(tcp853Probe);
+    assert.match(baselineTcp853.stdout, /tcp853-open/);
 
     source = await createQualified({
       network: {
@@ -170,17 +186,19 @@ test('A2-NET-01: deny-all plus one private allowlisted host fires; redirects and
     const hits = await redirector.files.read('/tmp/conexus-redirect-hits.log');
     assert.match(hits, /\/redirect/, 'first redirect hop must have reached the allowlisted host');
 
-    await assert.rejects(
-      source.commands.run(
-        "python3 - <<'PY'\nimport socket,struct\nq=b'\\x12\\x34\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00'+b'\\x07example\\x03com\\x00'+b'\\x00\\x01\\x00\\x01'\ns=socket.create_connection(('8.8.8.8',53),timeout=2)\ns.sendall(struct.pack('!H',len(q))+q)\ns.settimeout(2)\nif not s.recv(2): raise RuntimeError('no DNS response')\nPY",
-      ),
-      CommandExitError,
-    );
+    await assert.rejects(source.commands.run(tcp853Probe), CommandExitError);
+
+    // C-008 already freezes public DNS as an E2B limitation. Characterize it
+    // explicitly instead of incorrectly treating port 53 as a deny-all target.
+    const dnsException = await source.commands.run(publicDnsProbe);
+    assert.match(dnsException.stdout, /public-dns-exception-observed/);
+    console.log('A2_NET_DNS_EXCEPTION=PUBLIC_TCP53_DNS_REACHABLE_UNDER_DENY_ALL');
 
     const sourceEnv = await source.commands.run("env | grep -i 'traffic.*token' || true");
     assert.equal(sourceEnv.stdout.trim(), '', 'provider-side traffic-token transform must not become a guest env var');
   } finally {
     await killSandbox(source);
+    await killSandbox(baseline);
     await killSandbox(redirector);
   }
 });

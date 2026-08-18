@@ -54,7 +54,9 @@ jobs:
         working-directory: spikes/conexus-3l-a
         run: node --test tests/a3-admission.test.mjs
 
+  # A2 is already qualified. Replay the costly provider suite only when explicitly requested.
   e2b-live:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: E2B_API_KEY
     timeout-minutes: 20

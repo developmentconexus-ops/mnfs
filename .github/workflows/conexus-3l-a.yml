@@ -48,6 +48,29 @@ jobs:
         working-directory: spikes/conexus-3l-a
         run: node --test tests/e2b-adapter-contract.test.mjs
 
+  e2b-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Require approved E2B credential
+        run: |
+          if [ -z "$E2B_API_KEY" ]; then
+            echo 'A2_E2B_LIVE=NOT_PROVEN_NO_APPROVED_CREDENTIAL'
+            exit 1
+          fi
+      - name: Install exact spike lock without lifecycle scripts
+        working-directory: spikes/conexus-3l-a
+        run: npm ci --ignore-scripts --audit=false --fund=false
+      - name: Run A2 live E2B qualification probes
+        working-directory: spikes/conexus-3l-a
+        run: node --test tests/e2b-live.test.mjs
+
   external-credential-admission:
     runs-on: ubuntu-latest
     steps:

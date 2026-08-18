@@ -1,8 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { Agent } from '@mastra/core/agent';
 import { AgentController } from '@mastra/core/agent-controller';
+import { LocalFilesystem, Workspace } from '@mastra/core/workspace';
 import { PostgresStore } from '@mastra/pg';
 
 const connectionString = process.env.TEST_DATABASE_URL;
@@ -18,6 +22,14 @@ async function createStore(schema, id) {
   return store;
 }
 
+function createFixtureWorkspace() {
+  const basePath = fs.mkdtempSync(path.join(os.tmpdir(), 'conexus-3l-a1-'));
+  return new Workspace({
+    id: `a1-fixture-${crypto.randomUUID()}`,
+    filesystem: new LocalFilesystem({ basePath }),
+  });
+}
+
 async function createController(storage, { controllerId = 'builder-controller', defaultModelId = 'probe/current' } = {}) {
   const agent = new Agent({
     id: 'builder-probe-agent',
@@ -30,6 +42,9 @@ async function createController(storage, { controllerId = 'builder-controller', 
     id: controllerId,
     agent,
     storage,
+    // A1 requires a valid AgentController Session workspace, but does not qualify
+    // Builder workspace semantics. E2B remains exclusively in the A2 live track.
+    workspace: createFixtureWorkspace(),
     defaultModeId: 'build',
     modes: [
       { id: 'build', name: 'Build', defaultModelId, metadata: { default: true } },

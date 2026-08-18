@@ -1,9 +1,4 @@
-import {
-  A3_OM_CONFIG,
-  A3_RUN_MATRIX,
-  ACTOR_MODEL,
-  ACTOR_PROVIDER_OPTIONS,
-} from './a3-admission.mjs';
+import { A3_OM_CONFIG, A3_RUN_MATRIX, ACTOR_MODEL, OM_MODEL } from './a3-admission.mjs';
 
 export function buildConditionRuntimeConfig(id) {
   const condition = A3_RUN_MATRIX.find(item => item.id === id);
@@ -15,7 +10,7 @@ export function buildConditionRuntimeConfig(id) {
     omEnabled: condition.om,
     requiresE2B: condition.fixture === 'coding-effectiveness',
     actorModel: ACTOR_MODEL,
-    actorProviderOptions: ACTOR_PROVIDER_OPTIONS,
+    omModel: OM_MODEL,
   });
 }
 
@@ -47,37 +42,23 @@ export function buildMemoryOptions({ omEnabled, omModel }) {
   };
 }
 
-export function extractProviderMetadata(value) {
-  const metadata = value?.providerMetadata?.openrouter ?? value?.providerMetadata;
-  if (!metadata || typeof metadata !== 'object') return null;
-
-  const provider = metadata.provider ?? metadata.provider_name;
-  const generationId = metadata.generationId ?? metadata.generation_id;
-  if (provider === undefined && generationId === undefined) return null;
-
-  return {
-    ...(provider !== undefined ? { provider } : {}),
-    ...(generationId !== undefined ? { generationId } : {}),
-  };
-}
-
-export function scoreA3Condition({ condition, correctness, eventSummary, spendDeltaUsd }) {
+export function scoreA3Condition({ condition, correctness, eventSummary }) {
   if (!correctness?.pass) {
-    return Object.freeze({ admissible: false, reason: 'CORRECTNESS_FAILED', spendDeltaUsd });
+    return Object.freeze({ admissible: false, reason: 'CORRECTNESS_FAILED' });
   }
 
   if (
     condition?.omEnabled &&
     ((eventSummary?.observationFailures ?? 0) + (eventSummary?.bufferedObservationFailures ?? 0)) > 0
   ) {
-    return Object.freeze({ admissible: false, reason: 'OM_OBSERVATION_FAILED', spendDeltaUsd });
+    return Object.freeze({ admissible: false, reason: 'OM_OBSERVATION_FAILED' });
   }
 
   const successfulObserverCycles =
     (eventSummary?.observationEnds ?? 0) + (eventSummary?.bufferedObservationEnds ?? 0);
   if (condition?.omEnabled && successfulObserverCycles < 1) {
-    return Object.freeze({ admissible: false, reason: 'OM_DID_NOT_FIRE', spendDeltaUsd });
+    return Object.freeze({ admissible: false, reason: 'OM_DID_NOT_FIRE' });
   }
 
-  return Object.freeze({ admissible: true, reason: 'PASS', spendDeltaUsd });
+  return Object.freeze({ admissible: true, reason: 'PASS' });
 }

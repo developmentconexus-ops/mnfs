@@ -66,9 +66,16 @@ jobs:
           tests/a3-admission.test.mjs
           tests/a3-runner-contract.test.mjs
           tests/a3-live-runner.test.mjs
-      - name: Syntax-check A3 live executor without provider calls
+      - name: Import-check native Mastra Code Codex OAuth surfaces
         working-directory: spikes/conexus-3l-a
-        run: node --check src/a3-live-execute.mjs
+        run: >-
+          node --input-type=module -e "await import('@mastra/code-sdk/auth/providers/openai-codex'); await import('@mastra/code-sdk/auth/storage'); await import('@mastra/code-sdk/providers/openai-codex');"
+      - name: Syntax-check A3 live scripts without provider calls
+        working-directory: spikes/conexus-3l-a
+        run: >-
+          node --check src/a3-codex-device-start.mjs &&
+          node --check src/a3-codex-device-complete.mjs &&
+          node --check src/a3-live-execute.mjs
 
   # A2 is already qualified. Replay its provider suite only when explicitly selected.
   e2b-live:
@@ -101,11 +108,35 @@ jobs:
           tests/e2b-controls-live.test.mjs
           tests/e2b-db-reconcile-live.test.mjs
 
-  a3-live:
+  codex-device-start:
     if: github.event_name == 'workflow_dispatch' && inputs.target == 'a3'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Install exact spike lock without lifecycle scripts
+        working-directory: spikes/conexus-3l-a
+        run: npm ci --ignore-scripts --audit=false --fund=false
+      - name: Start native Mastra Code Codex device login
+        working-directory: spikes/conexus-3l-a
+        run: node src/a3-codex-device-start.mjs
+      - name: Preserve non-secret device pending state for the polling job
+        uses: actions/upload-artifact@v4
+        with:
+          name: conexus-3l-a3-codex-device-pending
+          path: spikes/conexus-3l-a/a3-codex-device-pending.json
+          if-no-files-found: error
+          retention-days: 1
+
+  a3-live:
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'a3'
+    needs: codex-device-start
+    runs-on: ubuntu-latest
     environment: E2B_API_KEY
-    timeout-minutes: 25
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17.10-bookworm
@@ -123,21 +154,18 @@ jobs:
     env:
       TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/conexus_probe
       E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      CODEX_DEVICE_PENDING_PATH: a3-codex-device-pending.json
+      CODEX_AUTH_PATH: /tmp/conexus-a3-codex-auth.json
       A3_RESULT_PATH: a3-cognition-result.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '24.18.0'
-      - name: Require only credentials needed by A3
+      - name: Require only the already-qualified E2B credential
         run: |
           if [ -z "$E2B_API_KEY" ]; then
             echo 'A3=NOT_PROVEN_NO_E2B_CREDENTIAL'
-            exit 1
-          fi
-          if [ -z "$OPENROUTER_API_KEY" ]; then
-            echo 'A3=NOT_PROVEN_NO_OPENROUTER_CREDENTIAL'
             exit 1
           fi
       - name: Install exact spike lock without lifecycle scripts
@@ -146,6 +174,14 @@ jobs:
       - name: Confirm PostgreSQL exact minor
         run: |
           PGPASSWORD=postgres psql -h 127.0.0.1 -U postgres -d conexus_probe -Atc 'show server_version;'
+      - name: Download device pending state from this workflow run
+        uses: actions/download-artifact@v4
+        with:
+          name: conexus-3l-a3-codex-device-pending
+          path: spikes/conexus-3l-a
+      - name: Poll native Codex OAuth and run one smoke inference
+        working-directory: spikes/conexus-3l-a
+        run: node src/a3-codex-device-complete.mjs
       - name: Execute the admitted four-run OM OFF x ON experiment
         working-directory: spikes/conexus-3l-a
         run: node src/a3-live-execute.mjs
@@ -157,22 +193,3 @@ jobs:
           path: spikes/conexus-3l-a/a3-cognition-result.json
           if-no-files-found: warn
           retention-days: 14
-
-  external-credential-admission:
-    runs-on: ubuntu-latest
-    environment: E2B_API_KEY
-    steps:
-      - name: Report only credentials needed by the current Package A path
-        env:
-          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-        run: |
-          node - <<'NODE'
-          const availability = {
-            E2B_API_KEY: Boolean(process.env.E2B_API_KEY),
-            OPENROUTER_API_KEY: Boolean(process.env.OPENROUTER_API_KEY),
-          };
-          console.log(JSON.stringify(availability, null, 2));
-          if (!availability.E2B_API_KEY) console.log('A2_E2B_LIVE=NOT_PROVEN_NO_APPROVED_CREDENTIAL');
-          if (!availability.OPENROUTER_API_KEY) console.log('A3_OM_COGNITION=NOT_PROVEN_NO_APPROVED_MODEL_CREDENTIAL');
-          NODE

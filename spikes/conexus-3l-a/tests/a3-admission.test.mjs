@@ -1,17 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  A3_KEY_POLICY,
   A3_LOCK_SHA256,
   A3_OM_CONFIG,
   A3_RUN_MATRIX,
+  A3_THINKING_LEVEL,
   ACTOR_MODEL,
-  ACTOR_PROVIDER_OPTIONS,
+  ACTOR_MODEL_SLUG,
+  CODEX_AUTH_PROVIDER,
   OM_MODEL,
-  OM_PROVIDER_OPTIONS,
+  OM_MODEL_SLUG,
   QUALIFIED_E2B_TEMPLATE_ID,
-  validateOpenRouterKeyMetadata,
-  validateReturnedRoute,
+  codexModelSlug,
 } from '../src/a3-admission.mjs';
 import {
   AUTHORITY_FINAL_TASK,
@@ -22,27 +22,19 @@ import {
   scoreCodingResult,
 } from '../src/a3-fixtures.mjs';
 
-test('A3 admission identity is exact and the matrix contains exactly four paired primary runs', () => {
-  assert.equal(A3_LOCK_SHA256, '70975a4b3aadc453959bd36835c1c4ad3edc320c862a9ebfb6ace7feb4fd1864');
+test('A3 Codex admission pins Sol actor, Luna OM and exactly four paired primary runs', () => {
+  assert.equal(A3_LOCK_SHA256, null, 'new Codex closure must be materialized before live execution');
   assert.equal(QUALIFIED_E2B_TEMPLATE_ID, '7ezun152y8jtqxf7llpl');
-  assert.equal(ACTOR_MODEL, 'openrouter/anthropic/claude-sonnet-5');
-  assert.equal(OM_MODEL, 'openrouter/google/gemini-3.5-flash');
+  assert.equal(CODEX_AUTH_PROVIDER, 'openai-codex');
+  assert.equal(ACTOR_MODEL, 'openai/gpt-5.6-sol');
+  assert.equal(ACTOR_MODEL_SLUG, 'gpt-5.6-sol');
+  assert.equal(OM_MODEL, 'openai/gpt-5.6-luna');
+  assert.equal(OM_MODEL_SLUG, 'gpt-5.6-luna');
+  assert.equal(codexModelSlug(ACTOR_MODEL), ACTOR_MODEL_SLUG);
+  assert.equal(codexModelSlug(OM_MODEL), OM_MODEL_SLUG);
+  assert.equal(A3_THINKING_LEVEL, 'medium');
   assert.deepEqual(A3_RUN_MATRIX.map(run => run.id), ['A0', 'A1', 'B0', 'B1']);
   assert.deepEqual(A3_RUN_MATRIX.map(run => run.om), [false, true, false, true]);
-});
-
-test('A3 provider routing disables fallback and pins Actor/OM provider classes', () => {
-  assert.deepEqual(ACTOR_PROVIDER_OPTIONS.openrouter.provider.only, ['anthropic']);
-  assert.deepEqual(ACTOR_PROVIDER_OPTIONS.openrouter.provider.order, ['anthropic']);
-  assert.equal(ACTOR_PROVIDER_OPTIONS.openrouter.provider.allow_fallbacks, false);
-  assert.equal(ACTOR_PROVIDER_OPTIONS.openrouter.provider.require_parameters, true);
-  assert.equal(ACTOR_PROVIDER_OPTIONS.openrouter.reasoning.effort, 'medium');
-
-  assert.deepEqual(OM_PROVIDER_OPTIONS.openrouter.provider.only, ['google-ai-studio']);
-  assert.deepEqual(OM_PROVIDER_OPTIONS.openrouter.provider.order, ['google-ai-studio']);
-  assert.equal(OM_PROVIDER_OPTIONS.openrouter.provider.allow_fallbacks, false);
-  assert.equal(OM_PROVIDER_OPTIONS.openrouter.provider.require_parameters, true);
-  assert.equal(OM_PROVIDER_OPTIONS.openrouter.reasoning.effort, 'medium');
 });
 
 test('A3 OM probe config is thread-scoped, bounded and excludes deferred memory expansions', () => {
@@ -56,58 +48,7 @@ test('A3 OM probe config is thread-scoped, bounded and excludes deferred memory 
   assert.equal('extract' in A3_OM_CONFIG.observation, false);
   assert.equal('workingMemory' in A3_OM_CONFIG, false);
   assert.equal('vector' in A3_OM_CONFIG, false);
-});
-
-test('A3 key gate only enforces a finite qualification spend envelope', () => {
-  const accepted = validateOpenRouterKeyMetadata({
-    data: {
-      limit: 10,
-      limit_remaining: 10,
-      // Security/account-shape metadata is deliberately not a 3L-A gate.
-      is_management_key: true,
-      is_provisioning_key: true,
-      include_byok_in_limit: false,
-    },
-  });
-  assert.equal(accepted.limit, A3_KEY_POLICY.hardLimitUsd);
-  assert.equal(accepted.limitRemaining, 10);
-
-  for (const metadata of [
-    { limit: null, limit_remaining: 10 },
-    { limit: 11, limit_remaining: 11 },
-    { limit: 10, limit_remaining: 0 },
-    { limit: 10, limit_remaining: 12 },
-  ]) {
-    assert.throws(() => validateOpenRouterKeyMetadata({ data: metadata }));
-  }
-});
-
-test('A3 returned-route guard rejects model/provider drift when metadata is available', () => {
-  assert.equal(
-    validateReturnedRoute({
-      requestedModel: 'anthropic/claude-sonnet-5',
-      returnedModel: 'anthropic/claude-sonnet-5',
-      expectedProvider: 'anthropic',
-      providerMetadata: { provider: 'Anthropic' },
-    }),
-    true,
-  );
-  assert.throws(() =>
-    validateReturnedRoute({
-      requestedModel: 'anthropic/claude-sonnet-5',
-      returnedModel: 'anthropic/claude-sonnet-5',
-      expectedProvider: 'anthropic',
-      providerMetadata: { provider: 'Amazon Bedrock' },
-    }),
-  );
-  assert.throws(() =>
-    validateReturnedRoute({
-      requestedModel: 'anthropic/claude-sonnet-5',
-      returnedModel: 'anthropic/claude-sonnet-latest',
-      expectedProvider: 'anthropic',
-      providerMetadata: { provider: 'Anthropic' },
-    }),
-  );
+  assert.equal('providerOptions' in A3_OM_CONFIG.observation, false);
 });
 
 test('authority-currentness fixture is large, contains an explicit supersession and scores stale authority as failure', () => {
@@ -137,11 +78,7 @@ test('coding fixture has a real red baseline and scoring forbids verifier edits 
   assert.ok(CODING_FIXTURE_FILES['test/budget.test.mjs'].includes('displayUnknownAs: null'));
 
   assert.equal(
-    scoreCodingResult({
-      changedPaths: ['src/budget.mjs'],
-      testExitCode: 0,
-      finalFile: 'return { displayUnknownAs: null };',
-    }).pass,
+    scoreCodingResult({ changedPaths: ['src/budget.mjs'], testExitCode: 0, finalFile: 'return { displayUnknownAs: null };' }).pass,
     true,
   );
   assert.equal(
@@ -153,11 +90,7 @@ test('coding fixture has a real red baseline and scoring forbids verifier edits 
     false,
   );
   assert.equal(
-    scoreCodingResult({
-      changedPaths: ['src/budget.mjs'],
-      testExitCode: 0,
-      finalFile: 'return { displayUnknownAs: 0 };',
-    }).pass,
+    scoreCodingResult({ changedPaths: ['src/budget.mjs'], testExitCode: 0, finalFile: 'return { displayUnknownAs: 0 };' }).pass,
     false,
   );
 });

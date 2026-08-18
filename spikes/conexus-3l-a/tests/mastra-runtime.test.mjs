@@ -199,3 +199,56 @@ test('P27-subset: stale OM observer/reflector selections are restored but mechan
 
   await secondStore.close();
 });
+
+test('P2: live session grants are ephemeral and do not survive clean controller recreation', async () => {
+  const schema = schemaName('p2');
+  const sessionArgs = {
+    id: 'runtime-session-grants',
+    ownerId: 'builder-owner',
+    resourceId: 'coding-session-grants',
+    threadId: 'coding-thread-grants',
+  };
+
+  const firstStore = await createStore(schema, 'builder-store-grants-first');
+  const firstController = await createController(firstStore);
+  const firstSession = await firstController.createSession(sessionArgs);
+  firstSession.grantTool('probe-dangerous-tool');
+  assert.ok(firstSession.getGrants().tools.includes('probe-dangerous-tool'));
+  await firstStore.close();
+
+  const secondStore = await createStore(schema, 'builder-store-grants-second');
+  const secondController = await createController(secondStore);
+  const rebound = await secondController.createSession(sessionArgs);
+  const reboundGrants = rebound.getGrants();
+
+  assert.equal(reboundGrants.tools.includes('probe-dangerous-tool'), false);
+  assert.equal(reboundGrants.categories.length, 0);
+  await secondStore.close();
+});
+
+test('P27-subset: stale subagent model selection is restored but mechanically replaceable', async () => {
+  const schema = schemaName('p27subagent');
+  const sessionArgs = {
+    id: 'runtime-session-subagent',
+    ownerId: 'builder-owner',
+    resourceId: 'coding-session-subagent',
+    threadId: 'coding-thread-subagent',
+  };
+
+  const firstStore = await createStore(schema, 'builder-store-subagent-poison');
+  const firstController = await createController(firstStore);
+  const firstSession = await firstController.createSession(sessionArgs);
+  await firstSession.subagents.model.set({ modelId: 'probe/stale-subagent' });
+  assert.equal(firstSession.subagents.model.get({}), 'probe/stale-subagent');
+  await firstStore.close();
+
+  const secondStore = await createStore(schema, 'builder-store-subagent-current');
+  const secondController = await createController(secondStore);
+  const rebound = await secondController.createSession(sessionArgs);
+
+  assert.equal(rebound.subagents.model.get({}), 'probe/stale-subagent');
+  await rebound.subagents.model.set({ modelId: 'probe/current-subagent' });
+  assert.equal(rebound.subagents.model.get({}), 'probe/current-subagent');
+
+  await secondStore.close();
+});

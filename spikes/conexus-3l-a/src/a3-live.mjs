@@ -42,6 +42,15 @@ export function buildMemoryOptions({ omEnabled, omModel }) {
   };
 }
 
+export async function smokeCodexModel(agent, marker) {
+  const response = await agent.stream(`Reply with exactly ${marker} and nothing else.`);
+  let text = '';
+  for await (const chunk of response.textStream) {
+    text += chunk;
+  }
+  return text.trim();
+}
+
 export function scoreA3Condition({ condition, correctness, eventSummary }) {
   if (!correctness?.pass) {
     return Object.freeze({ admissible: false, reason: 'CORRECTNESS_FAILED' });

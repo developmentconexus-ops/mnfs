@@ -59,6 +59,29 @@ function schemaName(conditionId) {
   return `mastra_a3_${conditionId.toLowerCase()}_${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`;
 }
 
+function conditionIdentity(condition) {
+  return {
+    id: `a3-session-${condition.id.toLowerCase()}`,
+    ownerId: `a3-owner-${condition.id.toLowerCase()}`,
+    resourceId: `a3-resource-${condition.id.toLowerCase()}`,
+    threadId: `a3-thread-${condition.id.toLowerCase()}`,
+  };
+}
+
+async function withTimeout(promise, timeoutMs, label) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label} exceeded ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function fetchKeyEnvelope() {
   const response = await fetch('https://openrouter.ai/api/v1/key', {
     headers: { Authorization: `Bearer ${openRouterApiKey}` },
@@ -161,18 +184,15 @@ async function verifyCodingFixture(sandbox) {
   };
 }
 
-async function persistHistory(store, history, condition) {
+async function persistHistory(store, history, condition, { threadId, resourceId }) {
   const memoryStore = await store.getStore('memory');
   if (!memoryStore) throw new Error('A3 Postgres store did not expose memory domain');
-  const threadId = `a3-thread-${condition.id.toLowerCase()}`;
-  const resourceId = `a3-resource-${condition.id.toLowerCase()}`;
   const messages = buildMastraHistoryMessages(history, {
     conditionId: condition.id,
     threadId,
     resourceId,
   });
   await memoryStore.saveMessages({ messages });
-  return { threadId, resourceId };
 }
 
 function latestAssistantMetadata(messages) {
@@ -194,12 +214,20 @@ async function waitForOmSettled(events) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < OM_SETTLE_MS) {
     const summary = summarizeA3Events(events);
-    const started = summary.observationStarts + summary.reflectionStarts;
+    const started =
+      summary.observationStarts +
+      summary.reflectionStarts +
+      summary.bufferedObservationStarts +
+      summary.bufferedReflectionStarts;
     const settled =
       summary.observationEnds +
       summary.observationFailures +
       summary.reflectionEnds +
-      summary.reflectionFailures;
+      summary.reflectionFailures +
+      summary.bufferedObservationEnds +
+      summary.bufferedObservationFailures +
+      summary.bufferedReflectionEnds +
+      summary.bufferedReflectionFailures;
     if (started > 0 && settled >= started) return summary;
     await new Promise(resolve => setTimeout(resolve, 250));
   }
@@ -267,14 +295,10 @@ async function runCondition(conditionSpec, models) {
     await controller.init();
     if (sandbox) await seedCodingFixture(sandbox);
 
+    const identity = conditionIdentity(condition);
+    const session = await controller.createSession(identity);
     const history = condition.fixture === 'authority-currentness' ? buildAuthorityHistory() : CODING_HISTORY;
-    const ids = await persistHistory(store, history, condition);
-    const session = await controller.createSession({
-      id: `a3-session-${condition.id.toLowerCase()}`,
-      ownerId: `a3-owner-${condition.id.toLowerCase()}`,
-      resourceId: ids.resourceId,
-      threadId: ids.threadId,
-    });
+    await persistHistory(store, history, condition, identity);
 
     unsubscribe = session.subscribe(event => events.push(event));
 
@@ -366,12 +390,11 @@ async function main() {
   for (const condition of A3_RUN_MATRIX) {
     console.log(`A3_CONDITION_START=${condition.id}`);
     try {
-      const result = await Promise.race([
+      const result = await withTimeout(
         runCondition(condition, models),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error(`A3 condition ${condition.id} exceeded ${RUN_TIMEOUT_MS}ms`)), RUN_TIMEOUT_MS),
-        ),
-      ]);
+        RUN_TIMEOUT_MS,
+        `A3 condition ${condition.id}`,
+      );
       results.push(result);
       console.log(
         `A3_CONDITION_RESULT=${JSON.stringify({

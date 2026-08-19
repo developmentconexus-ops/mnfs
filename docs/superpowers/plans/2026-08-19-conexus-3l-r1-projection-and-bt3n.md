@@ -1,3 +1,16 @@
+---
+id: PLAN-CONEXUS-3L-R1-PROJECTION-BT3N
+title: Conexus 3L-R1 Projection and BT-3N Implementation Plan
+document_type: implementation_plan
+form: how_to
+authority: guidance
+status: accepted
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+last_reviewed: 2026-08-19
+---
+
 # Conexus 3L-R1 Projection + BT-3N Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

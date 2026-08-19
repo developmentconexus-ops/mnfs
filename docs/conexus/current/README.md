@@ -317,7 +317,7 @@ Historical pre-execution route, superseded by the executor record above: `BT-5N 
 
 BT-3N proves only native HITL + restart + current-owner authority boundary. BT-4N is lead-adjudicated `PASS_NATIVE_SCHEDULE_INGRESS`. BT-5N execution is complete with executor verdict `NOT_PROVEN`; Architecture-Lead / Package-B closure adjudication remains pending.
 
-The BT-5N executor evidence records that the RED wiring guard and shared-PubSub negative control fired, and that a focused public workflow/PubSub worker diagnostic succeeded. The required PostgreSQL-backed positive role-isolation path was not reached because `TEST_DATABASE_URL` was unset and PostgreSQL was unavailable locally. This does not qualify `CX-RUNTIME-ISOLATION-01` or close Package B.
+The BT-5N executor evidence records that the RED wiring guard and shared-PubSub negative control fired. The required PostgreSQL-backed positive path, including the public `OrchestrationWorker`/workflow/PubSub path, was not reached locally because `TEST_DATABASE_URL` was unset and PostgreSQL was unavailable. This does not qualify `CX-RUNTIME-ISOLATION-01` or close Package B.
 
 ---
 

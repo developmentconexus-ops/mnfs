@@ -1,6 +1,6 @@
 # 3L Package B — Proportional Technology Probe Result
 
-**Status:** `BT-3N PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY / BT-4N NEXT — EXECUTION AUTHORIZED`
+**Status:** `BT-4N EXECUTION COMPLETE / PASS_NATIVE_SCHEDULE_INGRESS / ARCHITECTURE-LEAD ADJUDICATION PENDING`
 
 **Execution authority:** [3L-R1 framework-native proportional qualification rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md), preserving the historical [3L-B proof-routing amendment](3L-B-proof-routing-amendment.md) as Evidence
 
@@ -8,7 +8,7 @@
 
 **PostgreSQL probe identity:** `17.10 (Debian 17.10-1.pgdg12+1)`
 
-This record preserves the earlier BT-1..BT-3 evidence and the lead-adjudicated BT-3N PASS under 3L-R1. It authorizes BT-4N only; it is not Package-B closure, architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
+This record preserves the earlier BT-1..BT-3 evidence, the lead-adjudicated BT-3N PASS, and the operator-authorized BT-4N executor Evidence under 3L-R1. BT-4N still requires Architecture-Lead adjudication; this is not Package-B closure, architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
 
 ## BT-1 — Direct Agent authority closure
 
@@ -63,6 +63,18 @@ This record preserves the earlier BT-1..BT-3 evidence and the lead-adjudicated B
 - **Known / limitation:** this proves framework-native boundary feasibility. It does not prove Product PAR/Gateway implementation conformance or fully qualify `CX-AGENT-MASTRA-01`; the Architecture Lead accepted only the bounded BT-3N slice.
 - **Executor verdict:** `PASS_NATIVE_HITL_OWNER_BOUNDARY`.
 
+## BT-4N — Native Scheduler → PAR narrow dispatch seam
+
+- **Question:** can the exact pinned scheduler expose one stable logical scheduled occurrence through a deterministic non-Agent seam before Product execution while leaving PAR as the only future AgentRun admission authority?
+- **Exact identity:** `@mastra/core 1.56.0`; `@mastra/pg 1.19.0`; PostgreSQL `17.10`; exact deciding files and SHA-256 values are recorded in `spikes/conexus-3l-b/evidence/bt4n-source.json`.
+- **Native target:** public workflow schedule creation and public `Scheduler.tick()` reached one deterministic workflow step. No `Agent`, model, business tool, Gateway or Product owner state was constructed.
+- **Stable occurrence:** the pinned scheduler derived `runId = sched_<scheduleId>_<scheduledFireAt>` before publish. The fixture normalized the actual `scheduleId = schedule_bt4n-native-slot` and `scheduledFireAt = 1767225600000` into logical occurrence `schedule_bt4n-native-slot:1767225600000`.
+- **Concurrent ticks:** a test-only barrier forced two native scheduler instances to read the same due PostgreSQL row before either CAS. Exact `SchedulesPG` CAS admitted one winner, one trigger row and one synthetic PAR ingress.
+- **Duplicate/redelivery:** public `EventEmitterPubSub` `nack()` redelivered the same native `workflow.start` event with `deliveryAttempt` values `1` then `2`; the exact logical run material remained unchanged and produced one stable logical occurrence identity.
+- **External activity:** Product Agent executions `0`; model calls `0`; business tool calls `0`; provider calls `0`; E2B calls `0`; real external effects `0`.
+- **Known / limitation:** the workflow ingress derives the stable schedule/slot pair from the exact pinned public run-id format. It creates no Conexus scheduler, ScheduleOccurrence durable record, queue, outbox or automation domain.
+- **Executor verdict:** `PASS_NATIVE_SCHEDULE_INGRESS`.
+
 ## Candidate package result returned for adjudication
 
 ```text
@@ -72,7 +84,9 @@ BT-3 = FAIL_REALIZATION
 BT-4 = NOT EXECUTED — STOP AFTER BT-3
 BT-5 = NOT EXECUTED — STOP AFTER BT-3
 BT-3N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
-BT-4N = NEXT / EXECUTION AUTHORIZED
+BT-4N EXECUTION = COMPLETE
+BT-4N EXECUTOR VERDICT = PASS_NATIVE_SCHEDULE_INGRESS
+ARCHITECTURE-LEAD ADJUDICATION = PENDING
 BT-5N = BLOCKED / NOT AUTHORIZED
 
 CX-AGENT-MASTRA-01 = PARTIALLY QUALIFIED / PACKAGE B NOT CLOSED
@@ -83,4 +97,4 @@ Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
 
-External provider/model calls, E2B calls and real external effects were zero. The model used by the harness was a deterministic local object only. No dependency, Product module, Package-C work, C-018 action or merge was introduced.
+External provider/model calls, E2B calls and real external effects were zero. BT-4N constructed no model or Agent. No dependency, Product module, Package-C work, C-018 action or merge was introduced.

@@ -29,16 +29,23 @@ assert.match(readme, /BT-3N[^\n]*PASS[^\n]*LEAD-ADJUDICATED/iu,
   'current README must project the lead-adjudicated BT-3N PASS');
 assert.match(ledger, /BT-3N[^\n]*PASS[^\n]*LEAD-ADJUDICATED/iu,
   'LEDGER must project the lead-adjudicated BT-3N PASS');
-assert.match(readme, /BT-4N[^\n]*NEXT[^\n]*AUTHORIZED/iu,
-  'current README must authorize BT-4N as the exact next action');
-assert.match(ledger, /BT-4N[^\n]*NEXT[^\n]*AUTHORIZED/iu,
-  'LEDGER must authorize BT-4N as the exact next action');
+assert.match(readme, /BT-4N EXECUTION[^\n]*COMPLETE/iu,
+  'current README must record completed BT-4N execution');
+assert.match(ledger, /BT-4N EXECUTION[^\n]*COMPLETE/iu,
+  'LEDGER must record completed BT-4N execution');
+assert.match(readme, /BT-4N EXECUTOR VERDICT[^\n]*PASS_NATIVE_SCHEDULE_INGRESS/iu,
+  'current README must preserve the BT-4N executor verdict');
+assert.match(ledger, /BT-4N EXECUTOR VERDICT[^\n]*PASS_NATIVE_SCHEDULE_INGRESS/iu,
+  'LEDGER must preserve the BT-4N executor verdict');
 assert.match(readme, /BT-5N[^\n]*BLOCKED/iu,
   'current README must keep BT-5N blocked');
 assert.match(ledger, /BT-5N[^\n]*BLOCKED/iu,
   'LEDGER must keep BT-5N blocked');
-assert.doesNotMatch(readme, /ARCHITECTURE-LEAD ADJUDICATION = PENDING/iu,
-  'current README must not retain pending BT-3N Architecture-Lead adjudication');
+assert.doesNotMatch(
+  readme,
+  /BT-3N EXECUTION[^\n]*COMPLETE\s*\nBT-3N EXECUTOR VERDICT[^\n]*\s*\nARCHITECTURE-LEAD ADJUDICATION = PENDING/iu,
+  'current README must not retain pending BT-3N Architecture-Lead adjudication'
+);
 assert.doesNotMatch(readme, /BT-3A NEXT/u, 'current README must not re-authorize completed BT-3A');
 assert.doesNotMatch(ledger, /BT-3A NEXT/u, 'LEDGER must not re-authorize completed BT-3A');
 assert.match(architecture, /RequestContext[^\n]*runtime[^\n]*configuration[^\n]*not[^\n]*authority/iu,

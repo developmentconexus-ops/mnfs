@@ -1,26 +1,61 @@
 # Conexus — Current Product & Architecture Entrypoint
 
-> **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
-> **Whole-product checkpoint:** 3A-R11 CLOSED / APPROVED
-> **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
+> **Status:** CURRENT / ACCEPTED CURRENT-TREE ROUTER  
+> **Whole-product checkpoint:** `3A-R11 CLOSED / APPROVED / OPERATOR RATIFIED`  
+> **3L routing amendment:** `3L-R1 CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19`  
 > **Phase 3:** IN PROGRESS  
-> **Technology Qualification:** 3L IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE  
-> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
-> **PR #40:** DRAFT / NO MERGE AUTHORIZATION  
+> **PR #40:** DRAFT / NO MERGE AUTHORIZATION
 
-This page is the canonical short entrypoint to the **current Conexus Product and architecture**.
+This page is the shortest safe entrypoint to the **current Conexus Product, architecture and exact next action**.
 
-The operator ratified this current tree through 3A-R11. Detailed accepted authority still controls if any current-tree projection disagrees with its semantic home.
+Do not reconstruct current state from old chat, old checklist order or document date. Historical documents preserve rationale; current amendments may supersede only explicitly named mechanism/routing clauses.
 
 ---
 
-## 1. What Conexus is
+## 1. Read in this order
+
+```text
+AGENTS.md
+→ DevelopmentConexus Engineering Method
+→ docs/DOCUMENTATION-MAP.md
+→ this current README
+→ PRODUCT-CONTRACT.md when Product meaning/scope is relevant
+→ ARCHITECTURE-BASELINE.md when structural owner/boundary meaning is relevant
+→ DECISION-RECONCILIATION.md when historical decisions appear to conflict
+→ 3L-R1 for current Mastra / Package-B / Package-C realization routing
+→ docs/conexus/phase3/LEDGER.md for other Phase-3 detail
+→ exact accepted semantic authority
+→ deciding Evidence/current implementation only when material
+```
+
+### Current precedence warning
+
+For the exact clauses named by `3L-R1`, the following document is the current amendment:
+
+> **[3L-R1 — Mastra-Native Qualification & F1 Routing Reconciliation](../phase3/3L-R1-mastra-native-qualification-routing-reconciliation.md)**
+
+Until its mechanical projection roll-forward is complete, `3L-R1` **supersedes stale Package-B / Package-C route and realization rows** still visible in the Architecture Baseline or Phase-3 LEDGER.
+
+In particular:
+
+```text
+BT-3A = NOT NEXT
+BT-3A = COMPLETE / native schema route rejected
+BT-3R = NEXT only after projection roll-forward
+Package C = DEFER SAFELY FOR F1
+```
+
+No executor may re-run BT-3A because an older router row still says `NEXT`.
+
+---
+
+## 2. What Conexus is
 
 > **Conexus is an AI-first enterprise software platform for building, evolving and operating business applications and Product Agents over real enterprise systems and data, with reusable enterprise knowledge, governed authority, verifiable engineering and truthful operational evidence.**
 
-Its four coherent Product strengths are:
+Four coherent Product strengths:
 
 ```text
 Conexus Builder / Harness
@@ -29,7 +64,7 @@ Business Applications / Capabilities / Integrations
 Product Agents
 ```
 
-F1 is company/internal-first. Later SaaS evolution remains a real Product direction but does not justify speculative F1 machinery.
+F1 remains company/internal-first. Later SaaS evolution is real but does not justify speculative F1 machinery.
 
 First vertical:
 
@@ -37,19 +72,17 @@ First vertical:
 Analisador Inteligente de Orçamentos — Sankhya
 ```
 
-It is intentionally read-only and does not require a fake Product Agent or write just to exercise platform infrastructure.
+The first vertical remains intentionally read-only and does not need a fake Product Agent or write path merely to exercise infrastructure.
 
 ---
 
-## 2. Read the current tree
+## 3. Current Product and architecture authorities
 
-### Need to understand the Product?
-
-Read:
+### Product meaning
 
 > **[PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md)**
 
-It owns the current accepted projection of:
+Owns the current accepted projection of:
 
 ```text
 North Star
@@ -61,82 +94,38 @@ whole-product scenario gate
 success criterion
 ```
 
-### Need to understand how it is architected?
-
-Read:
+### Structural architecture
 
 > **[ARCHITECTURE-BASELINE.md](ARCHITECTURE-BASELINE.md)**
 
-It owns the current accepted projection of:
+Owns the accepted structural projection of:
 
 ```text
-semantic owners and boundaries
+semantic owners / module boundaries
 persistence authorities
 Builder / E2B
 Brain / Connections / Gateway
 Registry / Release / Promotion
-Production Agent Runtime (PAR)
+PAR
 Builder ↔ PAR isolation
-managed execution
-model spend
-F5 / observability
+managed application runtime
 security / trust zones
 data / environments / migrations
 frontend / scaffold
 first-production topology
-technology qualification state
-future seams / reopen triggers
 ```
 
-### Found an older decision that says something different?
+`3L-R1` currently supersedes only the exact Mastra realization, RequestContext, active-run recovery, scheduler-routing and F1 model-economics clauses enumerated in its supersession map. It does not weaken the structural owner/invariant architecture.
 
-Read:
+### Historical reconciliation
 
 > **[DECISION-RECONCILIATION.md](DECISION-RECONCILIATION.md)**
 
-It answers:
-
-```text
-what survives?
-what was refined?
-what was partially/fully superseded?
-where is the current detailed semantic home?
-what must not resurrect by inheritance?
-what remains genuinely deferred?
-```
-
-Do **not** choose the oldest/newest document by date alone.
-
-### Need exact Phase-3 status or detailed accepted authority?
-
-Read:
-
-```text
-docs/conexus/phase3/LEDGER.md
-→ exact accepted 3A/3B/3C/... authority named for the question
-```
-
-After R11 closure, the live Phase-3 router requires:
-
-```text
-3A-R11 = CLOSED / APPROVED / OPERATOR RATIFIED
-Package B = IN PROGRESS
-B0 = EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
-Proof-routing amendment = APPROVED / CURRENT
-BT-1 = PASS
-BT-2 = PASS
-BT-3 observed Mastra merge behavior = CONFIRMED EVIDENCE
-BT-3 architecture contradiction = NOT YET ESTABLISHED
-BT-3A = NEXT / EXECUTION AUTHORIZED
-BT-4..BT-5 = BLOCKED
-52 B1-01..B4-18 obligations = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-CX-AGENT-MASTRA-01 = NOT QUALIFIED / BT-3A PENDING
-CX-RUNTIME-ISOLATION-01 = NOT PROVEN / BT-5 NOT EXECUTED
-```
+Use it to determine what survives, what was refined/superseded and where detailed semantic authority lives.
 
 ---
 
-## 3. Current whole-system map
+## 4. Current whole-system map
 
 ```text
 Workspace — sovereign isolation/resource root
@@ -145,27 +134,24 @@ Workspace — sovereign isolation/resource root
 │   ├── Project Baseline
 │   ├── Changes / Plan / Work Units / Builder runs
 │   ├── Data / Capabilities / Integrations
-│   ├── private Project-scoped Connections / explicit bindings
+│   ├── explicit Brain / Connection bindings
 │   ├── Product Agents
 │   ├── Releases / Published Application
-│   └── managed jobs when the Project requires them
+│   └── admitted managed jobs when required
 │
-├── Brain
-│   └── explicit ProjectBrainBinding
-│
+├── canonical Workspace Brain
 └── reusable Workspace-scoped Connections
-    └── Project use through explicit ProjectConnectionBinding
 
 Trusted Conexus Hub
 ├── Node/TypeScript modular monolith
 ├── PostgreSQL authoritative owner state
 ├── Capability Gateway
 ├── Builder control runtime
-├── Production Agent Runtime (PAR)
-└── Managed Application Runtime
+├── Production Agent Runtime — PAR
+└── Managed Application Runtime — MAR
 
 Builder
-→ persistent Change-scoped CodingSession
+→ Change-scoped CodingSession
 → Mastra AgentController
 → Mastra Workspace
 → E2B
@@ -173,162 +159,217 @@ Builder
 Product Agent
 → exact active Release
 → RuntimeAgentProjection
+→ ParMastra
 → direct Mastra Agent
-→ bounded ToolProjection
+→ bounded tools
 → Conexus owners / Gateway
 ```
 
-Key rule:
+Core law:
 
 > **Mechanism ≠ Authority.**
 
-Mastra, E2B, PostgreSQL, Git, telemetry, provider state and framework persistence never become Product/business authority by convenience.
+Mastra, E2B, PostgreSQL, Git, telemetry, provider state, framework memory and scheduler state never become Product/business authority merely because they persist or execute something.
 
 ---
 
-## 4. Current authority truths worth knowing first
+## 5. Current authority truths worth carrying into implementation
 
 ```text
 Workspace != Project
 Change != WorkUnit != Builder ActorRun
 Builder ActorRun != Product AgentRun != Gateway EffectAttempt != Promotion
 Project Git != Workspace Brain Git != hub_control != Project DB != Registry/CAS
-Workspace owns the canonical Brain; the Connections module owns one Connection lifecycle
-with ownerScope WORKSPACE | PROJECT, and Project use pins an exact revision through
-explicit ProjectConnectionBinding
-Project ARCHIVED freezes ordinary authoring/future intent expansion; it does not unpublish,
-stop current serving, stop pre-existing enabled Product-Agent triggers or stop existing
-managed recurrence by itself; explicit trigger DISABLE remains allowed narrowing
 Control Plane != Preview != Published App authorization
 administer != use
 approval binds one exact sealed subject
 OUTCOME_UNKNOWN != safe retry
 Release is exact immutable composition; no mutable latest
-telemetry/trace != owner F5/terminal truth
-Product-Agent SCHEDULE overlap is consumed SKIPPED with no backlog/catch-up;
-MAR managed-sync downtime may admit at most one catch-up when freshness is behind
-ordinary telemetry missing may degrade; audit-required persistence failure is FAIL CLOSED;
-verification-required Evidence missing is NOT_PROVEN/INCONCLUSIVE
+telemetry/trace != owner terminal truth
 Brain != agent/runtime memory
 future seam != dormant implementation
 selected architecture != qualified behavior
+stale runtime state != current Product authority
 ```
+
+Current mutable authorization is always server/owner-derived at protected points.
 
 ---
 
-## 5. Current technology state
+## 6. Current Mastra realization — 3L-R1
 
-| Surface | Current status |
+The framework-first review used:
+
+```text
+repo-installed official Mastra skill
+→ .agents/skills/mastra/SKILL.md
+
+Context7
+→ /mastra-ai/mastra
+
+exact Package-B lock/source
+→ @mastra/core 1.56.0
+→ @mastra/memory 1.25.0
+→ @mastra/pg 1.19.0
+→ PostgreSQL 17.10
+```
+
+Current mapping:
+
+| Need | Current realization |
 |---|---|
-| Hub | **ARCHITECTURE CURRENT** — Node/TS modular monolith |
-| PostgreSQL | **ARCHITECTURE CURRENT** — major 17; Q0 deciding probe 17.10 |
+| Product Agent | direct Mastra `Agent` |
+| Conversation | Mastra Memory with explicit Conexus-derived thread/resource scoping |
+| runtime/config context | Mastra `RequestContext`, subordinate and non-authoritative |
+| risky tool pause | native `requireApproval` |
+| Product approval authority | PAR `ApprovalRequest` |
+| effect authority | Capability Gateway |
+| generic in-tool information wait | tool `suspend()` only when actually needed |
+| approval wait surviving process restart | direct Agent + persistent suspended-run discovery/continuation |
+| active-run automatic crash recovery | `DurableAgent` — DEFER SAFELY |
+| universal Workflow wrapper around Product Agent | REJECT F1 baseline |
+| Product-Agent cron mechanics | native Mastra Scheduler substrate |
+| scheduled occurrence → execution | must cross narrow PAR admission seam before AgentRun/model execution |
+| Builder/PAR role isolation | separate BuilderMastra / ParMastra instances; residual proof pending |
+
+### RequestContext correction
+
+```text
+Mastra RequestContext
+= runtime / request / configuration / correlation substrate
+!= Product/business authority
+```
+
+BT-3/BT-3A proved that stale omitted snapshot keys may physically survive resume. They also established that early dynamic Agent shaping uses the fresh caller RequestContext before that backfill in the pinned path.
+
+Therefore the correct invariant is semantic, not object-cleanliness:
+
+> stale raw runtime context may not authorize any current governed Product decision.
+
+Governed tools/Gateway must consume/revalidate current Conexus owner truth rather than trust arbitrary raw `RequestContext` keys.
+
+No `RuntimeContextService`, generic authority service, new owner, new database or universal context bus is admitted.
+
+---
+
+## 7. Current Package-B Evidence
+
+Exact Package-B lock SHA-256:
+
+```text
+5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0
+```
+
+```text
+BT-1
+Direct exact Agent / mutable-selector negative control
+= PASS
+
+BT-2
+Conversation / Memory thread-resource isolation on PostgreSQL
+= PASS
+
+BT-3
+genuine suspend → persisted snapshot → process loss → fresh-process rediscovery/resume
+fresh same-key value wins
+unknown stale omitted key survives
+= REAL BEHAVIOR PROVEN / MECHANISM FINDING
+
+BT-3A
+requestContextSchema as post-merge closed authority view
+= FALSIFIED BY PINNED SOURCE
+= FAIL_SCHEMA_OR_NATIVE_GUARD_INSUFFICIENT
+```
+
+This does **not** establish Mastra incompatibility and does not reopen Product architecture.
+
+Current route:
+
+```text
+BT-3R = NEXT after projection roll-forward
+BT-4R = BLOCKED
+BT-5R = BLOCKED
+```
+
+BT-3R proves only native HITL + restart + current-owner authority boundary. It does not inherit authorization for BT-4R/BT-5R.
+
+---
+
+## 8. Package C — current F1 route
+
+Operator-ratified classification:
+
+```text
+Package C pre-C-018 execution = DEFER SAFELY FOR F1
+```
+
+Deferred now:
+
+```text
+model benchmarking/calibration program
+quality-price model routing
+cheapest-model selection
+automatic provider/model optimizer
+sophisticated fallback cascade
+invoice-bound per-run cost machinery
+pre-provider maximum-liability reservation subsystem
+customer quota/billing machinery
+```
+
+F1 still requires a bounded posture:
+
+```text
+small explicit model/provider allowlist
+no automatic fallback cascade
+bounded/disabled hidden retries where controllable
+strict retry limits
+explicit Agent/loop/tool-step limits
+provider/account spending caps where available
+usage/token/cost telemetry with MISSING != ZERO
+truthful visible failure when unavailable
+```
+
+Reopen stronger model-economics machinery for commercialization/billing/quotas, automatic multi-provider routing, sophisticated fallback, contractual per-run budgets, high-autonomy material cost exposure or real evidence that the bounded posture is insufficient.
+
+---
+
+## 9. Current technology state
+
+| Surface | Status |
+|---|---|
+| Hub Node/TS modular monolith | **ARCHITECTURE CURRENT** |
+| PostgreSQL | **ARCHITECTURE CURRENT** — major 17; probe pin 17.10 |
 | Builder Mastra | **QUALIFIED for Package-A tested properties** |
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** |
-| BuilderMastra ↔ ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** |
-| model-spend pre-provider enforcement | **CURRENT OBLIGATION / PACKAGE C NOT QUALIFIED** |
-| managed execution | **CURRENT SEMANTICS / PACKAGE D NOT QUALIFIED** |
-| pg-boss 12.26.3 | **PACKAGE D CANDIDATE / NOT AUTHORITY** |
-| deciding F5/observability surfaces | **CURRENT SHAPE / PACKAGE E NOT QUALIFIED** |
+| direct Mastra Product Agent | **ARCHITECTURE CURRENT / BT-1+BT-2 PASS / PACKAGE B NOT YET CLOSED** |
+| native Product-Agent approval/restart route | **BT-3R NEXT AFTER PROJECTION ROLL-FORWARD** |
+| BuilderMastra ↔ ParMastra same-process isolation | **ARCHITECTURE CURRENT / BT-5R PENDING** |
+| advanced per-run model-economics machinery | **DEFER SAFELY FOR F1** |
+| managed execution / Package D | **NOT AUTO-AUTHORIZED — RE-DERIVE AFTER PACKAGE B** |
+| deciding Evidence / Package E | **NOT AUTO-AUTHORIZED — RE-DERIVE AFTER PACKAGE B** |
 | React/TS/Vite/TanStack paved road | **ARCHITECTURE CURRENT / first-build conformance pending** |
-| first-production private Linux-guest topology | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION / activation proof pending** |
+| private Linux-guest first-production topology | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION / activation proof pending** |
 
-Never upgrade a weaker status to `QUALIFIED` merely because a technology appears in the architecture.
-
----
-
-## 6. Current first-production shape
-
-First installation only — not universal SaaS topology:
-
-```text
-existing company physical server
-→ Windows host
-→ dedicated Linux production guest
-→ one Node/TS Hub process
-→ co-located but capability-isolated PostgreSQL/Mastra/backings
-```
-
-Ingress:
-
-```text
-company LAN + HTTPS
-OR
-existing corporate VPN → private network + HTTPS
-```
-
-```text
-public Internet ingress F1 = NONE
-```
-
-E2B remains remote Builder guest execution; it does not hold durable Hub/ERP/Git/model-provider credentials.
+Never upgrade a weaker status to `QUALIFIED` merely because a technology appears in architecture or docs.
 
 ---
 
-## 7. Current Product scope in plain language
+## 10. Explicit future/deferred seams still remembered
 
-F1 is intended to let a real operator/company:
-
-```text
-create/enter a Workspace
-→ create/import a Project
-→ discover requirements/data/source reality
-→ approve a sufficient Project Baseline
-→ ask Conexus to build/evolve the software
-→ inspect Plan / progress / Preview / Code / Diff / Data / Capabilities / Integrations / Brain / Agents / Versions / Activity
-→ discover/publish reusable Brain meaning with human authority
-→ bind real enterprise systems through qualified Connections
-→ verify candidates with mechanical/runtime/business Evidence
-→ create exact Releases
-→ promote and prove what is actually served
-→ let business users use Published Apps independently from Builder access
-→ create/evolve/use Project-owned Product Agents under the same Change/Release laws
-→ approve exact external effects when required
-→ operate admitted managed sync/jobs without a workflow platform
-→ inspect truthful cost/tokens/duration/provenance/failures
-→ restore/recover without fabricating authority
-```
-
----
-
-## 8. Important current Product capabilities that must not be lost
-
-The rebaseline deliberately preserves, among others:
-
-```text
-visual/proportional Change Plan
-Hub-owned live execution checklist
-`tasks.md` purpose/context memory — not operational state
-Platform Consultant / contextual Conexus assistant
-Brain assisted Discovery — machine propose / human decide
-Brain health/drift/conformance
-static Query + restricted AnalyticQuery read regimes
-closed ApplicationRuntimeProfile = MANAGED | DEDICATED inside one Factory
-Project duplication — no data/credentials/bindings by default
-private-by-default attachment/blob access
-Golden Budget Analyzer benchmark
-Conexus Worker Eval for real runtime/model comparison
-per-run/model token/cost/duration visibility with missing != zero
-Release/EnvironmentConformance/migration/served-verification discipline
-```
-
----
-
-## 9. Explicitly future/deferred — remembered, not built now
+Among the current deferred seams:
 
 ```text
 SaaS signup/billing/customer operations
-SaaS↔private/on-prem authenticated reachability
+SaaS ↔ private/on-prem reachability
 multi-repo Project
 cross-Workspace exchange
 DEDICATED physical deployment
 HA/PITR/multi-host topology
-external SLA monitoring
 advanced Product Agent memory / Semantic Recall / OM / Extractors
 EVENT triggers
-Durable Agent reconnect-to-same-stream
+DurableAgent active-run recovery / reconnect-to-same-stream
 Agent-as-tool / subagents / networks
 MCP/A2A external Agent clients
 Product Agent browser/source/workspace access
@@ -338,65 +379,69 @@ SSO/SCIM/passkeys
 public/embed apps
 richer app role/data scoping
 Brain vector/RAG index
+advanced model economics per 3L-R1 reopen triggers
 ```
 
-Reopen when a **real consumer, changed requirement, new reachable failure mode or external constraint** fires the seam.
+Deferred means remembered with a seam/trigger, not secretly implemented.
 
 ---
 
-## 10. Explicit F1 non-architecture
+## 11. Explicit F1 non-architecture
 
-Do not resurrect by history/framework convenience:
+Do not resurrect by history or framework convenience:
 
 ```text
 Pi as primary Builder
 fresh cognitive reset every WorkUnit
 guest model-provider key
-Vercel AI SDK Product Agent authority
 Mastra Stored/Editor/latest Agent authority
-Mission/Milestone/Fleet work model
-generic Workflow/Scheduler/Automation domain
+Vercel AI SDK as Product Agent authority
+generic Workflow/Scheduler/Automation business domain
+universal RuntimeContext/Authority service
 UniversalEnvelope
-mutable artifact-registration API as authoring authority
-universal Tool/ResourceBinding/Status/Secret/Budget services
+Universal Tool/ResourceBinding/Status/Secret/Budget service
+generic RuntimeBus/EventBus/outbox without a named failure class
 shared mutable cross-Project DB/runtime state
 memory/RAG framework as Brain authority
 browser/frontend authorization authority
-URL-fragment Published App auth
-mandatory universal chat widget/postMessage protocol
-PROD as forked logical Project
-“security later because F1 is internal”
-generic `agent_event` owner/table
+generic agent_event owner/table
 public Internet first-installation ingress
 ```
 
+Native Mastra mechanisms may be used; they do not create similarly named Conexus business owners.
+
 ---
 
-## 11. Program state right now
+## 12. Program state right now
 
 ```text
 3A Architecture Reconciliation     CONTINUOUS through C-018
+3A-R11                              CLOSED / APPROVED / OPERATOR RATIFIED
 3B System Context                  CLOSED / APPROVED
 3C Module Architecture             CLOSED / APPROVED
 3D Dependency Architecture         CLOSED / APPROVED
 3E Data Architecture               CLOSED / APPROVED
 3F Contracts/API                   CLOSED / APPROVED
 3G Behavioral/State                CLOSED / APPROVED
-3H Runtime/Agent                   CLOSED / APPROVED
-3I Security/Authority              CLOSED / APPROVED
+3H Runtime/Agent                   CLOSED / APPROVED; selected mechanisms amended by 3L-R1
+3I Security/Authority              CLOSED / APPROVED; F1 model-spend mechanism routing amended by 3L-R1
 3J Deployment/Operations           CLOSED / APPROVED
 3K Frontend/Product                CLOSED / APPROVED
+
 3L Technology Qualification        IN PROGRESS
-  Q0                               COMPLETE
+  Q0                               COMPLETE / evidence discipline retained / execution route amended
   Package A                        COMPLETE
-  Package B                        IN PROGRESS / BT-3A EXECUTION AUTHORIZED
+  Package B                        IN PROGRESS
     BT-1                           PASS
     BT-2                           PASS
-    BT-3                           MERGE BEHAVIOR CONFIRMED / CONTRADICTION NOT YET ESTABLISHED
-    BT-3A                          NEXT / EXECUTION AUTHORIZED
-    BT-4..BT-5                     BLOCKED
-    B1-01..B4-18                   DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-  Packages C–E                     NOT STARTED
+    BT-3                           BEHAVIOR PROVEN / MECHANISM FINDING
+    BT-3A                          COMPLETE / NATIVE SCHEMA ROUTE REJECTED
+    BT-3R                          NEXT AFTER PROJECTION ROLL-FORWARD
+    BT-4R                          BLOCKED
+    BT-5R                          BLOCKED
+  Package C                        DEFER SAFELY FOR F1
+  Packages D/E                     RE-DERIVE AFTER PACKAGE B / NOT AUTO-AUTHORIZED
+
 3M Failure & Recovery              NOT STARTED
 3N Architecture Verification       NOT STARTED
 3O Vertical Proof Contract         NOT STARTED
@@ -404,47 +449,26 @@ C-018                              NOT RATIFIED
 Implementation                     BLOCKED
 ```
 
-R11 itself:
+---
 
-```text
-R11-A Authority Census             COMPLETE
-R11-B Decision Reconciliation      CURRENT / ACCEPTED
-R11-C Product Contract             CURRENT / ACCEPTED
-R11-D Architecture Baseline        CURRENT / ACCEPTED
-R11-E Coherence Round 1            COMPLETE / 14 projection findings
-R11-E Coherence Round 2            COMPLETE / 14 closed / 0 material findings
-R11-F Fresh Actor review           COMPLETE / PASS
-R11-G independent Fable review     COMPLETE / BOUNDED CORRECTION REQUIRED
-Fable finding adjudication         COMPLETE / FBL-01..17 ACCEPTED
-Round-3 Fable corrections          APPLIED
-Closure-keyed pass                 FOUND R3C-01..08
-Round-3.1 projection correction    APPLIED / VERIFIED
-Final GPT authority review         COMPLETE / PASS
-R11-H operator ratification        APPROVED / 2026-08-18
-R11 closure                        CLOSED / ACCEPTED
-```
+## 13. Exact next action
+
+> **Roll the operator-ratified 3L-R1 amendment into `ARCHITECTURE-BASELINE.md` and the Phase-3 `LEDGER.md`, verify repository coherence, then execute BT-3R only against the existing exact Package-B lock. Return Evidence for Architecture-Lead adjudication and STOP.**
+
+Do **not** execute BT-4R, BT-5R, Package C, Product implementation, C-018 ratification or merge by inheritance.
 
 ---
 
-## 12. Exact next action
+## 14. Phase-3 status router caveat during roll-forward
 
-> **Execute only the operator-ratified [BT-3A Context Authority Discriminant](../phase3/3L-B-BT3A-context-authority-discriminant.md) against the existing exact Package-B lock and return Evidence for Architecture-Lead adjudication. Do not execute BT-4/BT-5 or close BT-3.**
+The Phase-3 `LEDGER.md` still contains older BT-3A-next rows until the exact next action above mechanically projects `3L-R1` into it.
 
-Product implementation remains blocked; C-018 is not ratified, and PR #40 has no merge authorization.
-
----
-
-## 13. Canonical read path
+For Package B / Package C only, those stale rows are superseded by:
 
 ```text
-AGENTS.md
-→ DevelopmentConexus Engineering Method
-→ docs/DOCUMENTATION-MAP.md
-→ docs/conexus/current/README.md
-→ PRODUCT-CONTRACT.md / ARCHITECTURE-BASELINE.md / DECISION-RECONCILIATION.md as needed
-→ docs/conexus/phase3/LEDGER.md for Phase-3 status/detail while Phase 3 remains active
-→ exact accepted detailed semantic authority
-→ deciding Evidence/current implementation only when material
+docs/conexus/phase3/3L-R1-mastra-native-qualification-routing-reconciliation.md
 ```
 
-Historical C-/3A–3L documents remain available for exact rationale, provenance and reopen analysis. They stop being the route by which a Fresh Actor has to reconstruct the present from scratch.
+For all other Phase-3 status/detail, the LEDGER remains the live router.
+
+This bounded precedence is temporary and exists specifically to prevent a stale router from recreating already-falsified work while the approved projection roll-forward is performed.

@@ -2284,7 +2284,7 @@ REJECTED F1
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** | guard mandatory in Product realization |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** | not universal model/provider winner |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** | net benefit not proven; no stale-authority regression observed |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | B paused by R11 |
+| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | Package B NEXT / NOT STARTED; qualification must be rederived |
 | BuilderMastra != ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | split only on material failure |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | model-spend pre-provider enforcement | **ARCHITECTURE CURRENT OBLIGATION / PACKAGE C NOT QUALIFIED** | hidden retries below gate must stay disabled/qualified |

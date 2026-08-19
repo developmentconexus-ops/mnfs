@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 CLOSED — APPROVED / OPERATOR RATIFIED` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / Q0 APPROVED-COMPLETE / PACKAGE A COMPLETE / PACKAGE B STOPPED AT BT-3 — FAIL_REALIZATION / LEAD ADJUDICATION REQUIRED`
-**Fase atual:** `3L — Technology Qualification` — **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B STOPPED AT BT-3 — BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED / LEAD ADJUDICATION REQUIRED**; `3A-R11 — Whole-Product Authority Rebaseline` = **CLOSED / APPROVED / OPERATOR RATIFIED em 2026-08-18**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**; `3K — Frontend / Product Architecture` = **CLOSED / APPROVED por 3K-R1** após internal closure `Material Finding = 0` + único independent Fable challenge `Material Finding = 0 / CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`; as 5 correções não-materiais foram adjudicadas em 3K-R1; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 CLOSED — APPROVED / OPERATOR RATIFIED` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / Q0 APPROVED-COMPLETE / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-3A NEXT / EXECUTION AUTHORIZED`
+**Fase atual:** `3L — Technology Qualification` — **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / ARCHITECTURE CONTRADICTION NOT YET ESTABLISHED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED**; `3A-R11 — Whole-Product Authority Rebaseline` = **CLOSED / APPROVED / OPERATOR RATIFIED em 2026-08-18**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**; `3K — Frontend / Product Architecture` = **CLOSED / APPROVED por 3K-R1** após internal closure `Material Finding = 0` + único independent Fable challenge `Material Finding = 0 / CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`; as 5 correções não-materiais foram adjudicadas em 3K-R1; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -149,7 +149,7 @@ Nenhuma conversa cria authority.
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3K — Frontend / Product Architecture | **CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS** | [3K-R1](3K-R1-frontend-product-architecture-final-closure.md); reabrir apenas por Finding material |
-| 3L — Technology Qualification | **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B STOPPED AT BT-3 — FAIL_REALIZATION / LEAD ADJUDICATION REQUIRED** | [BT qualification Evidence](3L-B-technology-qualification.md); BT-4/BT-5 not executed; 52 obligations remain downstream proof inventory |
+| 3L — Technology Qualification | **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-3A NEXT / EXECUTION AUTHORIZED** | [BT-3A discriminant](3L-B-BT3A-context-authority-discriminant.md); BT-4/BT-5 blocked; 52 obligations remain downstream proof inventory |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
 | 3O — Vertical Architecture Proof Contract | NÃO INICIADA | contract-only end-to-end proof target |
@@ -217,10 +217,12 @@ job/v1
 → proof-routing amendment = APPROVED / CURRENT
 → BT-1 = PASS
 → BT-2 = PASS
-→ BT-3 = FAIL_REALIZATION / LOAD-BEARING STOP
-→ BT-4..BT-5 = NOT EXECUTED
+→ BT-3 observed Mastra merge behavior = CONFIRMED EVIDENCE
+→ BT-3 architecture contradiction = NOT YET ESTABLISHED
+→ BT-3A = NEXT / EXECUTION AUTHORIZED
+→ BT-4..BT-5 = BLOCKED
 → B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-→ first action = Architecture-Lead adjudication of BT-3 Evidence; no probe resume is self-authorized
+→ first action = execute only the operator-ratified BT-3A discriminant and return Evidence
 → load-bearing qualification probes only
 → includes CX-MANAGED-JOB-01 from 3A-R9
 → routing refined by 3A-R10
@@ -363,7 +365,7 @@ Resultado:
 3L = OPEN / IN PROGRESS
 Q0 = APPROVED / COMPLETE
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
-Package B = STOPPED AT BT-3 / BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED / LEAD ADJUDICATION REQUIRED
+Package B = IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / CONTRADICTION NOT YET ESTABLISHED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
 Packages C–E = NOT STARTED
 product implementation = BLOCKED
 prior architecture reopen = NONE
@@ -1585,7 +1587,7 @@ CX-BUILDER-COGNITION-01 = MUST EVALUATE in 3L / NOT MUST ENABLE
 3L = IN PROGRESS / Q0 COMPLETE
 3L-Q0 = APPROVED / COMPLETE
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
-Package B = STOPPED AT BT-3 / BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED / LEAD ADJUDICATION REQUIRED
+Package B = IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / CONTRADICTION NOT YET ESTABLISHED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
 product implementation = BLOCKED
 prior architecture reopen = NONE
 ```
@@ -1665,7 +1667,7 @@ O único independent final Fable challenge de 3K foi executado em **2026-08-18**
 
 Próxima ação:
 
-> **Adjudicar o `FAIL_REALIZATION` de BT-3 registrado em [3L-B-technology-qualification.md](3L-B-technology-qualification.md). Não retomar BT-4/BT-5, executar B1-01..B4-18 literalmente ou autorizar o próximo package sem direção explícita do Architecture Lead. Product implementation continua proibida.**
+> **Executar somente o [BT-3A Context Authority Discriminant](3L-B-BT3A-context-authority-discriminant.md) ratificado pelo operador contra o lock exato existente e devolver Evidence para adjudicação do Architecture Lead. Não executar BT-4/BT-5 nem fechar BT-3. Product implementation continua proibida.**
 
 3L–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9 + 3A-R10 e o current tree ratificado por 3A-R11. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + F3B-R1 + accepted derived realization plan(s).
 

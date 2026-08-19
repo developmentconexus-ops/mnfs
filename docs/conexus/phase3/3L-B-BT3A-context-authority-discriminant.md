@@ -1,6 +1,7 @@
 # 3L Package B — BT-3A Context Authority Discriminant
 
-**Status:** `OPERATOR APPROVED IN CHAT / WRITTEN SPEC REVIEW REQUIRED BEFORE EXECUTION`  
+**Status:** `OPERATOR RATIFIED 2026-08-19 / EXECUTION AUTHORIZED / BT-3A NEXT`
+
 **Phase:** 3L — Technology Qualification  
 **Scope:** Package B — Product Agent + Cross-Runtime  
 **Parent proof route:** [3L-B proof-routing amendment](3L-B-proof-routing-amendment.md)  
@@ -338,11 +339,19 @@ The operator separately approved that advanced model benchmarking/calibration/au
 
 BT-3A does not perform that reconciliation. Package-C routing will be reconciled separately after Package B is stabilized so no current-authority contradiction is hidden.
 
-## 15. Exact next action after written review
+## 15. Exact next action
 
-After the operator reviews this written spec and confirms it, the Architecture Lead may:
+The operator ratified this written discriminant on 2026-08-19 and authorized execution of BT-3A only:
 
-1. update the current router/LEDGER from `BT-3 LEAD ADJUDICATION REQUIRED` to `BT-3A NEXT`;
-2. create a bounded Codex execution plan for BT-3A only;
-3. authorize Codex to execute that plan;
-4. independently verify the returned Evidence before any BT-3 continuation, BT-4 or BT-5.
+```text
+BT-3A = NEXT / EXECUTION AUTHORIZED
+BT-4 = BLOCKED
+BT-5 = BLOCKED
+BT-3 plain active crash = NOT AUTHORIZED BY BT-3A
+Package C = NOT AUTHORIZED
+C-018 = NOT RATIFIED
+Product implementation = BLOCKED
+merge = NOT AUTHORIZED
+```
+
+Execute the bounded BT-3A plan and return exact source/runtime Evidence for independent Architecture-Lead adjudication. Do not close BT-3 or continue into another probe/package by inheritance.

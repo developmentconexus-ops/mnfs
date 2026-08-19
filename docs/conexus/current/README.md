@@ -5,7 +5,7 @@
 > **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
 > **Phase 3:** IN PROGRESS  
 > **Technology Qualification:** 3L IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE  
-> **Package B:** STOPPED AT BT-3 / BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED / LEAD ADJUDICATION REQUIRED
+> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
 > **PR #40:** DRAFT / NO MERGE AUTHORIZATION  
@@ -125,10 +125,12 @@ B0 = EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
 Proof-routing amendment = APPROVED / CURRENT
 BT-1 = PASS
 BT-2 = PASS
-BT-3 = FAIL_REALIZATION / LOAD-BEARING STOP
-BT-4..BT-5 = NOT EXECUTED
+BT-3 observed Mastra merge behavior = CONFIRMED EVIDENCE
+BT-3 architecture contradiction = NOT YET ESTABLISHED
+BT-3A = NEXT / EXECUTION AUTHORIZED
+BT-4..BT-5 = BLOCKED
 52 B1-01..B4-18 obligations = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-CX-AGENT-MASTRA-01 = FAIL_REALIZATION / LEAD ADJUDICATION REQUIRED
+CX-AGENT-MASTRA-01 = NOT QUALIFIED / BT-3A PENDING
 CX-RUNTIME-ISOLATION-01 = NOT PROVEN / BT-5 NOT EXECUTED
 ```
 
@@ -387,11 +389,12 @@ public Internet first-installation ingress
 3L Technology Qualification        IN PROGRESS
   Q0                               COMPLETE
   Package A                        COMPLETE
-  Package B                        STOPPED AT BT-3 / LEAD ADJUDICATION REQUIRED
+  Package B                        IN PROGRESS / BT-3A EXECUTION AUTHORIZED
     BT-1                           PASS
     BT-2                           PASS
-    BT-3                           FAIL_REALIZATION
-    BT-4..BT-5                     NOT EXECUTED
+    BT-3                           MERGE BEHAVIOR CONFIRMED / CONTRADICTION NOT YET ESTABLISHED
+    BT-3A                          NEXT / EXECUTION AUTHORIZED
+    BT-4..BT-5                     BLOCKED
     B1-01..B4-18                   DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
   Packages C–E                     NOT STARTED
 3M Failure & Recovery              NOT STARTED
@@ -425,7 +428,7 @@ R11 closure                        CLOSED / ACCEPTED
 
 ## 12. Exact next action
 
-> **Adjudicate the BT-3 `FAIL_REALIZATION` recorded in [3L-B-technology-qualification.md](../phase3/3L-B-technology-qualification.md). Do not resume BT-4/BT-5, execute B1-01..B4-18 literally, redesign the harness or authorize a next package without explicit Architecture-Lead direction.**
+> **Execute only the operator-ratified [BT-3A Context Authority Discriminant](../phase3/3L-B-BT3A-context-authority-discriminant.md) against the existing exact Package-B lock and return Evidence for Architecture-Lead adjudication. Do not execute BT-4/BT-5 or close BT-3.**
 
 Product implementation remains blocked; C-018 is not ratified, and PR #40 has no merge authorization.
 

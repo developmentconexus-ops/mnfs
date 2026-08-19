@@ -8,7 +8,7 @@
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** STOPPED AT BT-3 / BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED / LEAD ADJUDICATION REQUIRED
+> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
 
 This current accepted authority projection answers:
 
@@ -1456,10 +1456,12 @@ Package B B0 = EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
 Package B proof-routing amendment = APPROVED / CURRENT
 Package B BT-1 = PASS
 Package B BT-2 = PASS
-Package B BT-3 = FAIL_REALIZATION / LOAD-BEARING STOP
-Package B BT-4..BT-5 = NOT EXECUTED
+Package B BT-3 observed Mastra merge behavior = CONFIRMED EVIDENCE
+Package B BT-3 architecture contradiction = NOT YET ESTABLISHED
+Package B BT-3A = NEXT / EXECUTION AUTHORIZED
+Package B BT-4..BT-5 = BLOCKED
 Package B B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-CX-AGENT-MASTRA-01 = FAIL_REALIZATION / LEAD ADJUDICATION REQUIRED
+CX-AGENT-MASTRA-01 = NOT QUALIFIED / BT-3A PENDING
 CX-RUNTIME-ISOLATION-01 = NOT PROVEN / BT-5 NOT EXECUTED
 ```
 
@@ -2292,7 +2294,7 @@ REJECTED F1
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** | guard mandatory in Product realization |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** | not universal model/provider winner |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** | net benefit not proven; no stale-authority regression observed |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B FAIL_REALIZATION PENDING ADJUDICATION** | BT-1 and BT-2 passed; BT-3 proved stale unknown RequestContext keys survive fresh-process resume; BT-4/BT-5 were not executed after the mandatory stop |
+| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B BT-3A PENDING** | BT-1 and BT-2 passed; BT-3 confirmed stale unknown RequestContext merge; BT-3A is authorized to discriminate whether a closed current authority projection prevents governed influence; BT-4/BT-5 remain blocked |
 | BuilderMastra != ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | split only on material failure |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | model-spend pre-provider enforcement | **ARCHITECTURE CURRENT OBLIGATION / PACKAGE C NOT QUALIFIED** | hidden retries below gate must stay disabled/qualified |
@@ -2335,12 +2337,14 @@ R11 is closed; the remaining 3L route preserves serial proof dependency.
 Current route:
 
 ```text
-adjudicate Package-B BT-3 FAIL_REALIZATION; do not resume probes without explicit direction
+execute only Package-B BT-3A under the operator-ratified discriminant
 ↓
-Package B — Product Agent + Cross-Runtime — STOPPED / LEAD ADJUDICATION REQUIRED
+Package B — Product Agent + Cross-Runtime — IN PROGRESS
   B0 EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
-  BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION
-  BT-4..BT-5 NOT EXECUTED
+  BT-1 PASS / BT-2 PASS
+  BT-3 MERGE BEHAVIOR CONFIRMED / ARCHITECTURE CONTRADICTION NOT YET ESTABLISHED
+  BT-3A NEXT / EXECUTION AUTHORIZED
+  BT-4..BT-5 BLOCKED
   B1-01..B4-18 PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
@@ -2604,4 +2608,4 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 # 50. Exact next action
 
-> **Adjudicate the BT-3 `FAIL_REALIZATION` in [3L-B-technology-qualification.md](../phase3/3L-B-technology-qualification.md). Do not resume BT-4/BT-5, execute B1-01..B4-18 literally or authorize the next package without explicit Architecture-Lead direction.**
+> **Execute only the operator-ratified BT-3A Context Authority Discriminant against the existing exact Package-B lock and return Evidence for Architecture-Lead adjudication. Do not execute BT-4/BT-5 or close BT-3.**

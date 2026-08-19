@@ -1,6 +1,7 @@
 import { Agent } from '@mastra/core/agent';
 import { Mastra } from '@mastra/core/mastra';
 import { createTool } from '@mastra/core/tools';
+import { OrchestrationWorker } from '@mastra/core/worker';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { Memory } from '@mastra/memory';
 import { PostgresStore } from '@mastra/pg';
@@ -118,7 +119,7 @@ export async function createRoleFixture({
       logger: false,
       storage: store,
       pubsub,
-      workers: [],
+      workers: [new OrchestrationWorker()],
       scheduler: { enabled: false },
       agents: { [agentKey]: agent },
       tools: { [toolKey]: tool },

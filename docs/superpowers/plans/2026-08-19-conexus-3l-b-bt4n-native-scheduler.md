@@ -1,3 +1,16 @@
+---
+id: PLAN-CONEXUS-3L-B-BT4N-NATIVE-SCHEDULER
+title: Conexus 3L Package B BT-4N Native Scheduler Implementation Plan
+document_type: implementation_plan
+form: how_to
+authority: guidance
+status: accepted
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+last_reviewed: 2026-08-19
+---
+
 # Conexus 3L Package B BT-4N Native Scheduler Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -161,12 +174,12 @@ Use this closed shape:
   "nativeScheduleClaimMechanics": "SUPPORTED|NOT_SUPPORTED|UNKNOWN",
   "deterministicNonAgentTarget": "SUPPORTED|NOT_SUPPORTED|UNKNOWN",
   "stableOccurrenceMaterialBeforeProductExecution": "SUPPORTED|NOT_SUPPORTED|UNKNOWN",
-  "candidatePublicSurface": "<exact public API name from installed declarations>",
+  "candidatePublicSurface": null,
   "unknowns": []
 }
 ```
 
-Populate every placeholder-like angle-bracket field with the exact discovered public API name before commit; if no public surface exists, use `null` and explain it in `unknowns` rather than inventing one.
+Set `candidatePublicSurface` to the exact discovered public API name before commit. If no public surface exists, keep it `null` and explain why in `unknowns`; do not invent one.
 
 - [ ] **Step 5: Commit source admission**
 
@@ -269,16 +282,16 @@ git commit -m "test(conexus): probe BT-4N native scheduler ingress"
 
 - [ ] **Step 1: Write the result artifact**
 
-Record exactly:
+Record exactly this shape with observed values:
 
 ```json
 {
   "probe": "BT-4N",
   "lockSha256": "5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0",
   "nativeScheduleClaim": "PASS|FAIL|NOT_PROVEN",
-  "stableOccurrenceMaterial": "<actual bounded material or null>",
-  "concurrentTickResult": "<actual result>",
-  "duplicateRedeliveryResult": "<actual result>",
+  "stableOccurrenceMaterial": null,
+  "concurrentTickResult": null,
+  "duplicateRedeliveryResult": null,
   "syntheticParIngressCount": 0,
   "productAgentExecutions": 0,
   "modelCalls": 0,
@@ -291,7 +304,7 @@ Record exactly:
 }
 ```
 
-Replace all sample values with observed values. `syntheticParIngressCount` may be non-zero when the deterministic ingress is actually exercised; only Product/model/business/effect counters are required to remain zero.
+Replace the `null`, enum-union strings, and counters with actual observed values. `syntheticParIngressCount` may be non-zero when the deterministic ingress is actually exercised; only Product/model/business/effect counters are required to remain zero.
 
 - [ ] **Step 2: Project executor status without self-adjudicating**
 
@@ -299,7 +312,7 @@ Current docs must state:
 
 ```text
 BT-4N EXECUTION = COMPLETE
-BT-4N EXECUTOR VERDICT = <actual verdict>
+BT-4N EXECUTOR VERDICT = actual observed verdict
 ARCHITECTURE-LEAD ADJUDICATION = PENDING
 BT-5N = BLOCKED / NOT AUTHORIZED
 ```

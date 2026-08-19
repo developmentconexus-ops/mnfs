@@ -31,6 +31,34 @@ docs/conexus/current/README.md
 
 `docs/conexus/phase3/LEDGER.md` remains the live Phase 3 status/navigation authority. `docs/conexus/DECISOES.md` is the historical/provenance decision index, not the current-state entrypoint. Dialogue/review files are inputs, not authority unless ratified into an approved decision.
 
+### Conexus framework / technology execution protocol
+
+For Conexus technology qualification, realization work or any framework-sensitive probe, use this execution order:
+
+```text
+current Conexus authority
+→ applicable execution skill
+→ current external documentation
+→ exact pinned package/source/configuration
+→ proof/falsification design
+→ harness or bounded execution
+→ Evidence
+→ adjudication against Conexus authority
+```
+
+Operational rules:
+
+- The DevelopmentConexus Engineering Method and accepted Conexus authority lead. Skills, Context7, framework docs, source code and runtime output are Evidence/mechanics; they do not become Product or architecture authority.
+- When a task touches **Mastra**, the executing actor MUST load and follow the installed **Mastra skill** before planning, editing or probing Mastra-specific code. If that skill is unavailable in the execution environment, stop and report the missing prerequisite rather than substituting memory or guessed APIs.
+- Use **Context7** for current framework/library documentation. For Mastra, resolve the official/current Mastra library (currently `/mastra-ai/mastra`) and query the exact concept being exercised. Context7 may reflect documentation newer than the qualification pin, so any version-specific deciding claim MUST be checked against the exact locked package source and/or a real bounded probe.
+- Prefer official/primary external sources for unstable facts. Search snippets, summaries and remembered APIs are not deciding Evidence.
+- Before a probe, compile historical criteria against current authority, classify `Known / Inferred / Unknown / Deferred`, freeze exact versions/lock/configuration and define how the claim can be falsified.
+- Prove controls can fire. Use a negative/RED fixture before trusting a GREEN result when the protected property admits a meaningful negative case.
+- Prefer deterministic proof first. Admit provider/model/live execution only when the remaining property cannot be established credibly without it; bind live Evidence to exact provider/runtime identities.
+- A harness may expose a substrate limitation; it may not silently redesign Product architecture. Material authority/boundary findings stop execution and return to the Decision Loop. Config/API-local defects may receive the smallest bounded correction and reprobe.
+- Record enough provenance to reproduce the claim: repo HEAD, authority/spec revision, direct and transitive pins, lock digest, relevant skill/documentation source, commands/configuration, runtime/provider identities and exact Evidence/result.
+- Do not create generic adapters, buses, workflow engines, registries or other abstractions merely to make a test convenient. Apply the Method's `prepare the seam, not the entire future capability` law.
+
 ### MNFS legacy/product program
 
 For MNFS-specific work, use:

@@ -1,16 +1,19 @@
 # 3L-B — Product Agent + Cross-Runtime Qualification
 
-**Status:** APPROVED BY OPERATOR / ADMISSION DESIGN RATIFIED / B0 NEXT / EXECUTION NOT YET STARTED  
+**Status:** IN PROGRESS / B0 LEAD-ADJUDICATED — PASS / PROOF-ROUTING AMENDMENT APPROVED — CURRENT / BT-1..BT-5 NEXT — NOT EXECUTED
 **Fase:** 3L — Technology Qualification  
 **Package:** B — Product Agent + Cross-Runtime  
 **Authority:** current accepted `docs/conexus/current/*` tree + 3A-R10 + 3L-Q0 + current 3G/3H/3I/3J semantic authority  
 **Method:** DevelopmentConexus Engineering Method v1.0.0  
 **Operator ratification:** 2026-08-18  
+**Current execution authority:** [3L-B-proof-routing-amendment.md](3L-B-proof-routing-amendment.md)
 **Important:** this package is qualification/evidence-only. It does not authorize Product implementation, does not constitute C-018, does not authorize merge of PR #40, and does not authorize Package C–E by inheritance.
 
 ## 1. Decision in one sentence
 
-Package B qualifies the current Product Agent and Builder↔PAR realization by **property-sliced, deterministic-first proof** rather than by replaying historical probes literally: `B0 Admission/Compilation → B1 Projection+Conversation → B2 Suspend/Restart/Approval/Effect → B3 Schedule → B4 Cross-Runtime/RequestContext/F5`, with `B5` admitted only when a remaining load-bearing property genuinely requires provider/model-live confirmation; historical mechanisms are compiled away before tests, Context7 + the installed Mastra skill are mandatory execution inputs, exact pinned source/runtime behavior remains deciding evidence, and any material contradiction stops execution instead of being hidden by harness redesign.
+Package B qualifies the current Product Agent and Builder↔PAR realization by **property-sliced, deterministic-first proof** rather than by replaying historical probes literally: `B0 Admission/Compilation → BT-1..BT-5 proportional technology probes → Architecture-Lead adjudication`; the 52 `B1-01..B4-18` obligations remain durable downstream proof inventory, not literal pre-C-018 execution, and `B5` remains not admitted. Historical mechanisms are compiled away before tests, Context7 + the installed Mastra skill are mandatory execution inputs, exact pinned source/runtime behavior remains deciding evidence, and any material contradiction stops execution instead of being hidden by harness redesign.
+
+The B1→B4 sections below remain authoritative as proof inventory but are partially superseded **only for execution timing** by the current proof-routing amendment. They do not authorize literal B1→B4 execution in this package stage.
 
 ---
 
@@ -275,7 +278,7 @@ Mocks/fakes may prove local contract/control behavior; they do not prove a real 
 
 # 6. B0 — Admission + Criterion Compilation
 
-**State:** NEXT / AUTHORIZED BY OPERATOR / NOT YET EXECUTED.
+**State:** EXECUTION COMPLETE / FINAL ARCHITECTURE-LEAD ADJUDICATION PASS.
 
 B0 performs no Product implementation and no billable Product-Agent execution.
 
@@ -296,7 +299,7 @@ Required outputs:
 
 B0 cannot silently change architecture. If exact source makes a current assumption impossible, record a Finding and stop before constructing a compensating architecture.
 
-B0 completion is required before B1 code execution.
+B0 is complete. The approved next execution is only `BT-1..BT-5`; literal B1→B4 execution remains superseded for this pre-C-018 stage.
 
 ---
 
@@ -672,9 +675,9 @@ Do not reopen for framework preference, a newer Mastra release existing, microse
 # 19. Operator-ratified next action
 
 ```text
-B0 — Admission + Criterion Compilation
+BT-1 → BT-2 → BT-3 → BT-4 → BT-5
 ```
 
-The B0 executor must first revalidate the current PR/branch HEAD and read `AGENTS.md`; this document is authority for the approved Package-B proof shape, not permission to skip repository routing.
+The executor must first revalidate the current PR/branch HEAD and read `AGENTS.md`; [the proof-routing amendment](3L-B-proof-routing-amendment.md) is current execution authority, and this parent remains the durable proof inventory.
 
-No B1–B5 execution may be claimed before B0 freezes the exact admitted stack and compiled criterion map.
+Do not execute `B1-01..B4-18` literally. Do not auto-admit B5 or any next package after the five proportional technology probes.

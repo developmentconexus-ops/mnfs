@@ -1,7 +1,8 @@
 # 3L Package B — B0 Admission Record
 
-**Status:** `B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS / B1 BLOCKED — NOT AUTHORIZED / NOT EXECUTED`
-**Lead adjudication:** [3L-B0-lead-adjudication.md](3L-B0-lead-adjudication.md) — `BOUNDED CORRECTION REQUIRED / RE-ADJUDICATION PENDING`
+**Status:** `B0 EXECUTION COMPLETE / FINAL LEAD ADJUDICATION PASS / PROOF-ROUTING AMENDMENT CURRENT / BT-1..BT-5 NEXT — NOT EXECUTED`
+**Final Lead adjudication:** [3L-B0-final-lead-adjudication.md](3L-B0-final-lead-adjudication.md) — `PASS / B0 CLOSED`
+**Current execution authority:** [3L-B-proof-routing-amendment.md](3L-B-proof-routing-amendment.md) — `APPROVED / CURRENT`
 **Ratified Package-B spec:** [3L-B-product-agent-cross-runtime-qualification.md](3L-B-product-agent-cross-runtime-qualification.md)  
 **B0 Evidence-capture HEAD:** `0957361a04c3c0096860245077924ab21491f02a`  
 **Package-B lock SHA-256:** `5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0`
@@ -24,10 +25,12 @@ The committed Package-B lock and `evidence/npm-tree.json` freeze the complete tr
 ## Current criterion compilation
 
 ```text
-B1 = 10 ADMITTED criteria / BLOCKED / NOT AUTHORIZED / NOT EXECUTED
-B2 = 12 ADMITTED criteria / NOT EXECUTED
-B3 = 12 ADMITTED criteria / NOT EXECUTED
-B4 = 18 ADMITTED criteria / NOT EXECUTED
+B1 = 10 ADMITTED criteria / PRESERVED DOWNSTREAM PROOF INVENTORY
+B2 = 12 ADMITTED criteria / PRESERVED DOWNSTREAM PROOF INVENTORY
+B3 = 12 ADMITTED criteria / PRESERVED DOWNSTREAM PROOF INVENTORY
+B4 = 18 ADMITTED criteria / PRESERVED DOWNSTREAM PROOF INVENTORY
+literal B1-01..B4-18 pre-C-018 execution = SUPERSEDED / NOT AUTHORIZED / NOT EXECUTED
+current technology probes = BT-1..BT-5 / NEXT / NOT EXECUTED
 ```
 
 Historical mechanisms were compiled against current authority. Nine named observability/deciding-evidence families remain preserved as `ROUTED_TO_E`; they were not deleted or executed in Package B. Historical P30 is preserved only as this reopen trigger:
@@ -55,21 +58,23 @@ Still `UNKNOWN` pending the owning executable criteria:
 - end-to-end schedule occurrence idempotency under PubSub redelivery;
 - same-process cross-role isolation with every enabled process-global Mastra capability.
 
-These `UNKNOWN`s do not contradict current authority and do not require an additional B0 dependency. They remain explicit B1–B4 execution obligations.
+These `UNKNOWN`s do not contradict current authority and do not require an additional B0 dependency. Under the approved amendment, the three load-bearing substrate questions route proportionally into BT-3, BT-4 and BT-5; the 52 criteria remain downstream proof inventory.
 
 ## Executor result and Lead adjudication status
 
 ```text
 executor result          = COMPLETE
-Lead correction/adjudication = BOUNDED CORRECTION REQUIRED / CORRECTION IN PROGRESS / RE-ADJUDICATION PENDING
+final Lead adjudication = PASS / B0 CLOSED
+proof-routing amendment = APPROVED / CURRENT
 Material Finding        = NONE
 authority/boundary clash = NONE
 B5                      = NOT ADMITTED
 Product implementation = BLOCKED
 C-018                   = NOT RATIFIED
 merge                   = NOT AUTHORIZED
-B1                      = BLOCKED / NOT AUTHORIZED / NOT EXECUTED
-next                    = return corrected Evidence for Lead re-adjudication
+B1-01..B4-18            = DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
+BT-1..BT-5              = NEXT / NOT EXECUTED
+next                    = execute only the five proportional technology probes
 ```
 
-B0 execution produced only the reproducible evidence identity and the current criterion pack. Lead adjudication remains pending after the bounded correction. B0 did not qualify `CX-AGENT-MASTRA-01`, did not qualify `CX-RUNTIME-ISOLATION-01`, and did not execute B1, B2, B3, B4 or B5.
+B0 execution produced only the reproducible evidence identity and the current criterion pack. Final Lead adjudication closed B0 as PASS, and the proof-routing amendment replaced literal pre-C-018 B1→B4 execution with BT-1..BT-5. B0 did not qualify `CX-AGENT-MASTRA-01`, did not qualify `CX-RUNTIME-ISOLATION-01`, and did not execute BT-1..BT-5, B1-01..B4-18 or B5.

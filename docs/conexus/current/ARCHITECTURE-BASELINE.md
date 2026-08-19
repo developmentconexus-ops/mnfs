@@ -8,7 +8,7 @@
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** IN PROGRESS / B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS / B1 BLOCKED — NOT AUTHORIZED / NOT EXECUTED
+> **Package B:** IN PROGRESS / B0 LEAD-ADJUDICATED — PASS / PROOF-ROUTING AMENDMENT CURRENT / BT-1..BT-5 NEXT — NOT EXECUTED
 
 This current accepted authority projection answers:
 
@@ -1452,9 +1452,10 @@ Never merge only known keys onto a stale restored context and leave unknown stal
 
 ```text
 architecture = CURRENT
-Package B B0 execution = COMPLETE
-Package B B0 Lead correction/adjudication = BOUNDED CORRECTION REQUIRED / CORRECTION IN PROGRESS / RE-ADJUDICATION PENDING
-Package B B1 = BLOCKED / NOT AUTHORIZED / NOT EXECUTED
+Package B B0 = EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
+Package B proof-routing amendment = APPROVED / CURRENT
+Package B BT-1..BT-5 = NEXT / NOT EXECUTED
+Package B B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
 CX-AGENT-MASTRA-01 = NOT YET QUALIFIED
 CX-RUNTIME-ISOLATION-01 = NOT YET QUALIFIED
 ```
@@ -2288,7 +2289,7 @@ REJECTED F1
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** | guard mandatory in Product realization |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** | not universal model/provider winner |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** | net benefit not proven; no stale-authority regression observed |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | B0 execution complete; Lead correction/re-adjudication pending; B1 blocked / not authorized / not executed |
+| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | B0 Lead-adjudicated PASS; BT-1..BT-5 next under the current proof-routing amendment; 52 obligations remain downstream inventory |
 | BuilderMastra != ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | split only on material failure |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | model-spend pre-provider enforcement | **ARCHITECTURE CURRENT OBLIGATION / PACKAGE C NOT QUALIFIED** | hidden retries below gate must stay disabled/qualified |
@@ -2331,11 +2332,12 @@ R11 is closed; the remaining 3L route preserves serial proof dependency.
 Current route:
 
 ```text
-complete bounded Package-B B0 Lead correction and return Evidence for re-adjudication
+execute only Package-B BT-1→BT-5 under the current proof-routing amendment
 ↓
 Package B — Product Agent + Cross-Runtime — IN PROGRESS
-  B0 execution COMPLETE / Lead correction IN PROGRESS
-  B1 BLOCKED / NOT AUTHORIZED / NOT EXECUTED
+  B0 EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
+  BT-1..BT-5 NEXT / NOT EXECUTED
+  B1-01..B4-18 PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
 ↓ adjudicate
@@ -2598,4 +2600,4 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 # 50. Exact next action
 
-> **Complete the bounded Package-B B0 Lead correction and return its Evidence for re-adjudication. B1 is BLOCKED / NOT AUTHORIZED / NOT EXECUTED.**
+> **Execute only Package-B BT-1→BT-5 under the current proof-routing amendment and return Evidence for Architecture-Lead adjudication. Do not execute B1-01..B4-18 literally.**

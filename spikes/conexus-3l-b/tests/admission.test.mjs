@@ -73,6 +73,46 @@ test('admission verifier rejects a superseded mechanism', () => {
   assert.throws(() => validateAdmission(bad), /superseded mechanism/u);
 });
 
+test('admission verifier rejects literal pre-C-018 B1-B4 execution', () => {
+  const bad = structuredClone(realAdmission);
+  bad.executionRouting = { literalB1B4PreC018: true };
+
+  assert.throws(
+    () => validateAdmission(bad),
+    /literal B1-B4 pre-C-018 execution is superseded/u
+  );
+});
+
+test('admission verifier rejects a missing or extra technology probe', () => {
+  const mutations = [
+    {
+      label: 'missing BT-3',
+      mutate(probes) {
+        return probes.filter((probe) => probe !== 'BT-3');
+      }
+    },
+    {
+      label: 'extra BT-6',
+      mutate(probes) {
+        return [...probes, 'BT-6'];
+      }
+    }
+  ];
+
+  for (const { label, mutate } of mutations) {
+    const bad = structuredClone(realAdmission);
+    bad.executionRouting.currentTechnologyProbes = mutate(
+      bad.executionRouting.currentTechnologyProbes
+    );
+
+    assert.throws(
+      () => validateAdmission(bad),
+      /current technology probes must be exactly BT-1\.\.BT-5 in order/u,
+      label
+    );
+  }
+});
+
 test('admission verifier rejects a missing or drifted criterion', () => {
   const bad = structuredClone(realAdmission);
   bad.criteria.find(({ id }) => id === 'B2-07').id = 'B2-99';

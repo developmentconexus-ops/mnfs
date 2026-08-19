@@ -2,6 +2,16 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const TRACK_COUNTS = Object.freeze({ B1: 10, B2: 12, B3: 12, B4: 18 });
+const CURRENT_TECHNOLOGY_PROBES = Object.freeze(['BT-1', 'BT-2', 'BT-3', 'BT-4', 'BT-5']);
+const FIRST_BUILD_CONFORMANCE = Object.freeze([
+  'B1-01..B1-10',
+  'B2-01',
+  'B2-03..B2-09',
+  'B2-11..B2-12',
+  'B3-01..B3-12',
+  'B4-01..B4-18'
+]);
+const FAILURE_RECOVERY = Object.freeze(['B2-02', 'B2-10']);
 const PROOF_CLASSES = new Set([
   'SOURCE',
   'DETERMINISTIC',
@@ -48,10 +58,39 @@ function expectedCriterionIds() {
   );
 }
 
+function sameOrderedValues(actual, expected) {
+  return Array.isArray(actual) && JSON.stringify(actual) === JSON.stringify(expected);
+}
+
 export function validateAdmission(record) {
   invariant(record?.schemaVersion === 1, 'schemaVersion must be 1');
   invariant(record?.package === '3L-B', 'package must be 3L-B');
   invariant(record?.b5?.admitted === false, 'B5 must remain not admitted');
+  const routing = record?.executionRouting;
+  invariant(
+    routing?.literalB1B4PreC018 === false,
+    'literal B1-B4 pre-C-018 execution is superseded'
+  );
+  invariant(
+    routing?.mode === 'PROOF_INVENTORY_PLUS_TECH_PROBES',
+    'execution routing mode drift'
+  );
+  invariant(
+    sameOrderedValues(routing?.currentTechnologyProbes, CURRENT_TECHNOLOGY_PROBES),
+    'current technology probes must be exactly BT-1..BT-5 in order'
+  );
+  invariant(
+    sameOrderedValues(routing?.firstBuildConformance, FIRST_BUILD_CONFORMANCE),
+    'first-build conformance route drift'
+  );
+  invariant(
+    sameOrderedValues(routing?.failureRecovery, FAILURE_RECOVERY),
+    'failure/recovery route must be exactly B2-02 and B2-10'
+  );
+  invariant(
+    routing?.observabilityFamilies === 'ROUTED_TO_E',
+    'observability families must remain ROUTED_TO_E'
+  );
   invariant(Array.isArray(record.criteria), 'criteria must be an array');
   invariant(Array.isArray(record.routedToPackageE), 'routedToPackageE must be an array');
   invariant(Array.isArray(record.reopenTriggers), 'reopenTriggers must be an array');

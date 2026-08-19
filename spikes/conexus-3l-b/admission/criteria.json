@@ -2,6 +2,21 @@
   "schemaVersion": 1,
   "package": "3L-B",
   "b5": { "admitted": false },
+  "executionRouting": {
+    "mode": "PROOF_INVENTORY_PLUS_TECH_PROBES",
+    "literalB1B4PreC018": false,
+    "currentTechnologyProbes": ["BT-1", "BT-2", "BT-3", "BT-4", "BT-5"],
+    "firstBuildConformance": [
+      "B1-01..B1-10",
+      "B2-01",
+      "B2-03..B2-09",
+      "B2-11..B2-12",
+      "B3-01..B3-12",
+      "B4-01..B4-18"
+    ],
+    "failureRecovery": ["B2-02", "B2-10"],
+    "observabilityFamilies": "ROUTED_TO_E"
+  },
   "criteria": [
     { "id": "B1-01", "state": "ADMITTED", "track": "B1", "protectedInvariant": "exact Release facts produce one exact RuntimeAgentProjection", "authority": ["3H-02", "3A-R10", "3L-B"], "currentMechanism": "exact Release-pinned RuntimeAgentProjection to direct Mastra Agent", "proofClass": "DETERMINISTIC", "negativeFixture": "a mutable runtime projection is presented for an already pinned run and must be refused", "requiredEvidence": "owner pin and runtime projection identity remain exact" },
     { "id": "B1-02", "state": "ADMITTED", "track": "B1", "protectedInvariant": "Product execution invokes the exact direct Mastra Agent instance without mutable resolution", "authority": ["3H-02", "3A-R10", "3L-B"], "currentMechanism": "direct Agent instance selected only from exact Release pins", "proofClass": "DETERMINISTIC", "negativeFixture": "a newer mutable instance is offered after owner admission and must not replace the pinned instance", "requiredEvidence": "executed instance identity equals the admitted projection identity" },

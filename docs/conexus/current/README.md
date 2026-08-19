@@ -5,7 +5,7 @@
 > **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
 > **Phase 3:** IN PROGRESS  
 > **Technology Qualification:** 3L IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE  
-> **Package B:** IN PROGRESS / B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS / B1 BLOCKED — NOT AUTHORIZED / NOT EXECUTED
+> **Package B:** IN PROGRESS / B0 LEAD-ADJUDICATED — PASS / PROOF-ROUTING AMENDMENT CURRENT / BT-1..BT-5 NEXT — NOT EXECUTED
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
 > **PR #40:** DRAFT / NO MERGE AUTHORIZATION  
@@ -121,9 +121,12 @@ After R11 closure, the live Phase-3 router requires:
 ```text
 3A-R11 = CLOSED / APPROVED / OPERATOR RATIFIED
 Package B = IN PROGRESS
-B0 execution = COMPLETE
-B0 Lead correction/adjudication = BOUNDED CORRECTION REQUIRED / CORRECTION IN PROGRESS / RE-ADJUDICATION PENDING
-B1 = BLOCKED / NOT AUTHORIZED / NOT EXECUTED
+B0 = EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
+Proof-routing amendment = APPROVED / CURRENT
+BT-1..BT-5 = NEXT / NOT EXECUTED
+52 B1-01..B4-18 obligations = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
+CX-AGENT-MASTRA-01 = NOT YET QUALIFIED
+CX-RUNTIME-ISOLATION-01 = NOT YET QUALIFIED
 ```
 
 ---
@@ -381,8 +384,9 @@ public Internet first-installation ingress
 3L Technology Qualification        IN PROGRESS
   Q0                               COMPLETE
   Package A                        COMPLETE
-  Package B                        IN PROGRESS / B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS
-    B1                             BLOCKED / NOT AUTHORIZED / NOT EXECUTED
+  Package B                        IN PROGRESS / B0 PASS / PROOF-ROUTING AMENDMENT CURRENT
+    BT-1..BT-5                     NEXT / NOT EXECUTED
+    B1-01..B4-18                   DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
   Packages C–E                     NOT STARTED
 3M Failure & Recovery              NOT STARTED
 3N Architecture Verification       NOT STARTED
@@ -415,7 +419,7 @@ R11 closure                        CLOSED / ACCEPTED
 
 ## 12. Exact next action
 
-> **Complete the bounded B0 Lead correction and return its Evidence for re-adjudication. B1 is BLOCKED / NOT AUTHORIZED / NOT EXECUTED.**
+> **Execute only BT-1→BT-5 under the current Package-B proof-routing amendment, then return Evidence for Architecture-Lead adjudication. Literal B1-01..B4-18 execution is not authorized.**
 
 Product implementation remains blocked; C-018 is not ratified, and PR #40 has no merge authorization.
 

@@ -442,7 +442,8 @@ test('BT-5N qualifies same-process role-instance isolation on public Mastra path
       },
       verdict: 'QUALIFIED_SAME_PROCESS'
     };
-    process.stdout.write(`BT5N_RESULT ${JSON.stringify(evidence)}\n`);
+    // This is a transient positive-path candidate for CI review, not the committed executor Evidence.
+    process.stdout.write(`BT5N_CANDIDATE_RESULT ${JSON.stringify(evidence)}\n`);
   } finally {
     builderThreadSubscription?.unsubscribe();
     parThreadSubscription?.unsubscribe();

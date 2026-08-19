@@ -2317,7 +2317,7 @@ R11 is closed; the remaining 3L route preserves serial proof dependency.
 Current route:
 
 ```text
-project the BT-4N lead-adjudicated pass and authorize only Package-B BT-5N under operator-ratified 3L-R1
+project the BT-4N lead-adjudicated pass and return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication
 ↓
 Package B — Product Agent + Cross-Runtime — IN PROGRESS
   B0 EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS

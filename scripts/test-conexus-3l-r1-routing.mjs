@@ -96,6 +96,11 @@ for (const [name, text] of Object.entries({ readme, architecture, reconciliation
   );
   assert.doesNotMatch(
     text,
+    /(?:^|\n)\s*(?:authorize|authorise) only (?:Package-B )?BT-5N\b[^\n]*/iu,
+    `${name} must not authorize a completed BT-5N rerun`,
+  );
+  assert.doesNotMatch(
+    text,
     staleBt4nProjectionPattern,
     `${name} must not retain stale BT-4N execution or pending-adjudication state`,
   );

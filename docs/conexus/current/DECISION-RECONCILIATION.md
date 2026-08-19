@@ -6,8 +6,8 @@
 > **3L-R1:** CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
-> **Product implementation:** BLOCKED  
-> **C-018:** NOT RATIFIED  
+> **Product implementation:** BLOCKED
+> **C-018:** NOT RATIFIED
 > **Package B:** IN PROGRESS / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N EXECUTION = COMPLETE / BT-5N EXECUTOR VERDICT = NOT_PROVEN / ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
 
 This registry answers one question:

@@ -1,0 +1,47 @@
+{
+  "probe": "BT-5N",
+  "lockSha256": "5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0",
+  "postgresqlVersion": "17.10",
+  "roleInstancesDistinct": false,
+  "storeSchemas": {
+    "builder": "NOT_PROVEN",
+    "par": "NOT_PROVEN"
+  },
+  "pubsubInstancesDistinct": false,
+  "sharedPubSubNegativeControl": "FIRED",
+  "registryIsolation": "NOT_PROVEN",
+  "persistentStoreIsolation": "NOT_PROVEN",
+  "workflowPubSubIsolation": "NOT_PROVEN",
+  "attachedAgentExecution": "NOT_PROVEN",
+  "moduleDefaultOrGlobalCanary": "NOT_PROVEN",
+  "enabledProcessGlobalSurfaces": [
+    "AgentThreadStreamRuntime state keyed by PubSub identity"
+  ],
+  "deferredProcessGlobalSurfaces": [
+    "Module-level scorer/evaluation hooks",
+    "DurableAgent globalRunRegistry, resumable cache and stream PubSub machinery",
+    "Observational Memory active-operation registry and static buffering maps"
+  ],
+  "builderExecutions": 0,
+  "parExecutions": 0,
+  "localModelFixtureCalls": 0,
+  "providerCalls": 0,
+  "e2bCalls": 0,
+  "realExternalEffects": 0,
+  "verdict": "NOT_PROVEN",
+  "limitations": [
+    "The required PostgreSQL-backed two-role positive runtime was not reached locally: TEST_DATABASE_URL was unset and no PostgreSQL listener or postgres, psql, or pg_isready executable was available.",
+    "Positive role-instance, store/schema, schedule, workflow, attached-Agent, and enabled AgentThreadStreamRuntime canary isolation were not observed; no unobserved positive result is represented as PASS.",
+    "The RED wiring guard fired for all four mutable role identities: pubsub, store, agent, and memory.",
+    "The shared-PubSub negative control delivered the Builder-tagged event once to each role observer, demonstrating shared-identity bleed.",
+    "A focused one-instance public workflow/PubSub worker diagnostic succeeded with one deterministic execution and a successful workflow run, but it does not prove cross-role isolation.",
+    "Provider/model API calls, E2B calls, and real external effects remained at zero."
+  ],
+  "requalificationTriggers": [
+    "Enable any module-level scorer or evaluation hook consumer: requalify process-global role isolation before use.",
+    "Enable DurableAgent, its globalRunRegistry, resumable cache, or stream PubSub machinery: requalify process-global role isolation before use.",
+    "Enable Observational Memory activeOps or static buffering coordination: requalify process-global role isolation before use.",
+    "Reach the module-default agent-thread PubSub fallback or omit an explicit role PubSub: fail closed and requalify the enabled-global canary.",
+    "Switch to a shared external PubSub or broker: separately qualify distinct per-role namespaces or keyPrefixes before use; otherwise requalify the isolation boundary."
+  ]
+}

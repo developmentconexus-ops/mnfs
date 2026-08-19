@@ -45,12 +45,16 @@ BT-3A = NOT NEXT
 BT-3A = COMPLETE / native schema route rejected
 BT-3N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
 BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
-BT-5N = NEXT / EXECUTION AUTHORIZED
+BT-5N EXECUTION = COMPLETE
+BT-5N EXECUTOR VERDICT = NOT_PROVEN
+ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
 Package B = IN PROGRESS / NOT CLOSED
-Package C = DEFER SAFELY FOR F1
+Package C = DEFER SAFELY / NOT EXECUTED
+Product implementation = BLOCKED
+C-018 = NOT RATIFIED
 ```
 
-No executor may re-run BT-3A because an older router row still says `NEXT`.
+No executor may re-run BT-3A; BT-5N execution is complete and its executor verdict is recorded below.
 
 ---
 
@@ -300,10 +304,20 @@ Current route:
 ```text
 BT-3N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
 BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
-BT-5N = NEXT / EXECUTION AUTHORIZED
+BT-5N EXECUTION = COMPLETE
+BT-5N EXECUTOR VERDICT = NOT_PROVEN
+ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
+Package B = IN PROGRESS / NOT CLOSED
+Package C = DEFER SAFELY / NOT EXECUTED
+Product implementation = BLOCKED
+C-018 = NOT RATIFIED
 ```
 
-BT-3N proves only native HITL + restart + current-owner authority boundary. BT-4N is now lead-adjudicated `PASS_NATIVE_SCHEDULE_INGRESS`, and BT-5N is the only authorized next execution.
+Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.
+
+BT-3N proves only native HITL + restart + current-owner authority boundary. BT-4N is lead-adjudicated `PASS_NATIVE_SCHEDULE_INGRESS`. BT-5N execution is complete with executor verdict `NOT_PROVEN`; Architecture-Lead / Package-B closure adjudication remains pending.
+
+The BT-5N executor evidence records that the RED wiring guard and shared-PubSub negative control fired, and that a focused public workflow/PubSub worker diagnostic succeeded. The required PostgreSQL-backed positive role-isolation path was not reached because `TEST_DATABASE_URL` was unset and PostgreSQL was unavailable locally. This does not qualify `CX-RUNTIME-ISOLATION-01` or close Package B.
 
 ---
 
@@ -358,7 +372,7 @@ Reopen stronger model-economics machinery for commercialization/billing/quotas, 
 | direct Mastra Product Agent | **ARCHITECTURE CURRENT / BT-1+BT-2 PASS / PACKAGE B NOT YET CLOSED** |
 | native Product-Agent approval/restart route | **BT-3N PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY** |
 | native Product-Agent schedule ingress | **BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS** |
-| BuilderMastra ↔ ParMastra same-process isolation | **ARCHITECTURE CURRENT / BT-5N NEXT / EXECUTION AUTHORIZED** |
+| BuilderMastra ↔ ParMastra same-process isolation | **ARCHITECTURE CURRENT / BT-5N EXECUTION COMPLETE / EXECUTOR VERDICT NOT_PROVEN / LEAD ADJUDICATION PENDING** |
 | advanced per-run model-economics machinery | **DEFER SAFELY FOR F1** |
 | managed execution / Package D | **NOT AUTO-AUTHORIZED — RE-DERIVE AFTER PACKAGE B** |
 | deciding Evidence / Package E | **NOT AUTO-AUTHORIZED — RE-DERIVE AFTER PACKAGE B** |
@@ -451,8 +465,10 @@ Native Mastra mechanisms may be used; they do not create similarly named Conexus
     BT-3A                          COMPLETE / NATIVE SCHEMA ROUTE REJECTED
     BT-3N                          PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
     BT-4N                          PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
-    BT-5N                          NEXT / EXECUTION AUTHORIZED
-  Package C                        DEFER SAFELY FOR F1
+    BT-5N                          EXECUTION COMPLETE / EXECUTOR VERDICT NOT_PROVEN
+  Architecture-Lead / Package-B   CLOSURE ADJUDICATION PENDING
+  Package B                        IN PROGRESS / NOT CLOSED
+  Package C                        DEFER SAFELY / NOT EXECUTED
   Packages D/E                     RE-DERIVE AFTER PACKAGE B / NOT AUTO-AUTHORIZED
 
 3M Failure & Recovery              NOT STARTED
@@ -466,9 +482,9 @@ Implementation                     BLOCKED
 
 ## 13. Exact next action
 
-> **Execute only `BT-5N — Role-instance isolation + enabled-global canary` under a new accepted execution plan.**
+> **Return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication.**
 
-Do **not** execute Package C, Product implementation, C-018 ratification or merge by inheritance.
+Do **not** execute Package C, Product implementation, C-018 ratification or merge by inheritance. `CX-RUNTIME-ISOLATION-01` remains `NOT_PROVEN`.
 
 ---
 

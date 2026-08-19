@@ -49,7 +49,7 @@ current Conexus authority
 Operational rules:
 
 - The DevelopmentConexus Engineering Method and accepted Conexus authority lead. Skills, Context7, framework docs, source code and runtime output are Evidence/mechanics; they do not become Product or architecture authority.
-- When a task touches **Mastra**, the executing actor MUST load and follow the installed **Mastra skill** before planning, editing or probing Mastra-specific code. If that skill is unavailable in the execution environment, stop and report the missing prerequisite rather than substituting memory or guessed APIs.
+- When a task touches **Mastra**, the executing actor MUST load and follow the project-installed Mastra skill at **`.agents/skills/mastra/SKILL.md`** before planning, editing or probing Mastra-specific code. If that skill is unavailable in the execution environment, stop and report the missing prerequisite rather than substituting memory or guessed APIs.
 - Use **Context7** for current framework/library documentation. For Mastra, resolve the official/current Mastra library (currently `/mastra-ai/mastra`) and query the exact concept being exercised. Context7 may reflect documentation newer than the qualification pin, so any version-specific deciding claim MUST be checked against the exact locked package source and/or a real bounded probe.
 - Prefer official/primary external sources for unstable facts. Search snippets, summaries and remembered APIs are not deciding Evidence.
 - Before a probe, compile historical criteria against current authority, classify `Known / Inferred / Unknown / Deferred`, freeze exact versions/lock/configuration and define how the claim can be falsified.

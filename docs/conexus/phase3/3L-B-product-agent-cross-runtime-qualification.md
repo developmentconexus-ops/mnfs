@@ -1,13 +1,15 @@
 # 3L-B — Product Agent + Cross-Runtime Qualification
 
-**Status:** STOPPED AT BT-3 / BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED / ARCHITECTURE-LEAD ADJUDICATION REQUIRED
+**Status:** IN PROGRESS / 3L-R1 CURRENT / BT-1 PASS / BT-2 PASS / BT-3 CHARACTERIZED / BT-3A COMPLETE / BT-3N NEXT / BT-4N..BT-5N BLOCKED
 **Fase:** 3L — Technology Qualification  
 **Package:** B — Product Agent + Cross-Runtime  
 **Authority:** current accepted `docs/conexus/current/*` tree + 3A-R10 + 3L-Q0 + current 3G/3H/3I/3J semantic authority  
 **Method:** DevelopmentConexus Engineering Method v1.0.0  
 **Operator ratification:** 2026-08-18  
-**Current execution authority:** [3L-B-proof-routing-amendment.md](3L-B-proof-routing-amendment.md)
+**Current execution authority:** [3L-R1 framework-native rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md)
 **Important:** this package is qualification/evidence-only. It does not authorize Product implementation, does not constitute C-018, does not authorize merge of PR #40, and does not authorize Package C–E by inheritance.
+
+> Historical `BT-1..BT-5` material below remains proof inventory/Evidence. 3L-R1 supersedes its execution routing with `BT-3N → BT-4N → BT-5N`; only BT-3N is currently authorized.
 
 ## 1. Decision in one sentence
 

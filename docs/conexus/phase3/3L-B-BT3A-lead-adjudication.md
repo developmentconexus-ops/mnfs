@@ -8,6 +8,8 @@
 **Source Evidence:** `spikes/conexus-3l-b/evidence/bt3a-source.json`  
 **Method:** DevelopmentConexus Engineering Method v1.0.0  
 
+> **Current route:** this adjudication remains historical Evidence. [3L-R1](3L-R1-framework-native-proportional-qualification-rebaseline.md) ratified the bounded framework-native correction; `BT-3N` is next and no BT-4N/BT-5N authorization is inherited.
+
 ## 1. Adjudication
 
 The BT-3A source gate **falsified the proposed native `requestContextSchema` realization before a guarded runtime candidate was worth implementing**.

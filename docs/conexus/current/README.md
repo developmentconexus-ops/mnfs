@@ -34,16 +34,16 @@ AGENTS.md
 
 For the exact clauses named by `3L-R1`, the following document is the current amendment:
 
-> **[3L-R1 — Mastra-Native Qualification & F1 Routing Reconciliation](../phase3/3L-R1-mastra-native-qualification-routing-reconciliation.md)**
+> **[3L-R1 — Framework-Native Proportional Qualification Rebaseline](../phase3/3L-R1-framework-native-proportional-qualification-rebaseline.md)**
 
-Until its mechanical projection roll-forward is complete, `3L-R1` **supersedes stale Package-B / Package-C route and realization rows** still visible in the Architecture Baseline or Phase-3 LEDGER.
+`3L-R1` is now projected into the Architecture Baseline and Phase-3 LEDGER and **supersedes historical Package-B / Package-C route and realization rows** retained only as Evidence.
 
 In particular:
 
 ```text
 BT-3A = NOT NEXT
 BT-3A = COMPLETE / native schema route rejected
-BT-3R = NEXT only after projection roll-forward
+BT-3N = NEXT / EXECUTION AUTHORIZED
 Package C = DEFER SAFELY FOR F1
 ```
 
@@ -286,12 +286,12 @@ This does **not** establish Mastra incompatibility and does not reopen Product a
 Current route:
 
 ```text
-BT-3R = NEXT after projection roll-forward
-BT-4R = BLOCKED
-BT-5R = BLOCKED
+BT-3N = NEXT / EXECUTION AUTHORIZED
+BT-4N = BLOCKED
+BT-5N = BLOCKED
 ```
 
-BT-3R proves only native HITL + restart + current-owner authority boundary. It does not inherit authorization for BT-4R/BT-5R.
+BT-3N proves only native HITL + restart + current-owner authority boundary. It does not inherit authorization for BT-4N/BT-5N.
 
 ---
 
@@ -344,8 +344,8 @@ Reopen stronger model-economics machinery for commercialization/billing/quotas, 
 | native Codex OAuth | **QUALIFIED for Package-A tested path** |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** |
 | direct Mastra Product Agent | **ARCHITECTURE CURRENT / BT-1+BT-2 PASS / PACKAGE B NOT YET CLOSED** |
-| native Product-Agent approval/restart route | **BT-3R NEXT AFTER PROJECTION ROLL-FORWARD** |
-| BuilderMastra ↔ ParMastra same-process isolation | **ARCHITECTURE CURRENT / BT-5R PENDING** |
+| native Product-Agent approval/restart route | **BT-3N NEXT / EXECUTION AUTHORIZED** |
+| BuilderMastra ↔ ParMastra same-process isolation | **ARCHITECTURE CURRENT / BT-5N PENDING** |
 | advanced per-run model-economics machinery | **DEFER SAFELY FOR F1** |
 | managed execution / Package D | **NOT AUTO-AUTHORIZED — RE-DERIVE AFTER PACKAGE B** |
 | deciding Evidence / Package E | **NOT AUTO-AUTHORIZED — RE-DERIVE AFTER PACKAGE B** |
@@ -436,9 +436,9 @@ Native Mastra mechanisms may be used; they do not create similarly named Conexus
     BT-2                           PASS
     BT-3                           BEHAVIOR PROVEN / MECHANISM FINDING
     BT-3A                          COMPLETE / NATIVE SCHEMA ROUTE REJECTED
-    BT-3R                          NEXT AFTER PROJECTION ROLL-FORWARD
-    BT-4R                          BLOCKED
-    BT-5R                          BLOCKED
+    BT-3N                          NEXT / EXECUTION AUTHORIZED
+    BT-4N                          BLOCKED
+    BT-5N                          BLOCKED
   Package C                        DEFER SAFELY FOR F1
   Packages D/E                     RE-DERIVE AFTER PACKAGE B / NOT AUTO-AUTHORIZED
 
@@ -453,22 +453,18 @@ Implementation                     BLOCKED
 
 ## 13. Exact next action
 
-> **Roll the operator-ratified 3L-R1 amendment into `ARCHITECTURE-BASELINE.md` and the Phase-3 `LEDGER.md`, verify repository coherence, then execute BT-3R only against the existing exact Package-B lock. Return Evidence for Architecture-Lead adjudication and STOP.**
+> **Execute BT-3N only against the existing exact Package-B lock. Return Evidence for Architecture-Lead adjudication and STOP.**
 
-Do **not** execute BT-4R, BT-5R, Package C, Product implementation, C-018 ratification or merge by inheritance.
+Do **not** execute BT-4N, BT-5N, Package C, Product implementation, C-018 ratification or merge by inheritance.
 
 ---
 
-## 14. Phase-3 status router caveat during roll-forward
+## 14. Phase-3 status router
 
-The Phase-3 `LEDGER.md` still contains older BT-3A-next rows until the exact next action above mechanically projects `3L-R1` into it.
-
-For Package B / Package C only, those stale rows are superseded by:
+The Phase-3 `LEDGER.md` projects the current Package-B/Package-C route from:
 
 ```text
-docs/conexus/phase3/3L-R1-mastra-native-qualification-routing-reconciliation.md
+docs/conexus/phase3/3L-R1-framework-native-proportional-qualification-rebaseline.md
 ```
 
-For all other Phase-3 status/detail, the LEDGER remains the live router.
-
-This bounded precedence is temporary and exists specifically to prevent a stale router from recreating already-falsified work while the approved projection roll-forward is performed.
+For all Phase-3 status/detail, the LEDGER remains the live router. Historical BT-3A documents remain Evidence and do not re-authorize execution.

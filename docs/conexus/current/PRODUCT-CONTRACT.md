@@ -3,10 +3,11 @@
 > **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
 > **Parent checkpoint:** `3A-R11 — CLOSED / APPROVED`
 > **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
+> **3L-R1:** CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** NEXT / NOT STARTED
+> **Package B:** IN PROGRESS / BT-3N NEXT — EXECUTION AUTHORIZED
 
 This current accepted authority projection consolidates **what Conexus is, what users can do, which Product meanings and whole-product journeys must remain true, and which future capabilities are deliberately preserved without becoming F1 machinery**.
 
@@ -946,6 +947,8 @@ Repeated platform failure classes can improve scaffold/gates/runtime seams; one 
 
 F1 must make agentic execution economics observable without inventing false certainty.
 
+F1 preserves finite server-derived model-call/step limits and truthful usage/cost visibility. A hard per-run USD/provider-invoice guarantee is not promised for F1; monetary reservation/cost-envelope enforcement is deferred by 3L-R1 until a named reopen trigger becomes real.
+
 Where the source exposes the facts, user-facing execution detail supports:
 
 ```text
@@ -1344,10 +1347,10 @@ E2B                                      = PASS WITH REQUIRED PHYSICAL-INCARNATI
 native Codex OAuth                       = PASS for tested A3 path
 Builder Observational Memory             = EVALUATED / KEEP OFF
 
-Package B Product Agent/Cross-Runtime    = NEXT / NOT STARTED
-Package C Model Economics/Enforcement   = NOT STARTED
-Package D Managed Execution             = NOT STARTED
-Package E Deciding Evidence             = NOT STARTED
+Package B Product Agent/Cross-Runtime    = IN PROGRESS / BT-3N NEXT
+Package C Model Economics/Enforcement   = DEFER SAFELY / NO F1 EXECUTION
+Package D Managed Execution             = REDERIVE PROPORTIONALLY AFTER B
+Package E Deciding Evidence             = REDERIVE PROPORTIONALLY AFTER B/D
 3M / 3N / 3O                            = NOT STARTED
 ```
 

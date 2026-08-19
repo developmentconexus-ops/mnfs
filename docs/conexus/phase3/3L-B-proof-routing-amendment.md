@@ -8,6 +8,8 @@
 **Method:** DevelopmentConexus Engineering Method v1.0.0  
 **Important:** this amendment changes **proof timing/routing only**. It does not change Product meaning, owner/boundary semantics, 3G/3H architecture, C-018, implementation authorization or merge authority.
 
+> **Current supersession:** [3L-R1](3L-R1-framework-native-proportional-qualification-rebaseline.md) preserves this proof-obligation inventory but supersedes the old `BT-3/BT-4/BT-5` execution route. `BT-3A` is complete; current execution is `BT-3N` only, while `BT-4N` and `BT-5N` remain blocked.
+
 ## 1. Decision in one sentence
 
 Package B will no longer execute its 52 compiled obligations as 52 pre-implementation tests. The 52 remain a durable **proof-obligation inventory**, while 3L executes only five bounded technology probes capable of falsifying the selected Mastra/runtime realization before C-018; Conexus-owned correctness rules are proven against the real implementation at first-build conformance, recovery-specific obligations close in 3M, and deciding-observability obligations remain in Package E/3N.

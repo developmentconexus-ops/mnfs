@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 CLOSED — APPROVED / OPERATOR RATIFIED` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / Q0 APPROVED-COMPLETE / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-3A NEXT / EXECUTION AUTHORIZED`
-**Fase atual:** `3L — Technology Qualification` — **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / ARCHITECTURE CONTRADICTION NOT YET ESTABLISHED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED**; `3A-R11 — Whole-Product Authority Rebaseline` = **CLOSED / APPROVED / OPERATOR RATIFIED em 2026-08-18**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**; `3K — Frontend / Product Architecture` = **CLOSED / APPROVED por 3K-R1** após internal closure `Material Finding = 0` + único independent Fable challenge `Material Finding = 0 / CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`; as 5 correções não-materiais foram adjudicadas em 3K-R1; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 CLOSED — APPROVED / OPERATOR RATIFIED` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / 3L-R1 CURRENT / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-3N NEXT / EXECUTION AUTHORIZED / PACKAGE C DEFER SAFELY`
+**Fase atual:** `3L — Technology Qualification` — **IN PROGRESS / Q0 COMPLETE / 3L-R1 APPROVED-CURRENT / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N NEXT — EXECUTION AUTHORIZED / BT-4N..BT-5N BLOCKED / PACKAGE C DEFER SAFELY**; `3A-R11 — Whole-Product Authority Rebaseline` = **CLOSED / APPROVED / OPERATOR RATIFIED em 2026-08-18**; [3L-R1 — Framework-Native Proportional Qualification Rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md) = **APPROVED / CURRENT / OPERATOR RATIFIED em 2026-08-19**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE / ROUTE PARTIALLY SUPERSEDED BY 3L-R1**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -149,7 +149,7 @@ Nenhuma conversa cria authority.
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3K — Frontend / Product Architecture | **CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS** | [3K-R1](3K-R1-frontend-product-architecture-final-closure.md); reabrir apenas por Finding material |
-| 3L — Technology Qualification | **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-3A NEXT / EXECUTION AUTHORIZED** | [BT-3A discriminant](3L-B-BT3A-context-authority-discriminant.md); BT-4/BT-5 blocked; 52 obligations remain downstream proof inventory |
+| 3L — Technology Qualification | **IN PROGRESS / 3L-R1 CURRENT / PACKAGE A COMPLETE / PACKAGE B IN PROGRESS — BT-3N NEXT / EXECUTION AUTHORIZED / PACKAGE C DEFER SAFELY** | [3L-R1](3L-R1-framework-native-proportional-qualification-rebaseline.md); BT-4N/BT-5N blocked; 52 obligations remain downstream proof inventory |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
 | 3O — Vertical Architecture Proof Contract | NÃO INICIADA | contract-only end-to-end proof target |
@@ -217,12 +217,15 @@ job/v1
 → proof-routing amendment = APPROVED / CURRENT
 → BT-1 = PASS
 → BT-2 = PASS
-→ BT-3 observed Mastra merge behavior = CONFIRMED EVIDENCE
-→ BT-3 architecture contradiction = NOT YET ESTABLISHED
-→ BT-3A = NEXT / EXECUTION AUTHORIZED
-→ BT-4..BT-5 = BLOCKED
+→ BT-3 observed Mastra continuation behavior = FRAMEWORK BEHAVIOR CHARACTERIZED
+→ BT-3A = COMPLETE / NATIVE SCHEMA HYPOTHESIS REJECTED
+→ 3L-R1 = APPROVED / CURRENT / OPERATOR RATIFIED
+→ BT-3N = NEXT / EXECUTION AUTHORIZED
+→ BT-4N..BT-5N = BLOCKED
+→ Package C = DEFER SAFELY / NO F1 EXECUTION
+→ Packages D/E = REDERIVE PROPORTIONALLY AFTER B
 → B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-→ first action = execute only the operator-ratified BT-3A discriminant and return Evidence
+→ first action = execute only BT-3N and return Evidence for Architecture-Lead adjudication
 → load-bearing qualification probes only
 → includes CX-MANAGED-JOB-01 from 3A-R9
 → routing refined by 3A-R10
@@ -365,13 +368,14 @@ Resultado:
 3L = OPEN / IN PROGRESS
 Q0 = APPROVED / COMPLETE
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
-Package B = IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / CONTRADICTION NOT YET ESTABLISHED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
-Packages C–E = NOT STARTED
+Package B = IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N NEXT — EXECUTION AUTHORIZED / BT-4N..BT-5N BLOCKED
+Package C = DEFER SAFELY / NO F1 EXECUTION
+Packages D/E = REDERIVE PROPORTIONALLY AFTER B
 product implementation = BLOCKED
 prior architecture reopen = NONE
 ```
 
-Q0 congela **identidade de qualificação, não arquitetura permanente**: Node/npm/TypeScript do probe host, PostgreSQL 17 current-minor probe pin, exact candidate pins de Mastra/Memory/PG/E2B, supply-chain admission, exact model/provider/pricing identity antes de chamadas billable, pg-boss como incumbent candidate e serial execution `A → B → C → D → E`. `latest`, alias mutável, semver range/transitive dependency não congelada e historical criterion não compilado contra current authority são deciding identities inadmissíveis.
+Q0 congela **identidade de qualificação, não arquitetura permanente**: Node/npm/TypeScript do probe host, PostgreSQL 17 current-minor probe pin, exact candidate pins de Mastra/Memory/PG/E2B, supply-chain admission, exact model/provider/pricing identity antes de chamadas billable e pg-boss como incumbent candidate. A antiga execução incondicional `A → B → C → D → E` foi parcialmente superseded por 3L-R1: serial adjudication permanece, C é deferred e D/E são rederivados antes de admissão. `latest`, alias mutável, semver range/transitive dependency não congelada e historical criterion não compilado contra current authority são deciding identities inadmissíveis.
 
 Q0 não instala dependências, não implementa probe harness e não executa Package A.
 
@@ -724,7 +728,8 @@ ActorRunId / AgentRunId remain durable correlation anchors
 one domain run may span 0..N trace segments
 OTel is preferred observational plumbing, never authority
 runtime role must be mechanically attributable on every relevant telemetry signal
-RequestContext is rebuilt from owner facts and REPLACED WHOLE on dispatch/resume
+RequestContext is runtime/configuration/correlation substrate, never current Product authority
+governed owner/tool/Gateway decisions recheck current Conexus owner truth after continuation
 Conexus owner IDs do not ride OTel baggage by default
 high-cardinality run/trace IDs are not default metric dimensions
 F5 control handoff != Operational Telemetry
@@ -1299,12 +1304,9 @@ Package B — Product Agent + Cross-Runtime
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
 
-Package C — Model Economics / Enforcement
-  3I-03 pre-provider interception
-  retry/fallback/hidden-call neutralization
-  usage/missingness + streaming settlement
-  finite cost-envelope subset
-  OM Observer/Reflector accounting if Builder OM candidate is enabled for evaluation
+Package C — DEFER SAFELY / NO F1 EXECUTION
+  finite model-call/step limits and truthful usage/cost missingness remain F1 obligations
+  hard per-run monetary reservation/cost-envelope machinery deferred until a named trigger
 
 Package D — Managed Execution
   CX-MANAGED-JOB-01
@@ -1355,7 +1357,7 @@ Mastra capability coverage classification                       → 3H-02; optio
 Builder↔PAR role-specific Mastra/store/PubSub isolation        → 3H-03
 same-process vs condition-triggered process split              → 3H-03; physical topology 3J
 Conexus IDs ↔ 0..N OTel/runtime trace correlation              → 3H-03
-RequestContext rebuild/replace-whole boundary                  → 3H-03
+RequestContext non-authority + current-owner recheck boundary  → 3H-03; amended by 3L-R1
 F5 control handoff identity/channel separation                 → 3H-03
 producer_trust mapping for runtime/provider/guest observations → 3H-03
 Verification Observability Mastra+E2B+app realization          → 3H-03; qualification 3L/3N
@@ -1587,7 +1589,8 @@ CX-BUILDER-COGNITION-01 = MUST EVALUATE in 3L / NOT MUST ENABLE
 3L = IN PROGRESS / Q0 COMPLETE
 3L-Q0 = APPROVED / COMPLETE
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
-Package B = IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / CONTRADICTION NOT YET ESTABLISHED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
+Package B = IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N NEXT — EXECUTION AUTHORIZED / BT-4N..BT-5N BLOCKED
+Package C = DEFER SAFELY / NO F1 EXECUTION
 product implementation = BLOCKED
 prior architecture reopen = NONE
 ```
@@ -1667,7 +1670,7 @@ O único independent final Fable challenge de 3K foi executado em **2026-08-18**
 
 Próxima ação:
 
-> **Executar somente o [BT-3A Context Authority Discriminant](3L-B-BT3A-context-authority-discriminant.md) ratificado pelo operador contra o lock exato existente e devolver Evidence para adjudicação do Architecture Lead. Não executar BT-4/BT-5 nem fechar BT-3. Product implementation continua proibida.**
+> **Executar somente BT-3N sob [3L-R1](3L-R1-framework-native-proportional-qualification-rebaseline.md) contra o lock exato existente e devolver Evidence para adjudicação do Architecture Lead. Não executar BT-4N/BT-5N, Package C ou Product implementation.**
 
 3L–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9 + 3A-R10 e o current tree ratificado por 3A-R11. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + F3B-R1 + accepted derived realization plan(s).
 

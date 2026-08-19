@@ -1,6 +1,6 @@
 # 3L Package B — BT-3A Context Authority Discriminant
 
-**Status:** `OPERATOR RATIFIED 2026-08-19 / EXECUTION AUTHORIZED / BT-3A NEXT`
+**Status:** `EXECUTED / COMPLETE / SUPERSEDED AS NEXT ROUTE BY 3L-R1`
 
 **Phase:** 3L — Technology Qualification  
 **Scope:** Package B — Product Agent + Cross-Runtime  
@@ -8,6 +8,8 @@
 **Observed failure:** [3L-B technology qualification](3L-B-technology-qualification.md)  
 **Method:** DevelopmentConexus Engineering Method v1.0.0  
 **Nature:** bounded Architecture-Lead adjudication design; this file does not authorize Product implementation, BT-4/BT-5, C-018 or merge.
+
+> **Current route:** BT-3A preserved its historical source Evidence and rejected the native schema hypothesis. [3L-R1](3L-R1-framework-native-proportional-qualification-rebaseline.md) is now current authority; `BT-3N` is next and `BT-4N`/`BT-5N` remain blocked.
 
 ## 1. Decision in one sentence
 

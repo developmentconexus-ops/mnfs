@@ -7,9 +7,11 @@
 **Método:** DevelopmentConexus Engineering Method v1.0.0  
 **Importante:** Q0 não executa probe, não autoriza product implementation, não constitui C-018 e não autoriza merge do PR #40.
 
+> **Current amendment — 3L-R1:** exact identity/admission and serial adjudication remain current, but unconditional Package execution is superseded. Package B continues through `BT-3N → BT-4N → BT-5N`; Package C = `DEFER SAFELY / NO F1 EXECUTION`; Packages D/E are rederived proportionally before admission.
+
 ## Decisão em uma frase
 
-3L abre com uma **qualification stack reproduzível e fail-closed**: cada Package A–E só pode produzir deciding Evidence contra versões/configurações explicitamente pinadas e admitidas; `latest`, alias mutável, transitive dependency não congelada, package acquisition fora de C-016 ou historical probe não compilado contra current authority tornam a prova inadmissível. A execução será serial `A → B → C → D → E`; cada package é adjudicado antes do próximo, e Material Finding reabre somente a menor assumption/realization falsificada.
+3L abre com uma **qualification stack reproduzível e fail-closed**: cada Package admitido só pode produzir deciding Evidence contra versões/configurações explicitamente pinadas; `latest`, alias mutável, transitive dependency não congelada, package acquisition fora de C-016 ou historical probe não compilado contra current authority tornam a prova inadmissível. Serial adjudication permanece; 3L-R1 supersede execução incondicional de packages que não têm questão load-bearing atual.
 
 ---
 
@@ -361,9 +363,9 @@ Missing required evidence:
 
 ---
 
-## 13. Serial package order — no branch divergence
+## 13. Serial adjudication — route amended by 3L-R1
 
-Although some mechanics could be probed independently, 3L executes one operator-visible line:
+3L keeps one operator-visible adjudication line, but a deferred package is not executed for sequence ceremony:
 
 ```text
 Q0 COMPLETE
@@ -372,19 +374,13 @@ Package A — Builder Substrate + Cognition
 ↓
 adjudication
 ↓
-Package B — Product Agent + Cross-Runtime
+Package B — Product Agent + Cross-Runtime / BT-3N NEXT
+↓ Architecture-Lead adjudication
+Package C — DEFER SAFELY / NO F1 EXECUTION
 ↓
-adjudication
-↓
-Package C — Model Economics / Enforcement
-↓
-adjudication
-↓
-Package D — Managed Execution
-↓
-adjudication
-↓
-Package E — Deciding Evidence
+Package D — REDERIVE PROPORTIONALLY AFTER B
+↓ adjudication when admitted
+Package E — REDERIVE PROPORTIONALLY AFTER B/D
 ↓
 adjudication + internal completeness/deletion check
 ↓
@@ -476,9 +472,9 @@ The candidate versions above are **qualification identities**, not permanent pro
 ```text
 3L-Q0 = APPROVED / COMPLETE
 3L = OPEN / IN PROGRESS
-current = Package A — Builder Substrate + Cognition / IN PROGRESS / A3 NEXT
+current = Package B — Product Agent + Cross-Runtime / BT-3N NEXT
 
-Package A executes:
+Package A executed:
   CX-SBX-E2B-01 compiled against current authority
   CX-BUILDER-MASTRA-01
   CX-BUILDER-COGNITION-01

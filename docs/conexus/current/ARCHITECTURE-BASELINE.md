@@ -3,12 +3,13 @@
 > **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
 > **Parent checkpoint:** `3A-R11 — CLOSED / APPROVED`
 > **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
+> **3L-R1:** CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19
 > **Product meaning:** [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) — current accepted projection
 > **Decision routing:** [DECISION-RECONCILIATION.md](DECISION-RECONCILIATION.md) — current accepted reconciliation
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 MERGE BEHAVIOR CONFIRMED / BT-3A NEXT — EXECUTION AUTHORIZED / BT-4..BT-5 BLOCKED
+> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N NEXT — EXECUTION AUTHORIZED / BT-4N..BT-5N BLOCKED
 
 This current accepted authority projection answers:
 
@@ -1353,11 +1354,12 @@ For durable waits:
 ```text
 PAR owner persists exact proposal/ApprovalRequest first
 → owner commit
-→ runtime suspension/checkpoint in mastra_par
+→ native Mastra requireApproval provides mechanical suspension/checkpoint in mastra_par
 → process may disappear
 → resume rebuilds exact old projection
 → current authorization/owner facts rechecked
-→ RequestContext replaced whole
+→ raw RequestContext remains non-authoritative runtime substrate
+→ governed tool/effect boundary rechecks current owner truth
 → resume exact same AgentRun
 ```
 
@@ -1431,38 +1433,42 @@ standalone/ephemeral fallback for governed runs
 
 ## 25.2 Same-process baseline is conditional
 
-Builder and PAR may coexist in one Hub application process only if Package B proves all enabled F1 process-global mutable state can be partitioned/fenced.
+Builder and PAR may coexist in one Hub application process only if Package B proves the enabled F1 mutable surfaces can be partitioned/fenced.
 
 Material unpartitionable cross-role framework global state fires the process-split trigger; semantic owners do not change.
 
 ## 25.3 RequestContext
 
-Every dispatch/rebind/resume:
+Mastra RequestContext is runtime/configuration/correlation substrate, not Product/business authority.
+
+Every dispatch/rebind/resume supplies the complete current request/runtime configuration required by early Agent shaping:
 
 ```text
 current/pinned owner facts
 → build NEW role-specific RequestContext
-→ REPLACE WHOLE restored/effective context
-→ execute
+→ Mastra continuation mechanics may retain subordinate runtime keys
+→ governed owner/tool/Gateway decision rechecks current Conexus owner truth
+→ fail closed on stale/revoked/mismatched authority before effect admission
 ```
 
-Never merge only known keys onto a stale restored context and leave unknown stale authority-bearing values alive.
+Raw or restored `RequestContext`, Mastra approval state, `toolCallId` and model output never become permission, role, binding, approval or effect authority. Physical survival of an unknown stale key is not itself a failure; its use as current authority is prohibited.
 
 ## 25.4 Status
 
 ```text
 architecture = CURRENT
+3L-R1 framework-native rebaseline = APPROVED / CURRENT
 Package B B0 = EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
 Package B proof-routing amendment = APPROVED / CURRENT
 Package B BT-1 = PASS
 Package B BT-2 = PASS
-Package B BT-3 observed Mastra merge behavior = CONFIRMED EVIDENCE
-Package B BT-3 architecture contradiction = NOT YET ESTABLISHED
-Package B BT-3A = NEXT / EXECUTION AUTHORIZED
-Package B BT-4..BT-5 = BLOCKED
+Package B BT-3 observed Mastra merge behavior = FRAMEWORK BEHAVIOR CHARACTERIZED
+Package B BT-3A = COMPLETE / NATIVE SCHEMA HYPOTHESIS REJECTED
+Package B BT-3N = NEXT / EXECUTION AUTHORIZED
+Package B BT-4N..BT-5N = BLOCKED
 Package B B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-CX-AGENT-MASTRA-01 = NOT QUALIFIED / BT-3A PENDING
-CX-RUNTIME-ISOLATION-01 = NOT PROVEN / BT-5 NOT EXECUTED
+CX-AGENT-MASTRA-01 = NOT QUALIFIED / BT-3N PENDING
+CX-RUNTIME-ISOLATION-01 = NOT PROVEN / BT-5N NOT EXECUTED
 ```
 
 No claim of same-process safety is allowed before B.
@@ -1575,44 +1581,11 @@ Builder model spend → Builder ActorRun
 Product Agent spend → Product AgentRun
 ```
 
-## 28.1 Invariant
+## 28.1 F1 finite-execution invariant
 
-```text
-committedModelSpendUsd
-+
-outstandingModelLiabilityUsd
-<= effectiveModelSpendCapUsd
-```
+F1 requires a small server allowlist of providers/models, exact Release-pinned model identity, finite server-derived `maxModelCalls`/step limits, strict bounded retries and no automatic fallback cascade unless separately admitted. Caller/model/runtime state cannot widen those limits.
 
-At most one unsettled billable liability per run in F1 baseline.
-
-An admitted run cap is immutable upward: there is no in-place mid-run top-up. Materially more authority requires a fresh owner admission path.
-
-## 28.2 Pre-provider gate
-
-Before every physical billable model attempt:
-
-```text
-run current/admissible
-+ exact provider/model allowed
-+ call count available
-+ qualified finite max-cost envelope
-+ no outstanding liability
-+ cap sufficient
-→ durably reserve maximum liability in owner run fact
-→ commit
-→ only then provider I/O
-```
-
-Streaming follows the same gate: reserve the full qualified maximum liability before the stream/provider attempt starts.
-
-## 28.3 Retry/fallback
-
-Every physical attempt needs fresh owner admission. Hidden automatic retries/fallback below the owner gate are disabled in the F1 target.
-
-Fallback provider/model requires its own qualified profile/admission.
-
-## 28.4 Missing/ambiguous usage
+## 28.2 Missing/ambiguous usage
 
 ```text
 usage missing
@@ -1621,14 +1594,18 @@ response lost
 crash
 ambiguous provider outcome
 → never zero
-→ conservatively consume/reserve max according to owner settlement law
+→ remain visibly missing/unknown
 ```
 
-## 28.5 Status
+## 28.3 Deferred monetary enforcement
 
-Architecture obligation = CURRENT.
+The hard per-run USD/provider-invoice guarantee, pre-provider maximum-liability reservation, qualified cost envelope and monetary settlement machinery are deferred for F1 by 3L-R1. Reopen on commercialization/billing/quotas, automatic multi-provider routing, contractual hard per-run budgets, material autonomous cost exposure or evidence that bounded F1 controls are insufficient.
 
-Exact Mastra/provider interception/usage/cost-envelope proof = **Package C NOT YET QUALIFIED**.
+## 28.4 Status
+
+Finite execution limits and truthful cost/usage missingness = **CURRENT F1 OBLIGATION**.
+
+Package C advanced monetary enforcement = **DEFER SAFELY / NO F1 EXECUTION**.
 
 No generic BudgetService/model proxy/token broker/ModelCallAttempt business domain F1.
 
@@ -2294,10 +2271,10 @@ REJECTED F1
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** | guard mandatory in Product realization |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** | not universal model/provider winner |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** | net benefit not proven; no stale-authority regression observed |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B BT-3A PENDING** | BT-1 and BT-2 passed; BT-3 confirmed stale unknown RequestContext merge; BT-3A is authorized to discriminate whether a closed current authority projection prevents governed influence; BT-4/BT-5 remain blocked |
+| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B BT-3N PENDING** | BT-1 and BT-2 passed; BT-3 characterized continuation behavior; BT-3A rejected the native schema hypothesis; BT-3N is authorized to prove native HITL plus current-owner boundary; BT-4N/BT-5N remain blocked |
 | BuilderMastra != ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | split only on material failure |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
-| model-spend pre-provider enforcement | **ARCHITECTURE CURRENT OBLIGATION / PACKAGE C NOT QUALIFIED** | hidden retries below gate must stay disabled/qualified |
+| bounded F1 model execution/economics | **ARCHITECTURE CURRENT / PACKAGE C DEFER SAFELY** | finite server limits and truthful usage/cost visibility remain; advanced hard monetary enforcement is deferred by 3L-R1 |
 | managed sync/job semantics | **ARCHITECTURE CURRENT / PACKAGE D NOT QUALIFIED** | MAR/Release law current |
 | pg-boss 12.26.3 | **PACKAGE D CANDIDATE / NOT AUTHORITY** | one-catch-up law must be proved |
 | deciding F5/observability surfaces | **ARCHITECTURE CURRENT SHAPE / PACKAGE E NOT QUALIFIED** | telemetry-never-authority is already architectural |
@@ -2337,20 +2314,20 @@ R11 is closed; the remaining 3L route preserves serial proof dependency.
 Current route:
 
 ```text
-execute only Package-B BT-3A under the operator-ratified discriminant
+execute only Package-B BT-3N under operator-ratified 3L-R1
 ↓
 Package B — Product Agent + Cross-Runtime — IN PROGRESS
   B0 EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
   BT-1 PASS / BT-2 PASS
-  BT-3 MERGE BEHAVIOR CONFIRMED / ARCHITECTURE CONTRADICTION NOT YET ESTABLISHED
-  BT-3A NEXT / EXECUTION AUTHORIZED
-  BT-4..BT-5 BLOCKED
+  BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED
+  BT-3A COMPLETE / NATIVE SCHEMA HYPOTHESIS REJECTED
+  BT-3N NEXT / EXECUTION AUTHORIZED
+  BT-4N..BT-5N BLOCKED
   B1-01..B4-18 PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
-↓ adjudicate
-Package C — Model Economics / Enforcement
-↓ adjudicate
+↓ Architecture-Lead adjudication
+Package C — DEFER SAFELY / NO F1 EXECUTION
 Package D — Managed Execution
   includes CX-MANAGED-JOB-01
 ↓ adjudicate
@@ -2608,4 +2585,4 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 # 50. Exact next action
 
-> **Execute only the operator-ratified BT-3A Context Authority Discriminant against the existing exact Package-B lock and return Evidence for Architecture-Lead adjudication. Do not execute BT-4/BT-5 or close BT-3.**
+> **Execute only BT-3N against the existing exact Package-B lock and return Evidence for Architecture-Lead adjudication. Do not execute BT-4N/BT-5N, Package C or Product implementation.**

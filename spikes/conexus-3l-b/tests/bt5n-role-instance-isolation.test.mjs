@@ -346,25 +346,27 @@ test('BT-5N qualifies same-process role-instance isolation on public Mastra path
     builderThreadCollector = beginThreadCollection(builderThreadSubscription, builderThreadEvents);
     parThreadCollector = beginThreadCollection(parThreadSubscription, parThreadEvents);
 
-    const builderAgentResult = await builder.mastra.getAgent('builderAgent').generate(
+    const builderAgentStream = await builder.mastra.getAgent('builderAgent').stream(
       'identify the attached role',
       {
         runId: 'builder-agent-run',
         memory: { thread: sharedThreadId, resource: sharedResourceId }
       }
     );
+    const builderAgentResult = { text: await builderAgentStream.text };
     await Promise.all([builder.pubsub.flush(), par.pubsub.flush()]);
     await waitFor(() => builderThreadEvents.length > 0, 'Builder thread stream');
     assert.equal(parThreadEvents.length, 0);
 
     const builderEventsBeforePar = builderThreadEvents.length;
-    const parAgentResult = await par.mastra.getAgent('parAgent').generate(
+    const parAgentStream = await par.mastra.getAgent('parAgent').stream(
       'identify the attached role',
       {
         runId: 'par-agent-run',
         memory: { thread: sharedThreadId, resource: sharedResourceId }
       }
     );
+    const parAgentResult = { text: await parAgentStream.text };
     await Promise.all([builder.pubsub.flush(), par.pubsub.flush()]);
     await waitFor(() => parThreadEvents.length > 0, 'PAR thread stream');
 

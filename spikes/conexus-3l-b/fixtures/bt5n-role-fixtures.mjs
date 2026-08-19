@@ -23,7 +23,23 @@ function deterministicLocalModel(role, counters) {
       };
     },
     async doStream() {
-      throw new Error('BT-5N deterministic fixture uses generate() only');
+      counters.modelFixtureCalls += 1;
+      return {
+        stream: new ReadableStream({
+          start(controller) {
+            controller.enqueue({ type: 'stream-start', warnings: [] });
+            controller.enqueue({ type: 'text-start', id: 'bt5n-text' });
+            controller.enqueue({ type: 'text-delta', id: 'bt5n-text', delta: role });
+            controller.enqueue({ type: 'text-end', id: 'bt5n-text' });
+            controller.enqueue({
+              type: 'finish',
+              finishReason: 'stop',
+              usage: { inputTokens: 0, outputTokens: 1, totalTokens: 1 }
+            });
+            controller.close();
+          }
+        })
+      };
     }
   };
 }

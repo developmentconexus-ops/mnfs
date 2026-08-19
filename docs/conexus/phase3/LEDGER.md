@@ -33,7 +33,7 @@ C-000..C-017
 → Pre-Implementation Convergence & Realization Routing
 
 3A-R11
-→ Whole-Product Authority Rebaseline / ACTIVE / Round-3 projection correction
+→ Whole-Product Authority Rebaseline / CLOSED / APPROVED / OPERATOR RATIFIED
 
 3B
 → System Context & Boundaries
@@ -123,10 +123,11 @@ Regra de leitura:
 AGENTS.md
 → docs/engineering/standards/root-cause-global-maximum-method.md
 → docs/DOCUMENTATION-MAP.md
-→ docs/conexus/DECISOES.md
-→ este LEDGER
-→ exact accepted phase/task authority
-→ supporting evidence/current implementation quando material
+→ docs/conexus/current/README.md
+→ current Product Contract / Architecture Baseline / Decision Reconciliation conforme a questão
+→ este LEDGER quando Phase-3 status/detail for relevante
+→ exact accepted detailed semantic authority
+→ deciding Evidence/current implementation somente quando material
 ```
 
 Nenhuma conversa cria authority.
@@ -142,7 +143,7 @@ Nenhuma conversa cria authority.
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3E — Data Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
-| 3F — Contracts & API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
+| 3F — Contracts / API Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3G — Behavioral / State Architecture | **CLOSED / APROVADA** | [3G-R1](3G-R1-behavioral-state-architecture-final-closure.md) |
 | 3H — Runtime & Agent Architecture | **CLOSED / APROVADA** | [3H-R1](3H-R1-runtime-agent-architecture-final-closure.md) |
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
@@ -1141,7 +1142,7 @@ whole-Hub emergency stop out-of-band derrota TODA camada de auto-start
 sem HA/zero-downtime/orchestrator/PlatformDeployment/EmergencyStop record
 ```
 
-`3J-04 = NOT JUSTIFIED` — ownership 3A-R6 §7 completo em 3J-01/02/03; dois defers de 3A-R6 (DEDICATED physical; old-PAR drain) preservados com triggers. **C-001 permanece a product vision authority.**
+`3J-04 = NOT JUSTIFIED` — ownership 3A-R6 §7 completo em 3J-01/02/03; dois defers de 3A-R6 (DEDICATED physical; old-PAR drain) preservados com triggers. **C-001 permanece product vision authority.**
 
 ### 11.4 Final closure — 3J-R1
 
@@ -1653,7 +1654,7 @@ verdict                                                     = INTERNALLY CONVERG
 
 O único independent final Fable challenge de 3K foi executado em **2026-08-18** e registrado como evidence não-autoritativa em `3K-FABLE-DIALOGUE-final-product-architecture-review.md`. Verdict: `CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`, `Material findings = NONE`, `reopen 3B–3J = NONE`, `new module/record/database = 0`. As cinco correções não-materiais foram adjudicadas em [3K-R1](3K-R1-frontend-product-architecture-final-closure.md): três restaurações de links/wording do LEDGER + duas clarificações bounded de 3K-04 (Workspace Agent attention é discovery projection, nunca decision surface; structured Agent edit sem LLM continua no Change/work graph + C-014/C-017 commit matrix).
 
-3K-R1 foi ratificada pelo operador em **2026-08-18** e fecha `3K — Frontend / Product Architecture` como **CLOSED / APPROVED**. `3K-01..3K-04 = APPROVED`; internal Material Finding = 0; final Fable Material Finding = 0; prior structural reopen = NONE; implementation continua bloqueada.
+3K-R1 foi ratificada pelo operador em **2026-08-18** e fecha `3K — Frontend / Product Architecture` como **CLOSED / APPROVED**. `3K-01..3K-04 = APPROVED`; internal Material Finding = 0; final Fable Material Finding = 0; prior structural reopen = NONE; implementação continua bloqueada.
 
 Próxima ação:
 

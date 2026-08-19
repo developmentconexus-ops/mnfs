@@ -30,6 +30,16 @@
       "claim": "public workflow step execute context exposes runId before any Product Agent execution"
     },
     {
+      "path": "node_modules/@mastra/core/dist/events/types.d.ts",
+      "sha256": "8d0d86ca2f148762c7a74b2b5f539aefd1a6e577e9f75ac1a494b3bd5ea22092",
+      "claim": "public PubSub callback exposes nack redelivery and deliveryAttempt while retaining the event payload"
+    },
+    {
+      "path": "node_modules/@mastra/core/dist/event-emitter-C12mi0dL.js",
+      "sha256": "d95dc1f4d59391a17da524aa8a7f7a16a68a43356d79c01cc1d1c5e97926f3ac",
+      "claim": "exact public EventEmitterPubSub nack path redelivers the same event and increments only deliveryAttempt"
+    },
+    {
       "path": "node_modules/@mastra/pg/dist/storage/domains/schedules/index.d.ts",
       "sha256": "cdcafeec74a6741b9e0c744e85b76758c1ef7531a76020bc9f7c1bf8a5a5d470",
       "claim": "public PostgreSQL schedules domain implements due listing, CAS advancement, and trigger history"
@@ -44,7 +54,5 @@
   "deterministicNonAgentTarget": "SUPPORTED",
   "stableOccurrenceMaterialBeforeProductExecution": "SUPPORTED",
   "candidatePublicSurface": "mastra.schedules.create({ workflowId }) -> Scheduler.tick() -> workflow step execute.runId",
-  "unknowns": [
-    "The pinned public API exposes no scheduler-level retry command for a claimed workflow fire; runtime Evidence must classify duplicate presentation using the unchanged deterministic scheduleId plus scheduledFireAt material rather than infer automatic redelivery."
-  ]
+  "unknowns": []
 }

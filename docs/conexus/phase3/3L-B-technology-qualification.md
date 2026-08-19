@@ -1,6 +1,6 @@
 # 3L Package B — Proportional Technology Probe Result
 
-**Status:** `BT-4N EXECUTION COMPLETE / PASS_NATIVE_SCHEDULE_INGRESS / ARCHITECTURE-LEAD ADJUDICATION PENDING`
+**Status:** `BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS / BT-5N NEXT / EXECUTION AUTHORIZED`
 
 **Execution authority:** [3L-R1 framework-native proportional qualification rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md), preserving the historical [3L-B proof-routing amendment](3L-B-proof-routing-amendment.md) as Evidence
 
@@ -8,7 +8,7 @@
 
 **PostgreSQL probe identity:** `17.10 (Debian 17.10-1.pgdg12+1)`
 
-This record preserves the earlier BT-1..BT-3 evidence, the lead-adjudicated BT-3N PASS, and the operator-authorized BT-4N executor Evidence under 3L-R1. BT-4N still requires Architecture-Lead adjudication; this is not Package-B closure, architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
+This record preserves the earlier BT-1..BT-3 evidence, the lead-adjudicated BT-3N PASS, and the lead-adjudicated BT-4N PASS under 3L-R1. This is not Package-B closure, architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
 
 ## BT-1 — Direct Agent authority closure
 
@@ -72,7 +72,7 @@ This record preserves the earlier BT-1..BT-3 evidence, the lead-adjudicated BT-3
 - **Concurrent ticks:** a test-only barrier forced two native scheduler instances to read the same due PostgreSQL row before either CAS. Exact `SchedulesPG` CAS admitted one winner, one trigger row and one synthetic PAR ingress.
 - **Duplicate/redelivery:** public `EventEmitterPubSub` `nack()` redelivered the same native `workflow.start` event with `deliveryAttempt` values `1` then `2`; the exact logical run material remained unchanged and produced one stable logical occurrence identity.
 - **External activity:** Product Agent executions `0`; model calls `0`; business tool calls `0`; provider calls `0`; E2B calls `0`; real external effects `0`.
-- **Known / limitation:** the workflow ingress derives the stable schedule/slot pair from the exact pinned public run-id format. It creates no Conexus scheduler, ScheduleOccurrence durable record, queue, outbox or automation domain.
+- **Known / limitation:** the stable occurrence adapter is bound to the exact qualified Mastra scheduler/run-id contract → fail closed on malformed material → requalify on behavior/version change. The workflow ingress derives the stable schedule/slot pair from the exact pinned public run-id format. It creates no Conexus scheduler, ScheduleOccurrence durable record, queue, outbox or automation domain.
 - **Executor verdict:** `PASS_NATIVE_SCHEDULE_INGRESS`.
 
 ## Candidate package result returned for adjudication
@@ -84,10 +84,8 @@ BT-3 = FAIL_REALIZATION
 BT-4 = NOT EXECUTED — STOP AFTER BT-3
 BT-5 = NOT EXECUTED — STOP AFTER BT-3
 BT-3N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
-BT-4N EXECUTION = COMPLETE
-BT-4N EXECUTOR VERDICT = PASS_NATIVE_SCHEDULE_INGRESS
-ARCHITECTURE-LEAD ADJUDICATION = PENDING
-BT-5N = BLOCKED / NOT AUTHORIZED
+BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
+BT-5N = NEXT / EXECUTION AUTHORIZED
 
 CX-AGENT-MASTRA-01 = PARTIALLY QUALIFIED / PACKAGE B NOT CLOSED
 CX-RUNTIME-ISOLATION-01 = NOT_PROVEN / BT-5 NOT EXECUTED

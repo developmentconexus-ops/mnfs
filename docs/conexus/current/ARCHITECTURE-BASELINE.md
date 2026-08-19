@@ -9,7 +9,7 @@
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED / BT-4N NEXT — EXECUTION AUTHORIZED / BT-5N BLOCKED
+> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N NEXT — EXECUTION AUTHORIZED
 
 This current accepted authority projection answers:
 
@@ -1465,8 +1465,8 @@ Package B BT-2 = PASS
 Package B BT-3 observed Mastra merge behavior = FRAMEWORK BEHAVIOR CHARACTERIZED
 Package B BT-3A = COMPLETE / NATIVE SCHEMA HYPOTHESIS REJECTED
 Package B BT-3N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
-Package B BT-4N = NEXT / EXECUTION AUTHORIZED
-Package B BT-5N = BLOCKED / NOT AUTHORIZED
+Package B BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
+Package B BT-5N = NEXT / EXECUTION AUTHORIZED
 Package B B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
 CX-AGENT-MASTRA-01 = PARTIALLY QUALIFIED / PACKAGE B NOT CLOSED
 CX-RUNTIME-ISOLATION-01 = NOT PROVEN / BT-5N NOT EXECUTED
@@ -2272,7 +2272,7 @@ REJECTED F1
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** | guard mandatory in Product realization |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** | not universal model/provider winner |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** | net benefit not proven; no stale-authority regression observed |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / BT-3N PASS — LEAD-ADJUDICATED / PACKAGE B NOT CLOSED** | BT-1 and BT-2 passed; BT-3 characterized continuation behavior; BT-3A rejected the native schema hypothesis; BT-3N passed native HITL plus current-owner boundary; BT-4N is authorized next and BT-5N remains blocked |
+| direct Mastra Product Agent | **ARCHITECTURE CURRENT / BT-3N PASS — LEAD-ADJUDICATED / PACKAGE B NOT CLOSED** | BT-1 and BT-2 passed; BT-3 characterized continuation behavior; BT-3A rejected the native schema hypothesis; BT-3N passed native HITL plus current-owner boundary; BT-4N passed lead adjudication and BT-5N is the only authorized next execution |
 | BuilderMastra != ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | split only on material failure |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | bounded F1 model execution/economics | **ARCHITECTURE CURRENT / PACKAGE C DEFER SAFELY** | finite server limits and truthful usage/cost visibility remain; advanced hard monetary enforcement is deferred by 3L-R1 |
@@ -2315,7 +2315,7 @@ R11 is closed; the remaining 3L route preserves serial proof dependency.
 Current route:
 
 ```text
-execute only Package-B BT-4N under operator-ratified 3L-R1
+project the BT-4N lead-adjudicated pass and authorize only Package-B BT-5N under operator-ratified 3L-R1
 ↓
 Package B — Product Agent + Cross-Runtime — IN PROGRESS
   B0 EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
@@ -2323,8 +2323,8 @@ Package B — Product Agent + Cross-Runtime — IN PROGRESS
   BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED
   BT-3A COMPLETE / NATIVE SCHEMA HYPOTHESIS REJECTED
   BT-3N PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
-  BT-4N NEXT / EXECUTION AUTHORIZED
-  BT-5N BLOCKED / NOT AUTHORIZED
+  BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
+  BT-5N NEXT / EXECUTION AUTHORIZED
   B1-01..B4-18 PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
@@ -2587,4 +2587,4 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 # 50. Exact next action
 
-> **Execute only BT-4N against the existing exact Package-B lock and return executor Evidence for Architecture-Lead adjudication. Do not execute BT-5N, Package C or Product implementation.**
+> **Execute only `BT-5N — Role-instance isolation + enabled-global canary` under a new accepted execution plan. Do not execute Package C or Product implementation.**

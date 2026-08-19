@@ -6,7 +6,7 @@ import path from 'node:path';
 const root = process.cwd();
 const read = (p) => readFile(path.join(root, p), 'utf8');
 
-const [readme, product, architecture, reconciliation, ledger, q0, bt3a, bt3aLead] = await Promise.all([
+const [readme, product, architecture, reconciliation, ledger, q0, bt3a, bt3aLead, bt4nLead] = await Promise.all([
   read('docs/conexus/current/README.md'),
   read('docs/conexus/current/PRODUCT-CONTRACT.md'),
   read('docs/conexus/current/ARCHITECTURE-BASELINE.md'),
@@ -15,6 +15,7 @@ const [readme, product, architecture, reconciliation, ledger, q0, bt3a, bt3aLead
   read('docs/conexus/phase3/3L-Q0-qualification-manifest.md'),
   read('docs/conexus/phase3/3L-B-BT3A-context-authority-discriminant.md'),
   read('docs/conexus/phase3/3L-B-BT3A-lead-adjudication.md'),
+  read('docs/conexus/phase3/3L-B-BT4N-lead-adjudication.md'),
 ]);
 
 for (const [name, text] of Object.entries({ readme, architecture, reconciliation, ledger })) {
@@ -29,18 +30,28 @@ assert.match(readme, /BT-3N[^\n]*PASS[^\n]*LEAD-ADJUDICATED/iu,
   'current README must project the lead-adjudicated BT-3N PASS');
 assert.match(ledger, /BT-3N[^\n]*PASS[^\n]*LEAD-ADJUDICATED/iu,
   'LEDGER must project the lead-adjudicated BT-3N PASS');
-assert.match(readme, /BT-4N EXECUTION[^\n]*COMPLETE/iu,
-  'current README must record completed BT-4N execution');
-assert.match(ledger, /BT-4N EXECUTION[^\n]*COMPLETE/iu,
-  'LEDGER must record completed BT-4N execution');
-assert.match(readme, /BT-4N EXECUTOR VERDICT[^\n]*PASS_NATIVE_SCHEDULE_INGRESS/iu,
-  'current README must preserve the BT-4N executor verdict');
-assert.match(ledger, /BT-4N EXECUTOR VERDICT[^\n]*PASS_NATIVE_SCHEDULE_INGRESS/iu,
-  'LEDGER must preserve the BT-4N executor verdict');
-assert.match(readme, /BT-5N[^\n]*BLOCKED/iu,
-  'current README must keep BT-5N blocked');
-assert.match(ledger, /BT-5N[^\n]*BLOCKED/iu,
-  'LEDGER must keep BT-5N blocked');
+for (const [name, text] of Object.entries({ readme, architecture, reconciliation, ledger })) {
+  assert.match(
+    text,
+    /BT-4N[^\n]*PASS[^\n]*LEAD-ADJUDICATED[^\n]*PASS_NATIVE_SCHEDULE_INGRESS/iu,
+    `${name} must project the lead-adjudicated BT-4N PASS`,
+  );
+  assert.match(
+    text,
+    /BT-5N[^\n]*NEXT[^\n]*AUTHORIZED/iu,
+    `${name} must route only BT-5N as next`,
+  );
+  assert.doesNotMatch(
+    text,
+    /(?:BT-4N[^\n]*=\s*NEXT\s*\/\s*EXECUTION AUTHORIZED|BT-4N NEXT\s*\/\s*EXECUTION AUTHORIZED|BT-4N[^\n]*ADJUDICATION[^\n]*PENDING)/iu,
+    `${name} must not retain stale BT-4N execution or pending-adjudication state`,
+  );
+}
+assert.match(
+  bt4nLead,
+  /PASS_NATIVE_SCHEDULE_INGRESS/iu,
+  'router projection must be anchored in the BT-4N lead adjudication',
+);
 assert.doesNotMatch(
   readme,
   /BT-3N EXECUTION[^\n]*COMPLETE\s*\nBT-3N EXECUTOR VERDICT[^\n]*\s*\nARCHITECTURE-LEAD ADJUDICATION = PENDING/iu,

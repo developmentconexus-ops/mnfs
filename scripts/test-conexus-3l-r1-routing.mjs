@@ -21,8 +21,12 @@ for (const [name, text] of Object.entries({ readme, architecture, reconciliation
   assert.match(text, /3L-R1/u, `${name} must route through the operator-ratified 3L-R1 amendment`);
 }
 
-assert.match(readme, /BT-3N[^\n]*NEXT/u, 'current README must route Package B to BT-3N');
-assert.match(ledger, /BT-3N[^\n]*NEXT/u, 'LEDGER must route Package B to BT-3N');
+assert.match(readme, /BT-3N EXECUTION[^\n]*COMPLETE/u, 'current README must record completed BT-3N execution');
+assert.match(ledger, /BT-3N[^\n]*EXECUTION COMPLETE/u, 'LEDGER must record completed BT-3N execution');
+assert.match(readme, /BT-3N EXECUTOR VERDICT[^\n]*PASS_NATIVE_HITL_OWNER_BOUNDARY/u,
+  'current README must preserve the executor verdict without closing Package B');
+assert.match(ledger, /BT-3N EXECUTOR VERDICT[^\n]*PASS_NATIVE_HITL_OWNER_BOUNDARY/u,
+  'LEDGER must preserve the executor verdict without closing Package B');
 assert.doesNotMatch(readme, /BT-3A NEXT/u, 'current README must not re-authorize completed BT-3A');
 assert.doesNotMatch(ledger, /BT-3A NEXT/u, 'LEDGER must not re-authorize completed BT-3A');
 assert.match(architecture, /RequestContext[^\n]*runtime[^\n]*configuration[^\n]*not[^\n]*authority/iu,

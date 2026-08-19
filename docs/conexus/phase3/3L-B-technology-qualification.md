@@ -1,14 +1,14 @@
 # 3L Package B — Proportional Technology Probe Result
 
-**Status:** `STOPPED AT BT-3 / MATERIAL LOAD-BEARING FAILURE / ARCHITECTURE-LEAD ADJUDICATION REQUIRED`
+**Status:** `BT-3N EXECUTION COMPLETE / PASS_NATIVE_HITL_OWNER_BOUNDARY / ARCHITECTURE-LEAD ADJUDICATION PENDING`
 
-**Execution authority:** [3L-B proof-routing amendment](3L-B-proof-routing-amendment.md)
+**Execution authority:** [3L-R1 framework-native proportional qualification rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md), preserving the historical [3L-B proof-routing amendment](3L-B-proof-routing-amendment.md) as Evidence
 
 **Exact lock:** `@mastra/core 1.56.0`, `@mastra/memory 1.25.0`, `@mastra/pg 1.19.0`; SHA-256 `5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0`
 
 **PostgreSQL probe identity:** `17.10 (Debian 17.10-1.pgdg12+1)`
 
-This record reports only the probes actually executed before the plan's mandatory stop condition fired. It is Evidence for Architecture-Lead adjudication, not Package-B closure, architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
+This record preserves the earlier BT-1..BT-3 evidence and adds only the operator-authorized BT-3N execution under 3L-R1. It is Evidence for Architecture-Lead adjudication, not Package-B closure, architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
 
 ## BT-1 — Direct Agent authority closure
 
@@ -51,6 +51,18 @@ This record reports only the probes actually executed before the plan's mandator
 - **Verdict:** `NOT EXECUTED`.
 - **Known / limitation:** no same-process qualification claim is permitted; the existing source-map unknown remains unresolved.
 
+## BT-3N — Native HITL / restart / current-owner authority boundary
+
+- **Question:** can the exact direct Agent use static native `requireApproval`, survive real process loss, be rediscovered from PostgreSQL by a fresh process, and still make the current external owner authoritative at the tool/effect boundary?
+- **Exact identity:** `@mastra/core 1.56.0`; `node_modules/@mastra/core/dist/agent-3cYAz4qr.js`, SHA-256 `871818d21f0ceaadeac9848f72687ccbc0133acec10d2b4b5dbf2cb56b64932d`; `node_modules/@mastra/core/dist/agent/agent.d.ts`, SHA-256 `a077b5bb90c9591c49f052684ffc5de19f39f20c7020a5299fd3cbc9aa141cf8`; PostgreSQL `17.10`.
+- **Native suspension and restart:** static `requireApproval: true` suspended before tool execution. Process A exited; process B discovered the exact suspended run through persistent storage and used the public Agent approval/decline APIs.
+- **Revoked-owner scenario:** the raw resumed `RequestContext` still exposed stale `staleBusinessAuthority=ALLOW`; process B mechanically approved; the tool boundary re-read current external owner truth as `DENY`; synthetic effect count was `0`. The stale raw value was observable but was not used as authority.
+- **Allowed-owner scenario:** the current external owner returned `ALLOW`; tool-boundary execution count was `1`; synthetic effect count was exactly `1`.
+- **Decline scenario:** native decline executed neither the tool boundary nor the effect; both counts were `0`.
+- **External activity:** provider/model API calls `0`; E2B calls `0`; real external effects `0`. The harness used only a deterministic local model object and a current-owner fixture at the tool/effect boundary.
+- **Known / limitation:** this proves framework-native boundary feasibility. It does not prove Product PAR/Gateway implementation conformance and does not qualify `CX-AGENT-MASTRA-01` without Architecture-Lead adjudication.
+- **Executor verdict:** `PASS_NATIVE_HITL_OWNER_BOUNDARY`.
+
 ## Candidate package result returned for adjudication
 
 ```text
@@ -59,10 +71,15 @@ BT-2 = PASS
 BT-3 = FAIL_REALIZATION
 BT-4 = NOT EXECUTED — STOP AFTER BT-3
 BT-5 = NOT EXECUTED — STOP AFTER BT-3
+BT-3N EXECUTION = COMPLETE
+BT-3N EXECUTOR VERDICT = PASS_NATIVE_HITL_OWNER_BOUNDARY
+ARCHITECTURE-LEAD ADJUDICATION = PENDING
+BT-4N = BLOCKED / NOT AUTHORIZED
+BT-5N = BLOCKED / NOT AUTHORIZED
 
-CX-AGENT-MASTRA-01 = FAIL_REALIZATION / ARCHITECTURE-LEAD ADJUDICATION REQUIRED
+CX-AGENT-MASTRA-01 = NOT QUALIFIED / EXECUTOR EVIDENCE RETURNED / ARCHITECTURE-LEAD ADJUDICATION PENDING
 CX-RUNTIME-ISOLATION-01 = NOT_PROVEN / BT-5 NOT EXECUTED
-Package B = STOPPED / NOT CLOSED / NEXT PACKAGE NOT AUTHORIZED
+Package B = IN PROGRESS / NOT CLOSED / NEXT PACKAGE NOT AUTHORIZED
 ```
 
 External provider/model calls, E2B calls and real external effects were zero. The model used by the harness was a deterministic local object only. No dependency, Product module, Package-C work, C-018 action or merge was introduced.

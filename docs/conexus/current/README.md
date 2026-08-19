@@ -43,7 +43,11 @@ In particular:
 ```text
 BT-3A = NOT NEXT
 BT-3A = COMPLETE / native schema route rejected
-BT-3N = NEXT / EXECUTION AUTHORIZED
+BT-3N EXECUTION = COMPLETE
+BT-3N EXECUTOR VERDICT = PASS_NATIVE_HITL_OWNER_BOUNDARY
+ARCHITECTURE-LEAD ADJUDICATION = PENDING
+BT-4N = BLOCKED / NOT AUTHORIZED
+BT-5N = BLOCKED / NOT AUTHORIZED
 Package C = DEFER SAFELY FOR F1
 ```
 
@@ -279,6 +283,15 @@ BT-3A
 requestContextSchema as post-merge closed authority view
 = FALSIFIED BY PINNED SOURCE
 = FAIL_SCHEMA_OR_NATIVE_GUARD_INSUFFICIENT
+
+BT-3N
+static native requireApproval → PostgreSQL suspension → process loss → fresh-process rediscovery
+stale raw RequestContext physically observable but not authoritative
+current owner DENY → effect 0
+current owner ALLOW → effect exactly 1
+native decline → tool boundary 0 / effect 0
+= EXECUTION COMPLETE / PASS_NATIVE_HITL_OWNER_BOUNDARY
+= ARCHITECTURE-LEAD ADJUDICATION PENDING
 ```
 
 This does **not** establish Mastra incompatibility and does not reopen Product architecture.
@@ -286,9 +299,11 @@ This does **not** establish Mastra incompatibility and does not reopen Product a
 Current route:
 
 ```text
-BT-3N = NEXT / EXECUTION AUTHORIZED
-BT-4N = BLOCKED
-BT-5N = BLOCKED
+BT-3N EXECUTION = COMPLETE
+BT-3N EXECUTOR VERDICT = PASS_NATIVE_HITL_OWNER_BOUNDARY
+ARCHITECTURE-LEAD ADJUDICATION = PENDING
+BT-4N = BLOCKED / NOT AUTHORIZED
+BT-5N = BLOCKED / NOT AUTHORIZED
 ```
 
 BT-3N proves only native HITL + restart + current-owner authority boundary. It does not inherit authorization for BT-4N/BT-5N.
@@ -344,7 +359,7 @@ Reopen stronger model-economics machinery for commercialization/billing/quotas, 
 | native Codex OAuth | **QUALIFIED for Package-A tested path** |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** |
 | direct Mastra Product Agent | **ARCHITECTURE CURRENT / BT-1+BT-2 PASS / PACKAGE B NOT YET CLOSED** |
-| native Product-Agent approval/restart route | **BT-3N NEXT / EXECUTION AUTHORIZED** |
+| native Product-Agent approval/restart route | **BT-3N EXECUTION COMPLETE / EXECUTOR PASS / LEAD ADJUDICATION PENDING** |
 | BuilderMastra ↔ ParMastra same-process isolation | **ARCHITECTURE CURRENT / BT-5N PENDING** |
 | advanced per-run model-economics machinery | **DEFER SAFELY FOR F1** |
 | managed execution / Package D | **NOT AUTO-AUTHORIZED — RE-DERIVE AFTER PACKAGE B** |
@@ -436,9 +451,10 @@ Native Mastra mechanisms may be used; they do not create similarly named Conexus
     BT-2                           PASS
     BT-3                           BEHAVIOR PROVEN / MECHANISM FINDING
     BT-3A                          COMPLETE / NATIVE SCHEMA ROUTE REJECTED
-    BT-3N                          NEXT / EXECUTION AUTHORIZED
-    BT-4N                          BLOCKED
-    BT-5N                          BLOCKED
+    BT-3N                          EXECUTION COMPLETE / PASS_NATIVE_HITL_OWNER_BOUNDARY
+    Architecture-Lead adjudication PENDING
+    BT-4N                          BLOCKED / NOT AUTHORIZED
+    BT-5N                          BLOCKED / NOT AUTHORIZED
   Package C                        DEFER SAFELY FOR F1
   Packages D/E                     RE-DERIVE AFTER PACKAGE B / NOT AUTO-AUTHORIZED
 
@@ -453,7 +469,7 @@ Implementation                     BLOCKED
 
 ## 13. Exact next action
 
-> **Execute BT-3N only against the existing exact Package-B lock. Return Evidence for Architecture-Lead adjudication and STOP.**
+> **BT-3N execution is complete. Return this Evidence for Architecture-Lead adjudication and STOP.**
 
 Do **not** execute BT-4N, BT-5N, Package C, Product implementation, C-018 ratification or merge by inheritance.
 

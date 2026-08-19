@@ -1,6 +1,6 @@
 # 3L-B — Product Agent + Cross-Runtime Qualification
 
-**Status:** IN PROGRESS / B0 LEAD-ADJUDICATED — PASS / PROOF-ROUTING AMENDMENT APPROVED — CURRENT / BT-1..BT-5 NEXT — NOT EXECUTED
+**Status:** STOPPED AT BT-3 / BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED / ARCHITECTURE-LEAD ADJUDICATION REQUIRED
 **Fase:** 3L — Technology Qualification  
 **Package:** B — Product Agent + Cross-Runtime  
 **Authority:** current accepted `docs/conexus/current/*` tree + 3A-R10 + 3L-Q0 + current 3G/3H/3I/3J semantic authority  
@@ -299,7 +299,7 @@ Required outputs:
 
 B0 cannot silently change architecture. If exact source makes a current assumption impossible, record a Finding and stop before constructing a compensating architecture.
 
-B0 is complete. The approved next execution is only `BT-1..BT-5`; literal B1→B4 execution remains superseded for this pre-C-018 stage.
+B0 is complete. Post-B0 execution passed `BT-1` and `BT-2`, then hit the amendment's load-bearing stop condition at `BT-3`: the exact pinned resume path restored an unknown stale RequestContext key into the supplied fresh context. `BT-4` and `BT-5` were not executed. See [3L-B-technology-qualification.md](3L-B-technology-qualification.md). Literal B1→B4 execution remains superseded for this pre-C-018 stage.
 
 ---
 
@@ -675,9 +675,10 @@ Do not reopen for framework preference, a newer Mastra release existing, microse
 # 19. Operator-ratified next action
 
 ```text
-BT-1 → BT-2 → BT-3 → BT-4 → BT-5
+BT-1 PASS → BT-2 PASS → BT-3 FAIL_REALIZATION → STOP
+BT-4 / BT-5 = NOT EXECUTED
 ```
 
 The executor must first revalidate the current PR/branch HEAD and read `AGENTS.md`; [the proof-routing amendment](3L-B-proof-routing-amendment.md) is current execution authority, and this parent remains the durable proof inventory.
 
-Do not execute `B1-01..B4-18` literally. Do not auto-admit B5 or any next package after the five proportional technology probes.
+Do not resume BT-4/BT-5, execute `B1-01..B4-18` literally, auto-admit B5 or authorize any next package without explicit Architecture-Lead adjudication of the BT-3 Evidence.

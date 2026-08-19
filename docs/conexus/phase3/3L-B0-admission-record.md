@@ -1,6 +1,6 @@
 # 3L Package B — B0 Admission Record
 
-**Status:** `B0 EXECUTION COMPLETE / FINAL LEAD ADJUDICATION PASS / PROOF-ROUTING AMENDMENT CURRENT / BT-1..BT-5 NEXT — NOT EXECUTED`
+**Status:** `B0 EXECUTION COMPLETE / FINAL LEAD ADJUDICATION PASS / POST-B0 PROBES STOPPED AT BT-3 — FAIL_REALIZATION / LEAD ADJUDICATION REQUIRED`
 **Final Lead adjudication:** [3L-B0-final-lead-adjudication.md](3L-B0-final-lead-adjudication.md) — `PASS / B0 CLOSED`
 **Current execution authority:** [3L-B-proof-routing-amendment.md](3L-B-proof-routing-amendment.md) — `APPROVED / CURRENT`
 **Ratified Package-B spec:** [3L-B-product-agent-cross-runtime-qualification.md](3L-B-product-agent-cross-runtime-qualification.md)  
@@ -30,7 +30,7 @@ B2 = 12 ADMITTED criteria / PRESERVED DOWNSTREAM PROOF INVENTORY
 B3 = 12 ADMITTED criteria / PRESERVED DOWNSTREAM PROOF INVENTORY
 B4 = 18 ADMITTED criteria / PRESERVED DOWNSTREAM PROOF INVENTORY
 literal B1-01..B4-18 pre-C-018 execution = SUPERSEDED / NOT AUTHORIZED / NOT EXECUTED
-current technology probes = BT-1..BT-5 / NEXT / NOT EXECUTED
+post-B0 probe execution = BT-1 PASS / BT-2 PASS / BT-3 FAIL_REALIZATION / BT-4..BT-5 NOT EXECUTED
 ```
 
 Historical mechanisms were compiled against current authority. Nine named observability/deciding-evidence families remain preserved as `ROUTED_TO_E`; they were not deleted or executed in Package B. Historical P30 is preserved only as this reopen trigger:
@@ -73,8 +73,13 @@ Product implementation = BLOCKED
 C-018                   = NOT RATIFIED
 merge                   = NOT AUTHORIZED
 B1-01..B4-18            = DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-BT-1..BT-5              = NEXT / NOT EXECUTED
-next                    = execute only the five proportional technology probes
+BT-1                    = PASS
+BT-2                    = PASS
+BT-3                    = FAIL_REALIZATION / LOAD-BEARING STOP
+BT-4..BT-5              = NOT EXECUTED
+next                    = Architecture-Lead adjudication of BT-3 Evidence
 ```
 
 B0 execution produced only the reproducible evidence identity and the current criterion pack. Final Lead adjudication closed B0 as PASS, and the proof-routing amendment replaced literal pre-C-018 B1→B4 execution with BT-1..BT-5. B0 did not qualify `CX-AGENT-MASTRA-01`, did not qualify `CX-RUNTIME-ISOLATION-01`, and did not execute BT-1..BT-5, B1-01..B4-18 or B5.
+
+Post-B0 execution is recorded separately in [3L-B-technology-qualification.md](3L-B-technology-qualification.md). That execution passed BT-1 and BT-2, then stopped at BT-3 after the exact pinned resume path restored an unknown stale RequestContext key into the supplied fresh context. This later finding does not reopen or rewrite the historical B0 PASS; it blocks further Package-B probe execution pending adjudication.

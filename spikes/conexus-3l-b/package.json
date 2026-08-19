@@ -7,7 +7,7 @@
     "node": "24.18.0"
   },
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
     "verify:lock": "node scripts/verify-lock.mjs",
     "verify:admission": "node scripts/validate-admission.mjs",
     "verify": "npm run verify:lock && npm run verify:admission && npm test"

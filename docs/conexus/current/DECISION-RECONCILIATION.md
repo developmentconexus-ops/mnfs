@@ -1,7 +1,8 @@
 # Conexus — Decision Reconciliation Registry
 
-> **Status:** CANDIDATE / R11-B — ROUND-3 CORRECTED / RE-COHERENCE PASS / NOT YET CURRENT AUTHORITY\
+> **Status:** CANDIDATE / R11-B — ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / NOT YET CURRENT AUTHORITY\
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
+> **R11-H:** BLOCKED pending GPT authority review verification
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **Package B:** PAUSED / NOT OPENED  
@@ -10,7 +11,7 @@ This registry answers one question:
 
 > **Which generation of a Conexus decision is current, where does its detailed meaning live, what survives from older decisions, what must not be resurrected, and what remains genuinely deferred/open?**
 
-Round-3 correction, closure-keyed coherence and repeated Fresh Actor review are complete/pass. This file remains a candidate routing projection until explicit R11-H operator ratification.
+Round-3 Fable corrections are applied. A closure-keyed pass found `R3C-01..08`, and the bounded Round-3.1 projection correction is applied but not yet verified by GPT authority review. This remains a candidate routing projection; R11-H is blocked.
 
 ---
 
@@ -130,7 +131,8 @@ Project = independent software/product lifecycle unit
 Change != WorkUnit != Builder ActorRun
 Builder ActorRun != Product AgentRun != Gateway EffectAttempt != Promotion
 Git authoring != Hub control truth != Project business DB != Registry/CAS serving output
-Workspace owns Brain/Connection; Project owns explicit typed binding intent
+Workspace owns the canonical Brain; Connections owns one Connection lifecycle with
+ownerScope WORKSPACE | PROJECT; Project use requires explicit exact-revision binding
 same Workspace membership != resource-use authority
 same bytes/digest != same authorization authority
 Control Plane != Preview != Published App authorization
@@ -163,11 +165,11 @@ review finding != requirement authority
 | **C-004** | **SUPERSEDED** | Historical sandbox rationale/probe only. | Local Pi+SRT F1 sandbox. | C-008, 3A-R5, 3H-01, 3L-A |
 | **C-005** | **REFINED / CORE PRESERVED** | Git-first artifact authoring; stable semantic reference; immutable revision/digest; real binds/roles; exact Release composition; no mutable latest serving. | Kind set/owners/lifecycle expanded and refined; mutable registration/provisioning API is not current authoring authority; `job/v1` narrowed by 3A-R9. | 3C-06/11/15, 3D–3G, 3A-R9 |
 | **C-006** | **REFINED / CORE PRESERVED** | PG17; Hub control != Project business DB; real least-privilege roles; migration/validation/drift/restore correctness. | Early physical placement/backup wording is not current deployment authority. | 3B-16, 3E, 3J, 3L-Q0 |
-| **C-007** | **REFINED / CORE PRESERVED** | Narrow declarative connectors; Workspace Connection; explicit qualification/environment/revision; opaque credential relation; fail-closed effects. | Gateway/3I now own effect, custody/trust and replay properties; no free-form hook runtime by inheritance. | 3B-15, 3C-07/08, 3D-02, 3G-06, 3I |
+| **C-007** | **REFINED / CORE PRESERVED** | Narrow declarative connectors; one Connections-owned lifecycle with `ownerScope = WORKSPACE | PROJECT`; Workspace-scoped reusable or Project-scoped private Connection; explicit exact-revision `ProjectConnectionBinding`; provider-independent scope; cross-Workspace denial; qualification/environment/revision; opaque credential relation; fail-closed effects. | Gateway/3I now own effect, custody/trust and replay properties; Project-scoped Connections are not implicitly reusable by sibling Projects; no second Connection class, generic scope engine or free-form hook runtime by inheritance. | 3B-15, 3C-07/08, 3D-02, 3G-06, 3I |
 | **C-008** | **PARTIALLY_SUPERSEDED / SUBSTRATE QUALIFIED WITH GUARD** | E2B Builder substrate; full-machine agency; durable privileged secrets outside guest; Hub-mediated Git/result custody; governed egress; BuildValidationDatabase distinction. | Pi realization, guest LLM provider key, historical hard session-cutoff doctrine, stock write retry across unseen physical recreation. | 3A-R5, 3H-01, 3I-02, 3L-A |
 | **C-009** | **PRESERVE AS RATIONALE/EVIDENCE** | Mechanical invariants beat model goodwill; maintenance must be fixed by class; live credential/egress honesty; orphan/guarantee-break detection; unknown remains unknown. | Mitra-specific runtime/tool/session behavior is not Conexus architecture. | C-009 as Evidence; later authority owns mechanisms |
 | **C-010** | **PARTIALLY_SUPERSEDED** | Product Agent as Project-owned git-first artifact; immutable revision/projection; Conversation/AgentRun/ApprovalRequest; bounded tools; Gateway effects; budgets/model identity; mechanical HITL. | Vercel AI SDK light loop, current `ModelProviderAdapter` realization, “Mastra rejected” premise, old continuation mechanics. | 3C-10, 3F-03, 3G-05/06, 3H-02, 3I-03, 3A-R10 |
-| **C-011** | **REFINED / CORE PRESERVED** | Workspace Brain; SEMANTIC/KNOWLEDGE/EVIDENCE; Brain != RAG/memory; own Git source; immutable Registry revision; explicit ProjectBrainBinding; live inheritance rejected; assisted Discovery; KnowledgeProposal; health/drift; AnalyticQuery; hard context budgets. | Early case-1 read-only Agent v0 is superseded by 3K-03: the first vertical requires no Product Agent. AnalyticQuery does not automatically enter a Product Agent ToolProjection. `BrainRevision` is the semantic view of exact ArtifactRevision. | 3B-15, 3C-09, 3K-03/04, 3A-R7/R10 |
+| **C-011** | **REFINED / CORE PRESERVED** | Workspace Brain; `SEMANTIC | KNOWLEDGE | EVIDENCE_SPEC`; Brain EVIDENCE_SPEC says what/how to prove while Builder/verification Evidence is collected proof; Brain != RAG/memory; own Git source; immutable Registry revision; explicit ProjectBrainBinding; live inheritance rejected; assisted Discovery; KnowledgeProposal; health/drift; AnalyticQuery; hard context budgets. | Early case-1 read-only Agent v0 is superseded by 3K-03: the first vertical requires no Product Agent. AnalyticQuery does not automatically enter a Product Agent ToolProjection. `BrainRevision` is the semantic view of exact ArtifactRevision. | 3B-15, 3C-09, 3K-03/04, 3A-R7/R10 |
 | **C-012** | **REFINED / CORE PRESERVED** | Versioned reproducible scaffold; rich infrastructure/poor Product features; Generated vs Platform-Contract vs App-Owned; React/TS/Vite/TanStack; fail-closed generated contracts; honest UI; first-build conformance. | 3K owns current Product shell; exact implementation probes remain downstream, not pre-proven by architecture. | 3K, 3A-R10 |
 | **C-013** | **REFINED / CORE PRESERVED** | Causal observation; producer trust; usage/cost states; live checklist; tasks-purpose memory; unknown != zero; no blind ambiguous retry; completion ladder through SERVED_VERIFIED. | Pi-specific telemetry adapter and generic `agent_event` durable-table/owner wording do not survive current 3E/OBS inventory; F5 owner control is separate from telemetry. | 3C-13, 3E, 3H-03, 3K-02, Package E |
 | **C-014** | **REFINED / CORE PRESERVED** | Immutable ReleaseManifest composition; branch/Change Git model; exact environments/config; migration gates; EnvironmentConformance; Promotion/CAS/served verification; Project duplication semantics. | Early owner labels/state spellings refine through 3G/3J; managed schedule semantics moved to 3A-R9. | 3C-11, 3G-08, 3J, 3K, 3A-R9 |
@@ -220,7 +222,7 @@ C-003 F2 `INT-6 managed tunnel` preserves a future **SaaS↔private/on-prem reac
 
 **Disposition:** `CURRENT`.
 
-Current core: Workspace sovereign root; Project independent unit; Change bounded evolution; Project Baseline; proportional planning; one repo per Project F1; separate Control Plane/Preview/Published App authority; Workspace Brain/Connections + typed Project bindings; no direct cross-Project mutable reach.
+Current core: Workspace sovereign root; Project independent unit; Change bounded evolution; Project Baseline; proportional planning; one repo per Project F1; separate Control Plane/Preview/Published App authority; Workspace Brain plus Workspace- or Project-scoped Connections with typed exact-revision Project bindings; no direct cross-Project mutable reach.
 
 ## 3C — Domain / Module Architecture
 
@@ -252,7 +254,7 @@ Semantic owners do not imply separate services/processes/databases.
 ApplicationRuntimeProfile = MANAGED | DEDICATED
 ```
 
-Both profiles remain one Factory; profile selection is material Project Baseline authority. `DEDICATED` physical topology and automatic profile conversion are not implied.
+Both profiles remain one Factory; profile selection is material Project Baseline authority. DEDICATED runtime/data-plane ownership and trusted Platform-Service exchange are current, while physical DEDICATED deployment is deferred until its first real deployment; automatic profile conversion is not implied.
 
 ## 3D — Dependency Architecture
 
@@ -264,7 +266,7 @@ Modular monolith; typed/direct-call-first owner ports; no cross-owner table/inte
 
 **Disposition:** `CURRENT`.
 
-`hub_control` owner truth, Project business DBs, Builder/PAR Mastra stores and byte/credential backings remain distinct authority/capability domains. Current durable inventory supersedes generic historical `agent_event` table ownership.
+`hub_control` owner truth, Project business DBs, Builder/PAR Mastra stores and byte/credential backings remain distinct authority/capability domains. The closed current inventory is 13 owner schemas (`iam ws prj bld reg con gw brn par rel mar obs att`), 46 durable record classes and exactly 16 Tier-2 structural cross-module FKs; Tier-3 refs/digests are the non-structural default. No shared/common schema or mutable current-state mirror of another owner exists. New durable class/Tier-2 FK routes through Decision Loop/material Finding; exact inventory remains in 3E-02. Current durable inventory supersedes generic historical `agent_event` table ownership.
 
 ## 3F — Contracts/API Architecture
 
@@ -508,11 +510,11 @@ R11-E coherence rounds 1/2          COMPLETE
 R11-F Fresh Actor review            COMPLETE / PASS
 R11-G independent Fable review      COMPLETE / BOUNDED CORRECTION REQUIRED
 FBL-01..17 adjudication             COMPLETE / CORRECT_PROJECTION
-Round-3 corrections                 COMPLETE / VERIFIED
-Round-3 closure-keyed coherence     COMPLETE / PASS
-Round-3 Fresh Actor re-review       COMPLETE / PASS
-R11-H operator ratification         NEXT / EXPLICIT OPERATOR ACT REQUIRED
+Round-3 Fable corrections           APPLIED
+Closure-keyed pass                  FOUND R3C-01..08
+Round-3.1 projection correction     APPLIED / GPT AUTHORITY REVIEW PENDING
+R11-H operator ratification         BLOCKED pending GPT authority review verification
 Package B                           PAUSED / NOT OPENED
 ```
 
-No irreconcilable accepted-authority conflict or architecture reopen was found. **Next:** present the corrected candidate at R11-H for explicit operator ratification; do not treat it as current authority beforehand.
+No irreconcilable accepted-authority conflict or architecture reopen was found. **Next:** GPT authority review verifies the applied Round-3.1 projection correction. R11-H remains blocked, and this candidate is not current authority.

@@ -1,7 +1,8 @@
 # Conexus — Whole-Product Contract
 
-> **Status:** CANDIDATE / R11-C — ROUND-3 CORRECTED / RE-COHERENCE PASS / NOT YET CURRENT AUTHORITY\
+> **Status:** CANDIDATE / R11-C — ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / NOT YET CURRENT AUTHORITY\
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
+> **R11-H:** BLOCKED pending GPT authority review verification
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
@@ -11,7 +12,7 @@ This candidate consolidates **what Conexus is, what users can do, which Product 
 
 It is derived from accepted Product/system authority, especially C-001/C-003, 3B, 3K and the owner/state/security boundaries of 3C–3J. It does not replace those detailed semantic homes and does not turn runtime/provider mechanics into Product authority.
 
-Round-3 correction, closure-keyed coherence and repeated Fresh Actor review are complete/pass. This file remains a candidate projection until explicit R11-H operator ratification.
+Round-3 Fable corrections are applied. A closure-keyed pass found `R3C-01..08`, and the bounded Round-3.1 projection correction is applied but not yet verified by GPT authority review. This file remains a candidate projection; R11-H is blocked.
 
 ---
 
@@ -156,7 +157,7 @@ Workspace-owned visible resources include:
 Projects
 access-filtered Agent catalog
 Brain
-Connections
+Workspace-scoped Connections
 Areas/membership context
 administration/settings
 ```
@@ -176,6 +177,7 @@ application/frontend surfaces
 business data/read models
 Queries / Actions
 integration bindings
+private Project-scoped Connections
 Product Agents
 managed jobs when needed
 artifacts
@@ -192,7 +194,9 @@ Every software-publishing Project fixes exactly one `ApplicationRuntimeProfile` 
 ApplicationRuntimeProfile = MANAGED | DEDICATED
 ```
 
-This is a closed F1 union inside one Software Factory. `MANAGED` uses the Conexus-governed application runtime; `DEDICATED` is independently executable and may consume Conexus services only through explicit bindings/contracts. It is not a second Factory, and automatic profile conversion is not promised. Physical DEDICATED deployment remains deferred until the first real consumer.
+This is a closed F1 union inside one Software Factory. `MANAGED` uses the Conexus-governed application runtime. A `DEDICATED` application may own its independently executable runtime/data plane and Product-specific network behavior; the Gateway remains the Conexus-governed capability boundary, not a mandatory universal network stack for that application. Conexus-owned capabilities require an explicit binding/Platform Service, and no Connection, Hub or Vault credential is inherited. It is not a second Factory, and automatic profile conversion is not promised.
+
+The DEDICATED semantic/trust contract is current even though physical deployment remains deferred until the first real deployment. Its server-side principal is `DedicatedApplicationPrincipal`; `private_key_jwt` authenticates a signed assertion bound to the exact `ReleaseRef`, yielding a short-lived signed bearer. Every request rechecks `credentialGeneration`, Project/Release containment, Release-pinned service composition and current owner/security gates. F1 admits only `SERVICE_SCOPED` exchange.
 
 ### 5.4.1 Archived Project
 
@@ -246,7 +250,14 @@ known blockers/unknowns
 current progress
 ```
 
-Planning depth is proportional: a tiny safe Change may use a lighter/direct route without losing applicable correctness/authority.
+The two current axes are independent:
+
+```text
+PlanningDepth = DIRECT | LIGHT | FULL
+RigorProfile  = FAST | BOUNDED | CONTROLLED
+```
+
+`DIRECT + CONTROLLED` and `FULL + BOUNDED` are both valid. Human checkpoint/Change authority fixes the `PlanningDepth` floor; the system/operator may elevate it, but runtime dispatch cannot downgrade it. `RigorProfile` is the maximum calculated from declared effect/authority risk, detected diff/artifact risk and environment risk; unknown never lowers rigor. Dispatch requires both gates to pass. These enum names are inspectable contract language, not vocabulary the normal UI must force on users. There is no 3×3 policy matrix, `PlanningEngine`, LOC score or LLM-authoritative classifier.
 
 The Hub owns accepted Plan/current plan-item state. Model/worker narration cannot mark work complete by itself.
 
@@ -278,9 +289,11 @@ SEMANTIC
 KNOWLEDGE
 → glossary, rules, caveats, processes, campaigns/policies/context
 
-EVIDENCE
-→ provenance specifications, assertions, verification requirements, golden cases
+EVIDENCE_SPEC
+→ specifications of what/how to prove, assertions, verification requirements, golden cases
 ```
+
+Brain `EVIDENCE_SPEC` describes required proof; Builder/verification `Evidence` is the actual collected proof.
 
 Brain is published/versioned and used through explicit `ProjectBrainBinding`.
 
@@ -336,9 +349,15 @@ AnalyticQuery being an admitted platform read regime does **not** automatically 
 
 ## 5.12 Connection
 
-Workspace-owned concrete relationship to an external system/environment using a versioned Connector, qualification facts and opaque credential relationship.
+One Connections-module-owned semantic lifecycle for a relationship to an external system/environment using a versioned Connector, qualification facts and opaque credential relationship:
 
-Project use requires explicit `ProjectConnectionBinding`.
+```text
+Connection.ownerScope = WORKSPACE | PROJECT
+WORKSPACE → reusable organizational resource
+PROJECT   → private Project resource, not implicitly reusable by siblings
+```
+
+Provider does not determine scope. Project use of an exact `ConnectionRevision` requires explicit `ProjectConnectionBinding`; cross-Workspace use is denied. These scopes do not create two Connection classes or a generic scope engine.
 
 ## 5.13 Capability
 
@@ -355,7 +374,7 @@ Capability does not erase owner-specific Integration Operation/AnalyticQuery sem
 
 ## 5.14 Integration
 
-Project view/use of explicitly bound external-system capability. Workspace owns Connection; Project owns binding/use; Gateway owns last-mile execution/effect safety.
+Project view/use of explicitly bound external-system capability. Connections owns the Connection lifecycle; the owning Workspace or Project supplies the scoped resource, Project owns binding/use, and Gateway owns last-mile execution/effect safety.
 
 ## 5.15 Artifact / immutable revision
 
@@ -635,10 +654,10 @@ No memory self-publish; no live inheritance.
 # 12. Journey F — Connection / Integration
 
 ```text
-Workspace configures Connector-backed Connection
+Workspace exposes a reusable Connection or Project defines a private Project-scoped Connection
 → secret entered through write-only trusted path
 → Connection qualified against real environment
-→ Project explicitly binds Connection/environment
+→ Project explicitly binds exact Connection revision/environment
 → Release pins binding
 → Project capability/Agent/job calls admitted operation
 → Gateway resolves current binding/access/effect/credential/destination
@@ -1173,7 +1192,7 @@ formal security deferred because “F1 is internal”
 6. `tasks.md` preserves purpose/context but never operational status authority.
 7. Mechanism/framework/storage/provider never gains Product authority by convenience.
 8. Project Git != Hub control truth != Project DB != Registry/CAS serving output.
-9. Workspace Brain/Connections are used only through explicit typed Project bindings.
+9. Workspace Brain and every Workspace- or Project-scoped Connection are used by a Project only through explicit typed exact-revision bindings; cross-Workspace use is denied.
 10. Direct mutable cross-Project data/runtime reach is denied.
 11. Brain is published business meaning, not memory/RAG/Project implementation.
 12. Brain Discovery proposals remain hypotheses until human-reviewed publication.
@@ -1417,4 +1436,4 @@ technology qualification                          = not overstated
 new Product authority intentionally invented       = NO
 ```
 
-**Next:** present this corrected candidate at R11-H for explicit operator ratification. It is not current authority before that act; Package B remains paused/not opened.
+**Next:** GPT authority review must verify the applied Round-3.1 projection correction. R11-H remains blocked until then; this is not current authority, and Package B remains paused/not opened.

@@ -1,7 +1,8 @@
 # Conexus — Current Architecture Baseline
 
-> **Status:** CANDIDATE / R11-D — ROUND-3 CORRECTED / RE-COHERENCE PASS / NOT YET CURRENT AUTHORITY\
+> **Status:** CANDIDATE / R11-D — ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / NOT YET CURRENT AUTHORITY\
 > **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
+> **R11-H:** BLOCKED pending GPT authority review verification
 > **Product meaning:** [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) — candidate until R11 ratification  
 > **Decision routing:** [DECISION-RECONCILIATION.md](DECISION-RECONCILIATION.md) — candidate until R11 ratification  
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
@@ -19,7 +20,7 @@ This is a current-state architecture projection, not a second detailed architect
 
 # 1. Architecture in one sentence
 
-Conexus F1 is a **Node/TypeScript modular-monolith Hub with PostgreSQL-backed authoritative control state**, Project-owned Git/business-data/Release lifecycles, a separate Workspace Brain Git authority, Workspace-owned Connections, a Hub-owned Capability Gateway for governed data/effects/credential last-mile, a **Mastra AgentController + E2B Builder runtime** for Project Changes, a **direct Mastra Agent Production Agent Runtime (PAR)** derived from exact Releases, a bounded Managed Application Runtime for Project apps/jobs, and an agent-first React/TypeScript/Vite/TanStack Product shell; every runtime/provider/storage mechanism remains subordinate to Conexus owner facts, current authorization and exact immutable composition.
+Conexus F1 is a **Node/TypeScript modular-monolith Hub with PostgreSQL-backed authoritative control state**, Project-owned Git/business-data/Release lifecycles, a separate Workspace Brain Git authority, Connections-module-owned Workspace- or Project-scoped Connections, a Hub-owned Capability Gateway for governed data/effects/credential last-mile, a **Mastra AgentController + E2B Builder runtime** for Project Changes, a **direct Mastra Agent Production Agent Runtime (PAR)** derived from exact Releases, a bounded Managed Application Runtime for Project apps/jobs, and an agent-first React/TypeScript/Vite/TanStack Product shell; every runtime/provider/storage mechanism remains subordinate to Conexus owner facts, current authorization and exact immutable composition.
 
 ---
 
@@ -34,7 +35,8 @@ Project = independent software/product lifecycle unit
 Change != WorkUnit != Builder ActorRun
 Builder ActorRun != Product AgentRun != Gateway EffectAttempt != Promotion
 Project Git != Workspace Brain Git != Hub control truth != Project business DB != Registry/CAS serving output
-Workspace owns Brain/Connections; Project owns explicit typed binding intent
+Workspace owns the canonical Brain; Connections owns one Connection lifecycle with
+ownerScope WORKSPACE | PROJECT; Project use requires explicit exact-revision binding
 same Workspace != implicit resource-use authority
 same bytes/digest != same semantic identity/authorization
 Control Plane != Preview != Published App authorization
@@ -124,9 +126,9 @@ F1 is a modular monolith with explicit semantic owners:
 | **Project** | Project identity/lifecycle, Project Baseline, explicit Brain/Connection binding intent, Project-level composition intent | Workspace resources themselves, runtime implementation, external effect authority |
 | **Builder** | Change, Plan/current plan items, WorkUnit, Builder ActorRun, checkpoints/correctness coordination, Findings/routing, CodingSession relationship | Project business authority, PAR runtime truth, provider/runtime authority |
 | **Artifact Registry** | immutable compiled ArtifactRevision identity/digest/payload/availability | authored Git truth, active serving, business meaning of each artifact kind |
-| **Connections** | Connection logical identity/lifecycle, qualification/current logical credential relationship | plaintext/ciphertext secret-byte ownership, external effect execution |
+| **Connections** | one Connection logical lifecycle with `ownerScope = WORKSPACE | PROJECT`, qualification/current logical credential relationship | plaintext/ciphertext secret-byte ownership, external effect execution, cross-Workspace use |
 | **Capability Gateway** | governed Query/Action/Integration execution, effect admission/replay/idempotency, credential last-mile, execution receipts | Project/Brain meaning, Account identity, Product Agent lifecycle, model-spend authority |
-| **Brain** | Workspace SEMANTIC/KNOWLEDGE/EVIDENCE meaning, validation/compilation/publication, Discovery proposal semantics, KnowledgeProposal, health/conformance | RAG/index, agent memory, Project DB, telemetry, security policy |
+| **Brain** | Workspace `SEMANTIC | KNOWLEDGE | EVIDENCE_SPEC` meaning, validation/compilation/publication, Discovery proposal semantics, KnowledgeProposal, health/conformance | actual Builder/verification Evidence, RAG/index, agent memory, Project DB, telemetry, security policy |
 | **Production Agent Runtime (PAR)** | Conversation, Product AgentRun, ApprovalRequest, AgentTrigger runtime semantics, exact-projection execution/terminal owner facts | Agent authored source/Release authority, Gateway effect replay, I&A authority |
 | **Release** | exact immutable Project composition, Release/Promotion/current serving authority | authored source, mutable framework state, Project business data |
 | **Observability & Audit** | authorized audit facts and operational observations/provenance projections | business-state reconstruction from logs, authorization, owner F5 terminal truth |
@@ -134,6 +136,26 @@ F1 is a modular monolith with explicit semantic owners:
 | **Managed Application Runtime (MAR)** | managed app serving mechanics and admitted job occurrences | Product business meaning, scheduler business authority, arbitrary privileged Project code |
 
 No generic `Workflow`, `Tool`, `ResourceBinding`, `Secret`, `Budget`, `Status`, `Runtime`, `EvidenceGraph` or `Automation` business owner exists simply for uniformity.
+
+## 4.1 Closed dependency architecture
+
+The modular-monolith import graph is acyclic. Narrow direct in-process calls are the default; a module or runtime may not call L7, and L7 is not a universal mediator.
+
+The closed F1 L7 control-plane orchestration set contains exactly seven flows:
+
+```text
+CreateProject
+SetProjectBinding
+QualifyConnection
+InceptionInvestigation
+BrainHealthProbe
+ComposeRelease
+PromoteRelease
+```
+
+There is exactly one domain dependency inversion: Gateway defines the narrow approval-claim capability, PAR owns `ApprovalRequest` and implements that capability, and the composition root wires it. The 3D infrastructure boundaries are exactly `CodingRuntime`, `CredentialBackend`, `BlobStore/CAS` and `GitInfra`.
+
+The later 3A-R9 `MANAGED_JOB` addition is a Gateway caller-surface amendment, not an eighth L7 orchestration flow.
 
 ---
 
@@ -165,7 +187,7 @@ Canonical published Brain source lives in a **Workspace/group-scoped Git tree/re
 ```text
 Workspace Brain Git
 → BrainDefinition published source
-→ semantic/knowledge/evidence source material
+→ semantic/knowledge/evidence-spec source material
 → publication history
 ```
 
@@ -324,6 +346,18 @@ stale authority pre-read + concurrent revoke/narrow
 
 The same realization must preserve owner-scoped persistence: the consuming owner cannot directly read/write/lock unrelated `iam` state, `SET ROLE` into another owner or use a broad umbrella role. 3N/3O must prove both sides together; the exact primitive remains derived Realization Planning.
 
+## 6.5 Closed F1 data inventory
+
+`hub_control` has exactly 13 owner schemas:
+
+```text
+iam ws prj bld reg con gw brn par rel mar obs att
+```
+
+The F1 durable inventory is closed at 46 record classes, and the Tier-2 structural cross-module FK allowlist is closed at exactly 16. Tier-3 semantic references/digests are the default for non-structural cross-owner references. There is no shared/common schema, and a mutable current-state mirror of another owner is forbidden.
+
+The exact 46-class inventory and 16-FK allowlist live in 3E-02. A new durable class or Tier-2 FK requires the Decision Loop/material Finding; this projection does not reproduce those full lists.
+
 ---
 
 # 7. Workspace / Project / Baseline architecture
@@ -371,7 +405,7 @@ For every software-publishing Project, the approved Baseline carries the closed 
 ApplicationRuntimeProfile = MANAGED | DEDICATED
 ```
 
-Both profiles share Project/Change/Builder/verification/Release and semantic contracts inside one Factory. `MANAGED` is realized by the Managed Application Runtime; `DEDICATED` remains independently executable and crosses into Conexus only through explicit admitted contracts. Profile choice is material Baseline authority; there is no automatic conversion, plugin registry or second Factory. Physical DEDICATED topology remains deferred to its first real consumer.
+Both profiles share Project/Change/Builder/verification/Release and semantic contracts inside one Factory. `MANAGED` is realized by the Managed Application Runtime. `DEDICATED` may own its independently executable runtime/data plane and Product-specific network behavior; Gateway-only is the Conexus-governed capability boundary, not a universal DEDICATED network stack. Conexus-owned capabilities require explicit binding/Platform Service, with no inherited Connection/Hub/Vault credential. Profile choice is material Baseline authority; there is no automatic conversion, plugin registry or second Factory. The DEDICATED semantic/trust contract is current while physical deployment remains deferred to its first real deployment.
 
 ## 7.3 Project Baseline
 
@@ -405,7 +439,7 @@ Current reuse seams:
 ```text
 published Platform machinery
 Workspace Brain + explicit ProjectBrainBinding
-Workspace Connection + explicit ProjectConnectionBinding
+Workspace-scoped Connection + explicit ProjectConnectionBinding
 ```
 
 Small duplication is preferred to premature shared mutable authority.
@@ -462,6 +496,17 @@ At SHARE, a fenced structured status block **must** be checked mechanically agai
 ## 8.4 Acceptance completeness
 
 Material delivery closes only against accepted criteria/assertions and known limitations. “No Finding” or “agent says complete” is not acceptance.
+
+## 8.5 `PlanningDepth` × `RigorProfile`
+
+```text
+PlanningDepth = DIRECT | LIGHT | FULL
+RigorProfile  = FAST | BOUNDED | CONTROLLED
+```
+
+The axes are orthogonal: `DIRECT + CONTROLLED` and `FULL + BOUNDED` are valid. Human checkpoint/Change authority fixes the `PlanningDepth` floor; system/operator elevation is allowed, but runtime downgrade is not. `RigorProfile` is the maximum calculated from declared effect/authority risk, detected diff/artifact risk and environment risk; unknown never lowers it. Dispatch requires both the planning and rigor gates to pass.
+
+No 3×3 policy matrix, `PlanningEngine`, LOC score or LLM-authoritative classifier is admitted.
 
 ---
 
@@ -946,14 +991,19 @@ Destination must explicitly establish its own current Brain/Connection/environme
 ## 18.1 Ownership
 
 ```text
-Workspace
-→ Connection
+Connection.ownerScope = WORKSPACE | PROJECT
 
-Project
-→ ProjectConnectionBinding intent
+WORKSPACE
+→ reusable organizational Connection
+
+PROJECT
+→ private Project Connection, not implicitly reusable by siblings
 
 Connections
 → logical Connection/qualification/credential-handle facts
+
+Project
+→ ProjectConnectionBinding to exact ConnectionRevision
 
 CredentialBackend
 → encrypted secret-byte/crypto mechanics
@@ -962,7 +1012,7 @@ Gateway
 → trusted last-mile execution
 ```
 
-No generic ResourceBinding framework.
+Provider does not determine scope, and cross-Workspace use is denied. These rules preserve one Connection class; they do not create two Connection classes, a generic scope engine or a generic ResourceBinding framework.
 
 ## 18.2 Connector model
 
@@ -1038,6 +1088,33 @@ OUTCOME_UNKNOWN
 → current reconciliation/evidence
 -X-> blind replay
 ```
+
+## 19.5 Closed Contracts/API projection
+
+```text
+LIVE SURFACE = INTERNAL | INDEPENDENT
+CONDITIONAL  = routing only
+persistence alone != contract
+VERSION-GAP  = PRESERVE | REJECT_STALE | QUIESCE | TRANSFORM | DISCARD
+```
+
+Payload families remain owner-specific; there is no `UniversalRequest`, `UniversalResponse`, `UniversalStatus` or `InternalFailure`. One `ApprovalRequest` represents one human decision over one exact sealed effect subject. Bindings remain concrete: `ProjectConnectionBinding` and `ProjectBrainBinding`.
+
+The closed public consumer-behavior code baseline is:
+
+```text
+CLIENT_OUTDATED
+CAS_CONFLICT
+CAPABILITY_UNAVAILABLE_HEALTH
+NOT_FOUND
+OPERATION_REJECTED
+VALIDATION_FAILED
+MANIFEST_INVALID
+OUTPUT_CONTRACT_VIOLATION
+INTERNAL_ERROR
+```
+
+`code` is the semantic consumer-behavior key; HTTP/transport status is not a second taxonomy. Exact route and DTO spelling remain derived realization, not frozen here.
 
 ---
 
@@ -1745,7 +1822,7 @@ Root-capable/untrusted; gets bounded run/work capabilities only, no durable priv
 
 Authenticated external server-to-platform consumer under DEDICATED profile when a real consumer exists.
 
-No Hub internals, Connection credentials or Project DB credentials by inheritance. Physical DEDICATED deployment remains deferred until first real consumer.
+Its independently executable application may own its runtime/data plane and Product-specific network behavior. Conexus-owned capability access is explicit binding/Platform Service only; Gateway is that governed capability boundary, not the application's universal network stack. No Hub internals, Connection/Hub/Vault credentials or Project DB credentials are inherited. Physical DEDICATED deployment remains deferred until first real deployment.
 
 ## Z5 — External Provider / Enterprise
 
@@ -1816,6 +1893,20 @@ SaaS Conexus selected
 ```
 
 Current architecture does **not** preselect or deploy a managed tunnel F1. Mechanism is rederived from real SaaS/customer topology.
+
+## 32.5 DEDICATED trusted exchange
+
+The DEDICATED trust contract is current even though its physical deployment is deferred:
+
+```text
+principal              = DedicatedApplicationPrincipal
+client authentication  = private_key_jwt
+signed assertion binds = exact ReleaseRef
+access token           = short-lived signed bearer
+F1 mode                = SERVICE_SCOPED only
+```
+
+Every Platform Service request rechecks current `credentialGeneration`, Project/Release containment, Release-pinned service composition and current owner/security gates. No auth record/session store, refresh-token, DPoP, mTLS or fleet machinery is introduced.
 
 ---
 
@@ -2059,13 +2150,27 @@ Current first-installation posture:
 ```text
 single physical failure domain accepted
 manual restore acceptable initially
+RPO <= 6h
+RTO <= 8h
 off-host recoverable set required
-restore proof before first production
+complete restore proof from a real off-host protected generation before first production
 whole-Hub emergency-stop drill before first production
 no HA/auto-failover/multi-region claim
 ```
 
-Owner durable facts, Git, Project DBs, Mastra stores/backings and secret-recovery material are included according to 3J-02/3J-03.
+Required recovery set:
+
+```text
+hub_control
+all production Project DBs
+mastra_par
+non-reconstructible digest-addressed bytes
+CredentialBackend ciphertext backing
+provider-independent canonical Git recovery bundles
+recovery manifests
+```
+
+Not required by default: `mastra_builder` and E2B/validation/cache/reconstructible state. The RPO/RTO numbers are the first-installation operations contract, not a SaaS SLA.
 
 3M still owns the semantic question: after interruption/restore, do current durable facts suffice to decide resume/retry/reconcile without fabricated success?
 
@@ -2487,4 +2592,4 @@ Detailed accepted homes remain controlling until R11 final ratification rewires 
 
 # 50. Exact next action
 
-> **Present this corrected candidate at R11-H for explicit operator ratification. It is not current authority before that act; do not open Package B.**
+> **Run GPT authority review over the applied Round-3.1 projection correction. R11-H remains blocked until that review verifies the correction; this is not current authority and Package B stays closed.**

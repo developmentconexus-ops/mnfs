@@ -1,7 +1,8 @@
 # Conexus — Current Product & Architecture Entrypoint
 
-> **Status:** CANDIDATE / R11 ROUND-3 CORRECTIONS VERIFIED / RE-COHERENCE PASS — NOT YET CURRENT AUTHORITY\
+> **Status:** CANDIDATE / R11 ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING — NOT YET CURRENT AUTHORITY\
 > **Whole-product checkpoint:** 3A-R11 ACTIVE  
+> **R11-H:** BLOCKED pending GPT authority review verification
 > **Phase 3:** IN PROGRESS  
 > **Technology Qualification:** 3L IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE  
 > **Package B:** PAUSED / NOT OPENED while R11 is active  
@@ -11,7 +12,7 @@
 
 This page is the intended short entrypoint to the **current Conexus Product and architecture** after R11 final ratification.
 
-During R11 it remains a candidate. Detailed accepted authority still controls if any current-tree projection disagrees with its semantic home; only explicit R11-H operator ratification can promote this tree.
+During R11 it remains a candidate. Detailed accepted authority still controls if any current-tree projection disagrees with its semantic home. GPT authority review must first verify the Round-3.1 correction; only later explicit R11-H operator ratification can promote this tree.
 
 ---
 
@@ -133,6 +134,7 @@ Workspace — sovereign isolation/resource root
 │   ├── Project Baseline
 │   ├── Changes / Plan / Work Units / Builder runs
 │   ├── Data / Capabilities / Integrations
+│   ├── private Project-scoped Connections / explicit bindings
 │   ├── Product Agents
 │   ├── Releases / Published Application
 │   └── managed jobs when the Project requires them
@@ -140,8 +142,8 @@ Workspace — sovereign isolation/resource root
 ├── Brain
 │   └── explicit ProjectBrainBinding
 │
-└── Connections
-    └── explicit ProjectConnectionBinding
+└── reusable Workspace-scoped Connections
+    └── Project use through explicit ProjectConnectionBinding
 
 Trusted Conexus Hub
 ├── Node/TypeScript modular monolith
@@ -180,7 +182,9 @@ Workspace != Project
 Change != WorkUnit != Builder ActorRun
 Builder ActorRun != Product AgentRun != Gateway EffectAttempt != Promotion
 Project Git != Workspace Brain Git != hub_control != Project DB != Registry/CAS
-Workspace owns Brain/Connections; Project owns explicit typed binding intent
+Workspace owns the canonical Brain; the Connections module owns one Connection lifecycle
+with ownerScope WORKSPACE | PROJECT, and Project use pins an exact revision through
+explicit ProjectConnectionBinding
 Project ARCHIVED freezes ordinary authoring/future intent expansion; it does not unpublish,
 stop current serving, stop pre-existing enabled Product-Agent triggers or stop existing
 managed recurrence by itself; explicit trigger DISABLE remains allowed narrowing
@@ -387,27 +391,27 @@ R11 itself:
 
 ```text
 R11-A Authority Census             COMPLETE
-R11-B Decision Reconciliation      CANDIDATE / ROUND-3 CORRECTED
-R11-C Product Contract             CANDIDATE / ROUND-3 CORRECTED
-R11-D Architecture Baseline        CANDIDATE / ROUND-3 CORRECTED
+R11-B Decision Reconciliation      CANDIDATE / ROUND-3.1 APPLIED / GPT REVIEW PENDING
+R11-C Product Contract             CANDIDATE / ROUND-3.1 APPLIED / GPT REVIEW PENDING
+R11-D Architecture Baseline        CANDIDATE / ROUND-3.1 APPLIED / GPT REVIEW PENDING
 R11-E Coherence Round 1            COMPLETE / 14 projection findings
 R11-E Coherence Round 2            COMPLETE / 14 closed / 0 material findings
 R11-F Fresh Actor review           COMPLETE / PASS
 R11-G independent Fable review     COMPLETE / BOUNDED CORRECTION REQUIRED
 Fable finding adjudication         COMPLETE / FBL-01..17 ACCEPTED
-Round-3 corrections                COMPLETE / VERIFIED
-Round-3 closure-keyed coherence    COMPLETE / PASS
-Round-3 Fresh Actor re-review      COMPLETE / PASS
-R11-H operator ratification        NEXT / EXPLICIT OPERATOR ACT REQUIRED
+Round-3 Fable corrections          APPLIED
+Closure-keyed pass                 FOUND R3C-01..08
+Round-3.1 projection correction    APPLIED / GPT AUTHORITY REVIEW PENDING
+R11-H operator ratification        BLOCKED pending GPT authority review verification
 ```
 
 ---
 
 ## 12. Exact next action
 
-> **Present the corrected whole-product contract/baseline/reconciliation at R11-H for explicit operator ratification. Do not treat this candidate tree as current authority before that act.**
+> **Run GPT authority review over the applied Round-3.1 projection correction. R11-H remains blocked until that review verifies the correction; do not treat this candidate tree as current authority.**
 
-Package B remains paused and not opened until R11-H receives final explicit operator ratification.
+Package B remains paused and not opened. Only after GPT authority review verifies this correction may the router consider R11-H eligible for a later explicit operator act.
 
 ---
 

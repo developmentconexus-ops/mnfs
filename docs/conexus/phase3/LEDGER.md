@@ -1,8 +1,8 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 ACTIVE — ROUND-3 CORRECTIONS VERIFIED / R11-H NEXT` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / Q0 APPROVED-COMPLETE / PACKAGE A COMPLETE / PACKAGE B PAUSED — NOT OPENED`
-**Fase atual:** `3A-R11 — Whole-Product Authority Rebaseline` — **ACTIVE / ROUND-3 CORRECTIONS VERIFIED / CLOSURE + FRESH ACTOR PASS / R11-H NEXT**; `3L — Technology Qualification` permanece **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B PAUSED — NOT OPENED**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**; `3K — Frontend / Product Architecture` = **CLOSED / APPROVED por 3K-R1** após internal closure `Material Finding = 0` + único independent Fable challenge `Material Finding = 0 / CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`; as 5 correções não-materiais foram adjudicadas em 3K-R1; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 ACTIVE — ROUND-3 FABLE CORRECTIONS APPLIED / CLOSURE-KEYED PASS FOUND R3C-01..08 / ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / R11-H BLOCKED` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / Q0 APPROVED-COMPLETE / PACKAGE A COMPLETE / PACKAGE B PAUSED — NOT OPENED`
+**Fase atual:** `3A-R11 — Whole-Product Authority Rebaseline` — **ACTIVE / ROUND-3 FABLE CORRECTIONS APPLIED / CLOSURE-KEYED PASS FOUND R3C-01..08 / ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / R11-H BLOCKED**; `3L — Technology Qualification` permanece **IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE / PACKAGE B PAUSED — NOT OPENED**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**; `3K — Frontend / Product Architecture` = **CLOSED / APPROVED por 3K-R1** após internal closure `Material Finding = 0` + único independent Fable challenge `Material Finding = 0 / CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS`; as 5 correções não-materiais foram adjudicadas em 3K-R1; 3A-R8 Project Baseline & Change Engineering Coherence = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; 3A-R9 Managed Job / Deterministic Sync Dispatch = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION**; pre-3K Global Platform Coherence Checkpoint = **CLOSED / POSITIVE** (`CURRENT STRUCTURE CONFIRMED`; único finding `F-GPC-01 / AGT-4` = RESOLVED por 3A-R7)
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
 **Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
@@ -137,7 +137,7 @@ Nenhuma conversa cria authority.
 
 | Fase | Estado | Próxima ação |
 |---|---|---|
-| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6..R10 APPROVED / 3A-R11 ACTIVE — ROUND-3 VERIFIED** | R11-H explicit operator ratification; candidate tree is not authority beforehand |
+| 3A — Architecture Reconciliation | CONTÍNUA até C-018 / **3A-R6..R10 APPROVED / 3A-R11 ACTIVE — ROUND-3.1 CORRECTION APPLIED / GPT REVIEW PENDING** | R11-H blocked until GPT authority review verifies the correction; candidate tree is not authority |
 | 3B — System Context & Boundaries | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3C — Domain / Module Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3D — Dependency Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
@@ -210,7 +210,7 @@ job/v1
 → IN PROGRESS
 → Q0 Qualification Manifest = APPROVED / COMPLETE
 → Package A — Builder Substrate + Cognition = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED GUARD / A3 KEEP OM OFF
-→ 3A-R11 = ACTIVE / ROUND-3 CORRECTIONS VERIFIED / R11-H NEXT
+→ 3A-R11 = ACTIVE / ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / R11-H BLOCKED
 → Package B — Product Agent + Cross-Runtime = PAUSED / NOT OPENED
 → load-bearing qualification probes only
 → includes CX-MANAGED-JOB-01 from 3A-R9
@@ -364,7 +364,7 @@ Q0 congela **identidade de qualificação, não arquitetura permanente**: Node/n
 
 Q0 não instala dependências, não implementa probe harness e não executa Package A.
 
-### 2.7 3A-R11 — Whole-Product Authority Rebaseline — ACTIVE / ROUND-3 VERIFIED / R11-H NEXT
+### 2.7 3A-R11 — Whole-Product Authority Rebaseline — ACTIVE / ROUND-3.1 APPLIED / GPT REVIEW PENDING / R11-H BLOCKED
 
 [3A-R11 — Whole-Product Authority Rebaseline](3A-R11-whole-product-authority-rebaseline.md) foi ativada pelo operador em **2026-08-18**. O independent whole-product Fable review terminou, e [a adjudicação](3A-R11-fable-review-adjudication.md) classificou `FBL-01..17` como correções obrigatórias de projeção/roteamento sobre authority já fechada.
 
@@ -374,14 +374,14 @@ Estado de execução:
 R11-F independent Fable review = COMPLETE / PASS
 R11-G adjudication = COMPLETE / BOUNDED CORRECTION REQUIRED
 FBL-01..17 = ADJUDICATED / CORRECT_PROJECTION
-Round-3 current-tree correction = COMPLETE / VERIFIED
-closure-keyed coherence = COMPLETE / PASS
-Fresh Actor re-review = COMPLETE / PASS
-R11-H operator ratification = NEXT / EXPLICIT OPERATOR ACT REQUIRED
+Round-3 Fable corrections = APPLIED
+closure-keyed pass = FOUND R3C-01..08
+Round-3.1 projection correction = APPLIED / GPT AUTHORITY REVIEW PENDING
+R11-H operator ratification = BLOCKED pending GPT authority review verification
 Package B = PAUSED / NOT OPENED
 ```
 
-As correções não reabrem 3B–3K e não criam requirement de produto, owner, module, durable record, database ou processo. As projeções, o coherence pass por closure key e o Fresh Actor re-review estão completos/limpos; R11-H permanece um ato explícito do operador e ainda não ocorreu. Até essa ratificação, Package B e implementação de produto permanecem bloqueados.
+As correções não reabrem 3B–3K e não criam requirement de produto, owner, module, durable record, database ou processo. O closure-keyed pass encontrou `R3C-01..08`; a correção de projeção Round-3.1 foi aplicada, mas somente GPT authority review pode verificá-la. Até essa verificação, `R11-H = BLOCKED`; Package B e implementação de produto permanecem bloqueados.
 
 ---
 
@@ -1517,12 +1517,12 @@ Expansion returns only through Decision Loop with named current consumer/failure
 3A-R8 = APPROVED
 3A-R9 = APPROVED
 3A-R10 = APPROVED
-3A-R11 = ACTIVE / ROUND-3 CORRECTIONS VERIFIED
+3A-R11 = ACTIVE / ROUND-3 FABLE CORRECTIONS APPLIED
 R11-G = COMPLETE / BOUNDED CORRECTION REQUIRED
 FBL-01..17 = ADJUDICATED / CORRECT_PROJECTION
-closure-keyed coherence = COMPLETE / PASS
-Fresh Actor re-review = COMPLETE / PASS
-R11-H = NEXT / EXPLICIT OPERATOR ACT REQUIRED
+closure-keyed pass = FOUND R3C-01..08
+Round-3.1 projection correction = APPLIED / GPT AUTHORITY REVIEW PENDING
+R11-H = BLOCKED pending GPT authority review verification
 
 3B = CLOSED / APPROVED
 3C = CLOSED / APPROVED
@@ -1612,7 +1612,7 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 
 3L-Q0 foi ratificada pelo operador em **2026-08-18** como manifesto de admissão/reprodutibilidade da Technology Qualification. `Q0 = APPROVED / COMPLETE`: fixa a qualification stack/candidate identities, supply-chain gates, historical-probe compilation, model/provider pin law, E2B live-run identity requirements, pg-boss incumbent candidate e ordem serial `A → B → C → D → E`; não instala dependências, não implementa harness de probe e não executa Package A. Durante Package A, antes de qualquer A3 model-bearing call, o operador aprovou uma latest-stable reconciliation: `core 1.56.0 / memory 1.25.0 / pg 1.19.0 / e2b 0.8.0 / code-sdk 1.1.2`, lock `7f61c6c7…`; A1 6/6, adapter 3/3, incarnation guard 5/5 e A3 contracts 15/15 passaram no novo lock, sem rerodar provider-live surfaces cujo E2B SDK `2.40.0` e release behavior relevante não mudaram. O smoke OAuth admitiu os exatos `gpt-5.6-sol` e `gpt-5.6-luna`; `A0 → A1 → B0 → B1` executou exatamente uma vez no run `32183868645`. A1 respondeu corretamente, mas falhou a admissão por `OM_DID_NOT_FIRE`; B1 preservou correção com menos Actor tokens, porém latência materialmente maior e usage de Observer/Reflector `MISSING`. Assim, `CX-BUILDER-COGNITION-01 = EVALUATED / NOT_PROVEN FOR ENABLEMENT / KEEP OM OFF`. Package A fechou `COMPLETE`, sem Finding material ou reopen arquitetural. `3L = IN PROGRESS`; implementação permanece bloqueada.
 
-3A-R11 foi ativada pelo operador em **2026-08-18** como Whole-Product Authority Rebaseline. O independent Fable review e sua adjudicação fecharam `FBL-01..17` como `CORRECT_PROJECTION`: as correções obrigatórias foram aplicadas/verificadas no current tree e no routing do LEDGER, sem reabrir arquitetura, adicionar requirement de produto ou autorizar implementação. O closure-keyed coherence pass e o Fresh Actor re-review fecharam `PASS`; `R11-H = NEXT / EXPLICIT OPERATOR ACT REQUIRED` e `Package B = PAUSED / NOT OPENED`.
+3A-R11 foi ativada pelo operador em **2026-08-18** como Whole-Product Authority Rebaseline. O independent Fable review e sua adjudicação classificaram `FBL-01..17` como `CORRECT_PROJECTION`. O closure-keyed pass posterior encontrou `R3C-01..08`; a correção bounded Round-3.1 foi aplicada ao current tree e ao routing do LEDGER, sem reabrir arquitetura, adicionar requirement de produto ou autorizar implementação. A correção aguarda GPT authority review: `R11-H = BLOCKED pending verification` e `Package B = PAUSED / NOT OPENED`.
 
 3K-01 foi ratificada pelo operador em **2026-08-17** e abriu formalmente 3K. Congela Workspace shell ≠ Project shell; Project-scoped navigation; Build agent-first com Preview como work surface dominante e Conexus contextual/retrátil; Data/Capabilities/Integrations/Agents/Brain/Versions/Activity diretamente inspecionáveis; Code/Diff como Build lenses; machinery interna apenas progressive detail; `Product`/`Resources` artificiais rejeitados; exact visual/component/streaming realization deferred. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
@@ -1653,7 +1653,7 @@ O único independent final Fable challenge de 3K foi executado em **2026-08-18**
 
 Próxima ação:
 
-> **Executar R11-H somente como ratificação explícita do operador** sobre o current tree corrigido. Antes desse ato, o candidate tree não é current authority. **Package B permanece PAUSED / NOT OPENED**; product implementation continua proibida.
+> **Executar agora GPT authority review da correção Round-3.1 aplicada. R11-H permanece BLOCKED até essa verificação e, mesmo depois, somente uma ratificação explícita do operador pode promover o candidate tree. Package B permanece PAUSED / NOT OPENED; product implementation continua proibida.**
 
 3L–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9 + 3A-R10 e o rebaseline ativo de 3A-R11. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + F3B-R1 + accepted derived realization plan(s).
 

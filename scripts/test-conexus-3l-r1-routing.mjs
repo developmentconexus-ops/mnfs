@@ -18,6 +18,25 @@ const [readme, product, architecture, reconciliation, ledger, q0, bt3a, bt3aLead
   read('docs/conexus/phase3/3L-B-BT4N-lead-adjudication.md'),
 ]);
 
+const staleBt4nProjectionPattern = /BT-4N\b(?:(?!BT-\d+[A-Z]+\b)[^\n])*(?:\bNEXT\b|ADJUDICATION(?:(?!BT-\d+[A-Z]+\b)[^\n])*\bPENDING\b)/iu;
+
+for (const staleProjection of [
+  'BT-4N NEXT — EXECUTION AUTHORIZED',
+  'BT-4N NEXT',
+  'BT-4N ADJUDICATION = PENDING',
+]) {
+  assert.match(
+    staleProjection,
+    staleBt4nProjectionPattern,
+    `stale BT-4N matcher must identify ${staleProjection}`,
+  );
+}
+assert.doesNotMatch(
+  'BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS / BT-5N = NEXT / EXECUTION AUTHORIZED',
+  staleBt4nProjectionPattern,
+  'BT-4N stale matcher must not consume a later BT-5N NEXT projection on the same line',
+);
+
 for (const [name, text] of Object.entries({ readme, architecture, reconciliation, ledger })) {
   assert.match(text, /3L-R1/u, `${name} must route through the operator-ratified 3L-R1 amendment`);
 }
@@ -43,7 +62,7 @@ for (const [name, text] of Object.entries({ readme, architecture, reconciliation
   );
   assert.doesNotMatch(
     text,
-    /(?:BT-4N[^\n]*=\s*NEXT\s*\/\s*EXECUTION AUTHORIZED|BT-4N NEXT\s*\/\s*EXECUTION AUTHORIZED|BT-4N[^\n]*ADJUDICATION[^\n]*PENDING)/iu,
+    staleBt4nProjectionPattern,
     `${name} must not retain stale BT-4N execution or pending-adjudication state`,
   );
 }

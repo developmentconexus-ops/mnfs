@@ -252,8 +252,10 @@ test('BT-5N qualifies same-process role-instance isolation on public Mastra path
     assertDistinctRoleWiring(builder, par);
     assert.equal(builder.agent.getMastraInstance(), builder.mastra);
     assert.equal(par.agent.getMastraInstance(), par.mastra);
-    assert.equal(builder.agent.getPubSub(), builder.pubsub);
-    assert.equal(par.agent.getPubSub(), par.pubsub);
+    // Mastra exposes a role-local public PubSub proxy; the fixture also retains
+    // the raw configured transport for the cross-role control and observers.
+    assert.equal(builder.agent.getPubSub(), builder.mastra.pubsub);
+    assert.equal(par.agent.getPubSub(), par.mastra.pubsub);
     assert.notEqual(builder.agent.getPubSub(), par.agent.getPubSub());
 
     roleNotFoundAssertions(builder.mastra, 'builder', 'par');

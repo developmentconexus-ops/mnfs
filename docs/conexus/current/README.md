@@ -5,7 +5,7 @@
 > **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
 > **Phase 3:** IN PROGRESS  
 > **Technology Qualification:** 3L IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE  
-> **Package B:** IN PROGRESS / B0 COMPLETE / B1 NEXT / NOT EXECUTED
+> **Package B:** IN PROGRESS / B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS / B1 BLOCKED — NOT AUTHORIZED / NOT EXECUTED
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
 > **PR #40:** DRAFT / NO MERGE AUTHORIZATION  
@@ -120,7 +120,10 @@ After R11 closure, the live Phase-3 router requires:
 
 ```text
 3A-R11 = CLOSED / APPROVED / OPERATOR RATIFIED
-Package B = IN PROGRESS / B0 COMPLETE / B1 NEXT / NOT EXECUTED
+Package B = IN PROGRESS
+B0 execution = COMPLETE
+B0 Lead correction/adjudication = BOUNDED CORRECTION REQUIRED / CORRECTION IN PROGRESS / RE-ADJUDICATION PENDING
+B1 = BLOCKED / NOT AUTHORIZED / NOT EXECUTED
 ```
 
 ---
@@ -378,7 +381,8 @@ public Internet first-installation ingress
 3L Technology Qualification        IN PROGRESS
   Q0                               COMPLETE
   Package A                        COMPLETE
-  Package B                        IN PROGRESS / B0 COMPLETE / B1 NEXT / NOT EXECUTED
+  Package B                        IN PROGRESS / B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS
+    B1                             BLOCKED / NOT AUTHORIZED / NOT EXECUTED
   Packages C–E                     NOT STARTED
 3M Failure & Recovery              NOT STARTED
 3N Architecture Verification       NOT STARTED
@@ -411,7 +415,7 @@ R11 closure                        CLOSED / ACCEPTED
 
 ## 12. Exact next action
 
-> **Review and adjudicate the Package-B B0 Evidence. Package B is IN PROGRESS / B0 COMPLETE / B1 NEXT / NOT EXECUTED; do not execute B1 by inheritance or assumption.**
+> **Complete the bounded B0 Lead correction and return its Evidence for re-adjudication. B1 is BLOCKED / NOT AUTHORIZED / NOT EXECUTED.**
 
 Product implementation remains blocked; C-018 is not ratified, and PR #40 has no merge authorization.
 

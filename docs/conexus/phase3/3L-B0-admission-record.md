@@ -1,6 +1,7 @@
 # 3L Package B — B0 Admission Record
 
-**Status:** `COMPLETE / B1 NEXT / B1 NOT EXECUTED`  
+**Status:** `B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS / B1 BLOCKED — NOT AUTHORIZED / NOT EXECUTED`
+**Lead adjudication:** [3L-B0-lead-adjudication.md](3L-B0-lead-adjudication.md) — `BOUNDED CORRECTION REQUIRED / RE-ADJUDICATION PENDING`
 **Ratified Package-B spec:** [3L-B-product-agent-cross-runtime-qualification.md](3L-B-product-agent-cross-runtime-qualification.md)  
 **B0 Evidence-capture HEAD:** `0957361a04c3c0096860245077924ab21491f02a`  
 **Package-B lock SHA-256:** `5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0`
@@ -23,7 +24,7 @@ The committed Package-B lock and `evidence/npm-tree.json` freeze the complete tr
 ## Current criterion compilation
 
 ```text
-B1 = 10 ADMITTED criteria / NOT EXECUTED
+B1 = 10 ADMITTED criteria / BLOCKED / NOT AUTHORIZED / NOT EXECUTED
 B2 = 12 ADMITTED criteria / NOT EXECUTED
 B3 = 12 ADMITTED criteria / NOT EXECUTED
 B4 = 18 ADMITTED criteria / NOT EXECUTED
@@ -56,16 +57,19 @@ Still `UNKNOWN` pending the owning executable criteria:
 
 These `UNKNOWN`s do not contradict current authority and do not require an additional B0 dependency. They remain explicit B1–B4 execution obligations.
 
-## B0 adjudication
+## Executor result and Lead adjudication status
 
 ```text
+executor result          = COMPLETE
+Lead correction/adjudication = BOUNDED CORRECTION REQUIRED / CORRECTION IN PROGRESS / RE-ADJUDICATION PENDING
 Material Finding        = NONE
 authority/boundary clash = NONE
 B5                      = NOT ADMITTED
 Product implementation = BLOCKED
 C-018                   = NOT RATIFIED
 merge                   = NOT AUTHORIZED
-next                    = B1 / NOT EXECUTED
+B1                      = BLOCKED / NOT AUTHORIZED / NOT EXECUTED
+next                    = return corrected Evidence for Lead re-adjudication
 ```
 
-B0 admitted only the reproducible evidence identity and the current criterion pack. It did not qualify `CX-AGENT-MASTRA-01`, did not qualify `CX-RUNTIME-ISOLATION-01`, and did not execute B1, B2, B3, B4 or B5.
+B0 execution produced only the reproducible evidence identity and the current criterion pack. Lead adjudication remains pending after the bounded correction. B0 did not qualify `CX-AGENT-MASTRA-01`, did not qualify `CX-RUNTIME-ISOLATION-01`, and did not execute B1, B2, B3, B4 or B5.

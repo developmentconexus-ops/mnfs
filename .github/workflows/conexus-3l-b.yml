@@ -1,0 +1,30 @@
+name: Conexus 3L Package B
+
+on:
+  pull_request:
+    paths:
+      - 'spikes/conexus-3l-b/**'
+      - 'docs/conexus/phase3/3L-B-product-agent-cross-runtime-qualification.md'
+      - 'docs/conexus/phase3/3L-B0-admission-record.md'
+      - 'docs/conexus/phase3/3L-B0-lead-adjudication.md'
+      - '.github/workflows/conexus-3l-b.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  b0-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Install exact Package-B lock without lifecycle scripts
+        working-directory: spikes/conexus-3l-b
+        run: npm ci --ignore-scripts --audit=false --fund=false
+      - name: Verify Package-B B0 admission controls
+        working-directory: spikes/conexus-3l-b
+        run: npm run verify

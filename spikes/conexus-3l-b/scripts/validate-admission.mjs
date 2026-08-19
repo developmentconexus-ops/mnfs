@@ -29,6 +29,14 @@ const SUPERSEDED_MECHANISMS = Object.freeze([
   /Pi as primary Builder/iu,
   /generic Workflow\/Scheduler\/Automation/iu
 ]);
+const AUTHORITY_ANCHORS = Object.freeze({
+  'B2-07': { required: ['3G-06'] },
+  'B2-08': { required: ['3G-06'], forbidden: ['3G-05'] },
+  'B2-09': { required: ['3G-06'], forbidden: ['3G-05'] },
+  'B3-08': { required: ['3G-05'], forbidden: ['3G-06'] },
+  'B3-09': { required: ['3H-02'], forbidden: ['3G-06'] },
+  'B3-12': { required: ['3H-02', '3A-R9'], forbidden: ['3H-03'] }
+});
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -77,6 +85,13 @@ export function validateAdmission(record) {
       }
       invariant(Array.isArray(criterion.authority) && criterion.authority.length > 0, `${criterion.id} empty authority`);
       invariant(PROOF_CLASSES.has(criterion.proofClass), `${criterion.id} invalid proofClass`);
+      const anchors = AUTHORITY_ANCHORS[criterion.id];
+      for (const anchor of anchors?.required ?? []) {
+        invariant(criterion.authority.includes(anchor), `${criterion.id} missing required authority anchor ${anchor}`);
+      }
+      for (const anchor of anchors?.forbidden ?? []) {
+        invariant(!criterion.authority.includes(anchor), `${criterion.id} forbidden authority anchor ${anchor}`);
+      }
     }
   }
 

@@ -8,7 +8,7 @@
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** IN PROGRESS / B0 COMPLETE / B1 NEXT / NOT EXECUTED
+> **Package B:** IN PROGRESS / B0 EXECUTION COMPLETE / LEAD CORRECTION IN PROGRESS / B1 BLOCKED — NOT AUTHORIZED / NOT EXECUTED
 
 This current accepted authority projection answers:
 
@@ -1452,7 +1452,9 @@ Never merge only known keys onto a stale restored context and leave unknown stal
 
 ```text
 architecture = CURRENT
-Package B deciding Evidence = B0 ADMISSION COMPLETE / B1 NEXT / NOT EXECUTED
+Package B B0 execution = COMPLETE
+Package B B0 Lead correction/adjudication = BOUNDED CORRECTION REQUIRED / CORRECTION IN PROGRESS / RE-ADJUDICATION PENDING
+Package B B1 = BLOCKED / NOT AUTHORIZED / NOT EXECUTED
 CX-AGENT-MASTRA-01 = NOT YET QUALIFIED
 CX-RUNTIME-ISOLATION-01 = NOT YET QUALIFIED
 ```
@@ -2286,7 +2288,7 @@ REJECTED F1
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** | guard mandatory in Product realization |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** | not universal model/provider winner |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** | net benefit not proven; no stale-authority regression observed |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | B0 admission complete; B1 next / not executed |
+| direct Mastra Product Agent | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | B0 execution complete; Lead correction/re-adjudication pending; B1 blocked / not authorized / not executed |
 | BuilderMastra != ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | split only on material failure |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | model-spend pre-provider enforcement | **ARCHITECTURE CURRENT OBLIGATION / PACKAGE C NOT QUALIFIED** | hidden retries below gate must stay disabled/qualified |
@@ -2329,9 +2331,11 @@ R11 is closed; the remaining 3L route preserves serial proof dependency.
 Current route:
 
 ```text
-review/adjudicate Package-B B0 Evidence
+complete bounded Package-B B0 Lead correction and return Evidence for re-adjudication
 ↓
-Package B — Product Agent + Cross-Runtime — IN PROGRESS / B0 COMPLETE / B1 NEXT / NOT EXECUTED
+Package B — Product Agent + Cross-Runtime — IN PROGRESS
+  B0 execution COMPLETE / Lead correction IN PROGRESS
+  B1 BLOCKED / NOT AUTHORIZED / NOT EXECUTED
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
 ↓ adjudicate
@@ -2594,4 +2598,4 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 # 50. Exact next action
 
-> **Review and adjudicate the Package-B B0 Evidence. Package B is IN PROGRESS / B0 COMPLETE / B1 NEXT / NOT EXECUTED; do not execute B1 by inheritance or assumption.**
+> **Complete the bounded Package-B B0 Lead correction and return its Evidence for re-adjudication. B1 is BLOCKED / NOT AUTHORIZED / NOT EXECUTED.**

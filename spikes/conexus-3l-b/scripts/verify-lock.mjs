@@ -41,6 +41,13 @@ export function verifyLock(lock) {
     }
   }
 
+  for (const [name, version] of Object.entries(REQUIRED_DIRECT)) {
+    const resolved = lock.packages?.[`node_modules/${name}`]?.version;
+    if (resolved !== version) {
+      throw new Error(`Resolved direct pin drift: ${name} expected ${version}, got ${resolved ?? 'MISSING'}`);
+    }
+  }
+
   return true;
 }
 

@@ -36,6 +36,25 @@ test('lock verifier rejects direct pin drift', () => {
   assert.throws(() => verifyLock(bad), /Direct pin drift/u);
 });
 
+test('lock verifier rejects resolved direct pin drift while root declarations remain exact', () => {
+  const drifts = [
+    ['@mastra/core', '1.56.1'],
+    ['@mastra/memory', '1.25.1'],
+    ['@mastra/pg', '1.19.1']
+  ];
+
+  for (const [name, driftedVersion] of drifts) {
+    const bad = structuredClone(realLock);
+    bad.packages[`node_modules/${name}`].version = driftedVersion;
+
+    assert.equal(bad.packages[''].dependencies[name], realLock.packages[''].dependencies[name]);
+    assert.throws(
+      () => verifyLock(bad),
+      new RegExp(`Resolved direct pin drift: ${name.replace('/', '\\/')}`, 'u')
+    );
+  }
+});
+
 test('lock verifier rejects Mastra prereleases', () => {
   const bad = structuredClone(realLock);
   bad.packages['node_modules/@mastra/core'].version = '1.56.0-rc.1';
@@ -59,6 +78,50 @@ test('admission verifier rejects a missing or drifted criterion', () => {
   bad.criteria.find(({ id }) => id === 'B2-07').id = 'B2-99';
 
   assert.throws(() => validateAdmission(bad), /missing\/drifted criterion B2-07/u);
+});
+
+test('admission verifier rejects missing required semantic-home anchors', () => {
+  const requiredAnchors = [
+    ['B2-07', '3G-06'],
+    ['B2-08', '3G-06'],
+    ['B2-09', '3G-06'],
+    ['B3-08', '3G-05'],
+    ['B3-09', '3H-02'],
+    ['B3-12', '3H-02'],
+    ['B3-12', '3A-R9']
+  ];
+
+  for (const [id, anchor] of requiredAnchors) {
+    const bad = structuredClone(realAdmission);
+    const criterion = bad.criteria.find((entry) => entry.id === id);
+    criterion.authority = criterion.authority.filter((entry) => entry !== anchor);
+
+    assert.throws(
+      () => validateAdmission(bad),
+      new RegExp(`${id} missing required authority anchor ${anchor}`, 'u')
+    );
+  }
+});
+
+test('admission verifier rejects forbidden semantic-home anchors', () => {
+  const forbiddenAnchors = [
+    ['B2-08', '3G-05'],
+    ['B2-09', '3G-05'],
+    ['B3-08', '3G-06'],
+    ['B3-09', '3G-06'],
+    ['B3-12', '3H-03']
+  ];
+
+  for (const [id, anchor] of forbiddenAnchors) {
+    const bad = structuredClone(realAdmission);
+    const criterion = bad.criteria.find((entry) => entry.id === id);
+    if (!criterion.authority.includes(anchor)) criterion.authority.push(anchor);
+
+    assert.throws(
+      () => validateAdmission(bad),
+      new RegExp(`${id} forbidden authority anchor ${anchor}`, 'u')
+    );
+  }
 });
 
 test('admission verifier admits the current complete criterion compilation', () => {

@@ -1,3 +1,16 @@
+---
+id: PLAN-CONEXUS-3L-PACKAGE-B-B0-ADMISSION
+title: Conexus 3L Package B B0 Admission Implementation Plan
+document_type: implementation_plan
+form: how_to
+authority: guidance
+status: accepted
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+last_reviewed: 2026-08-18
+---
+
 # Conexus 3L Package B — B0 Admission Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

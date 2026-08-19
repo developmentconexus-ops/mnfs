@@ -121,6 +121,7 @@ export async function createRoleFixture({
       pubsub,
       workers: [new OrchestrationWorker()],
       scheduler: { enabled: false },
+      notifications: { dispatch: { enabled: false } },
       agents: { [agentKey]: agent },
       tools: { [toolKey]: tool },
       workflows: { [workflowKey]: workflow },

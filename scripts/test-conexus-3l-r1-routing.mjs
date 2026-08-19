@@ -19,6 +19,7 @@ const [readme, product, architecture, reconciliation, ledger, q0, bt3a, bt3aLead
 ]);
 
 const staleBt4nProjectionPattern = /BT-4N\b(?:(?!BT-\d+[A-Z]+\b)[^\n])*(?:\bNEXT\b|ADJUDICATION(?:(?!BT-\d+[A-Z]+\b)[^\n])*\bPENDING\b)/iu;
+const historicalBt5nRoutePattern = /Historical pre-execution route, superseded by (?:the executor record above|current executor projection): `BT-5N = NEXT \/ EXECUTION AUTHORIZED`/u;
 
 for (const staleProjection of [
   'BT-4N NEXT — EXECUTION AUTHORIZED',
@@ -57,8 +58,41 @@ for (const [name, text] of Object.entries({ readme, architecture, reconciliation
   );
   assert.match(
     text,
-    /BT-5N[^\n]*NEXT[^\n]*AUTHORIZED/iu,
-    `${name} must route only BT-5N as next`,
+    /BT-5N EXECUTION\s*=\s*COMPLETE/iu,
+    `${name} must project complete BT-5N executor evidence`,
+  );
+  assert.match(
+    text,
+    /BT-5N EXECUTOR VERDICT\s*=\s*NOT_PROVEN/iu,
+    `${name} must project the BT-5N executor verdict as not proven`,
+  );
+  assert.match(
+    text,
+    /ARCHITECTURE-LEAD\s*\/\s*PACKAGE-B CLOSURE ADJUDICATION\s*=\s*PENDING/iu,
+    `${name} must leave Architecture-Lead / Package-B closure adjudication pending`,
+  );
+  assert.match(text, /Package B[^\n]*(?:IN PROGRESS|NOT CLOSED)/iu,
+    `${name} must keep Package B open`);
+  assert.match(text, /Package C[^\n]*DEFER/iu,
+    `${name} must keep Package C deferred`);
+  assert.match(text, /(?:Product )?implementation[^\n]*BLOCKED/iu,
+    `${name} must keep Product implementation blocked`);
+  assert.match(text, /C-018[^\n]*NOT(?: YET)? RATIFIED/iu,
+    `${name} must keep C-018 unratified`);
+  assert.match(
+    text,
+    /(?:Return BT-5N executor evidence|BT-5N executor evidence)[^\n]*(?:Architecture-Lead|Package-B)[^\n]*adjudication/iu,
+    `${name} must route the BT-5N evidence return for adjudication`,
+  );
+  assert.match(
+    text,
+    historicalBt5nRoutePattern,
+    `${name} must retain the explicitly labeled historical pre-execution route`,
+  );
+  assert.doesNotMatch(
+    text,
+    /(?:^|\n)\s*>?\s*\*{0,2}Execute only `BT-5N\b[^\n]*/iu,
+    `${name} must not instruct a current BT-5N rerun`,
   );
   assert.doesNotMatch(
     text,

@@ -6,7 +6,9 @@
 > **3L-R1:** CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
-> **Package B:** IN PROGRESS / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N NEXT — EXECUTION AUTHORIZED
+> **Product implementation:** BLOCKED  
+> **C-018:** NOT RATIFIED  
+> **Package B:** IN PROGRESS / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N EXECUTION = COMPLETE / BT-5N EXECUTOR VERDICT = NOT_PROVEN / ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
 
 This registry answers one question:
 
@@ -365,7 +367,7 @@ Exact deciding Evidence identity and serial adjudication survive. The old uncond
 
 **Disposition:** `CURRENT / APPROVED / OPERATOR RATIFIED`.
 
-Direct code-defined Mastra Agent, native `requireApproval` pause/resume mechanics and PostgreSQL-backed suspended-run discovery are current. Raw Mastra `RequestContext` is non-authoritative runtime/configuration substrate; current Conexus owner truth is rechecked at governed owner/tool/Gateway boundaries. BT-3A is complete with the native schema hypothesis rejected; BT-3N and BT-4N passed Architecture-Lead adjudication, and BT-5N is the only authorized next execution. Package C is deferred safely for F1 without weakening finite model-call/step limits or truthful usage/cost missingness.
+Direct code-defined Mastra Agent, native `requireApproval` pause/resume mechanics and PostgreSQL-backed suspended-run discovery are current. Raw Mastra `RequestContext` is non-authoritative runtime/configuration substrate; current Conexus owner truth is rechecked at governed owner/tool/Gateway boundaries. BT-3A is complete with the native schema hypothesis rejected; BT-3N and BT-4N passed Architecture-Lead adjudication; BT-5N execution is complete with executor verdict `NOT_PROVEN`, and Architecture-Lead / Package-B closure adjudication is pending. Return BT-5N executor evidence for adjudication. Package C is deferred safely for F1 without weakening finite model-call/step limits or truthful usage/cost missingness.
 
 ## 3L Package A
 
@@ -524,8 +526,10 @@ Final GPT authority review          COMPLETE / PASS
 R11-H operator ratification         APPROVED / 2026-08-18
 R11                                  CLOSED / ACCEPTED
 3L-R1                               CURRENT / APPROVED / OPERATOR RATIFIED
-Package B                            IN PROGRESS / BT-3N PASS / BT-4N PASS / BT-5N NEXT
+Package B                            IN PROGRESS / BT-3N PASS / BT-4N PASS / BT-5N EXECUTION COMPLETE / EXECUTOR VERDICT NOT_PROVEN / ARCHITECTURE-LEAD PACKAGE-B CLOSURE ADJUDICATION PENDING
 Package C                            DEFER SAFELY / NO F1 EXECUTION
 ```
 
-No irreconcilable accepted-authority conflict or architecture reopen was found. **Next:** execute only `BT-5N — Role-instance isolation + enabled-global canary` under a new accepted execution plan.
+No irreconcilable accepted-authority conflict or architecture reopen was found. **Current handoff:** return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication.
+
+Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.

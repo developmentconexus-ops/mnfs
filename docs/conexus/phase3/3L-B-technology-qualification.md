@@ -39,6 +39,10 @@ This record preserves the earlier BT-1..BT-3 evidence, the lead-adjudicated BT-3
 - **Verdict:** `FAIL_REALIZATION`.
 - **Architecture consequence:** mandatory STOP for Architecture-Lead adjudication. No compensating wrapper or owner was invented in the spike.
 
+## Historical / superseded legacy BT-4 / BT-5 route
+
+The following legacy pre-3L-R1 BT-4/BT-5 block is historical and superseded. It is not current BT-4N or BT-5N evidence, does not alter the current executor verdict, and must not be read as a current rerun instruction.
+
 ## BT-4 — Schedule intended-slot / redelivery substrate
 
 - **Execution:** `NOT EXECUTED — STOP AFTER BT-3`.

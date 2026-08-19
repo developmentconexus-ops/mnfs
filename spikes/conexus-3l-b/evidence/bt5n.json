@@ -1,7 +1,7 @@
 {
   "probe": "BT-5N",
   "lockSha256": "5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0",
-  "postgresqlVersion": "17.10",
+  "postgresqlProbePin": "17.10",
   "roleInstancesDistinct": "NOT_PROVEN",
   "storeSchemas": {
     "builder": "NOT_PROVEN",

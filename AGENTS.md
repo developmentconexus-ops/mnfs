@@ -22,13 +22,14 @@ This repository contains distinct program histories. Never infer current work fr
 For Conexus work, use:
 
 ```text
-docs/conexus/DECISOES.md
-→ docs/conexus/phase3/LEDGER.md when working in Phase 3
-→ accepted phase/task-specific authority
-→ supporting evidence/current implementation
+docs/conexus/current/README.md
+→ current Product Contract / Architecture Baseline / Decision Reconciliation as needed
+→ docs/conexus/phase3/LEDGER.md when Phase-3 status/detail is relevant
+→ exact accepted detailed semantic authority
+→ deciding Evidence/current implementation only when material
 ```
 
-`docs/conexus/phase3/LEDGER.md` is the live Phase 3 status/navigation authority. Dialogue/review files are inputs, not authority unless ratified into an approved decision.
+`docs/conexus/phase3/LEDGER.md` remains the live Phase 3 status/navigation authority. `docs/conexus/DECISOES.md` is the historical/provenance decision index, not the current-state entrypoint. Dialogue/review files are inputs, not authority unless ratified into an approved decision.
 
 ### MNFS legacy/product program
 

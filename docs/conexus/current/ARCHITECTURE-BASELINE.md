@@ -1,16 +1,16 @@
 # Conexus — Current Architecture Baseline
 
-> **Status:** CANDIDATE / R11-D — ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / NOT YET CURRENT AUTHORITY\
-> **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
-> **R11-H:** BLOCKED pending GPT authority review verification
-> **Product meaning:** [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) — candidate until R11 ratification  
-> **Decision routing:** [DECISION-RECONCILIATION.md](DECISION-RECONCILIATION.md) — candidate until R11 ratification  
+> **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
+> **Parent checkpoint:** `3A-R11 — CLOSED / APPROVED`
+> **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
+> **Product meaning:** [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) — current accepted projection
+> **Decision routing:** [DECISION-RECONCILIATION.md](DECISION-RECONCILIATION.md) — current accepted reconciliation
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** PAUSED / NOT OPENED by R11  
+> **Package B:** NEXT / NOT STARTED
 
-This candidate answers:
+This current accepted authority projection answers:
 
 > **How is the currently accepted Conexus Product structurally divided, where does authority live, which mechanisms currently realize each boundary, what has actually been qualified, what remains qualification-pending, and which future seams are deliberately preserved without becoming F1 machinery?**
 
@@ -1452,7 +1452,7 @@ Never merge only known keys onto a stale restored context and leave unknown stal
 
 ```text
 architecture = CURRENT
-Package B deciding Evidence = NOT YET RUN / PAUSED BY R11
+Package B deciding Evidence = NOT YET RUN / NEXT / NOT STARTED
 ```
 
 No claim of same-process safety is allowed before B.
@@ -2322,14 +2322,14 @@ Known malicious Mastra package families/versions remain denied under Q0/C-016 su
 
 # 41. Remaining 3L qualification route
 
-R11 pauses progression but does not change serial proof dependency.
+R11 is closed; the remaining 3L route preserves serial proof dependency.
 
-After final R11 ratification:
+Current route:
 
 ```text
 rederive Package B from canonical current baseline
 ↓
-Package B — Product Agent + Cross-Runtime
+Package B — Product Agent + Cross-Runtime — NEXT / NOT STARTED
   CX-AGENT-MASTRA-01
   CX-RUNTIME-ISOLATION-01
 ↓ adjudicate
@@ -2579,17 +2579,17 @@ C-017 engineering model
 3K-01..04 + 3K-R1
 3L-Q0 + 3L-A
 R11-A census/completion
-R11-B corrected Decision Reconciliation candidate
-R11-C corrected Product Contract candidate
+R11-B accepted current Decision Reconciliation
+R11-C accepted current Product Contract
 R11-E Round-1 coherence findings
 R11-F Fresh Actor review
 R11-G independent Fable review + accepted FBL-01..17 adjudication
 ```
 
-Detailed accepted homes remain controlling until R11 final ratification rewires discovery.
+Detailed accepted homes remain controlling for exact semantic depth and when resolving any projection conflict.
 
 ---
 
 # 50. Exact next action
 
-> **Run GPT authority review over the applied Round-3.1 projection correction. R11-H remains blocked until that review verifies the correction; this is not current authority and Package B stays closed.**
+> **Rederive the bounded Package-B admission/spec from this canonical current baseline. Package B is NEXT / NOT STARTED; do not execute it by inheritance or assumption.**

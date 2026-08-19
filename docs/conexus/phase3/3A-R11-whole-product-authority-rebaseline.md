@@ -1,9 +1,10 @@
 # 3A-R11 — Whole-Product Authority Rebaseline
 
-**Status:** PROPOSED / OPERATOR-APPROVED IN CONCEPT / WRITTEN SPEC PENDING OPERATOR REVIEW  
+**Status:** CLOSED / APPROVED / OPERATOR RATIFIED
 **Fase:** 3A — Architecture Reconciliation contínua até C-018  
 **Natureza:** whole-product authority compilation / reconciliation checkpoint  
 **Método:** DevelopmentConexus Engineering Method v1.0.0  
+**Closure authority:** [3A-R11-operator-ratification.md](3A-R11-operator-ratification.md) — APPROVED 2026-08-18
 **Importante:** este checkpoint não constitui C-018, não encerra a Fase 3, não autoriza implementação de produto, não autoriza merge do PR #40 e não reabre decisões ratificadas sem Finding material.
 
 ---
@@ -627,23 +628,23 @@ current code shape alone
 R11 só pode fechar quando:
 
 ```text
-[ ] full authority census completed
-[ ] Product Contract written
-[ ] Architecture Baseline written
-[ ] Decision Reconciliation written
-[ ] current README/router written
-[ ] every material accepted decision routed/dispositioned
-[ ] major known supersessions explicitly protected against resurrection
-[ ] Unknown/Deferred preserved honestly
-[ ] qualification-state matrix reconciled with deciding Evidence
-[ ] whole-product scenario/coherence pass complete
-[ ] fresh self-review complete
-[ ] independent Fable review complete
-[ ] every Fable material finding adjudicated
-[ ] no unresolved material contradiction remains
-[ ] AGENTS/DOCUMENTATION-MAP/DECISOES/LEDGER rewired coherently
-[ ] implementation remains blocked
-[ ] operator explicitly ratifies final current baseline
+[x] full authority census completed
+[x] Product Contract written
+[x] Architecture Baseline written
+[x] Decision Reconciliation written
+[x] current README/router written
+[x] every material accepted decision routed/dispositioned
+[x] major known supersessions explicitly protected against resurrection
+[x] Unknown/Deferred preserved honestly
+[x] qualification-state matrix reconciled with deciding Evidence
+[x] whole-product scenario/coherence pass complete
+[x] fresh self-review complete
+[x] independent Fable review complete
+[x] every Fable material finding adjudicated
+[x] no unresolved material contradiction remains
+[x] AGENTS/DOCUMENTATION-MAP/DECISOES/LEDGER rewired coherently
+[x] implementation remains blocked
+[x] operator explicitly ratifies final current baseline
 ```
 
 Após fechamento:
@@ -675,19 +676,16 @@ Ordinary implementation commits, CI noise, refactors e non-material wording não
 
 ---
 
-## 17. Current gate
-
-Este written spec implementa apenas o design do checkpoint aprovado em conceito pelo operador.
-
-Antes de iniciar o census ou rewire dos current authority paths:
-
-> **o operador revisa e aprova explicitamente este arquivo escrito.**
-
-Até lá:
+## 17. Final closure record
 
 ```text
-Package A = COMPLETE
-Package B = repository-router NEXT, operationally held for R11 spec review
-R11 = written candidate, not yet active router authority
-product implementation = BLOCKED
+operator ratification = APPROVED / 2026-08-18
+R11-A..G              = COMPLETE
+R11-H                 = APPROVED
+mechanical rewiring   = COMPLETE by the R11 finalization commit
+R11                    = CLOSED / ACCEPTED
+Material reopen        = NONE
+Package B              = NEXT / NOT STARTED
 ```
+
+Package-B admission/spec must be rederived from the canonical current tree; Package B has not started. C-018 remains not ratified, Product implementation remains blocked and PR #40 merge remains unauthorized.

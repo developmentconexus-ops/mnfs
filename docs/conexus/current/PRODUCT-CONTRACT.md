@@ -1,18 +1,18 @@
 # Conexus — Whole-Product Contract
 
-> **Status:** CANDIDATE / R11-C — ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / NOT YET CURRENT AUTHORITY\
-> **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
-> **R11-H:** BLOCKED pending GPT authority review verification
+> **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
+> **Parent checkpoint:** `3A-R11 — CLOSED / APPROVED`
+> **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** PAUSED / NOT OPENED  
+> **Package B:** NEXT / NOT STARTED
 
-This candidate consolidates **what Conexus is, what users can do, which Product meanings and whole-product journeys must remain true, and which future capabilities are deliberately preserved without becoming F1 machinery**.
+This current accepted authority projection consolidates **what Conexus is, what users can do, which Product meanings and whole-product journeys must remain true, and which future capabilities are deliberately preserved without becoming F1 machinery**.
 
 It is derived from accepted Product/system authority, especially C-001/C-003, 3B, 3K and the owner/state/security boundaries of 3C–3J. It does not replace those detailed semantic homes and does not turn runtime/provider mechanics into Product authority.
 
-Round-3 Fable corrections are applied. A closure-keyed pass found `R3C-01..08`, and the bounded Round-3.1 projection correction is applied but not yet verified by GPT authority review. This file remains a candidate projection; R11-H is blocked.
+Round-3 Fable corrections, closure-keyed `R3C-01..08`, Round-3.1 projection correction and final GPT authority review are complete. The operator accepted this projection through 3A-R11.
 
 ---
 
@@ -1344,7 +1344,7 @@ E2B                                      = PASS WITH REQUIRED PHYSICAL-INCARNATI
 native Codex OAuth                       = PASS for tested A3 path
 Builder Observational Memory             = EVALUATED / KEEP OFF
 
-Package B Product Agent/Cross-Runtime    = PAUSED / NOT OPENED by R11
+Package B Product Agent/Cross-Runtime    = NEXT / NOT STARTED
 Package C Model Economics/Enforcement   = NOT STARTED
 Package D Managed Execution             = NOT STARTED
 Package E Deciding Evidence             = NOT STARTED
@@ -1403,17 +1403,17 @@ C-014 lifecycle/duplication
 3K-R1 Product closure
 3L-Q0 + 3L-A qualification
 R11-A census
-R11-B corrected candidate reconciliation
+R11-B accepted current reconciliation
 R11-E Round-1 findings
 R11-F Fresh Actor review
 R11-G independent Fable review + accepted FBL-01..17 adjudication
 ```
 
-Detailed accepted homes remain controlling until R11 final ratification rewires discovery.
+Detailed accepted homes remain controlling for exact semantic depth and when resolving any projection conflict.
 
 ---
 
-# 36. Candidate verdict
+# 36. Accepted verdict
 
 ```text
 North Star / product boundary                     = represented
@@ -1436,4 +1436,4 @@ technology qualification                          = not overstated
 new Product authority intentionally invented       = NO
 ```
 
-**Next:** GPT authority review must verify the applied Round-3.1 projection correction. R11-H remains blocked until then; this is not current authority, and Package B remains paused/not opened.
+**Next:** rederive the bounded Package-B admission/spec from the canonical current tree. Package B is `NEXT / NOT STARTED`; no Package-B execution is authorized by this status.

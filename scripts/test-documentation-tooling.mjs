@@ -264,7 +264,8 @@ for (const rel of agentBootstrapReadPath) {
 }
 assert.match(agentsText, /DevelopmentConexus Engineering Method v1\.0\.0/u, 'AGENTS must name the consumed organizational method version');
 assert.match(agentsText, /developmentconexus-ops\/conexus-methodology\/METHOD\.md/u, 'AGENTS must name the canonical organizational method source');
-assert.match(agentsText, /docs\/conexus\/DECISOES\.md[\s\S]*docs\/conexus\/phase3\/LEDGER\.md/u, 'AGENTS must route Conexus through its decision and Phase 3 status owners');
+assert.match(agentsText, /docs\/conexus\/current\/README\.md[\s\S]*docs\/conexus\/phase3\/LEDGER\.md/u, 'AGENTS must route Conexus through its current entrypoint before Phase 3 detail');
+assert.ok(agentsText.indexOf('docs/conexus/current/README.md') < agentsText.indexOf('docs/conexus/DECISOES.md'), 'AGENTS must not place the historical Conexus decision index before current authority');
 assert.match(agentsText, /docs\/tracking\/STATUS\.md[\s\S]*docs\/tracking\/DECISIONS\.md[\s\S]*docs\/product\/DEVELOPMENT-GOVERNANCE-METHOD\.md/u, 'AGENTS must route MNFS through status, decisions and repo-specific governance owners');
 assert.match(agentsText, /MNFS-specific specialization[\s\S]{0,100}not a second organizational engineering method/iu, 'AGENTS must classify MNFS governance as specialization, not second organizational method');
 assert.match(agentsText, /npm run verify/u, 'AGENTS must expose the default repository verification command');
@@ -288,6 +289,14 @@ assert.match(documentationMapText, /M2 — Secure One-Worker Vertical Slice[^\n]
 assert.match(documentationMapText, /MIS-002\/M02[\s\S]{0,160}SUPERSEDED_AS_EXECUTION_PATH/u);
 assert.match(documentationMapText, /ARR-S0[\s\S]*ARR-S3/u);
 assert.match(documentationMapText, /D-010 through D-022/u, 'Documentation Map must expose current Decision range');
+for (const rel of [
+  'docs/conexus/current/README.md',
+  'docs/conexus/current/PRODUCT-CONTRACT.md',
+  'docs/conexus/current/ARCHITECTURE-BASELINE.md',
+  'docs/conexus/current/DECISION-RECONCILIATION.md',
+]) {
+  assert.ok(documentationMapText.includes(rel), `Documentation Map missing canonical Conexus entrypoint: ${rel}`);
+}
 assert.match(documentationMapText, /BOUNDED[^\n]*default/u, 'Documentation Map must expose the default bounded profile');
 
 assert.match(toolingText, /projection of current capability-realization decisions/u);

@@ -1,6 +1,10 @@
 # Conexus — registro de decisões
 
-Uma linha por decisão. Detalhe e evidência vivem no doc do tópico.
+> **Role:** HISTORICAL / PROVENANCE DECISION INDEX
+> **Not:** the current-state entrypoint or precedence-by-recency authority
+> **Current questions:** [current/README.md](current/README.md) → [current/DECISION-RECONCILIATION.md](current/DECISION-RECONCILIATION.md) when an older decision appears inconsistent
+
+Uma linha por decisão. Detalhe e evidência vivem no doc do tópico. Preserve este registro para história, rationale e provenance; não derive o target atual pela decisão mais recente/antiga sem o current reconciliation.
 
 | ID | Data | Decisão | Doc |
 |---|---|---|---|

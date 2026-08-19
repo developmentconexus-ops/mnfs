@@ -1,18 +1,18 @@
 # Conexus — Current Product & Architecture Entrypoint
 
-> **Status:** CANDIDATE / R11 ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING — NOT YET CURRENT AUTHORITY\
-> **Whole-product checkpoint:** 3A-R11 ACTIVE  
-> **R11-H:** BLOCKED pending GPT authority review verification
+> **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
+> **Whole-product checkpoint:** 3A-R11 CLOSED / APPROVED
+> **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
 > **Phase 3:** IN PROGRESS  
 > **Technology Qualification:** 3L IN PROGRESS / Q0 COMPLETE / PACKAGE A COMPLETE  
-> **Package B:** PAUSED / NOT OPENED while R11 is active  
+> **Package B:** NEXT / NOT STARTED
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
 > **PR #40:** DRAFT / NO MERGE AUTHORIZATION  
 
-This page is the intended short entrypoint to the **current Conexus Product and architecture** after R11 final ratification.
+This page is the canonical short entrypoint to the **current Conexus Product and architecture**.
 
-During R11 it remains a candidate. Detailed accepted authority still controls if any current-tree projection disagrees with its semantic home. GPT authority review must first verify the Round-3.1 correction; only later explicit R11-H operator ratification can promote this tree.
+The operator ratified this current tree through 3A-R11. Detailed accepted authority still controls if any current-tree projection disagrees with its semantic home.
 
 ---
 
@@ -49,7 +49,7 @@ Read:
 
 > **[PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md)**
 
-It owns the candidate current projection of:
+It owns the current accepted projection of:
 
 ```text
 North Star
@@ -67,7 +67,7 @@ Read:
 
 > **[ARCHITECTURE-BASELINE.md](ARCHITECTURE-BASELINE.md)**
 
-It owns the candidate current projection of:
+It owns the current accepted projection of:
 
 ```text
 semantic owners and boundaries
@@ -116,11 +116,11 @@ docs/conexus/phase3/LEDGER.md
 → exact accepted 3A/3B/3C/... authority named for the question
 ```
 
-During R11, the live Phase-3 router and operator-approved activation record require:
+After R11 closure, the live Phase-3 router requires:
 
 ```text
-3A-R11 = ACTIVE
-Package B = PAUSED / NOT OPENED
+3A-R11 = CLOSED / APPROVED / OPERATOR RATIFIED
+Package B = NEXT / NOT STARTED
 ```
 
 ---
@@ -378,7 +378,7 @@ public Internet first-installation ingress
 3L Technology Qualification        IN PROGRESS
   Q0                               COMPLETE
   Package A                        COMPLETE
-  Package B                        PAUSED by R11
+  Package B                        NEXT / NOT STARTED
   Packages C–E                     NOT STARTED
 3M Failure & Recovery              NOT STARTED
 3N Architecture Verification       NOT STARTED
@@ -391,9 +391,9 @@ R11 itself:
 
 ```text
 R11-A Authority Census             COMPLETE
-R11-B Decision Reconciliation      CANDIDATE / ROUND-3.1 APPLIED / GPT REVIEW PENDING
-R11-C Product Contract             CANDIDATE / ROUND-3.1 APPLIED / GPT REVIEW PENDING
-R11-D Architecture Baseline        CANDIDATE / ROUND-3.1 APPLIED / GPT REVIEW PENDING
+R11-B Decision Reconciliation      CURRENT / ACCEPTED
+R11-C Product Contract             CURRENT / ACCEPTED
+R11-D Architecture Baseline        CURRENT / ACCEPTED
 R11-E Coherence Round 1            COMPLETE / 14 projection findings
 R11-E Coherence Round 2            COMPLETE / 14 closed / 0 material findings
 R11-F Fresh Actor review           COMPLETE / PASS
@@ -401,21 +401,23 @@ R11-G independent Fable review     COMPLETE / BOUNDED CORRECTION REQUIRED
 Fable finding adjudication         COMPLETE / FBL-01..17 ACCEPTED
 Round-3 Fable corrections          APPLIED
 Closure-keyed pass                 FOUND R3C-01..08
-Round-3.1 projection correction    APPLIED / GPT AUTHORITY REVIEW PENDING
-R11-H operator ratification        BLOCKED pending GPT authority review verification
+Round-3.1 projection correction    APPLIED / VERIFIED
+Final GPT authority review         COMPLETE / PASS
+R11-H operator ratification        APPROVED / 2026-08-18
+R11 closure                        CLOSED / ACCEPTED
 ```
 
 ---
 
 ## 12. Exact next action
 
-> **Run GPT authority review over the applied Round-3.1 projection correction. R11-H remains blocked until that review verifies the correction; do not treat this candidate tree as current authority.**
+> **Rederive the bounded Package-B admission/spec from this canonical current tree. Package B is NEXT / NOT STARTED; do not execute it by inheritance or assumption.**
 
-Package B remains paused and not opened. Only after GPT authority review verifies this correction may the router consider R11-H eligible for a later explicit operator act.
+Product implementation remains blocked; C-018 is not ratified, and PR #40 has no merge authorization.
 
 ---
 
-## 13. Intended read path after final R11 ratification
+## 13. Canonical read path
 
 ```text
 AGENTS.md

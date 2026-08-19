@@ -1,23 +1,23 @@
 # Conexus — Decision Reconciliation Registry
 
-> **Status:** CANDIDATE / R11-B — ROUND-3.1 PROJECTION CORRECTION APPLIED / GPT AUTHORITY REVIEW PENDING / NOT YET CURRENT AUTHORITY\
-> **Parent checkpoint:** `3A-R11 — Whole-Product Authority Rebaseline`  
-> **R11-H:** BLOCKED pending GPT authority review verification
+> **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
+> **Parent checkpoint:** `3A-R11 — CLOSED / APPROVED`
+> **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
-> **Package B:** PAUSED / NOT OPENED  
+> **Package B:** NEXT / NOT STARTED
 
 This registry answers one question:
 
 > **Which generation of a Conexus decision is current, where does its detailed meaning live, what survives from older decisions, what must not be resurrected, and what remains genuinely deferred/open?**
 
-Round-3 Fable corrections are applied. A closure-keyed pass found `R3C-01..08`, and the bounded Round-3.1 projection correction is applied but not yet verified by GPT authority review. This remains a candidate routing projection; R11-H is blocked.
+Round-3 Fable corrections, closure-keyed `R3C-01..08`, Round-3.1 projection correction and final GPT authority review are complete. The operator accepted this reconciliation through 3A-R11.
 
 ---
 
 # 1. Role
 
-Once ratified, this registry owns **decision-generation reconciliation/routing only**.
+This registry owns **decision-generation reconciliation/routing only**.
 
 It does not:
 
@@ -215,7 +215,7 @@ C-003 F2 `INT-6 managed tunnel` preserves a future **SaaS↔private/on-prem reac
 3A-R8  CURRENT — SPEC-ANCHORED/LIVING/INCREMENTAL Project Baseline
 3A-R9  CURRENT — managed sync/job semantics; scheduler/queue as mechanics
 3A-R10 CURRENT — pre-implementation supersession + qualification routing
-3A-R11 ACTIVE — whole-product rebaseline; not final current authority until its gates close
+3A-R11 CLOSED / APPROVED — current whole-product authority rebaseline
 ```
 
 ## 3B — System Context & Boundaries
@@ -512,9 +512,11 @@ R11-G independent Fable review      COMPLETE / BOUNDED CORRECTION REQUIRED
 FBL-01..17 adjudication             COMPLETE / CORRECT_PROJECTION
 Round-3 Fable corrections           APPLIED
 Closure-keyed pass                  FOUND R3C-01..08
-Round-3.1 projection correction     APPLIED / GPT AUTHORITY REVIEW PENDING
-R11-H operator ratification         BLOCKED pending GPT authority review verification
-Package B                           PAUSED / NOT OPENED
+Round-3.1 projection correction     APPLIED / VERIFIED
+Final GPT authority review          COMPLETE / PASS
+R11-H operator ratification         APPROVED / 2026-08-18
+R11                                  CLOSED / ACCEPTED
+Package B                            NEXT / NOT STARTED
 ```
 
-No irreconcilable accepted-authority conflict or architecture reopen was found. **Next:** GPT authority review verifies the applied Round-3.1 projection correction. R11-H remains blocked, and this candidate is not current authority.
+No irreconcilable accepted-authority conflict or architecture reopen was found. **Next:** rederive the bounded Package-B admission/spec from the canonical current tree; Package B has not started.

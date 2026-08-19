@@ -1,11 +1,11 @@
 ---
 id: DOC-DOCUMENTATION-MAP
-title: MNFS Documentation Map
+title: MNFS / Conexus Documentation Map
 document_type: documentation_map
 form: reference
 authority: constitutional
 status: accepted
-version: 2.0.5
+version: 2.1.0
 owners:
   - developmentconexus-ops
 approvers:
@@ -41,11 +41,11 @@ review_triggers:
   - canonical document added, removed or superseded
   - documentation authority changes
   - Product Milestone or execution boundary changes
-last_reviewed: 2026-08-08
+last_reviewed: 2026-08-18
 tracking_issue: 23
 ---
 
-# MNFS Documentation Map
+# MNFS / Conexus Documentation Map
 
 > Constitutional discovery map. It tells a Fresh Actor what is authoritative and what to read next. It intentionally does not duplicate mechanical PR/CI/merge history that GitHub already preserves.
 
@@ -120,6 +120,10 @@ Operational history: commits/diffs, PRs/reviews, CI/workflow results, merge iden
 |---|---|---|
 | `AGENTS.md` | Fresh Actor bootstrap, hard invariants and execution-depth guidance | guidance/index |
 | `docs/DOCUMENTATION-MAP.md` | authority/discovery/read paths | constitutional reference |
+| `docs/conexus/current/README.md` | canonical Conexus current-state entrypoint/read router | current accepted authority projection |
+| `docs/conexus/current/PRODUCT-CONTRACT.md` | current Conexus whole-product meaning and journeys | current accepted Product authority projection |
+| `docs/conexus/current/ARCHITECTURE-BASELINE.md` | current Conexus architecture, boundaries and technology state | current accepted Architecture authority projection |
+| `docs/conexus/current/DECISION-RECONCILIATION.md` | current Conexus decision-generation disposition/routing | current accepted reconciliation authority |
 | `docs/tracking/STATUS.md` | current state, blocker and next meaningful action | tracking |
 | `docs/tracking/DECISIONS.md` | Operator Decision register | tracking of A1 authority |
 | `docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md` | Discovery → Decision → Execution and Replan policy | Standard / Policy |
@@ -138,6 +142,21 @@ Operational history: commits/diffs, PRs/reviews, CI/workflow results, merge iden
 | `docs/superpowers/plans/2026-08-07-arr-s2-execution-envelope-conformance.md` | deterministic S2 harness + later controlled run sequence | accepted exact bytes — D-022 |
 | `docs/product/PRODUCT-BLUEPRINT.md` | generated constitutional projection | generated projection |
 | `docs/roadmap.md` | generated capability/program sequence | generated projection |
+
+### 4.1 Conexus canonical read path
+
+```text
+AGENTS.md
+→ DevelopmentConexus Engineering Method
+→ docs/DOCUMENTATION-MAP.md
+→ docs/conexus/current/README.md
+→ current Product Contract / Architecture Baseline / Decision Reconciliation as needed
+→ docs/conexus/phase3/LEDGER.md for active Phase-3 status/detail
+→ exact accepted detailed semantic authority
+→ deciding Evidence/current implementation only when material
+```
+
+`docs/conexus/DECISOES.md` is the historical/provenance decision index. It is consulted for history and provenance, not placed before `current/` in the active Conexus discovery path.
 
 ## 5. Fresh-session read path
 

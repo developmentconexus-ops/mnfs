@@ -125,6 +125,12 @@
       "classification": "NOT_REACHABLE_IN_TESTED_BASELINE",
       "f1Enabled": false,
       "reason": "The worker exists and is instance-wired, but F1 does not admit stock direct Agent schedule dispatch because schedule fire must enter through the guarded PAR ingress."
+    },
+    {
+      "surface": "Standalone Agent ephemeral Mastra fallback",
+      "classification": "NOT_REACHABLE_IN_TESTED_BASELINE",
+      "f1Enabled": false,
+      "reason": "An unattached Agent lazily creates an in-memory Mastra and clears it when a real Mastra attaches; governed F1 uses attached Agents and does not admit this path."
     }
   ],
   "enabledProcessGlobalSurfaces": [

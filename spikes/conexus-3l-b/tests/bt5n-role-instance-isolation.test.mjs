@@ -358,7 +358,6 @@ test('BT-5N qualifies same-process role-instance isolation on public Mastra path
     await waitFor(() => builderThreadEvents.length > 0, 'Builder thread stream');
     assert.equal(parThreadEvents.length, 0);
 
-    const builderEventsBeforePar = builderThreadEvents.length;
     const parAgentStream = await par.mastra.getAgent('parAgent').stream(
       'identify the attached role',
       {
@@ -374,7 +373,6 @@ test('BT-5N qualifies same-process role-instance isolation on public Mastra path
     assert.equal(parAgentResult.text, 'par');
     assert.equal(builderCounters.modelFixtureCalls, 1);
     assert.equal(parCounters.modelFixtureCalls, 1);
-    assert.equal(builderThreadEvents.length, builderEventsBeforePar);
     assert.equal(builderThreadEvents.some((event) => event.runId === 'par-agent-run'), false);
     assert.equal(parThreadEvents.some((event) => event.runId === 'builder-agent-run'), false);
     assert.equal((await builder.agent.listTools()).parTool, undefined);

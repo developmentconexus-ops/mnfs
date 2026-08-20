@@ -1,24 +1,26 @@
-# Conexus OS — Agent Instructions
+# Conexus OS — Agent Bootstrap
 
-## Fresh actor path
+## Start here
 
 ```text
 AGENTS.md
-→ docs/INDEX.md
-→ one task row
-→ at most 1–3 task-specific canonical/reference documents
+→ docs/index.md
+→ docs/roadmap.md
+→ 1–2 task-specific owning documents
 ```
 
-Default pack is at most five files. Do not recursively read `docs/`. Do not read research or phase history by default. Do not read qualification harnesses unless validating or requalifying a named claim.
+Default pack is at most five files. Do not recursively read `docs/`, research, phase history, Git history or qualification harnesses before a concrete task requires them.
 
-Current accepted authority beats historical Git content. Research, code, tests, runtime, framework docs, and Git history are Evidence/mechanics, not Product authority. Mechanism is not authority. Temporary `AI_DIALOG.md` is non-authoritative.
+## Organizational standards
 
-Use [docs/engineering/METHOD.md](docs/engineering/METHOD.md) for engineering reasoning; do not duplicate it. Use Ubuntu WSL2 and a Linux-filesystem worktree. Preserve unowned state and never reset, clean, stash, or discard it.
+Engineering reasoning follows `developmentconexus-ops/conexus-methodology/METHOD.md` v1.0.0. Repository organization/workflow follows `developmentconexus-ops/conexus-methodology/REPOSITORY-STANDARD.md` v1.0.0. Repository-specific rules live in [docs/development/engineering-rules.md](docs/development/engineering-rules.md).
 
-For Mastra-sensitive work, load `.agents/skills/mastra/SKILL.md`; use Context7 only when current external documentation is material; decide version-specific claims from exact pinned source/configuration and bounded Evidence.
+Current accepted authority beats historical Git content. Research, code, tests, runtime, framework docs and reviewer output are Evidence/mechanics, not Product authority. Mechanism is not authority.
 
-Stop when work would create/change a Product requirement, semantic owner, trust boundary, structural runtime/database/service/module, delete accepted semantics without a destination, require unauthorized production effects/secrets, leave a material contradiction, receive a material independent-review finding, or require Product/architecture redesign to pass verification.
+For Mastra-sensitive work, load `.agents/skills/mastra/SKILL.md`; use Context7/current external docs only when material; decide version-specific claims from exact pinned source/configuration and bounded Evidence.
 
-Publish reviewable changes. One phase owns one PR. Run `npm ci && npm run verify`. Live qualification is opt-in. Never merge without explicit operator authority.
+Stop on a material Product/owner/trust/structural-boundary contradiction or unauthorized production effect. Otherwise keep work proportional and autonomous inside accepted boundaries.
 
-For current phase and implementation status, read [docs/ROADMAP.md](docs/ROADMAP.md); do not restate mutable status here.
+Use Ubuntu WSL2 with a Linux-filesystem worktree. Preserve unowned state. Run `npm ci && npm run verify` before claiming completion. One coherent phase/gate owns one PR. Never merge without explicit operator authority.
+
+Current stage, exact next action and implementation status live only in [docs/roadmap.md](docs/roadmap.md).

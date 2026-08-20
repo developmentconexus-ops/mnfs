@@ -1,6 +1,6 @@
 # Frontend and Product Surfaces
 
-Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/ARCHITECTURE.md` owns the overview; this file owns the detailed task surface named by its title.
+Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title.
 
 ## 33. Scaffold and frontend architecture
 

@@ -89,7 +89,7 @@ Gateway caller context is surface-specific. Current callers include the bounded 
 MANAGED_JOB
 ```
 
-This is the 3A-R9 amendment to the older 3D-02 caller list. The Hub derives exact `JobRun`, Project/environment, Release, Job ArtifactRevision and admitted input/occurrence identity server-side; the caller cannot select arbitrary Project, Connection, Release, revision or environment. Package D must prove this context cannot widen authority.
+This is the 3A-R9 amendment to the older 3D-02 caller list. The Hub derives exact `JobRun`, Project/environment, Release, Job ArtifactRevision and admitted input/occurrence identity server-side; the caller cannot select arbitrary Project, Connection, Release, revision or environment. Package D proves only the current tested transactional-admission subset; the current F1 managed-job consumer remains governed sync.
 
 ## 19.4 Retry law
 
@@ -104,6 +104,47 @@ OUTCOME_UNKNOWN
 → current reconciliation/evidence
 -X-> blind replay
 ```
+
+### 19.4.1 Semantic effect identity
+
+One logical external-effect intent has one Gateway-owned semantic effect/replay identity:
+
+```text
+one logical effect intent
+→ exact sealed effect subject
++ owner-stable intent/context facts admitted by the capability
+→ one server-derived Gateway replay identity
+```
+
+That identity is independent of runtime/model/AgentRun/JobRun/transport attempt, is stable across retry/recovery of the same intent, and is never allocated from a counter/sequence namespace that a restored generation can reuse.
+
+Identical payload or sealed subject does not collapse every future legitimate repetition into the same intent. Each effect-capable capability/connector declares the semantic idempotency/reconciliation scope that distinguishes duplicate risk from a later legitimate intent. That scope is admitted only after existing Connection/capability qualification and exact Release composition validate it; connector-authored metadata is not trusted merely by declaration.
+
+### 19.4.2 Unresolved truth fences new admission
+
+Unresolved Gateway effect truth fences not only replay but any new effect admission that could duplicate the same logical intent inside the validated idempotency/reconciliation scope.
+
+```text
+fresh AgentRun / ApprovalRequest / transport attempt / process restart
+-X-> bypass unresolved Gateway effect truth
+```
+
+Provider/SDK transport retry is subordinate mechanics and is allowed only when Gateway policy bounds it and preserves the same semantic effect/replay identity. Upstream runtimes never create a second semantic retry layer.
+
+### 19.4.3 Disaster-restore effect posture
+
+A disaster restore can lose an `EffectAttempt` that was created and externally applied entirely after the protected cutoff. Therefore the initial recovery posture cannot infer a safe affected-set by enumerating restored unresolved effects.
+
+```text
+disaster recovery active
+→ all governed external-effect admission DENY by default
+→ each effect-capable Connection/Gateway surface re-enabled only through existing owner checks
+   after provider/business reconciliation establishes acceptable current safety
+```
+
+If the lost interval cannot be reconciled sufficiently, the affected effect surface remains fail-closed until explicit operator/business reconciliation through existing authority. No missing local EffectAttempt is fabricated and no generic recovery owner is introduced.
+
+A future provider/effect class that cannot fit this idempotency/reconciliation model reopens the smallest Gateway/operations Decision Loop.
 
 ## 19.5 Closed Contracts/API projection
 

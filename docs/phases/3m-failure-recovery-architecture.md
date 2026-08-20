@@ -19,7 +19,7 @@ new pre-C-018 runtime probe = 0
 3L requalification = NO
 ```
 
-The operator ratified the first-installation recovery refinements after independent Fable review. C-018 remains separately gated and Product implementation remains blocked by the roadmap.
+The operator ratified the seven first-installation recovery refinements after independent Fable review. C-018 remains separately gated and Product implementation remains blocked by the roadmap.
 
 ## Current semantic homes
 

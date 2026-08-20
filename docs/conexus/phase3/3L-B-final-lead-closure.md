@@ -255,16 +255,16 @@ Those obligations remain routed to Realization Planning, first-build conformance
 ## 9. Global-Maximum conclusion
 
 ```text
-Direct Agent                              = ADOPT
-native HITL                               = ADOPT
-native Scheduler + narrow Workflow ingress= ADOPT
-same-process role instances               = ADOPT
-custom scheduler                          = REJECT / YAGNI
-process split                             = NOT REQUIRED
-DurableAgent baseline                     = DEFER SAFELY
-universal Workflow wrapping               = REJECT F1
-advanced memory / OM                      = DEFER SAFELY
-Package C hard monetary machinery         = DEFER SAFELY
+Direct Agent                               = ADOPT
+native HITL                                = ADOPT
+native Scheduler + narrow Workflow ingress = ADOPT
+same-process role instances                = ADOPT
+custom scheduler                           = REJECT / YAGNI
+process split                              = NOT REQUIRED
+DurableAgent baseline                      = DEFER SAFELY
+universal Workflow wrapping                = REJECT F1
+advanced memory / OM                       = DEFER SAFELY
+Package C hard monetary machinery          = DEFER SAFELY
 ```
 
 The selected realization uses more native Mastra behavior, preserves Conexus authority at owner boundaries and introduces no speculative infrastructure.

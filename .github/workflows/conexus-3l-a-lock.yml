@@ -1,0 +1,88 @@
+name: Conexus 3L Package A Lock Bootstrap
+
+on:
+  pull_request:
+    paths:
+      - 'spikes/conexus-3l-a/package.json'
+      - '.github/workflows/conexus-3l-a-lock.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.18.0'
+      - name: Resolve exact transitive closure without lifecycle scripts
+        working-directory: spikes/conexus-3l-a
+        run: npm install --package-lock-only --ignore-scripts --audit=false --fund=false
+      - name: Enforce Q0 direct pins and supply-chain deny set
+        working-directory: spikes/conexus-3l-a
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+
+          const raw = fs.readFileSync('package-lock.json');
+          const lock = JSON.parse(raw);
+          const expected = {
+            '@mastra/code-sdk': '1.1.2',
+            '@mastra/core': '1.56.0',
+            '@mastra/e2b': '0.8.0',
+            '@mastra/memory': '1.25.0',
+            '@mastra/pg': '1.19.0',
+          };
+          const denied = new Map([
+            ['@mastra/core', new Set(['1.42.1'])],
+            ['@mastra/memory', new Set(['1.20.4'])],
+            ['@mastra/e2b', new Set(['0.3.4'])],
+          ]);
+
+          for (const [name, version] of Object.entries(expected)) {
+            const pkg = lock.packages?.[`node_modules/${name}`];
+            if (!pkg || pkg.version !== version) {
+              throw new Error(`Q0 direct pin mismatch for ${name}: expected ${version}, got ${pkg?.version ?? 'MISSING'}`);
+            }
+          }
+
+          for (const [path, pkg] of Object.entries(lock.packages ?? {})) {
+            if (!pkg?.version) continue;
+            const name = path.replace(/^node_modules\//, '');
+            if (name === 'easy-day-js' || path.endsWith('/node_modules/easy-day-js')) {
+              throw new Error(`Denied malicious dependency family present at ${path}`);
+            }
+            const blocked = denied.get(name);
+            if (blocked?.has(pkg.version)) {
+              throw new Error(`Denied package version present: ${name}@${pkg.version}`);
+            }
+          }
+
+          const sha256 = crypto.createHash('sha256').update(raw).digest('hex');
+          const resolved = Object.fromEntries(
+            ['@mastra/code-sdk', '@mastra/core', '@mastra/e2b', '@mastra/memory', '@mastra/pg', 'e2b'].map(name => [
+              name,
+              lock.packages?.[`node_modules/${name}`]?.version ?? null,
+            ]),
+          );
+          console.log(JSON.stringify({ node: process.version, npmLockVersion: lock.lockfileVersion, sha256, resolved }, null, 2));
+          NODE
+      - name: Materialize spike-local lock closure on PR branch
+        if: github.event_name == 'pull_request'
+        working-directory: spikes/conexus-3l-a
+        run: |
+          if git diff --quiet -- package-lock.json && git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
+            echo 'package-lock.json already materialized and unchanged.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package-lock.json
+          git commit -m 'spike(conexus): lock 3L Package A dependencies'
+          git push origin HEAD:${{ github.head_ref }}

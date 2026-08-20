@@ -251,28 +251,25 @@ assert.match(roadmapGeneratorText, /ARR-S0/u);
 assert.match(roadmapGeneratorText, /docs\/tracking\/STATUS\.md/u);
 assert.doesNotMatch(roadmapGeneratorText, /AB1 — Architecture Baseline and Contract Reconciliation/u);
 
-const canonicalFreshReadPath = [
-  'docs/product/DEVELOPMENT-GOVERNANCE-METHOD.md',
-  'docs/product/CAPABILITY-REALIZATION-METHOD.md',
-  'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md',
-  'docs/tracking/ARCHITECTURE-REALIZATION-REVIEW.md',
-  'docs/superpowers/specs/2026-08-08-risk-proportional-execution-governance-design.md',
-  'docs/superpowers/plans/2026-08-07-architecture-reconciliation-arr-program.md',
+const agentBootstrapReadPath = [
+  'docs/engineering/standards/root-cause-global-maximum-method.md',
+  'docs/DOCUMENTATION-MAP.md',
 ];
-let previousReadPathIndex = -1;
-for (const rel of canonicalFreshReadPath) {
+let previousAgentBootstrapIndex = -1;
+for (const rel of agentBootstrapReadPath) {
   const nextIndex = agentsText.indexOf(rel);
-  assert.ok(nextIndex >= 0, `AGENTS missing current ARR read-path item: ${rel}`);
-  assert.ok(nextIndex > previousReadPathIndex, `AGENTS read order is wrong around ${rel}`);
-  previousReadPathIndex = nextIndex;
+  assert.ok(nextIndex >= 0, `AGENTS missing stable bootstrap item: ${rel}`);
+  assert.ok(nextIndex > previousAgentBootstrapIndex, `AGENTS stable bootstrap order is wrong around ${rel}`);
+  previousAgentBootstrapIndex = nextIndex;
 }
-assert.match(agentsText, /MIS-002\/M02[^\n]*SUPERSEDED/iu);
-assert.match(agentsText, /ARR-S0 real host Evidence:\s+ACCEPT_WITH_LIMITATIONS \/ COMPLETE/u, 'AGENTS must expose accepted S0 real-host Evidence');
-assert.match(agentsText, /ARR-S1 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022 \/ exact bytes preserved/u, 'AGENTS must expose accepted S1 pack authority');
-assert.match(agentsText, /ARR-S2 contract \+ plan:\s+ACCEPTED 0\.1\.0 \/ D-022 \/ exact bytes preserved/u, 'AGENTS must expose accepted S2 pack authority');
-assert.match(agentsText, /Candidate execution\/selection:\s+PROHIBITED/u, 'AGENTS must keep candidate execution and selection prohibited');
-assert.match(agentsText, /FAST[\s\S]*BOUNDED[\s\S]*CONTROLLED/u, 'AGENTS must expose risk-proportional execution profiles');
-assert.match(agentsText, /D-010 through D-022/u, 'AGENTS must orient fresh actors to current governance Decisions');
+assert.match(agentsText, /DevelopmentConexus Engineering Method v1\.0\.0/u, 'AGENTS must name the consumed organizational method version');
+assert.match(agentsText, /developmentconexus-ops\/conexus-methodology\/METHOD\.md/u, 'AGENTS must name the canonical organizational method source');
+assert.match(agentsText, /docs\/conexus\/current\/README\.md[\s\S]*docs\/conexus\/phase3\/LEDGER\.md/u, 'AGENTS must route Conexus through its current entrypoint before Phase 3 detail');
+assert.ok(agentsText.indexOf('docs/conexus/current/README.md') < agentsText.indexOf('docs/conexus/DECISOES.md'), 'AGENTS must not place the historical Conexus decision index before current authority');
+assert.match(agentsText, /docs\/tracking\/STATUS\.md[\s\S]*docs\/tracking\/DECISIONS\.md[\s\S]*docs\/product\/DEVELOPMENT-GOVERNANCE-METHOD\.md/u, 'AGENTS must route MNFS through status, decisions and repo-specific governance owners');
+assert.match(agentsText, /MNFS-specific specialization[\s\S]{0,100}not a second organizational engineering method/iu, 'AGENTS must classify MNFS governance as specialization, not second organizational method');
+assert.match(agentsText, /npm run verify/u, 'AGENTS must expose the default repository verification command');
+assert.doesNotMatch(agentsText, /ARR-S[0-9]|D-010 through D-022|MIS-002\/M02[^\n]*SUPERSEDED/u, 'AGENTS must not duplicate volatile MNFS status or Decision-range projections');
 
 for (const id of [
   'ADR-0013',
@@ -292,6 +289,14 @@ assert.match(documentationMapText, /M2 — Secure One-Worker Vertical Slice[^\n]
 assert.match(documentationMapText, /MIS-002\/M02[\s\S]{0,160}SUPERSEDED_AS_EXECUTION_PATH/u);
 assert.match(documentationMapText, /ARR-S0[\s\S]*ARR-S3/u);
 assert.match(documentationMapText, /D-010 through D-022/u, 'Documentation Map must expose current Decision range');
+for (const rel of [
+  'docs/conexus/current/README.md',
+  'docs/conexus/current/PRODUCT-CONTRACT.md',
+  'docs/conexus/current/ARCHITECTURE-BASELINE.md',
+  'docs/conexus/current/DECISION-RECONCILIATION.md',
+]) {
+  assert.ok(documentationMapText.includes(rel), `Documentation Map missing canonical Conexus entrypoint: ${rel}`);
+}
 assert.match(documentationMapText, /BOUNDED[^\n]*default/u, 'Documentation Map must expose the default bounded profile');
 
 assert.match(toolingText, /projection of current capability-realization decisions/u);
@@ -561,15 +566,10 @@ const layeredPlanningMetadata = parseFrontmatter(
   'docs/superpowers/specs/2026-08-07-layered-agent-execution-planning-design.md',
 ).metadata;
 assert.equal(layeredPlanningMetadata.version, '1.1.0', 'canonical execution-planning design must be version 1.1.0');
-assert.match(
-  agentsText,
-  /Layered Agent Execution Planning 1\.1\.0/u,
-  'AGENTS must project the current execution-planning design version',
-);
 assert.doesNotMatch(
   agentsText,
-  /Layered Agent Execution Planning 1\.0\.0/u,
-  'AGENTS must not project the historical execution-planning design version as current',
+  /Layered Agent Execution Planning/u,
+  'AGENTS must route volatile MNFS planning versions through their document owners rather than projecting them',
 );
 assert.match(
   arrReviewText,

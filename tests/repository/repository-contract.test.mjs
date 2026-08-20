@@ -1,12 +1,45 @@
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { resolve } from 'node:path'
 
 const root = resolve(new URL('../../', import.meta.url).pathname)
+const run = script => spawnSync(process.execPath, [script], { cwd: root, encoding: 'utf8' })
 
 test('Conexus OS repository contract is green', () => {
-  execFileSync(process.execPath, ['scripts/check-repository-hygiene.mjs'], { cwd: root, stdio: 'inherit' })
-  execFileSync(process.execPath, ['scripts/check-doc-index.mjs'], { cwd: root, stdio: 'inherit' })
-  execFileSync(process.execPath, ['scripts/check-current-state.mjs'], { cwd: root, stdio: 'inherit' })
-  execFileSync(process.execPath, ['scripts/check-qualification-provenance.mjs'], { cwd: root, stdio: 'inherit' })
+  for (const script of [
+    'scripts/check-repository-hygiene.mjs',
+    'scripts/check-doc-index.mjs',
+    'scripts/check-current-state.mjs',
+    'scripts/check-qualification-provenance.mjs'
+  ]) {
+    execFileSync(process.execPath, [script], { cwd: root, stdio: 'inherit' })
+  }
+})
+
+test('repository hygiene guard fires on temporary work contamination', () => {
+  const workDir = resolve(root, 'docs/work/current')
+  const file = resolve(workDir, 'ai-dialog.md')
+  mkdirSync(workDir, { recursive: true })
+  writeFileSync(file, '# temporary review\n')
+  try {
+    const result = run('scripts/check-repository-hygiene.mjs')
+    const output = `${result.stdout}\n${result.stderr}`
+    if (result.status === 0 || !output.includes('docs/work')) throw new Error('hygiene negative control did not fire')
+  } finally {
+    rmSync(resolve(root, 'docs/work'), { recursive: true, force: true })
+  }
+})
+
+test('bootstrap/status guard fires when README becomes a phase authority', () => {
+  const path = resolve(root, 'README.md')
+  const original = readFileSync(path, 'utf8')
+  writeFileSync(path, `${original}\n3M = NEXT / NOT STARTED\n`)
+  try {
+    const result = run('scripts/check-current-state.mjs')
+    const output = `${result.stdout}\n${result.stderr}`
+    if (result.status === 0 || !output.includes('README.md')) throw new Error('status negative control did not fire')
+  } finally {
+    writeFileSync(path, original)
+  }
 })

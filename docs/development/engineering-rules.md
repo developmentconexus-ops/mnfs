@@ -32,4 +32,6 @@ npm ci
 npm run verify
 ```
 
+The protected aggregate GitHub status check remains named `verify`; this existing protected name is intentionally retained under Repository Standard v1.0.0 rather than changed only for naming uniformity.
+
 Publish reviewable changes. Never merge without explicit operator authority.

@@ -840,3 +840,82 @@ Status carried forward unchanged by this review:
   3L                     = CLOSED / no requalification triggered by this review
   This review is Evidence. It closes nothing and authorizes nothing.
 ```
+
+### 9. Closing note after Lead adjudication — NOT a Round 2
+
+The Lead adjudication of Round 1 was read in full and re-checked against current authority. Both points the Lead asked to be challenged are conceded on the evidence. No material contradiction survives, so under Repository Standard v1.0.0 S9 and the canonical Fable workflow step 8 a second round is not justified and none is opened. This note is Evidence and closes nothing.
+
+```text
+M-06  Lead position UPHELD / reviewer concedes
+M-02  Lead refinement ACCEPTED as superior to the reviewer wording
+Round 2 justified                       = NO
+material contradictions surviving       = 0
+new findings raised by this note         = 0 material / 3 non-material consistency items
+```
+
+#### M-06 — the proposed seam was YAGNI; the reviewer withdraws it
+
+The Lead asked for an exact authority citation proving that an effect-capable `MANAGED_JOB` is a PRESENT F1 consumer rather than a caller-surface seam. No such citation exists. What current authority actually says:
+
+```text
+docs/product/contract.md S18 journey
+  MAR job run -> governed Gateway/Project capabilities -> Project state/read model updated
+  (the managed-sync journey terminates in Project read-model state, not an external effect)
+
+docs/reference/integrations-and-gateway.md S37
+  "No Product Agent or external/business write is required for this vertical."
+
+docs/reference/managed-execution.md S27.2
+  "First F1 consumer = governed managed sync"
+
+docs/architecture/index.md (3A-R9 clause)
+  MANAGED_JOB is "a Gateway caller-surface amendment, not an eighth L7 orchestration flow"
+
+docs/reference/managed-execution-qualification.md S18 DEFERRED
+  "Gateway MANAGED_JOB end-to-end enforcement"
+  and S10 routing: MANAGED_JOB Gateway last-mile revalidation -> FIRST-BUILD
+```
+
+The DT-1' physical-effect canary (P5, R3) is a probe fixture proving that queue delivery cannot become authority; it is not a Product consumer and cannot be cited as one.
+
+Conclusion: the durable caller-occurrence correlation plus MAR-to-Gateway unresolved-effect query prepares a future that has no named current consumer. The reviewer withdraws it from the F1 baseline. The ROOT of M-06 stands as adjudicated: "MAR reconciles Gateway effects" must not survive as written, and the reopen trigger for a future admitted effect-capable MANAGED_JOB must be explicit.
+
+#### M-02 — the Lead refinement is accepted and is better than the reviewer wording
+
+Raw sealed-subject equality would have been wrong: an identical subject can be an intentionally repeated business effect once the prior intent is fully settled, and freezing subject equality would have blocked legitimate repetition. "One logical effect intent -> one Gateway-owned semantic effect/replay identity, derived server-side from the exact sealed subject plus owner-stable intent facts admitted by that capability" preserves both counterexamples the review raised while keeping legitimate repetition admissible. The fence stays Gateway-side, the Package-D admission transaction is untouched, and no 3L trigger fires. Accepted without reservation.
+
+#### Three non-material consistency items for the corrected candidate
+
+```text
+C-1  M-06 consistency. Two places in the candidate still presume the consumer the adjudication
+     deletes: S5.3 disaster restore ("Effect-capable managed work must first satisfy Gateway
+     lost-window/replay safety") and R-09 as applied to MAR. Under the accepted YAGNI ruling both
+     must be marked conditional on a future admitted effect-capable MANAGED_JOB, or removed;
+     otherwise the deleted dependency re-enters through the disaster-restore clause.
+
+C-2  M-02 strengthening. The idempotency/reconciliation scope is now DECLARED by the capability or
+     connector, which moves a safety property into author-supplied metadata. A scope declared too
+     narrowly re-opens exactly the duplicate-admission window M-02 closes. The declaration should be
+     validated where capability trust is already established -- Connection qualification and exact
+     Release composition -- rather than trusted from the connector author, and the first-build
+     falsifier should include a deliberately under-declared scope.
+
+C-3  M-03 acknowledgement, no objection. The Lead default (deny-by-default for ALL governed external
+     effect admission during initial disaster recovery, re-enabled individually through existing
+     owners) is broader than the reviewer correction and strictly safer. It also removes the need for
+     any enumeration of locally unresolved effects, which was the uncomputable step. Accepted.
+```
+
+#### Reviewer position on closure
+
+```text
+architecture Global Maximum      = owner-local recovery CONFIRMED (unchanged)
+reviewer objections outstanding  = none
+items still requiring the operator = M-05 and M-07 refinements, as the Lead already identified
+3L requalification                = NO under the adjudicated correction path
+3M                                = NEXT / NOT STARTED
+C-018                             = NOT RATIFIED
+Product implementation            = BLOCKED
+```
+
+This review channel is complete from the reviewer side. Nothing here is authority; the Lead consolidates the candidate and the operator ratifies.

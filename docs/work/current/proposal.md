@@ -1,731 +1,486 @@
 # 3M — Failure & Recovery Architecture Candidate
 
-> **NON-AUTHORITATIVE / REVIEW CANDIDATE / TEMPORARY WORK**
+> **NON-AUTHORITATIVE / REVIEWED CANDIDATE / TEMPORARY WORK**
 >
-> This document is the bounded Lead candidate for independent review. It does **not** close 3M, change `docs/roadmap.md`, ratify C-018, authorize Product implementation, reopen 3L, or supersede accepted authority by itself. If accepted after independent review and operator ratification, its surviving semantics must be projected into durable current authority and this temporary file must be deleted before merge.
+> This file is not current Product/architecture authority. It does not close 3M, change `docs/roadmap.md`, ratify C-018, authorize Product implementation, or reopen 3L. Fable Round 1 is complete; no material contradiction survives. Operator ratification of the material first-installation operations refinements in §7 is still required before durable projection and closure.
 
-## 0. Identity and scope
+## 0. Identity and current disposition
 
 ```text
-Phase                         = 3M — Failure & Recovery Architecture
-Current roadmap status        = NEXT / NOT STARTED
-Candidate outcome             = CURRENT STRUCTURE CONFIRMED + BOUNDED RECOVERY SEMANTICS
-Product implementation        = BLOCKED
-C-018                         = NOT RATIFIED
-New Product requirement       = 0
-New semantic owner            = 0
-New Hub domain module         = 0
-New durable record class      = 0
-New database/schema           = 0
-New cross-owner transaction   = 0
-New generic retry engine      = 0
-New generic recovery engine   = 0
-Pre-C-018 runtime probe       = NOT CURRENTLY JUSTIFIED
+Phase                              = 3M — Failure & Recovery Architecture
+Roadmap                            = NEXT / NOT STARTED
+Candidate outcome                  = CURRENT STRUCTURE CONFIRMED + BOUNDED RECOVERY SEMANTICS
+Fable Round 1                      = COMPLETE
+Material contradictions surviving = 0
+Round 2                            = NOT JUSTIFIED
+3L requalification                = NO under this correction path
+C-018                              = NOT RATIFIED
+Product implementation             = BLOCKED
+
+new Product capability             = 0
+new semantic owner                 = 0
+new Hub domain module              = 0
+new durable record class           = 0
+new database/schema                = 0
+new cross-owner transaction        = 0
+new generic retry/recovery engine  = 0
+new pre-C-018 runtime probe        = 0
+
+proposed first-installation operational refinements = 7
+operator ratification required before authority projection = YES
 ```
 
-### F1 surfaces in scope
-
-3M closes failure/recovery semantics only for already-reachable F1 surfaces:
+3M covers only already-reachable F1 surfaces:
 
 ```text
 Builder / ActorRun
-Production Agent Runtime / AgentRun / ApprovalRequest / AgentTrigger
-Managed Application Runtime / JobRun
-Capability Gateway / effect authority
-Release / Promotion / serving / migration
+PAR / AgentRun / ApprovalRequest / AgentTrigger
+MAR / JobRun — current governed-sync consumer
+Capability Gateway / governed effects
+Release / Promotion / migration / serving
 first-installation disaster restore and reactivation
 ```
 
-Explicit future seams remain out of scope unless review finds a present F1 invariant impossible without them:
+Still deferred unless a real trigger fires:
 
 ```text
 HA / auto-failover / multi-region
 PITR as a Product requirement
-DurableAgent active-run reconnect/re-drive
+DurableAgent active-run recovery/reconnect
 EVENT triggers
-cross-host job execution
-generic saga/compensation engine
-generic Recovery/Workflow/Automation domain
+cross-host managed execution
+Temporal/universal Workflow lifecycle
+generic saga/compensation/recovery domain
+replicated zero-loss effect ledger
 DEDICATED physical deployment
 ```
 
-## 1. Authority and method basis
+## 1. Evidence, root cause and Global Maximum
 
-Reasoning follows DevelopmentConexus Engineering Method v1.0.0 and the repository-specific authority model:
-
-```text
-current Product / architecture authority
-→ current decision register + roadmap
-→ detailed current references
-→ accepted qualification conclusions
-→ reproducible Evidence / exact pinned source
-→ research / external references / historical Git
-```
-
-Primary current repository inputs:
-
-```text
-AGENTS.md
-docs/index.md
-docs/roadmap.md
-docs/product/contract.md
-docs/architecture/index.md
-docs/decisions/index.md
-docs/reference/builder-and-harness.md
-docs/reference/runtime-and-agents.md
-docs/reference/managed-execution.md
-docs/reference/managed-execution-qualification.md
-docs/reference/integrations-and-gateway.md
-docs/reference/data-and-persistence.md
-docs/reference/release-deployment-and-operations.md
-docs/reference/security-and-authority.md
-docs/reference/mastra/current-mapping.md
-docs/reference/mastra/qualification-and-reopen-triggers.md
-```
-
-Framework-sensitive reasoning preserves the Package-B lesson: Conexus invariants remain sovereign, but realization must use native framework behavior where useful rather than forcing Mastra to imitate an imagined Conexus mechanism.
-
-Current deciding Mastra qualification remains pinned to the accepted 3L identities, including:
-
-```text
-@mastra/core   = 1.56.0
-@mastra/memory = 1.25.0
-@mastra/pg     = 1.19.0
-PostgreSQL     = 17.10 probe pin
-```
-
-Current/latest Mastra documentation is supporting mechanics only and does not promote newer capabilities into the qualified baseline.
-
-## 2. Root cause and target invariant
-
-The architecture already has durable owner facts for Builder, PAR, MAR, Gateway and Release, but 3M is the named phase that must close what happens when physical execution and durable semantic truth diverge through interruption, timeout, partial failure, process loss, retry, cancellation, orphaned work or disaster restore.
+Current Product/architecture/decision authority remains sovereign. Framework docs, provider docs and review output are Evidence only; exact 3L pins and accepted qualification decide version-specific framework claims.
 
 Root failure class:
 
 ```text
 physical/runtime state becomes incomplete, stale, lost or ambiguous
 +
-owner durable state and/or external reality may have progressed differently
-→ a mechanism guesses success, retry permission or continuity
+owner durable truth and/or external reality may have progressed differently
+→ mechanism guesses success, continuity, current authority or replay permission
 ```
 
 Target invariant:
 
-> **After interruption or restore, Conexus must decide resume, successor admission, reconciliation, refusal and safe reactivation from the correct semantic owner and admissible Evidence without fabricating success, silently widening authority, or letting runtime/provider/queue state become Product truth.**
+> After interruption or restore, Conexus must decide continuation, successor admission, reconciliation, refusal and reactivation through the correct existing owner and admissible Evidence, without fabricating success, silently widening authority, or promoting runtime/provider/queue state into Product truth.
 
-## 3. Credible alternatives and Global Maximum
-
-### A. Generic Recovery Engine / cross-cutting Recovery owner
-
-Rejected for F1.
-
-It would create a second lifecycle over Builder ActorRun, Product AgentRun, Gateway EffectAttempt, MAR JobRun and Promotion, encouraging generic statuses, generic retry policy and cross-owner persistence. Existing owners already own the meanings required to decide recovery.
-
-### B. Framework-owned recovery
-
-Rejected as architecture.
-
-Mastra, pg-boss, E2B, PostgreSQL and provider SDKs may supply useful recovery/abort/retry mechanics, but none owns Conexus authority. Mastra DurableAgent recovery in current documentation may re-drive LLM and tool calls from persisted snapshots and therefore still requires idempotent/effect-safe tools; it cannot replace Gateway effect authority. It is also not part of the currently qualified F1 baseline.
-
-### C. Universal durable workflow runtime (for example a Temporal-like central workflow lifecycle)
-
-Rejected for current F1.
-
-A durable workflow engine is credible where the Workflow itself is the central domain lifecycle. Conexus already has distinct semantic owners and intentionally rejects a generic Workflow/Automation domain. Adding a new workflow service/runtime now would duplicate lifecycle and operational infrastructure without a named current consumer. External Activities/effects would still require idempotency and settlement.
-
-### D. Owner-local recovery + narrow operational coordination
-
-**Selected candidate Global Maximum.**
+Credible alternatives were re-checked under the Method and Fable challenge:
 
 ```text
-owner durable truth
-→ owner-specific re-entry / settlement / reconciliation
-→ subordinate framework/runtime mechanics where useful
-→ owner-specific safe admission
+Generic Recovery owner/engine         = REJECTED; duplicates five accepted lifecycles.
+Framework-owned recovery              = REJECTED as authority; framework remains mechanics.
+Temporal/universal durable Workflow   = REJECTED F1; no current consumer, does not remove effect settlement.
+Owner-local recovery + narrow
+operational coordination              = GLOBAL MAXIMUM CONFIRMED.
 ```
 
-Shared operational code may sequence startup/restore and invoke owner entrypoints, but it owns no business meaning and creates no new Product lifecycle.
+No additional pre-C-018 probe is justified: the remaining falsifiers require real Product owner records/transitions and integrated paths, not larger fixtures.
 
-## 4. Final cross-cutting invariants
+## 2. Recovery laws
 
-### R-01 — owner-local recovery
+Existing structural laws remain owned where they already live — especially `mechanism != authority`, `unknown/missing/partial != success`, telemetry not owner terminal truth, Gateway effect authority, exact Release composition and Builder lineage. 3M cites rather than duplicates them.
 
-Recovery meaning remains owned by the existing semantic owner. No generic Recovery owner or universal recovery FSM exists.
+### R-01 — recovery is owner-local
 
-### R-02 — mechanics remain subordinate
+No generic recovery authority or universal recovery FSM exists. Each existing owner decides the meaning of interruption and recovery for its own lifecycle.
 
-Runtime/provider/queue/snapshot/thread/trace/process state is mechanism or Evidence. It never becomes Product authority by persistence or survival.
+### R-02 — normal restart is surface-scoped
 
-### R-03 — unknown remains unknown
+A restart of the same positively established durable generation reconciles only affected owner/surface state. An unresolved surface does not automatically block unrelated owners.
+
+### R-03 — continuation requires positive owner-specific basis
+
+The same execution identity may continue only when its owner can positively establish the basis required by that surface. Failure to prove continuity never becomes continuity by convenience.
+
+### R-04 — stop, timeout and process loss are not rollback
 
 ```text
-unknown / missing / partial
-!= zero
-!= success
-!= safe retry permission
+cancel requested != quiescent != rolled back
+timeout          != terminal outcome
+process death    != transaction/effect rollback proof
 ```
 
-### R-04 — runtime retry is not effect retry permission
+Owner-specific settlement/reconciliation precedes retry or successor admission. Late runtime/substrate output never regains authority by arrival alone.
 
-PAR retry, MAR retry, HTTP/client retry, queue redelivery, model/provider retry and process restart may never independently re-drive a governed business effect.
+### R-05 — one logical effect intent has one Gateway replay identity
 
-### R-05 — Gateway owns semantic effect replay
-
-Possible external acceptance plus ambiguous response becomes Gateway-owned unresolved effect truth. Blind replay is forbidden. Safe re-drive is admitted only through the same semantic effect identity under Gateway idempotency/reconciliation rules.
-
-### R-06 — one semantic retry layer for governed effects
-
-Provider/SDK transport retry is permissible only when bounded by Gateway policy and provably preserves the same semantic effect/idempotency identity. Upstream runtimes do not create an independent effect retry layer.
-
-### R-07 — cancel intent is not quiescence or rollback
+For governed external effects:
 
 ```text
-cancel requested
-!= execution stopped
-!= work rolled back
-!= external effect did not happen
-!= safe retry
+one logical effect intent
+→ one Gateway-owned semantic effect/replay identity
+→ derived server-side from exact sealed effect subject
+   + owner-stable intent/context facts admitted by the capability
+→ independent of runtime/model/AgentRun/transport attempt
+→ stable across retry/recovery of that intent
+→ never allocated from a counter/sequence namespace that a restored generation can reuse
 ```
 
-### R-08 — timeout is a recovery trigger, not a terminal fact
+Identical payload/subject does not mean all future legitimate repetitions are the same intent. The capability/connector defines the semantic **idempotency/reconciliation scope** that distinguishes duplicate risk from a later legitimate intent.
 
-Deadline expiry prevents further unsafe progression, initiates interruption/settlement, and does not by itself mean success, failure, rollback or retryable.
+That scope is not trusted as arbitrary author metadata: it must be validated through the existing Connection/capability qualification and exact Release composition gates. A deliberately under-declared scope is a required first-build negative falsifier.
 
-### R-09 — settlement precedes retry decision
+### R-06 — unresolved effect truth fences new admission, not only replay
 
-After timeout/cancel/orphan/partial failure, owner-specific partial-progress settlement or reconciliation occurs before retry/successor admission.
+Gateway refuses a new effect admission when it could duplicate unresolved effect truth inside the validated idempotency/reconciliation scope. A fresh AgentRun, ApprovalRequest, JobRun, transport attempt or process restart cannot bypass the unresolved Gateway fence.
 
-### R-10 — late result cannot regain authority by arrival alone
+Provider/SDK retry is permitted only when bounded by Gateway policy and preserving the same semantic effect/replay identity. Upstream runtimes never become an independent semantic retry layer.
 
-Once an owner has settled that an execution may no longer produce authoritative output, a later runtime/substrate callback/result is revalidated against current owner truth and cannot overwrite the settled state merely because it arrived late.
+### R-07 — disaster restore is not restart
 
-### R-11 — normal restart is surface-scoped
+A disaster restore may reintroduce an older generation. Missing facts after the protected cutoff do not prove that an effect, revocation, approval decision, trigger change, execution or authored change never happened.
 
-A normal process restart reconciles only affected owner/surface state. One unresolved surface does not automatically block unrelated owners.
+### R-08 — normal PROD requires positive generation continuity
 
-### R-12 — same-execution continuation requires positive basis
+Normal restart/PROD admission requires positive evidence that the running installation continues the current generation. Missing, unreadable or unknown continuity evidence is `UNKNOWN` and enters deny-only recovery posture; absence of a recovery marker is never proof of normal continuity.
 
-The same execution identity may resume only when that owner can positively establish the continuation basis required by the surface. Failure to prove continuation never becomes continuity by convenience.
+The exact continuity mechanism belongs Realization Planning. If it cannot be established without a new semantic owner/durable Product class, return to the smallest Decision Loop.
 
-### R-13 — process termination is not rollback
+### R-09 — recovery fence is deny-only infrastructure
+
+The disaster-recovery posture may deny normal ingress/autonomy but can never grant, widen or prove Product authority. No owner may read the fence or its clearing as evidence that an operation is permitted.
+
+Clearing the deny is an operator/infrastructure procedure only. Re-enablement occurs through ordinary existing-owner operations. If realization requires a composite Hub-side `ActivateRecoveredProd` flow, durable activation record, or owner that consumes the fence as permission, that is an L7/owner Decision Loop amendment.
+
+### R-10 — lost-RPO mutable authority is historical, not current by assumption
+
+If the Hub was the only authority for a mutable fact and that fact may have changed after the recovery cutoff, the restored value is historical as-of-cutoff. Privileged/autonomous/effectful use remains fenced until the responsible existing owner re-establishes/recertifies the required current authority.
+
+### R-11 — external effects fail closed by class during initial disaster recovery
+
+Because an EffectAttempt created wholly in the lost interval may be absent from restored local state, initial disaster recovery must not infer a safe affected-set from locally unresolved attempts.
 
 ```text
-process termination
-!= transaction rollback proof
-!= external effect rollback
+disaster recovery active
+→ all governed external-effect admission DENY by default
+→ each effect-capable Gateway/Connection surface re-enabled only through existing owners
+   after provider/business reconciliation establishes acceptable current safety
 ```
 
-Actual database/provider/target state is inspected where material.
+If interval-level reconciliation is insufficient, that effect surface remains fail-closed until explicit operator/business reconciliation under existing owner authority. After broad recovery posture clears, remaining faults become surface-scoped again.
 
-### R-14 — restart differs from disaster restore
+### R-12 — post-cutoff canonical Git is preserved but not auto-promoted
 
-A normal restart preserves the current durable generation. Disaster restore may reintroduce an older generation whose missing facts do not describe the lost RPO interval.
+Canonical Project/Brain Git history that survives beyond the restored Hub cutoff remains authoring/provenance truth. It is preserved and explicitly reconciled; it does not recreate lost Change/Plan/acceptance/Release/current-serving authority automatically.
 
-### R-15 — missing after restore does not mean never happened
+Git-write-capable Builder/authoring paths remain fenced until the surviving canonical history has been reconciled against restored owner facts.
 
-Any effect, authorization change, approval decision, trigger transition, runtime execution or authored change that could have occurred after the protected cutoff cannot be inferred as nonexistent solely because the restored generation lacks it.
+### R-13 — recoverable ciphertext requires recoverable decryption means
 
-### R-16 — restored generation is not active PROD
+For every recoverable CredentialBackend ciphertext generation, the referenced decryption key generation or recovery means must also be recoverable and restore-time decryptability must be proven. Ciphertext backup custody and key/recovery-key custody remain separate, preserving the existing compromise-separation law.
 
-A restored generation remains under a recovery-activation fence until recovery provenance, required closure, security/currentness re-establishment, owner reconciliation, environment conformance and required serving verification have passed.
+### R-14 — current MAR recovery stays limited to the real F1 consumer
 
-### R-17 — recovery posture survives another process crash
-
-A disaster-recovery activation fence must survive Hub/process restart and must not depend solely on volatile memory or on application state restored from the older generation. A second crash during recovery must not silently downgrade to a normal restart. Exact mechanism is Realization Planning; no new Product owner/class is implied.
-
-### R-18 — lost mutable authority is not reconstructible by assumption
-
-If the Hub was the only authority for a mutable authorization fact and the fact may have changed after the protected cutoff, the restored value is historical as-of-cutoff, not automatically proven current. Recovery must conservatively re-establish/recertify the authority classes whose stale resurrection can produce privileged, autonomous or effectful actions before those actions are re-enabled.
-
-### R-19 — post-cutoff Git truth is preserved but not auto-promoted
-
-Canonical Project/Brain Git history that survives beyond the restored Hub cutoff remains authored/provenance truth. Newer Git commits are preserved and reconciled explicitly; they do not automatically recreate lost Hub Change/Plan/acceptance/Release/current-serving authority.
-
-## 5. Owner-specific recovery semantics
-
-The following words are conceptual outcomes, not a global persisted enum:
+The current `job/v1` consumer is governed sync. Its recovery settlement is limited to:
 
 ```text
-resume same admitted execution
-admit successor execution
-reconcile uncertainty / partial progress
-refuse unsafe progression
+exact JobRun / Release / job pins
+durable sync freshness/cursor
+deterministic Project DB merge/commit state
+single-flight / one-current-catch-up rules
 ```
 
-### 5.1 Builder / ActorRun
+No generic MAR→Gateway unresolved-effect discovery seam is admitted now. A future real **effect-capable MANAGED_JOB** reopens the smallest MAR/Gateway recovery boundary and must then establish whatever narrow correlation/discovery mechanism is actually required.
 
-Current architecture already distinguishes Change, CodingSession, WorkUnit, ActorRun and physical sandbox.
+## 3. Owner-specific deltas
 
-Normal restart:
+### Builder
+
+Normal restart may rebind the same ActorRun only with the already-required positive compatibility, physical continuity, quiescence and contamination checks. Unknown/orphan physical lineage does not attach a replacement sandbox silently; successor work uses the existing admission rules, including `FRESH_BASE` where continuity is not positively established.
+
+After disaster restore, in-flight physical Builder continuity is not assumed. Restored Builder owner facts plus canonical Git/result custody preserve purpose/correctness history. Post-cutoff canonical Git is preserved and reconciled before Git-write-capable authoring resumes.
+
+### PAR
+
+Normal restart of an exact admitted durable approval/suspension may resume the same AgentRun through the already-qualified native path when the owner ApprovalRequest and current checks remain admissible.
+
+An ordinary actively executing AgentRun that loses its process does not reconstruct completion from Mastra snapshot/thread/trace and does not gain DurableAgent re-drive by inheritance. A later attempt requires owner admission.
+
+After disaster restore, recovered pending ApprovalRequests/suspensions are not automatically actionable; effect-capable continuation is re-established under current owner authority.
+
+### MAR
+
+An already admitted exact-pinned JobRun may execute after restart when current owner facts still admit it. A RUNNING orphan settles durable sync cursor/freshness and Project DB merge/commit state before same-JobRun continuation or terminalization. Queue redelivery is never authority.
+
+Current F1 managed-sync recovery does **not** include generic Gateway-effect settlement. Effect-capable managed work is a future reopen trigger, not dormant F1 machinery.
+
+### Gateway
+
+Gateway owns semantic effect identity, idempotency/reconciliation scope validation, unresolved effect truth, new-admission conflict checks, replay safety and receipts. Cancellation/reversal is a new governed effect when a provider offers a real cancel/void/refund/reverse operation; it is not rollback of the previous effect.
+
+### Release
+
+Recovery adds no second Promotion lifecycle. A non-terminal Promotion reconciles actual migration/pointer/served state through existing Release/Promotion authority rather than replaying the last intended step. Existing migration ledger/checksum, CAS and `SERVED_VERIFIED` laws remain authoritative by reference.
+
+## 4. Owner-local stop / quiescence / settlement
+
+The vocabulary below is reasoning language only. It must project into each owner reference, never into a shared lifecycle/domain:
 
 ```text
-non-terminal ActorRun
-+ exact sandbox incarnation still exists
-+ current compatibility
-+ established quiescence
-+ no material contamination
-→ rebind may resume same ActorRun
+stop intent
+→ owner narrows further progression
+→ cooperative physical interruption where available
+→ surface-specific quiescence
+→ owner-specific partial-progress settlement/reconciliation
+→ continuation / successor / refusal according to that owner
 ```
 
-If physical continuity is dead or unknown:
+Quiescence means only that the old execution can no longer produce new mutations under its prior admission. It is not rollback and does not settle external effects.
+
+Examples remain owner-specific:
 
 ```text
-unknown/orphan physical basis
-→ never silently attach replacement sandbox
-→ settle interrupted/orphan truth
-→ successor ActorRun requires FRESH_BASE unless an independently valid continuation basis exists
+Builder   → old sandbox/incarnation cannot mutate under old admission
+PAR       → no model/tool progression can reach a governed effect boundary
+MAR       → no handler/redelivery can advance that JobRun
+Promotion → no new material Promotion step can begin
+Gateway   → local executor can be quiescent while provider outcome remains unresolved
 ```
 
-Cancel/timeout:
+## 5. Seven first-installation operational refinements — OPERATOR RATIFICATION REQUIRED
+
+These refine the accepted operations contract; they are not smuggled in as `new requirement = 0`.
+
+### O-01 — fail-closed generation continuity
+
+Normal PROD starts only with positive evidence of unbroken/current generation continuity. Missing/unreadable/unknown continuity enters recovery posture.
+
+### O-02 — one internally consistent PostgreSQL recovery generation
+
+The mutable PostgreSQL recovery set required for F1 restores from one internally consistent PostgreSQL generation. Current first-installation topology makes this the smallest present property; exact backup mechanism is Realization Planning.
+
+### O-03 — temporal/current authority re-establishment
+
+Restored normal sessions are invalid for normal reuse. Normal user/effectful ingress and autonomous effectful execution remain fenced until the responsible existing owners re-establish the material privileged/autonomous/effectful authority classes required for use. The closed class enumeration is a Realization Planning + first-production proof obligation, not a new domain model.
+
+### O-04 — external effects deny-by-default during initial disaster recovery
+
+All governed external-effect admission is denied initially and re-enabled per existing Gateway/Connections authority only after acceptable reconciliation/current safety is established. Missing local EffectAttempts never prove a surface safe.
+
+### O-05 — credential key-generation recoverability
+
+Every recoverable ciphertext generation has separately custodied recoverable key-generation/recovery means, and restore proves decryptability before dependent effectful use is enabled.
+
+### O-06 — deny-only recovery posture + per-owner reactivation
+
+Recovery posture survives process restart and cannot grant Product state. Restricted operator/infrastructure recovery ingress may exist while normal ingress is fenced. Re-enablement is performed through existing owners; exact Release closure, EnvironmentConformance and required real serving verification precede restored serving activation.
+
+### O-07 — RTO truthfulness
+
+`RPO <= 6h` continues to mean a complete, off-host, verifiable recovery generation within the accepted window.
+
+`RTO <= 8h` is the first-installation objective for **useful safe platform service**, not a guarantee that every effect-capable integration is safe within eight hours. Effect surfaces whose lost interval cannot yet be reconciled remain fail-closed beyond broad platform recovery rather than fabricating certainty. The minimum useful-safe service set is fixed in Realization Planning and proved before first production.
+
+## 6. Cross-store closure
+
+After PostgreSQL restore, recovered authoritative references needed for a re-enabled surface must close over their exact referenced material:
 
 ```text
-owner narrows/stops further execution authority
-→ stop/revoke guest capabilities
-→ best-effort exact-incarnation interruption
-→ establish quiescence
-→ inspect/custody produced output
+Project/Brain Git identity required by recovered owner truth
+immutable Artifact/Blob/CAS digest
+CredentialBackend ciphertext generation
+referenced decryption key-generation/recovery means under separate custody
+exact Release composition and required recovery Evidence
 ```
 
-Late sandbox output after owner cancellation/interruption is telemetry/quarantine until a current owner path explicitly admits it; it does not regain authority.
+Presence alone is not enough for credentials: decryptability is a recovery proof. Extra immutable bytes do not become current by existence. Newer canonical Git is treated per R-12, not as generic extra CAS.
 
-Disaster restore:
+## 7. Proof routing
 
-`mastra_builder` and E2B are not required recovery truth. Recovered Change/Plan/WorkUnit/ActorRun facts plus canonical Git/result custody preserve purpose/correctness history. In-flight Builder physical continuity is not assumed. Canonical remote Git history newer than the Hub cutoff, when it survives, must be preserved and reconciled rather than deleted or auto-promoted.
+### 3N — architecture verification
 
-### 5.2 PAR / Product AgentRun
-
-Durable approved suspension is deliberately different from active ordinary execution.
-
-Normal restart, durable wait:
+3N should try to falsify at least:
 
 ```text
-PAR owner ApprovalRequest remains current/admissible
-+ matching persisted Mastra suspension
-+ exact old Release/AgentRun pins
-+ current owner checks pass
-→ native Mastra continuation may resume the same AgentRun
+V1  exactly one semantic owner decides each recovery meaning
+V2  re-entry uses current/exact-pinned owner facts, not runtime survival
+V3  unknown/partial/lost response never becomes success/replay permission
+V4  owner/storage/dependency boundaries remain closed
+V5  no hidden need for RecoveryEngine, DurableAgent, HA/PITR or universal Workflow
+V6  positive generation-continuity / deny-only recovery posture is implementable without new owner/class
+V7  stale restored authority cannot regain privileged/autonomous/effectful use by default
+V8  post-cutoff canonical Git is preserved without silent deletion or authority promotion
+V9  Gateway new-admission fence cannot be bypassed by a fresh AgentRun/ApprovalRequest
+V10 capability idempotency/reconciliation scope cannot be accepted when deliberately under-declared
+V11 current MAR recovery contains no effect-capable dependency without a real consumer
 ```
 
-Active ordinary AgentRun crash:
-
-```text
-no PAR terminal owner fact
--X-> infer completion from trace/message/snapshot
--X-> silently re-drive same execution through a new runtime
-```
-
-Current F1 does not inherit DurableAgent active-run crash recovery. A fresh attempt normally requires a new current AgentRun admission.
-
-Cancel/timeout:
-
-PAR prevents new Product-Agent progression, propagates cooperative abort where available, and continues to rely on governed tool/Gateway owner checks. Abort after a tool/effect crossed its boundary does not undo the effect.
-
-Scheduled Product Agent:
-
-An already consumed trigger slot does not create hidden backlog/catch-up merely because its AgentRun was interrupted.
-
-Disaster restore:
-
-Recovered non-terminal PAR runtime/suspension is not automatically actionable. Old restored ApprovalRequests/snapshots cannot resume effect-capable execution merely because they were pending at the cutoff. Material intent must be re-established under current recovery authority before a new/current effectful continuation is allowed.
-
-### 5.3 MAR / JobRun
-
-Package D already qualifies atomic owner JobRun + private pg-boss projection admission for the tested subset.
-
-Admitted but not physically running:
-
-```text
-committed exact-pinned JobRun
-+ committed queue projection
-→ restart discovers same work
-→ after owner revalidation, same admitted JobRun may execute
-```
-
-RUNNING orphan:
-
-```text
-worker/process disappears
-→ queue redelivery has zero semantic authority by itself
-→ MAR reconciles durable cursor/freshness, Project DB progress, Gateway effects and exact pins
-```
-
-If continuation/reexecution is proven idempotent and compatible, the same JobRun may continue. If progress/effects are uncertain, MAR remains blocked pending reconciliation. F1 does not add `JobAttempt` merely to model physical tries.
-
-Cancel/timeout:
-
-```text
-owner prevents new retry/redelivery/admission
-→ cooperative signal to handler
-→ establish handler quiescence
-→ settle cursor/partial progress/Gateway effects
-→ then decide continuation/terminalization
-```
-
-Recurrence after restart remains freshness-derived: at most one current catch-up when due, never N replayed historical intervals.
-
-Disaster restore:
-
-Read-only/replay-safe sync may perform one current freshness reconciliation/catch-up. Effect-capable managed work must first satisfy Gateway lost-window/replay safety.
-
-### 5.4 Capability Gateway / governed effects
-
-Gateway remains the semantic authority for external effect admission, idempotency, replay safety and execution receipt/traffic-state truth.
-
-Before a request can have crossed an external boundary, a proven local failure may be safely re-requested under new/current admission.
-
-Once the provider may have received the request:
-
-```text
-no authoritative success/rejection
-→ OUTCOME_UNKNOWN / unresolved owner truth
-```
-
-Safe re-drive requires one of:
-
-```text
-provider-supported idempotency preserving the same semantic effect identity
-provider reconciliation proving the effect did not apply
-effect contract proving replay is idempotent under current preconditions
-```
-
-If none is available, the affected capability remains fail-closed pending operator/business reconciliation.
-
-Cancellation/reversal is itself a new governed effect where the provider exposes a real cancel/void/refund/reverse operation; it is never a magical rollback of the prior effect.
-
-Lost-RPO limitation is explicit:
-
-```text
-EffectAttempt created and applied entirely after backup cutoff
-+ local control store lost
-→ recovered Conexus may have no local record from which to discover it
-```
-
-When provider idempotency/correlation/reconciliation is insufficient, automatic correctness is impossible under the accepted RPO. The affected capability remains fail-closed. This is a known residual of the F1 RPO posture, not justification for an unrequested replicated effect ledger.
-
-### 5.5 Release / Promotion
-
-A non-terminal Promotion on restart reconciles actual target state rather than blindly replaying the last intended step.
-
-Migration recovery:
-
-```text
-migration may have committed before process loss
-→ inspect migration ledger/checksum + actual schema/conformance
-→ continue if already correctly applied
-→ apply only if proven not applied and still admissible
-→ partial/drift enters explicit recovery branch
-```
-
-Pointer recovery:
-
-```text
-pointer may already be candidate Release
-→ do not swap again blindly
-→ perform real serving verification
-→ only exact served digest match can establish SERVED_VERIFIED
-```
-
-CAS conflicts never force-write.
-
-Cancellation before a material boundary stops progression. Cancellation after irreversible/maintenance transition does not roll back reality or silently re-enable incompatible old serving. Existing exits remain forward fix, idempotent continuation, validated restore or safe recovery Promotion.
-
-## 6. Cancellation, timeout, quiescence and settlement
-
-### 6.1 Stop intent
-
-Owner first narrows further progression/admission, then signals the physical mechanism where applicable.
-
-### 6.2 Quiescence
-
-Quiescence is surface-specific evidence that the old execution no longer has a material path capable of producing new mutations under its prior admission.
-
-```text
-Builder   → exact sandbox/incarnation can no longer mutate under old admission
-PAR       → no model/tool progression remains capable of reaching governed effect boundary
-MAR       → no handler/redelivery remains able to advance that JobRun under old admission
-Promotion → no new material Promotion step can begin under that Promotion
-Gateway   → local executor may be quiescent while external outcome remains unsettled
-```
-
-Quiescence is not rollback and is not effect settlement.
-
-### 6.3 Timeout positions
-
-```text
-before material boundary
-→ if proven, no material partial outcome
-
-inside local transaction
-→ actual commit/rollback result decides
-
-after external boundary may be crossed
-→ Gateway unresolved effect truth unless reconciled
-```
-
-### 6.4 Framework abort mechanics
-
-Mastra `AbortSignal`/abort, pg-boss `job.signal`, E2B/process termination, Node `AbortController` and database cancellation are cooperative/physical mechanisms. They do not prove rollback or absence of a prior external effect.
-
-## 7. Disaster restore and reactivation
-
-Current first-installation posture remains:
-
-```text
-single physical failure domain accepted
-manual restore acceptable initially
-RPO <= 6h
-RTO <= 8h
-off-host recoverable set required
-real complete restore proof before first production
-whole-Hub emergency-stop drill before first production
-no HA / auto-failover / multi-region claim
-```
-
-### 7.1 Recovery consistency property
-
-The mutable PostgreSQL recovery set required for F1 must restore from one internally consistent PostgreSQL recovery generation. Current topology places `hub_control`, `mastra_par` and production Project DBs in the same cluster, making a cluster-consistent generation the smallest current architecture. Exact backup tool is Realization Planning; current PostgreSQL physical backup/WAL/backup-manifest mechanics are supporting Evidence, not Product authority.
-
-### 7.2 Cross-store closure
-
-After PostgreSQL restore, every recovered authoritative reference required for activation must resolve to the exact needed material:
-
-```text
-referenced Project/Brain Git commit/tree/source
-referenced immutable Artifact/Blob/CAS digest
-required CredentialBackend ciphertext generation
-exact Release composition and required recovery material
-```
-
-Missing required closure blocks affected activation. Extra immutable bytes do not become current merely by existence.
-
-Canonical Git is different from generic CAS: newer canonical Git commits that survived past the Hub cutoff remain authored/provenance truth and require explicit reconciliation; they are neither discarded nor silently promoted into lost Hub operational/Release authority.
-
-### 7.3 Recovery provenance and lost-RPO interval
-
-Recovery records/procedure must establish the protected generation cutoff and enough provenance to know that the running installation is a restored older generation. The interval after that cutoff is uncertain. This need not create a Product `RecoveryIncident` class.
-
-### 7.4 Sticky recovery activation fence
-
-A disaster restore must establish a recovery posture that survives another Hub/process crash until explicit successful activation clears it. The mechanism must not rely solely on restored application state or volatile memory. Concrete host/service-manager/file/config mechanism is derived later.
-
-### 7.5 Security/currentness re-establishment
-
-Because lost-RPO mutable authority cannot be reconstructed from the older Hub generation, recovery must be conservative before normal ingress/autonomy returns:
-
-```text
-normal user sessions from restored generation → invalid for normal reuse
-normal user/effectful ingress                 → closed until recovery authority established
-autonomous PAR/MAR effectful execution        → quiesced
-restored pending effectful approvals          → not directly actionable
-material privileged/autonomous/effect authority classes
-                                             → re-established/recertified under fresh operator recovery control
-```
-
-The exact recertification UX/data mechanics belong Realization Planning. The architecture requirement is epistemic honesty: a recovered historical grant/trigger/approval is not automatically proven current if a post-cutoff revocation/decision may have been lost.
-
-After initial recovery activation, unresolved faults return to owner/surface scope; a broken Connection does not require unrelated Builder/administrative surfaces to remain unavailable.
-
-### 7.6 Connections/effects after restore
-
-Recovered ConnectionRevision/binding/ciphertext must be resolvable and qualified sufficiently for current use before effectful capability admission. A lost-window effect with insufficient provider reconciliation keeps only the affected capability fail-closed.
-
-### 7.7 Release/serving activation
-
-Recovered serving does not become normal PROD solely because the pointer exists. Activation requires exact Release closure, target schema/migration/conformance checks, required bindings, and real serving verification where serving is re-enabled.
-
-### 7.8 RPO/RTO meaning
-
-`RPO <= 6h` means the installation maintains a last complete, off-host, verifiable recovery generation within the accepted window; a scheduled job that produced a corrupt/incomplete/local-only backup does not satisfy it.
-
-`RTO <= 8h` is the first-installation recovery objective for useful safe service. Specific unsafe capabilities may remain fail-closed beyond broad platform recovery rather than forcing the system to fabricate certainty.
-
-## 8. Framework-native alignment and no Package-B regression
-
-### 8.1 Mastra primitives kept native
-
-```text
-direct code-defined Agent                         = KEEP
-native requireApproval / persisted suspension     = KEEP
-Memory/thread substrate                           = KEEP
-role-specific BuilderMastra / ParMastra           = KEEP
-native scheduler mechanics behind PAR ingress     = KEEP
-RequestContext as runtime/configuration substrate = KEEP
-```
-
-### 8.2 Mastra primitives not pulled forward
-
-```text
-DurableAgent active-run crash recovery = KEEP OFF / existing requalification trigger
-universal Workflow wrapper              = KEEP REJECTED
-advanced memory/global facilities       = KEEP OFF unless separately admitted
-```
-
-Current Mastra documentation shows newer durable-agent crash recovery can automatically re-drive orphaned runs and re-execute tool calls from the last persisted snapshot, with idempotent tools required. This supports the current decision not to use runtime recovery as effect authority. It does not establish that the currently pinned/qualified F1 baseline includes or should enable DurableAgent.
-
-### 8.3 Qualification boundary
-
-3L must reopen/requalify if 3M would require changing already-qualified mechanics, including enabling DurableAgent, adding active-run same-stream recovery guarantees, changing cancellation/timeout/orphan behavior of the qualified surfaces, or changing Builder/PAR process/storage topology. This candidate currently requires none of those changes.
-
-## 9. Proof routing
-
-### 9.1 3M architecture proof
-
-3M itself must close reasoning, not fake Product runtime:
-
-```text
-every named F1 failure class has a semantic owner
-no duplicate recovery/retry authority is introduced
-restart and disaster restore differ explicitly
-retry/unknown/cancel/timeout/orphan/partial progress are semantically closed
-accepted future seams are not required for current correctness
-proof obligations are routed to the first stage capable of falsifying them
-```
-
-No new pre-C-018 runtime probe is currently justified because remaining claims depend on Product owner records/transitions and real integrated paths that do not yet exist.
-
-### 9.2 3N architecture verification families
-
-3N should attempt to falsify at least:
-
-```text
-V1 authority uniqueness
-V2 current/exact-pinned re-entry checks
-V3 unknown preservation
-V4 owner/storage boundary preservation
-V5 deletion challenge: no hidden need for DurableAgent/HA/PITR/generic workflow/recovery engine
-V6 recovery-latch survivability property is implementable without new semantic owner
-V7 restored stale authority cannot regain privileged/autonomous/effectful use by default
-V8 newer canonical Git history cannot silently become or be silently discarded as Hub current authority
-```
-
-### 9.3 First-build kill-point families
+### First-build falsifiers
 
 ```text
 Builder
-→ kill after guest output before Hub custody
+→ kill after guest output before Hub custody; no authoritative late output
 
 PAR
-→ kill during durable approval wait
-→ separately kill active ordinary run before PAR terminal fact
+→ kill during admitted durable approval wait; exact continuation remains guarded
+→ kill ordinary active run before PAR terminal fact; no fabricated completion
 
 MAR
 → kill after atomic admission
-→ kill while RUNNING with partial durable progress
-→ handler delays/ignores cooperative stop
+→ kill RUNNING sync with partial durable cursor/merge progress
+→ delayed/ignored cooperative stop does not create concurrent retry
 
 Gateway
-→ provider accepts, response disappears
-→ prove no blind replay / duplicate semantic retry layer
+→ provider accepts then response disappears; no blind replay
+→ fresh AgentRun proposes same unresolved logical effect intent; new admission remains fenced
+→ restore rolls back local counters; provider idempotency identity must not collide across unrelated intents
+→ deliberately under-declare idempotency/reconciliation scope; qualification/Release guard must reject it
 
 Release
 → kill after migration commit before owner transition
-→ kill after pointer swap before SERVED_VERIFIED
+→ kill after pointer swap before SERVED_VERIFIED; reconcile actual target
 ```
 
-### 9.4 First-production recovery proof
+### First-production recovery proof
 
-Before first production, existing operational authority already requires a real complete off-host restore and whole-Hub emergency-stop drill. 3M adds the recovery semantics that proof must exercise:
+The real off-host restore proof must include:
 
 ```text
-restore protected generation
-prove sticky recovery posture survives process restart
-verify PostgreSQL recovery integrity and cross-store closure
-invalidate/re-establish temporal/material authority as required
-keep autonomous/effectful surfaces fenced
-reconcile owner state and newer canonical Git where present
-run EnvironmentConformance
-verify exact serving
-explicitly activate recovered PROD
+restore without establishing positive continuity evidence
+→ normal PROD must remain denied
+
+restore protected PostgreSQL generation
+→ verify integrity + cross-store closure + credential decryptability
+→ recovery posture survives another process restart
+→ restored sessions invalid for normal reuse
+→ external-effect admission deny-by-default
+→ reconcile post-cutoff canonical Git before Git-write paths reopen
+→ existing owners re-establish required current authority/readiness
+→ EnvironmentConformance + exact serving verification
+→ remove only the extra deny; no composite grant is created
 ```
 
-### 9.5 3O / first vertical
+The existing whole-Hub emergency-stop drill remains required.
 
-Budget Analyzer is deliberately read-only and is a proportional first recovery consumer:
+### 3O / first vertical
+
+Budget Analyzer remains the proportional first recovery consumer: read-only Sankhya sync can falsify interrupted sync, deterministic cursor/merge recovery, one-catch-up/no-backlog and exact serving without inventing a business write.
+
+## 8. Projection destination map
+
+Durable projection must not create a second cross-cutting authority. `docs/phases/3m-failure-recovery-architecture.md`, if useful, is a closure/result summary that routes by reference only.
+
+### Invariants
+
+| Item | Durable destination | Action |
+| --- | --- | --- |
+| R-01 owner-local recovery | `docs/architecture/index.md` structural summary + owner refs | PROJECT-NEW narrowly |
+| R-02 restart surface scope | `docs/reference/release-deployment-and-operations.md` + owner refs | PROJECT-NEW |
+| R-03 positive continuation basis | Builder/PAR/MAR owning refs | PROJECT-NEW deltas; cite existing Builder law |
+| R-04 stop/timeout/process-loss semantics | Builder/PAR/MAR/Release owning refs | PROJECT-NEW owner-locally; no shared FSM |
+| R-05 effect identity | `docs/reference/integrations-and-gateway.md` | PROJECT-NEW |
+| R-06 unresolved-admission/retry fence | `docs/reference/integrations-and-gateway.md` | PROJECT-NEW |
+| R-07 restore != restart | `docs/reference/release-deployment-and-operations.md` | PROJECT-NEW |
+| R-08 positive generation continuity | `docs/reference/release-deployment-and-operations.md` | PROJECT-NEW |
+| R-09 deny-only fence | `docs/reference/release-deployment-and-operations.md` | PROJECT-NEW; architecture cites boundary only |
+| R-10 stale restored authority | `docs/reference/security-and-authority.md` + operations ref | PROJECT-NEW |
+| R-11 external-effect disaster default | `docs/reference/integrations-and-gateway.md` + operations ref | PROJECT-NEW |
+| R-12 post-cutoff Git | `docs/reference/builder-and-harness.md` + operations ref | PROJECT-NEW |
+| R-13 credential key closure | `docs/reference/data-and-persistence.md` + operations ref | PROJECT-NEW after operator ratification |
+| R-14 current MAR bounded recovery | `docs/reference/managed-execution.md` | PROJECT-NEW / DELETE premature Gateway seam |
+
+Existing global laws such as `mechanism != authority`, `unknown != success`, telemetry not terminal truth, CAS/migration laws and Builder late-output quarantine are PROJECT-BY-REFERENCE and must not be copied as new 3M authority.
+
+### Owner/recovery sections
+
+| Candidate content | Destination | Action |
+| --- | --- | --- |
+| Builder restart/restore/Git deltas | `docs/reference/builder-and-harness.md` | PROJECT-NEW deltas only |
+| PAR restart/restore deltas | `docs/reference/runtime-and-agents.md` | PROJECT-NEW deltas only |
+| MAR sync recovery | `docs/reference/managed-execution.md` | PROJECT-NEW; future effect-capable trigger explicit |
+| Gateway effect recovery | `docs/reference/integrations-and-gateway.md` | PROJECT-NEW |
+| Release recovery deltas | `docs/reference/release-deployment-and-operations.md` | PROJECT-NEW deltas; existing Promotion law BY-REFERENCE |
+| stop/quiescence/settlement vocabulary | each owning reference | PROJECT-NEW owner-locally; DELETE shared lifecycle text after projection |
+| O-01..O-07 | operations/security/data/integration owning refs | PROJECT-NEW only after operator ratification |
+| phase result | `docs/phases/3m-failure-recovery-architecture.md` if retained | summary/by-reference only |
+| mutable phase status | `docs/roadmap.md` | only after operator ratification + successful projection/verification |
+
+Any surviving rule with no admissible existing destination is a missing-owner signal and reopens the smallest Decision Loop; no new authority home is invented for convenience.
+
+## 9. YAGNI / framework boundary
+
+3M deliberately does not introduce:
 
 ```text
-Sankhya read
-→ governed MAR sync
-→ analytical Project DB
-→ dashboard
+RecoveryService / RecoveryModule / RecoveryIncident / RecoveryAttempt
+OwnerReconciler domain interface
+SurfaceReadinessGate domain class
+SettlementEngine / RetryCoordinator / CancellationService
+JobAttempt
+generic MAR→Gateway effect-discovery seam without effect-capable consumer
+DurableAgent active-run recovery
+universal Workflow/Temporal lifecycle
+HA/PITR/multi-region/replicated effect ledger
 ```
 
-A real vertical proof can falsify interrupted sync, freshness reconciliation, one-catch-up/no-backlog and Release serving behavior without inventing an external write merely to exercise infrastructure.
+Current native Mastra choices remain exactly those already qualified/admitted: direct Agent, native approval/persisted suspension, Memory scoping, role-specific instances and scheduler ingress. DurableAgent remains off and is a requalification trigger. No latest/unpinned Mastra claim is needed to decide 3M.
 
-## 10. YAGNI / deletion challenge
+## 10. Reopen triggers
 
-The candidate intentionally does **not** freeze these implementation abstractions:
-
-```text
-OwnerReconciler interface
-RecoveryService / RecoveryModule
-SurfaceReadinessGate class
-SettlementEngine
-CancellationService
-TimeoutService
-RetryCoordinator
-RecoveryIncident Product class
-RecoveryAttempt Product class
-JobAttempt Product class
-```
-
-Shared implementation utilities may exist later if concrete code repetition justifies them, but they do not own meaning.
-
-The following future capabilities can be deleted from the F1 implementation plan without invalidating this architecture:
+Reopen only the smallest affected boundary on material evidence such as:
 
 ```text
-DurableAgent
-Temporal/universal workflow engine
-HA/auto-failover
-PITR requirement
-multi-region
-active-active
-replicated zero-loss effect ledger
-EVENT triggers
-generic saga/compensation engine
-```
-
-If independent review finds any current invariant impossible without one of these, that is a material finding and must return to the smallest owning Decision Loop.
-
-## 11. Reopen triggers
-
-Reopen only the smallest implicated boundary on material evidence such as:
-
-```text
-first-build kill tests show existing owner facts cannot decide safe recovery
-real provider cannot fit Gateway idempotency/reconciliation model
+positive generation continuity cannot be established without a new owner/class
+real provider cannot satisfy validated Gateway idempotency/reconciliation semantics
+first real effect-capable MANAGED_JOB is admitted
 single-cluster recovery-consistency assumption changes
-multi-host/HA/PITR/zero-loss effect requirement becomes real
-DurableAgent or active-run same-stream recovery is selected
-EVENT triggers or materially broader autonomous execution are admitted
-Builder/PAR runtime/storage/process topology changes
-DEDICATED physical deployment creates a new recovery domain
-RPO/RTO cannot be met under accepted first-installation posture
+credential key recovery cannot satisfy separate-custody security law
+first-build kill tests show owner facts are insufficient
+multi-host/HA/PITR/zero-loss effects become a real requirement
+DurableAgent/active-run same-stream recovery is selected
+EVENT triggers or broader autonomous execution are admitted
+Builder/PAR topology or isolation changes
+DEDICATED physical deployment creates another recovery domain
+RPO/RTO cannot be met under the ratified first-installation posture
 post-cutoff Git reconciliation exposes missing semantic ownership
 ```
 
-Existing Mastra/pg-boss/E2B qualification triggers remain in force. Preference or availability of a newer framework feature alone is not a reopen trigger.
+Existing 3L Mastra/pg-boss/E2B requalification triggers remain in force. Availability of a newer framework feature alone is not a trigger.
 
-## 12. Candidate closure test
+## 11. Independent review result
 
-3M may be proposed for closure only if independent review cannot falsify all of the following:
+Fable Round 1 reconstructed current authority, attacked the candidate, confirmed owner-local recovery as the Global Maximum, and produced eight material findings. The Lead accepted/adjudicated all roots; Fable then re-read the adjudication and explicitly conceded the two challenged points:
 
 ```text
-1. every named F1 failure/recovery class has an owner;
-2. no generic recovery/retry authority is needed;
-3. Builder/PAR/MAR/Gateway/Release recovery semantics are coherent;
-4. timeout/cancel/quiescence/settlement are explicit;
-5. runtime retry cannot bypass Gateway effect authority;
-6. normal restart and disaster restore are distinct;
-7. recovery itself can crash without silently activating restored PROD;
-8. lost-RPO mutable authority is treated as unknown/historical, not automatically current;
-9. post-cutoff canonical Git truth is preserved without automatic authority projection;
-10. no load-bearing technology uncertainty requires another pre-C-018 probe;
-11. proof obligations are routed to 3N/first-build/first-production/3O;
-12. no future HA/PITR/DurableAgent/workflow machinery is pulled into F1 without a current consumer;
-13. global coherence review finds no material contradiction with Product, owner/storage boundaries or accepted 3L qualification.
+M-06 Lead YAGNI position              = UPHELD
+M-02 Lead effect-identity refinement  = ACCEPTED AS SUPERIOR
+material contradictions surviving     = 0
+Round 2 justified                      = NO
+architecture Global Maximum            = OWNER-LOCAL RECOVERY CONFIRMED
+3L requalification                     = NO
 ```
 
-If accepted and projected after independent review:
+Review output remains Evidence, never authority.
+
+## 12. Candidate closure gate
+
+After operator ratification of §5, durable projection may proceed only if:
+
+```text
+1. every named F1 failure/recovery class has exactly one owner;
+2. no generic recovery/retry authority is introduced;
+3. effect identity + unresolved new-admission fence are Gateway-owned and restore-stable;
+4. current MAR recovery contains only the real governed-sync semantics;
+5. normal restart requires positive generation continuity;
+6. disaster-recovery posture is deny-only and survives restart;
+7. stale/lost-RPO authority is not treated as current by absence;
+8. initial external-effect admission is deny-by-default after disaster restore;
+9. credential ciphertext + required decryption means are actually recoverable under separate custody;
+10. post-cutoff canonical Git is preserved/reconciled before write paths reopen;
+11. proof obligations are routed to 3N/first-build/first-production/3O;
+12. all surviving semantics have exactly one durable destination;
+13. repository verification passes after temporary review/work files are removed from the merge candidate.
+```
+
+Only after successful projection, verification and explicit operator closure:
 
 ```text
 3M = CLOSED
@@ -734,26 +489,3 @@ If accepted and projected after independent review:
 C-018 = NOT RATIFIED
 Product implementation = BLOCKED
 ```
-
-## 13. Independent review focus
-
-Fable should reconstruct current authority first and attack this candidate as one coherent package. At minimum challenge:
-
-```text
-A. Is owner-local recovery really the Global Maximum?
-B. Does any "reconcile" wording hide a missing durable fact or impossible knowledge claim?
-C. Can recovery itself crash safely without a new semantic owner?
-D. Does RPO <= 6h resurrect unsafe authorization/trigger/approval/credential truth?
-E. Is the conservative re-establishment of material authority sufficient, too broad, or under-specified?
-F. Are newer post-cutoff canonical Git facts handled with the correct authoring-vs-operational ownership?
-G. Is external-effect lost-window handling honest and sufficient under the accepted RPO?
-H. Can any governed business effect be retried at more than one semantic layer?
-I. Did the candidate underuse an already-qualified native Mastra primitive or overfit to newer unqualified Mastra behavior?
-J. Does any proposed law actually require a new durable class/schema/transaction despite claiming zero?
-K. Can any invariant/section be deleted without losing correctness?
-L. Is any HA/PITR/DurableAgent/Temporal-like capability being pulled forward or incorrectly rejected despite a current consumer?
-M. Are proof obligations placed at the earliest stage that can genuinely falsify them rather than proving mocks?
-N. Does the candidate preserve first-installation RPO/RTO while keeping recovery operationally achievable?
-```
-
-Reviewer output is Evidence only. A finding that proposes new Product authority must return to the Decision Loop rather than enter as an automatic correction.

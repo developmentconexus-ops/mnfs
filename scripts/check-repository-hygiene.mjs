@@ -10,6 +10,11 @@ const errors = []
 const forbiddenLegacy = ['m', 'n', 'f', 's'].join('')
 const reviewCandidate = process.env.REVIEW_CANDIDATE_REF || ''
 const reviewFile = 'docs/work/current/ai-dialog.md'
+const admittedReviewCandidateWork = new Set([
+  'docs/work/current/index.md',
+  'docs/work/current/proposal.md',
+  'docs/work/current/plan.md'
+])
 
 if (reviewCandidate) {
   const changed = execFileSync('git', ['diff', '--name-only', `${reviewCandidate}...HEAD`], { cwd: root, encoding: 'utf8' })
@@ -17,9 +22,15 @@ if (reviewCandidate) {
   if (changed.length !== 1 || changed[0] !== reviewFile) {
     errors.push(`review branch must differ from candidate only by ${reviewFile}: ${changed.join(', ') || 'no diff'}`)
   }
+
   const candidatePaths = execFileSync('git', ['ls-tree', '-r', '--name-only', reviewCandidate], { cwd: root, encoding: 'utf8' })
     .split('\n').filter(Boolean)
-  if (candidatePaths.some(path => path.startsWith('docs/work/'))) errors.push('review candidate itself contains docs/work/**')
+  const invalidCandidateWork = candidatePaths.filter(path =>
+    path.startsWith('docs/work/') && !admittedReviewCandidateWork.has(path)
+  )
+  if (invalidCandidateWork.length) {
+    errors.push(`review candidate contains non-admitted docs/work path(s): ${invalidCandidateWork.join(', ')}`)
+  }
 } else if (existsSync(resolve(root, 'docs/work'))) {
   errors.push('merge candidate/main must not contain docs/work/**')
 }
@@ -30,7 +41,11 @@ for (const path of tracked) {
   if (normalized.startsWith('docs/superpowers/')) errors.push(`superseded documentation tree: ${path}`)
   if (/(handoff|dialogue|round|correction-handoff)/i.test(path) && path !== reviewFile) errors.push(`transient path: ${path}`)
   if (/^(ai_dialog|knowledge-migration)\.md$/i.test(path)) errors.push(`temporary root artifact: ${path}`)
-  if (normalized.startsWith('docs/work/') && !(reviewCandidate && path === reviewFile)) errors.push(`temporary work path in candidate: ${path}`)
+
+  const admittedReviewPath = reviewCandidate && (path === reviewFile || admittedReviewCandidateWork.has(path))
+  if (normalized.startsWith('docs/work/') && !admittedReviewPath) {
+    errors.push(`temporary work path in candidate: ${path}`)
+  }
 
   const bytes = readFileSync(resolve(root, path))
   if (!bytes.includes(0) && bytes.toString('utf8').toLowerCase().includes(forbiddenLegacy)) {

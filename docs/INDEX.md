@@ -2,16 +2,7 @@
 
 ## Current status
 
-```text
-3A = CLOSED / consolidated baseline preserved
-3B–3K = CLOSED
-3L = CLOSED
-3M = NEXT / NOT STARTED
-3N = NOT STARTED
-3O = NOT STARTED
-C-018 = NOT RATIFIED
-Product implementation = BLOCKED
-```
+[ROADMAP.md](ROADMAP.md) is the only current phase and implementation-status authority. This index routes to it and does not restate mutable status.
 
 This is the canonical technical entrypoint. Current authority beats historical Git content. Do not recursively read `docs/`; select one task row and read only the named pack.
 
@@ -72,4 +63,3 @@ Engineering and visuals: [engineering/METHOD.md](engineering/METHOD.md), [engine
 - `docs/evidence/**`: deciding summaries and provenance only.
 - `docs/research/mitra/evidence/**`: large raw observations and detailed chapters.
 - Git history: superseded proposals, dialogue, handoffs, and mechanical review history.
-

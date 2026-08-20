@@ -21,5 +21,4 @@ Stop when work would create/change a Product requirement, semantic owner, trust 
 
 Publish reviewable changes. One phase owns one PR. Run `npm ci && npm run verify`. Live qualification is opt-in. Never merge without explicit operator authority.
 
-Current state: 3L closed; 3M next/not started; 3N/3O not started; C-018 not ratified; Product implementation blocked.
-
+For current phase and implementation status, read [docs/ROADMAP.md](docs/ROADMAP.md); do not restate mutable status here.

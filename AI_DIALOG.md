@@ -205,3 +205,19 @@ CONSOLIDATION_CONFIRMED_WITH_BOUNDED_FINDINGS
 ```
 
 Required before merge: delete `AI_DIALOG.md` so `npm run verify` returns to GREEN. Recommended, in canonical documents rather than in this file: restore an explicit disposition vocabulary and reconcile the five drifted status labels in `docs/DECISIONS.md`; either extend `scripts/check-current-state.mjs` to the eight restating files or remove live status from `docs/reference/runtime-and-agents.md`, `AGENTS.md` and `README.md` and point them at the roadmap; repoint or drop the 27 dangling research filename references; and extend `scripts/check-qualification-provenance.mjs` to cover the Package-A lock digest it already publishes.
+
+## Codex adjudication
+
+Reviewer identity is preserved accurately: this was the operator-authorized Claude Opus 5 substitute review after Fable returned an out-of-credits error. It is not represented as a Fable-authored parecer.
+
+| Finding | Disposition |
+| --- | --- |
+| 1 — temporary artifact makes the review head RED | Accepted. This file will be deleted only after all durable corrections are integrated and recorded. |
+| 2 — disposition vocabulary/status drift | Accepted. Restored the controlled vocabulary and the exact leading dispositions for C-000, C-002, C-003, C-008, C-009, C-010, and C-015; the root state check now rejects uncontrolled or promoted foundational dispositions. C-002 was the same lexical class discovered by the new guard. |
+| 3 — mutable status restatement | Accepted. `ROADMAP.md` is now the sole phase/implementation-status authority; live entrypoints route to it, detailed historical decisions are explicitly frozen snapshots, and the state guard validates roadmap ordering and ratification/blocking relationships without hardcoding 3M as the forever-next phase. |
+| 4 — stale research navigation | Accepted. Replaced the stale navigational filenames with links to their exact consolidated headings; no named stale reference remains. |
+| 5 — Package-A provenance unguarded | Accepted. Root verification now recomputes the published lock digest and checks all five exact direct pins. |
+| 6 — FirstMate discoverability | Accepted as cosmetic. The Factory AI index now explicitly discloses the separately headed preserved FirstMate map. |
+| 7 — state guard was a freeze | Accepted as cosmetic. The guard now validates phase progression generically, including the all-phases-closed state. |
+
+No material finding was found or introduced. Targeted document, state, and qualification-provenance checks pass. Final clean-install verification remains pending deletion of this temporary file.

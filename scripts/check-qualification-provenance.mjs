@@ -8,6 +8,20 @@ const json = path => JSON.parse(read(path).toString('utf8'))
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex')
 const errors = []
 
+const packageA = json('qualification/3l/builder-substrate/package.json')
+const lockA = read('qualification/3l/builder-substrate/package-lock.json')
+const expectedA = {
+  '@mastra/code-sdk': '1.1.2',
+  '@mastra/core': '1.56.0',
+  '@mastra/e2b': '0.8.0',
+  '@mastra/memory': '1.25.0',
+  '@mastra/pg': '1.19.0'
+}
+if (sha256(lockA) !== '7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5') errors.push('Package-A lock digest drift')
+for (const [name, version] of Object.entries(expectedA)) {
+  if (packageA.dependencies?.[name] !== version) errors.push(`Package-A pin drift: ${name}`)
+}
+
 const packageB = json('qualification/3l/mastra-runtime/package.json')
 const evidenceB = json('qualification/3l/mastra-runtime/evidence/admission.json')
 const lockB = read('qualification/3l/mastra-runtime/package-lock.json')

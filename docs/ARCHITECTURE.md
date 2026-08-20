@@ -1,6 +1,6 @@
 # Conexus OS Architecture
 
-This is the current structural overview and technology-status authority. Detailed owner and boundary semantics live in the linked task references from [INDEX.md](INDEX.md). Mechanisms remain subordinate to Conexus OS semantic owners.
+This is the current structural overview and qualification-outcome summary. [ROADMAP.md](ROADMAP.md) alone owns current phase and implementation status. Detailed owner and boundary semantics live in the linked task references from [INDEX.md](INDEX.md). Mechanisms remain subordinate to Conexus OS semantic owners.
 
 ## 1. Architecture in one sentence
 
@@ -232,8 +232,8 @@ Package E — Deciding Evidence
 ↓ adjudicate + completeness/deletion check
 3L-R3 final closure = CURRENT / FABLE INCORPORATED
 ↓
-3L = CLOSED
-3M = NEXT / NOT STARTED
+3L qualification closure is recorded in [phases/3L-technology-qualification.md](phases/3L-technology-qualification.md).
+Current phase status is owned only by [ROADMAP.md](ROADMAP.md).
 ```
 
 The current Package-D admission is bounded to the tested transactional-admission subset. Downstream remainder is preserved for FIRST-BUILD + 3M + 3N/3O; Package E remains safely deferred with no pre-C-018 runtime probe.
@@ -462,7 +462,7 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 ## 50. Current handoff
 
-> **3L is CLOSED by 3L-R3. Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C and Package E remain DEFER SAFELY / NOT EXECUTED; Package D is CLOSED / LEAD-ADJUDICATED for the current F1 tested transactional-admission subset. CX-MANAGED-JOB-01 preserves its downstream remainder for FIRST-BUILD + 3M + 3N/3O. 3M — Failure & Recovery Architecture = NEXT / NOT STARTED. Do not execute another probe, start 3M by inheritance, implement Product code, ratify C-018 or merge by inheritance.**
+> **3L is CLOSED by 3L-R3. Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C and Package E remain DEFER SAFELY / NOT EXECUTED; Package D is CLOSED / LEAD-ADJUDICATED for the current F1 tested transactional-admission subset. CX-MANAGED-JOB-01 preserves its downstream remainder for FIRST-BUILD + 3M + 3N/3O. [ROADMAP.md](ROADMAP.md) alone owns current phase and implementation status. Do not execute another probe or start a later phase by inheritance.**
 
 Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.
 

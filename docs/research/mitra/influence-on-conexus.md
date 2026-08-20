@@ -4,7 +4,7 @@
 > só lugar: cada padrão observado, seu veredito para o Conexus, e o porquê. É a peça de consulta
 > mais importante desta pasta — quando for planejar o Conexus, comece por aqui.
 >
-> **De onde vem.** Extraído de ``MITRA-INSPIRATION-MAP.md``
+> **De onde vem.** Extraído do [Mitra Inspiration Map](#mitra-inspiration-map)
 > (v0.9.0), que permanece congelado como cadeia de evidência (fonte, citação, data). Este registro
 > **deriva** dele; não o substitui. A coluna *Evidência* aponta a seção do mapa; a coluna *Ref*
 > aponta o documento temático desta pasta que explica o padrão em profundidade.
@@ -21,7 +21,7 @@
 - **ADOPT / ADAPT** = a Mitra acertou. Copiar (talvez com ajuste). São o piso do Conexus.
 - **OWN** = a Mitra **não tem** e é onde o Conexus ganha mercado. São as apostas.
 - **REJECT** = a Mitra tem e está **errado/perigoso**. Cada um é um requisito negativo do Conexus
-  (“não repetir isto”). Consolidados em ``08-limites-e-gaps.md``.
+  (“não repetir isto”). Consolidados em [08 — Limites e gaps](full-study.md#08--limites-e-gaps-onde-a-mitra-falha--onde-o-conexus-ganha).
 - **SPIKE / REFERENCE / DEFER** = decidir depois, com contexto.
 
 **Placar** (após dedup): ~95 ADOPT · ~25 ADAPT · ~6 OWN · ~22 REJECT · ~3 SPIKE · ~30 REFERENCE · ~4 DEFER.
@@ -218,8 +218,8 @@
 
 ---
 
-*Índice mantido em ``00-OVERVIEW.md``. Evidência-fonte congelada em
-``MITRA-INSPIRATION-MAP.md`` v0.9.0.*
+*O antigo índice `00-OVERVIEW.md` foi consolidado em [full-study.md](full-study.md). Evidência-fonte congelada no
+[Mitra Inspiration Map](#mitra-inspiration-map), v0.9.0.*
 
 
 ---

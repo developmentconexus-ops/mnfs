@@ -1,5 +1,7 @@
 # 3L-R1 — Framework-Native Proportional Qualification Rebaseline
 
+> Frozen accepted-decision snapshot. [../../ROADMAP.md](../../ROADMAP.md) alone owns current phase and implementation status.
+
 **Status:** `APPROVED / OPERATOR RATIFIED 2026-08-19`  
 **Phase:** 3L — Technology Qualification  
 **Scope:** Product-Agent Mastra realization, Package-B proof route, Package-C F1 critical-path disposition, and downstream 3L routing  

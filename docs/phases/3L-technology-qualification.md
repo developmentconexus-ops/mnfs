@@ -48,6 +48,8 @@ Current owner truth must be revalidated at governed boundaries; stale runtime co
 
 The final 3L independent Fable review was incorporated. The accepted final closure recorded zero remaining material technology questions and root verification PASS on the exact Phase-3 tree. This repository consolidation preserves that result; it does not rerun or broaden it.
 
+The block below is the frozen 3L-closure snapshot, not current status authority. Consult [../ROADMAP.md](../ROADMAP.md) for current phase and implementation status.
+
 ```text
 3L = CLOSED
 3M = NEXT / NOT STARTED
@@ -56,4 +58,3 @@ Product implementation = BLOCKED
 ```
 
 Requalification triggers are canonical in [../reference/mastra/qualification-and-reopen-triggers.md](../reference/mastra/qualification-and-reopen-triggers.md).
-

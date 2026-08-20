@@ -1,5 +1,7 @@
 # 3L-R2 — Managed Execution & Deciding Evidence Proportional Rederivation
 
+> Frozen accepted-decision snapshot. [../ROADMAP.md](../ROADMAP.md) alone owns current phase and implementation status.
+
 **Status:** `APPROVED / OPERATOR RATIFIED 2026-08-20`  
 **Phase:** 3L — Technology Qualification  
 **Scope:** Package D (Managed Execution) + Package E (Deciding Evidence) proportional rederivation after Package-B closure  

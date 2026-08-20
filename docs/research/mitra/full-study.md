@@ -4,7 +4,7 @@
 > (`agent.mitralab.io` — app-builder brasileiro guiado por IA), organizada por assunto para servir
 > de **consulta** no desenho do **Conexus** (nossa harness).
 >
-> Não é o registro de descoberta — esse é ``MITRA-INSPIRATION-MAP.md``
+> Não é o registro de descoberta — esse é o [Mitra Inspiration Map](influence-on-conexus.md#mitra-inspiration-map)
 > (v0.9.0, cadeia de evidência congelada). Esta pasta **deriva** dele: reorganiza por tema, adiciona
 > diagramas, e termina cada documento com o veredito para o Conexus. Toda afirmação factual aqui
 > tem origem rastreável no mapa; quando divergir de uma leitura casual, o mapa prevalece.
@@ -13,7 +13,7 @@
 
 | # | Documento | O que responde |
 |---|---|---|
-| — | ``DECISION-REGISTER.md`` | **Comece aqui.** Todos os ~170 vereditos ADOPT/REJECT/OWN num só lugar, com link para a evidência |
+| — | [Registro de Decisões](influence-on-conexus.md#registro-de-decisões--mitra--conexus) | **Comece aqui.** Todos os ~170 vereditos ADOPT/REJECT/OWN num só lugar, com link para a evidência |
 | 00 | este arquivo | Mapa macro + glossário + os 7 fatos que você precisa saber antes de tudo |
 | 01 | ``01-harness-agentico.md`` | Como o agente roda: E2B, Claude Code, `CLAUDE.md`, protocolo de turno, MCP |
 | 02 | ``02-registro-artefatos.md`` | O que o agente cria: server functions, dataLoaders, dbActions, os dois SDKs |
@@ -22,7 +22,7 @@
 | 05 | ``05-ciclo-de-vida.md`` | Do build ao ar: git por usuário, SYNC/SHARE, releases, promote DEV→PROD |
 | 06 | ``06-runtime-publicado.md`` | O app final: SPA React, `__mitraEnv`, SDK de runtime, login/RBAC, chat-embed |
 | 07 | ``07-padrao-de-projeto.md`` | Como um projeto real nasce: as 8 fases, docs de planejamento, testes, honestidade |
-| 08 | ``08-limites-e-gaps.md`` | Onde a Mitra falha = onde o Conexus ganha. Todos os REJECT + as apostas OWN |
+| 08 | [08 — Limites e gaps](#08--limites-e-gaps-onde-a-mitra-falha--onde-o-conexus-ganha) | Onde a Mitra falha = onde o Conexus ganha. Todos os REJECT + as apostas OWN |
 | 09 | ``09-agente-embarcado.md`` | O agente **dentro** do app publicado (Playground/Generative UI) + protocolo WS capturado ao vivo |
 
 Cada documento temático segue a mesma estrutura:
@@ -173,12 +173,12 @@ sequenceDiagram
 
 ## O que fazer com isto
 
-1. Ler o ``DECISION-REGISTER.md`` inteiro uma vez — é a lista de compras.
+1. Ler o [Registro de Decisões](influence-on-conexus.md#registro-de-decisões--mitra--conexus) inteiro uma vez — é a lista de compras.
 2. Para cada área que o Conexus for atacar, abrir o documento temático correspondente: ele tem o
    diagrama, os contratos exatos, e a seção *Ideias de melhoria* onde suas próprias ideias entram.
 3. As linhas **OWN** do registro são as apostas do Conexus. As **REJECT** são os requisitos
    negativos. Juntas, elas são o esqueleto do que o Conexus precisa ser para superar a Mitra —
-   consolidadas em ``08-limites-e-gaps.md``.
+   consolidadas em [08 — Limites e gaps](#08--limites-e-gaps-onde-a-mitra-falha--onde-o-conexus-ganha).
 
 
 ---
@@ -375,7 +375,7 @@ Server function tem **três tipos**, e é aqui que mora a maior inconsistência 
 | `INTEGRATION` | um **JSON** `{connection, method, endpoint, body}` | `event.x` textual dentro da string |
 
 **Nenhum dos três é bind parameter de verdade — todos são interpolação de string.** Ver
-``08-limites-e-gaps.md`` para o risco de injeção.
+[08 — Limites e gaps](#08--limites-e-gaps-onde-a-mitra-falha--onde-o-conexus-ganha) para o risco de injeção.
 
 ## Como funciona
 
@@ -1363,7 +1363,7 @@ flowchart TB
   id numérico, banco único, header como tenancy), o Conexus escolhe correção. O custo é pequeno; o
   ganho de confiança operacional é o argumento de venda.
 
-*Todos os vereditos com link de evidência em ``DECISION-REGISTER.md``.*
+*Todos os vereditos com link de evidência no [Registro de Decisões](influence-on-conexus.md#registro-de-decisões--mitra--conexus).*
 
 
 ---
@@ -1378,7 +1378,7 @@ flowchart TB
 > **ao vivo** numa sessão de operação real da plataforma.
 >
 > **Natureza da evidência.** Diferente dos docs 00–08 (que derivam do
-> ``MITRA-INSPIRATION-MAP.md`` congelado), este doc é
+> [Mitra Inspiration Map](influence-on-conexus.md#mitra-inspiration-map) congelado), este doc é
 > **evidência primária nova**, coletada em **2026-08-11** operando a plataforma logada: projeto
 > `Playground BI-Investigacao` (workspace `146638`, projeto `55878`), interceptando os frames do
 > WebSocket agêntico no navegador. Onde confirma o mapa, é reforço; onde acrescenta, está marcado

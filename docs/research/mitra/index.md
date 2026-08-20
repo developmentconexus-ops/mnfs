@@ -6,5 +6,5 @@ Mitra is reference Evidence, never implicit Conexus OS authority.
 - [influence-on-conexus.md](influence-on-conexus.md): adopted/adapted/deferred/rejected influence and reasons.
 - `evidence/`: maintenance probe, observation log, and raw observations. **DO NOT READ BY DEFAULT.**
 
-The study remains deep enough to support comparison; Product decisions are owned by [../../DECISIONS.md](../../DECISIONS.md).
+The study remains deep enough to support comparison; Product decisions are owned by [../../DECISIONS.md](../../decisions/index.md).
 

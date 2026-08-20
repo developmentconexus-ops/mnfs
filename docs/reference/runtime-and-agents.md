@@ -1,6 +1,6 @@
 # Runtime and Product Agents
 
-Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/ARCHITECTURE.md` owns the overview; this file owns the detailed task surface named by its title.
+Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title.
 
 ## 24. Production Agent Runtime architecture
 
@@ -191,7 +191,7 @@ Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURREN
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
 3L = CLOSED / 3L-R3 FINAL CLOSURE
-Current phase status is owned only by [../ROADMAP.md](../ROADMAP.md).
+Current phase status is owned only by [../ROADMAP.md](../roadmap.md).
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```

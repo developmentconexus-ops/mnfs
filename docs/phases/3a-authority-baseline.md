@@ -12,10 +12,10 @@ Ratified Product meaning and structural invariants survived. Stale mechanisms—
 
 ## Current outputs
 
-- Product authority: [../PRODUCT.md](../PRODUCT.md)
-- Structural architecture: [../ARCHITECTURE.md](../ARCHITECTURE.md) and task references
-- Reconciled decisions: [../DECISIONS.md](../DECISIONS.md)
-- Status and next action: [../ROADMAP.md](../ROADMAP.md)
+- Product authority: [../PRODUCT.md](../product/contract.md)
+- Structural architecture: [../ARCHITECTURE.md](../architecture/index.md) and task references
+- Reconciled decisions: [../DECISIONS.md](../decisions/index.md)
+- Status and next action: [../ROADMAP.md](../roadmap.md)
 
 ## Supersession law
 

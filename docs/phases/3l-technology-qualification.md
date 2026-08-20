@@ -25,7 +25,7 @@ Package-B lock SHA-256 = 5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2d
 pg-boss 12.26.3
 ```
 
-Exact package locks, criteria, tests, fixtures, raw JSON Evidence, and vendor DDL live under `qualification/3l/`. [../evidence/qualification/3L/summary.md](../evidence/qualification/3L/summary.md) maps the durable evidence.
+Exact package locks, criteria, tests, fixtures, raw JSON Evidence, and vendor DDL live under `qualification/3l/`. [../evidence/qualification/3L/summary.md](../evidence/qualification/3l/summary.md) maps the durable evidence.
 
 ## Proven
 
@@ -48,7 +48,7 @@ Current owner truth must be revalidated at governed boundaries; stale runtime co
 
 The final 3L independent Fable review was incorporated. The accepted final closure recorded zero remaining material technology questions and root verification PASS on the exact Phase-3 tree. This repository consolidation preserves that result; it does not rerun or broaden it.
 
-The block below is the frozen 3L-closure snapshot, not current status authority. Consult [../ROADMAP.md](../ROADMAP.md) for current phase and implementation status.
+The block below is the frozen 3L-closure snapshot, not current status authority. Consult [../ROADMAP.md](../roadmap.md) for current phase and implementation status.
 
 ```text
 3L = CLOSED

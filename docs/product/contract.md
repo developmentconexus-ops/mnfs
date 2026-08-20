@@ -1,13 +1,8 @@
 # Conexus OS — Product Contract
 
-> **Status:** CURRENT / ACCEPTED BY 3A-R11 OPERATOR RATIFICATION\
-> **Parent checkpoint:** `3A-R11 — CLOSED / APPROVED`
-> **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
-> **3L-R1:** CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19
-> **Method:** DevelopmentConexus Engineering Method v1.0.0  
-> **Implementation:** BLOCKED  
-> **C-018:** NOT YET RATIFIED  
-> **Package B:** IN PROGRESS / BT-3N NEXT — EXECUTION AUTHORIZED
+> **Semantic authority:** CURRENT / ACCEPTED PRODUCT CONTRACT
+> **Mutable status:** owned only by [../roadmap.md](../roadmap.md). Accepted technology qualification is summarized in [../phases/3l-technology-qualification.md](../phases/3l-technology-qualification.md).
+> **Method:** DevelopmentConexus Engineering Method v1.0.0
 
 This current accepted authority projection consolidates **what Conexus is, what users can do, which Product meanings and whole-product journeys must remain true, and which future capabilities are deliberately preserved without becoming F1 machinery**.
 
@@ -1337,24 +1332,9 @@ It gates a challenger/reconsideration when current primary runtime/model is mate
 
 # 33. Qualification-state boundary
 
-This Product Contract states required Product meaning, not proof that every substrate already works.
+This Product Contract owns required Product meaning, not mutable phase or technology-qualification status. Current stage/implementation authority lives only in [../roadmap.md](../roadmap.md). The accepted bounded 3L outcomes, exact pins, proven properties, unproven properties and requalification triggers live in [../phases/3l-technology-qualification.md](../phases/3l-technology-qualification.md) and the routed qualification references.
 
-```text
-3L Q0                                   = COMPLETE
-Package A                               = COMPLETE
-Mastra Builder tested properties        = PASS
-E2B                                      = PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD
-native Codex OAuth                       = PASS for tested A3 path
-Builder Observational Memory             = EVALUATED / KEEP OFF
-
-Package B Product Agent/Cross-Runtime    = IN PROGRESS / BT-3N NEXT
-Package C Model Economics/Enforcement   = DEFER SAFELY / NO F1 EXECUTION
-Package D Managed Execution             = REDERIVE PROPORTIONALLY AFTER B
-Package E Deciding Evidence             = REDERIVE PROPORTIONALLY AFTER B/D
-3M / 3N / 3O                            = NOT STARTED
-```
-
-Product Agents/model spend/managed jobs/Evidence can be F1 Product obligations while their exact technology-specific realization remains qualification-pending.
+Framework/substrate Evidence may strengthen or falsify a realization claim; it never changes Product meaning by implication.
 
 ---
 
@@ -1439,7 +1419,7 @@ technology qualification                          = not overstated
 new Product authority intentionally invented       = NO
 ```
 
-**Next:** rederive the bounded Package-B admission/spec from the canonical current tree. Package B is `NEXT / NOT STARTED`; no Package-B execution is authorized by this status.
+**Current next action:** owned only by [../roadmap.md](../roadmap.md). This accepted Product verdict does not authorize a later phase or implementation by inheritance.
 
 
 # 37. Public ecosystem routes

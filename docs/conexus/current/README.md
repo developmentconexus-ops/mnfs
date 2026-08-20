@@ -8,7 +8,7 @@
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
 > **Package B:** CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES  
-> **Package D:** REDERIVED / `DT-1'` ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED  
+> **Package D:** CLOSED / LEAD-ADJUDICATED / `QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION`
 > **Package E:** DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE  
 > **PR #40:** DRAFT / NO MERGE AUTHORIZATION
 
@@ -30,6 +30,7 @@ AGENTS.md
 → DECISION-RECONCILIATION.md when historical decisions appear to conflict
 → 3L-R1 for current Mastra / Package-B / Package-C realization routing
 → 3L-R2 for current Package-D / Package-E realization routing
+→ 3L-D final lead closure + 3L preclosure completeness/deletion check
 → docs/conexus/phase3/LEDGER.md for other Phase-3 detail
 → exact accepted semantic authority
 → deciding Evidence/current implementation only when material
@@ -56,13 +57,19 @@ CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
-Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+3L completeness/deletion check = PASS
+FINAL INDEPENDENT FABLE REVIEW = NEXT
+3L = IN PROGRESS
+3M = NOT STARTED
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
 
-BT-5N final Evidence is bound to executor HEAD `b712dc289a82feb8f0f5edc9d9d579ad18848226`; no executor may re-run BT-3A, execute Package C/E, or execute Package D merely by inheritance. `DT-1'` requires its own explicit operator execution authorization after the current plan is reviewed.
+Detailed Package-D acceptance is recorded in [3L-D final lead closure](../phase3/3L-D-final-lead-closure.md). The current critical-path deletion result is recorded in the [3L preclosure completeness/deletion check](../phase3/3L-preclosure-completeness-deletion-check.md). Historical Evidence and authority remain preserved; no executor may re-run closed probes or execute deferred Packages by inheritance.
+
+Historical pre-3L-R2 route, retained only for provenance and superseded by 3L-R2 plus the Package-D closure: `Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`.
 
 ---
 
@@ -318,7 +325,7 @@ CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
-Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
@@ -374,13 +381,15 @@ Reopen stronger model-economics machinery for commercialization/billing/quotas, 
 
 ### Package D — Managed Execution
 
-Operator-ratified rederivation:
+Architecture-Lead adjudication projected after the operator-authorized probe:
 
 ```text
-Package D = REDERIVED
-required pre-C-018 execution = ONE BOUNDED COMPOSITION PROBE
+Package D = CLOSED / LEAD-ADJUDICATED
 probe = DT-1' — Transactional Managed-Occurrence Admission
-probe execution = NOT YET AUTHORIZED
+probe = EXECUTED / EVIDENCE ACCEPTED
+verdict = QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
+Material Finding = 0
+reviewed executor HEAD = ab6b1841e585b9cafbf8ea04290505832fa1b952
 ```
 
 Current candidate realization:
@@ -405,7 +414,7 @@ Owner uniqueness on the logical occurrence is the primary correctness fence. pg-
 
 For version locking, a managed JobRun becomes admitted/in-flight at its durable admission commit; physical `RUNNING` begins at worker execution. A later Release handoff blocks new old-Release admissions but does not rewrite an already committed exact-pin JobRun.
 
-`DT-1'` proves only the exact PostgreSQL/pg-boss transaction/race/restart/queue-not-authority composition. It explicitly does not implement Product MAR, Release, Gateway, sync/ETL, Sankhya, provider/model/E2B, cron, future scheduling, or recovery policy.
+[`DT-1'` final closure](../phase3/3L-D-final-lead-closure.md) accepts P1–P6 and R1–R3 under the exact pinned stack and confirms owner `INSERT` + `boss.send(...)` through the same physical PostgreSQL transaction adapter. Queue state remains mechanics, never Product authority. The qualification covers only the tested transaction/race/fresh-process/queue-not-authority composition; it does not establish Product MAR, Release, Gateway, sync/ETL, Sankhya, provider/model/E2B, cron, future scheduling or recovery correctness.
 
 ### Package E — Deciding Evidence
 
@@ -447,7 +456,7 @@ Future integration remains public Mastra observability → Conexus-authored `Obs
 | native Product-Agent schedule ingress | **BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS** |
 | BuilderMastra ↔ ParMastra same-process isolation | **QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES** |
 | advanced per-run model-economics machinery | **DEFER SAFELY FOR F1** |
-| managed execution / Package D | **REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED** |
+| managed execution / Package D | **CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION** |
 | deciding Evidence / Package E | **DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE / SOURCE BASIS CORRECTED** |
 | React/TS/Vite/TanStack paved road | **ARCHITECTURE CURRENT / first-build conformance pending** |
 | private Linux-guest first-production topology | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION / activation proof pending** |
@@ -550,9 +559,11 @@ Native framework mechanisms may be used where admitted; they do not create simil
   CX-RUNTIME-ISOLATION-01         QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
   Architecture-Lead / Package-B   CLOSED / LEAD-ADJUDICATED
   Package C                        DEFER SAFELY / NOT EXECUTED
-  Package D                        REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+  Package D                        CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
   Package E                        DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
   3L-R2                            APPROVED / OPERATOR RATIFIED 2026-08-20
+  3L completeness/deletion check  PASS / ARCHITECTURE-LEAD COMPLETE
+  final independent Fable review  NEXT
 
 3M Failure & Recovery              NOT STARTED
 3N Architecture Verification       NOT STARTED
@@ -565,11 +576,13 @@ Implementation                     BLOCKED
 
 ## 14. Exact next action
 
-> **Review the derived Codex `DT-1' — Transactional Managed-Occurrence Admission` execution plan against 3L-R2.**
+> **Perform ONE final independent Fable review of the complete 3L package.**
 
-Package C remains **DEFER SAFELY / NOT EXECUTED**. Package E remains **DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE**. Package D has completed proportional rederivation, but `DT-1'` is **NOT YET AUTHORIZED FOR EXECUTION**. Do not acquire Package-D dependencies, create/execute the spike, run Product implementation, ratify C-018 or merge by inheritance.
+Package A is **COMPLETE**. Package B and Package D are **CLOSED / LEAD-ADJUDICATED** for their exact tested properties. Package C and Package E remain **DEFER SAFELY**.
 
-Only explicit operator authorization after plan review may start `DT-1'` execution. Git staging/commit/push remain separate authorizations under repository safety rails.
+The [3L preclosure completeness/deletion check](../phase3/3L-preclosure-completeness-deletion-check.md) is `PASS`, with `remaining material 3L technology question = 0`, but 3L remains **IN PROGRESS** until the final independent review is adjudicated.
+
+Use the [final independent Fable review handoff](../phase3/3L-FABLE-FINAL-INDEPENDENT-REVIEW-HANDOFF.md). Do not self-execute another probe, start 3M, ratify C-018, implement Product code, change PR #40 from Draft or merge by inheritance.
 
 ---
 

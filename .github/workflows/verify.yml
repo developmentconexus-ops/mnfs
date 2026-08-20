@@ -10,9 +10,17 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Bind isolated review branch to candidate
+        if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'review/')
+        shell: bash
+        run: |
+          git fetch origin "${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}"
+          echo "REVIEW_CANDIDATE_REF=origin/${GITHUB_BASE_REF}" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

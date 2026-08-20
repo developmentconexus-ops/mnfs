@@ -132,7 +132,7 @@ A later attempt requires owner admission. Current F1 does not enable DurableAgen
 
 Cancel/timeout first prevents new PAR progression and propagates cooperative abort where available. Abort, timeout and process loss do not prove that an already-crossed Gateway effect did not happen. Late runtime completion remains subordinate to current guarded/write-once owner transitions.
 
-After disaster restore, restored pending `ApprovalRequest`/Mastra suspension state is historical as-of-cutoff and is not directly actionable merely because it was pending in the recovered generation. Effect-capable continuation is re-established through current owner authority; restored runtime state never bypasses the initial external-effect deny posture owned at the Gateway/operations boundary.
+After disaster restore, restored pending `ApprovalRequest`/Mastra suspension state is historical as-of-cutoff and is not directly actionable merely because it was pending in the recovered generation. Effect-capable continuation is re-established through current owner authority; the restored runtime state never authorizes itself and cannot bypass the initial Gateway/operations external-effect deny posture.
 
 ---
 

@@ -26,7 +26,7 @@ if (packageJson.name !== 'conexus-os' || packageJson.private !== true) {
   errors.push('package identity must be private conexus-os')
 }
 
-for (const forbidden of ['.mnfs/', '.pi/skills/mnfs-plan/', 'bin/mnfs.mjs', 'docs/conexus/current/']) {
+for (const forbidden of [`.${forbiddenLegacy}/`, `.pi/skills/${forbiddenLegacy}-plan/`, `bin/${forbiddenLegacy}.mjs`, 'docs/conexus/current/']) {
   if (tracked.some(path => path.startsWith(forbidden))) errors.push(`forbidden legacy/current-router path: ${forbidden}`)
 }
 

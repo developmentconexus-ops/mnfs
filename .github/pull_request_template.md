@@ -1,39 +1,19 @@
-## Summary
+## Outcome
 
-## Why
+## Authority and boundaries
 
-## Validation
+## Proof / falsifier
+
+## Verification
 
 ```text
+npm ci
 npm run verify
 ```
 
-## Documentation impact
+## Material findings or deferred obligations
 
-```yaml
-documentation_impact:
-  status: UPDATED
-  affected:
-    - DOC-...
-  rationale: ""
-  follow_up: null
-```
-
-## Requirements impact
-
-```yaml
-requirements_impact:
-  status: NONE
-  affected: []
-  rationale: ""
-```
-
-## Risk and rollback
-
-## Architecture checklist
-
-- [ ] The change follows the Documentation Map authority hierarchy.
-- [ ] Accepted ADRs and Mission revisions were not semantically rewritten.
-- [ ] Generated files were regenerated rather than edited manually.
-- [ ] New external tooling has a named consumer, proof and Removal Conditions.
-- [ ] M2 remains blocked unless its explicit readiness gates pass.
+- [ ] Canonical authority remains singular.
+- [ ] No Product requirement, owner, or trust boundary changed silently.
+- [ ] Temporary review/migration artifacts are absent.
+- [ ] Current roadmap state remains explicit.

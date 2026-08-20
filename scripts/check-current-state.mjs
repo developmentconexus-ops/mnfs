@@ -18,7 +18,7 @@ for (const required of ['3L = CLOSED', '3M = NEXT / NOT STARTED', '3N = NOT STAR
 }
 
 const roadmap = existsSync(resolve(root, 'docs/ROADMAP.md')) ? readFileSync(resolve(root, 'docs/ROADMAP.md'), 'utf8') : ''
-const nextPhases = roadmap.match(/\bNEXT\s*\/\s*NOT STARTED\b/g) ?? []
+const nextPhases = roadmap.match(/^\| 3[A-Z] \| NEXT \/ NOT STARTED \|/gm) ?? []
 if (nextPhases.length !== 1) errors.push(`ROADMAP must contain exactly one NEXT / NOT STARTED phase; found ${nextPhases.length}`)
 
 if (errors.length) {

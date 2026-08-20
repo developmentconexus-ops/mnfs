@@ -38,7 +38,15 @@ Brain != agent/runtime memory
 future seam != dormant implementation
 selected/current architecture != qualified behavior
 review finding != requirement authority
+recovery meaning remains owner-local; no generic Recovery owner/FSM exists
+same-execution continuation requires positive owner-specific basis
+normal restart != disaster restore
+recovery posture is deny-only and never grants Product authority
+missing after restore != never happened
+Gateway unresolved effect truth fences replay and duplicate new admission within validated scope
 ```
+
+Recovery uses the existing owners rather than a sixth cross-cutting lifecycle. Runtime/queue/snapshot/process state can help detect and execute recovery mechanics but never decides semantic continuation, replay or current authority. Exact recovery behavior lives in the owning references.
 
 ---
 
@@ -119,7 +127,7 @@ F1 is a modular monolith with explicit semantic owners:
 | **Attachments & Blob** | shared byte/storage mechanics and attachment semantics where owner contracts admit them | semantic identity/authorization of every owner referencing the bytes |
 | **Managed Application Runtime (MAR)** | managed app serving mechanics and admitted job occurrences | Product business meaning, scheduler business authority, arbitrary privileged Project code |
 
-No generic `Workflow`, `Tool`, `ResourceBinding`, `Secret`, `Budget`, `Status`, `Runtime`, `EvidenceGraph` or `Automation` business owner exists simply for uniformity.
+No generic `Workflow`, `Tool`, `ResourceBinding`, `Secret`, `Budget`, `Status`, `Runtime`, `EvidenceGraph`, `Automation` or `Recovery` business owner exists simply for uniformity.
 
 ## 4.1 Closed dependency architecture
 
@@ -139,7 +147,7 @@ PromoteRelease
 
 There is exactly one domain dependency inversion: Gateway defines the narrow approval-claim capability, PAR owns `ApprovalRequest` and implements that capability, and the composition root wires it. The 3D infrastructure boundaries are exactly `CodingRuntime`, `CredentialBackend`, `BlobStore/CAS` and `GitInfra`.
 
-The later 3A-R9 `MANAGED_JOB` addition is a Gateway caller-surface amendment, not an eighth L7 orchestration flow.
+The later 3A-R9 `MANAGED_JOB` addition is a Gateway caller-surface amendment, not an eighth L7 orchestration flow. Disaster-recovery posture is deny-only infrastructure; if realization ever needs a composite Hub-side activation flow, that is an explicit L7 Decision Loop amendment rather than implied recovery plumbing.
 
 ---
 
@@ -170,12 +178,12 @@ REJECTED F1
 | BuilderMastra != ParMastra same-process isolation | **QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES** | process split remains a future trigger for a reachable enabled-global bleed |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | bounded F1 model execution/economics | **ARCHITECTURE CURRENT / PACKAGE C DEFER SAFELY** | finite server limits and truthful usage/cost visibility remain; advanced hard monetary enforcement is deferred by 3L-R1 |
-| managed sync/job semantics | **CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION** | only the current F1 tested transactional-admission subset is qualified; downstream MAR/Release/sync obligations remain first-build + 3M + 3N/3O |
+| managed sync/job semantics | **CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION** | only the tested transactional-admission subset is technology-qualified; recovery semantics for the real governed-sync consumer are now architecture-current and downstream implementation proof remains first-build + 3N/3O |
 | pg-boss 12.26.3 | **QUALIFIED FOR TESTED TRANSACTIONAL-ADMISSION MECHANICS / PRIVATE MAR SUBSTRATE / NOT AUTHORITY** | one-catch-up/no-N-slots law remains the Product owner-side law and first-build reconciliation conformance, not a remaining pg-boss cron probe |
 | deciding F5/observability surfaces | **DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE** | telemetry-never-authority remains architectural; Package E has no pre-C-018 runtime probe |
 | React/TS/Vite/TanStack paved road | **ARCHITECTURE CURRENT** | first-build scaffold conformance pending |
 | Brain semantic architecture | **ARCHITECTURE CURRENT** | implementation-dependent Discovery/feedback/conformance probes downstream |
-| first-production Linux guest/private ingress | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION** | activation/restore/security proofs remain |
+| first-production Linux guest/private ingress | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION** | 3M recovery contract current; activation/restore/security proof remains first-production work |
 
 ---
 
@@ -232,11 +240,11 @@ Package E — Deciding Evidence
 ↓ adjudicate + completeness/deletion check
 3L-R3 final closure = CURRENT / FABLE INCORPORATED
 ↓
-3L qualification closure is recorded in [phases/3L-technology-qualification.md](../phases/3l-technology-qualification.md).
-Current phase status is owned only by [ROADMAP.md](../roadmap.md).
+3L qualification closure is recorded in [phases/3l-technology-qualification.md](../phases/3l-technology-qualification.md).
+Current phase status is owned only by [roadmap.md](../roadmap.md).
 ```
 
-The current Package-D admission is bounded to the tested transactional-admission subset. Downstream remainder is preserved for FIRST-BUILD + 3M + 3N/3O; Package E remains safely deferred with no pre-C-018 runtime probe.
+The current Package-D admission is bounded to the tested transactional-admission subset. Its Product recovery semantics are now closed by the owner references; downstream realization/proof remains FIRST-BUILD + 3N/3O. Package E remains safely deferred with no pre-C-018 runtime probe.
 
 ---
 
@@ -305,6 +313,8 @@ Brain vector/RAG index
 Brain G2 Graph projection for measured traversal/impact/dependency reasoning
 Brain G4 Advanced knowledge governance for a real ontology/DMN-BPMN/temporal/formal-rule consumer
 broader Project export/import/clone workflows
+zero-loss replicated external-effect ledger
+effect-capable MANAGED_JOB recovery seam before a real consumer
 ```
 
 No empty module/table/service/registry/engine exists merely to reserve these futures.
@@ -333,6 +343,7 @@ public Internet first-installation ingress
 multiple production coding runtimes for optionality
 forced per-WorkUnit cognitive reset
 mandatory tunnel infrastructure before SaaS/private-source consumer
+generic Recovery owner/engine or universal recovery FSM
 ```
 
 ---
@@ -353,16 +364,22 @@ Brain Discovery proposal becoming authority without human publish
 AnalyticQuery escaping semantic/SELECT-only boundaries
 caller/model selecting arbitrary Connection/effect destination
 Gateway duplicate/lost-response replay manufacturing second effect
+Gateway unresolved effect bypassed by fresh AgentRun/new admission
+Gateway idempotency/reconciliation scope accepted when deliberately under-declared
 Product Agent losing exact old Release pins across suspension/restart
 Builder/PAR mutable-state leakage
 stale RequestContext authority resurrection
 provider call occurring without spend reservation
 managed sync replaying all missed slots
+managed sync recovery depending on effect-capable machinery with no current consumer
 telemetry manufacturing F5/terminal truth
 Published App authority collapsing into Control Plane
 Release AVAILABLE/pointer swap masquerading as SERVED_VERIFIED
 migration/EnvironmentConformance drift hidden as success
 storage object key bypassing owner authorization
+restore without positive generation continuity opening normal PROD
+restored stale authority regaining privileged/autonomous/effectful use
+post-cutoff canonical Git silently discarded or promoted to current Hub authority
 first vertical read model proving itself / unsupported KPI fabricated
 ```
 
@@ -381,11 +398,11 @@ first vertical read model proving itself / unsupported KPI fabricated
 | Product Agent direct Mastra | B proves direct Agent cannot preserve exact pins/suspension/approval/Gateway safety |
 | PostgreSQL 17 | support/security/feature requirement or implementation Evidence invalidates current major |
 | owner-scoped DB capability | accepted cross-owner atomicity/ops requirement cannot be expressed without violating negative property |
-| Gateway | new effect/integration class cannot preserve current owner/effect/credential boundary |
+| Gateway | new effect/integration class cannot preserve current owner/effect/credential/recovery boundary |
 | Brain | independent lifecycle/trust/scale consumer proves one Workspace Brain insufficient |
-| Release | real consumer needs composition/version/cutover semantics current model cannot represent |
-| MAR/jobs | real deterministic workflow needs semantics beyond managed-sync seam |
-| first-production topology | company server unsuitable; RPO/RTO/public/compliance/DEDICATED consumer demands new placement |
+| Release | real consumer needs composition/version/cutover/recovery semantics current model cannot represent |
+| MAR/jobs | first real effect-capable MANAGED_JOB or deterministic workflow needs semantics beyond managed-sync seam |
+| first-production topology | company server unsuitable; RPO/RTO/public/compliance/DEDICATED consumer demands new placement, or positive generation continuity cannot be realized without new semantic state |
 | Published App access | real role/audience/data-scope needs exceed closed F1 role model |
 | Product Agent memory/tools | named Product Agent needs advanced memory/browser/source/workspace capability with acceptable proof |
 | SaaS private reachability | SaaS deployment + real private/on-prem enterprise target |
@@ -448,6 +465,7 @@ C-017 engineering model
 3J-01..03 + 3J-R1
 3K-01..04 + 3K-R1
 3L-Q0 + 3L-A
+3M failure/recovery closure
 R11-A census/completion
 R11-B accepted current Decision Reconciliation
 R11-C accepted current Product Contract
@@ -462,7 +480,7 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 ## 50. Current handoff
 
-> **3L is CLOSED by 3L-R3. Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C and Package E remain DEFER SAFELY / NOT EXECUTED; Package D is CLOSED / LEAD-ADJUDICATED for the current F1 tested transactional-admission subset. CX-MANAGED-JOB-01 preserves its downstream remainder for FIRST-BUILD + 3M + 3N/3O. [ROADMAP.md](../roadmap.md) alone owns current phase and implementation status. Do not execute another probe or start a later phase by inheritance.**
+> **3L is CLOSED by 3L-R3. Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C and Package E remain DEFER SAFELY / NOT EXECUTED; Package D is CLOSED / LEAD-ADJUDICATED for the current F1 tested transactional-admission subset. CX-MANAGED-JOB-01 preserves its downstream realization/proof remainder for FIRST-BUILD + 3N/3O. Failure/recovery semantics are projected into the owning references without a generic Recovery owner. [roadmap.md](../roadmap.md) alone owns current phase and implementation status. Do not execute another probe or start a later phase by inheritance.**
 
 Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.
 

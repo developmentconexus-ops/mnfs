@@ -18,29 +18,26 @@ test('Conexus OS repository contract is green', () => {
 })
 
 test('repository hygiene guard fires on temporary work contamination', () => {
-  const workDir = resolve(root, 'docs/work')
-  const fixture = resolve(workDir, '__repository-contract-negative__.md')
-  const workDirExisted = existsSync(workDir)
-  const fixtureExisted = existsSync(fixture)
-  const originalFixture = fixtureExisted ? readFileSync(fixture, 'utf8') : null
-
+  const workDir = resolve(root, 'docs/work/current')
+  const file = resolve(workDir, 'forbidden-fixture.md')
+  const existed = existsSync(file)
+  const original = existed ? readFileSync(file, 'utf8') : null
   mkdirSync(workDir, { recursive: true })
-  writeFileSync(fixture, '# temporary negative-control fixture\n')
+  writeFileSync(file, '# temporary review\n')
   try {
     const result = run('scripts/check-repository-hygiene.mjs')
     const output = `${result.stdout}\n${result.stderr}`
     if (result.status === 0 || !output.includes('docs/work')) throw new Error('hygiene negative control did not fire')
   } finally {
-    if (fixtureExisted) writeFileSync(fixture, originalFixture)
-    else rmSync(fixture, { force: true })
-    if (!workDirExisted) rmSync(workDir, { recursive: true, force: true })
+    if (existed) writeFileSync(file, original)
+    else rmSync(file, { force: true })
   }
 })
 
 test('bootstrap/status guard fires when README becomes a phase authority', () => {
   const path = resolve(root, 'README.md')
   const original = readFileSync(path, 'utf8')
-  writeFileSync(path, `${original}\n3M = NEXT / NOT STARTED\n`)
+  writeFileSync(path, `${original}\n3N = NEXT / NOT STARTED\n`)
   try {
     const result = run('scripts/check-current-state.mjs')
     const output = `${result.stdout}\n${result.stderr}`

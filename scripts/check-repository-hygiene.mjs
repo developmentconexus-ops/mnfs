@@ -16,6 +16,11 @@ const admittedGateWork = new Set([
   'docs/work/current/proposal.md',
   'docs/work/current/plan.md'
 ])
+const workRoot = resolve(root, 'docs/work')
+const workPaths = existsSync(workRoot)
+  ? execFileSync('git', ['ls-files', '-co', '--exclude-standard', 'docs/work'], { cwd: root, encoding: 'utf8' })
+      .split('\n').filter(Boolean)
+  : []
 
 if (reviewCandidate) {
   const changed = execFileSync('git', ['diff', '--name-only', `${reviewCandidate}...HEAD`], { cwd: root, encoding: 'utf8' })
@@ -32,12 +37,17 @@ if (reviewCandidate) {
   if (invalidCandidateWork.length) {
     errors.push(`review candidate contains non-admitted docs/work path(s): ${invalidCandidateWork.join(', ')}`)
   }
+
+  const invalidReviewWork = workPaths.filter(path => path !== reviewFile && !admittedGateWork.has(path))
+  if (invalidReviewWork.length) {
+    errors.push(`review branch contains non-admitted docs/work path(s): ${invalidReviewWork.join(', ')}`)
+  }
 } else if (temporaryGate) {
-  const invalidGateWork = tracked.filter(path => path.startsWith('docs/work/') && !admittedGateWork.has(path))
+  const invalidGateWork = workPaths.filter(path => !admittedGateWork.has(path))
   if (invalidGateWork.length) {
     errors.push(`temporary gate contains non-admitted docs/work path(s): ${invalidGateWork.join(', ')}`)
   }
-} else if (existsSync(resolve(root, 'docs/work'))) {
+} else if (existsSync(workRoot)) {
   errors.push('merge candidate/main must not contain docs/work/**')
 }
 

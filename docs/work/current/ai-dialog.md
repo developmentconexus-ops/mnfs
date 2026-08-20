@@ -625,17 +625,24 @@ N-08  S9.3 kill-point families should gain the two falsifiers this review needs:
       restore-and-start with no recovery marker planted (M-01), and idempotency-key reuse across a
       restore boundary (M-02b).
 
-N-09  Package placement, not architecture: the candidate carries its proposal at
-      docs/work/current/proposal.md, and the enforced hygiene guard rejects that path on BOTH branch
-      classes. On the review branch only docs/work/current/ai-dialog.md is permitted; on any merge
-      candidate docs/work/** may not exist at all. Reproduced in a clean Linux worktree on the
-      pinned Node 24.18.0 with REVIEW_CANDIDATE_REF set to the candidate HEAD:
+N-09  Guard defect, not a candidate defect. The candidate carries its proposal at
+      docs/work/current/proposal.md, which the enforced hygiene guard rejects. Reproduced in a clean
+      Linux worktree on the pinned Node 24.18.0 with REVIEW_CANDIDATE_REF at the candidate HEAD:
         "review candidate itself contains docs/work/**"
         "temporary work path in candidate: docs/work/current/proposal.md"
-      The protected verify check therefore cannot be green for the candidate as published. The
-      candidate preamble already promises deletion before merge, so this is a sequencing defect
-      rather than a semantic one, but the Lead should decide it explicitly rather than discover it
-      at merge.
+      Checked against the canonical authority the repository claims to implement: Repository
+      Standard v1.0.0 S9 explicitly ADMITS docs/work/current/index.md, proposal.md and plan.md as
+      material-gate temporary files, requires only that they be absorbed or deleted before merge,
+      and constrains the review branch to add ai-dialog.md only. The candidate is therefore
+      conformant and scripts/check-repository-hygiene.mjs is stricter than its own canonical
+      standard: in REVIEW_CANDIDATE_REF mode it forbids on the candidate exactly the files S9
+      admits.
+      Smallest correction is to the guard, not to the candidate: in review mode allow the three
+      admitted gate files on the candidate branch, keep proving
+      "review branch - candidate branch = docs/work/current/ai-dialog.md only", and keep the
+      unconditional docs/work ban for merge candidate and main. Until that is fixed the protected
+      verify check cannot be green on either branch of this review, which is why this review commit
+      reports a red hygiene result it did not cause.
 
 N-10  Operating-envelope hazard on exactly this branch class: the repository contract test plants a
       fixture at docs/work/current/ai-dialog.md and then removes the whole docs/work tree in its
@@ -812,7 +819,8 @@ Round 2 position:
 Verification actually run for this review commit:
   environment            = clean Linux-filesystem worktree, Node 24.18.0 (repository pin)
   command                = npm ci && REVIEW_CANDIDATE_REF=c5b2a4c npm run verify
-  check-repository-hygiene = FAIL, and the only two errors are N-09 (candidate proposal path).
+  check-repository-hygiene = FAIL, and the only two errors are N-09 (guard stricter than the
+                             canonical Repository Standard v1.0.0 S9, not a candidate defect).
                              The "differ only by ai-dialog.md" guard did NOT fire, so this review
                              commit is exactly the one permitted delta, and the legacy-content scan
                              over this file passed.

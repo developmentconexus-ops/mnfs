@@ -8,7 +8,7 @@
 > **Implementation:** BLOCKED  
 > **Product implementation:** BLOCKED
 > **C-018:** NOT RATIFIED
-> **Package B:** IN PROGRESS / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N EXECUTION = COMPLETE / BT-5N EXECUTOR VERDICT = NOT_PROVEN / ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
+> **Package B:** CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS
 
 This registry answers one question:
 
@@ -317,7 +317,7 @@ exact RuntimeAgentProjection
 BuilderMastra != ParMastra
 ```
 
-Same-process isolation remains Package-B proof, not yet a qualified fact.
+Same-process isolation is `QUALIFIED_SAME_PROCESS` for the currently enabled F1 Mastra surfaces; disabled process-global facilities remain deferred and require requalification before enablement.
 
 ## 3I — Security/Authority Architecture
 
@@ -367,7 +367,18 @@ Exact deciding Evidence identity and serial adjudication survive. The old uncond
 
 **Disposition:** `CURRENT / APPROVED / OPERATOR RATIFIED`.
 
-Direct code-defined Mastra Agent, native `requireApproval` pause/resume mechanics and PostgreSQL-backed suspended-run discovery are current. Raw Mastra `RequestContext` is non-authoritative runtime/configuration substrate; current Conexus owner truth is rechecked at governed owner/tool/Gateway boundaries. BT-3A is complete with the native schema hypothesis rejected; BT-3N and BT-4N passed Architecture-Lead adjudication; BT-5N execution is complete with executor verdict `NOT_PROVEN`, and Architecture-Lead / Package-B closure adjudication is pending. Return BT-5N executor evidence for adjudication. Package C is deferred safely for F1 without weakening finite model-call/step limits or truthful usage/cost missingness.
+Direct code-defined Mastra Agent, native `requireApproval` pause/resume mechanics and PostgreSQL-backed suspended-run discovery are current. Raw Mastra `RequestContext` is non-authoritative runtime/configuration substrate; current Conexus owner truth is rechecked at governed owner/tool/Gateway boundaries. BT-3A is complete with the native schema hypothesis rejected; BT-3N and BT-4N passed Architecture-Lead adjudication; BT-5N is `PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS` for enabled F1 surfaces. Package B is `CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES`; `CX-AGENT-MASTRA-01` is qualified for current F1 tested properties and `CX-RUNTIME-ISOLATION-01` is qualified same-process for enabled F1 surfaces. Package C is `DEFER SAFELY / NOT EXECUTED` without weakening finite model-call/step limits or truthful usage/cost missingness. Packages D/E are `NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`.
+
+```text
+BT-5N = PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS
+CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
+Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+Package C = DEFER SAFELY / NOT EXECUTED
+Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Product implementation = BLOCKED
+C-018 = NOT RATIFIED
+```
 
 ## 3L Package A
 
@@ -501,8 +512,8 @@ REJECTED F1
 | E2B Builder substrate | QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD |
 | native Codex OAuth | QUALIFIED for Package-A tested path |
 | Builder Observational Memory | EVALUATED / KEEP OFF |
-| direct Mastra Product Agent | ARCHITECTURE CURRENT / BT-3N PASS — LEAD-ADJUDICATED / PACKAGE B NOT CLOSED |
-| BuilderMastra/ParMastra same-process isolation | ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED |
+| direct Mastra Product Agent | QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / PACKAGE B CLOSED |
+| BuilderMastra/ParMastra same-process isolation | QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES |
 | bounded F1 model execution/economics | ARCHITECTURE CURRENT / PACKAGE C DEFER SAFELY |
 | pg-boss 12.26.3 | PACKAGE D CANDIDATE / NOT AUTHORITY |
 | deciding observability/F5 surfaces | ARCHITECTURE CURRENT SHAPE / PACKAGE E NOT QUALIFIED |
@@ -526,10 +537,13 @@ Final GPT authority review          COMPLETE / PASS
 R11-H operator ratification         APPROVED / 2026-08-18
 R11                                  CLOSED / ACCEPTED
 3L-R1                               CURRENT / APPROVED / OPERATOR RATIFIED
-Package B                            IN PROGRESS / BT-3N PASS / BT-4N PASS / BT-5N EXECUTION COMPLETE / EXECUTOR VERDICT NOT_PROVEN / ARCHITECTURE-LEAD PACKAGE-B CLOSURE ADJUDICATION PENDING
-Package C                            DEFER SAFELY / NO F1 EXECUTION
+Package B                            CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-5N QUALIFIED_SAME_PROCESS
+CX-AGENT-MASTRA-01                   QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+CX-RUNTIME-ISOLATION-01              QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
+Package C                            DEFER SAFELY / NOT EXECUTED
+Packages D/E                         NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
 ```
 
-No irreconcilable accepted-authority conflict or architecture reopen was found. **Current handoff:** return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication.
+No irreconcilable accepted-authority conflict or architecture reopen was found. **Current handoff:** Package B closure is projected from the accepted fresh BT-5N Evidence; Packages D/E require proportional rederivation and are not admitted by inheritance.
 
 Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.

@@ -1,6 +1,6 @@
 # 3L Package B — Proportional Technology Probe Result
 
-**Status:** `BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS / BT-5N EXECUTION COMPLETE / EXECUTOR VERDICT NOT_PROVEN / ARCHITECTURE-LEAD PACKAGE-B CLOSURE ADJUDICATION PENDING`
+**Status:** `CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES`
 
 **Execution authority:** [3L-R1 framework-native proportional qualification rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md), preserving the historical [3L-B proof-routing amendment](3L-B-proof-routing-amendment.md) as Evidence
 
@@ -8,7 +8,7 @@
 
 **PostgreSQL probe identity:** `17.10 (Debian 17.10-1.pgdg12+1)`
 
-This record preserves the earlier BT-1..BT-3 evidence, the lead-adjudicated BT-3N PASS, and the lead-adjudicated BT-4N PASS under 3L-R1. BT-5N executor evidence is recorded below; this is not Package-B closure, architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
+This record preserves the earlier BT-1..BT-3 evidence, the lead-adjudicated BT-3N PASS, the lead-adjudicated BT-4N PASS and the fresh BT-5N executor Evidence under 3L-R1. Architecture-Lead closure adjudication accepts the exact result below; this is not architecture redesign, C-018, Product implementation, Package-C authorization or merge authorization.
 
 ## BT-1 — Direct Agent authority closure
 
@@ -81,16 +81,14 @@ The following legacy pre-3L-R1 BT-4/BT-5 block is historical and superseded. It 
 
 ## BT-5N — Same-process Builder ↔ PAR role-instance isolation
 
-- **Execution:** complete as executor evidence; the required PostgreSQL-backed positive runtime was not proven locally.
+- **Execution:** fresh CI complete at executor HEAD `b712dc289a82feb8f0f5edc9d9d579ad18848226`; 28/28 tests passed.
 - **Exact lock:** SHA-256 `5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0`; PostgreSQL probe pin `17.10`; direct pins remain `@mastra/core 1.56.0`, `@mastra/memory 1.25.0`, and `@mastra/pg 1.19.0`.
 - **RED wiring guard:** fired for all four mutable role identities: `pubsub`, `store`, `agent`, and `memory`.
 - **Shared-PubSub negative control:** fired; the Builder-tagged event was delivered once to the Builder observer and once to the PAR observer, demonstrating cross-role bleed under an intentionally shared PubSub identity.
-- **Worker path limitation:** the required PostgreSQL-backed positive test includes the public `OrchestrationWorker`/workflow/PubSub path, but that worker path was not reached locally; no focused one-instance worker success is claimed.
-- **Required positive runtime limitation:** `TEST_DATABASE_URL` was unset, and no PostgreSQL listener or `postgres`, `psql`, or `pg_isready` executable was available locally. Therefore positive role-instance/store-schema/schedule/workflow/attached-Agent/AgentThreadStreamRuntime canary isolation was not reached.
-- **Observed positive values:** role-instance distinctness, Builder/PAR store schemas, PubSub distinctness, registry isolation, persistent-store isolation, workflow/PubSub isolation, attached-Agent execution and the module-default/global canary are all `NOT_PROVEN`; none is represented as `PASS`.
+- **Observed positive values:** role instances distinct `PASS`; Builder schema `mastra_bt5n_builder_8deb5a7e7107`; PAR schema `mastra_bt5n_par_8deb5a7e7107`; PubSub instances distinct `PASS`; registry isolation `PASS`; persistent-store isolation `PASS`; workflow PubSub isolation `PASS`; attached-Agent execution `PASS`; module-default/global canary `PASS_FOR_ENABLED_F1_SURFACE`.
 - **Process-global scope:** enabled F1 `AgentThreadStreamRuntime` remains fenced by explicit role PubSub identity. Scorer/evaluation hooks, DurableAgent global run state/cache/stream machinery, and Observational Memory active-operation/static buffering registries remain disabled and deferred.
-- **External activity:** Builder executions `0`, PAR executions `0`, local model fixture calls `0`, provider calls `0`, E2B calls `0`, and real external effects `0` in the required positive path.
-- **Executor verdict:** `NOT_PROVEN`.
+- **External activity:** Builder executions `1`, PAR executions `1`, Builder local model calls `1`, PAR local model calls `1`, provider calls `0`, E2B calls `0`, and real external effects `0`.
+- **Executor verdict:** `QUALIFIED_SAME_PROCESS` for currently enabled F1 Mastra surfaces only.
 - **Requalification triggers:** enabling any deferred process-global surface, reaching the module-default PubSub fallback, or switching to a shared external PubSub/broker requires fresh qualification; a shared broker additionally requires distinct per-role namespaces/key prefixes.
 
 ## Candidate package result returned for adjudication
@@ -103,16 +101,15 @@ BT-4 = NOT EXECUTED — STOP AFTER BT-3
 BT-5 = NOT EXECUTED — STOP AFTER BT-3
 BT-3N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
 BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
-BT-5N EXECUTION = COMPLETE
-BT-5N EXECUTOR VERDICT = NOT_PROVEN
-ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
+BT-5N = PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS
 
-CX-AGENT-MASTRA-01 = PARTIALLY QUALIFIED / PACKAGE B NOT CLOSED
-CX-RUNTIME-ISOLATION-01 = NOT_PROVEN / BT-5N positive runtime not reached
-Package B = IN PROGRESS / NOT CLOSED
+CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
+Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
+Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
 
-External provider/model calls, E2B calls and real external effects were zero. BT-4N constructed no model or Agent. No dependency, Product module, Package-C work, C-018 action or merge was introduced.
+External provider/model calls, E2B calls and real external effects were zero. BT-4N constructed no model or Agent. No dependency, Product module, Package-C work, Package D/E execution, C-018 action or merge was introduced.

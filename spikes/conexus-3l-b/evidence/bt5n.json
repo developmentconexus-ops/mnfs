@@ -1,19 +1,21 @@
 {
   "probe": "BT-5N",
+  "executorHead": "b712dc289a82feb8f0f5edc9d9d579ad18848226",
   "lockSha256": "5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0",
   "postgresqlProbePin": "17.10",
-  "roleInstancesDistinct": "NOT_PROVEN",
+  "qualificationScope": "currently enabled F1 Mastra surfaces only",
+  "roleInstancesDistinct": "PASS",
   "storeSchemas": {
-    "builder": "NOT_PROVEN",
-    "par": "NOT_PROVEN"
+    "builder": "mastra_bt5n_builder_8deb5a7e7107",
+    "par": "mastra_bt5n_par_8deb5a7e7107"
   },
-  "pubsubInstancesDistinct": "NOT_PROVEN",
+  "pubsubInstancesDistinct": "PASS",
   "sharedPubSubNegativeControl": "FIRED",
-  "registryIsolation": "NOT_PROVEN",
-  "persistentStoreIsolation": "NOT_PROVEN",
-  "workflowPubSubIsolation": "NOT_PROVEN",
-  "attachedAgentExecution": "NOT_PROVEN",
-  "moduleDefaultOrGlobalCanary": "NOT_PROVEN",
+  "registryIsolation": "PASS",
+  "persistentStoreIsolation": "PASS",
+  "workflowPubSubIsolation": "PASS",
+  "attachedAgentExecution": "PASS",
+  "moduleDefaultOrGlobalCanary": "PASS_FOR_ENABLED_F1_SURFACE",
   "enabledProcessGlobalSurfaces": [
     "AgentThreadStreamRuntime state keyed by PubSub identity"
   ],
@@ -22,19 +24,25 @@
     "DurableAgent globalRunRegistry, resumable cache and stream PubSub machinery",
     "Observational Memory active-operation registry and static buffering maps"
   ],
-  "builderExecutions": 0,
-  "parExecutions": 0,
-  "localModelFixtureCalls": 0,
+  "builderExecutions": 1,
+  "parExecutions": 1,
+  "builderLocalModelCalls": 1,
+  "parLocalModelCalls": 1,
+  "localModelFixtureCalls": 2,
   "providerCalls": 0,
   "e2bCalls": 0,
   "realExternalEffects": 0,
-  "verdict": "NOT_PROVEN",
+  "freshCi": {
+    "tests": 28,
+    "pass": 28,
+    "fail": 0
+  },
+  "verdict": "QUALIFIED_SAME_PROCESS",
   "limitations": [
-    "The required PostgreSQL-backed two-role positive runtime was not reached locally: TEST_DATABASE_URL was unset and no PostgreSQL listener or postgres, psql, or pg_isready executable was available.",
-    "Positive role-instance, store/schema, schedule, workflow, attached-Agent, and enabled AgentThreadStreamRuntime canary isolation were not observed; no unobserved positive result is represented as PASS.",
+    "Fresh Package-B CI at executor HEAD b712dc289a82feb8f0f5edc9d9d579ad18848226 completed 28/28 tests with zero failures.",
     "The RED wiring guard fired for all four mutable role identities: pubsub, store, agent, and memory.",
     "The shared-PubSub negative control delivered the Builder-tagged event once to each role observer, demonstrating shared-identity bleed.",
-    "The required PostgreSQL-backed positive test includes the public OrchestrationWorker/workflow/PubSub path, but that worker path was not reached locally.",
+    "Same-process qualification applies only to currently enabled F1 Mastra surfaces; disabled scorer/evaluation, DurableAgent and Observational Memory globals remain deferred.",
     "Provider/model API calls, E2B calls, and real external effects remained at zero."
   ],
   "requalificationTriggers": [

@@ -9,7 +9,7 @@
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
 > **Implementation:** BLOCKED  
 > **C-018:** NOT YET RATIFIED  
-> **Package B:** IN PROGRESS / BT-1 PASS / BT-2 PASS / BT-3 BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N EXECUTION = COMPLETE / BT-5N EXECUTOR VERDICT = NOT_PROVEN / ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
+> **Package B:** CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-1 PASS / BT-2 PASS / BT-3 BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS
 
 This current accepted authority projection answers:
 
@@ -1466,15 +1466,18 @@ Package B BT-3 observed Mastra merge behavior = FRAMEWORK BEHAVIOR CHARACTERIZED
 Package B BT-3A = COMPLETE / NATIVE SCHEMA HYPOTHESIS REJECTED
 Package B BT-3N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
 Package B BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
-Package B BT-5N EXECUTION = COMPLETE
-Package B BT-5N EXECUTOR VERDICT = NOT_PROVEN
-ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
+Package B BT-5N = PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS
 Package B B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-CX-AGENT-MASTRA-01 = PARTIALLY QUALIFIED / PACKAGE B NOT CLOSED
-CX-RUNTIME-ISOLATION-01 = NOT PROVEN / BT-5N POSITIVE RUNTIME NOT REACHED
+CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
+Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+Package C = DEFER SAFELY / NOT EXECUTED
+Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Product implementation = BLOCKED
+C-018 = NOT RATIFIED
 ```
 
-No claim of same-process safety is allowed before B. Return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication.
+Same-process qualification is accepted only for the currently enabled F1 Mastra surfaces. Disabled scorer/evaluation, DurableAgent and Observational Memory globals remain deferred and require requalification before enablement.
 
 ---
 
@@ -2274,13 +2277,13 @@ REJECTED F1
 | E2B | **QUALIFIED WITH REQUIRED PHYSICAL-INCARNATION GUARD** | guard mandatory in Product realization |
 | native Codex OAuth | **QUALIFIED for Package-A tested path** | not universal model/provider winner |
 | Builder Observational Memory | **EVALUATED / KEEP OFF** | net benefit not proven; no stale-authority regression observed |
-| direct Mastra Product Agent | **ARCHITECTURE CURRENT / BT-3N PASS — LEAD-ADJUDICATED / PACKAGE B NOT CLOSED** | BT-1 and BT-2 passed; BT-3 characterized continuation behavior; BT-3A rejected the native schema hypothesis; BT-3N passed native HITL plus current-owner boundary; BT-4N passed lead adjudication; BT-5N execution is complete with executor verdict `NOT_PROVEN`, pending Architecture-Lead / Package-B closure adjudication |
-| BuilderMastra != ParMastra same-process isolation | **ARCHITECTURE CURRENT / PACKAGE B NOT QUALIFIED** | split only on material failure |
+| direct Mastra Product Agent | **QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / PACKAGE B CLOSED** | BT-1 and BT-2 passed; BT-3 characterized continuation behavior; BT-3A rejected the native schema hypothesis; BT-3N and BT-4N passed lead adjudication; BT-5N is `QUALIFIED_SAME_PROCESS` for enabled F1 surfaces |
+| BuilderMastra != ParMastra same-process isolation | **QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES** | process split remains a future trigger for a reachable enabled-global bleed |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | bounded F1 model execution/economics | **ARCHITECTURE CURRENT / PACKAGE C DEFER SAFELY** | finite server limits and truthful usage/cost visibility remain; advanced hard monetary enforcement is deferred by 3L-R1 |
-| managed sync/job semantics | **ARCHITECTURE CURRENT / PACKAGE D NOT QUALIFIED** | MAR/Release law current |
+| managed sync/job semantics | **NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION** | MAR/Release law remains current; Package D is not admitted by inheritance |
 | pg-boss 12.26.3 | **PACKAGE D CANDIDATE / NOT AUTHORITY** | one-catch-up law must be proved |
-| deciding F5/observability surfaces | **ARCHITECTURE CURRENT SHAPE / PACKAGE E NOT QUALIFIED** | telemetry-never-authority is already architectural |
+| deciding F5/observability surfaces | **NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION** | telemetry-never-authority remains architectural; Package E is not admitted by inheritance |
 | React/TS/Vite/TanStack paved road | **ARCHITECTURE CURRENT** | first-build scaffold conformance pending |
 | Brain semantic architecture | **ARCHITECTURE CURRENT** | implementation-dependent Discovery/feedback/conformance probes downstream |
 | first-production Linux guest/private ingress | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION** | activation/restore/security proofs remain |
@@ -2317,34 +2320,33 @@ R11 is closed; the remaining 3L route preserves serial proof dependency.
 Current route:
 
 ```text
-project the BT-4N lead-adjudicated pass and return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication
+Package B closure projected from the lead-adjudicated BT-5N Evidence
 ↓
-Package B — Product Agent + Cross-Runtime — IN PROGRESS
+Package B — Product Agent + Cross-Runtime — CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
   B0 EXECUTION COMPLETE / LEAD-ADJUDICATED / PASS
   BT-1 PASS / BT-2 PASS
   BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED
   BT-3A COMPLETE / NATIVE SCHEMA HYPOTHESIS REJECTED
   BT-3N PASS / LEAD-ADJUDICATED / PASS_NATIVE_HITL_OWNER_BOUNDARY
   BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
-  BT-5N EXECUTION = COMPLETE
-  BT-5N EXECUTOR VERDICT = NOT_PROVEN
-  ARCHITECTURE-LEAD / PACKAGE-B CLOSURE ADJUDICATION = PENDING
+  BT-5N PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS
   B1-01..B4-18 PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
-  CX-AGENT-MASTRA-01
-  CX-RUNTIME-ISOLATION-01
-↓ Return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication
-Package C — DEFER SAFELY / NO F1 EXECUTION
+  CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+  CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
+Package C — DEFER SAFELY / NOT EXECUTED
 Package D — Managed Execution
+  NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
   includes CX-MANAGED-JOB-01
 ↓ adjudicate
 Package E — Deciding Evidence
+  NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
 ↓ adjudicate + completeness/deletion check
 ONE final independent Fable review of complete 3L
 ↓
 3L closure
 ```
 
-A package does not start merely because the previous package claimed success; deciding Evidence must be read/adjudicated.
+A package does not start merely because the previous package claimed success; Packages D/E remain NOT EXECUTED and require proportional rederivation before any admission.
 
 ---
 
@@ -2591,6 +2593,6 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 # 50. Current handoff
 
-> **Return BT-5N executor evidence for Architecture-Lead / Package-B closure adjudication. Do not execute Package C, Product implementation, C-018 ratification or merge by inheritance.**
+> **Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C remains DEFER SAFELY / NOT EXECUTED; Packages D/E remain NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION. Do not execute them, Product implementation, C-018 ratification or merge by inheritance.**
 
 Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.

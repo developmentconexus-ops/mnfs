@@ -20,6 +20,21 @@ const [readme, product, architecture, reconciliation, ledger, q0, bt3a, bt3aLead
 
 const staleBt4nProjectionPattern = /BT-4N\b(?:(?!BT-\d+[A-Z]+\b)[^\n])*(?:\bNEXT\b|ADJUDICATION(?:(?!BT-\d+[A-Z]+\b)[^\n])*\bPENDING\b)/iu;
 const historicalBt5nRoutePattern = /Historical pre-execution route, superseded by (?:the executor record above|current executor projection): `BT-5N = NEXT \/ EXECUTION AUTHORIZED`/u;
+const staleBt5nVerdictPattern = /BT-5N[^\n]*\bNOT_PROVEN\b/iu;
+const staleBt5nAdjudicationPattern = /BT-5N\s+(?:EXECUTION|EXECUTOR VERDICT)[^\n]*(?:\n[^\n]*){0,2}\bPENDING\b/iu;
+const stalePackageBPattern = /Package B[^\n]*\bIN PROGRESS\b/iu;
+const stalePackageDEInheritancePattern = /Packages? D(?:\/E| and E)?[^\n]*\bNEXT\b[^\n]*inheritance/iu;
+
+const acceptedCurrentOutcomePatterns = {
+  packageB: /Package B\s*=\s*CLOSED\s*\/\s*LEAD-ADJUDICATED\s*\/\s*QUALIFIED FOR CURRENT F1 TESTED PROPERTIES/iu,
+  bt5n: /BT-5N\s*=\s*PASS\s*\/\s*LEAD-ADJUDICATED\s*\/\s*QUALIFIED_SAME_PROCESS/iu,
+  agent: /CX-AGENT-MASTRA-01\s*=\s*QUALIFIED FOR CURRENT F1 TESTED PROPERTIES/iu,
+  isolation: /CX-RUNTIME-ISOLATION-01\s*=\s*QUALIFIED_SAME_PROCESS(?:\s+FOR ENABLED F1 SURFACES)?/iu,
+  packageC: /Package C\s*=\s*DEFER SAFELY\s*\/\s*NOT EXECUTED/iu,
+  packagesDE: /Packages D\/E\s*=\s*NOT EXECUTED\s*\/\s*REQUIRE PROPORTIONAL REDERIVATION/iu,
+  implementation: /Product implementation\s*=\s*BLOCKED/iu,
+  c018: /C-018\s*=\s*NOT RATIFIED/iu,
+};
 
 for (const staleProjection of [
   'BT-4N NEXT — EXECUTION AUTHORIZED',
@@ -56,34 +71,17 @@ for (const [name, text] of Object.entries({ readme, architecture, reconciliation
     /BT-4N[^\n]*PASS[^\n]*LEAD-ADJUDICATED[^\n]*PASS_NATIVE_SCHEDULE_INGRESS/iu,
     `${name} must project the lead-adjudicated BT-4N PASS`,
   );
-  assert.match(
-    text,
-    /BT-5N EXECUTION\s*=\s*COMPLETE/iu,
-    `${name} must project complete BT-5N executor evidence`,
-  );
-  assert.match(
-    text,
-    /BT-5N EXECUTOR VERDICT\s*=\s*NOT_PROVEN/iu,
-    `${name} must project the BT-5N executor verdict as not proven`,
-  );
-  assert.match(
-    text,
-    /ARCHITECTURE-LEAD\s*\/\s*PACKAGE-B CLOSURE ADJUDICATION\s*=\s*PENDING/iu,
-    `${name} must leave Architecture-Lead / Package-B closure adjudication pending`,
-  );
-  assert.match(text, /Package B[^\n]*(?:IN PROGRESS|NOT CLOSED)/iu,
-    `${name} must keep Package B open`);
-  assert.match(text, /Package C[^\n]*DEFER/iu,
-    `${name} must keep Package C deferred`);
-  assert.match(text, /(?:Product )?implementation[^\n]*BLOCKED/iu,
-    `${name} must keep Product implementation blocked`);
-  assert.match(text, /C-018[^\n]*NOT(?: YET)? RATIFIED/iu,
-    `${name} must keep C-018 unratified`);
-  assert.match(
-    text,
-    /(?:Return BT-5N executor evidence|BT-5N executor evidence)[^\n]*(?:Architecture-Lead|Package-B)[^\n]*adjudication/iu,
-    `${name} must route the BT-5N evidence return for adjudication`,
-  );
+  for (const [outcome, pattern] of Object.entries(acceptedCurrentOutcomePatterns)) {
+    assert.match(text, pattern, `${name} must project accepted current outcome: ${outcome}`);
+  }
+  assert.doesNotMatch(text, staleBt5nVerdictPattern,
+    `${name} must reject stale BT-5N NOT_PROVEN projection`);
+  assert.doesNotMatch(text, staleBt5nAdjudicationPattern,
+    `${name} must reject stale BT-5N adjudication-pending projection`);
+  assert.doesNotMatch(text, stalePackageBPattern,
+    `${name} must reject stale Package B IN PROGRESS projection`);
+  assert.doesNotMatch(text, stalePackageDEInheritancePattern,
+    `${name} must reject inherited Package D/E NEXT routing`);
   assert.match(
     text,
     historicalBt5nRoutePattern,

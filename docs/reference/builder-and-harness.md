@@ -249,6 +249,16 @@ Builder commits ActorRun CANCELLED
 → late output/snapshot is telemetry/quarantine only and never regains authority
 ```
 
+### 9.4.3 Failure and recovery
+
+A normal restart may rebind the same ActorRun only through the existing positive continuation basis: current compatibility, exact physical-incarnation continuity, established quiescence and no material contamination. A missing/unknown/dead physical basis never attaches a replacement sandbox silently; successor work follows the existing admission law, including `FRESH_BASE` where continuation is not positively established.
+
+Cancel, timeout and process loss first narrow further Builder progression, then use best-effort physical interruption. Quiescence means the old sandbox/incarnation can no longer mutate under the prior admission; it is not rollback, and late output remains subject to the custody/quarantine law above.
+
+Disaster restore does not assume in-flight Builder physical continuity. Restored Change/Plan/WorkUnit/ActorRun facts plus Hub-custodied results preserve operational/correctness history; `mastra_builder` and E2B remain reconstructible mechanics rather than required recovery truth.
+
+Canonical Project/Brain Git history that survives beyond the restored Hub cutoff remains authoring/provenance truth. It must be preserved and reconciled against restored owner facts; it neither recreates lost Change/Plan/acceptance/Release authority nor may it be silently discarded. Git-write-capable Builder/authoring paths remain fenced until that reconciliation completes.
+
 ## 9.5 E2B substrate
 
 ```text

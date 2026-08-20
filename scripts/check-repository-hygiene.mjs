@@ -9,8 +9,9 @@ const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: '
 const errors = []
 const forbiddenLegacy = ['m', 'n', 'f', 's'].join('')
 const reviewCandidate = process.env.REVIEW_CANDIDATE_REF || ''
+const temporaryGate = process.env.TEMPORARY_GATE === '1'
 const reviewFile = 'docs/work/current/ai-dialog.md'
-const admittedReviewCandidateWork = new Set([
+const admittedGateWork = new Set([
   'docs/work/current/index.md',
   'docs/work/current/proposal.md',
   'docs/work/current/plan.md'
@@ -26,10 +27,15 @@ if (reviewCandidate) {
   const candidatePaths = execFileSync('git', ['ls-tree', '-r', '--name-only', reviewCandidate], { cwd: root, encoding: 'utf8' })
     .split('\n').filter(Boolean)
   const invalidCandidateWork = candidatePaths.filter(path =>
-    path.startsWith('docs/work/') && !admittedReviewCandidateWork.has(path)
+    path.startsWith('docs/work/') && !admittedGateWork.has(path)
   )
   if (invalidCandidateWork.length) {
     errors.push(`review candidate contains non-admitted docs/work path(s): ${invalidCandidateWork.join(', ')}`)
+  }
+} else if (temporaryGate) {
+  const invalidGateWork = tracked.filter(path => path.startsWith('docs/work/') && !admittedGateWork.has(path))
+  if (invalidGateWork.length) {
+    errors.push(`temporary gate contains non-admitted docs/work path(s): ${invalidGateWork.join(', ')}`)
   }
 } else if (existsSync(resolve(root, 'docs/work'))) {
   errors.push('merge candidate/main must not contain docs/work/**')
@@ -42,8 +48,9 @@ for (const path of tracked) {
   if (/(handoff|dialogue|round|correction-handoff)/i.test(path) && path !== reviewFile) errors.push(`transient path: ${path}`)
   if (/^(ai_dialog|knowledge-migration)\.md$/i.test(path)) errors.push(`temporary root artifact: ${path}`)
 
-  const admittedReviewPath = reviewCandidate && (path === reviewFile || admittedReviewCandidateWork.has(path))
-  if (normalized.startsWith('docs/work/') && !admittedReviewPath) {
+  const admittedReviewPath = reviewCandidate && (path === reviewFile || admittedGateWork.has(path))
+  const admittedTemporaryGatePath = temporaryGate && admittedGateWork.has(path)
+  if (normalized.startsWith('docs/work/') && !admittedReviewPath && !admittedTemporaryGatePath) {
     errors.push(`temporary work path in candidate: ${path}`)
   }
 

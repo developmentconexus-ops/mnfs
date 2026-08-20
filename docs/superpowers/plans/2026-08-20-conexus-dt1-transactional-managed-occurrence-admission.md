@@ -1,3 +1,16 @@
+---
+id: PLAN-CONEXUS-3L-DT1-TRANSACTIONAL-MANAGED-OCCURRENCE-ADMISSION
+title: Conexus DT-1 Transactional Managed-Occurrence Admission Implementation Plan
+document_type: implementation_plan
+form: how_to
+authority: guidance
+status: accepted
+version: 1.0.0
+owners:
+  - developmentconexus-ops
+last_reviewed: 2026-08-20
+---
+
 # Conexus DT-1' Transactional Managed-Occurrence Admission Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -223,7 +236,7 @@ Preferred if Docker is available:
 
 ```bash
 docker pull postgres:17.10-bookworm
-docker image inspect postgres:17.10-bookworm --format '{{json .RepoDigests}}'
+docker image inspect postgres:17.10-bookworm --format "$(printf '%s%s%s' '{' '{json .RepoDigests}' '}')"
 docker run --rm -d --name conexus-dt1p-pg \
   -e POSTGRES_PASSWORD=dt1p \
   -e POSTGRES_DB=conexus_dt1p \

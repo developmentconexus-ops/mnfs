@@ -1,6 +1,6 @@
 # 3L-R3 — Final Technology-Qualification Closure
 
-**Status:** `CLOSED / ARCHITECTURE-LEAD ADJUDICATED / FABLE INCORPORATED / ROOT VERIFICATION BLOCKED BY HOST`
+**Status:** `CLOSED / ARCHITECTURE-LEAD ADJUDICATED / FABLE INCORPORATED`
 
 **Phase:** 3L — Technology Qualification
 
@@ -20,7 +20,7 @@ Non-material Findings   = 6
 New Product requirement = 0
 Architecture reopen     = NO
 Verdict                 = BOUNDED CORRECTION REQUIRED
-Disposition             = CORRECTION APPLIED / ROOT VERIFICATION BLOCKED BY HOST
+Disposition             = CORRECTION APPLIED / ROOT VERIFICATION PASS
 ```
 
 F-01 was accepted as the material current-tree projection and verification-gate blocker. The narrow correction reclassified the old D/E route as historical, projected Package D closure and Package E safe deferral into the current routers, and added the final closure/status routing. No architecture, Product requirement, Package or probe was reopened.
@@ -90,15 +90,15 @@ npm run docs:test
 npm run verify
 ```
 
-Results observed in this worktree before publication:
+Fresh verification environment: WSL Ubuntu Linux filesystem worktree, Node.js `24.18.0`, npm `11.16.0`, `/bin/bash`.
+
+Fresh results:
 
 ```text
 routing = PASS
-docs:test = BLOCKED before documentation tests (`rm` is not recognized by the Windows host)
-verify = BLOCKED during test:unit build (`rm` is not recognized by the Windows host)
+docs:test = PASS (exit 0)
+verify = PASS (exit 0)
 ```
-
-The required fresh root verification did not reach exit 0 because the Windows host lacks the POSIX `rm` command; this environment limitation is recorded and does not change the accepted DT-1' Evidence results.
 
 ## 6. Closure boundaries and next action
 

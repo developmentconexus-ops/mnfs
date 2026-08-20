@@ -7,15 +7,17 @@
 **Método:** DevelopmentConexus Engineering Method v1.0.0  
 **Importante:** Q0 não executa probe, não autoriza product implementation, não constitui C-018 e não autoriza merge do PR #40.
 
-> **Current amendment — 3L-R1:** exact identity/admission and serial adjudication remain current, but unconditional Package execution is superseded. Package B continues through `BT-3N → BT-4N → BT-5N`; Package C = `DEFER SAFELY / NO F1 EXECUTION`; Packages D/E are rederived proportionally before admission.
+> **Current amendments — 3L-R1 + 3L-R2:** exact identity/admission and serial adjudication remain current, but unconditional Package execution is superseded. Package B is closed for its tested F1 properties; Package C = `DEFER SAFELY / NO F1 EXECUTION`; Package D = `REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED`; Package E = `DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE`.
 
 ## Decisão em uma frase
 
-3L abre com uma **qualification stack reproduzível e fail-closed**: cada Package admitido só pode produzir deciding Evidence contra versões/configurações explicitamente pinadas; `latest`, alias mutável, transitive dependency não congelada, package acquisition fora de C-016 ou historical probe não compilado contra current authority tornam a prova inadmissível. Serial adjudication permanece; 3L-R1 supersede execução incondicional de packages que não têm questão load-bearing atual.
+3L abre com uma **qualification stack reproduzível e fail-closed**: cada Package admitido só pode produzir deciding Evidence contra versões/configurações explicitamente pinadas; `latest`, alias mutável, transitive dependency não congelada, package acquisition fora de C-016 ou historical probe não compilado contra current authority tornam a prova inadmissível. Serial adjudication permanece; 3L-R1/3L-R2 supersede execução incondicional de packages que não têm questão load-bearing atual e compilam Package D para um único probe de composição.
 
 ---
 
 ## 1. Q0 outcome
+
+Historical Q0 opening state:
 
 ```text
 3L                                  = OPEN / IN PROGRESS
@@ -28,7 +30,7 @@ prior architecture reopen           = NONE
 new module / record / DB / workflow = 0
 ```
 
-Q0 fecha **identidade e admission da prova**, não o resultado das tecnologias.
+Current route is projected by `3L-R1` + `3L-R2`; Q0 itself closes **identidade e admission da prova**, not Package results.
 
 ```text
 technology selected != technology qualified
@@ -48,6 +50,7 @@ DevelopmentConexus Engineering Method v1.0.0
 → 3A-R8 Project Baseline/change law when applicable
 → 3A-R9 managed-job law
 → 3A-R10 current realization + historical-probe compilation law
+→ current 3L-R1 / 3L-R2 amendment applicable to the Package
 → exact current 3H/3I/3J authority for the property
 → this Q0 manifest
 → Package-specific criteria/evidence
@@ -116,13 +119,15 @@ Therefore substrate probes requiring PostgreSQL use **17.10** unless a Package e
 PG18 merely newer → NOT a qualification reason
 ```
 
+`DT-1'` retains PostgreSQL `17.10` as its deciding database pin and must record the physical image/runtime identity actually executed, not only a mutable image tag.
+
 ---
 
 ## 5. Mastra qualification candidate stack
 
 ### 5.1 Direct pins
 
-Current stable candidate set for 3L:
+Current stable candidate set for executed Package-A/B evidence remains:
 
 ```text
 @mastra/code-sdk = 1.1.2   # A3 native Codex OAuth surface
@@ -161,16 +166,7 @@ The Package A candidate family was explicitly repinned before A3 live execution 
 
 ### 5.2 Transitive lock closure
 
-Before Package A/B execution, npm acquisition must produce one exact committed/spike-local lock closure. At that point record at least:
-
-```text
-resolved e2b SDK version + integrity
-all @mastra/* resolved versions + integrity
-model/provider SDKs reachable by the selected path
-lockfile digest
-```
-
-A semver range in an upstream package is **not** deciding identity.
+Before any Package dependency acquisition, npm must produce one exact spike-local lock closure and record the directly relevant transitive identities/integrities.
 
 Current Package A latest-stable closure after approved repin:
 
@@ -184,13 +180,23 @@ e2b SDK          = 2.40.0
 package-lock SHA-256 = 7f61c6c74ad92b23abd0fb44353bc63f444ab01dd3b62d23cec7d7de4b1051d5
 ```
 
-The physical E2B SDK remained `2.40.0` across the repin. Package A requalifies changed Mastra surfaces separately from historical provider-live evidence rather than relabeling old evidence as new bytes.
+Exact Package-B lock used by current source adjudication:
+
+```text
+@mastra/core   = 1.56.0
+@mastra/memory = 1.25.0
+@mastra/pg     = 1.19.0
+package-lock SHA-256 = 5e8b2b4ea2ef5ae5676652cdbafd8c7c284be68cfc445de92950b2decdc8a4f0
+@mastra/observability = ABSENT
+```
+
+3L-R2 therefore names `@mastra/observability` as a future realization dependency only: VERSION UNPINNED / C-016 admission NOT PERFORMED / no Package-E acquisition before a real first-build consumer.
 
 ---
 
 ## 6. Supply-chain admission is mandatory
 
-Q0 does not install the candidate dependencies. Package acquisition remains subject to C-016 dependency admission, frozen lockfile/integrity and explicit scope.
+Q0 does not authorize installation of candidate dependencies. Package acquisition remains subject to C-016 dependency admission, frozen lockfile/integrity and explicit scope.
 
 Known June-2026 Mastra compromised versions are an explicit negative fixture/deny set, including at minimum:
 
@@ -203,6 +209,8 @@ Known June-2026 Mastra compromised versions are an explicit negative fixture/den
 Any acquisition that resolves a known malicious release or the `easy-day-js` malicious dependency family is **FAIL / no probe execution**.
 
 A newly published release is never adopted merely because its dist-tag says `latest`. Exact acquisition must satisfy current C-016 supply-chain gates before it becomes an executable probe pin.
+
+For Package D this rule applies to the exact `pg-boss 12.26.3` + direct probe `pg 8.22.0` lock closure before `DT-1'` executes. For Package E, no `@mastra/observability` acquisition is authorized by 3L-R2.
 
 ---
 
@@ -231,117 +239,92 @@ floating alias without resolved identity evidence
 provider default model
 ```
 
-Package C may only claim invoice-bound spend protection for exact qualified provider/model/request classes under 3I-03.
+Package C is currently `DEFER SAFELY / NO F1 EXECUTION` under 3L-R1. `DT-1'` has zero model/provider calls.
 
 ---
 
-## 8. Model-call interception facts to carry into Package C
+## 8. Model-call interception facts carried forward
 
-Current Mastra source/docs provide two facts worth testing rather than trusting:
+Current Mastra source/docs provide two historical facts retained for downstream realization when the relevant model-spend trigger returns:
 
 1. Agent processor retries are configurable and can be disabled with `maxProcessorRetries = 0`; some error-processor configurations may otherwise enable retry behavior.
 2. `processLLMRequest` sees the model request before provider dispatch and is a plausible interception seam, but **plausible != qualified**.
 
 Current Mastra output exposes `usage`, `totalUsage`, `providerMetadata` and response metadata. Missing component token fields can remain `undefined`, while aggregate `totalTokens` may be synthesized from missing components.
 
-Therefore:
-
-```text
-framework aggregate totalUsage/totalTokens
-→ diagnostics/cross-check only until Package C proves missingness safety
-
-owner downward settlement
-→ requires exact qualified usage extraction preserving MISSING != ZERO
-```
-
-No model proxy/token broker is authorized by Q0.
+No model proxy/token broker is authorized by Q0 or 3L-R1.
 
 ---
 
 ## 9. Builder Observational Memory candidate
 
-Package A compares:
+Package A already evaluated:
 
 ```text
 A0 = persistent Change-scoped thread + OM OFF
 A1 = same shape + OM ON
 ```
 
-For A1, `@mastra/memory 1.25.0` is the current candidate package pin after the approved latest-stable repin.
-
-Current OM surfaces include model-bearing observer/reflector work, persisted observational state and async/buffering controls. Therefore OM cannot be enabled by a pure quality score alone.
-
-A1 must satisfy simultaneously:
+Current adjudicated result:
 
 ```text
-net Builder quality/economic gain
-3H-01 authority-currentness law
-3H-03 Builder/PAR isolation law
-3I-03 owner-local model-spend law
-restart/resume honesty
+CX-BUILDER-COGNITION-01 = EVALUATED / NOT_PROVEN FOR ENABLEMENT / KEEP OM OFF
 ```
 
-Verdict remains:
-
-```text
-MUST EVALUATE
-!= MUST ENABLE
-```
+No Package-D/E routing reopens that result.
 
 ---
 
 ## 10. E2B qualification identity
 
-Package A must record the exact live E2B facts used for every run:
+Package-A E2B deciding evidence remains bound to its recorded exact live identities. No E2B durable credential, model-provider credential, ERP credential, Git write credential or Hub DB credential may enter the guest.
 
-```text
-E2B account/tier facts relevant to limits
-region when relevant
-template ID + template digest/hash
-physical sandboxId
-envd/runtime identity when exposed
-CPU / memory / disk allocation
-network config
-allowPublicTraffic
-allowOut / denyOut or equivalent policy
-timeout / lifecycle config
-pause/resume/stop/destroy path
-```
-
-E2B account pricing/credit or historical one-hour assumptions are **not architecture** and are re-observed at execution.
-
-No E2B durable credential, model-provider credential, ERP credential, Git write credential or Hub DB credential may enter the guest.
+`DT-1'` uses no E2B; its Evidence must assert `e2bCalls = 0`.
 
 ---
 
-## 11. Managed-job candidate pin
+## 11. Managed-job candidate pin — amended by 3L-R2
 
-Package D starts with:
+Package D candidate remains:
 
 ```text
 pg-boss = 12.26.3
+PostgreSQL = 17.10
+Node = 24.18.0
 ```
 
-Reason:
+`3L-R2` compiles the load-bearing question to:
 
-- it remains aligned with the approved Node/Postgres topology;
-- supports transactional job creation and queue/schedule mechanics useful to 3A-R9;
-- it is the incumbent candidate, not schedule authority;
-- Q0 does not chase a just-published package revision merely for recency.
+```text
+DT-1' — Transactional Managed-Occurrence Admission
+```
 
-Known deciding hazard preserved:
+Current candidate placement/configuration:
 
-> native schedule wake/catch-up during downtime is NOT assumed; current upstream discussion demonstrates that missed scheduled execution during service outage is a real failure class.
+```text
+pg-boss database = hub_control scratch equivalent in probe
+pg-boss schema   = existing mar owner schema
+createSchema     = false
+migrate          = false
+schedule         = false
+retryLimit       = 0
+```
 
-Therefore Package D must prove the Conexus `one catch-up, not N slots` law using the selected mechanics or add the smallest owner-side reconciliation sufficient to satisfy 3A-R9.
+Package D no longer probes or adopts native cron catch-up, delayed future occurrences or rolling future JobRuns. Recurrence is owner-side freshness reconciliation; the probe is limited to owner+queue same-transaction composition, rollback, fresh-process rediscovery, concurrency and queue-not-authority controls.
 
-No outbox/dispatcher/workflow framework exists before that proof demands it.
+Exact `DT-1'` dependency acquisition/execution remains blocked until explicit operator execution authorization after review of the derived Codex plan.
+
+No outbox/dispatcher/workflow/scheduler framework exists before evidence demands it.
 
 ---
 
-## 12. Observability candidate surface
+## 12. Observability candidate surface — amended by 3L-R2
 
-Package E does **not** require a mandatory OTel Collector, OtelBridge, Sentry, Spotlight or E2B OTLP push.
+Package E remains:
+
+```text
+DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+```
 
 Baseline deciding paths remain:
 
@@ -352,62 +335,79 @@ Hub owner facts
 + app-under-test/browser/backend observation where required
 ```
 
-OTel is preferred observational plumbing where useful, but exporter/backend versions are pinned only if Package E actually needs them for a criterion.
+Exact Package-B source/lock now establishes:
 
-Missing required evidence:
+```text
+@mastra/core 1.56.0
+→ public observability contracts/types + NoOp path
+→ concrete full observability implementation NOT present in core lock
+
+@mastra/observability
+→ named later realization dependency
+→ unpinned/unadmitted until first real acquisition under C-016/Q0
+```
+
+A future Conexus exporter uses the public Mastra observability seam and server-side trust/correlation binding. `MastraStorageExporter` is not a Conexus OBS read path. Missing required evidence remains:
 
 ```text
 → NOT_PROVEN / INCONCLUSIVE
 -X-> PASS
 ```
 
+No mandatory OTel Collector, OtelBridge, Sentry, Spotlight or E2B OTLP push is created by 3L-R2.
+
 ---
 
-## 13. Serial adjudication — route amended by 3L-R1
+## 13. Serial adjudication — current route after 3L-R1 + 3L-R2
 
 3L keeps one operator-visible adjudication line, but a deferred package is not executed for sequence ceremony:
 
 ```text
 Q0 COMPLETE
 ↓
-Package A — Builder Substrate + Cognition
+Package A — COMPLETE
 ↓
-adjudication
+Package B — CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 ↓
-Package B — Product Agent + Cross-Runtime / BT-3N NEXT
-↓ Architecture-Lead adjudication
 Package C — DEFER SAFELY / NO F1 EXECUTION
 ↓
-Package D — REDERIVE PROPORTIONALLY AFTER B
-↓ adjudication when admitted
-Package E — REDERIVE PROPORTIONALLY AFTER B/D
+Package D — REDERIVED / DT-1' ROUTE ADMITTED
+  ↓
+  review exact Codex execution plan
+  ↓
+  explicit operator execution authorization REQUIRED
+  ↓
+  DT-1' execution
+  ↓
+  Architecture-Lead evidence adjudication
 ↓
-adjudication + internal completeness/deletion check
+Package E — DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 ↓
-ONE final independent Fable review of the complete 3L package
+3L completeness/deletion check and any final independent review required by current router
 ↓
 3L closure
 ```
 
-No Package automatically starts from the success claim of the previous one without its evidence being read/adjudicated.
+No Package automatically starts from the success claim of the previous one without its evidence/route being read and adjudicated. `DT-1' ROUTE ADMITTED` is not execution authorization.
 
 ---
 
 ## 14. Package admission record
 
-Before each Package first execution, capture a bounded record with:
+Before Package-D first execution, capture a bounded record with:
 
 ```text
 Q0 revision / commit
+3L-R2 revision / commit
 current repo HEAD
-exact direct dependency pins
-resolved lock digest
-external provider/runtime identity
-model/provider pins when applicable
-current compiled probe criteria
-negative fixtures
-expected evidence
+exact pg-boss / pg direct dependency pins
+resolved transitive lock digest/integrities
+PostgreSQL 17.10 physical runtime/image identity
+current compiled DT-1' criteria
+negative fixtures R1..R3
+expected Evidence P1..P6
 known UNKNOWN/PARTIAL facts
+explicit zero external-effect surface
 ```
 
 If any listed identity drifts mid-package:
@@ -447,12 +447,12 @@ Framework preference, new release availability or benchmark curiosity is not a r
 
 ## 16. Q0 non-goals
 
-Q0 creates none of:
+Q0 and its current amendments create none of:
 
 ```text
 product implementation
-probe harness implementation
-new package dependency in the product
+Product MAR implementation
+new Product package dependency merely because a probe uses it
 TechnologyRegistry domain
 provider registry
 model router
@@ -460,27 +460,33 @@ workflow/scheduler engine
 memory service
 model proxy/token broker
 new domain record/schema/database
-Fable review cycle
+outbox/dispatcher
+observability backend
 ```
 
-The candidate versions above are **qualification identities**, not permanent product architecture.
+Candidate versions are **qualification identities**, not permanent Product architecture.
 
 ---
 
-## 17. Final Q0 outcome
+## 17. Current Q0 projection
 
 ```text
 3L-Q0 = APPROVED / COMPLETE
-3L = OPEN / IN PROGRESS
-current = Package B — Product Agent + Cross-Runtime / BT-3N NEXT
+3L = IN PROGRESS
+3L-R1 = APPROVED / CURRENT
+3L-R2 = APPROVED / CURRENT / OPERATOR RATIFIED 2026-08-20
 
-Package A executed:
-  CX-SBX-E2B-01 compiled against current authority
-  CX-BUILDER-MASTRA-01
-  CX-BUILDER-COGNITION-01
+Package A = COMPLETE
+Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+Package C = DEFER SAFELY / NO F1 EXECUTION
+Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 
-Package A not executed by Q0 = TRUE
 Product code authorization = FALSE
 C-018 = NOT YET RATIFIED
 PR #40 merge = explicit operator authorization required
 ```
+
+Exact next gate:
+
+> Review the filed Codex `DT-1'` implementation plan against 3L-R2. Only a new explicit operator authorization may begin Package-D dependency acquisition and probe execution.

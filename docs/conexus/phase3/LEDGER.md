@@ -1,11 +1,11 @@
 # Fase 3 — Live Ledger
 
 **Status geral:** EM ANDAMENTO  
-**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 CLOSED — APPROVED / OPERATOR RATIFIED` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / 3L-R1 CURRENT / PACKAGE A COMPLETE / PACKAGE B CLOSED — LEAD-ADJUDICATED — QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-5N QUALIFIED_SAME_PROCESS / PACKAGE C DEFER SAFELY / NOT EXECUTED / PACKAGES D/E NOT EXECUTED — REQUIRE PROPORTIONAL REDERIVATION`
-**Fase atual:** `3L — Technology Qualification` — **IN PROGRESS / Q0 COMPLETE / 3L-R1 APPROVED-CURRENT / PACKAGE A COMPLETE / PACKAGE B CLOSED — LEAD-ADJUDICATED — QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED — PASS_NATIVE_HITL_OWNER_BOUNDARY / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS / PACKAGE C DEFER SAFELY — NOT EXECUTED / PACKAGES D/E NOT EXECUTED — REQUIRE PROPORTIONAL REDERIVATION**; `3A-R11 — Whole-Product Authority Rebaseline` = **CLOSED / APPROVED / OPERATOR RATIFIED em 2026-08-18**; [3L-R1 — Framework-Native Proportional Qualification Rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md) = **APPROVED / CURRENT / OPERATOR RATIFIED em 2026-08-19**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE / ROUTE PARTIALLY SUPERSEDED BY 3L-R1**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**
+**Estado:** `3A CONTÍNUA / 3A-R6 + 3A-R7 + 3A-R8 + 3A-R9 + 3A-R10 APROVADAS / 3A-R11 CLOSED — APPROVED / OPERATOR RATIFIED` · `3B CLOSED` · `3C CLOSED / APROVADA` · `3D CLOSED / APROVADA` · `3E CLOSED / APROVADA` · `3F CLOSED / APROVADA` · `3G CLOSED / APROVADA / 3G-01..3G-08 + 3G-R1 APROVADAS` · `3H CLOSED / APROVADA / 3H-01..3H-03 + 3H-R1 APROVADAS` · `3I CLOSED / APROVADA / 3I-01..3I-05 + 3I-R1 APROVADAS` · `3J CLOSED / APROVADA / 3J-01..3J-03 + 3J-R1 APROVADAS` · `3K CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS` · `3L IN PROGRESS / 3L-R1 + 3L-R2 CURRENT / PACKAGE A COMPLETE / PACKAGE B CLOSED — LEAD-ADJUDICATED — QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-5N QUALIFIED_SAME_PROCESS / PACKAGE C DEFER SAFELY / NOT EXECUTED / PACKAGE D REDERIVED — DT-1' ROUTE ADMITTED — EXECUTION NOT YET AUTHORIZED / PACKAGE E DEFER SAFELY — NO PRE-C-018 RUNTIME PROBE`
+**Fase atual:** `3L — Technology Qualification` — **IN PROGRESS / Q0 COMPLETE / 3L-R1 + 3L-R2 APPROVED-CURRENT / PACKAGE A COMPLETE / PACKAGE B CLOSED — LEAD-ADJUDICATED — QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED — PASS_NATIVE_HITL_OWNER_BOUNDARY / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS / PACKAGE C DEFER SAFELY — NOT EXECUTED / PACKAGE D REDERIVED — DT-1' ROUTE ADMITTED — EXECUTION NOT YET AUTHORIZED / PACKAGE E DEFER SAFELY — NO PRE-C-018 RUNTIME PROBE**; `3A-R11 — Whole-Product Authority Rebaseline` = **CLOSED / APPROVED / OPERATOR RATIFIED em 2026-08-18**; [3L-R1 — Framework-Native Proportional Qualification Rebaseline](3L-R1-framework-native-proportional-qualification-rebaseline.md) = **APPROVED / CURRENT / OPERATOR RATIFIED em 2026-08-19**; [3L-R2 — Managed Execution & Deciding Evidence Proportional Rederivation](3L-R2-managed-execution-deciding-evidence-proportional-rederivation.md) = **APPROVED / CURRENT / OPERATOR RATIFIED em 2026-08-20**; [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) = **APPROVED / COMPLETE / ROUTE AMENDED BY 3L-R1 + 3L-R2**; `3A-R10 — Pre-Implementation Convergence & Realization Routing` = **APPROVED / CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION**
 **Base canônica da Fase 3:** `354f44219fb5970bb9233976773db90d2102ae7a`  
 **Autoridade anterior:** C-000..C-017  
-**Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto.
+**Importante:** este ledger não constitui C-018, não encerra a Fase 3 completa e não autoriza implementação de produto nem a execução de `DT-1'` por herança.
 
 Este arquivo é o **router/status authority** vivo da Fase 3. Detalhe normativo permanece nos documentos de decisão linkados; review/dialogue files continuam não-autoritativos salvo conteúdo explicitamente ratificado em authority aprovada.
 
@@ -113,6 +113,12 @@ C-000..C-017
 3L-Q0
 → Technology Qualification Manifest / exact probe pins + serial package admission
 
+3L-R1
+→ Framework-native Package-B / Package-C proportional realization routing
+
+3L-R2
+→ Package-D / Package-E proportional rederivation; DT-1' question admitted, execution separately gated
+
 este LEDGER
 → status / navigation authority da Fase 3
 ```
@@ -130,7 +136,7 @@ AGENTS.md
 → deciding Evidence/current implementation somente quando material
 ```
 
-Nenhuma conversa cria authority.
+Nenhuma conversa cria authority. A ratificação do operador só vira durable authority quando projetada em decisão aceita/current tree.
 
 ---
 
@@ -149,7 +155,7 @@ Nenhuma conversa cria authority.
 | 3I — Security / Authority Architecture | **CLOSED / APROVADA** | [3I-R1](3I-R1-security-authority-architecture-final-closure.md); reabrir apenas por Finding material |
 | 3J — Deployment / Operations Architecture | **CLOSED / APROVADA** | reabrir apenas por Finding material |
 | 3K — Frontend / Product Architecture | **CLOSED / APROVADA / 3K-01..3K-04 + 3K-R1 APROVADAS** | [3K-R1](3K-R1-frontend-product-architecture-final-closure.md); reabrir apenas por Finding material |
-| 3L — Technology Qualification | **IN PROGRESS / 3L-R1 CURRENT / PACKAGE A COMPLETE / PACKAGE B CLOSED — LEAD-ADJUDICATED — QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-5N QUALIFIED_SAME_PROCESS / PACKAGE C DEFER SAFELY / NOT EXECUTED / PACKAGES D/E NOT EXECUTED — REQUIRE PROPORTIONAL REDERIVATION** | [3L-R1](3L-R1-framework-native-proportional-qualification-rebaseline.md); fresh BT-5N Evidence is recorded; `CX-RUNTIME-ISOLATION-01` is qualified for enabled F1 surfaces and downstream obligations remain routed to first-build conformance, 3M, Package E and 3N |
+| 3L — Technology Qualification | **IN PROGRESS / 3L-R1 + 3L-R2 CURRENT / PACKAGE A COMPLETE / PACKAGE B CLOSED — LEAD-ADJUDICATED — QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-5N QUALIFIED_SAME_PROCESS / PACKAGE C DEFER SAFELY / NOT EXECUTED / PACKAGE D REDERIVED — DT-1' ROUTE ADMITTED — EXECUTION NOT YET AUTHORIZED / PACKAGE E DEFER SAFELY — NO PRE-C-018 RUNTIME PROBE** | Review [3L-R2](3L-R2-managed-execution-deciding-evidence-proportional-rederivation.md) + Codex DT-1' plan; explicit operator execution authorization is the next gate |
 | 3M — Failure & Recovery Architecture | NÃO INICIADA | structural recovery sufficiency sweep |
 | 3N — Architecture Verification | NÃO INICIADA | independent global coherence review |
 | 3O — Vertical Architecture Proof Contract | NÃO INICIADA | contract-only end-to-end proof target |
@@ -205,7 +211,7 @@ Critical path ratificado:
 
 job/v1
 → RESOLVED FOR FIRST VERTICAL by 3A-R9
-→ managed sync only; MANAGED_JOB Gateway surface; Release-derived schedule; no generic automation/workflow runtime
+→ managed sync only; MANAGED_JOB Gateway surface; Release-derived schedule meaning; no generic automation/workflow runtime
 
 3L
 → IN PROGRESS
@@ -227,14 +233,16 @@ job/v1
 → CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 → Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 → Package C = DEFER SAFELY / NOT EXECUTED
-→ Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+→ 3L-R2 = APPROVED / CURRENT / OPERATOR RATIFIED
+→ Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+→ Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 → Product implementation = BLOCKED
 → C-018 = NOT RATIFIED
 → B1-01..B4-18 = PRESERVED DOWNSTREAM PROOF INVENTORY / NOT LITERAL PRE-C-018 EXECUTION
 → BT-5N fresh Evidence accepted by Architecture-Lead closure adjudication
 → load-bearing qualification probes only
-→ includes CX-MANAGED-JOB-01 from 3A-R9
-→ routing refined by 3A-R10
+→ CX-MANAGED-JOB-01 current bounded question = DT-1'
+→ routing refined by 3A-R10 + 3L-R1 + 3L-R2
 
 3M
 → do existing durable facts suffice for recovery?
@@ -246,7 +254,7 @@ job/v1
 → contract-only vertical architecture proof
 ```
 
-Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.
+Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`. Likewise, historical `Packages D/E = REQUIRE PROPORTIONAL REDERIVATION` is superseded by 3L-R2; it does not authorize Package-D execution.
 
 C-018 fecha Architecture & System Design, mas **não autoriza product code**:
 
@@ -326,6 +334,8 @@ Lei essencial:
 
 > `job/v1` não é um mini workflow engine nem arbitrary Project code executando dentro do Hub. O primeiro profile admitido coordena sync por capabilities governadas; credentials/network/DB authority permanecem no Gateway/owners. A Release pinada governa o que pode produzir ocorrências futuras e o scheduler é projeção reconstruível. Cada `job_run` pina exact Release/job revision, single-flight evita overlap e downtime gera no máximo um catch-up do sync, nunca replay de todos os slots perdidos.
 
+3L-R2 refina somente a realization temporal/queue do primeiro sync: F1 usa owner-side freshness reconciliation e admissão imediata quando due; não mantém rolling future JobRun, não enumera nominal missed slots e não usa pg-boss cron como admission authority. Para version locking, o JobRun torna-se admitted/in-flight no durable admission commit; o state físico `RUNNING` ainda começa no worker.
+
 3A-R9 adiciona somente a bounded surface `MANAGED_JOB` a 3D-02 e a qualification `CX-MANAGED-JOB-01` ao 3L; não reabre 3C/3E nem cria novo domain.
 
 ### 2.5 3A-R10 — Pre-Implementation Convergence & Realization Routing — APPROVED
@@ -350,7 +360,7 @@ first-build implementation-dependent probes = mandatory downstream, not pulled i
 post-C-018 Realization Planning = REQUIRED / DERIVED-ONLY
 ```
 
-3L passa a executar cinco packages:
+3L possui os cinco package families históricos, agora roteados proporcionalmente:
 
 ```text
 A — Builder Substrate + Cognition
@@ -368,9 +378,9 @@ Regra essencial:
 
 ### 2.6 3L-Q0 — Technology Qualification Manifest — APPROVED / COMPLETE
 
-[3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) foi ratificada pelo operador em **2026-08-18** e abre formalmente 3L sem executar nenhum probe.
+[3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) foi ratificada pelo operador em **2026-08-18** e abriu formalmente 3L sem executar nenhum probe.
 
-Resultado:
+Current projection after 3L-R1 + 3L-R2:
 
 ```text
 3L = OPEN / IN PROGRESS
@@ -378,16 +388,17 @@ Q0 = APPROVED / COMPLETE
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED — PASS_NATIVE_HITL_OWNER_BOUNDARY / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS
 Package C = DEFER SAFELY / NOT EXECUTED
-Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 product implementation = BLOCKED
 prior architecture reopen = NONE
 ```
 
-Q0 congela **identidade de qualificação, não arquitetura permanente**: Node/npm/TypeScript do probe host, PostgreSQL 17 current-minor probe pin, exact candidate pins de Mastra/Memory/PG/E2B, supply-chain admission, exact model/provider/pricing identity antes de chamadas billable e pg-boss como incumbent candidate. A antiga execução incondicional `A → B → C → D → E` foi parcialmente superseded por 3L-R1: serial adjudication permanece, C é deferred e D/E são rederivados antes de admissão. `latest`, alias mutável, semver range/transitive dependency não congelada e historical criterion não compilado contra current authority são deciding identities inadmissíveis.
+Q0 congela **identidade de qualificação, não arquitetura permanente**: Node/npm/TypeScript do probe host, PostgreSQL 17 current-minor probe pin, exact candidate pins, supply-chain admission, exact model/provider/pricing identity antes de chamadas billable e pg-boss como incumbent candidate. A antiga execução incondicional `A → B → C → D → E` está superseded por 3L-R1 + 3L-R2: serial adjudication permanece, C/E são deferred e D possui exatamente um bounded composition probe, separadamente execution-gated. `latest`, alias mutável, semver range/transitive dependency não congelada e historical criterion não compilado contra current authority são deciding identities inadmissíveis.
 
-Q0 não instala dependências, não implementa probe harness e não executa Package A.
+Q0 não autoriza dependency acquisition ou execution por si só.
 
 ### 2.7 3A-R11 — Whole-Product Authority Rebaseline — CLOSED / APPROVED / OPERATOR RATIFIED
 
@@ -405,10 +416,48 @@ Round-3.1 projection correction = APPLIED / VERIFIED
 final GPT authority review = COMPLETE / PASS
 R11-H operator ratification = APPROVED / 2026-08-18
 R11 = CLOSED / ACCEPTED
-Package B = NEXT / NOT STARTED
 ```
 
-As correções não reabriram 3B–3K e não criaram requirement de produto, owner, module, durable record, database ou processo. A final GPT authority review verificou a projeção, e o operador ratificou os blobs exatos do current tree. Package B agora é apenas o próximo pacote a ser rederivado/admitido; não foi iniciado. Implementação de produto permanece bloqueada.
+As correções não reabriram 3B–3K e não criaram requirement de produto, owner, module, durable record, database ou processo. A final GPT authority review verificou a projeção e o operador ratificou os blobs exatos do current tree daquela etapa. Estado 3L posterior é governado por 3L-R1 + 3L-R2, não pelo antigo `Package B = NEXT` daquele checkpoint.
+
+### 2.8 3L-R2 — Managed Execution & Deciding Evidence Proportional Rederivation — APPROVED / CURRENT
+
+[3L-R2 — Managed Execution & Deciding Evidence Proportional Rederivation](3L-R2-managed-execution-deciding-evidence-proportional-rederivation.md) foi ratificada pelo operador em **2026-08-20** após rederivação Architecture-Lead, independent Fable challenge e adjudicação dos Findings.
+
+Resultado:
+
+```text
+Package D = REDERIVED / ONE BOUNDED PRE-C-018 COMPOSITION PROBE REQUIRED
+probe = DT-1' — Transactional Managed-Occurrence Admission
+DT-1' route = ADMITTED
+DT-1' execution = NOT YET AUTHORIZED
+
+pg-boss 12.26.3 physical candidate
+→ hub_control database
+→ existing mar owner schema
+→ private substrate objects, not new Conexus durable records
+→ vendor DDL folded into the single hub_control migration lineage
+→ runtime createSchema=false / migrate=false / schedule=false
+
+F1 recurrence
+→ startup + process-local wake only
+→ MAR owner reconciliation from served Release + exact job config + durable sync freshness
+→ one immediate admitted JobRun when due
+→ no rolling future JobRun
+→ no nominal missed-slot walk
+
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+@mastra/observability = named later realization dependency / UNPINNED / C-016 admission not performed
+MastraStorageExporter = diagnostics-only, never Conexus OBS read path
+
+new Product requirement/module/record/schema/database/scheduler/outbox/OBS backend = 0
+Product implementation = BLOCKED
+C-018 = NOT RATIFIED
+```
+
+`DT-1'` testa apenas PostgreSQL 17.10 + pg-boss 12.26.3 composition: owner+queue atomic commit, rollback, fresh-process rediscovery, owner-side race fence e queue-not-authority RED→GREEN controls. Não testa Product MAR, real sync/ETL, Gateway, Release, Sankhya, model/provider/E2B, cron, delayed occurrence, cancel/timeout ou 3M recovery.
+
+Exact next gate = operator review of the derived Codex plan followed by a **new explicit DT-1' execution authorization**. Git staging/commit/push remain separately gated.
 
 ---
 
@@ -497,6 +546,8 @@ mastra_builder / mastra_par isolated substrate stores
 no shared/common schema
 no cross-module table/internal reads
 ```
+
+3L-R2 does not add a 14th schema or 47th durable record class: pg-boss vendor tables/functions are private substrate objects under the existing `mar` schema and remain non-authoritative mechanics.
 
 ---
 
@@ -1146,7 +1197,7 @@ RPO <= 6h / RTO <= 8h; sem PITR/replication/second provider/backup platform
 cross-store atomic snapshot = REJECT
 ```
 
-3J-02 protege a plataforma Conexus e seus Projects; Metal Nobre é somente first-deployment evidence e nenhum ERP/integration vira backup truth model. **C-001 permanece a product vision authority.**
+3J-02 protege a plataforma Conexus e seus Projects; Metal Nobre é somente first-deployment evidence e nenhum ERP/integration vira backup truth model. **C-001 permanece product vision authority.**
 
 ### 11.3 3J-03 — Platform lifecycle / secrets / stop / availability laws
 
@@ -1218,7 +1269,7 @@ Review provenance, não-autoritativa:
 
 ## 12. Open findings / routed work after 3I-R1
 
-Estes itens não reabrem fases anteriores automaticamente. 3A-R6 + 3A-R10 classificam quando cada item volta ao critical path.
+Estes itens não reabrem fases anteriores automaticamente. 3A-R6 + 3A-R10 + current 3L amendments classificam quando cada item volta ao critical path.
 
 | Finding / questão | Owner posterior |
 |---|---|
@@ -1233,11 +1284,11 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 + 3A-R10 classi
 | CredentialBackend exact encrypted backing primitive/path + host root-key custody | 3I-02 law closed; implementation/3J; no new record/schema/database silently |
 | guest telemetry capability pause/resume expiry/scope transport proof | implementation/3L under 3I-02/3I-05 |
 | orphan encrypted backing cleanup/repair if selected realization can produce it | 3M/3J/implementation under 3I-02 |
-| Builder/PAR model-call pre-provider interception + retry/fallback neutralization | 3L/implementation under 3I-03 — MUST QUALIFY |
-| provider usage extraction preserving MISSING != ZERO | 3L under 3I-03 — MUST QUALIFY |
-| provider/model/request qualified cost-envelope proof | 3L under 3I-03 — MUST QUALIFY |
-| model-bearing optional feature sweep for hidden billable calls | 3L under 3I-03; current baseline features budgeted-or-disabled |
-| Builder long-context / Observational Memory ON×OFF evaluation | **3L Package A — `CX-BUILDER-COGNITION-01` MUST EVALUATE; enablement only on deciding evidence** |
+| Builder/PAR model-call pre-provider interception + retry/fallback neutralization | downstream trigger under 3I-03 / Package C currently DEFER SAFELY |
+| provider usage extraction preserving MISSING != ZERO | downstream trigger under 3I-03 / first-build where current F1 path needs it |
+| provider/model/request qualified cost-envelope proof | DEFER SAFELY until 3L-R1 reopen trigger |
+| model-bearing optional feature sweep for hidden billable calls | first-build/realization under 3I-03; current baseline features budgeted-or-disabled |
+| Builder long-context / Observational Memory ON×OFF evaluation | **RESOLVED by Package A: EVALUATED / KEEP OM OFF** |
 | model-call reservation inclusion in C-013 owner-local admission coherence proof | 3N under 3I-03 + 3H-R1 |
 | Product Agent browser/workspace/code execution trust/egress if first consumer enables it | **3K-04 confirms REJECT/DEFER by default; Decision Loop / 3I-05 / 3L on first named consumer** |
 | whole-Hub emergency stop physical procedure / fail-closed ingress-process stop | **RESOLVED by 3J-03**; pre-production drill permanece gate (3I-01/3J-03/3J-R1) |
@@ -1253,8 +1304,8 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 + 3A-R10 classi
 | `hub_control` PostgreSQL role/isolation properties | **RESOLVED by 3I-05 at property level**; exact LOGIN/role/GRANT/pool spelling → Realization Planning |
 | `hub_control` owner-capability negative privilege matrix | Realization Planning + 3N/3O proof under 3I-05 |
 | current-authority serialization × owner-isolation combined proof (3I-R1 CR-1) | **Realization Planning + 3N/3O**; broad cross-owner privilege/new authority state requirement → Decision Loop |
-| cross-owner transaction profiles / audit append mechanism | Realization Planning under closed 3E/3I-05 properties; third case → Decision Loop |
-| Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | 3L qualification-triggered; one-process baseline fixado por 3J-01 |
+| cross-owner transaction profiles / audit append mechanism | Realization Planning under closed 3E/3I-05 properties; third cross-owner case → Decision Loop |
+| Builder/PAR physical process split only if `CX-RUNTIME-ISOLATION-01` fires | **current enabled F1 surfaces QUALIFIED_SAME_PROCESS**; requalify before enabling deferred globals |
 | old Production Agent Runtime coexistence / drain / cutover | **DEFER SAFELY — trigger: first runtime-affecting upgrade after production / 3J** |
 | `mastra_par` snapshot/thread schema upgrade compatibility operations | 3J/3L; upgrade operation detail deferred until first relevant upgrade |
 | physical Promotion/migration recovery and restore | 3M structural semantics + 3J material operation boundary |
@@ -1273,23 +1324,26 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 + 3A-R10 classi
 | exact `brn.binding_validation` ref if proof shows it load-bearing | Decision Loop / 3N |
 | exact security-sensitive mutation serialization spelling (`FOR UPDATE`/SERIALIZABLE/guard/equivalent) | **3I-R1 property closed**; exact realization → Realization Planning/implementation verification; 3L only if pinned behavior becomes load-bearing |
 | binding/Release/runtime end-to-end proof | 3N/3O — MUST |
-| exact Mastra telemetry role attributes / OTel Bridge/export realization | 3L only to the extent Verification Observability needs them; exporter topology can defer |
-| Verification Observability capture/correlation qualification | 3L/3N — MUST QUALIFY subset |
+| exact Mastra telemetry role attributes / exporter realization | first-build under public Mastra observability seam; `@mastra/observability` acquisition triggers C-016/Q0 |
+| Verification Observability capture/correlation qualification | **Package E pre-C-018 DEFER SAFELY**; `CX-OBS-V0-01` after smallest implementing slice + 3N/3O |
 | C-013 admission-ledger ↔ ActorRun/AgentRun coherence; verify one owner-local attempt realization and no parallel `UniversalAttempt` FSM | 3N — MUST |
-| `CX-BUILDER-MASTRA-01` qualification | **3L MUST QUALIFY** |
-| `CX-AGENT-MASTRA-01` including stable occurrence transport, restart, memory isolation, upgrade | **3L MUST QUALIFY applicable baseline** |
-| `CX-RUNTIME-ISOLATION-01` cross-role qualification | **3L MUST QUALIFY** |
-| role-local PubSub/default-bucket/external-broker namespace probes | 3L as part of runtime-isolation qualification |
-| E2B pull/OTLP exact pinned-version behavior | E2B control/evidence subset 3L; production exporter topology 3J only if adopted |
-| OTel baggage/redaction/egress policy | **RESOLVED by 3I-05 at property level**; exact propagator/header stripping → 3L/Realization Planning |
+| `CX-BUILDER-MASTRA-01` qualification | **Package A COMPLETE / applicable tested properties qualified** |
+| `CX-AGENT-MASTRA-01` applicable F1 baseline | **Package B CLOSED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES** |
+| `CX-RUNTIME-ISOLATION-01` cross-role qualification | **QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES** |
+| role-local PubSub/default-bucket/external-broker namespace probes | current enabled F1 role isolation covered by Package B; enabling deferred globals reopens relevant subset |
+| E2B pull/OTLP exact pinned-version behavior | physical sandbox anchor covered by Package A; concrete Product observation mapping later |
+| OTel baggage/redaction/egress policy | **RESOLVED by 3I-05 at property level**; exact propagator/header stripping → Realization Planning |
 | platform-control egress destination configuration | **3I-05 property fixed**; exact owner adapter endpoint/config wiring → Realization Planning/3J as applicable |
 | Product Agent Semantic Recall / Observational Memory / Memory Extractors enablement | DEFER SAFELY / named Product consumer + 3L eval; 3K-04 exposes only admitted regimes |
 | Durable Agent enablement and its process-global registry | Decision Loop + 3L on named consumer |
-| Observational Memory process-global `activeOps` if enabled in Builder | **3L under `CX-BUILDER-COGNITION-01` + `CX-RUNTIME-ISOLATION-01`** |
+| Observational Memory process-global `activeOps` if enabled in Builder | Builder OM currently KEEP OFF; enabling it triggers requalification |
 | Skills / Goals / Background Tasks Product enablement | implementation/Decision Loop when load-bearing; never independent authority; 3K-04 keeps them out of baseline F1 authoring |
 | Rubric Scorers / Datasets / Experiments / Gates & Verdicts | 3L/3N as evidence tooling, not acceptance authority |
 | Mastra Platform managed environments/workspaces/databases/regions | DEFER SAFELY optional deployment qualification |
-| `job/v1` / deterministic sync dispatch | **RESOLVED by [3A-R9](3A-R9-managed-job-deterministic-sync-dispatch-reconciliation.md) for first vertical; `CX-MANAGED-JOB-01` → 3L; future background-work classes re-enter Decision Loop on named consumer** |
+| `job/v1` / deterministic sync dispatch | **RESOLVED by 3A-R9 for first vertical; Package D rederived by 3L-R2; `DT-1'` is the only admitted pre-C-018 Package-D composition probe and still requires explicit execution authorization** |
+| managed-job queue physical placement | **RESOLVED by 3L-R2: pg-boss candidate uses existing `hub_control.mar` schema; vendor DDL in single hub_control lineage; no new domain schema/record** |
+| managed-job RUNNING-orphan / timeout / cancel / partial-progress recovery | **3M + first-build**, explicitly not part of DT-1' |
+| `@mastra/observability` concrete runtime acquisition | **DEFER SAFELY**; first real F1 observability slice triggers exact C-016/Q0 pin/admission |
 | async/attempt status projection for UI/query convenience | 3K-02 truth law closed; exact projection realization → Realization Planning; never second authority |
 | pools/failover/shared resources | Decision Loop on real consumer |
 | Product multi-agent/subagents/Agent Network | Decision Loop on real consumer; 3K-04 keeps them out of F1 Agent Builder baseline |
@@ -1302,30 +1356,31 @@ Estes itens não reabrem fases anteriores automaticamente. 3A-R6 + 3A-R10 classi
 | DEDICATED Release retirement/support lifecycle | Decision Loop when real install base requires |
 | DEDICATED multi-install/fleet management | REJECT F1 / Decision Loop on real install base |
 
-Technology qualification critical path after 3A-R10:
+Technology qualification critical path after current amendments:
 
 ```text
-Package A — Builder Substrate + Cognition
+Package A — COMPLETE
   CX-SBX-E2B-01
   CX-BUILDER-MASTRA-01
-  CX-BUILDER-COGNITION-01
+  CX-BUILDER-COGNITION-01 = EVALUATED / KEEP OM OFF
 
-Package B — Product Agent + Cross-Runtime
-  CX-AGENT-MASTRA-01
-  CX-RUNTIME-ISOLATION-01
+Package B — CLOSED / LEAD-ADJUDICATED
+  CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+  CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 
 Package C — DEFER SAFELY / NO F1 EXECUTION
-  finite model-call/step limits and truthful usage/cost missingness remain F1 obligations
+  finite model-call/step limits and truthful usage/cost missingness remain first-build F1 obligations
   hard per-run monetary reservation/cost-envelope machinery deferred until a named trigger
 
-Package D — Managed Execution
-  CX-MANAGED-JOB-01
+Package D — REDERIVED / ONE BOUNDED COMPOSITION PROBE
+  DT-1' — Transactional Managed-Occurrence Admission
+  route admitted; execution requires explicit operator authorization
 
-Package E — Deciding Evidence
-  Verification Observability deciding-evidence subset
+Package E — DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+  source basis corrected; @mastra/observability named but unpinned/unadmitted until first real slice
 ```
 
-**Q0 Qualification Manifest = APPROVED / COMPLETE.** Exact Package admission still freezes the resolved lock digest, model/provider identities and live E2B/provider facts for the execution being judged. Historical probe criteria are compiled against current authority first. 3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
+**Q0 Qualification Manifest = APPROVED / COMPLETE.** Exact Package-D admission must still freeze the resolved lock digest and physical PostgreSQL runtime identity for the execution being judged. Historical probe criteria are compiled against current authority first. 3L proves substrate behavior; material failure reopens substrate/realization first, not domain semantics automatically.
 
 ---
 
@@ -1370,7 +1425,7 @@ Conexus IDs ↔ 0..N OTel/runtime trace correlation              → 3H-03
 RequestContext non-authority + current-owner recheck boundary  → 3H-03; amended by 3L-R1
 F5 control handoff identity/channel separation                 → 3H-03
 producer_trust mapping for runtime/provider/guest observations → 3H-03
-Verification Observability Mastra+E2B+app realization          → 3H-03; qualification 3L/3N
+Verification Observability Mastra+E2B+app realization          → 3H-03; Package E routing amended by 3L-R2
 E2B pull anchor + OTLP enrichment semantics                    → 3H-03
 3H completeness / no remaining runtime decision                → 3H-R1
 current authorization freshness / no mutable auth cache F1     → 3I-01
@@ -1395,11 +1450,11 @@ metadata-only secret audit / no per-use secret ledger            → 3I-02
 Builder/PAR owner-local model-spend authority                    → 3I-03
 one-outstanding per-run model liability + pre-I/O reservation   → 3I-03
 unknown/missing model usage burns conservative reservation       → 3I-03
-qualified downward settlement preserves MISSING != ZERO          → 3I-03; exact extraction 3L
-retry/fallback below model-spend gate prohibited                 → 3I-03; pinned mechanism proof 3L
-all billable model-bearing run features budgeted-or-disabled     → 3I-03; capability sweep 3L
+qualified downward settlement preserves MISSING != ZERO          → 3I-03; exact extraction on current trigger
+retry/fallback below model-spend gate prohibited                 → 3I-03; bounded realization under 3L-R1
+all billable model-bearing run features budgeted-or-disabled     → 3I-03; capability sweep first-build
 cancel/restart/resume cannot reset run spend                      → 3I-03
-qualified cost-envelope + broken-profile fail-closed             → 3I-03; exact proof 3L
+qualified cost-envelope + broken-profile fail-closed             → 3I-03; exact proof on 3L-R1 reopen trigger
 provider-native spend control = defense-in-depth only             → 3I-03
 model-call reservation included in owner-local C-013 coherence   → 3I-03; proof 3N
 DEDICATED application-principal credential owner                 → 3I-04 = Project
@@ -1525,6 +1580,12 @@ NO JobModule / SchedulerModule / AutomationModule for first sync consumer
 NO JobSchedule authority table / generic schedule DSL
 NO arbitrary Project-authored privileged job code inside Hub
 NO per-tick sync backlog / replay of every missed interval
+NO rolling future managed JobRun as F1 recurrence baseline
+NO pg-boss cron/schedule as F1 managed-sync admission authority
+NO Mastra Scheduler as MAR baseline / third Mastra instance
+NO queue job id as Product occurrence authority
+NO Conexus cross-read of mastra_builder/mastra_par observability vendor tables
+NO Product observability backend merely to satisfy pre-C-018 sequence
 NO product implementation before C-018 + accepted post-C-018 Realization Planning
 NO Realization Planning as second architecture authority/readiness framework
 ```
@@ -1592,20 +1653,24 @@ F3K-IC-01 Product Agent authoring/management/use = RESOLVED BY 3K-04
 3K final Fable verdict = CURRENT STRUCTURE CONFIRMED WITH NON-MATERIAL CORRECTIONS
 3K non-material corrections = 5 / ADJUDICATED BY 3K-R1
 
-job/v1 / deterministic sync dispatch = RESOLVED BY 3A-R9
-CX-MANAGED-JOB-01 = MUST QUALIFY in 3L
-CX-BUILDER-COGNITION-01 = MUST EVALUATE in 3L / NOT MUST ENABLE
+job/v1 / deterministic sync dispatch = RESOLVED BY 3A-R9 / REALIZATION AMENDED BY 3L-R2
+CX-MANAGED-JOB-01 current pre-C-018 subset = DT-1'
+CX-BUILDER-COGNITION-01 = EVALUATED / KEEP OM OFF
 
 3L = IN PROGRESS / Q0 COMPLETE
-3L-Q0 = APPROVED / COMPLETE
+3L-Q0 = APPROVED / COMPLETE / ROUTE AMENDED BY 3L-R1 + 3L-R2
+3L-R1 = APPROVED / CURRENT / OPERATOR RATIFIED 2026-08-19
+3L-R2 = APPROVED / CURRENT / OPERATOR RATIFIED 2026-08-20
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED — PASS_NATIVE_HITL_OWNER_BOUNDARY / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS
 Package C = DEFER SAFELY / NO F1 EXECUTION
-Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 product implementation = BLOCKED
-prior architecture reopen = NONE
+C-018 = NOT RATIFIED
+PR #40 merge = NOT AUTHORIZED
 ```
 
 3A-R6 foi ratificada em **2026-08-17** após independent Fable challenge com `CURRENT STRUCTURE CONFIRMED`, `Material Finding = NONE`, `method amendment = NONE`; congela a classificação `MUST DECIDE | DEFER SAFELY | REJECT F1`, promove F3B-R1 a blocker antes do Realization Planning, torna `job/v1` conditional blocker se o first vertical precisar mirror/sync, demove DEDICATED physical topology e old-runtime drain para triggered defers, ancora 3K em C-001 caso 1 salvo redirect e estabelece que C-018 fecha architecture mas não autoriza product code.
@@ -1636,19 +1701,21 @@ O pre-3K Global Platform Coherence Checkpoint foi executado e fechou **POSITIVE 
 
 3A-R8 foi ratificada pelo operador em **2026-08-18** após coherence sweep interno e pesquisa externa adversarial. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: Project Baseline permanece Project-owned e passa a ser explicitamente `spec-anchored / living / incremental`; sua suficiência é proporcional ao Change atual; todo Change pina a Baseline aprovada exata; decisão material requerida pelo Change não pode ser delegada silenciosamente ao coding actor; late architecture discovery retorna por Finding/Replan/Handoff antes de atravessar a boundary; `ProjectBaselineDigest` participa explicitamente da execution/proof identity; big-design-up-front, ArchitectureEngine, novo record/DB/workflow e global invalidation por qualquer mudança de digest são rejeitados. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
 
-3A-R9 foi ratificada pelo operador em **2026-08-18** após 3K-03 disparar o primeiro consumidor real de mirror/sync. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: `job/v1` permanece artifact Project-scoped e MAR-owned no runtime; primeira realization = governed sync capability-driven; `MANAGED_JOB` vira surface explícita do Gateway; schedule é derivado da exact active served Release; `mar.job_run` permanece record suficiente; fixed interval/manual, single-flight/coalesce e one-catch-up fecham o primeiro consumer; arbitrary privileged Project job code, Workflow/Automation/Scheduler domain e generic calendar DSL são rejeitados F1; `CX-MANAGED-JOB-01` entra no 3L. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
+3A-R9 foi ratificada pelo operador em **2026-08-18** após 3K-03 disparar o primeiro consumidor real de mirror/sync. `CURRENT STRUCTURE CONFIRMED + BOUNDED CORRECTION APPROVED`: `job/v1` permanece artifact Project-scoped e MAR-owned no runtime; primeira realization = governed sync capability-driven; `MANAGED_JOB` vira surface explícita do Gateway; schedule meaning deriva da exact active served Release; `mar.job_run` permanece record suficiente; fixed interval/manual, single-flight/coalesce e one-catch-up fecham o primeiro consumer; arbitrary privileged Project job code, Workflow/Automation/Scheduler domain e generic calendar DSL são rejeitados F1; `CX-MANAGED-JOB-01` entra no 3L. 3L-R2 depois refinou a realization física/temporal sem reabrir esses invariants.
 
 3A-R10 foi ratificada pelo operador em **2026-08-18** como checkpoint bounded de convergência antes de 3L. `CURRENT STRUCTURE CONFIRMED + BOUNDED ROUTING CORRECTION`: compila supersessões de realization sem apagar invariantes históricos; congela `technology selected != technology qualified`; proíbe executar probe histórico literalmente quando authority posterior mudou o mechanism; promove Builder long-context/Observational Memory para `CX-BUILDER-COGNITION-01 MUST EVALUATE / NOT MUST ENABLE`; preserva Product Agent OM/Semantic Recall/Extractors consumer-gated; organiza 3L em Packages A–E com Q0 exact-version Qualification Manifest; preserva mandatory downstream first-build probes sem trazê-los para 3L; e explicita o post-C-018 Implementation Realization Planning Gate como derived-only. Nenhuma prior phase foi estruturalmente reaberta e implementação permanece bloqueada.
 
-3L-Q0 foi ratificada pelo operador em **2026-08-18** como manifesto de admissão/reprodutibilidade da Technology Qualification. `Q0 = APPROVED / COMPLETE`: fixa a qualification stack/candidate identities, supply-chain gates, historical-probe compilation, model/provider pin law, E2B live-run identity requirements, pg-boss incumbent candidate e ordem serial `A → B → C → D → E`; não instala dependências, não implementa harness de probe e não executa Package A. Durante Package A, antes de qualquer A3 model-bearing call, o operador aprovou uma latest-stable reconciliation: `core 1.56.0 / memory 1.25.0 / pg 1.19.0 / e2b 0.8.0 / code-sdk 1.1.2`, lock `7f61c6c7…`; A1 6/6, adapter 3/3, incarnation guard 5/5 e A3 contracts 15/15 passaram no novo lock, sem rerodar provider-live surfaces cujo E2B SDK `2.40.0` e release behavior relevante não mudaram. O smoke OAuth admitiu os exatos `gpt-5.6-sol` e `gpt-5.6-luna`; `A0 → A1 → B0 → B1` executou exatamente uma vez no run `32183868645`. A1 respondeu corretamente, mas falhou a admissão por `OM_DID_NOT_FIRE`; B1 preservou correção com menos Actor tokens, porém latência materialmente maior e usage de Observer/Reflector `MISSING`. Assim, `CX-BUILDER-COGNITION-01 = EVALUATED / NOT_PROVEN FOR ENABLEMENT / KEEP OM OFF`. Package A fechou `COMPLETE`, sem Finding material ou reopen arquitetural. `3L = IN PROGRESS`; implementação permanece bloqueada.
+3L-Q0 foi ratificada pelo operador em **2026-08-18** como manifesto de admissão/reprodutibilidade da Technology Qualification. `Q0 = APPROVED / COMPLETE`: fixa qualification stack/candidate identities, supply-chain gates, historical-probe compilation, model/provider pin law, E2B live-run identity requirements e pg-boss incumbent candidate. A rota original serial foi posteriormente compilada por 3L-R1 + 3L-R2; Q0 não autoriza execução por sequência.
 
-3A-R11 foi ativada e ratificada pelo operador em **2026-08-18** como Whole-Product Authority Rebaseline. O independent Fable review e sua adjudicação classificaram `FBL-01..17` como `CORRECT_PROJECTION`; o closure-keyed pass encontrou `R3C-01..08`; a correção bounded Round-3.1 foi aplicada e a final GPT authority review fechou `PASS`. O operador ratificou os blobs exatos do current tree: `R11 = CLOSED / ACCEPTED`, `Package B = NEXT / NOT STARTED`, sem reabrir arquitetura, adicionar requirement de produto ou autorizar implementação.
+3A-R11 foi ativada e ratificada pelo operador em **2026-08-18** como Whole-Product Authority Rebaseline. O independent Fable review e sua adjudicação classificaram `FBL-01..17` como `CORRECT_PROJECTION`; o closure-keyed pass encontrou `R3C-01..08`; a correção bounded Round-3.1 foi aplicada e a final GPT authority review fechou `PASS`. Estado 3L posterior é projetado por 3L-R1 + 3L-R2.
+
+3L-R2 foi ratificada pelo operador em **2026-08-20** após independent D/E Fable review + Architecture-Lead adjudication. O Finding de physical home foi resolvido sem 14º schema ou novo database: `pg-boss 12.26.3` permanece incumbent candidate e, para a current realization, seus objetos privados vivem dentro do existing `hub_control.mar`, com DDL exportado/reviewed na única migration lineage e runtime `createSchema=false / migrate=false / schedule=false`. O rolling future-JobRun candidate foi removido; recurrence passa por freshness-driven owner reconciliation e immediate admission. Package D possui apenas `DT-1'`, cujo route está admitido mas execução ainda exige autorização explícita. Package E é `DEFER SAFELY`, com `@mastra/observability` nomeado como futura dependency unpinned/unadmitted; nenhum runtime probe/OBS backend é criado agora.
 
 3K-01 foi ratificada pelo operador em **2026-08-17** e abriu formalmente 3K. Congela Workspace shell ≠ Project shell; Project-scoped navigation; Build agent-first com Preview como work surface dominante e Conexus contextual/retrátil; Data/Capabilities/Integrations/Agents/Brain/Versions/Activity diretamente inspecionáveis; Code/Diff como Build lenses; machinery interna apenas progressive detail; `Product`/`Resources` artificiais rejeitados; exact visual/component/streaming realization deferred. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
 3K-02 foi ratificada pelo operador em **2026-08-17**. Congela context-local truth + progressive Evidence; UI como projection, nunca authority; separation entre observed/verified, empty/loading/failed/partial, AgentRun/effect outcome e completion ladder até SERVED_VERIFIED; exact ApprovalRequest presentation, context-local Change/Effect/Publish/Access decisions, permission/dependency widening never-hide, cost missingness, known limitations e Activity causal; `Trust Center`, universal status/approval, truth score e generic retry over uncertainty rejeitados. Nenhuma prior authority foi reaberta e implementação permanece bloqueada.
 
-3K-03 foi ratificada pelo operador em **2026-08-18**. Congela que Conexus não possui default universal `live|mirror|hybrid`; Connector declara source capabilities e Project Baseline decide o data path do slice. Para o caso 1, aprova read-only analytics com Project analytical read model derivado, sync governado, live Gateway reads como source anchor para Discovery/qualification/reconciliation/verification/Evidence, registered read-only queries para a UI, Brain semantic binding, zero Product Agent/WRITE/business effect e separação entre historical Golden benchmark e current operational truth. O trigger `job/v1` previsto por 3A-R6/C-007 foi disparado e está **RESOLVED por 3A-R9**. Sankhya permanece first-vertical evidence, nunca product-wide topology/ERP law.
+3K-03 foi ratificada pelo operador em **2026-08-18**. Congela que Conexus não possui default universal `live|mirror|hybrid`; Connector declara source capabilities e Project Baseline decide o data path do slice. Para o caso 1, aprova read-only analytics com Project analytical read model derivado, sync governado, live Gateway reads como source anchor para Discovery/qualification/reconciliation/verification/Evidence, registered read-only queries para a UI, Brain semantic binding, zero Product Agent/WRITE/business effect e separação entre historical Golden benchmark e current operational truth. O trigger `job/v1` previsto por 3A-R6/C-007 foi disparado e está **RESOLVED por 3A-R9**, com realization atual em 3L-R2. Sankhya permanece first-vertical evidence, nunca product-wide topology/ERP law.
 
 3K-04 foi ratificada pelo operador em **2026-08-18** após pesquisa externa + decomposição adversarial do finding `F3K-IC-01`. Product Agents permanecem Project-owned/git-first/Release-pinned sob canonical `agent/v1`; Agent Builder = specialized Builder experience, nunca segundo module/DB/authority; structured/manual + natural-language authoring convergem para a mesma Change/candidate; missing Capabilities podem ser propostas apenas como expansão explícita da Change; runtime tools continuam compiled `ToolProjection` sobre owners existentes, sem UniversalTool; Workspace ganha `Agents` como access-filtered cross-Project catalog/projection sem Agent fleet ownership; Builder é source-aware, Product Agent é product/context-aware e não recebe repo/source/shell/filesystem/browser por default; interactive/headless permanecem o mesmo Product Agent concept; Mastra Editor/Stored Agent nunca substitui Registry/Release authority. `F3K-IC-01 = RESOLVED`, `new module/record/DB = 0`.
 
@@ -1683,8 +1750,8 @@ O único independent final Fable challenge de 3K foi executado em **2026-08-18**
 
 Próxima ação:
 
-> **Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C remains DEFER SAFELY / NOT EXECUTED; Packages D/E remain NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION. Do not execute them, Product implementation or C-018.**
+> **Review `3L-R2` plus the derived Codex `DT-1' — Transactional Managed-Occurrence Admission` plan. Package D is REDERIVED and its probe route is admitted, but execution is NOT YET AUTHORIZED. Package C and Package E remain DEFER SAFELY. Do not acquire Package-D dependencies, execute DT-1', implement Product code, ratify C-018 or merge by inheritance.**
 
-3L–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9 + 3A-R10 e o current tree ratificado por 3A-R11. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + F3B-R1 + accepted derived realization plan(s).
+3L–3O seguem integralmente sob 3A-R6 + 3A-R8 + 3A-R9 + 3A-R10, the current tree ratificado por 3A-R11, e current 3L amendments R1/R2. F3B-R1 deve estar decidido antes do post-C-018 Realization Planning Gate. Product implementation permanece proibida até C-018 + F3B-R1 + accepted derived realization plan(s).
 
 A Fase 3 completa continua em andamento até C-018. Nenhuma implementação de produto está autorizada por este ledger e PR #40 não deve ser mergeado sem autorização explícita do operador.

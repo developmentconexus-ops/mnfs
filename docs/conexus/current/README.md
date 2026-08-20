@@ -2,11 +2,14 @@
 
 > **Status:** CURRENT / ACCEPTED CURRENT-TREE ROUTER  
 > **Whole-product checkpoint:** `3A-R11 CLOSED / APPROVED / OPERATOR RATIFIED`  
-> **3L routing amendment:** `3L-R1 CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19`  
+> **3L framework/routing amendment:** `3L-R1 CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19`  
+> **3L Package-D/E amendment:** `3L-R2 CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-20`  
 > **Phase 3:** IN PROGRESS  
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
-> **Package B:** CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
+> **Package B:** CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES  
+> **Package D:** REDERIVED / `DT-1'` ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED  
+> **Package E:** DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE  
 > **PR #40:** DRAFT / NO MERGE AUTHORIZATION
 
 This page is the shortest safe entrypoint to the **current Conexus Product, architecture and exact next action**.
@@ -26,6 +29,7 @@ AGENTS.md
 → ARCHITECTURE-BASELINE.md when structural owner/boundary meaning is relevant
 → DECISION-RECONCILIATION.md when historical decisions appear to conflict
 → 3L-R1 for current Mastra / Package-B / Package-C realization routing
+→ 3L-R2 for current Package-D / Package-E realization routing
 → docs/conexus/phase3/LEDGER.md for other Phase-3 detail
 → exact accepted semantic authority
 → deciding Evidence/current implementation only when material
@@ -33,13 +37,14 @@ AGENTS.md
 
 ### Current precedence warning
 
-For the exact clauses named by `3L-R1`, the following document is the current amendment:
+For the exact clauses named by `3L-R1` and `3L-R2`, these are the current amendments:
 
-> **[3L-R1 — Framework-Native Proportional Qualification Rebaseline](../phase3/3L-R1-framework-native-proportional-qualification-rebaseline.md)**
+> **[3L-R1 — Framework-Native Proportional Qualification Rebaseline](../phase3/3L-R1-framework-native-proportional-qualification-rebaseline.md)**  
+> **[3L-R2 — Managed Execution & Deciding Evidence Proportional Rederivation](../phase3/3L-R2-managed-execution-deciding-evidence-proportional-rederivation.md)**
 
-`3L-R1` is now projected into the Architecture Baseline and Phase-3 LEDGER and **supersedes historical Package-B / Package-C route and realization rows** retained only as Evidence.
+`3L-R1` supersedes the exact historical Package-B / Package-C route and realization rows named by that decision. `3L-R2` supersedes only the stale Package-D / Package-E `REQUIRE PROPORTIONAL REDERIVATION` routing/realization clauses and the rejected delayed-occurrence candidate; neither amendment weakens the structural owner/invariant architecture.
 
-In particular:
+Current route:
 
 ```text
 BT-3A = NOT NEXT
@@ -51,12 +56,13 @@ CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
-Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
 
-BT-5N final Evidence is bound to executor HEAD `b712dc289a82feb8f0f5edc9d9d579ad18848226`; no executor may re-run BT-3A or execute Package C/D/E by inheritance.
+BT-5N final Evidence is bound to executor HEAD `b712dc289a82feb8f0f5edc9d9d579ad18848226`; no executor may re-run BT-3A, execute Package C/E, or execute Package D merely by inheritance. `DT-1'` requires its own explicit operator execution authorization after the current plan is reviewed.
 
 ---
 
@@ -124,7 +130,7 @@ frontend / scaffold
 first-production topology
 ```
 
-`3L-R1` currently supersedes only the exact Mastra realization, RequestContext, active-run recovery, scheduler-routing and F1 model-economics clauses enumerated in its supersession map. It does not weaken the structural owner/invariant architecture.
+`3L-R1` currently supersedes only the exact Mastra realization, RequestContext, active-run recovery, scheduler-routing and F1 model-economics clauses enumerated in its supersession map. `3L-R2` clarifies Package-D/E technology realization inside existing MAR/OBS boundaries: pg-boss is private MAR mechanics inside the existing `mar` schema for the current candidate, and Package E remains deferred with a corrected Mastra-observability dependency basis. Neither creates a new owner, durable record class, Conexus schema or database.
 
 ### Historical reconciliation
 
@@ -178,7 +184,7 @@ Core law:
 
 > **Mechanism ≠ Authority.**
 
-Mastra, E2B, PostgreSQL, Git, telemetry, provider state, framework memory and scheduler state never become Product/business authority merely because they persist or execute something.
+Mastra, E2B, PostgreSQL, Git, telemetry, provider state, framework memory, queue state and scheduler/timer state never become Product/business authority merely because they persist or execute something.
 
 ---
 
@@ -199,6 +205,7 @@ Brain != agent/runtime memory
 future seam != dormant implementation
 selected architecture != qualified behavior
 stale runtime state != current Product authority
+queue/timer state != managed-job admission authority
 ```
 
 Current mutable authorization is always server/owner-derived at protected points.
@@ -239,7 +246,7 @@ Current mapping:
 | universal Workflow wrapper around Product Agent | REJECT F1 baseline |
 | Product-Agent cron mechanics | native Mastra Scheduler substrate |
 | scheduled occurrence → execution | must cross narrow PAR admission seam before AgentRun/model execution |
-| Builder/PAR role isolation | separate BuilderMastra / ParMastra instances; residual proof pending |
+| Builder/PAR role isolation | separate BuilderMastra / ParMastra instances; qualified for enabled F1 surfaces |
 
 ### RequestContext correction
 
@@ -311,7 +318,8 @@ CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
-Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Package D = REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
@@ -362,7 +370,69 @@ Reopen stronger model-economics machinery for commercialization/billing/quotas, 
 
 ---
 
-## 9. Current technology state
+## 9. Package D/E — current route from 3L-R2
+
+### Package D — Managed Execution
+
+Operator-ratified rederivation:
+
+```text
+Package D = REDERIVED
+required pre-C-018 execution = ONE BOUNDED COMPOSITION PROBE
+probe = DT-1' — Transactional Managed-Occurrence Admission
+probe execution = NOT YET AUTHORIZED
+```
+
+Current candidate realization:
+
+```text
+pg-boss 12.26.3
+→ database = hub_control
+→ schema = existing mar owner schema
+→ private substrate objects only
+→ vendor DDL folded into the one hub_control migration lineage
+→ runtime createSchema=false / migrate=false / schedule=false
+
+MAR recurrence
+→ startup + process-local wake tick
+→ owner reconciliation from current served Release + exact job config + durable sync freshness
+→ at most one immediate admitted JobRun when due
+→ no rolling future JobRun
+→ no nominal missed-slot walk
+```
+
+Owner uniqueness on the logical occurrence is the primary correctness fence. pg-boss job identity/policy is projection mechanics only. `boss.send(...) === null` is fail-closed, never successful admission.
+
+For version locking, a managed JobRun becomes admitted/in-flight at its durable admission commit; physical `RUNNING` begins at worker execution. A later Release handoff blocks new old-Release admissions but does not rewrite an already committed exact-pin JobRun.
+
+`DT-1'` proves only the exact PostgreSQL/pg-boss transaction/race/restart/queue-not-authority composition. It explicitly does not implement Product MAR, Release, Gateway, sync/ETL, Sankhya, provider/model/E2B, cron, future scheduling, or recovery policy.
+
+### Package E — Deciding Evidence
+
+```text
+Package E = DEFER SAFELY
+pre-C-018 runtime probe = NONE
+```
+
+Exact Package-B source/lock review corrected one factual basis:
+
+```text
+@mastra/core 1.56.0
+→ public observability contracts/types + no-op path
+→ not the concrete full observability implementation
+
+@mastra/observability
+→ named F1 realization dependency for the accepted Mastra observability path
+→ version UNPINNED
+→ C-016 admission NOT PERFORMED
+→ first acquisition triggers exact pin/lock/supply-chain admission
+```
+
+Future integration remains public Mastra observability → Conexus-authored `ObservabilityExporter` → server-side owner/trust binding → `obs.operational_event`. `MastraStorageExporter` may be diagnostics-only; Conexus must not cross-read `mastra_builder`/`mastra_par` as its OBS truth path. Missing/drop-free telemetry never implies completeness; required evidence missing remains `NOT_PROVEN / INCONCLUSIVE`.
+
+---
+
+## 10. Current technology state
 
 | Surface | Status |
 |---|---|
@@ -377,8 +447,8 @@ Reopen stronger model-economics machinery for commercialization/billing/quotas, 
 | native Product-Agent schedule ingress | **BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS** |
 | BuilderMastra ↔ ParMastra same-process isolation | **QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES** |
 | advanced per-run model-economics machinery | **DEFER SAFELY FOR F1** |
-| managed execution / Package D | **NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION** |
-| deciding Evidence / Package E | **NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION** |
+| managed execution / Package D | **REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED** |
+| deciding Evidence / Package E | **DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE / SOURCE BASIS CORRECTED** |
 | React/TS/Vite/TanStack paved road | **ARCHITECTURE CURRENT / first-build conformance pending** |
 | private Linux-guest first-production topology | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION / activation proof pending** |
 
@@ -386,7 +456,7 @@ Never upgrade a weaker status to `QUALIFIED` merely because a technology appears
 
 ---
 
-## 10. Explicit future/deferred seams still remembered
+## 11. Explicit future/deferred seams still remembered
 
 Among the current deferred seams:
 
@@ -410,13 +480,15 @@ public/embed apps
 richer app role/data scoping
 Brain vector/RAG index
 advanced model economics per 3L-R1 reopen triggers
+Package-D RUNNING-orphan / cancel / timeout / partial-progress recovery → 3M
+real OBS ingestion/trust/correlation implementation → first-build / 3M / 3N/3O
 ```
 
 Deferred means remembered with a seam/trigger, not secretly implemented.
 
 ---
 
-## 11. Explicit F1 non-architecture
+## 12. Explicit F1 non-architecture
 
 Do not resurrect by history or framework convenience:
 
@@ -436,13 +508,18 @@ memory/RAG framework as Brain authority
 browser/frontend authorization authority
 generic agent_event owner/table
 public Internet first-installation ingress
+rolling future managed JobRun as F1 recurrence baseline
+pg-boss cron/schedule as managed-sync admission authority
+Mastra Scheduler as MAR baseline
+JobSchedule / ScheduleOccurrence authority
+Conexus cross-read of Mastra observability vendor tables
 ```
 
-Native Mastra mechanisms may be used; they do not create similarly named Conexus business owners.
+Native framework mechanisms may be used where admitted; they do not create similarly named Conexus business owners.
 
 ---
 
-## 12. Program state right now
+## 13. Program state right now
 
 ```text
 3A Architecture Reconciliation     CONTINUOUS through C-018
@@ -459,7 +536,7 @@ Native Mastra mechanisms may be used; they do not create similarly named Conexus
 3K Frontend/Product                CLOSED / APPROVED
 
 3L Technology Qualification        IN PROGRESS
-  Q0                               COMPLETE / evidence discipline retained / execution route amended
+  Q0                               COMPLETE / evidence discipline retained / route amended by 3L-R1 + 3L-R2
   Package A                        COMPLETE
   Package B                        CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
     BT-1                           PASS
@@ -473,7 +550,9 @@ Native Mastra mechanisms may be used; they do not create similarly named Conexus
   CX-RUNTIME-ISOLATION-01         QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
   Architecture-Lead / Package-B   CLOSED / LEAD-ADJUDICATED
   Package C                        DEFER SAFELY / NOT EXECUTED
-  Packages D/E                     NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+  Package D                        REDERIVED / DT-1' ROUTE ADMITTED / EXECUTION NOT YET AUTHORIZED
+  Package E                        DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+  3L-R2                            APPROVED / OPERATOR RATIFIED 2026-08-20
 
 3M Failure & Recovery              NOT STARTED
 3N Architecture Verification       NOT STARTED
@@ -484,20 +563,23 @@ Implementation                     BLOCKED
 
 ---
 
-## 13. Exact next action
+## 14. Exact next action
 
-> **Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES.**
+> **Review the derived Codex `DT-1' — Transactional Managed-Occurrence Admission` execution plan against 3L-R2.**
 
-Package C remains **DEFER SAFELY / NOT EXECUTED**. Packages D/E remain **NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION**. Do **not** execute them, Product implementation, C-018 ratification or merge by inheritance.
+Package C remains **DEFER SAFELY / NOT EXECUTED**. Package E remains **DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE**. Package D has completed proportional rederivation, but `DT-1'` is **NOT YET AUTHORIZED FOR EXECUTION**. Do not acquire Package-D dependencies, create/execute the spike, run Product implementation, ratify C-018 or merge by inheritance.
+
+Only explicit operator authorization after plan review may start `DT-1'` execution. Git staging/commit/push remain separate authorizations under repository safety rails.
 
 ---
 
-## 14. Phase-3 status router
+## 15. Phase-3 status router
 
-The Phase-3 `LEDGER.md` projects the current Package-B/Package-C route from:
+The Phase-3 `LEDGER.md` projects the current 3L route from:
 
 ```text
 docs/conexus/phase3/3L-R1-framework-native-proportional-qualification-rebaseline.md
+docs/conexus/phase3/3L-R2-managed-execution-deciding-evidence-proportional-rederivation.md
 ```
 
-For all Phase-3 status/detail, the LEDGER remains the live router. Historical BT-3A documents remain Evidence and do not re-authorize execution.
+For all Phase-3 status/detail, the LEDGER remains the live router. Historical pre-rebaseline Package-D/E candidates and BT-3A documents remain Evidence and do not re-authorize execution.

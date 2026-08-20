@@ -117,9 +117,26 @@ Connections owns logical credential handles/grant facts; Gateway receives plaint
 
 Outside the trusted Hub boundary, no single compromise path/location/credential may yield both the Connection ciphertext backup set and root/recovery-key material. F1 transient acquired tokens are memory-only; no durable transient-token cache is admitted.
 
+### 5.8.1 Recovery closure
+
+A ciphertext generation is recoverable only if its referenced decryption key generation or equivalent recovery means is also recoverable and restore-time decryptability can be proven.
+
+```text
+recoverable ciphertext generation
++ separately custodied required key generation / recovery means
++ successful decryptability proof
+→ credential bytes are recoverable
+```
+
+Ciphertext backup custody and root/recovery-key custody remain separate. This refinement does not create a generic Secret owner or permit one recovery location/credential to expose both sets.
+
 ## 5.9 Backup material
 
 Operational recovery state, not current application authority while the system is running. Recovery may reconstruct durable owner truth; it may not fabricate newer/cleaner semantic truth than recovered Evidence establishes.
+
+For the first installation, the mutable PostgreSQL recovery set restores from one internally consistent PostgreSQL generation. Recovered references needed by a re-enabled surface must close over the exact required Git, immutable byte, credential and Release material; presence alone is insufficient where decryptability or conformance is required.
+
+Canonical Git that survives beyond the restored Hub cutoff is not generic extra backup/CAS data. It remains authoring/provenance truth and is reconciled explicitly before Git-write-capable paths reopen.
 
 ---
 

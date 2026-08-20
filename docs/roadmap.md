@@ -23,5 +23,5 @@ C-018 = NOT RATIFIED
 Product implementation = BLOCKED
 ```
 
-3M closure is summarized in [phases/3m-failure-recovery-architecture.md](phases/3m-failure-recovery-architecture.md); detailed current recovery semantics live in their owning references. 3N now owns the next action: define and execute the architecture verification contract against the accepted 3A–3M authority. 3L reopens only through the triggers in [reference/mastra/qualification-and-reopen-triggers.md](reference/mastra/qualification-and-reopen-triggers.md) or the managed-execution qualification.
+3M closure is summarized in [phases/3m-failure-recovery-architecture.md](phases/3m-failure-recovery-architecture.md); detailed current recovery semantics live in their owning references. 3N now owns the exact next action: define the bounded architecture verification contract against accepted 3A–3M authority, execute only the proofs that can genuinely falsify those architecture claims, and route first-build/first-production/3O properties forward rather than mocking them pre-implementation. 3L reopens only through the triggers in [reference/mastra/qualification-and-reopen-triggers.md](reference/mastra/qualification-and-reopen-triggers.md) or the managed-execution qualification.
 

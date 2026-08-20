@@ -112,8 +112,8 @@ const statusStart = productLines.findIndex(line => line.startsWith('> **Status:*
 const statusEnd = productLines.findIndex((line, index) => index >= statusStart && line.startsWith('> **Package B:**'))
 if (statusStart < 0 || statusEnd < statusStart) throw new Error('Product status header shape changed')
 productLines.splice(statusStart, statusEnd - statusStart + 1,
-  '> **Semantic authority:** CURRENT / ACCEPTED PRODUCT CONTRACT  ',
-  '> **Mutable status:** owned only by [../roadmap.md](../roadmap.md). Accepted technology qualification is summarized in [../phases/3l-technology-qualification.md](../phases/3l-technology-qualification.md).  ',
+  '> **Semantic authority:** CURRENT / ACCEPTED PRODUCT CONTRACT',
+  '> **Mutable status:** owned only by [../roadmap.md](../roadmap.md). Accepted technology qualification is summarized in [../phases/3l-technology-qualification.md](../phases/3l-technology-qualification.md).',
   '> **Method:** DevelopmentConexus Engineering Method v1.0.0')
 product = productLines.join('\n')
 const section33 = /# 33\. Qualification-state boundary[\s\S]*?\n---\n\n# 34\. Reopen triggers/

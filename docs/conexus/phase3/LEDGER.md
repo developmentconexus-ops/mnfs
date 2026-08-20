@@ -264,7 +264,7 @@ job/v1
 
 Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`. Likewise, historical `Packages D/E = REQUIRE PROPORTIONAL REDERIVATION` is superseded by 3L-R2; it does not authorize Package-D execution.
 
-Exact historical pre-3L-R2 projection retained for deterministic provenance: `Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`. It is not current status.
+Historical pre-3L-R2 route, superseded by the current 3L-R2 + 3L-D + 3L-R3 projection and retained only for deterministic provenance: `Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`. It is not current status.
 
 C-018 fecha Architecture & System Design, mas **não autoriza product code**:
 
@@ -390,25 +390,27 @@ Regra essencial:
 
 [3L-Q0 — Technology Qualification Manifest](3L-Q0-qualification-manifest.md) foi ratificada pelo operador em **2026-08-18** e abriu formalmente 3L sem executar nenhum probe.
 
-Current projection after 3L-R1 + 3L-R2:
+Current projection after 3L-R1 + 3L-R2 + 3L-R3:
 
 ```text
-3L = OPEN / IN PROGRESS
+3L = CLOSED / ARCHITECTURE-LEAD ADJUDICATED / 3L-R3 FINAL CLOSURE
+3M = NEXT / NOT STARTED
 Q0 = APPROVED / COMPLETE
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED — PASS_NATIVE_HITL_OWNER_BOUNDARY / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS
 Package C = DEFER SAFELY / NOT EXECUTED
 Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
 3L completeness/deletion check = PASS
-final independent Fable review = NEXT
+3L-R3 = CURRENT / FINAL CLOSURE / FABLE INCORPORATED
 CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 product implementation = BLOCKED
 prior architecture reopen = NONE
 ```
 
-Q0 congela **identidade de qualificação, não arquitetura permanente**: Node/npm/TypeScript do probe host, PostgreSQL 17 current-minor probe pin, exact candidate pins, supply-chain admission, exact model/provider/pricing identity antes de chamadas billable e pg-boss como incumbent candidate. A antiga execução incondicional `A → B → C → D → E` está superseded por 3L-R1 + 3L-R2: serial adjudication permanece, C/E são deferred e D possui exatamente um bounded composition probe, separadamente execution-gated. `latest`, alias mutável, semver range/transitive dependency não congelada e historical criterion não compilado contra current authority são deciding identities inadmissíveis.
+Q0 congela **identidade de qualificação, não arquitetura permanente**: Node/npm/TypeScript do probe host, PostgreSQL 17 current-minor probe pin, exact candidate pins, supply-chain admission, exact model/provider/pricing identity antes de chamadas billable e pg-boss como incumbent candidate. A antiga execução incondicional `A → B → C → D → E` está superseded por 3L-R1 + 3L-R2 + 3L-R3: serial adjudication permanece, C/E são deferred e D possui exatamente um bounded composition probe, separadamente execution-gated. `latest`, alias mutável, semver range/transitive dependency não congelada e historical criterion não compilado contra current authority são deciding identities inadmissíveis.
 
 Q0 não autoriza dependency acquisition ou execution por si só.
 
@@ -499,14 +501,18 @@ remaining material 3L technology question = 0
 additional Package = NOT JUSTIFIED
 additional pre-C-018 probe = NOT JUSTIFIED
 3L proportional completeness/deletion check = PASS
-final independent Fable review = REQUIRED NEXT
-3L = NOT YET CLOSED
-3M = NOT YET OPENED
+final independent Fable review = INCORPORATED IN 3L-R3
+3L = CLOSED / 3L-R3 FINAL CLOSURE
+3M = NEXT / NOT STARTED
 C-018 = NOT RATIFIED
 Product implementation = BLOCKED
 ```
 
-Exact next action: use the [3L final independent Fable review handoff](3L-FABLE-FINAL-INDEPENDENT-REVIEW-HANDOFF.md) for one adversarial review of the complete package. Do not self-execute the review in this projection step.
+Exact next action: `3M — Failure & Recovery Architecture = NEXT / NOT STARTED`. Do not execute another probe, implement Product code, ratify C-018 or merge by inheritance.
+
+### 2.10 3L-R3 — Final technology-qualification closure — CURRENT
+
+[3L-R3 — Final Technology-Qualification Closure](3L-R3-final-technology-qualification-closure.md) is the current closure authority. It records the Architecture-Lead adjudication of the final independent Fable review, closes 3L without claiming Product correctness, preserves Package E's safe deferral and routes the `CX-MANAGED-JOB-01` downstream remainder to FIRST-BUILD + 3M + 3N/3O.
 
 ---
 
@@ -1711,15 +1717,17 @@ job/v1 / deterministic sync dispatch = RESOLVED BY 3A-R9 / REALIZATION AMENDED B
 CX-MANAGED-JOB-01 current pre-C-018 tested subset = QUALIFIED by DT-1'
 CX-BUILDER-COGNITION-01 = EVALUATED / KEEP OM OFF
 
-3L = IN PROGRESS / Q0 COMPLETE
+3L = CLOSED / ARCHITECTURE-LEAD ADJUDICATED / 3L-R3 FINAL CLOSURE
 3L-Q0 = APPROVED / COMPLETE / ROUTE AMENDED BY 3L-R1 + 3L-R2
 3L-R1 = APPROVED / CURRENT / OPERATOR RATIFIED 2026-08-19
 3L-R2 = APPROVED / CURRENT / OPERATOR RATIFIED 2026-08-20
+3L-R3 = CURRENT / FINAL TECHNOLOGY-QUALIFICATION CLOSURE / FABLE INCORPORATED
 Package A = COMPLETE / A1 PASS / A2 PASS WITH REQUIRED PHYSICAL-INCARNATION GUARD / A3 EVALUATED — KEEP OM OFF
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-1 PASS / BT-2 PASS / BT-3 FRAMEWORK BEHAVIOR CHARACTERIZED / BT-3A COMPLETE — NATIVE SCHEMA HYPOTHESIS REJECTED / BT-3N PASS — LEAD-ADJUDICATED — PASS_NATIVE_HITL_OWNER_BOUNDARY / BT-4N PASS — LEAD-ADJUDICATED — PASS_NATIVE_SCHEDULE_INGRESS / BT-5N PASS — LEAD-ADJUDICATED — QUALIFIED_SAME_PROCESS
 Package C = DEFER SAFELY / NO F1 EXECUTION
 Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
 3L completeness/deletion check = PASS
 remaining material 3L technology question = 0
 additional Package = NOT JUSTIFIED

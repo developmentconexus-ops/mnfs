@@ -20,10 +20,13 @@ const [readme, product, architecture, reconciliation, ledger, q0, bt3a, bt3aLead
 
 const staleBt4nProjectionPattern = /BT-4N\b(?:(?!BT-\d+[A-Z]+\b)[^\n])*(?:\bNEXT\b|ADJUDICATION(?:(?!BT-\d+[A-Z]+\b)[^\n])*\bPENDING\b)/iu;
 const historicalBt5nRoutePattern = /Historical pre-execution route, superseded by (?:the executor record above|current executor projection): `BT-5N = NEXT \/ EXECUTION AUTHORIZED`/u;
+const historicalPackageDERoutePattern = /Historical pre-3L-R2[^\n]*(?:superseded|not current status)[^\n]*Packages D\/E\s*=\s*NOT EXECUTED\s*\/\s*REQUIRE PROPORTIONAL REDERIVATION/iu;
+const stalePackageDERoutePattern = /Packages D\/E\s*=\s*NOT EXECUTED\s*\/\s*REQUIRE PROPORTIONAL REDERIVATION/iu;
+const stalePackageDCurrentPattern = /(?:managed sync\/job semantics[^\n]*NOT EXECUTED\s*\/\s*REQUIRE PROPORTIONAL REDERIVATION|pg-boss 12\.26\.3[^\n]*PACKAGE D CANDIDATE[^\n]*one-catch-up law must be proved|Packages D\/E remain NOT EXECUTED)/iu;
 const staleBt5nVerdictPattern = /BT-5N[^\n]*\bNOT_PROVEN\b/iu;
 const staleBt5nAdjudicationPattern = /BT-5N\s+(?:EXECUTION|EXECUTOR VERDICT)[^\n]*(?:\n[^\n]*){0,2}\bPENDING\b/iu;
 const stalePackageBPattern = /Package B[^\n]*\bIN PROGRESS\b/iu;
-const stalePackageDEInheritancePattern = /Packages? D(?:\/E| and E)?[^\n]*\bNEXT\b[^\n]*inheritance/iu;
+const stalePackageDEInheritancePattern = /Packages D(?:\/E| and E)[^\n]*\bNEXT\b[^\n]*inheritance/iu;
 
 const acceptedCurrentOutcomePatterns = {
   packageB: /Package B\s*=\s*CLOSED\s*\/\s*LEAD-ADJUDICATED\s*\/\s*QUALIFIED FOR CURRENT F1 TESTED PROPERTIES/iu,
@@ -31,7 +34,13 @@ const acceptedCurrentOutcomePatterns = {
   agent: /CX-AGENT-MASTRA-01\s*=\s*QUALIFIED FOR CURRENT F1 TESTED PROPERTIES/iu,
   isolation: /CX-RUNTIME-ISOLATION-01\s*=\s*QUALIFIED_SAME_PROCESS(?:\s+FOR ENABLED F1 SURFACES)?/iu,
   packageC: /Package C\s*=\s*DEFER SAFELY\s*\/\s*NOT EXECUTED/iu,
-  packagesDE: /Packages D\/E\s*=\s*NOT EXECUTED\s*\/\s*REQUIRE PROPORTIONAL REDERIVATION/iu,
+  packageD: /Package D\s*=\s*CLOSED\s*\/\s*LEAD-ADJUDICATED\s*\/\s*QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION/iu,
+  packageE: /Package E\s*=\s*DEFER SAFELY\s*\/\s*NO PRE-C-018 RUNTIME PROBE/iu,
+  managedJob: /CX-MANAGED-JOB-01\s*=\s*QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET\s*=\s*DOWNSTREAM REMAINDER PRESERVED/iu,
+  phase3Closed: /3L\s*=\s*CLOSED/iu,
+  phase3Next: /3M\s*=\s*NEXT\s*\/\s*NOT STARTED/iu,
+  r2Current: /3L-R2[^\n]*CURRENT/iu,
+  r3Current: /3L-R3[^\n]*(?:CURRENT|FINAL CLOSURE)/iu,
   implementation: /Product implementation\s*=\s*BLOCKED/iu,
   c018: /C-018\s*=\s*NOT RATIFIED/iu,
 };
@@ -82,6 +91,25 @@ for (const [name, text] of Object.entries({ readme, architecture, reconciliation
     `${name} must reject stale Package B IN PROGRESS projection`);
   assert.doesNotMatch(text, stalePackageDEInheritancePattern,
     `${name} must reject inherited Package D/E NEXT routing`);
+  assert.match(
+    text,
+    historicalPackageDERoutePattern,
+    `${name} must retain the explicitly labeled historical pre-3L-R2 Package D/E route`,
+  );
+  const nonHistoricalLines = text
+    .split('\n')
+    .filter((line) => !/Historical pre-3L-R2/i.test(line))
+    .join('\n');
+  assert.doesNotMatch(
+    nonHistoricalLines,
+    stalePackageDERoutePattern,
+    `${name} must not retain the superseded Package D/E route as a current assertion`,
+  );
+  assert.doesNotMatch(
+    nonHistoricalLines,
+    stalePackageDCurrentPattern,
+    `${name} must not retain stale current Package D qualification language`,
+  );
   assert.match(
     text,
     historicalBt5nRoutePattern,

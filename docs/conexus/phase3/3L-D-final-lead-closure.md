@@ -58,9 +58,11 @@ createSchema = false
 migrate      = false
 schedule     = false
 retryLimit   = 0
+supervise    = false
+useListenNotify = false
 ```
 
-The vendor DDL was exported through the pinned pg-boss `getConstructionPlans("mar")` surface. Runtime vendor migration and scheduler ownership were not admitted.
+The probe also constructed pg-boss with `supervise=false` and `useListenNotify=false`; these behavior-affecting options were present in the harness but were not recorded in the original criteria/Evidence. No accepted property depends on either option, and neither is a Product default. Future requalification must record every behavior-affecting option. The vendor DDL was exported through the pinned pg-boss `getConstructionPlans("mar")` surface. Runtime vendor migration and scheduler ownership were not admitted.
 
 ## 3. Deciding results
 
@@ -118,7 +120,7 @@ P5/R3 provide the deciding counterexample: the same queue work fires the unguard
 Two proof nuances are recorded without reopening Package D or requiring another probe:
 
 1. P3 proves committed durability plus fresh-process rediscovery after the original handles close. It is not a literal `SIGKILL` test. Recovery of a physically `RUNNING` worker after process loss remains routed to 3M.
-2. P6 is bounded by the isolated dependency/execution surface of DT-1'. It proves zero calls through that admitted surface; it is not a general network interceptor.
+2. P6 and `prohibitedSurfaceObserved` are structural surface attestations, not instrumented network/provider counters. Their basis is the enforced dependency closure (`pg-boss` + `pg` only), lock guard, scratch-database guard and source inspection showing no provider/model/E2B/Sankhya/HTTP imports in the admitted source; they do not claim that a runtime interceptor observed zero calls. The admitted surface is bounded, not a general network interceptor.
 
 These nuances narrow claim wording only. They do not invalidate the accepted transactional-admission Evidence.
 
@@ -155,6 +157,10 @@ MANAGED_JOB Gateway last-mile revalidation                  → FIRST-BUILD secu
 Release SERVED_VERIFIED integration                         → FIRST-BUILD / Release
 actual sync / Sankhya / Project DB realization              → FIRST-BUILD / 3N / 3O as routed
 ```
+
+The exported vendor DDL carries its own outer `BEGIN`/`COMMIT`. First-build migration realization must integrate it into the single ordered `hub_control` migration lineage by stripping/normalizing only that outer wrapper through controlled tooling, then preserving and reviewing the exact object diff/hash. An embedded `COMMIT` must never terminate an already-open migration-runner transaction; this is wrapper handling, not a fork of pg-boss internals.
+
+The DT-1' admission provenance is reconstructible from the executor commit `ab6b1841e585b9cafbf8ea04290505832fa1b952`, its parent authority projection `b7232aa...`, and `3L-R2 §18`. No accepted claim is invalidated. Future Package admission records must capture the Q0 commit, amendment commit, current HEAD and known `UNKNOWN`/`PARTIAL` facts explicitly; this closure does not rewrite historical admission artifacts.
 
 No outbox, scheduler/automation domain, new durable owner record or Package F is admitted.
 

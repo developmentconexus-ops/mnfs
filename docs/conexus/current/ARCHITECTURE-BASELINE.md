@@ -4,6 +4,8 @@
 > **Parent checkpoint:** `3A-R11 — CLOSED / APPROVED`
 > **R11-H:** APPROVED / OPERATOR RATIFIED 2026-08-18
 > **3L-R1:** CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19
+> **3L-R2:** CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-20
+> **3L-R3:** CURRENT / FINAL TECHNOLOGY-QUALIFICATION CLOSURE / FABLE INCORPORATED
 > **Product meaning:** [PRODUCT-CONTRACT.md](PRODUCT-CONTRACT.md) — current accepted projection
 > **Decision routing:** [DECISION-RECONCILIATION.md](DECISION-RECONCILIATION.md) — current accepted reconciliation
 > **Method:** DevelopmentConexus Engineering Method v1.0.0  
@@ -1472,7 +1474,11 @@ CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
-Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
+3L = CLOSED / 3L-R3 FINAL CLOSURE
+3M = NEXT / NOT STARTED
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
@@ -1571,10 +1577,10 @@ pg-boss 12.26.3
 Status:
 
 ```text
-CANDIDATE / NOT QUALIFIED / NOT AUTHORITY
+QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION MECHANICS / PRIVATE MAR SUBSTRATE / NOT AUTHORITY
 ```
 
-Package D must prove 3A-R9 behavior or introduce only the smallest owner-side reconciliation required.
+The one-catch-up/no-N-slots law is preserved as a Product owner-side law and first-build reconciliation conformance obligation. It is not a remaining pg-boss cron/catch-up qualification probe.
 
 ---
 
@@ -2281,9 +2287,9 @@ REJECTED F1
 | BuilderMastra != ParMastra same-process isolation | **QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES** | process split remains a future trigger for a reachable enabled-global bleed |
 | Conversation history baseline | **ARCHITECTURE CURRENT** | advanced memory gated |
 | bounded F1 model execution/economics | **ARCHITECTURE CURRENT / PACKAGE C DEFER SAFELY** | finite server limits and truthful usage/cost visibility remain; advanced hard monetary enforcement is deferred by 3L-R1 |
-| managed sync/job semantics | **NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION** | MAR/Release law remains current; Package D is not admitted by inheritance |
-| pg-boss 12.26.3 | **PACKAGE D CANDIDATE / NOT AUTHORITY** | one-catch-up law must be proved |
-| deciding F5/observability surfaces | **NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION** | telemetry-never-authority remains architectural; Package E is not admitted by inheritance |
+| managed sync/job semantics | **CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION** | only the current F1 tested transactional-admission subset is qualified; downstream MAR/Release/sync obligations remain first-build + 3M + 3N/3O |
+| pg-boss 12.26.3 | **QUALIFIED FOR TESTED TRANSACTIONAL-ADMISSION MECHANICS / PRIVATE MAR SUBSTRATE / NOT AUTHORITY** | one-catch-up/no-N-slots law remains the Product owner-side law and first-build reconciliation conformance, not a remaining pg-boss cron probe |
+| deciding F5/observability surfaces | **DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE** | telemetry-never-authority remains architectural; Package E has no pre-C-018 runtime probe |
 | React/TS/Vite/TanStack paved road | **ARCHITECTURE CURRENT** | first-build scaffold conformance pending |
 | Brain semantic architecture | **ARCHITECTURE CURRENT** | implementation-dependent Discovery/feedback/conformance probes downstream |
 | first-production Linux guest/private ingress | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION** | activation/restore/security proofs remain |
@@ -2335,18 +2341,19 @@ Package B — Product Agent + Cross-Runtime — CLOSED / LEAD-ADJUDICATED / QUAL
   CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package C — DEFER SAFELY / NOT EXECUTED
 Package D — Managed Execution
-  NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
-  includes CX-MANAGED-JOB-01
+  CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
+  CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
 ↓ adjudicate
 Package E — Deciding Evidence
-  NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+  DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 ↓ adjudicate + completeness/deletion check
-ONE final independent Fable review of complete 3L
+3L-R3 final closure = CURRENT / FABLE INCORPORATED
 ↓
-3L closure
+3L = CLOSED
+3M = NEXT / NOT STARTED
 ```
 
-A package does not start merely because the previous package claimed success; Packages D/E remain NOT EXECUTED and require proportional rederivation before any admission.
+The current Package-D admission is bounded to the tested transactional-admission subset. Downstream remainder is preserved for FIRST-BUILD + 3M + 3N/3O; Package E remains safely deferred with no pre-C-018 runtime probe.
 
 ---
 
@@ -2593,6 +2600,8 @@ Detailed accepted homes remain controlling for exact semantic depth and when res
 
 # 50. Current handoff
 
-> **Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C remains DEFER SAFELY / NOT EXECUTED; Packages D/E remain NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION. Do not execute them, Product implementation, C-018 ratification or merge by inheritance.**
+> **3L is CLOSED by 3L-R3. Package B is CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES. Package C and Package E remain DEFER SAFELY / NOT EXECUTED; Package D is CLOSED / LEAD-ADJUDICATED for the current F1 tested transactional-admission subset. CX-MANAGED-JOB-01 preserves its downstream remainder for FIRST-BUILD + 3M + 3N/3O. 3M — Failure & Recovery Architecture = NEXT / NOT STARTED. Do not execute another probe, start 3M by inheritance, implement Product code, ratify C-018 or merge by inheritance.**
 
 Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.
+
+Historical pre-3L-R2 route, superseded by the current 3L-R2 + 3L-D + 3L-R3 projection: `Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`.

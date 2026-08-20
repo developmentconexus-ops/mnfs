@@ -361,13 +361,13 @@ Agent-first, simple-by-default, inspectable-by-design Workspace/Project shell; t
 
 **Disposition:** `CURRENT QUALIFICATION ROUTER / PARTIALLY SUPERSEDED BY 3L-R1`.
 
-Exact deciding Evidence identity and serial adjudication survive. The old unconditional Package A→B→C→D→E execution route is superseded: Package C is `DEFER SAFELY / NO F1 EXECUTION`, and Packages D/E must be rederived proportionally after B.
+Exact deciding Evidence identity and serial adjudication survive. The old unconditional Package A→B→C→D→E execution route is superseded: Package C is `DEFER SAFELY / NO F1 EXECUTION`, and the former D/E rederivation route is historical and superseded by 3L-R2 plus 3L-R3.
 
 ## 3L-R1
 
 **Disposition:** `CURRENT / APPROVED / OPERATOR RATIFIED`.
 
-Direct code-defined Mastra Agent, native `requireApproval` pause/resume mechanics and PostgreSQL-backed suspended-run discovery are current. Raw Mastra `RequestContext` is non-authoritative runtime/configuration substrate; current Conexus owner truth is rechecked at governed owner/tool/Gateway boundaries. BT-3A is complete with the native schema hypothesis rejected; BT-3N and BT-4N passed Architecture-Lead adjudication; BT-5N is `PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS` for enabled F1 surfaces. Package B is `CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES`; `CX-AGENT-MASTRA-01` is qualified for current F1 tested properties and `CX-RUNTIME-ISOLATION-01` is qualified same-process for enabled F1 surfaces. Package C is `DEFER SAFELY / NOT EXECUTED` without weakening finite model-call/step limits or truthful usage/cost missingness. Packages D/E are `NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`.
+Direct code-defined Mastra Agent, native `requireApproval` pause/resume mechanics and PostgreSQL-backed suspended-run discovery are current. Raw Mastra `RequestContext` is non-authoritative runtime/configuration substrate; current Conexus owner truth is rechecked at governed owner/tool/Gateway boundaries. BT-3A is complete with the native schema hypothesis rejected; BT-3N and BT-4N passed Architecture-Lead adjudication; BT-5N is `PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS` for enabled F1 surfaces. Package B is `CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES`; `CX-AGENT-MASTRA-01` is qualified for current F1 tested properties and `CX-RUNTIME-ISOLATION-01` is qualified same-process for enabled F1 surfaces. Package C is `DEFER SAFELY / NOT EXECUTED` without weakening finite model-call/step limits or truthful usage/cost missingness. Package D is `CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION` for the current F1 tested subset; Package E is `DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE`.
 
 ```text
 BT-5N = PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS
@@ -375,10 +375,22 @@ CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
-Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
+Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
+3L = CLOSED / 3L-R3 FINAL CLOSURE
+3M = NEXT / NOT STARTED
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
+
+Historical pre-3L-R2 route, superseded by the current 3L-R2 + 3L-D + 3L-R3 projection: `Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`.
+
+## 3L-R3
+
+**Disposition:** `CURRENT / FINAL TECHNOLOGY-QUALIFICATION CLOSURE / ARCHITECTURE-LEAD ADJUDICATED`.
+
+Package D is closed only for the tested transactional-admission subset. `CX-MANAGED-JOB-01` preserves the downstream remainder for `FIRST-BUILD + 3M + 3N/3O`; Package E remains safely deferred with no pre-C-018 runtime probe. 3L is closed, 3M is next and not started, C-018 is not ratified and Product implementation remains blocked.
 
 ## 3L Package A
 
@@ -515,7 +527,7 @@ REJECTED F1
 | direct Mastra Product Agent | QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / PACKAGE B CLOSED |
 | BuilderMastra/ParMastra same-process isolation | QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES |
 | bounded F1 model execution/economics | ARCHITECTURE CURRENT / PACKAGE C DEFER SAFELY |
-| pg-boss 12.26.3 | PACKAGE D CANDIDATE / NOT AUTHORITY |
+| pg-boss 12.26.3 | QUALIFIED FOR TESTED TRANSACTIONAL-ADMISSION MECHANICS / PRIVATE MAR SUBSTRATE / NOT AUTHORITY |
 | deciding observability/F5 surfaces | ARCHITECTURE CURRENT SHAPE / PACKAGE E NOT QUALIFIED |
 | React/TS/Vite/TanStack paved road | ARCHITECTURE CURRENT / first-build conformance pending |
 | first-production Linux guest/private ingress topology | ARCHITECTURE CURRENT FOR FIRST INSTALLATION / activation proofs pending |
@@ -537,13 +549,19 @@ Final GPT authority review          COMPLETE / PASS
 R11-H operator ratification         APPROVED / 2026-08-18
 R11                                  CLOSED / ACCEPTED
 3L-R1                               CURRENT / APPROVED / OPERATOR RATIFIED
+3L-R2                               CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-20
+3L-R3                               CURRENT / FINAL TECHNOLOGY-QUALIFICATION CLOSURE / FABLE INCORPORATED
 Package B                            CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES / BT-5N QUALIFIED_SAME_PROCESS
 CX-AGENT-MASTRA-01                   QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01              QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
 Package C                            DEFER SAFELY / NOT EXECUTED
-Packages D/E                         NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION
+Package D                            CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
+Package E                            DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+CX-MANAGED-JOB-01                    QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
+3L                                   CLOSED / 3L-R3 FINAL CLOSURE
+3M                                   NEXT / NOT STARTED
 ```
 
-No irreconcilable accepted-authority conflict or architecture reopen was found. **Current handoff:** Package B closure is projected from the accepted fresh BT-5N Evidence; Packages D/E require proportional rederivation and are not admitted by inheritance.
+No irreconcilable accepted-authority conflict or architecture reopen was found. **Current handoff:** 3L-R3 is the final closure authority incorporating the Fable review; Package D is admitted only for the tested transactional-admission subset, Package E is safely deferred, and the managed-job downstream remainder is routed to FIRST-BUILD + 3M + 3N/3O.
 
 Historical pre-execution route, superseded by the executor record above: `BT-5N = NEXT / EXECUTION AUTHORIZED`.

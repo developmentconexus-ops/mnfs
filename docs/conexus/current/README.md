@@ -4,12 +4,13 @@
 > **Whole-product checkpoint:** `3A-R11 CLOSED / APPROVED / OPERATOR RATIFIED`  
 > **3L framework/routing amendment:** `3L-R1 CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-19`  
 > **3L Package-D/E amendment:** `3L-R2 CURRENT / APPROVED / OPERATOR RATIFIED 2026-08-20`  
-> **Phase 3:** IN PROGRESS  
+> **Phase 3:** 3L CLOSED / 3M NEXT  
 > **C-018:** NOT RATIFIED  
 > **Product implementation:** BLOCKED  
 > **Package B:** CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES  
-> **Package D:** CLOSED / LEAD-ADJUDICATED / `QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION`
+> **Package D:** CLOSED / LEAD-ADJUDICATED / `QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION`  
 > **Package E:** DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE  
+> **3L-R3:** CURRENT / FINAL TECHNOLOGY-QUALIFICATION CLOSURE  
 > **PR #40:** DRAFT / NO MERGE AUTHORIZATION
 
 This page is the shortest safe entrypoint to the **current Conexus Product, architecture and exact next action**.
@@ -55,21 +56,22 @@ BT-4N = PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS
 BT-5N = PASS / LEAD-ADJUDICATED / QUALIFIED_SAME_PROCESS
 CX-AGENT-MASTRA-01 = QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 CX-RUNTIME-ISOLATION-01 = QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES
+CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
 Package B = CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
 Package C = DEFER SAFELY / NOT EXECUTED
 Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 3L completeness/deletion check = PASS
-FINAL INDEPENDENT FABLE REVIEW = NEXT
-3L = IN PROGRESS
-3M = NOT STARTED
+3L-R3 = CURRENT / FINAL CLOSURE / FABLE INCORPORATED
+3L = CLOSED
+3M = NEXT / NOT STARTED
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
 
 Detailed Package-D acceptance is recorded in [3L-D final lead closure](../phase3/3L-D-final-lead-closure.md). The current critical-path deletion result is recorded in the [3L preclosure completeness/deletion check](../phase3/3L-preclosure-completeness-deletion-check.md). Historical Evidence and authority remain preserved; no executor may re-run closed probes or execute deferred Packages by inheritance.
 
-Historical pre-3L-R2 route, retained only for provenance and superseded by 3L-R2 plus the Package-D closure: `Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`.
+Historical pre-3L-R2 route, retained only for provenance and superseded by 3L-R2 plus the Package-D closure and 3L-R3: `Packages D/E = NOT EXECUTED / REQUIRE PROPORTIONAL REDERIVATION`.
 
 ---
 
@@ -456,7 +458,7 @@ Future integration remains public Mastra observability → Conexus-authored `Obs
 | native Product-Agent schedule ingress | **BT-4N PASS / LEAD-ADJUDICATED / PASS_NATIVE_SCHEDULE_INGRESS** |
 | BuilderMastra ↔ ParMastra same-process isolation | **QUALIFIED_SAME_PROCESS FOR ENABLED F1 SURFACES** |
 | advanced per-run model-economics machinery | **DEFER SAFELY FOR F1** |
-| managed execution / Package D | **CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION** |
+| managed execution / Package D | **CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION**; pg-boss is qualified only for the tested admission mechanics and remains private MAR substrate, not authority |
 | deciding Evidence / Package E | **DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE / SOURCE BASIS CORRECTED** |
 | React/TS/Vite/TanStack paved road | **ARCHITECTURE CURRENT / first-build conformance pending** |
 | private Linux-guest first-production topology | **ARCHITECTURE CURRENT FOR FIRST INSTALLATION / activation proof pending** |
@@ -544,7 +546,7 @@ Native framework mechanisms may be used where admitted; they do not create simil
 3J Deployment/Operations           CLOSED / APPROVED
 3K Frontend/Product                CLOSED / APPROVED
 
-3L Technology Qualification        IN PROGRESS
+3L Technology Qualification        CLOSED / ARCHITECTURE-LEAD ADJUDICATED / 3L-R3 FINAL CLOSURE
   Q0                               COMPLETE / evidence discipline retained / route amended by 3L-R1 + 3L-R2
   Package A                        COMPLETE
   Package B                        CLOSED / LEAD-ADJUDICATED / QUALIFIED FOR CURRENT F1 TESTED PROPERTIES
@@ -561,11 +563,13 @@ Native framework mechanisms may be used where admitted; they do not create simil
   Package C                        DEFER SAFELY / NOT EXECUTED
   Package D                        CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURRENCE_ADMISSION
   Package E                        DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
+  CX-MANAGED-JOB-01                QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
   3L-R2                            APPROVED / OPERATOR RATIFIED 2026-08-20
+  3L-R3                            CURRENT / FINAL CLOSURE / FABLE INCORPORATED
   3L completeness/deletion check  PASS / ARCHITECTURE-LEAD COMPLETE
-  final independent Fable review  NEXT
+  final independent Fable review  COMPLETE / INCORPORATED
 
-3M Failure & Recovery              NOT STARTED
+3M Failure & Recovery              NEXT / NOT STARTED
 3N Architecture Verification       NOT STARTED
 3O Vertical Proof Contract         NOT STARTED
 C-018                              NOT RATIFIED
@@ -576,13 +580,13 @@ Implementation                     BLOCKED
 
 ## 14. Exact next action
 
-> **Perform ONE final independent Fable review of the complete 3L package.**
+> **3M — Failure & Recovery Architecture = NEXT / NOT STARTED.**
 
 Package A is **COMPLETE**. Package B and Package D are **CLOSED / LEAD-ADJUDICATED** for their exact tested properties. Package C and Package E remain **DEFER SAFELY**.
 
-The [3L preclosure completeness/deletion check](../phase3/3L-preclosure-completeness-deletion-check.md) is `PASS`, with `remaining material 3L technology question = 0`, but 3L remains **IN PROGRESS** until the final independent review is adjudicated.
+The [3L preclosure completeness/deletion check](../phase3/3L-preclosure-completeness-deletion-check.md) is `PASS`, with `remaining material 3L technology question = 0`. The [3L-R3 final closure](../phase3/3L-R3-final-technology-qualification-closure.md) records the Architecture-Lead adjudication and incorporated Fable review.
 
-Use the [final independent Fable review handoff](../phase3/3L-FABLE-FINAL-INDEPENDENT-REVIEW-HANDOFF.md). Do not self-execute another probe, start 3M, ratify C-018, implement Product code, change PR #40 from Draft or merge by inheritance.
+Do not execute another probe, implement Product code, ratify C-018, change PR #40 from Draft or merge by inheritance. Start 3M only through its owning authority and explicit next-session authorization.
 
 ---
 

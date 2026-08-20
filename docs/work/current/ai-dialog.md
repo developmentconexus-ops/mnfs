@@ -134,7 +134,7 @@ Deciding-authority note used throughout: current framework documentation is supp
 Overall verdict                        = STRUCTURE CONFIRMED / CLOSURE BLOCKED
                                          8 material corrections; no architecture reopen
 Material Findings count                = 8
-Non-material Findings count            = 8
+Non-material Findings count            = 10
 Architecture/Product reopen required?  = NO for owners, modules, durable classes, schemas and the
                                          dependency graph.
                                          YES for exactly one accepted clause: the required recovery
@@ -624,6 +624,27 @@ N-07  S6.1 to S6.3 apply one vocabulary (stop intent -> quiescence -> settlement
 N-08  S9.3 kill-point families should gain the two falsifiers this review needs:
       restore-and-start with no recovery marker planted (M-01), and idempotency-key reuse across a
       restore boundary (M-02b).
+
+N-09  Package placement, not architecture: the candidate carries its proposal at
+      docs/work/current/proposal.md, and the enforced hygiene guard rejects that path on BOTH branch
+      classes. On the review branch only docs/work/current/ai-dialog.md is permitted; on any merge
+      candidate docs/work/** may not exist at all. Reproduced in a clean Linux worktree on the
+      pinned Node 24.18.0 with REVIEW_CANDIDATE_REF set to the candidate HEAD:
+        "review candidate itself contains docs/work/**"
+        "temporary work path in candidate: docs/work/current/proposal.md"
+      The protected verify check therefore cannot be green for the candidate as published. The
+      candidate preamble already promises deletion before merge, so this is a sequencing defect
+      rather than a semantic one, but the Lead should decide it explicitly rather than discover it
+      at merge.
+
+N-10  Operating-envelope hazard on exactly this branch class: the repository contract test plants a
+      fixture at docs/work/current/ai-dialog.md and then removes the whole docs/work tree in its
+      cleanup (tests/repository/repository-contract.test.mjs). Running the mandated
+      "npm ci && npm run verify" on a review branch therefore DELETES the review evidence file from
+      the working tree, which collides with the engineering rule "Preserve unowned state". Observed
+      directly: after one verify run in a throwaway clone, git status showed both docs/work files
+      deleted. Smallest fix is for the negative control to use a distinct fixture path, or to
+      restore prior state instead of removing the tree.
 ```
 
 ### 5. Mandatory attack questions
@@ -787,6 +808,22 @@ Round 2 position:
   is justified only if adjudication of M-04 or M-05 changes structure (a Hub-side activation flow, a
   new durable class, or a custody model that touches data S5.8), because those would make the
   corrected candidate a materially different package rather than a corrected one.
+
+Verification actually run for this review commit:
+  environment            = clean Linux-filesystem worktree, Node 24.18.0 (repository pin)
+  command                = npm ci && REVIEW_CANDIDATE_REF=c5b2a4c npm run verify
+  check-repository-hygiene = FAIL, and the only two errors are N-09 (candidate proposal path).
+                             The "differ only by ai-dialog.md" guard did NOT fire, so this review
+                             commit is exactly the one permitted delta, and the legacy-content scan
+                             over this file passed.
+  check-doc-index          = PASS
+  check-current-state      = PASS (bootstrap_bytes=8719)
+  check-qualification-provenance = PASS
+  test:repository          = the contract test re-runs hygiene, so it inherits the same N-09 failure;
+                             both negative controls fired correctly.
+  Running verify on a Windows-filesystem worktree additionally produces two false positives
+  (case-insensitive matches on docs/INDEX.md and docs/ROADMAP.md, and vendor DDL digest drift from
+  CRLF), which is exactly why the repository rule requires a Linux-filesystem worktree.
 
 Status carried forward unchanged by this review:
   3M                     = NEXT / NOT STARTED

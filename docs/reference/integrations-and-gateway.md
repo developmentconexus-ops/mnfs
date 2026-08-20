@@ -118,7 +118,9 @@ one logical effect intent
 
 That identity is independent of runtime/model/AgentRun/JobRun/transport attempt, is stable across retry/recovery of the same intent, and is never allocated from a counter/sequence namespace that a restored generation can reuse.
 
-Identical payload or sealed subject does not collapse every future legitimate repetition into the same intent. Each effect-capable capability/connector declares the semantic idempotency/reconciliation scope that distinguishes duplicate risk from a later legitimate intent. That scope is admitted only after existing Connection/capability qualification and exact Release composition validate it; connector-authored metadata is not trusted merely by declaration.
+Identical payload or sealed subject does not collapse every future legitimate repetition into the same intent. Each effect-capable capability/connector declares the semantic idempotency/reconciliation scope that distinguishes duplicate risk from a later legitimate intent.
+
+That scope is not trusted as arbitrary author metadata: it must be validated through the existing Connection/capability qualification and exact Release composition gates. A deliberately under-declared scope is a required first-build negative falsifier.
 
 ### 19.4.2 Unresolved truth fences new admission
 
@@ -142,7 +144,7 @@ disaster recovery active
    after provider/business reconciliation establishes acceptable current safety
 ```
 
-If the lost interval cannot be reconciled sufficiently, the affected effect surface remains fail-closed until explicit operator/business reconciliation through existing authority. No missing local EffectAttempt is fabricated and no generic recovery owner is introduced.
+If the lost interval cannot be reconciled sufficiently, that effect surface remains fail-closed until explicit operator/business reconciliation through existing authority. No missing local EffectAttempt is fabricated and no generic recovery owner is introduced. Removing the infrastructure recovery deny never itself grants Gateway admission; each effect still passes the ordinary current Gateway/Connection checks.
 
 A future provider/effect class that cannot fit this idempotency/reconciliation model reopens the smallest Gateway/operations Decision Loop.
 

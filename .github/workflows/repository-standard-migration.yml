@@ -1,0 +1,45 @@
+name: Repository Standard Migration
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.head_ref == 'chore/repository-standard-v1'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Apply standard transformation
+        run: node scripts/apply-repository-standard-v1.mjs
+      - name: Remove branch-only migration machinery
+        run: |
+          rm scripts/apply-repository-standard-v1.mjs
+          rm .github/workflows/repository-standard-migration.yml
+      - name: Review exact transformation
+        run: |
+          git diff --check
+          git status --short
+          git diff --name-status
+      - name: Commit and publish transformed candidate
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name developmentconexus-ops
+          git config user.email development.conexus@gmail.com
+          git add -u -- AGENTS.md README.md CONTRIBUTING.md docs scripts tests .github/workflows/repository-standard-migration.yml
+          git add -- docs/index.md docs/roadmap.md docs/product docs/architecture docs/decisions docs/development docs/diagrams/index.md docs/reference/mastra/index.md docs/research/index.md docs/research/factory-ai/index.md docs/research/mastra/index.md docs/research/mitra/index.md docs/phases/3a-authority-baseline.md docs/phases/3l-technology-qualification.md docs/evidence/qualification/3l
+          git status --short
+          git commit -m "chore: align Conexus OS repository standard"
+          git push origin "HEAD:${HEAD_BRANCH}"

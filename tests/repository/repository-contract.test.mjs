@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { resolve } from 'node:path'
 
@@ -18,16 +18,22 @@ test('Conexus OS repository contract is green', () => {
 })
 
 test('repository hygiene guard fires on temporary work contamination', () => {
-  const workDir = resolve(root, 'docs/work/current')
-  const file = resolve(workDir, 'ai-dialog.md')
+  const workDir = resolve(root, 'docs/work')
+  const fixture = resolve(workDir, '__repository-contract-negative__.md')
+  const workDirExisted = existsSync(workDir)
+  const fixtureExisted = existsSync(fixture)
+  const originalFixture = fixtureExisted ? readFileSync(fixture, 'utf8') : null
+
   mkdirSync(workDir, { recursive: true })
-  writeFileSync(file, '# temporary review\n')
+  writeFileSync(fixture, '# temporary negative-control fixture\n')
   try {
     const result = run('scripts/check-repository-hygiene.mjs')
     const output = `${result.stdout}\n${result.stderr}`
     if (result.status === 0 || !output.includes('docs/work')) throw new Error('hygiene negative control did not fire')
   } finally {
-    rmSync(resolve(root, 'docs/work'), { recursive: true, force: true })
+    if (fixtureExisted) writeFileSync(fixture, originalFixture)
+    else rmSync(fixture, { force: true })
+    if (!workDirExisted) rmSync(workDir, { recursive: true, force: true })
   }
 })
 

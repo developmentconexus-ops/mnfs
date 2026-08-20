@@ -1,11 +1,5 @@
-# MNFS architecture and governance
-/docs/product/ @developmentconexus-ops
-/docs/adr/ @developmentconexus-ops
-/docs/capabilities/ @developmentconexus-ops
-/docs/standards/ @developmentconexus-ops
-/docs/golden-paths/ @developmentconexus-ops
-/docs/repository-profile/ @developmentconexus-ops
-/docs/research/ @developmentconexus-ops
-/.mnfs/ @developmentconexus-ops
-/AGENTS.md @developmentconexus-ops
+* @developmentconexus-ops
+/docs/ @developmentconexus-ops
+/qualification/ @developmentconexus-ops
+/.agents/skills/mastra/ @developmentconexus-ops
 /.github/CODEOWNERS @developmentconexus-ops

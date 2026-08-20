@@ -1,38 +1,15 @@
 {
-  "name": "mnfs",
+  "name": "conexus-os",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=24.18.0"
   },
-  "bin": {
-    "mnfs": "./bin/mnfs.mjs",
-    "mnfs-lease-action": "./bin/mnfs-lease-action.mjs"
-  },
   "scripts": {
-    "clean": "rm -rf dist",
-    "build": "npm run clean --silent && tsc -p tsconfig.json",
-    "typecheck": "tsc --noEmit",
-    "test": "npm run test:unit",
-    "test:unit": "npm run build --silent && node scripts/run-tests.mjs",
-    "test:as02": "node scripts/run-as02-tests.mjs",
-    "test:tc01": "node scripts/run-tc01-tests.mjs",
-    "test:arr-s0": "node scripts/run-arr-s0-tests.mjs",
-    "test:arr-s1": "node --test spikes/arr-s1/tests/*.test.mjs",
-    "as02": "node spikes/as-02/src/cli.mjs",
-    "tc01": "node spikes/tc-01/src/cli.mjs",
-    "arr-s0": "node spikes/arr-s0/bin/arr-s0.mjs",
-    "docs:generate": "node scripts/generate-product-blueprint.mjs && node scripts/generate-roadmap.mjs && node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
-    "docs:coverage": "node scripts/generate-capability-coverage.mjs --capability=CAP-EXECUTION",
-    "docs:check": "npm run docs:test && node scripts/validate-docs.mjs",
-    "verify": "npm run typecheck && npm run test:unit && npm run test:as02 && npm run test:tc01 && npm run test:arr-s0 && npm run test:arr-s1 && npm run docs:check",
-    "doctor": "npm run build --silent && node bin/mnfs.mjs doctor",
-    "docs:roadmap": "node scripts/generate-roadmap.mjs",
-    "docs:test": "npm run build --silent && node scripts/test-documentation-tooling.mjs && node scripts/test-conexus-r11-routing.mjs && node scripts/test-conexus-3l-r1-routing.mjs && node scripts/test-mis-002-replan-builder.mjs && node scripts/test-approved-mis-002-allocations.mjs && node scripts/test-arr-p1-blueprint-reconciliation.mjs && node scripts/test-arr-spike-contract-binding.mjs && node scripts/test-arr-s0-contract-consistency.mjs && node scripts/test-arr-s1-s2-planner-packs.mjs"
-  },
-  "devDependencies": {
-    "@types/node": "24.12.4",
-    "typescript": "5.9.3"
+    "test": "npm run test:repository",
+    "test:repository": "node --test tests/repository/*.test.mjs",
+    "repository:check": "node scripts/check-repository-hygiene.mjs && node scripts/check-doc-index.mjs && node scripts/check-current-state.mjs && node scripts/check-qualification-provenance.mjs",
+    "verify": "npm run repository:check && npm run test:repository"
   }
 }

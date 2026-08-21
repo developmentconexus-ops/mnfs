@@ -2,14 +2,12 @@
 
 > **Kind:** bounded 4B derivation Evidence; not Product authority and not the canonical machine-readable wire.
 > **Canonical destination:** `contracts/api/product/openapi.yaml`.
-> **Accepted source:** 4A `docs/product/operation-ledger.md`.
-> **Status:** candidate mapping under executable falsification.
+> **Accepted source:** current 4A `docs/product/operation-ledger.md`.
+> **Status:** CURRENT METHOD/PATH DERIVATION / `4B-F01` RECOMPILED / EXECUTABLY PROVED.
 
 ## 1. Derivation law
 
-The mapping below assigns one HTTP operation shape to each of the 114 accepted fixed Product operations before request/response schema authoring.
-
-Rules:
+HTTP shape is derived from accepted operation meaning rather than CRUD symmetry.
 
 ```text
 accepted read/provenance read
@@ -18,38 +16,34 @@ accepted read/provenance read
 accepted create with server-owned new identity
 → POST collection + Idempotency-Key when IC3 requires repeatable intake
 
-accepted mutable representation update
-→ PATCH exact resource + If-Match when IC2 is representation-current
-
 accepted exact membership/grant replacement/removal
-→ PUT / DELETE exact subject when the Product meaning is precisely that subject
+→ PUT / DELETE exact subject when Product meaning is precisely that subject
 
 accepted semantic command/decision/proof
-→ POST semantic command/decision collection
+→ POST semantic command/decision path
 → do not manufacture a CRUD resource identity just to look RESTful
 
 IC1
 → no mandatory caller precondition by symmetry; current authority is rechecked through owner commit
 
 IC2
-→ If-Match only when the protected subject is a current HTTP representation
-→ otherwise carry the exact immutable revision/digest/current subject explicitly
+→ If-Match only when the protected subject is the same current HTTP target representation
+→ otherwise carry exact revision/generation/digest/current subject explicitly
 
 IC3
 → Idempotency-Key when the caller can repeat consequential intake
-→ naturally idempotent PUT plus owner uniqueness can satisfy only where accepted semantics are the exact resource assignment
 
 IC4
-→ caller header only where it is the correct effect-intake carrier
-→ otherwise exact owner/Gateway effect fence remains internal and must be proved later
+→ caller carrier only where it is the correct effect-intake identity
+→ owner/Gateway effect fence remains authoritative
 
 path identifier
 → untrusted reference only
 → never authority by possession
-→ 404/403 disclosure law still applies server-side
+→ disclosure law remains server-side
 ```
 
-Surface roots:
+Current surface roots:
 
 ```text
 /api/control/...   authenticated Control Plane Product interaction
@@ -59,168 +53,127 @@ Surface roots:
 /api/projects/...  owner-neutral multi-ingress fixed capability such as AnalyticQuery
 ```
 
-A shared `MULTI` route does not merge authorization planes. Exact admitted ingress classes remain operation metadata and current owner authorization is rechecked independently.
+A shared multi-ingress route does not merge authorization planes. Exact admitted ingress classes remain operation metadata and current owner authorization is rechecked independently.
 
-## 2. Candidate census
+## 2. Current executable census
 
-```text
-fixed operations = 114
-unique operationIds = 114
-unique method+path pairs = 114
-GET    = 65
-POST   = 31
-PUT    = 7
-PATCH  = 4
-DELETE = 7
-```
+The exact current method/path map is intentionally **not duplicated as a second 111-row prose table**. It is represented once by the canonical OAD and mechanically joined back to the exact 4A ledger by `scripts/check-wire-bijection.mjs`.
 
-## 3. Exact operation shape map
-
-| 4A ID | operationId | Surface | Method | Candidate path | Caller/current-state carrier |
-| --- | --- | --- | --- | --- | --- |
-| `IAM-01` | `GetControlPlaneAccessContext` | `CP` | `GET` | `/api/control/access-context` | `NONE` |
-| `IAM-02` | `EndSession` | `CP` | `DELETE` | `/api/control/session` | `OWNER_CURRENT` |
-| `IAM-03` | `ProvisionAccount` | `CP` | `POST` | `/api/control/accounts` | `IDEMPOTENCY_KEY` |
-| `IAM-04` | `ListWorkspaceMembers` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/members` | `NONE` |
-| `IAM-05` | `AddWorkspaceMember` | `CP` | `PUT` | `/api/control/workspaces/{workspaceId}/members/{accountId}` | `OWNER_CURRENT` |
-| `IAM-06` | `RemoveWorkspaceMember` | `CP` | `DELETE` | `/api/control/workspaces/{workspaceId}/members/{accountId}` | `OWNER_CURRENT` |
-| `IAM-07` | `GrantAccountProjectAccess` | `CP` | `PUT` | `/api/control/projects/{projectId}/account-grants/{accountId}` | `OWNER_CURRENT` |
-| `IAM-08` | `RevokeAccountProjectAccess` | `CP` | `DELETE` | `/api/control/projects/{projectId}/account-grants/{accountId}` | `OWNER_CURRENT` |
-| `IAM-09` | `AddAreaMember` | `CP` | `PUT` | `/api/control/workspaces/{workspaceId}/areas/{areaId}/members/{accountId}` | `OWNER_CURRENT` |
-| `IAM-10` | `RemoveAreaMember` | `CP` | `DELETE` | `/api/control/workspaces/{workspaceId}/areas/{areaId}/members/{accountId}` | `OWNER_CURRENT` |
-| `IAM-11` | `GrantAreaProjectAccess` | `CP` | `PUT` | `/api/control/projects/{projectId}/area-grants/{areaId}` | `OWNER_CURRENT` |
-| `IAM-12` | `RevokeAreaProjectAccess` | `CP` | `DELETE` | `/api/control/projects/{projectId}/area-grants/{areaId}` | `OWNER_CURRENT` |
-| `IAM-13` | `GetPublishedAppAccessContext` | `PA` | `GET` | `/api/apps/{projectId}/access-context` | `NONE` |
-| `IAM-14` | `ListPublishedAppAccess` | `CP` | `GET` | `/api/control/projects/{projectId}/app-access` | `NONE` |
-| `IAM-15` | `SetPublishedAppAccess` | `CP` | `PUT` | `/api/control/projects/{projectId}/app-access/{accountId}` | `CURRENT_OR_ABSENT` |
-| `IAM-17` | `RevokePublishedAppAccess` | `CP` | `DELETE` | `/api/control/projects/{projectId}/app-access/{accountId}` | `IF_MATCH` |
-| `WS-01` | `CreateWorkspace` | `CP` | `POST` | `/api/control/workspaces` | `IDEMPOTENCY_KEY` |
-| `WS-02` | `GetWorkspace` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}` | `NONE` |
-| `WS-03` | `UpdateWorkspace` | `CP` | `PATCH` | `/api/control/workspaces/{workspaceId}` | `IF_MATCH` |
-| `WS-04` | `ListAreas` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/areas` | `NONE` |
-| `WS-05` | `CreateArea` | `CP` | `POST` | `/api/control/workspaces/{workspaceId}/areas` | `IDEMPOTENCY_KEY` |
-| `WS-06` | `UpdateArea` | `CP` | `PATCH` | `/api/control/workspaces/{workspaceId}/areas/{areaId}` | `IF_MATCH` |
-| `PRJ-01` | `ListProjects` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/projects` | `NONE` |
-| `PRJ-02` | `GetProject` | `CP` | `GET` | `/api/control/projects/{projectId}` | `NONE` |
-| `PRJ-03` | `CreateProject` | `CP` | `POST` | `/api/control/workspaces/{workspaceId}/projects` | `IDEMPOTENCY_KEY` |
-| `PRJ-04` | `UpdateProject` | `CP` | `PATCH` | `/api/control/projects/{projectId}` | `IF_MATCH` |
-| `PRJ-05` | `ArchiveProject` | `CP` | `POST` | `/api/control/projects/{projectId}/commands/archive` | `IF_MATCH` |
-| `PRJ-06` | `DuplicateProject` | `CP` | `POST` | `/api/control/projects/{projectId}/commands/duplicate` | `IDEMPOTENCY_KEY` |
-| `PRJ-07` | `RunInceptionInvestigation` | `CP` | `POST` | `/api/control/projects/{projectId}/inception-investigations` | `IDEMPOTENCY_KEY` |
-| `PRJ-08` | `GetApprovedProjectBaseline` | `CP` | `GET` | `/api/control/projects/{projectId}/baseline` | `NONE` |
-| `PRJ-09` | `ApproveProjectBaselineRevision` | `CP` | `POST` | `/api/control/projects/{projectId}/baseline/decisions` | `EXPLICIT_REVISION` |
-| `PRJ-10` | `GetProjectBrainBinding` | `CP` | `GET` | `/api/control/projects/{projectId}/brain-binding` | `NONE` |
-| `PRJ-11` | `SetProjectBrainBinding` | `CP` | `PUT` | `/api/control/projects/{projectId}/brain-binding` | `CURRENT_OR_ABSENT` |
-| `PRJ-12` | `ClearProjectBrainBinding` | `CP` | `DELETE` | `/api/control/projects/{projectId}/brain-binding` | `IF_MATCH` |
-| `PRJ-13` | `ListProjectConnectionBindings` | `CP` | `GET` | `/api/control/projects/{projectId}/connection-bindings` | `NONE` |
-| `PRJ-14` | `SetProjectConnectionBinding` | `CP` | `POST` | `/api/control/projects/{projectId}/commands/set-connection-binding` | `EXPLICIT_CURRENT_SUBJECT` |
-| `PRJ-15` | `RemoveProjectConnectionBinding` | `CP` | `POST` | `/api/control/projects/{projectId}/commands/remove-connection-binding` | `EXPLICIT_CURRENT_SUBJECT` |
-| `PRJ-16` | `ListProjectCapabilities` | `CP` | `GET` | `/api/control/projects/{projectId}/capabilities` | `NONE` |
-| `PRJ-17` | `GetProjectCapability` | `CP` | `GET` | `/api/control/projects/{projectId}/capabilities/{capabilityId}` | `NONE` |
-| `PRJ-18` | `ListProjectDataResources` | `CP` | `GET` | `/api/control/projects/{projectId}/data-resources` | `NONE` |
-| `PRJ-19` | `GetProjectDataResource` | `CP` | `GET` | `/api/control/projects/{projectId}/data-resources/{dataResourceId}` | `NONE` |
-| `PRJ-20` | `ListProjectProductAgents` | `CP` | `GET` | `/api/control/projects/{projectId}/product-agents` | `NONE` |
-| `PRJ-21` | `GetProjectProductAgent` | `CP` | `GET` | `/api/control/projects/{projectId}/product-agents/{agentId}` | `NONE` |
-| `PRJ-22` | `ListWorkspaceProductAgents` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/product-agents` | `NONE` |
-| `BLD-01` | `ListChanges` | `CP` | `GET` | `/api/control/projects/{projectId}/changes` | `NONE` |
-| `BLD-02` | `GetChange` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}` | `NONE` |
-| `BLD-03` | `CreateChange` | `CP` | `POST` | `/api/control/projects/{projectId}/changes` | `IDEMPOTENCY_KEY` |
-| `BLD-04` | `GetChangePlan` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/plan` | `NONE` |
-| `BLD-05` | `DecideChangePlanCheckpoint` | `CP` | `POST` | `/api/control/projects/{projectId}/changes/{changeId}/plan/decisions` | `EXPLICIT_REVISION` |
-| `BLD-06` | `GetChangeProgress` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/progress` | `NONE` |
-| `BLD-07` | `GetChangeDiff` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/diff` | `NONE` |
-| `BLD-08` | `ListProjectSourceTree` | `CP` | `GET` | `/api/control/projects/{projectId}/source/tree` | `NONE` |
-| `BLD-09` | `GetProjectSourceFile` | `CP` | `GET` | `/api/control/projects/{projectId}/source/file` | `NONE` |
-| `BLD-10` | `GetRunPreview` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/preview` | `NONE` |
-| `BLD-11` | `ListChangeFindings` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/findings` | `NONE` |
-| `BLD-12` | `GetFinding` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}` | `NONE` |
-| `BLD-13` | `CloseFinding` | `CP` | `POST` | `/api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}/commands/close` | `EXPLICIT_CURRENT_SUBJECT` |
-| `BLD-14` | `ListChangeEvidence` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/evidence` | `NONE` |
-| `BLD-15` | `GetEvidence` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/evidence/{evidenceId}` | `NONE` |
-| `BLD-16` | `AskConexusAboutContext` | `CP` | `POST` | `/api/control/projects/{projectId}/assistant/queries` | `NONE` |
-| `BLD-17` | `GetChangeExecutionDetail` | `CP` | `GET` | `/api/control/projects/{projectId}/changes/{changeId}/execution-detail` | `NONE` |
-| `BRN-01` | `GetWorkspaceBrain` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/brain` | `NONE` |
-| `BRN-02` | `ListBrainRevisions` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/brain/revisions` | `NONE` |
-| `BRN-03` | `GetBrainRevision` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/brain/revisions/{brainRevisionId}` | `NONE` |
-| `BRN-04` | `StartBrainDiscovery` | `CP` | `POST` | `/api/control/workspaces/{workspaceId}/brain/discoveries` | `IDEMPOTENCY_KEY` |
-| `BRN-05` | `ListKnowledgeProposals` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/brain/proposals` | `NONE` |
-| `BRN-06` | `GetKnowledgeProposal` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}` | `NONE` |
-| `BRN-07` | `SubmitKnowledgeProposal` | `CP` | `POST` | `/api/control/workspaces/{workspaceId}/brain/proposals` | `IDEMPOTENCY_KEY` |
-| `BRN-08` | `DecideKnowledgeProposal` | `CP` | `POST` | `/api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}/decisions` | `EXPLICIT_CURRENT_SUBJECT` |
-| `BRN-09` | `PublishBrainRevision` | `CP` | `POST` | `/api/control/workspaces/{workspaceId}/brain/publications` | `EXPLICIT_REVISION` |
-| `BRN-10` | `GetBrainHealth` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/brain/health` | `NONE` |
-| `BRN-12` | `RunAnalyticQuery` | `MULTI` | `POST` | `/api/projects/{projectId}/analytic-queries` | `NONE` |
-| `CON-01` | `ListConnectorDefinitions` | `CP` | `GET` | `/api/control/connectors` | `NONE` |
-| `CON-02` | `GetConnectorDefinition` | `CP` | `GET` | `/api/control/connectors/{connectorDefinitionId}` | `NONE` |
-| `CON-03` | `ListConnections` | `CP` | `GET` | `/api/control/connection-scopes/{ownerScopeKind}/{ownerId}/connections` | `NONE` |
-| `CON-04` | `GetConnection` | `CP` | `GET` | `/api/control/connections/{connectionId}` | `NONE` |
-| `CON-05` | `CreateConnection` | `CP` | `POST` | `/api/control/connection-scopes/{ownerScopeKind}/{ownerId}/connections` | `IDEMPOTENCY_KEY` |
-| `CON-06` | `ReviseConnection` | `CP` | `POST` | `/api/control/connections/{connectionId}/revisions` | `IF_MATCH` |
-| `CON-07` | `SetConnectionCredential` | `CP` | `PUT` | `/api/control/connections/{connectionId}/credential` | `IDEMPOTENCY_KEY` |
-| `CON-08` | `QualifyConnection` | `CP` | `POST` | `/api/control/connections/{connectionId}/qualifications` | `IDEMPOTENCY_KEY` |
-| `CON-09` | `GetConnectionQualification` | `CP` | `GET` | `/api/control/connections/{connectionId}/qualifications/{qualificationId}` | `NONE` |
-| `REL-01` | `ListReleases` | `CP` | `GET` | `/api/control/projects/{projectId}/releases` | `NONE` |
-| `REL-02` | `GetRelease` | `CP` | `GET` | `/api/control/projects/{projectId}/releases/{releaseId}` | `NONE` |
-| `REL-04` | `ListPromotions` | `CP` | `GET` | `/api/control/projects/{projectId}/promotions` | `NONE` |
-| `REL-05` | `GetPromotion` | `CP` | `GET` | `/api/control/projects/{projectId}/promotions/{promotionId}` | `NONE` |
-| `REL-06` | `PromoteRelease` | `CP` | `POST` | `/api/control/projects/{projectId}/promotions` | `IF_MATCH+IDEMPOTENCY_KEY` |
-| `REL-07` | `GetProjectServingState` | `CP` | `GET` | `/api/control/projects/{projectId}/serving-state` | `NONE` |
-| `REL-08` | `GetEnvironmentConformance` | `CP` | `GET` | `/api/control/projects/{projectId}/environments/{environmentId}/conformance` | `NONE` |
-| `PAR-01` | `ListConversations` | `PA` | `GET` | `/api/apps/{projectId}/agents/{agentId}/conversations` | `NONE` |
-| `PAR-02` | `GetConversation` | `PA` | `GET` | `/api/apps/{projectId}/agents/{agentId}/conversations/{conversationId}` | `NONE` |
-| `PAR-03` | `CreateConversation` | `PA` | `POST` | `/api/apps/{projectId}/agents/{agentId}/conversations` | `IDEMPOTENCY_KEY` |
-| `PAR-04` | `SendProductAgentTurn` | `PA` | `POST` | `/api/apps/{projectId}/agents/{agentId}/conversations/{conversationId}/turns` | `IDEMPOTENCY_KEY` |
-| `PAR-05` | `RunProductAgentHeadless` | `HEADLESS` | `POST` | `/api/headless/projects/{projectId}/agents/{agentId}/runs` | `IDEMPOTENCY_KEY` |
-| `PAR-06` | `ListAgentRuns` | `MULTI` | `GET` | `/api/runtime/projects/{projectId}/agent-runs` | `NONE` |
-| `PAR-07` | `GetAgentRun` | `MULTI` | `GET` | `/api/runtime/projects/{projectId}/agent-runs/{agentRunId}` | `NONE` |
-| `PAR-08` | `ListApprovalRequests` | `MULTI` | `GET` | `/api/runtime/projects/{projectId}/approval-requests` | `NONE` |
-| `PAR-09` | `GetApprovalRequest` | `MULTI` | `GET` | `/api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}` | `NONE` |
-| `PAR-10` | `DecideApprovalRequest` | `MULTI` | `POST` | `/api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}/decisions` | `IF_MATCH` |
-| `PAR-11` | `ListAgentTriggers` | `CP` | `GET` | `/api/control/projects/{projectId}/agents/{agentId}/triggers` | `NONE` |
-| `PAR-12` | `GetAgentTrigger` | `CP` | `GET` | `/api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}` | `NONE` |
-| `PAR-13` | `CreateScheduleTrigger` | `CP` | `POST` | `/api/control/projects/{projectId}/agents/{agentId}/triggers` | `IDEMPOTENCY_KEY` |
-| `PAR-14` | `ReviseScheduleTrigger` | `CP` | `PATCH` | `/api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}` | `IF_MATCH` |
-| `PAR-15` | `EnableAgentTrigger` | `CP` | `POST` | `/api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/enable` | `IF_MATCH` |
-| `PAR-16` | `DisableAgentTrigger` | `CP` | `POST` | `/api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/disable` | `OWNER_CURRENT` |
-| `GW-01` | `ListEffectAttempts` | `CP` | `GET` | `/api/control/projects/{projectId}/effect-attempts` | `NONE` |
-| `GW-02` | `GetEffectAttempt` | `CP` | `GET` | `/api/control/projects/{projectId}/effect-attempts/{effectAttemptId}` | `NONE` |
-| `MAR-01` | `ListManagedJobRuns` | `CP` | `GET` | `/api/control/projects/{projectId}/job-runs` | `NONE` |
-| `MAR-02` | `GetManagedJobRun` | `CP` | `GET` | `/api/control/projects/{projectId}/job-runs/{jobRunId}` | `NONE` |
-| `MAR-03` | `RunManagedJobNow` | `CP` | `POST` | `/api/control/projects/{projectId}/jobs/{jobId}/runs` | `IDEMPOTENCY_KEY` |
-| `OBS-01` | `ListProjectActivity` | `CP` | `GET` | `/api/control/projects/{projectId}/activity` | `NONE` |
-| `OBS-02` | `GetExecutionObservationDetail` | `CP` | `GET` | `/api/control/projects/{projectId}/execution-observations/{observationId}` | `NONE` |
-| `OBS-03` | `GetProjectUsageCostSummary` | `CP` | `GET` | `/api/control/projects/{projectId}/usage-cost-summary` | `NONE` |
-| `OBS-04` | `ListAuditRecords` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/audit-records` | `NONE` |
-| `OBS-05` | `GetAuditRecord` | `CP` | `GET` | `/api/control/workspaces/{workspaceId}/audit-records/{auditRecordId}` | `NONE` |
-
-## 4. Deliberate non-derivations
-
-The map does not yet decide:
-
-- exact request/response properties;
-- exact path/query parameter schemas beyond the semantic references visible above;
-- session-cookie wire name;
-- per-operation Problem subtype URIs;
-- pagination token schema;
-- exact retention window for `Idempotency-Key`;
-- server/runtime/controller implementation;
-- generated client/server SDK toolchain.
-
-Those are subsequent 4B closures. The final OpenAPI Description, not this Evidence table, is canonical.
-
-## 5. Negative controls
-
-A valid final mapping must reject:
+Current established closure:
 
 ```text
-POST /execute/{operationSlug}
-POST /sql
-POST /provider/{provider}/{operation}
-caller-selected target URL or Connection as effective authority
-one HTTP operation representing two accepted 4A operationIds
-two HTTP operations representing one accepted 4A operationId merely for UI ingress
-technical callback added to N_platform
-foreign path ID causing a 403 existence oracle when 404 non-disclosure is required
+fixed 4A operations       = 111
+bundled OAS operations    = 111
+missing                   = 0
+extra                     = 0
+duplicate operationId     = 0
+duplicate 4A ID           = 0
+duplicate method+path     = 0
+generic executor paths    = 0
+Verify #241               = SUCCESS
 ```
 
-The next executable step is to encode this candidate map in the canonical OAD and mechanically compare its `operationId` census with accepted 4A.
+The initial pre-`4B-F01` method/path derivation had 114 operations. Exact historical rows remain available through Git provenance, but they are not current wire authority and are not reproduced here because doing so would create a manually maintained parallel map that can drift from the executable OAD.
+
+## 3. `4B-F01` recompile
+
+Executable request-schema derivation proved that these three generic mutation operations had no accepted mutable Product property inventory:
+
+```text
+WS-03  UpdateWorkspace
+WS-06  UpdateArea
+PRJ-04 UpdateProject
+```
+
+After explicit operator approval:
+
+```text
+114
+- WS-03
+- WS-06
+- PRJ-04
+= 111
+```
+
+Current path consequence:
+
+```text
+GET /api/control/workspaces/{workspaceId}
+→ retained as WS-02 GetWorkspace
+→ no PATCH sibling
+
+/api/control/workspaces/{workspaceId}/areas/{areaId}
+→ no fixed Product operation remains
+→ path removed from canonical active OAD
+
+GET /api/control/projects/{projectId}
+→ retained as PRJ-02 GetProject
+→ no PATCH sibling
+```
+
+No speculative `Rename*`, settings or generic patch route replaces them.
+
+Bounded Evidence: [fixed-mutation-semantic-gap.md](fixed-mutation-semantic-gap.md).
+
+## 4. Current-state carrier correction
+
+Method/path mapping does not imply that every IC2 operation uses `If-Match`.
+
+The bundled current wire is separately challenged by [current-state-carrier-assessment.md](current-state-carrier-assessment.md).
+
+Current literal `IF_MATCH` set is exactly:
+
+```text
+PRJ-12 ClearProjectBrainBinding
+PAR-14 ReviseScheduleTrigger
+```
+
+Cross-resource/command-subpath cases use explicit semantic carriers instead. `4B-F01` removed `WS-03` and `PRJ-04` from the Product surface, further reducing the same-target ETag set.
+
+## 5. Command-shaped paths remain deliberate
+
+Where 4A admits an exact command but no stable Product resource identity for the command subject, 4B preserves command-shaped HTTP rather than manufacturing a REST noun.
+
+Examples include current exact operations such as:
+
+```text
+ArchiveProject
+DuplicateProject
+SetProjectConnectionBinding
+RemoveProjectConnectionBinding
+CloseFinding
+```
+
+The subject/current-state carrier is determined independently from the path aesthetics.
+
+## 6. Static Project-operation generation remains separate
+
+The fixed 111-operation platform OAD does not become a generic runtime executor for future Project business operations.
+
+Exact Release-pinned `project-operation/v1` declarations generate literal static paths by regime:
+
+```text
+QUERY       → /api/projects/{projectId}/queries/<static operation segment>
+ACTION      → /api/projects/{projectId}/actions/<static operation segment>
+INTEGRATION → /api/projects/{projectId}/integrations/<static operation segment>
+```
+
+The Budget Analyzer proves two exact generated paths and zero `{operationSlug}`/`/execute` escape hatch.
+
+## 7. Proof custody
+
+Current exact map custody is:
+
+```text
+4A operation ledger
+→ canonical OAS entrypoint + referenced Path Items
+→ deterministic bundle
+→ bijection checker
+```
+
+This Evidence records the derivation law and material corrections. It does not compete with the OAD as an editable route map.
+
+Any future method/path change must either:
+
+1. remain a faithful representation of unchanged accepted Product meaning and preserve the bijection; or
+2. stop and reopen the smallest upstream Product authority when the change requires new meaning.

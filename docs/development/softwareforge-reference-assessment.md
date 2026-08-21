@@ -1,8 +1,8 @@
 # SoftwareForge Reference Assessment — Blueprint/Paved-Road Input
 
-> **Status:** DESIGN INPUT / EVIDENCE SYNTHESIS / NOT PRODUCT AUTHORITY
+> **Status:** DESIGN INPUT / EVIDENCE SYNTHESIS / FABLE-ADJUDICATED / NOT PRODUCT AUTHORITY
 > **Scope:** bounded assessment of SoftwareForge patterns that may strengthen the Conexus Blueprint Harness, Project Paved Road and future Builder execution envelope.
-> **Decision boundary:** this document may influence later 4A/4D/4F contracts only after explicit admission. It creates no Product operation, semantic owner, durable record class, SDK API, Mastra workflow or implementation authority by itself.
+> **Decision boundary:** this document may influence later 4D/4F contracts only after exact admission. It creates no Product operation, semantic owner, durable record class, SDK API, Mastra workflow or implementation authority by itself.
 
 ## 1. Sources reviewed
 
@@ -15,23 +15,33 @@ Primary/current sources used for this assessment:
 
 The public Cursor plugin is especially useful because it exposes operational mechanics beyond product marketing: Work Orders, project/journey context, artifact updates, ForgeScore, dev-activity synchronization, MCP tools, skills, rules and safety hooks.
 
-SoftwareForge is a reference/evidence source only. Its names, claims and mechanisms do not outrank Conexus repository authority.
+SoftwareForge is a reference/Evidence source only. Its names, claims and mechanisms do not outrank Conexus repository authority.
 
-## 2. Overall verdict
+## 2. Fable-reviewed disposition
 
-SoftwareForge is materially closer to the Conexus problem than a conventional AI app builder. Its strongest transferable properties are not a fixed PRD/BRD pipeline or a named agent fleet; they are the continuity mechanisms connecting intent, specifications, architecture, implementation work and commit history.
-
-The bounded Conexus disposition is:
+Independent Fable review over exact candidate `e16edab6072ae551e491b39f080f4e7866c33f20` returned:
 
 ```text
-Authority Traceability Graph                 = ADOPT / ADAPT
-Change Impact + Staleness Analysis            = ADOPT
-WorkUnit Execution Envelope                   = ADAPT
-Authority Drift Gate before SHARE             = ADOPT PROPERTY / OWN AUTHORITY MECHANISM
-Versioned Policy Packs                        = ADAPT
-Brownfield Baseline Assessment                = ADAPT / later profile
+SURVIVES WITH BOUNDED CORRECTIONS
+```
+
+Lead adjudication accepted material findings `RF-SF-01`, `RF-SF-03`, `RF-SF-04` and `RF-SF-05` because each closes a concrete false-authority or false-proof channel while shrinking the mechanism. No finding changes Product meaning, semantic owners, trust boundaries or the 46-record durable closure. No 4A, C-018 or Phase-3 reopen is justified. A second review round is not required because the corrections only narrow properties already attacked.
+
+Final bounded disposition:
+
+```text
+D1 Authority Traceability Graph              = REFINE / KEEP
+D2 Change Impact + Staleness Analysis         = KEEP
+D3 WorkUnit execution context profile         = REFINE / KEEP
+D4 Authority Drift Gate before SHARE          = REFINE / KEEP
+D5 named/versioned Policy Pack concept        = DEFER
+   digest-pinned constraint reference seam    = KEEP AS 4D CANDIDATE
+D6 Brownfield Baseline Assessment             = DEFER UNTIL FIRST REAL BROWNFIELD PROJECT
 
 single giant Living Specification owner       = REJECT
+independent traceability/dependency owner      = REJECT
+second context compiler for WorkUnits          = REJECT
+unbounded `NO_DRIFT` proof claim               = REJECT
 fixed PRD→BRD→Architecture pipeline universal = REJECT
 human approval at every stage by ritual       = REJECT
 named SecurityAgent as required architecture  = REJECT
@@ -46,7 +56,7 @@ SoftwareForge maintains requirements traceability across specification, architec
 
 ### Conexus adaptation
 
-Conexus should preserve a derived traceability graph/manifest over existing authorities rather than create a new Traceability semantic owner.
+Conexus should preserve a **derived traceability manifest** over existing authorities rather than create a Traceability semantic owner.
 
 Conceptual forward chain:
 
@@ -76,15 +86,28 @@ changed file / result commit
 → Product intent / invariant
 ```
 
-Properties:
+### Binding invariants after `RF-SF-01`
 
-- graph is derived from canonical owner artifacts; it is not a second source of semantic truth;
-- every edge has exact source identity/digest where material;
-- absence of a required edge is a Finding/closure defect rather than an invitation for the coding agent to infer intent;
-- traceability supports context compilation, impact analysis, verification and review;
+The manifest is a `GENERATED`-class mechanism under the existing Project ownership model:
+
+```text
+canonical owner artifacts
+→ deterministic traceability compilation
+→ generated TraceabilityManifest
+```
+
+Therefore:
+
+- the manifest is reproducible and never hand-owned or manually edited into authority;
+- every edge consumed as **deciding** by Context Compiler, impact/staleness analysis, drift gate or another material gate carries exact source identity **and digest**;
+- an edge without exact digest is non-deciding and no gate may rely on it for a positive claim;
+- every deciding consumer verifies the manifest's recorded source digests against current canonical owner artifacts before use;
+- any mismatch makes the manifest `STALE`; the consumer stops and requires regeneration/recompilation rather than continuing from the stale projection;
+- absence of a required edge is a Finding/closure defect, not permission for the coding agent to infer intent;
+- the manifest remains projection/Evidence mechanics and never becomes Product or owner truth by convenience;
 - no new durable record class is admitted by this design input.
 
-Working names such as `TraceabilityManifest` or `AuthorityTraceManifest` are mechanism candidates only.
+Working names such as `TraceabilityManifest` or `AuthorityTraceManifest` remain mechanism candidates only.
 
 ## 4. D2 — Change Impact and Staleness Analysis
 
@@ -94,9 +117,9 @@ SoftwareForge previews downstream impact before artifact updates and keeps relat
 
 ### Conexus adaptation
 
-Before changing accepted authority, the system should derive the smallest affected downstream set from the traceability graph.
+Before changing accepted authority, the system should derive the **smallest affected downstream set** from the fresh digest-pinned traceability projection.
 
-Candidate disposition vocabulary:
+Candidate disposition vocabulary remains design input only:
 
 ```text
 UNAFFECTED
@@ -105,6 +128,8 @@ STALE
 RECOMPILE
 REOPEN
 ```
+
+The exact semantics of those states belong to 4D/4F before any mechanism consumes them.
 
 Example:
 
@@ -117,6 +142,15 @@ ordinary Permission changes materially
 → affected implementation slices
 ```
 
+Binding law:
+
+```text
+impact/staleness = pure derived function of canonical artifact relationships
+                 + fresh digest-pinned D1 edges
+```
+
+There is no independent user/model-editable dependency-edge surface. Adding such a surface would create the universal semantic dependency graph this decision rejects.
+
 Non-property:
 
 ```text
@@ -126,45 +160,43 @@ any upstream text edit
 
 The protected property is **minimal correct invalidation**, not maximum cascading ceremony.
 
-## 5. D3 — WorkUnit Execution Envelope
+## 5. D3 — WorkUnit execution context profile
 
 ### Observed useful property
 
 SoftwareForge Work Orders carry bounded implementation context, dependencies, acceptance criteria and upstream intent to the coding agent.
 
-### Conexus adaptation
+### Conexus adaptation after `RF-SF-03`
 
-Do not create a competing `WorkOrder` Product concept. Existing Builder authority remains:
+Do not create a competing `WorkOrder` Product concept and do not create a second context compiler. Existing Builder authority remains:
 
 ```text
 Project → Change → Plan → WorkUnit → ActorRun
 ```
 
-4F/Builder should derive one machine-readable execution envelope for each admitted WorkUnit, conceptually:
+There is exactly **one Hub-owned Context Compiler**. A future `WorkUnitExecutionEnvelope` is only the **WorkUnit-stage output profile** of that compiler, not a second compiler or authority artifact family.
+
+Conceptually, the WorkUnit profile may expose:
 
 ```text
-WorkUnitExecutionEnvelope
-  WorkUnitId
-  ChangeId
-  ProjectBaselineDigest
-  exact upstream authority refs/digests
-  exact operation / wire / UX refs relevant to the slice
-  in-scope surfaces
-  out-of-scope surfaces
-  GENERATED mutation law
-  PLATFORM-CONTRACT mutation law
-  APP-OWNED mutation law
-  exact PavedRoadProfile identity
-  admitted dependency/version set
-  ContextManifest digest
-  acceptance assertions
-  falsifiers / negative controls
-  required Evidence
-  prerequisites / blockers
-  stop / reopen conditions
+WorkUnitId / ChangeId
+ContextManifest ref + digest
+exact operation / wire / UX refs relevant to the slice
+in-scope / out-of-scope surfaces
+GENERATED / PLATFORM-CONTRACT / APP-OWNED mutation constraints
+exact PavedRoadProfile identity
+admitted dependency/version set
+acceptance assertions
+falsifiers / negative controls
+required Evidence
+prerequisites / blockers
 ```
 
-The envelope is derived execution authority, not a place for the model to invent new Product meaning.
+Fact classes already owned by `ContextManifest` — for example `ProjectBaselineDigest`, upstream authority identities or stop/reopen conditions — are referenced by identity/digest rather than re-stated as a parallel mutable truth copy.
+
+If a realization must materialize the same fact in two renderings, both are emitted in the **same compilation act from the same inputs**. Any detected divergence voids the compilation and requires recompilation; neither copy is adjudicated as truth.
+
+The field inventory above is illustrative design input, not a frozen schema or API.
 
 ## 6. D4 — Authority Drift Gate before SHARE
 
@@ -172,19 +204,19 @@ The envelope is derived execution authority, not a place for the model to invent
 
 SoftwareForge's plugin has pre-commit guards and traceability/activity checks around Work-Order commits.
 
-### Conexus adaptation
+### Conexus adaptation after `RF-SF-04`
 
 Before canonical SHARE/result acceptance:
 
 ```text
 candidate diff
-+ exact WorkUnitExecutionEnvelope
-+ current TraceabilityManifest
-+ current authority
++ exact WorkUnit-stage Context Compiler output
++ fresh TraceabilityManifest
++ current canonical authority
 → Authority Drift Check
 ```
 
-It should detect classes such as:
+Mechanically detectable candidate classes may include, when a detector is actually proven:
 
 ```text
 new Product operation not admitted
@@ -192,82 +224,88 @@ new Permission not admitted
 wire/DTO authority introduced in parallel
 PLATFORM-CONTRACT weakened/bypassed
 GENERATED surface hand-owned
-schema/owner boundary crossed outside envelope
+schema/owner boundary crossed outside admitted slice
 new dependency without admitted protected property
 frontend interaction invents backend capability
-upstream semantic decision silently changed downstream
 ```
 
-Outcome:
+The gate MUST NOT claim universal semantic understanding. Its positive Evidence is bounded:
 
 ```text
-NO_DRIFT
-OR
-DRIFT_DETECTED → Finding → STOP / smallest owning reopen
+NO_DRIFT_DETECTED_IN_DECLARED_CLASSES
 ```
 
-Conexus must not treat a local marker file, hook pass or agent declaration as correctness/acceptance authority. Hub-owned exact facts + Evidence decide admission.
+not an unqualified `NO_DRIFT` claim.
 
-## 7. D5 — Versioned Policy Packs
+Binding laws:
+
+1. the exact checked-class set is versioned/identified with the gate result;
+2. each claimed drift class has a deterministic negative/RED fixture proving that detector can fire;
+3. a class without a proven firing control is not included in positive coverage;
+4. the gate consumes only a fresh D1 manifest whose deciding source digests revalidate against current canonical authority;
+5. the gate result is Evidence/gate mechanics, never Change acceptance, Product truth or Release eligibility by itself;
+6. semantic classes that cannot be mechanically detected remain for explicit review/falsification rather than being hidden behind heuristics that produce false confidence.
+
+Failure remains:
+
+```text
+DRIFT_DETECTED
+→ Finding / bounded stop
+→ smallest owning replan/reopen path
+```
+
+A local marker file, hook pass or agent declaration is never correctness/acceptance authority.
+
+## 7. D5 — digest-pinned constraint reference seam; `Policy Pack` concept DEFERRED
 
 ### Observed useful property
 
-SoftwareForge carries security/compliance policies through generated artifacts and Work Orders.
+SoftwareForge carries security/compliance constraints through generated artifacts and Work Orders.
 
-### Conexus adaptation
+### Conexus adaptation after `RF-SF-05`
 
-Do not prebuild HIPAA/PCI/SOC2 policy engines for F1. Generalize only the useful property: exact versioned policy references can be compiled into context, Paved Road and verification when a Project/current property requires them.
+F1 does **not** admit a named `PolicyPack` Product/platform concept, pack authoring surface, propagation/inheritance model or prebuilt HIPAA/PCI/SOC2 engine without a real consumer.
 
-Candidate additions to `ContextManifest`:
+Retain only the smallest possible seam as a future 4D candidate in the existing `ContextManifest` compiler, conceptually:
 
 ```text
-policyPackRefs / digests
+constraintRefs / digests
 verificationProfile
 securityPropertyRefs
 ```
 
-A Policy Pack may represent platform engineering/security constraints, a Project-specific required standard or a future compliance profile.
+These field names remain illustrative, not frozen schema.
 
 Rules:
 
-- policy text is versioned and provenance-preserving;
-- prompt injection cannot widen policy authority;
-- policy pack != Product business semantic owner;
-- policy applicability is explicit and bounded;
-- verification/gates protect properties, not policy-document volume.
+- every deciding reference is exact/digest-pinned and provenance-preserving;
+- referenced constraint content may **narrow** cognition/verification behavior but can never grant Product, tool, data, network or platform authority;
+- all grants remain server-derived through existing Conexus capability/tool/current-owner authorization;
+- prompt/context text is never an authorization source;
+- applicability remains explicit and bounded;
+- verification/gates protect exact properties, not policy-document volume.
 
-## 8. D6 — Brownfield Baseline Assessment
+Reopen the named pack/versioning/propagation model only when a real security/compliance consumer cannot fit the seam above.
+
+## 8. D6 — Brownfield Baseline Assessment DEFERRED
 
 ### Observed useful property
 
 ForgeScore assesses a legacy codebase before modernization planning.
 
-### Conexus adaptation
+### Conexus disposition after deletion challenge
 
-Existing Project Inception already requires brownfield reality discovery. Strengthen the possible FULL/brownfield profile with an Evidence-backed dimensional assessment, for example:
+Current F1 has no real brownfield Project that needs a separate assessment framework. Existing Inception already requires discovering current source/contracts/architecture/data reality.
 
-```text
-architecture topology / coupling
-trust boundaries / security posture
-dependency health
-contract/API surface
-data ownership and migration posture
-test/verification posture
-operational/deployment posture
-semantic/domain clarity
-change-risk concentrations / unknowns
-```
-
-Do not make one composite score authoritative.
+Therefore:
 
 ```text
-87 / 100
--X-> architecture acceptance
--X-> release eligibility
--X-> modernization truth
+Brownfield Baseline Assessment framework = DEFER
+ForgeScore-like fixed dimension model     = REJECT AS CURRENT REQUIREMENT
+composite score as authority              = REJECT
 ```
 
-A score may later be a UX projection only if the underlying findings/evidence remain inspectable.
+At the first real brownfield Project, reopen only the Inception/profile seam. Any assessment dimensions must be derived from that Project/profile and bind to inspectable Evidence. A composite score, if ever useful, is UX projection only and never architecture or Release authority.
 
 ## 9. Existing Conexus strengths preserved
 
@@ -280,38 +318,53 @@ This assessment does not weaken current differentiators:
 - operator judgment is requested only for real Product/architecture decisions, not every pipeline box;
 - reviewer output remains Evidence, never automatic authority;
 - Hub owns stage/gate/current authority; Mastra remains cognition/runtime mechanics;
+- one Hub Context Compiler remains the only context-compilation mechanism;
 - `GENERATED | PLATFORM-CONTRACT | APP-OWNED` remains the Project Paved-Road ownership model;
 - Product implementation remains blocked through 4A–4G plus explicit execution authority.
 
-## 10. Fable review target
+## 10. SoftwareForge properties deliberately not added
 
-Independent review should attack this exact decision, not SoftwareForge as a product review.
+Independent challenge found no missing stronger current property requiring admission. In particular:
 
-Material questions:
+```text
+artifact-impact preview / stage staleness  → covered by D2
+Work Order execution contract              → covered by D3 without new WorkOrder concept
+traceability drift                         → D1 + D4
+skills / hooks / rules distribution        → already a 4D Paved-Road/scaffold concern
+policy inheritance                         → falls with D5 deferral
+clarification/decision binding             → current decision refs + ContextManifest already cover the concrete need
+```
 
-1. Does any proposed traceability/impact artifact duplicate an existing Conexus semantic owner or require a new durable record class prematurely?
-2. Can the traceability graph become a dangerous second authority if edges drift from owner artifacts?
-3. Is impact/staleness analysis actually derivable, or does it require an overly generic dependency graph that becomes a new platform domain?
-4. Does `WorkUnitExecutionEnvelope` duplicate Plan/WorkUnit/ContextManifest authority or merely compile them safely for execution?
-5. Can an Authority Drift Gate be meaningfully falsified without turning every commit into ceremony or blocking legitimate APP-OWNED evolution?
-6. Are Policy Packs useful property carriers, or do they create a speculative compliance framework before a consumer exists?
-7. Is Brownfield Baseline Assessment sufficiently bounded, or is it just ForgeScore renamed?
-8. Are there stronger SoftwareForge properties we missed that fit existing Conexus owners without reopening C-018?
-9. Did we copy any SoftwareForge mechanism where Conexus already has a stronger owner/current-authority model?
-10. Does any correction require reopening 4A/4D/4F design only, or does it materially falsify accepted Phase-3 authority?
+No new concept is admitted merely because SoftwareForge names it.
 
-## 11. Acceptance boundary
+## 11. Phase placement / reopen result
 
-This decision survives only if independent challenge supports the following bounded conclusion:
+```text
+4A      = unchanged; this decision adds no Product operation, principal, Permission or scope
+4D      = future owner of D1/D2/D4 realization constraints and the D5 reference seam where admitted
+4F      = future owner of the WorkUnit-stage compiled execution profile
+C-018   = no reopen
+Phase 3 = no reopen
+```
+
+These are Phase-4 design inputs only. 4D/4F are NOT STARTED, so the review does not reopen them; it bounds what may later be derived there.
+
+## 12. Acceptance boundary
+
+The SoftwareForge reference decision survives only in this bounded form:
 
 ```text
 SoftwareForge reference
-→ strengthens Blueprint/Paved-Road execution continuity
-→ does not create new Product semantic owners
-→ does not create Product operations by reference
-→ does not mandate new durable record classes
-→ does not make research/traceability/policy projections current owner truth
+→ strengthens traceability / impact / execution-context / drift continuity
+→ keeps traceability GENERATED and freshness-checked
+→ keeps one Hub Context Compiler
+→ emits only bounded, proven-firing drift Evidence
+→ defers Policy Pack and brownfield frameworks until real consumers
+→ creates no new Product semantic owner
+→ creates no Product operation by reference
+→ creates no durable record class
+→ never makes research/traceability/context constraints current owner truth
 → remains staged for exact 4D/4F realization after upstream Product/wire/frontend contracts
 ```
 
-If a material finding disproves one of those lines, reopen only the smallest implicated design input/Phase-4 contract.
+Any later realization that violates one of those lines reopens only the smallest implicated Phase-4/owner decision.

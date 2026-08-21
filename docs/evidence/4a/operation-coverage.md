@@ -1,31 +1,24 @@
 # 4A Evidence — Product Operation Coverage
 
 > **Kind:** Evidence / supporting proof, not Product authority.
-> **Candidate authority under test:** `docs/product/operation-ledger.md` + `docs/product/permission-contract.md`.
-> **Status:** 4A OPEN / pre-independent-review.
+> **Candidate authority under test:** `docs/product/operation-ledger.md` + `docs/product/permission-contract.md` + `docs/product/budget-analyzer-contract.md`.
+> **Status:** 4A OPEN / CENSUS+SUBTRACTION+CONSISTENCY PROOF COMPLETE / INDEPENDENT REVIEW PENDING.
 
-This evidence attacks the operation candidate against the accepted 15 Product journeys, the 13 semantic owners, the closed 46 durable record classes and the whole-product scenario laws. It is intended to detect both missing Product capability and CRUD/mechanism inflation.
+This Evidence attacks the completed operation candidate against the accepted 15 Product journeys, 13 semantic owners, closed 46 durable record classes, first Budget Analyzer semantic contract and whole-product negative laws. It tests both missing Product capability and CRUD/mechanism inflation.
 
 ---
 
 ## 1. Test rule
 
-A durable record class does **not** require a direct Product CRUD operation.
+Persistence does not manufacture Product CRUD.
 
-Each accepted class must have one of these dispositions:
+Every accepted durable record class must have one disposition:
 
 ```text
-DIRECT
-→ current Product consumer needs exact owner operation/read
-
-PROJECTION
-→ visible only through a purpose-built owner/Product projection
-
-INTERNAL
-→ owner/runtime state intentionally not caller-controlled
-
-CARRIER
-→ reusable byte/transport/property used only through owning operation
+DIRECT      current Product consumer needs exact owner operation/read
+PROJECTION  visible only through purpose-built owner/Product projection
+INTERNAL    owner/runtime state intentionally not caller-controlled
+CARRIER     byte/transport/property usable only through an owning operation
 ```
 
 Failure conditions:
@@ -35,6 +28,8 @@ real user/headless intent with no admitted operation
 record exposed only because CRUD symmetry suggests it
 foreign owner state mirrored into a generic API
 mechanism promoted to Product authority
+operation lacking principal/authority/scope/outcome/current-state closure
+Project capability admitted through arbitrary/mutable/global executor
 ```
 
 ---
@@ -51,7 +46,7 @@ mechanism promoted to Product authority
 | `iam.area_membership` | DIRECT | Area membership administration |
 | `iam.area_project_grant` | DIRECT | Area→Project grant/revoke |
 | `iam.account_project_grant` | DIRECT | Account→Project grant/revoke |
-| `iam.published_app_access` | DIRECT | independent Published-App access context/admin |
+| `iam.published_app_access` | DIRECT | Published-App context + List/Set/Revoke access; grant/role-change CRUD split subtracted |
 
 Result: `7/7 CLOSED_CANDIDATE`.
 
@@ -74,7 +69,7 @@ Result: `2/2 CLOSED_CANDIDATE`.
 | `prj.approved_baseline` | DIRECT | Get/approve exact Baseline revision |
 | `prj.brain_binding` | DIRECT | Get/Set/Clear exact binding |
 | `prj.connection_binding` | DIRECT | List/Set/Remove exact binding |
-| `prj.config_contract_revision` | INTERNAL/PROJECTION | exact Release/Baseline composition; no standalone mutable config API required |
+| `prj.config_contract_revision` | INTERNAL/PROJECTION | exact Release/Baseline composition; no standalone mutable config CRUD |
 
 Result: `5/5 CLOSED_CANDIDATE`.
 
@@ -85,19 +80,19 @@ Result: `5/5 CLOSED_CANDIDATE`.
 | `bld.change` | DIRECT | List/Get/Create Change |
 | `bld.contract_revision` | INTERNAL/PROJECTION | exact Change/Baseline/plan proof identity; no generic contract CRUD |
 | `bld.plan_revision` | DIRECT | Get Plan + exact checkpoint decision |
-| `bld.work_unit` | INTERNAL/PROJECTION | GetChangeExecutionDetail/progress; user does not create arbitrary WorkUnits |
+| `bld.work_unit` | INTERNAL/PROJECTION | GetChangeExecutionDetail/progress; caller does not create arbitrary WorkUnits |
 | `bld.actor_run` | INTERNAL/PROJECTION | execution detail/observability; runtime admission owner-only |
 | `bld.coding_session` | INTERNAL | persistent cognitive/runtime relationship; no session-resume Product authority |
 | `bld.finding` | DIRECT | list/get/close under current Evidence/owner authority |
-| `bld.change_acceptance` | INTERNAL CURRENT-PROOF FACT | no generic AcceptChange; exact checkpoints/verifier/owner settlement + ComposeRelease proof use |
+| `bld.change_acceptance` | INTERNAL CURRENT-PROOF FACT | no generic AcceptChange; exact checkpoints/verifier/Builder settlement feed owner-controlled Release composition |
 
-Result: `8/8 CLOSED_CANDIDATE`; direct CRUD inflation avoided for five owner/mechanism classes.
+Result: `8/8 CLOSED_CANDIDATE`.
 
 ### Artifact Registry — 2
 
 | Record | Disposition | Product home |
 | --- | --- | --- |
-| `reg.artifact` | PROJECTION | Project Capabilities/Agent/Brain/Release semantic projections |
+| `reg.artifact` | PROJECTION | Project Capability/Agent/Brain/Release semantic projections |
 | `reg.artifact_revision` | PROJECTION | immutable exact revisions through owning Product resources |
 
 No Universal Artifact CRUD is admitted.
@@ -110,7 +105,7 @@ Result: `2/2 CLOSED_CANDIDATE`.
 | --- | --- | --- |
 | `con.connection` | DIRECT | Connection lifecycle/read |
 | `con.connection_revision` | DIRECT/PROJECTION | revise/read exact Connection identity |
-| `con.connection_qualification` | DIRECT/PROJECTION | qualification action + detailed status/evidence read |
+| `con.connection_qualification` | DIRECT/PROJECTION | qualification proof + detailed status/evidence read |
 
 Result: `3/3 CLOSED_CANDIDATE`.
 
@@ -120,7 +115,7 @@ Result: `3/3 CLOSED_CANDIDATE`.
 | --- | --- | --- |
 | `gw.effect_attempt` | DIRECT INSPECTION | Get/List exact EffectAttempt receipts/outcomes; business command remains owner-specific Project operation |
 | `gw.idempotency_claim` | INTERNAL | no caller claims/retries generic idempotency |
-| `gw.budget_counter` | INTERNAL/PROJECTION | runtime enforcement; usage/cost truth exposed through OBS/owner-specific projection, not counter CRUD |
+| `gw.budget_counter` | INTERNAL/PROJECTION | runtime enforcement; usage/cost truth only through owner/OBS projection |
 
 Result: `3/3 CLOSED_CANDIDATE`.
 
@@ -129,8 +124,8 @@ Result: `3/3 CLOSED_CANDIDATE`.
 | Record | Disposition | Product home |
 | --- | --- | --- |
 | `brn.knowledge_proposal` | DIRECT | proposal intake/review/decision |
-| `brn.health` | DIRECT READ / INTERNAL PROBE | GetBrainHealth; probe orchestration may remain owner/internal |
-| `brn.binding_validation` | INTERNAL/PROJECTION | surfaced on exact ProjectBrainBinding health/conformance, not mutable foreign state |
+| `brn.health` | DIRECT READ / INTERNAL PROBE | GetBrainHealth; BrainHealthProbe is owner/proof orchestration, not Product command |
+| `brn.binding_validation` | INTERNAL/PROJECTION | exact ProjectBrainBinding health/conformance; no mutable foreign mirror |
 
 Result: `3/3 CLOSED_CANDIDATE`.
 
@@ -143,7 +138,7 @@ Result: `3/3 CLOSED_CANDIDATE`.
 | `par.approval_request` | DIRECT | exact sealed approval subject/read/decision |
 | `par.agent_trigger` | DIRECT | schedule trigger inspect/revise/enable/disable |
 
-Agent authored definition is **not** a PAR record; it remains Project Git/Artifact/Release through Builder.
+Authored Agent definition remains Project Git/Artifact/Release through Builder, not PAR CRUD.
 
 Result: `4/4 CLOSED_CANDIDATE`.
 
@@ -151,7 +146,7 @@ Result: `4/4 CLOSED_CANDIDATE`.
 
 | Record | Disposition | Product home |
 | --- | --- | --- |
-| `rel.release` | DIRECT READ / OWNER-COMPOSE | Versions/read; exact composition after accepted proof |
+| `rel.release` | DIRECT READ / OWNER-COMPOSE | Versions/read; immutable composition is owner/system transition after accepted proof |
 | `rel.promotion` | DIRECT | promotion history/current decision |
 | `rel.active_pointer` | PROJECTION | GetProjectServingState; caller cannot set pointer directly |
 
@@ -180,16 +175,16 @@ Result: `2/2 CLOSED_CANDIDATE`.
 | Record | Disposition | Product home |
 | --- | --- | --- |
 | `att.attachment` | CARRIER / OWNER-BOUND | exact owning Product operation where bytes are admitted |
-| `att.blob` | INTERNAL CARRIER | digest/storage mechanics; storage key/path never authorization |
+| `att.blob` | INTERNAL CARRIER | digest/storage mechanics; key/path never authorization |
 
-No global File Manager, UploadAnyFile or GetBlobByStorageKey operation is admitted.
+No global File Manager, UploadAnyFile or GetBlobByStorageKey Product operation is admitted.
 
 Result: `2/2 CLOSED_CANDIDATE`.
 
 ### Total
 
 ```text
-record classes checked = 46 / 46
+record classes checked = 46/46
 unclassified = 0
 record class requiring generic CRUD only by persistence symmetry = 0
 mutable foreign-owner mirror required = 0
@@ -197,20 +192,20 @@ mutable foreign-owner mirror required = 0
 
 ---
 
-## 3. 13-owner operation boundary check
+## 3. 13-owner boundary check
 
-| Owner | Product operation/projection exists | Mechanism inflation found? |
+| Owner | Product operation/projection exists | Inflation explicitly prevented |
 | --- | --- | --- |
-| I&A | yes | Keycloak/provider claims explicitly excluded |
+| I&A | yes | Keycloak/provider claims excluded; app grant/role CRUD split merged |
 | Workspace | yes | no generic organization tree |
 | Project | yes | no hidden/default Project/resource registry |
-| Builder | yes | WorkUnit/ActorRun/CodingSession remain subordinate |
+| Builder | yes | WorkUnit/ActorRun/CodingSession subordinate; no generic AcceptChange |
 | Artifact Registry | semantic projections only | no Universal Artifact API |
 | Connections | yes | no generic Secret/provider executor |
-| Gateway | effect inspection + internal execution | no second business command API |
-| Brain | yes | no RAG/memory/policy owner |
+| Gateway | effect inspection + internal execution | no second business command/retry API |
+| Brain | yes | no RAG/memory/policy owner; probe remains internal |
 | PAR | runtime semantics only | no authored Agent CRUD duplication |
-| Release | yes | pointer/served truth owner-controlled |
+| Release | yes | composition/pointer/served truth owner-controlled |
 | OBS/Audit | read/evidence projection | no current business-state authority |
 | Attachments/Blob | operation carrier | no global file owner |
 | MAR | job-run/serving projection | no scheduler/workflow Product domain |
@@ -221,171 +216,288 @@ Result: `13/13 owner boundaries preserved`.
 
 ## 4. Whole-product scenario cross-check
 
-The accepted whole-product scenario and negative laws were re-walked against the operation candidate.
-
 | Scenario class | Operation/protocol home | Result |
 | --- | --- | --- |
 | establish Account/session/Workspace | IAM + Workspace; OIDC separate | COVERED |
 | Project inception / Baseline | Project + InceptionInvestigation | COVERED |
 | tiny safe Change | Builder Change/Plan/proof | COVERED |
-| large Change / checkpoints | Builder + project.review | COVERED |
+| large Change / checkpoints | Builder + `project.review` | COVERED |
 | inspect Preview/Code/Diff/Evidence | Builder purpose-built reads | COVERED |
 | unhealthy/stale Connection | Connection qualification/read + exact Project binding | COVERED |
 | external read/effect capability | exact Project Query/Action/Integration grammar + Gateway | COVERED |
 | Brain discovery/review/publication | Brain proposal/review/publish | COVERED |
-| Brain health changes after Agent admission | current Brain health owner recheck; no stale Agent grant | COVERED |
+| Brain health changes after Agent admission | current Brain health recheck; no stale Agent grant | COVERED |
 | static Query | exact Release-pinned Project Query | COVERED |
-| AnalyticQuery | separate Brain-governed read regime | COVERED |
+| AnalyticQuery | fixed Brain-governed read regime with exact caller routes | COVERED |
 | publish/use app | Release/Promotion/app access + exact `Ops(R)` | COVERED |
 | Product Agent author/evolve | Builder Change path; no PAR definition CRUD | COVERED |
 | Product Agent conversation/run | PAR exact active Release/Conversation/AgentRun | COVERED |
-| effect approval | exact ApprovalRequest + current eligibility + Gateway atomic claim | COVERED |
-| unresolved external effect | Gateway internal fence + EffectAttempt inspection | COVERED |
+| effect approval | exact ApprovalRequest + current eligibility + Gateway atomic effect admission | COVERED |
+| unresolved external effect | Gateway effect fence + EffectAttempt inspection | COVERED |
 | managed sync/job | exact job artifact + MAR occurrence/run | COVERED |
 | Project archive | Project command; no implicit unpublish/trigger stop | COVERED |
-| Project duplicate | DuplicateProject; no-data/no-credential/default laws | COVERED |
+| Project duplicate | DuplicateProject; no-data/no-credential/no-binding defaults | COVERED |
 | rollback | another governed PromoteRelease to eligible prior Release | COVERED |
-| app access independence | separate Published-App access plane | COVERED |
+| app access independence | separate Published-App authorization plane | COVERED |
 | unauthorized private bytes | owner authorization before byte retrieval | COVERED |
-| backup/restore/emergency stop | operational control, intentionally not ordinary Product API | COVERED AS NON-PRODUCT |
-| DEDICATED future consumer | semantic trust contract current; concrete operations deferred to first real consumer | DEFERRED HONESTLY |
+| backup/restore/emergency stop | operational control, intentionally non-Product | COVERED AS NON-PRODUCT |
+| DEDICATED future consumer | semantic trust contract exists; concrete operations deferred to first real consumer | DEFERRED HONESTLY |
 | SaaS private reachability | future requirement class only | DEFERRED HONESTLY |
-| Budget Analyzer business results | Project Query grammar exists, exact semantic inventory absent | **BLOCKED 4A-BUDGET-01** |
+| Budget Analyzer business results | operator-approved R1–R6 semantic set + `BUD-01/02` | COVERED |
 
-No new fixed platform operation was discovered by this pass outside the known Budget Analyzer semantic blocker.
+Result: accepted 15 journeys + whole-product negative laws have an operation/protocol/non-Product home with no remaining semantic blocker.
 
 ---
 
-## 5. Subtractive attack — first pass
+## 5. Subtractive attack — applied
 
-### S1 — Published-App access upsert symmetry
-
-Candidate:
+### S1 — Published-App access CRUD symmetry
 
 ```text
 GrantPublishedAppAccess
 ChangePublishedAppAccessRole
 ```
 
-Observation: both write the same `iam.published_app_access` meaning and use the same semantic administration authority. Separate create/update wire semantics can be preserved in 4B without requiring two Product meanings.
+Both mutate the same `iam.published_app_access` Product meaning under the same administration authority. Exact create/update/precondition wire behavior can differ later without creating two Product meanings.
 
-Recommended candidate correction:
-
-```text
-SetPublishedAppAccess(account, exact app, role, expected-current?)
-RevokePublishedAppAccess(...)
-```
-
-Disposition: **MERGE RECOMMENDED** (`-1 fixed platform op`).
-
-### S2 — BrainHealthProbe caller command
-
-`BrainHealthProbe` is an accepted L7 owner orchestration flow, but current Product authority does not require a human caller command. The user needs current Brain health truth; owner/runtime needs an internal probe path.
-
-Recommended correction:
+Applied:
 
 ```text
-GetBrainHealth              = Product read
-RunBrainHealthProbe         = INTERNAL owner orchestration
+IAM-15 SetPublishedAppAccess
+IAM-17 RevokePublishedAppAccess
+IAM-16 removed from admitted census
 ```
 
-Disposition: **REMOVE FROM FIXED PRODUCT CENSUS** (`-1`).
+Result: `-1 fixed platform operation`.
 
-### S3 — ComposeRelease caller command
+### S2 — Brain health probe
 
-Accepted Journey C states that after verification the exact candidate becomes an immutable Release, while **Promotion** is the explicit governed operator decision. Current Product authority does not require a separate human `ComposeRelease` command merely because the L7 flow exists.
+Users need current Brain health truth; owner/runtime needs proof orchestration. Current authority does not require a human `RunBrainHealthProbe` Product command.
 
-Recommended correction:
+Applied:
 
 ```text
-ComposeRelease              = INTERNAL/OWNER transition gated by current accepted proof
-List/Get Release            = Product reads
-PromoteRelease              = explicit Product consequential decision
+BRN-10 GetBrainHealth = Product read
+BRN-11 RunBrainHealthProbe = SYSTEM owner/proof orchestration
 ```
 
-Disposition: **REMOVE FROM FIXED PRODUCT CENSUS** (`-1`).
+Result: `-1 fixed platform operation`.
 
-Consequence: ordinary Permission `release.compose` should also be removed unless a later Product interaction proves a separate human composition capability.
+### S3 — Release composition
 
-### S4 — Connection qualification read
+Current Product meaning has explicit governed Promotion after verified/accepted proof. Immutable Release composition is an owner transition and is rechecked by Promotion; a separate human Compose command would expose mechanism as authority.
 
-`GetConnectionQualification` carries exact revision/environment Evidence that does not fit safely into a generic Connection summary without either overfetching or hiding `configured != qualified != bound != healthy` semantics.
+Applied:
 
-Disposition: **KEEP**.
+```text
+REL-03 ComposeRelease = SYSTEM owner transition
+REL-01/02 Release reads = Product
+REL-06 PromoteRelease = explicit consequential Product decision
+```
 
-### S5 — EffectAttempt list
+Result: `-1 fixed platform operation`; `release.compose` remains rejected as an ordinary Permission.
 
-Effects can originate Product Agent, human Project Action/Integration and managed-job paths. A project/run-scoped list is useful for investigation without teaching every originating owner a parallel effect-receipt schema.
+### S4 — Connection qualification detail
 
-Disposition: **KEEP**, but authorization remains `audit.read`/exact source disclosure and gives no retry authority.
+`GetConnectionQualification` preserves exact revision/environment Evidence and `configured != qualified != bound != healthy` without hiding detail in a generic Connection summary.
 
-### S6 — list/get pairs
+Result: KEEP.
 
-List/detail pairs are retained only where the detail representation is materially richer/immutable/exact-subject scoped. No rule admits CRUD completeness by default.
+### S5 — EffectAttempt list/detail
 
-Disposition: **KEEP FOR 4C/4B FALSIFICATION**, subject to later screen/wire evidence.
+Cross-origin effect investigation needs a Gateway-owned receipt/effect Evidence projection without teaching each business owner a second effect schema.
+
+Result: KEEP under `audit.read`; no retry authority.
+
+### S6 — list/detail pairs
+
+Retained only where detail is materially richer, immutable or exact-subject scoped. No general list/get symmetry law exists.
+
+Result: KEEP subject to later 4B/4C falsification.
 
 ---
 
-## 6. Post-subtraction candidate size
+## 6. Exact census consistency proof
 
-Before the first subtraction, the operation candidate had 117 `ADMIT_CANDIDATE` rows.
-
-Applying S1–S3 gives:
+### 6.1 Fixed platform prefix census
 
 ```text
-117
-- 1  Published-App access semantic merge
-- 1  BrainHealthProbe → INTERNAL
-- 1  ComposeRelease → INTERNAL
-= 114 fixed platform operation candidates
+IAM = 16
+WS  =  6
+PRJ = 22
+BLD = 17
+BRN = 11
+CON =  9
+REL =  7
+PAR = 16
+GW  =  2
+MAR =  3
+OBS =  5
+----------------
+TOTAL = 114
 ```
+
+Independent subtractive equation:
 
 ```text
-N_platform candidate = 114
-status = NOT FROZEN / NOT RATIFIED
+initial admitted candidate = 117
+S1 semantic merge          =  -1
+S2 Brain probe internal    =  -1
+S3 Release compose internal=  -1
+---------------------------------
+N_platform                 = 114
 ```
 
-The count may still shrink or expand if Permission mapping, frontend realization or independent challenge finds a material semantic issue. The number itself is not a target.
+Both derivations converge.
+
+### 6.2 First vertical census
+
+```text
+BUD-01 AnalyzePendingBudgets
+BUD-02 ListPendingBudgets
+N_budget = 2
+```
+
+The two operations cover all approved R1–R6 results:
+
+```text
+BUD-01 → R1 summary + R2 seller + R3 customer + R4 aging + R5 month
+BUD-02 → R6 pageable drilldown
+unsupported/deferred F1 results → no operation
+```
+
+### 6.3 Permission census
+
+The operation ledger maps all concrete operations to the frozen candidate vocabulary in `permission-contract.md`:
+
+```text
+ordinary Permissions = 25
+fixed platform operations with auth route = 114/114
+Budget operations with auth route          = 2/2
+new global Permission per Project business operation = 0
+```
+
+### 6.4 Per-operation closure census
+
+The grouped authority matrix in `operation-ledger.md` is exhaustive over the exact admitted IDs.
+
+```text
+semantic owner                   114/114
+consumer                         114/114
+principal / ingress              114/114
+Permission / special condition   114/114
+scope / containment              114/114
+outcome profile                  114/114
+current-authority route          114/114
+idempotency/concurrency profile  114/114
+
+Budget operations all fields     2/2
+```
+
+No admitted fixed operation is absent from the matrix and no removed/internal operation is counted by the exact prefix sets.
 
 ---
 
-## 7. Current material findings
+## 7. Project capability grammar consistency proof
+
+The grammar survives the first vertical without becoming a universal executor:
 
 ```text
-4A-F01 CLOSED_CANDIDATE
-one global operation census was structurally wrong for a software platform
-→ fixed platform N_platform + exact Project Ops(R) grammar + first-vertical N_budget
+exact Release R
+→ exact finite Ops(R)
+→ registered Query / Action / honest Integration Operation only
+→ exact caller + authority + Project/app/binding scope
+→ exact positive + negative proof
+```
 
-4A-F02 CLOSED_CANDIDATE
-Product Agent authoring could have duplicated Project/Builder authority
-→ authoring remains Change/Release path; PAR owns runtime only
+Negative controls:
 
-4A-F03 CLOSED_CANDIDATE
-Paved-road planning names could have become new semantic owners
-→ Blueprint/Forge owner/API invention rejected; behavior remains Project/Builder design input
+```text
+execute(anySlug,anyInput)                = REJECT
+execute(anySql)                          = REJECT
+execute(anyProviderOperation)            = REJECT
+caller-selected Connection/target URL    = REJECT
+mutable-latest operation                 = REJECT
+unregistered Product-Agent tool          = REJECT
+```
 
-4A-F04 CLOSED_CANDIDATE
-persistence inventory could have driven generic CRUD
-→ 46/46 records explicitly direct/projection/internal/carrier classified
+Budget Analyzer specifically proves the grammar can express a real app with two exact `Query` operations without inventing generic dimension/metric/SQL authority.
 
-4A-F05 OPEN
-exact Budget Analyzer Product-visible semantic/result inventory is absent
-→ N_budget cannot be frozen without operator Product/Brain semantic decision
+---
+
+## 8. Budget semantic blocker closure
+
+`4A-BUDGET-01` / prior `4A-F05` is CLOSED by explicit operator approval on 2026-08-21.
+
+Accepted semantic decisions include:
+
+```text
+Product focus           pending-budget intelligence
+Budget                  Brain-admitted Budget document
+Pending                 current pending Budget with no admitted conversion relation proving otherwise
+source mappings         initial Sankhya Evidence, not Product meaning
+as_of                   system-resolved source/reconciliation coordinate; no arbitrary historical query
+Budget age              canonical Budget business date → as_of; DTALTER is not age authority
+aging bands             0–3 / 4–7 / 8–30 / 31+
+results                 R1–R6
+margin                  unsupported
+heuristic probability   rejected
+conversion metrics      deferred until separately proved/admitted
+operations              BUD-01 + BUD-02
+```
+
+A later field/code mapping correction remains a Brain/source-proof correction unless Evidence genuinely falsifies the Product semantic meaning.
+
+---
+
+## 9. Material findings disposition
+
+```text
+4A-F01 CLOSED
+one fake global platform+future-app operation count rejected
+→ N_platform + exact Ops(R) grammar + N_budget
+
+4A-F02 CLOSED
+Product Agent authoring duplication rejected
+→ authored Agent remains Builder Change/Release; PAR runtime only
+
+4A-F03 CLOSED
+Blueprint/Forge owner/API invention rejected
+→ planning-harness behavior stays Project/Builder design input
+
+4A-F04 CLOSED
+persistence-driven CRUD inflation rejected
+→ 46/46 record classes classified
+
+4A-F05 CLOSED / OPERATOR APPROVED
+Budget Analyzer semantic inventory fixed truthfully
+→ R1–R6 + BUD-01/02; unsupported claims remain unsupported
+
+4A-F06 CLOSED_CANDIDATE
+operation authority fields could remain narrative/incomplete
+→ complete 114/114 + 2/2 grouped authority/current-state/IC mapping
+
+4A-F07 CLOSED_CANDIDATE
+candidate Permission vocabulary had unresolved AnalyticQuery route
+→ no new analyticquery.execute; exact CP/PA/PAR routes closed
 ```
 
 ---
 
-## 8. Next proof steps
+## 10. Proof conclusion before independent challenge
 
 ```text
-1. apply the S1–S3 semantic corrections to the operation ledger
-2. remove `release.compose` from candidate ordinary Permissions
-3. complete operation → Permission/special-condition matrix
-4. bind idempotency / CR-1 / audit-required / current-proof obligations
-5. resolve 4A-F05 / 4A-BUDGET-01 with operator semantic decision
-6. then produce executable census consistency guard
-7. independent Fable review on exact candidate
+fixed platform census             = 114
+Project capability grammar        = closed exact-Release admission law
+Budget Analyzer census            = 2
+ordinary Permission vocabulary    = 25
+record-class classification       = 46/46
+owner-boundary classification     = 13/13
+orphan concrete operations        = 0
+speculative concrete operations   = 0
+known unresolved semantic blockers= 0
 ```
 
-No 4B/OpenAPI/frontend/SDK/runtime/Product implementation is authorized by this Evidence.
+The semantic/census/subtractive/consistency candidate is complete enough for an independent adversarial challenge over the **exact consolidated 4A HEAD**.
+
+This Evidence does not ratify 4A, open 4B or authorize Product implementation.

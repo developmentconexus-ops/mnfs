@@ -143,8 +143,8 @@ const fkSection = sectionBetween(
   'Tier-3 semantic references/digests',
   'Tier-2 FK allowlist'
 )
-const fkRows = [...fkSection.matchAll(/^\| (\d+) \| `([^`]+)` \|$/gm)]
-  .map(([, number, fk]) => ({ number: Number(number), fk }))
+const fkRows = [...fkSection.matchAll(/^\| (\d+) \| (.+?) \|$/gm)]
+  .map(([, number, fk]) => ({ number: Number(number), fk: fk.trim() }))
 if (!Number.isFinite(fkHeadingCount) || fkRows.length !== fkHeadingCount) {
   errors.push(`Tier-2 FK allowlist count changed: projected=${fkRows.length}, declared=${fkHeadingCount}`)
 }

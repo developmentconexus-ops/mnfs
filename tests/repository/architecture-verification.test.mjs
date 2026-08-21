@@ -273,11 +273,32 @@ test('3N proof-family guard rejects deletion of current UX proof coverage', () =
   }
 })
 
-test('3N progression guard rejects premature C-018 ratification', () => {
+test('closed 3N verifier admits operator-ratified C-018 after 3O closure', () => {
+  const result = run(root)
+  assert.equal(result.status, 0, outputOf(result))
+})
+
+test('closed 3N verifier rejects C-018 ratification review before 3O closure', () => {
   const target = fixture()
   try {
-    mutate(target, 'docs/roadmap.md', '| C-018 | NOT RATIFIED |', '| C-018 | RATIFIED |')
-    expectRejected(target, /C-018 must remain NOT RATIFIED during 3N/)
+    mutate(
+      target,
+      'docs/roadmap.md',
+      '| C-018 | RATIFIED / OPERATOR RATIFIED |',
+      '| C-018 | OPEN / RATIFICATION REVIEW |'
+    )
+    mutate(target, 'docs/roadmap.md', '| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
+    expectRejected(target, /C-018 must remain NOT RATIFIED until 3O closure/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('closed 3N verifier rejects operator-ratified C-018 before 3O closure', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/roadmap.md', '| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
+    expectRejected(target, /C-018 ratification requires 3N and 3O CLOSED/)
   } finally {
     rmSync(target, { recursive: true, force: true })
   }

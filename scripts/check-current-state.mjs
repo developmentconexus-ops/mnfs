@@ -48,8 +48,20 @@ if (firstUnclosed < 0) {
   }
 }
 
-if (byName.get('C-018') === 'RATIFIED' && phases.some(({ status }) => status !== 'CLOSED')) errors.push('C-018 cannot be RATIFIED before all phases close')
-if (byName.get('Product implementation') !== 'BLOCKED' && byName.get('C-018') !== 'RATIFIED') errors.push('Product implementation cannot be unblocked before C-018 ratification')
+const c018Status = byName.get('C-018')
+const allowedC018Statuses = new Set(['NOT RATIFIED', 'OPEN / RATIFICATION REVIEW', 'RATIFIED / OPERATOR RATIFIED'])
+if (!allowedC018Statuses.has(c018Status)) {
+  errors.push(`roadmap invalid C-018 status: ${c018Status ?? 'missing'}`)
+}
+if (c018Status === 'OPEN / RATIFICATION REVIEW' && phases.some(({ status }) => status !== 'CLOSED')) {
+  errors.push('C-018 ratification review requires all phases CLOSED')
+}
+if (c018Status === 'RATIFIED / OPERATOR RATIFIED' && phases.some(({ status }) => status !== 'CLOSED')) {
+  errors.push('C-018 ratification requires all phases CLOSED')
+}
+if (byName.get('Product implementation') !== 'BLOCKED') {
+  errors.push('Product implementation must remain BLOCKED until a later Realization Planning / explicit execution-authority gate')
+}
 
 const decisions = existsSync(resolve(root, 'docs/decisions/index.md')) ? read('docs/decisions/index.md') : ''
 const decisionRows = [...decisions.matchAll(/^\| (C-[A-Z0-9-]+) \| .*? \| ([^|]+?) \|/gm)].map(([, id, status]) => ({ id, status: status.trim() }))
@@ -58,6 +70,14 @@ for (const { id, status } of decisionRows) {
   if (![...controlled].some(term => status === term || status.startsWith(`${term} / `) || status.startsWith(`${term} AS `))) {
     errors.push(`${id} has uncontrolled disposition: ${status}`)
   }
+}
+
+const c018DecisionStatus = decisionRows.find(({ id }) => id === 'C-018')?.status
+if (c018Status === 'OPEN / RATIFICATION REVIEW' && c018DecisionStatus !== 'NOT RATIFIED') {
+  errors.push(`C-018 must remain NOT RATIFIED in the Decision Register while ratification review is open; got ${c018DecisionStatus ?? 'missing'}`)
+}
+if (c018Status === 'RATIFIED / OPERATOR RATIFIED' && c018DecisionStatus !== 'CURRENT / OPERATOR RATIFIED') {
+  errors.push(`ratified C-018 requires CURRENT / OPERATOR RATIFIED in the Decision Register; got ${c018DecisionStatus ?? 'missing'}`)
 }
 
 const bootstrapPaths = ['AGENTS.md', 'docs/index.md', 'docs/roadmap.md']

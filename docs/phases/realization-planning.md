@@ -225,14 +225,14 @@ Reopen 3L only if the bounded affected-criteria requalification materially falsi
 
 Current repository authority does not fix an Oracle/column/SCN/timestamp watermark or other source-specific cutoff. Realization MUST NOT invent one.
 
-Before live reconciliation can claim `MATCH`, a bounded read-only source probe must establish one honest `SourceComparisonBoundary` for the exact Sankhya source and admitted semantic subject, such that:
+Before live reconciliation can claim `MATCH`, a bounded read-only source probe must establish one honest comparison coordinate for the exact Sankhya source and admitted semantic subject, such that:
 
 ```text
 source oracle coverage
 == governed-sync/read-model candidate coverage
 ```
 
-The boundary may be a source transaction/snapshot identity, an admitted business cutoff plus deterministic cursor, or another source-supported mechanism, but only Evidence from the real source may select it. A freshness timestamp alone is insufficient.
+The coordinate may be a source transaction/snapshot identity, an admitted business cutoff plus deterministic cursor, or another source-supported mechanism, but only Evidence from the real source may select it. A freshness timestamp alone is insufficient. It is a proof/sync coordinate, not a new Product object, owner or durable record class.
 
 If no common boundary can be established without candidate self-reference, the build stops with `INDETERMINATE` and reopens the smallest data/3O decision. It does not compensate with tolerance, cache age, or guessed business time.
 
@@ -251,17 +251,17 @@ Each slice must leave an independently falsifiable working boundary. Later slice
 
 | Slice | Deliverable | Owners / authority | Depends on | FIRST_BUILD obligations exercised |
 | --- | --- | --- | --- | --- |
-| `R1` | minimum Account/session + Workspace + Project + approved Baseline and project access | I&A, Workspace, Project | `G0` admission | `3N-V01`, `3N-V16`; CR-1 contract prepared |
+| `R1` | minimum Account/session + Workspace + Project + approved Baseline and project access | I&A, Workspace, Project | `G0` admission | `3N-V01`; CR-1 contract prepared |
 | `R2` | canonical minimal Brain revision/binding + exact Sankhya Connection revision/binding + read-only Gateway path | Brain, Registry, Project, Connections, Gateway | `R1` | `3N-V06`, `V07`, `V10`; Brain conformance/health; Connection/Gateway egress |
-| `R3` | Project read-model migration + governed read-only sync contract, cursor/merge semantics and MAR occurrence | Project DB, MAR, Release pins, Connections/Gateway | `R2` | `3N-V18`, `V19`, `V20`; managed duplicate-authority/deciding-Evidence conformance |
+| `R3` | Project read-model migration + governed sync artifact/admission contract + cursor/merge semantics | Project DB, MAR, Release pins, Connections/Gateway | `R2` | `3N-V18`, `V19`; managed duplicate-authority/deciding-Evidence contract |
 | `R4` | static registered Query artifacts + Product-owned result API/boundary | Project, Registry, Gateway/read executor | `R3` | 3O semantic/unknown preconditions; read-only query enforcement |
-| `R5` | minimal React Published Application using only the admitted results and independent app authorization | I&A, Project, MAR serving | `R4` | `3N-V21`, `V24`; frontend/security and Published App proof families |
-| `R6` | exact candidate artifacts → Release → non-production Promotion → EnvironmentConformance → active serving → `SERVED_VERIFIED` | Registry, Release, Project, I&A, MAR | `R3–R5` | `3N-V22`, `V23`, CR-1 representative concurrency proof; Release/serving family |
-| `R7` | real governed Sankhya sync + real Product result + independent live oracle + negative control + complete verification manifest | existing owners; proof Evidence owns no Product meaning | `R6` + real source boundary | `3N-V28` through `3O-P1..P7`; first-vertical reconciliation; minimal benchmark Evidence |
+| `R5` | minimal React Published Application using only admitted results + independent app authorization | I&A, Project, MAR serving | `R4` | `3N-V21`; frontend/security and Published App proof families |
+| `R6` | exact candidate artifacts → Release → non-production Promotion → EnvironmentConformance → active serving → `SERVED_VERIFIED` | Registry, Release, Project, I&A, MAR | `R3–R5` | `3N-V22`, `V23`; CR-1 representative concurrency proof; Release/serving family |
+| `R7` | real JobRun + governed Sankhya sync + real Product result + independent live oracle + negative control + complete verification manifest | existing owners; proof Evidence owns no Product meaning | `R6` + real source boundary | `3N-V18`, `V28` through `3O-P1..P7`; first-vertical reconciliation; minimal benchmark Evidence |
 
-### 8.1 Why Release appears before live sync execution
+### 8.1 Why Release appears before the real sync occurrence
 
-The managed sync occurrence is derived from an exact served Release. `R3` builds and verifies the sync/read-model contract but does not manufacture an unpinned production-like execution. `R6` creates the exact non-production Release/serving authority. `R7` then executes the real sync and comparison under those exact pins.
+The managed sync occurrence is derived from an exact served Release. `R3` builds and verifies the sync/read-model contract, but no real JobRun is admitted from an unpinned candidate. `R6` creates the exact non-production Release/serving authority. `R7` then admits the real JobRun and executes the real sync/comparison under those exact pins.
 
 This preserves:
 
@@ -292,15 +292,15 @@ The first-build implementation branch must carry one manifest keyed by the exist
 | `3N-V13` | `NOT_INSTANTIATED` | no effect idempotency/reconciliation scope |
 | `3N-V14` | `NOT_INSTANTIATED` | no Product Agent/suspension/restart |
 | `3N-V15` | `NOT_INSTANTIATED` | neither BuilderMastra nor ParMastra is instantiated |
-| `3N-V16` | `EXECUTE` | `R1/R6`: current server-derived authorization is rechecked at protected commit/use; stale RequestContext cannot resurrect narrowed authority |
+| `3N-V16` | `NOT_INSTANTIATED` | no Mastra RequestContext/runtime authorization surface; current I&A freshness is proved through owner checks + CR-1 without relabeling that as V16 |
 | `3N-V17` | `NOT_INSTANTIATED` | no Product model execution |
 | `3N-V18` | `EXECUTE` | `R3/R7`: downtime admits at most one current catch-up, never N missed slots |
 | `3N-V19` | `EXECUTE` | `R3`: read-only sync recovery does not gain effect-capable machinery with no consumer |
-| `3N-V20` | `EXECUTE` | `R3`: JobRun/sync terminal/current truth comes from MAR/Project owner facts; injected/logged telemetry cannot set terminal truth |
+| `3N-V20` | `NOT_INSTANTIATED` | no OBS/telemetry-to-owner decision path; MAR/Project write their own owner facts directly and ordinary logs remain mechanics |
 | `3N-V21` | `EXECUTE` | `R5/R7`: Control Plane authority does not imply Published App access and vice versa |
 | `3N-V22` | `EXECUTE` | `R6`: AVAILABLE or pointer swap without served-digest verification cannot become `SERVED_VERIFIED` |
 | `3N-V23` | `EXECUTE` | `R6`: real target migration/conformance drift must fail closed before success |
-| `3N-V24` | `EXECUTE` | `R5/R6`: Registry/CAS object identity/key cannot bypass owner/Release/app authorization when bytes are served |
+| `3N-V24` | `NOT_INSTANTIATED` | no private attachment/blob or caller-addressable storage-object capability; internal Registry/CAS keys are not exposed as a Product authorization surface |
 | `3N-V25` | `FIRST_PRODUCTION` | preserved unchanged; no DEV restore imitation |
 | `3N-V26` | `FIRST_PRODUCTION` | preserved unchanged; no DEV stale-authority imitation |
 | `3N-V27` | `FIRST_PRODUCTION` | preserved unchanged; no DEV post-cutoff Git imitation |
@@ -318,7 +318,7 @@ A later first instantiation of any `NOT_INSTANTIATED` surface inherits the origi
 | Observability/audit/redaction/GC Product paths | `NOT_INSTANTIATED` as a Product capability; ordinary logs/proof Evidence do not instantiate the OBS owner |
 | Release/Promotion/EnvironmentConformance/serving | `EXECUTE` in `R6` |
 | Published App authorization/session/browser security | `EXECUTE` in `R5/R7` |
-| private attachment/blob authorization | `NOT_INSTANTIATED`; Registry/CAS serving proof for `V24` does not create attachment capability |
+| private attachment/blob authorization | `NOT_INSTANTIATED`; internal Registry/CAS storage does not create a private attachment/blob Product surface |
 | supply-chain/dependency admission | `EXECUTE` in `G0` |
 | Connection/Gateway effect/egress | execute the real **read-only egress/binding** path; effect/write branch = `NOT_INSTANTIATED` |
 | first-production restore/emergency-stop/activation | `FIRST_PRODUCTION` only |
@@ -360,7 +360,7 @@ Construct a direct governed read-only live-source oracle that shares accepted se
 
 ### `3O-P3` — comparison closure
 
-Bind both sides to the admitted `SourceComparisonBoundary`. If equivalent coverage cannot be established, result = `INDETERMINATE`.
+Bind both sides to the admitted real-source comparison coordinate. If equivalent coverage cannot be established, result = `INDETERMINATE`.
 
 ### `3O-P4` — real-path reconciliation
 
@@ -399,7 +399,7 @@ semantic revision / effective binding identity
 Connection + exact revision / source scope
 candidate Release/build identity
 read-model generation/cursor
-SourceComparisonBoundary
+real-source comparison coordinate
 oracle realization identity
 Product result identity
 comparison outcome
@@ -413,11 +413,11 @@ A first-build positive claim requires all of the following on one exact candidat
 
 1. real governed read-only Sankhya access through the exact Connection binding;
 2. one real non-production Release that contains the sync/read-model/query/app composition;
-3. one real governed sync occurrence under that exact Release;
+3. one real governed JobRun/sync occurrence under that exact Release;
 4. real Project read-model state produced by the sync;
 5. the furthest stable Product-owned result served to the actual Published Application path;
 6. an independently derived live Sankhya oracle;
-7. common comparison coverage established by the admitted source boundary;
+7. common comparison coverage established by the admitted real-source coordinate;
 8. representative coverage of every materially distinct transformation class actually exposed;
 9. one deterministic red negative control proving reconciliation can fail;
 10. exact Evidence provenance sufficient to reproduce/adjudicate the result.
@@ -432,7 +432,8 @@ For the **authority classes actually instantiated by this first slice**, the fir
 
 ```text
 iam.session                         → normal reuse invalid
-workspace/project access grants    → current I&A recertification before protected reuse
+instantiated workspace/project access facts
+                                    → current I&A recertification before protected reuse
 published_app_access                → current I&A recertification before normal app access
 Connection credential generation
 + current qualification             → Connections/Gateway recertification before source use
@@ -444,9 +445,9 @@ No PAR ApprovalRequest/AgentTrigger, Builder/E2B authority, external-effect repl
 
 Post-cutoff canonical Git handling remains exactly `3N-V27`; Realization does not define backup mechanics or a production topology to fake it early.
 
-## 15. Negative controls required before a slice can be called realized
+## 15. Negative controls defined before implementation
 
-At minimum, implementation must demonstrate that each reachable control can fire:
+The following controls are part of the implementation contract before code is authorized. A slice cannot be called realized until every reachable control assigned to it is demonstrated to fire:
 
 - cross-Workspace Project/app/query access is denied;
 - stale/narrowed authorization cannot commit the CR-1 representative mutation;
@@ -455,21 +456,21 @@ At minimum, implementation must demonstrate that each reachable control can fire
 - read-only source/query role cannot perform writes or arbitrary runtime SQL;
 - two concurrent sync admissions do not create parallel current occurrences;
 - downtime with multiple missed intervals produces at most one current catch-up;
-- injected telemetry cannot manufacture JobRun/sync terminal truth;
 - Control Plane admin without Published App access cannot consume the app;
 - Published App member cannot gain Builder/Control Plane/source authority;
-- direct object/CAS identity cannot bypass Release/app authorization;
 - AVAILABLE Release without served verification is not `SERVED_VERIFIED`;
 - deliberate EnvironmentConformance drift turns the gate red;
 - unsupported semantic meaning stays `UNSUPPORTED`;
 - partial/unverifiable comparison stays `INDETERMINATE`;
 - deliberate candidate-side reconciliation divergence turns 3O red.
 
+No fake telemetry consumer, private storage API, Mastra runtime, Product Agent, external write, or other excluded capability may be added merely to create another negative control.
+
 A presence-only test, mock-only integration, or fixture that proves only itself cannot satisfy a real-path claim.
 
 ## 16. Stop / reopen conditions
 
-Execution must stop rather than broaden scope when Evidence shows any of the following:
+Execution must stop rather than broaden scope when Evidence shows any of the following.
 
 ### Stop without architecture reopen
 
@@ -522,7 +523,7 @@ Realization Plan drafted
 
 This Draft PR may only establish the plan. Product implementation remains **BLOCKED** until:
 
-1. this Realization Plan survives required review/adjudication;
+1. this Realization Plan survives required independent review/adjudication;
 2. the operator explicitly accepts the plan;
 3. repository authority records that acceptance; and
 4. the operator separately grants explicit Product execution authority.
@@ -543,7 +544,7 @@ The planning gate can close only when the exact candidate head proves all of the
 8. FIRST_PRODUCTION restore obligations remain routed and the first-slice recertification classes are explicit without production implementation;
 9. no Product code, live production effect, runtime probe disguised as Product implementation, or architecture reopen enters this planning PR;
 10. repository verification passes on the exact planning candidate;
-11. independent adversarial review finds no unresolved material contradiction, if the repository/operator invokes that review for this material gate;
+11. a fresh independent Fable/adversarial review challenges the exact consolidated candidate and every material finding is adjudicated against current authority;
 12. operator explicitly accepts Realization Planning before any closure/merge transition.
 
 Failure reopens only the smallest decision actually falsified by Evidence.

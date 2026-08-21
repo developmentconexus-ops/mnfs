@@ -47,15 +47,13 @@ paths:
   /api/control/workspaces:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces'
   /api/control/workspaces/{workspaceId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}'
+    $ref: './fixed-census-overrides.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}'
   /api/control/workspaces/{workspaceId}/areas:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas'
-  /api/control/workspaces/{workspaceId}/areas/{areaId}:
-    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas~1{areaId}'
   /api/control/workspaces/{workspaceId}/projects:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1projects'
   /api/control/projects/{projectId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}'
+    $ref: './fixed-census-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}'
   /api/control/projects/{projectId}/commands/archive:
     $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1archive'
   /api/control/projects/{projectId}/commands/duplicate:

@@ -206,3 +206,5 @@ This Evidence decides carrier class only. It does not yet freeze:
 - router/framework implementation.
 
 Those are subsequent 4B/4D closures and may not weaken this property.
+
+Related first owner-schema closure Evidence: [identity-workspace-schema-closure.md](identity-workspace-schema-closure.md).

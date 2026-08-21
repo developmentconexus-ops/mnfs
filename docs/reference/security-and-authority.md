@@ -1,6 +1,6 @@
 # Security and Authority
 
-Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title.
+Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title. The operator-approved C-015 Keycloak refinement is projected here without changing Product authorization ownership.
 
 ## 31. Security architecture — six logical trust zones
 
@@ -32,9 +32,9 @@ Its independently executable application may own its runtime/data plane and Prod
 
 ## Z5 — External Provider / Enterprise
 
-Model provider, E2B, Git provider, package registries, ERP/marketplace, backup targets and similar systems.
+Model provider, E2B, Git provider, package registries, ERP/marketplace, backup targets, the selected Keycloak OIDC Identity Provider and similar systems.
 
-Authenticated/TLS provider response is observation/data, never Hub authority merely by transport.
+A self-hosted/private Keycloak deployment remains logically a provider boundary even when physically co-located in the first-installation Linux guest. Authenticated/TLS provider response, including OIDC tokens/claims, is provider Evidence used by I&A; it never becomes Workspace/Project/Published-App/Product authorization merely by transport or claim presence.
 
 ## Z6 — Trusted Data / Storage Infrastructure
 
@@ -47,10 +47,11 @@ mastra_builder
 mastra_par
 Artifact/Blob/CAS backing
 CredentialBackend backing
+Keycloak provider persistence where self-hosted
 backup material
 ```
 
-Not one credential domain. Each store preserves owner-specific capabilities/lifecycle.
+Not one credential domain. Each store preserves owner/provider-specific capabilities/lifecycle. Keycloak persistence is authentication-provider state, not a fourteenth Hub owner schema and not a 47th Conexus durable record class.
 
 ---
 
@@ -73,6 +74,7 @@ Generated app/browser/guest never bypasses Gateway to ERP/enterprise target.
 Owner-specific infrastructure adapters may call exact providers without routing all control traffic through Gateway:
 
 ```text
+I&A OIDC adapter → exact Keycloak issuer/client configuration
 CodingRuntime → E2B
 GitInfra → Git provider
 Model adapter → model provider
@@ -86,7 +88,9 @@ No universal privileged `fetch(url, secret)` service/egress proxy F1.
 
 ## 32.3 Browser egress
 
-Browser self-only/CSP/session/request-authenticity laws are platform-controlled. New cross-origin browser capability is explicit Product/security contract change, not app-config convenience.
+Browser self-only/CSP/session/request-authenticity laws are platform-controlled. The operator-approved C-015 refinement admits one bounded cross-origin authentication path: Conexus may redirect the browser to the exact configured Keycloak authorization endpoint and receive the allowlisted callback. This does not authorize arbitrary browser egress or make Keycloak claims Product authority.
+
+Any other new cross-origin browser capability is explicit Product/security contract change, not app-config convenience.
 
 ## 32.4 Future SaaS ↔ private/on-prem reachability
 
@@ -112,7 +116,26 @@ access token           = short-lived signed bearer
 F1 mode                = SERVICE_SCOPED only
 ```
 
-Every Platform Service request rechecks current `credentialGeneration`, Project/Release containment, Release-pinned service composition and current owner/security gates. No auth record/session store, refresh-token, DPoP, mTLS or fleet machinery is introduced.
+Every Platform Service request rechecks `credentialGeneration`, Project/Release containment, Release-pinned service composition and current owner/security gates. No auth record/session store, refresh-token, DPoP, mTLS or fleet machinery is introduced.
+
+## 32.6 Human authentication — Keycloak OIDC boundary
+
+C-015 now selects Keycloak as the human authentication mechanism while preserving Conexus I&A sovereignty:
+
+```text
+browser
+→ Conexus login endpoint
+→ exact Keycloak Authorization Code + PKCE S256 flow
+→ Keycloak authenticates the human
+→ server-side Conexus callback validates/exchanges the code
+→ verified (issuer, subject) resolves one iam.account
+→ Conexus issues its own opaque server-owned iam.session
+→ every protected operation resolves current Conexus owner authority
+```
+
+The OIDC client is confidential/server-side. A library unable to support the required confidential-client flow is not admissible. Exact issuer, redirect URI, client identity and signing/validation expectations are pinned server-side. Implicit and resource-owner-password/direct-grant browser login are not admitted.
+
+Keycloak realm/client roles, groups, organizations and Authorization Services remain provider-side mechanics and MUST NOT substitute for Workspace membership, Project grants, Published App access, Release eligibility, Connection-use authority or another Conexus owner fact.
 
 ---
 
@@ -143,7 +166,7 @@ Published App authorization is server-derived; frontend is not enforcement autho
 
 ## 34.2 Session boundary
 
-Current C-015/3I direction uses server-owned opaque session/cookie semantics; historical URL-fragment bearer flow is not current authority.
+Current C-015 direction uses Keycloak only to establish authenticated human identity through OIDC. Conexus maps verified `(issuer, subject)` to its own Account and creates an opaque server-owned application session/cookie. Historical URL-fragment bearer flow is not current authority, and browser possession of a Keycloak token never grants Conexus Product authority by itself.
 
 ## 34.3 Private-by-default bytes
 
@@ -154,6 +177,8 @@ owner record/current authorization
 → access decision
 → storage byte retrieval
 ```
+
+Published Application serving is also caller-reachable byte retrieval. Possession or guessing of an asset/CAS/storage path never bypasses the current serving/app authorization policy. Public/pre-auth exposure, if ever admitted for a bounded login shell, must be explicit and contain no protected business data.
 
 Public exposure requires explicit admitted Product policy/consumer. Storage key/path/prefix/provider URL never grants semantic access by possession alone.
 
@@ -171,6 +196,8 @@ material privileged/autonomous/effectful authority
 → re-established/recertified through the existing owning module
 → current owner checks apply again before protected use
 ```
+
+Because Keycloak is now a required authentication provider, first-production recovery must also establish continuity of the configured issuer/provider generation and the stable `(issuer, subject)` identities referenced by `iam.account`. Restoring or rebuilding an IdP must never silently remap an existing Conexus Account to a different human. Unknown identity continuity keeps normal human login/use fail-closed until explicitly reconciled through I&A.
 
 The exact closed set of authority classes that require recertification is fixed in Realization Planning and proven in the first-production restore drill. This is an operational recovery rule, not a new authorization domain.
 

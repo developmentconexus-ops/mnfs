@@ -1,6 +1,6 @@
 # Release, Deployment, and Operations
 
-Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title.
+Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title. The operator-approved C-015 Keycloak refinement is projected into first-production topology/recovery without changing Conexus authorization ownership.
 
 ## 12. Release and Promotion architecture
 
@@ -91,6 +91,8 @@ change_acceptance/current proof
 → rechecked immediately before material Promotion steps
 → stale/inadmissible proof refuses progression without rewriting history
 ```
+
+When a real Builder Change lifecycle is instantiated, `bld.change_acceptance` is the owner fact participating in this law. The first Budget Analyzer realization deliberately has no Builder/Change lifecycle; there, the current-proof subject is the exact verification/validation Evidence digest set closed into the ReleaseManifest. ComposeRelease and material Promotion steps must recheck that evidence remains the currently admitted candidate proof rather than manufacture a fake `change_acceptance` row or skip the recheck. The Builder-specific side inherits its original route when Builder is first instantiated.
 
 F1 admits at most one non-terminal Promotion per `(Project, PROD)`. Admission must use a conflicting Release-owner guard; the concurrent loser performs zero DDL, drain or other material step. This is refusal, not a Promotion queue/lease.
 
@@ -347,6 +349,8 @@ verification-required Evidence missing
 
 Audit Trail and Operational Telemetry remain distinct meanings inside the Observability & Audit owner.
 
+The non-production first Budget Analyzer slice instantiates no `obs.*` consumer and classifies zero operations as `audit-required`; this is an explicit first-build scope statement, not a production waiver. Before first production, or when the first operation is deliberately classified audit-required, the OBS owner/`AuditRecord` path becomes reachable and the fail-closed law must be realized and proved before that surface is authorized.
+
 ## 30.7 Required Evidence
 
 If an assertion requires a class of runtime evidence:
@@ -395,6 +399,9 @@ one Node/TS Hub application process
 ├── Builder control-side runtime
 └── Production Agent Runtime
 
+selected self-hosted Keycloak OIDC IdP service
+└── provider persistence / signing-and-identity state required for stable issuer-subject continuity
+
 PostgreSQL cluster
 ├── hub_control
 ├── mastra_builder
@@ -406,15 +413,15 @@ local platform backings
 └── encrypted CredentialBackend backing
 ```
 
-Physical co-location never merges owners/stores/credentials.
+Physical co-location never merges owners/stores/credentials/trust classifications. Keycloak remains logically an authentication provider; its roles/groups/policies never become Conexus authorization authority. Exact supported Keycloak persistence placement is admitted at realization/activation time; if it uses the PostgreSQL cluster, it remains under a dedicated provider credential/database boundary rather than an owner schema.
 
 E2B remains remote guest execution outside the production VM.
 
 ## 35.4 Private ingress
 
 ```text
-inside company → LAN → HTTPS → Conexus
-remote employee → existing corporate VPN → private company network → HTTPS → Conexus
+inside company → LAN → HTTPS → Conexus / exact private Keycloak login endpoint
+remote employee → existing corporate VPN → private company network → HTTPS → Conexus / exact private Keycloak login endpoint
 ```
 
 ```text
@@ -423,9 +430,9 @@ anonymous/public app access F1 = NONE
 remote plaintext HTTP = DENY
 ```
 
-VPN is reachability, never authorization.
+VPN is reachability, never authorization. Keycloak login reachability is authentication mechanism only; successful provider login still requires Conexus Account/session/current authorization before Product use.
 
-Remote production HTTPS must be normally trusted by first-user browsers; certificate-warning click-through is not a normal production state. Placement must also preserve an out-of-band infrastructure/host path to administer or stop ingress/application independently from the served Conexus web path.
+Remote production HTTPS must be normally trusted by first-user browsers; certificate-warning click-through is not a normal production state. Placement must also preserve an out-of-band infrastructure/host path to administer or stop ingress/application/IdP independently from the served Conexus web path.
 
 ## 35.5 MANAGED serving
 
@@ -460,6 +467,7 @@ Required recovery material includes:
 hub_control
 all production Project DBs
 mastra_par
+Keycloak provider persistence/configuration required for the configured issuer and stable subject identities
 non-reconstructible digest-addressed bytes
 CredentialBackend ciphertext backing
 separately custodied decryption key generations / recovery means required by recoverable ciphertext
@@ -469,13 +477,15 @@ recovery manifests / generation provenance
 
 `mastra_builder`, E2B/validation/cache/reconstructible state remain not required by default.
 
+The Keycloak recovery material must preserve enough provider state to prove that the configured issuer and the `(issuer, subject)` identities referenced by `iam.account` retain continuity. Re-provisioning that yields different subject identities cannot silently remap existing Accounts; unknown continuity keeps human login/use fenced until I&A reconciliation.
+
 For every recoverable ciphertext generation, the referenced decryption key generation or equivalent recovery means must also be recoverable and restore-time decryptability must be proven. Ciphertext and root/recovery-key material remain under separate custody; no single compromise path/location/credential may expose both sets.
 
 ### 36.2 PostgreSQL recovery consistency
 
-The mutable PostgreSQL recovery set required for F1 restores from one internally consistent PostgreSQL recovery generation. Current first-installation topology places `hub_control`, `mastra_par` and production Project DBs in one cluster, making that the smallest current property. Exact backup/WAL tooling remains Realization Planning rather than Product authority.
+The mutable PostgreSQL recovery set required for F1 restores from one internally consistent PostgreSQL recovery generation. Current first-installation topology places `hub_control`, `mastra_par` and production Project DBs in one cluster, making that the smallest current property. If the admitted Keycloak persistence also uses this cluster, its dedicated provider database/state participates in that protected generation; if a different supported store is selected, restore proof must establish compatible Keycloak↔Hub generation/provenance and issuer-subject continuity explicitly. Exact backup/WAL tooling remains Realization Planning rather than Product authority.
 
-Recovered owner references needed by a re-enabled surface must close over the exact referenced Git, immutable Artifact/Blob/CAS, credential and Release material. Missing required closure fails closed; credentials additionally require decryptability proof.
+Recovered owner references needed by a re-enabled surface must close over the exact referenced Git, immutable Artifact/Blob/CAS, credential, Release and required authentication-provider material. Missing required closure fails closed; credentials additionally require decryptability proof and human authentication additionally requires identity-continuity proof.
 
 ### 36.3 Normal restart vs disaster restore
 
@@ -504,6 +514,8 @@ No composite Hub-side `ActivateRecoveredProd` semantic flow exists. If realizati
 
 Restored normal sessions are invalid for normal reuse. Privileged/autonomous/effectful authority whose post-cutoff narrowing may have been lost remains fenced until the responsible existing owner re-establishes or recertifies the required current authority.
 
+Human authentication after restore additionally requires the exact configured Keycloak issuer/provider generation to be usable and its subject continuity to the restored `iam.account` mappings to be established. A successful Keycloak login alone never recertifies Workspace/Project/Published-App authority; those remain current Conexus owner checks.
+
 During **initial** disaster recovery, all governed external-effect admission is denied by default because a post-cutoff EffectAttempt may be absent from recovered local state. Each effect-capable Gateway/Connection surface is re-enabled only after existing owner/provider/business reconciliation establishes acceptable current safety. Missing local EffectAttempts never prove a surface safe.
 
 If the lost interval cannot be reconciled sufficiently, that effect surface remains fail-closed beyond broad platform recovery rather than fabricating certainty. After broad recovery posture clears, remaining faults return to owner/surface scope.
@@ -528,7 +540,7 @@ A non-terminal Promotion reconciles actual migration/pointer/served state instea
 
 `RPO <= 6h` means a last complete, off-host, verifiable recovery generation exists inside the accepted window; merely scheduling a backup does not satisfy it when the generation is incomplete, corrupt or local-only.
 
-`RTO <= 8h` is the first-installation objective for **useful safe platform service**, not a guarantee that every effect-capable integration is reconciled within eight hours. The minimum useful-safe service set is fixed in Realization Planning and proved before first production. Unsafe effect surfaces may remain fail-closed beyond broad platform recovery.
+`RTO <= 8h` is the first-installation objective for **useful safe platform service**, not a guarantee that every effect-capable integration is reconciled within eight hours. Under the C-015 Keycloak refinement, the minimum useful-safe human-operated service set includes a working private authentication path with proven issuer/subject continuity plus current Conexus session/authorization checks. Unsafe effect surfaces may remain fail-closed beyond broad platform recovery.
 
 These numbers remain the first-installation operations contract, not a SaaS SLA.
 
@@ -540,10 +552,12 @@ The real off-host restore proof must falsify at least:
 restore/start without positive generation-continuity evidence
 → normal PROD stays denied
 
-restore protected PostgreSQL generation
+restore protected mutable generation(s)
 → verify backup integrity + cross-store closure + credential decryptability
+→ restore Keycloak provider state/config and prove issuer-subject continuity before normal human login/use
 → recovery posture survives another process restart
 → restored sessions cannot be reused normally
+→ Keycloak role/group/provider state alone cannot grant Conexus Product authority
 → external-effect admission is deny-by-default
 → post-cutoff canonical Git is reconciled before Git-write paths reopen
 → existing owners re-establish required authority/readiness

@@ -1,6 +1,6 @@
 # Data and Persistence
 
-Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title.
+Current technical detail extracted without semantic rewriting from the accepted Phase-3 architecture baseline. `docs/architecture/index.md` owns the overview; this file owns the detailed task surface named by its title. The operator-approved C-015 Keycloak refinement is projected as provider persistence, not a new Conexus semantic owner.
 
 ## 5. Durable authority and storage boundaries
 
@@ -56,6 +56,8 @@ Release/Promotion/current serving state
 Observability/Audit records
 MAR job-run occurrence facts
 ```
+
+For C-015 human authentication, the verified external identity key `(issuer, subject)` is stored as attributes of the existing `iam.account` identity. It is not a separate durable record class and does not make Keycloak provider state Hub authority.
 
 Exact table/column spellings belong post-C-018 derived Realization Planning. Logical owner schemas/capabilities remain explicit.
 
@@ -130,11 +132,30 @@ recoverable ciphertext generation
 
 Ciphertext backup custody and root/recovery-key custody remain separate. This refinement does not create a generic Secret owner or permit one recovery location/credential to expose both sets.
 
+### 5.8.2 Keycloak Identity Provider backing
+
+C-015 selects Keycloak as the authentication provider. Its realm, user, credential, signing/provider configuration and other persistence required to preserve the configured OIDC issuer and stable subject identities are **provider-owned authentication state**, not Conexus Product authority.
+
+```text
+Keycloak provider persistence
+!= hub_control
+!= iam Account authority
+!= Workspace/Project/Published-App authorization
+```
+
+The Conexus side stores only the stable verified external identity key needed by I&A on the existing `iam.account`. Keycloak realm/client roles, groups, organizations and Authorization Services are not mirrored into mutable Conexus authorization state by convenience.
+
+Keycloak provider persistence does not add a fourteenth `hub_control` owner schema or a 47th durable Conexus record class. If its exact storage engine/placement is co-located with PostgreSQL, it still uses provider-specific credentials and remains outside owner-schema SQL capabilities.
+
+For first production, the provider persistence generation needed for `(issuer, subject)` continuity is part of the required recovery closure. Restore/rebuild may not silently produce a different subject identity and remap an existing Account. Unknown identity continuity fails closed until I&A reconciliation establishes the mapping safely.
+
 ## 5.9 Backup material
 
 Operational recovery state, not current application authority while the system is running. Recovery may reconstruct durable owner truth; it may not fabricate newer/cleaner semantic truth than recovered Evidence establishes.
 
-For the first installation, the mutable PostgreSQL recovery set restores from one internally consistent PostgreSQL generation. Recovered references needed by a re-enabled surface must close over the exact required Git, immutable byte, credential and Release material; presence alone is insufficient where decryptability or conformance is required.
+For the first installation, the mutable PostgreSQL recovery set restores from one internally consistent PostgreSQL generation. The complete first-production recoverable closure also includes the Keycloak provider state required for stable issuer/subject continuity. Exact physical placement may make that state part of the same protected PostgreSQL generation or a separately protected store; in either case, the restore proof must establish compatible generation/provenance rather than assume consistency from timestamps.
+
+Recovered references needed by a re-enabled surface must close over the exact required Git, immutable byte, credential, Release and authentication-provider material; presence alone is insufficient where decryptability, identity continuity or conformance is required.
 
 Canonical Git that survives beyond the restored Hub cutoff is not generic extra backup/CAS data. It remains authoring/provenance truth and is reconciled explicitly before Git-write-capable paths reopen.
 
@@ -180,18 +201,22 @@ hub owner credential
 -X-> mastra_builder
 -X-> mastra_par
 -X-> Project DB by default
+-X-> Keycloak provider persistence
 
 mastra_builder
--X-> hub_control / mastra_par / Project DB
+-X-> hub_control / mastra_par / Project DB / Keycloak provider persistence
 
 mastra_par
--X-> hub_control / mastra_builder / Project DB
+-X-> hub_control / mastra_builder / Project DB / Keycloak provider persistence
 
 Project query/action/migrator role
--X-> hub_control / Mastra stores / another Project DB
+-X-> hub_control / Mastra stores / another Project DB / Keycloak provider persistence
+
+Keycloak provider persistence credential
+-X-> hub_control / Mastra stores / Project DBs
 ```
 
-Physical co-location never weakens the matrix.
+The OIDC protocol boundary is not database authority. Physical co-location never weakens the matrix.
 
 RLS is not a universal Role/Area/permission engine. Canonical current authorization remains application/domain authority.
 
@@ -215,6 +240,8 @@ iam ws prj bld reg con gw brn par rel mar obs att
 ```
 
 The F1 durable inventory is closed at 46 record classes, and the Tier-2 structural cross-module FK allowlist is closed at exactly 16. Tier-3 semantic references/digests are the default for non-structural cross-owner references. There is no shared/common schema, and a mutable current-state mirror of another owner is forbidden.
+
+Keycloak provider persistence is deliberately outside this Conexus semantic inventory. The C-015 external identity key remains part of `iam.account`; no provider table/realm/group/role class is admitted into the 46-class inventory.
 
 The current projection below preserves the accepted 3E closure directly so a Fresh Actor can verify this load-bearing boundary without Git archaeology. Names are semantic record classes, not post-C-018 table/column spellings.
 

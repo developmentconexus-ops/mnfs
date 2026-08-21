@@ -1,6 +1,6 @@
 # Conexus OS — Executable Wire Contract
 
-> **Status:** 4B CANDIDATE / REPRESENTATION FOUNDATION CLOSED / OPERATION MAPPING ACTIVE
+> **Status:** 4B CANDIDATE / REPRESENTATION + FIXED METHOD/PATH BIJECTION CLOSED / SHARED CARRIERS ACTIVE
 > **Owner:** 4B — Executable Wire Contract.
 > **Product semantics:** accepted 4A authority remains canonical above this wire.
 > **Implementation:** BLOCKED.
@@ -18,30 +18,40 @@ jsonSchemaDialect            = https://spec.openapis.org/oas/3.1/dialect/2024-11
 source format                = YAML 1.2-compatible OpenAPI Description
 ```
 
-OAS 3.2.0 is deliberately deferred for current F1 4B. It is newer and backward-compatible, but no accepted 4A property requires a 3.2-only feature and current codegen/parser ecosystem support remains less uniform. The bounded Evidence is [../evidence/4b/wire-representation-assessment.md](../evidence/4b/wire-representation-assessment.md).
+OAS 3.2.0 is deliberately deferred for current F1 4B. No accepted 4A property requires a 3.2-only feature and the current interoperable validation/codegen surface is stronger around 3.1. Reopen only if a current accepted operation requires a 3.2-only property or exact selected tooling makes 3.1 materially unfit.
 
-Reopen only if a current accepted operation requires a 3.2-only property or exact selected tooling makes 3.1 materially unfit.
+Bounded Evidence: [../evidence/4b/wire-representation-assessment.md](../evidence/4b/wire-representation-assessment.md).
 
 ## 2. Canonical artifact topology
 
 ### 2.1 Fixed Conexus Product wire
 
+The single canonical entry document remains:
+
 ```text
 contracts/api/product/openapi.yaml
 ```
 
-is the single editable canonical OpenAPI entry document for the 114 fixed Conexus Product operations.
-
-F1 4B starts single-file deliberately. Do not split paths/components merely for aesthetics. If real size/tooling Evidence later requires a multi-document OAD:
+Real method/path mapping created enough size/maintenance pressure that 4B's previously defined split trigger fired. The OAD is therefore now a **single multi-file OpenAPI authority**:
 
 ```text
-one entry document remains canonical
-+ references are deterministic
-+ bundled output is generated
-+ source ↔ bundle equivalence is mechanically proved
+contracts/api/product/openapi.yaml     canonical entrypoint / shared wire law
+contracts/api/product/fixed-paths.yaml referenced Path Item source fragment
 ```
 
-Generated bundles are never editable co-authority.
+Rules:
+
+```text
+one editable entrypoint authority
++ deterministic local refs
++ validator resolves the whole graph
++ bundle is generated proof output
++ source ↔ bundle operation census is mechanically checked
+```
+
+`fixed-paths.yaml` is not a second Product API and is never consumed independently as an alternative entrypoint. Its existence is a maintenance partition inside one OAD authority.
+
+Generated bundles under `/tmp` are proof artifacts only and are never committed/editable co-authority.
 
 ### 2.2 Project-defined operation grammar
 
@@ -51,37 +61,57 @@ contracts/api/project-operation.schema.json
 
 is the canonical JSON Schema 2020-12 grammar for exact Release-pinned Project operation declarations.
 
-A concrete Project declaration is authoritative only as part of an exact admitted Project/Release contract. Generated OpenAPI from those declarations is a projection, not a second editable business-operation contract.
+A concrete Project declaration is authoritative only as part of an exact admitted Project/Release contract. Generated OpenAPI from those declarations is a deterministic projection, not a second editable business-operation contract.
 
 ### 2.3 First Budget Analyzer proof instance
 
-The first Budget Analyzer will provide an exact declaration instance conforming to `project-operation.schema.json`, containing only:
+The first Budget Analyzer must instantiate exactly:
 
 ```text
 AnalyzePendingBudgets
 ListPendingBudgets
 ```
 
-and a generated/conforming application OAD used as 4B proof. The generated OAD is not independently hand-edited.
+as `project-operation/v1` declarations and produce an exact generated/conforming application OAD. No third operation is admitted merely for wire convenience.
 
-## 3. `operationId` law
+## 3. Fixed operation identity / HTTP shape law
 
 For fixed platform operations:
 
 ```text
 operationId = exact accepted 4A semantic operation name
+x-conexus-4a-id = exact accepted 4A ledger ID
 ```
 
-Examples:
+The current fixed shape derivation has mechanically closed:
 
 ```text
-GetControlPlaneAccessContext
-SetProjectBrainBinding
-PromoteRelease
-SendProductAgentTurn
+4A fixed operations        = 114
+OAS fixed operations       = 114
+missing                    = 0
+extra                      = 0
+duplicate operationId      = 0
+duplicate 4A ID            = 0
+duplicate method+path      = 0
 ```
 
-No route/framework prefix or CRUD renaming may replace the accepted semantic name.
+`npm run wire:bijection` must remain green. The checker also rejects generic Product paths shaped like unrestricted `/execute` or `{operationSlug}` dispatch.
+
+HTTP shape Evidence: [../evidence/4b/http-shape-derivation.md](../evidence/4b/http-shape-derivation.md).
+
+Surface roots preserve 4A ingress separation:
+
+```text
+/api/control/...   authenticated Control Plane Product interaction
+/api/apps/...      Published Application human interaction
+/api/headless/...  explicit Product-Agent headless interaction
+/api/runtime/...   owner-neutral PAR read/approval HTTP surface
+/api/projects/...  owner-neutral multi-ingress Project/Brain Product capability
+```
+
+One operation may admit multiple ingress classes without creating multiple Product operations. A path namespace never grants authority.
+
+## 4. Project-defined static-path generation law
 
 For Project-defined operations:
 
@@ -89,9 +119,21 @@ For Project-defined operations:
 operationId = exact Release-admitted Project operation identity
 ```
 
-A generated OAD must contain concrete operation IDs/paths for the exact finite `Ops(R)`. No variable operation slug/path may create a runtime `execute(anySlug, anyInput)` surface.
+A generated application OAD must contain one **literal concrete** path for every exact finite `Ops(R)` entry. Runtime path variables that select an arbitrary operation are forbidden.
 
-## 4. Naming and schema law
+Current regime roots are intentionally operation-class specific rather than universal:
+
+```text
+QUERY       → /api/projects/{projectId}/queries/<static generated operation segment>
+ACTION      → /api/projects/{projectId}/actions/<static generated operation segment>
+INTEGRATION → /api/projects/{projectId}/integrations/<static generated operation segment>
+```
+
+All three use exact typed request/response schemas. A Query may use POST when structured typed analytical input is the honest wire shape; HTTP GET aesthetics do not override semantic input shape.
+
+The literal operation segment must be generated deterministically from the exact `operationId`; it cannot be caller-selected at runtime.
+
+## 5. Naming and schema law
 
 Canonical reusable schemas use stable PascalCase semantic names.
 
@@ -103,7 +145,7 @@ wire component name != frontend component name
 wire component name != provider DTO name unless provider meaning is genuinely Product-visible
 ```
 
-Request/response schemas should be operation-specific where their meaning differs. Reuse exists only for a real repeated semantic carrier/property.
+Request/response schemas are operation-specific where meaning differs. Reuse exists only for a repeated semantic carrier/property.
 
 Forbidden generic abstractions without a proved repeated semantic:
 
@@ -116,22 +158,25 @@ UniversalEntity
 ProviderPayload
 ```
 
-## 5. HTTP Problem contract
+Money/decimal business values must not silently inherit binary floating-point semantics merely because JSON has a number type. Exact decimal representation is decided per accepted business measure before the first real application schema freezes it.
+
+## 6. HTTP Problem contract
 
 4B adopts RFC 9457 Problem Details:
 
 ```text
 media type = application/problem+json
 base schema = Problem
+machine discriminator = Problem.type URI/reference
 ```
 
-The stable machine discriminator is the Problem `type` URI/reference. Human-readable `detail` MUST NOT be parsed as machine authority.
+Human-readable `detail` MUST NOT be parsed as machine authority.
 
-The 4A outcome classes remain:
+The accepted semantic outcome classes remain:
 
 ```text
 401 unauthenticated
-403 authenticated + legitimately disclosable subject/surface + denied action
+403 authenticated + legitimately disclosable subject/surface + denied action/request-authenticity
 404 absent or intentionally non-disclosable
 409 current owner-state/uniqueness/single-flight conflict
 412 stale expected current subject/precondition
@@ -139,71 +184,146 @@ The 4A outcome classes remain:
 503 required dependency unavailable
 ```
 
-Owner-specific problem types are added only when a concrete consumer needs stable branching beyond the HTTP class.
+No later wire may turn a non-disclosable foreign subject into a 403 existence oracle. Owner-specific problem types are admitted only where a concrete consumer needs stable branching beyond the HTTP class.
 
-A generic implementation/debugging exception taxonomy is forbidden.
+## 7. Current-state / conditional contract
 
-## 6. Current-state / conditional contract
+IC2 is a **semantic current-subject obligation**, not an automatic `If-Match` instruction.
 
-RFC 9110 strong ETags are the preferred standard representation validator when an accepted IC2 obligation is about current representation state.
+RFC 9110 `If-Match` is used only when the ETag describes the current representation of the **same HTTP target resource being mutated**.
+
+Truthful cases include:
 
 ```text
-read of current representation
-→ strong ETag where later mutation needs it
+GET /api/control/workspaces/{workspaceId}
+→ strong ETag
 
-state-changing operation with representation-current precondition
+PATCH same workspace target
 → If-Match
 
-failed current representation match
-→ 412-class Problem
+GET /api/control/projects/{projectId}
+→ strong ETag
+
+PATCH same Project target
+→ If-Match
+
+GET /.../brain-binding
+→ strong ETag when present
+
+PUT/DELETE same brain-binding target
+→ If-Match when present
+→ If-None-Match: * may protect exact absent-create semantics where applicable
 ```
 
-Do not force ETag/If-Match when the exact semantic subject is already an immutable digest/revision carried as explicit operation input. The per-operation mapping decides the truthful carrier.
+Do **not** reuse an ETag from one resource as `If-Match` on a different command/collection target. Examples that therefore require explicit semantic current-subject input rather than cross-resource ETag abuse include:
 
-`If-None-Match`/304 caching semantics are admitted only where a real read consumer/property benefits; IC2 does not imply caching by symmetry.
+```text
+PromoteRelease
+→ expected pointer generation explicitly carried
 
-## 7. Idempotency contract
+DecideApprovalRequest
+→ exact ApprovalRequest/proposal revision/digest explicitly carried
 
-There is no current RFC standardizing `Idempotency-Key`; the IETF HTTPAPI draft expired in April 2026. 4B therefore owns the semantics while adopting the interoperable header field name:
+EnableAgentTrigger
+→ exact TriggerRevision explicitly carried
+
+ArchiveProject command subpath
+→ exact Project current revision/generation explicitly carried if the command target remains distinct
+```
+
+Likewise, when no exact item GET exists (for example an Area or Published-App grant item), 4B must expose an explicit current revision/role/subject carrier rather than pretending the collection's ETag is the item's validator.
+
+Failed standard representation preconditions remain 412-class Problems. Exact field/header spelling for explicit semantic revisions is operation schema work inside 4B.
+
+## 8. Idempotency contract
+
+There is no current RFC standardizing `Idempotency-Key`; the IETF HTTPAPI draft expired in April 2026. 4B owns the semantics while adopting the interoperable header name:
 
 ```text
 Idempotency-Key
 ```
 
-Where an operation maps IC3/IC4 to a caller-supplied retry identity, 4B requires:
+Where IC3/IC4 maps to caller-supplied repeatable intake:
 
-- one key is scoped to the exact operation + current authority/containment subject;
-- reuse with a materially different admitted payload is a conflict/validation failure, never a second effect;
+- one key is scoped to exact operation + authority/containment subject;
+- reuse with materially different admitted payload is rejected;
 - duplicate admitted intake with the same key cannot create a second owner occurrence/effect;
-- an unresolved/ambiguous downstream effect remains fenced under IC4; replay is not authorized merely because the same key is supplied;
-- expiry/retention is explicit for that operation class before implementation;
-- server-generated owner/effect identities remain authoritative above the header value.
+- unresolved/ambiguous downstream effect remains fenced under IC4; same key never authorizes blind replay;
+- server-generated owner/effect identity remains authority above the key;
+- expiry/retention must be exact before implementation for every operation class that uses it.
 
-Exact persistence, claim transaction and reconciliation mechanics belong to 4D.
+Exact persistence/claim/reconciliation mechanics belong to 4D.
 
-## 8. Authentication/session carriage law
+## 9. Authentication/session carriage
 
-OpenAPI `securitySchemes` document carriage only. They never become Product authorization authority.
+### 9.1 Human Product HTTP session
 
-Current human path remains:
+Current F1 carriage is one Conexus-owned opaque `iam.session` cookie:
 
 ```text
-Keycloak OIDC protocol
-→ verified human identity
-→ Conexus Account
-→ Conexus-owned opaque session
-→ current owner authorization per operation
+cookie name = __Host-conexus_session
+Secure      = required
+HttpOnly    = required
+Path        = /
+Domain      = forbidden
+SameSite    = Lax
 ```
 
-The fixed Product OAD will describe the Conexus session cookie as the protected human-operation carriage mechanism once the exact cookie wire name is frozen in 4B.
+OpenAPI represents this only as a `securityScheme`; possession of the cookie is authentication/session carriage, not Product authorization.
 
-Published-App roles, ordinary Conexus Permissions, PAR/MAR run context and exact ToolProjection remain operation authority metadata/requirements; they are not encoded as trusted caller-supplied role headers.
+Current authority remains:
 
-No caller may supply an effective Workspace/Project/Release/role/approval authority field merely because a schema contains a similarly named reference.
+```text
+Keycloak OIDC
+→ verified human identity
+→ Conexus Account
+→ opaque Conexus session
+→ current Workspace/Project/app/owner authorization on every operation
+```
 
-## 9. API surface separation
+Keycloak bearer tokens, realm roles, groups, organizations and Authorization Services are never accepted as Product authorization substitutes.
 
-Wire namespaces must preserve the 4A distinction:
+### 9.2 Non-HTTP/runtime authority
+
+`PAR_TOOL`, `MAR_JOB`, owner/system transitions and future DEDICATED service projections are not converted into fake human HTTP cookies or arbitrary caller headers merely because OAS needs a security object.
+
+For `RunAnalyticQuery`, current HTTP ingress is CP/PA; `PAR_TOOL` remains explicitly marked as a **non-HTTP** admitted ingress/projection.
+
+## 10. Browser request-authenticity contract
+
+Accepted architecture requires browser self-only/session/request-authenticity to be platform controlled and admits no credentialed cross-origin Product API in F1.
+
+Current 4B law:
+
+```text
+credentialed cross-origin Product API = DENY
+OIDC redirect/callback                 = separate allowlisted Technical Protocol
+```
+
+For browser Product API requests carrying the opaque session:
+
+```text
+Sec-Fetch-Site present
+→ only same-origin is admitted
+→ same-site / cross-site / none rejected for /api Product requests
+
+Sec-Fetch-Site absent on CP/PA browser ingress
+→ exact Origin must match the configured current Conexus origin
+→ else exact Referer origin must match
+→ neither trustworthy signal present = reject
+```
+
+`same-site` is intentionally insufficient because sibling subdomains are not Product authority peers.
+
+HEADLESS is a distinct non-browser Product ingress. Absence of Fetch Metadata does not itself deny a legitimate non-browser HEADLESS request, but if browser metadata is present then foreign/same-site-non-origin context is rejected. `agent.headless.invoke` and exact owner facts remain mandatory.
+
+Safe HTTP methods never mutate Product state.
+
+Bounded Evidence: [../evidence/4b/browser-request-authenticity-assessment.md](../evidence/4b/browser-request-authenticity-assessment.md).
+
+## 11. API surface separation
+
+Wire namespaces preserve:
 
 ```text
 Control Plane Product API
@@ -214,15 +334,11 @@ Control Plane Product API
 != internal owner/runtime mechanism
 ```
 
-An OpenAPI operation existing in a technical/protocol document does not add it to `N_platform`.
+Technical/protocol routes never inflate `N_platform` merely because they use HTTP.
 
-For the fixed Product OAD, only the accepted 114 fixed Product operations count toward the Product operation bijection.
+## 12. Project-operation declaration law
 
-## 10. Project-operation generation law
-
-The Project-operation grammar must contain enough exact information to generate concrete wire without caller/runtime free-form dispatch.
-
-At minimum each declaration closes:
+`contracts/api/project-operation.schema.json` closes at least:
 
 ```text
 schemaVersion
@@ -236,88 +352,140 @@ required binding/pin classes
 effect/read classification
 truth/outcome profile
 IC profile
-proof/negative-control identity
+positive proof + negative control identity
 ```
 
-Authorization caller classes are closed to the 4A vocabulary. The grammar MUST NOT accept arbitrary global Permission strings or arbitrary provider URLs/Connections.
+The grammar accepts only the bounded 4A caller/Permission vocabulary. It does not accept arbitrary global Permission strings, arbitrary target URLs or caller-selected Connections as effective authority.
 
-Generated application wire has **static concrete paths** for each exact `Ops(R)` entry. A path parameter such as `{operationSlug}` used as an unrestricted dispatcher is forbidden.
+An exact declaration is not runtime authority by file existence; it must be admitted into the exact Release.
 
-The exact deterministic method/path generation rule is the next Project-wire decision after the declaration schema proves the required authority fields.
+## 13. Pagination / continuation law
 
-## 11. Pagination/filtering law
+There is no global filter/sort/include language.
 
-There is no global generic filter/sort/include language.
+Each operation exposes only accepted filters.
 
-Each operation declares only accepted parameters/filters.
+For mutable/unbounded list results, the reusable transport primitive is an **opaque continuation token**, not database offset/cursor internals. The token:
 
-Where a mutable/unbounded list needs pagination, prefer an opaque continuation token rather than exposing database offset/cursor internals. The token is a transport continuation, not authorization or historical-snapshot authority.
+```text
+continues one accepted list/query shape
+!= authorization
+!= source identity
+!= historical snapshot authority
+```
+
+Caller-controlled page size is not admitted merely by convention; a real consumer may prove it later. F1 may therefore keep page sizing server-controlled while exposing only an optional opaque `pageToken` and an optional returned `nextPageToken`.
 
 Unless an operation explicitly owns snapshot pinning:
 
 ```text
-page/result coordinate A
-+ later page/result coordinate B
-→ both coordinates disclosed truthfully
+page coordinate A
++ later page coordinate B
+→ each coordinate disclosed truthfully where material
 → B MUST NOT masquerade as the same snapshot as A
 ```
 
 Budget Analyzer F1 specifically has no retained cross-call/page snapshot-pinning promise.
 
-## 12. Exact bytes
+## 14. Truth/provenance wire law
 
-Byte transport is always subordinate to an owning Product operation.
+Where 4A admits analytical/provenance truth states, wire schemas must preserve the closed distinctions rather than encode uncertainty through nullable business numbers.
+
+Current closed state vocabulary includes:
+
+```text
+SUPPORTED_CURRENT
+SUPPORTED_STALE
+PARTIAL
+UNVERIFIED
+INDETERMINATE
+UNSUPPORTED
+DEPENDENCY_UNAVAILABLE
+```
+
+A material analytical response carries an opaque **system-issued result/source coordinate** where 4A requires `as_of`/provenance. The coordinate is output/provenance; it is not arbitrary caller historical input.
+
+Rules:
+
+```text
+unknown != zero
+partial != complete
+stale != current
+read-model result != source proof
+empty supported-current result != dependency failure
+```
+
+The first Budget Analyzer operation schemas are the proving instance for this shared law.
+
+## 15. Exact bytes
+
+Byte transport remains subordinate to an owning Product operation:
 
 ```text
 owner subject + current authorization
-→ byte capability/response
+→ byte retrieval/upload capability
 ```
 
-Storage keys, object paths, signed provider URLs and blob identifiers never become Product authorization by possession.
+Storage keys, object paths, signed provider URLs and blob identifiers never authorize by possession. No global File Manager API is admitted.
 
-No global File Manager API is admitted.
+## 16. Generated projections
 
-## 13. Generated projections
-
-The canonical machine-readable wire may generate implementation-facing artifacts, but 4B does not yet choose the final 4D SDK/toolchain.
+Canonical machine-readable wire may generate implementation-facing artifacts, but final 4D SDK/runtime toolchain is not selected here.
 
 Required property:
 
 ```text
-canonical wire
-→ reproducible projection
-→ implementation consumes projection
-→ drift from canonical wire fails verification
+canonical source wire
+→ deterministic bundle/projection
+→ drift from source fails verification
 ```
 
-Candidate later projections include TypeScript types/transport, server validation bindings and operation registry metadata. Selection requires an exact consumer/tooling proof and remains separate from Product semantics.
-
-## 14. Current foundation result
+Current proof tooling is intentionally build-only:
 
 ```text
-OAS                             = 3.1.2
-JSON Schema                     = Draft 2020-12 / explicit OAS 3.1 dialect
-fixed Product OAD source        = contracts/api/product/openapi.yaml
-Project declaration schema      = contracts/api/project-operation.schema.json
-Problem                         = RFC 9457
-current representation carrier  = strong ETag / If-Match where semantically applicable
-idempotency header              = Idempotency-Key with Conexus-owned semantics
-fixed operationId               = exact accepted 4A semantic operation name
-Project generic dispatcher      = forbidden
-parallel editable DTO authority = forbidden
+@redocly/cli@2.47.0  OAS lint + bundle
+ajv-cli@5.0.0        JSON Schema 2020-12 compile
 ```
 
-## 15. Next derivation
+These are not runtime dependencies and do not select future server/client codegen.
+
+## 17. Current executable proof
+
+The repository `verify` path currently proves:
+
+```text
+repository hygiene / docs / current-state guards
++ repository tests
++ OAS lint
++ OAS deterministic bundle
++ Project declaration schema compilation
++ 4A ↔ fixed Product OAS bijection
+```
+
+Latest established green proof before this amendment:
+
+```text
+Verify #205 = SUCCESS
+fixed 4A↔OAS = 114/114
+missing = 0
+extra = 0
+duplicate = 0
+```
+
+Any current HEAD after this amendment must be freshly reverified before the proof result is advanced.
+
+## 18. Next derivation
 
 Proceed in this order:
 
 ```text
-1. author the canonical OAS root + shared Problem/conditional/idempotency primitives
-2. author the Project operation declaration JSON Schema
-3. prove both artifacts validate under their exact standards
-4. derive fixed-platform owner/prefix mapping into concrete HTTP paths/methods
-5. map all 114 operations with exact 4A bijection
-6. instantiate Budget Analyzer and generated application wire
+1. encode request-authenticity/session attributes in machine-readable shared wire metadata
+2. correct exact IC2 carrier mapping where cross-resource If-Match would be semantically false
+3. freeze shared Problem / continuation / truth-provenance schemas
+4. instantiate the two Budget Analyzer project-operation declarations
+5. deterministically generate and validate the Budget application OAD
+6. use that vertical to falsify Project operation generation before mass request/response schema closure
+7. then complete exact request/response/error/carrier mapping across the 114 fixed operations
 ```
 
-Do not begin frontend, router/framework, persistence or Product implementation.
+Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.

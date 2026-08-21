@@ -1,6 +1,6 @@
 # Conexus OS — Permission Contract
 
-> **Status:** CLOSED CANDIDATE / 4A OPEN / INDEPENDENT REVIEW PENDING / NOT RATIFIED
+> **Status:** CLOSED CANDIDATE / 4A OPEN / INDEPENDENT REVIEW ADJUDICATED / NOT RATIFIED
 > **Purpose:** derive the smallest ordinary Permission vocabulary needed by the exact Conexus platform operation candidate without turning personas, screens, Keycloak claims or Published-App roles into a universal policy system.
 > **Operation authority:** [operation-ledger.md](operation-ledger.md).
 > **Mutable program status:** owned only by [../roadmap.md](../roadmap.md).
@@ -71,7 +71,7 @@ The vocabulary is frozen as the **4A candidate**, not yet operator-ratified.
 
 | Permission | Meaning | Material current consumers |
 | --- | --- | --- |
-| `project.read` | inspect ordinary Project-level Product truth/projections | `PRJ-01/02/16/17/22`, ordinary Release/Promotion/serving/job/activity reads |
+| `project.read` | inspect ordinary Project-level Product truth/projections | `PRJ-01/02/16/17/22`; `PAR-06/07` Control-Plane run inspection; ordinary Release/Promotion/serving/job/activity reads |
 | `project.source.read` | inspect Project source/diff/authored definitions without write authority | `BLD-07..09`, `PRJ-20/21` |
 | `project.data.read` | inspect declared Product/read-model/source resources without becoming a generic DB console | `PRJ-18/19`; Control-Plane `BRN-12` together with `brain.read` |
 | `project.manage` | administer Project identity/lifecycle, Baseline, bindings and independent Published-App access configuration | `PRJ-04..15` where mapped; `IAM-14/15/17`; source side of `PRJ-06` |
@@ -139,7 +139,7 @@ Interactive Published-App Agent use is authorized by exact Published-App access/
 
 `agent.effect.approve` is a semantic authority distinction, not a Control-Plane UI entitlement. An eligible human may reach the exact owner-specific approval surface through Control Plane or Published App when that Product experience exposes it, but every decision still rechecks current approver eligibility, revocation, Release, exact sealed proposal and owner state. Published-App role `{admin,member}` alone is never approval authority; conversely, presenting approval in a Published App never grants Builder/Control-Plane access.
 
-`audit.read` can expose `PAR-09` read-only to a separately authorized investigator; it can never decide an ApprovalRequest.
+`audit.read` can expose `PAR-09` read-only to a separately authorized investigator; it can never list the approval queue through `PAR-08` or decide an ApprovalRequest.
 
 ---
 
@@ -324,4 +324,4 @@ Closure challenge dispositions:
 8. **PASS** — binding/approval/promotion compound operations preserve owner-specific current checks atomically at the semantic level.
 9. **PASS** — removing any of the surviving 25 Permissions would either merge a currently distinct reusable authority class or force operation-local hidden policy.
 
-This is a frozen **candidate** result only. Independent adversarial review and explicit operator 4A ratification remain required before the vocabulary becomes accepted authority.
+Independent Fable review is complete and Lead-adjudicated. It found no missing Permission or trust-boundary defect; the only Permission-document correction was to make the existing `PAR-06/07` Control-Plane `project.read` consumers explicit and preserve investigator access on `PAR-09` only. Explicit operator 4A ratification remains required before the vocabulary becomes accepted authority.

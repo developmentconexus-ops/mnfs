@@ -10,14 +10,16 @@ const script = resolve(root, 'scripts/check-architecture-verification.mjs')
 const authorityPaths = [
   'docs/roadmap.md',
   'docs/architecture/index.md',
+  'docs/phases/3m-failure-recovery-architecture.md',
+  'docs/phases/3n-architecture-verification.md',
   'docs/reference/data-and-persistence.md',
-  'docs/phases/3n-architecture-verification.md'
+  'docs/reference/integrations-and-gateway.md',
+  'docs/reference/managed-execution-qualification.md'
 ]
 
 const outputOf = result => `${result.stdout ?? ''}\n${result.stderr ?? ''}`
-const run = verificationRoot => spawnSync(process.execPath, [script], {
+const run = verificationRoot => spawnSync(process.execPath, [script, verificationRoot], {
   cwd: root,
-  env: { ...process.env, CONEXUS_ARCH_VERIFY_ROOT: verificationRoot },
   encoding: 'utf8'
 })
 
@@ -69,14 +71,41 @@ test('3N can verify the current 46-class and 16-FK data closure without Git arch
   assert.match(data, /## 6\.5\.1 Current durable record inventory/)
   assert.match(data, /TOTAL\s+46/)
   assert.match(data, /## 6\.5\.2 Current Tier-2 cross-module FK allowlist — 16/)
+  assert.match(data, /Tier-2 is admitted only when/)
   assert.match(data, /\| 16 \| `att\.attachment\.project_id → prj\.project\(id\)` \|/)
 })
 
-test('3N carries downstream proof families beyond the explicit section-46 minimum', () => {
+test('3N carries downstream proof families without inventing a Worker Eval metric contract', () => {
+  const architecture = readFileSync(resolve(root, 'docs/architecture/index.md'), 'utf8')
   const contract = readFileSync(resolve(root, 'docs/phases/3n-architecture-verification.md'), 'utf8')
   assert.match(contract, /## Downstream proof-family coverage/)
   assert.match(contract, /Builder UX progressive disclosure/)
-  assert.match(contract, /Golden benchmark \/ Worker Eval outcome quality/)
+  assert.match(contract, /Golden benchmark \/ Worker Eval integration into engineering system/)
+  assert.doesNotMatch(architecture, /rework\/correction burden/)
+})
+
+test('3N carries current obligations explicitly routed from current owners outside architecture sections 42 and 46', () => {
+  const contract = readFileSync(resolve(root, 'docs/phases/3n-architecture-verification.md'), 'utf8')
+  assert.match(contract, /## Current 3N-routed obligation intake/)
+  assert.match(contract, /authority uniqueness/)
+  assert.match(contract, /current-authority serialization × owner isolation/)
+  assert.match(contract, /architecture-wide duplicate-authority proof/)
+  assert.match(contract, /architecture-wide deciding-evidence completeness/)
+  assert.match(contract, /YAGNI deletion challenge/)
+})
+
+test('Gateway budget counter is tied to current non-monetary external-effect budgets, not model spend', () => {
+  const gateway = readFileSync(resolve(root, 'docs/reference/integrations-and-gateway.md'), 'utf8')
+  assert.match(gateway, /`budget_counter`/)
+  assert.match(gateway, /Product Agent.*budgets/s)
+  assert.match(gateway, /not model-spend authority/)
+})
+
+test('3N closure gate requires the operator-authorized roadmap transition on the closure head', () => {
+  const contract = readFileSync(resolve(root, 'docs/phases/3n-architecture-verification.md'), 'utf8')
+  assert.match(contract, /explicit operator closure authority/)
+  assert.match(contract, /3N = CLOSED/)
+  assert.match(contract, /3O = NEXT \/ NOT STARTED/)
 })
 
 test('3N owner guard rejects semantic-owner drift', () => {
@@ -89,11 +118,41 @@ test('3N owner guard rejects semantic-owner drift', () => {
   }
 })
 
+test('3N owner guard rejects loss of owner-local recovery law', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/architecture/index.md', 'recovery meaning remains owner-local; no generic Recovery owner/FSM exists', 'recovery may use a generic Recovery owner')
+    expectRejected(target, /owner-local recovery law is missing/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
 test('3N dependency guard rejects L7 orchestration drift', () => {
   const target = fixture()
   try {
     mutate(target, 'docs/architecture/index.md', 'PromoteRelease\n```', '```')
     expectRejected(target, /L7 orchestration set changed/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N dependency guard rejects loss of the single domain inversion', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/architecture/index.md', 'There is exactly one domain dependency inversion:', 'There may be domain dependency inversions:')
+    expectRejected(target, /single domain dependency inversion projection changed/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N dependency guard rejects infrastructure-boundary drift', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/architecture/index.md', '`GitInfra`', '`GenericInfra`')
+    expectRejected(target, /infrastructure boundary set changed/)
   } finally {
     rmSync(target, { recursive: true, force: true })
   }
@@ -144,11 +203,56 @@ test('3N routing guard rejects a first-production falsifier moved to first-build
   }
 })
 
+test('3N routed-obligation guard rejects loss of a current 3M obligation', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/phases/3m-failure-recovery-architecture.md', 'unknown preservation, ', '')
+    expectRejected(target, /3N-routed obligation intake differs from current owners/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N routed-obligation guard rejects loss of CR-1 joint proof routing', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/reference/data-and-persistence.md', '3N/3O must prove both sides together', 'FIRST_BUILD must prove both sides together')
+    expectRejected(target, /CR-1 current 3N routing is missing/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
 test('3N data-closure guard rejects loss of a durable record class', () => {
   const target = fixture()
   try {
     mutate(target, 'docs/reference/data-and-persistence.md', 'audit_record / operational_event\n', 'audit_record\n')
     expectRejected(target, /durable record inventory count changed/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N data-closure guard rejects an undeclared record schema', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/reference/data-and-persistence.md', 'obs: audit_record / operational_event\n', 'xyz: audit_record / operational_event\n')
+    expectRejected(target, /durable record schema closure changed/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N FK guard rejects an endpoint outside the current schema and record inventory', () => {
+  const target = fixture()
+  try {
+    mutate(
+      target,
+      'docs/reference/data-and-persistence.md',
+      '| 16 | `att.attachment.project_id → prj.project(id)` |',
+      '| 16 | `xyz.invented_record.nope_id → nowhere.missing(id)` |'
+    )
+    expectRejected(target, /Tier-2 FK endpoint is outside current data closure/)
   } finally {
     rmSync(target, { recursive: true, force: true })
   }
@@ -177,4 +281,13 @@ test('3N progression guard rejects premature C-018 ratification', () => {
   } finally {
     rmSync(target, { recursive: true, force: true })
   }
+})
+
+test('3N checker reports an unreadable explicit verification root without a stack trace', () => {
+  const missing = resolve(tmpdir(), `conexus-3n-missing-${Date.now()}`)
+  const result = run(missing)
+  const output = outputOf(result)
+  assert.notEqual(result.status, 0)
+  assert.match(output, /unable to read verification file/)
+  assert.doesNotMatch(output, /node:fs|ENOENT.*at /s)
 })

@@ -20,6 +20,7 @@ Default task pack is at most five files. Do not recursively read `docs/`, Git hi
 | Current stage / implementation gate | [roadmap.md](roadmap.md) | [development/engineering-rules.md](development/engineering-rules.md) | research, qualification |
 | Phase 4 / Implementation Readiness | [phases/4-implementation-readiness-program.md](phases/4-implementation-readiness-program.md) | current owning 4A–4G contract routed by `roadmap.md` | Product code, unrelated Phase-3 history |
 | 4A Product Surface & Authority | [phases/4a-product-surface-and-authority-contract.md](phases/4a-product-surface-and-authority-contract.md) | [product/operation-ledger.md](product/operation-ledger.md); [product/permission-contract.md](product/permission-contract.md) for authority mapping; [product/budget-analyzer-contract.md](product/budget-analyzer-contract.md) only for the first-vertical semantic decision; then one exact owner reference as needed | HTTP/router/frontend/runtime choices |
+| Blueprint / planning-harness design | [development/blueprint-harness-design.md](development/blueprint-harness-design.md) | [development/softwareforge-reference-assessment.md](development/softwareforge-reference-assessment.md) only when evaluating SoftwareForge-derived traceability/impact/execution-envelope ideas | Product authority by reference, raw competitor marketing |
 | Realization Planning / first-build skeleton | [phases/realization-planning.md](phases/realization-planning.md) | [development/production-realization-guide.md](development/production-realization-guide.md); use as Phase-4/4F input, not direct execution authority | Product implementation history, unrelated qualification |
 | Product meaning / scope / journeys | [product/contract.md](product/contract.md) | [decisions/index.md](decisions/index.md) | research, phase history |
 | Architecture overview / owners | [architecture/index.md](architecture/index.md) | one reference below | research, raw Evidence |
@@ -68,6 +69,7 @@ Mechanism is not authority. Research and reviewer findings are Evidence, never i
 - First-vertical semantic decision candidate: [Budget Analyzer Contract](product/budget-analyzer-contract.md).
 - 4A supporting coverage Evidence: [Operation Coverage](evidence/4a/operation-coverage.md).
 - Planning/research/review harness design input: [Blueprint Harness Design](development/blueprint-harness-design.md).
+- Bounded SoftwareForge reference assessment: [SoftwareForge Reference Assessment](development/softwareforge-reference-assessment.md).
 - Realization research/implementation companion: [Evidence-Grounded Realization Engineering](development/production-realization-guide.md).
 - Research router: [research/index.md](research/index.md).
 - Qualification Evidence summary: [evidence/qualification/3l/summary.md](evidence/qualification/3l/summary.md).

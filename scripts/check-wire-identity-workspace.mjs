@@ -37,12 +37,25 @@ function op(id) {
   return entry.operation;
 }
 
+function resolveLocalRef(value) {
+  if (!value?.$ref || !value.$ref.startsWith('#/')) return value;
+  return value.$ref
+    .slice(2)
+    .split('/')
+    .map((part) => part.replaceAll('~1', '/').replaceAll('~0', '~'))
+    .reduce((node, part) => node?.[part], oas);
+}
+
 function jsonRequestSchema(id) {
   return op(id).requestBody?.content?.['application/json']?.schema;
 }
 
+function resolvedParameters(id) {
+  return (op(id).parameters ?? []).map(resolveLocalRef);
+}
+
 function hasRequiredParameter(id, where, name) {
-  return (op(id).parameters ?? []).some((p) => p?.in === where && p?.name === name && p?.required === true);
+  return resolvedParameters(id).some((p) => p?.in === where && p?.name === name && p?.required === true);
 }
 
 const provision = jsonRequestSchema('IAM-03');
@@ -71,7 +84,7 @@ if (states.join(',') !== 'ABSENT,PRESENT') {
 if (!hasRequiredParameter('IAM-17', 'query', 'expectedRole')) {
   throw new Error('IAM-17 must carry the expected current app role explicitly');
 }
-const revokeExpectedRole = (op('IAM-17').parameters ?? []).find((p) => p?.in === 'query' && p?.name === 'expectedRole');
+const revokeExpectedRole = resolvedParameters('IAM-17').find((p) => p?.in === 'query' && p?.name === 'expectedRole');
 const revokeRoles = revokeExpectedRole?.schema?.enum ?? [];
 if (revokeRoles.length !== 2 || !revokeRoles.includes('admin') || !revokeRoles.includes('member')) {
   throw new Error('IAM-17 expectedRole must be exactly admin/member');

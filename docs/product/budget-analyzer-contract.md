@@ -1,6 +1,6 @@
 # Budget Analyzer — First-Vertical Product Semantic Contract
 
-> **Status:** OPERATOR APPROVED / 4A-BUDGET-01 CLOSED / 4A RATIFICATION PENDING
+> **Status:** OPERATOR APPROVED / 4A-BUDGET-01 CLOSED / INDEPENDENT REVIEW ADJUDICATED / 4A RATIFICATION PENDING
 > **Product:** Analisador Inteligente de Orçamentos — Sankhya
 > **Purpose:** close the smallest real business semantic/result inventory required to instantiate the 4A Project-defined Query grammar without copying Mitra's implementation fragmentation.
 > **Not authorized:** OpenAPI, SQL, schema, sync implementation, frontend, runtime or Product code.
@@ -103,21 +103,23 @@ This mapping must survive real-source proof. The exact derivative topology is a 
 
 ### 3.4 Time coordinate
 
-Every age/time-derived result is bound to an explicit **`as_of` source/reconciliation coordinate** carried with the admitted result.
+Every age/time-derived result is bound to an explicit **`as_of` source/reconciliation coordinate** carried with that admitted response or page.
 
 For F1:
 
 ```text
 as_of
-= exact source/reconciliation coordinate of the analytical snapshot
+= exact source/reconciliation coordinate of that analytical result
 
 as_of
 != arbitrary caller-selected historical query coordinate
 ```
 
-The caller cannot request unconstrained historical reconstruction merely by supplying an old timestamp. Historical snapshot/query capability would be a separate Product decision and is not admitted in F1.
+The caller cannot request unconstrained historical reconstruction merely by supplying an old timestamp or coordinate. Historical snapshot/query capability would be a separate Product decision and is not admitted in F1.
 
-This keeps replay/reconciliation deterministic and prevents request time from masquerading as data time without inventing a temporal-query product.
+F1 also does **not** promise that separate `AnalyzePendingBudgets` and `ListPendingBudgets` calls, or separate drilldown pages, remain pinned to one retained snapshot. Each response/page carries its own system-resolved coordinate. If the coordinate changes, that difference must remain visible; consumers must not represent mixed-coordinate data as one coherent snapshot.
+
+This keeps result truth explicit without inventing temporal retention or caller-controlled historical selection.
 
 ### 3.5 Budget age
 
@@ -131,6 +133,8 @@ budget_age_days
 The exact Sankhya field that supplies the canonical Budget business date is fixed by the published Brain mapping after real-source proof. 4A does not guess `DTNEG` or another field by name.
 
 `DTALTER` is **not** the F1 Budget-age authority. A technical or administrative update must not make an old Budget analytically young. Last-change time may remain observable provenance/detail, but `days_since_last_change` is not admitted as an F1 Product metric.
+
+A future-dated canonical Budget business date producing `budget_age_days < 0` is **not** clamped to zero and is not assigned to any accepted aging band. The affected record/result must remain truthfully excluded with `PARTIAL` coverage when it can be isolated, or become `UNVERIFIED / INDETERMINATE` when correct coverage cannot be established. A later business requirement for future-dated Budgets must reopen only this semantic item before adding a new band or rule.
 
 ### 3.6 Aging bands
 
@@ -298,9 +302,9 @@ Cross-filter presentation belongs to 4C. Exact input/output wire belongs to 4B.
 
 ### `ListPendingBudgets`
 
-One pageable drilldown read for R6 under the same accepted semantic filters, source scope and result coordinate.
+One pageable drilldown read for R6 under the same accepted semantic filters and source scope.
 
-The operation consumes the system-resolved analytical coordinate; it does not expose arbitrary historical reconstruction through caller-selected `as_of`.
+Each response/page is bound to its own system-resolved analytical coordinate and discloses that coordinate. F1 does not promise cross-call or cross-page snapshot pinning; if a refresh changes the coordinate, the Product must expose the change rather than silently treating mixed-coordinate pages as one coherent snapshot. The caller cannot select or replay an arbitrary historical `as_of`.
 
 No third `GetBudgetDetail` operation is admitted until a real later interaction proves the list representation insufficient.
 
@@ -354,6 +358,8 @@ partial != complete
 stale != current
 read-model result != source proof
 empty current result != failed source
+changed result coordinate != same analytical snapshot
+negative Budget age != AGE_0_3
 ```
 
 The Product must expose material `as_of`, freshness, coverage and provenance rather than treating request time as data time.
@@ -381,7 +387,7 @@ Any later concrete implementation/proof stage consuming this contract must prese
 - proving the Budget and Pending population against real Sankhya at one common comparison coordinate;
 - proving the canonical Budget business-date mapping used by age and month semantics;
 - covering distinct transformation-rule classes rather than merely result count;
-- including a deterministic negative control such as excluded non-Budget operation type, derivative converted Budget, wrong seller/customer scope or wrong aging boundary;
+- including a deterministic negative control such as excluded non-Budget operation type, derivative converted Budget, wrong seller/customer scope, wrong aging boundary or future-dated Budget age;
 - returning INDETERMINATE/UNSUPPORTED rather than fabricating truth when the source coordinate or semantic mapping is insufficient.
 
 A correction to a Sankhya mapping should remain a mapping/proof correction unless Evidence genuinely falsifies the accepted Product semantic meaning.
@@ -390,7 +396,7 @@ A correction to a Sankhya mapping should remain a mapping/proof correction unles
 
 ## 10. Operator decision record
 
-Operator approval was explicit on **2026-08-21**.
+Operator approval was explicit on **2026-08-21**. The independent 4A review later narrowed two ambiguous edges without changing the approved Product focus, result set or operation count: no retained cross-call snapshot guarantee is admitted in F1, and negative Budget age is not silently clamped/banded.
 
 The accepted F1 contract is:
 
@@ -400,8 +406,9 @@ Budget semantic           = Brain-admitted Budget document
 Initial Sankhya mapping   = CODTIPOPER {14,714} as Evidence; real-source validation required
 Pending semantic          = admitted Budget currently pending with no admitted conversion relation proving otherwise
 Initial pending mapping   = PENDENTE='S' + candidate TGFVAR topology as Evidence; real-source validation required
-Time coordinate           = system-resolved source/reconciliation as_of; disclosed, not arbitrary historical query input
-Budget age                = as_of - canonical Budget business date
+Time coordinate           = system-resolved source/reconciliation as_of per response/page; disclosed, not arbitrary historical query input
+Snapshot coherence        = no retained cross-call/page pinning promised in F1; coordinate changes remain visible
+Budget age                = as_of - canonical Budget business date; negative values are not clamped/banded
 Age bands                 = 0–3 / 4–7 / 8–30 / 31+
 Supported results         = summary + seller + customer + aging + month + drilldown
 Margin                    = unsupported
@@ -420,8 +427,8 @@ Reopen only the smallest owning item if material Evidence establishes that:
 - the accepted Product concept of Budget or Pending Budget is itself wrong, rather than merely a Sankhya binding code/field being wrong;
 - the Pending derivative semantics are materially incomplete or false;
 - the canonical Budget business-date semantic needs a different Product meaning, not merely a different source field mapping;
-- the age-band boundaries do not reflect desired Product meaning;
-- a real first-vertical consumer requires detail not expressible through the two admitted Queries;
+- the age-band boundaries do not reflect desired Product meaning, including a real requirement to classify future-dated Budgets;
+- a real first-vertical consumer requires cross-call snapshot pinning/history or detail not expressible through the two admitted Queries;
 - correct conversion semantics are proved and explicitly proposed for admission.
 
 A source-code/field mapping correction alone does not manufacture a new Product operation or automatically reopen 4A.

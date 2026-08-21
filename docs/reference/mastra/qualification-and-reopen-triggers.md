@@ -21,7 +21,15 @@
 - allowing Product-Agent browser/source/workspace access, subagents/networks, agent-as-tool, external MCP/A2A clients, or advanced memory;
 - altering owner admission, queue projection, recurrence, release handoff, cancellation, timeout, orphan, or partial-progress behavior.
 
+## Realization repin guard
+
+Before Product realization selects new Mastra pins, inspect the exact selected release/source for known defect classes relevant to the enabled surfaces:
+
+- framework-managed authentication bearer material must not be durably persisted into workflow snapshots, score rows or durable-agent inputs when those surfaces are enabled; upstream issue `mastra-ai/mastra#21975` and fix PR `#21996` are current Evidence for this class;
+- when suspend/resume mechanics are used, concurrent resume of one suspension lifecycle must have a storage-backed single-winner claim on the selected concurrency-capable store; upstream issue `mastra-ai/mastra#20443` and fix PR `#21725` are current Evidence for this class.
+
+A version label alone is not proof. Select an exact release/source that contains the relevant fix or prove an equivalent mitigation, then run the affected qualification criteria before enabling the surface. These are qualification inputs, not new Product requirements, and do not imply enabling server auth, scorers, workflows, DurableAgent or any other currently disabled surface.
+
 ## Boundaries
 
 Fresh current docs are supporting mechanics. Exact lock/source and real bounded probes decide version-specific claims. Qualification never creates Product requirements and never establishes complete implementation or production correctness.
-

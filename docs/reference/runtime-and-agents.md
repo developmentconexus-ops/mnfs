@@ -188,7 +188,9 @@ current/pinned owner facts
 
 Raw or restored `RequestContext`, Mastra approval state, `toolCallId` and model output never become permission, role, binding, approval or effect authority. Physical survival of an unknown stale key is not itself a failure; its use as current authority is prohibited.
 
-## 25.4 Status
+## 25.4 Frozen 3L qualification snapshot
+
+The block below preserves the accepted 3L runtime qualification result. It is not current program-status authority; current stage and implementation authorization live only in [../roadmap.md](../roadmap.md).
 
 ```text
 architecture = CURRENT
@@ -211,9 +213,6 @@ Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURREN
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
 3L = CLOSED / 3L-R3 FINAL CLOSURE
-Current phase status is owned only by [../roadmap.md](../roadmap.md).
-Product implementation = BLOCKED
-C-018 = NOT RATIFIED
 ```
 
 Same-process qualification is accepted only for the currently enabled F1 Mastra surfaces. Disabled scorer/evaluation, DurableAgent and Observational Memory globals remain deferred and require requalification before enablement.

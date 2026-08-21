@@ -75,14 +75,15 @@ Do not replace those operations with speculative rename/settings/generic patch o
 The next bounded 4B work is:
 
 ```text
-1. close the Brain owner slice across BRN-01 → BRN-12
-2. derive Workspace Brain, immutable revision, Discovery, KnowledgeProposal, publication, health and AnalyticQuery shapes only from accepted Brain/knowledge/data authority
-3. preserve review-before-publish, immutable published revisions, explicit Project binding and UPDATE_AVAILABLE rather than silent inheritance
-4. preserve semantic-query admission as registered exact semantic IDs + restricted SELECT-only plan/proof; never arbitrary SQL/runtime text-to-SQL authority
-5. preserve SUSPECT/INVALID critical-health blocking and provenance/uncertainty truth without inventing unsupported percentage accuracy
-6. keep Brain discovery read-only through current qualified Connection/Gateway authority; no ERP credentials move to Builder/E2B merely for discovery
-7. treat any missing Brain property or lifecycle vocabulary as a stop/reopen falsifier, not a DTO-design opportunity
-8. keep remaining 4B owners provisional until their bounded schema-closure slices are proved
+1. close the 11 current Brain Product operations: BRN-01 → BRN-10 plus BRN-12
+2. keep BRN-11 RunBrainHealthProbe absent from caller Product wire; it is SYSTEM_OWNER_TRANSITION
+3. derive Workspace Brain, immutable revision, Discovery, KnowledgeProposal, publication, health and AnalyticQuery shapes only from accepted Brain/knowledge/data authority
+4. preserve review-before-publish, immutable published revisions, explicit Project binding and UPDATE_AVAILABLE rather than silent inheritance
+5. preserve semantic-query admission as registered exact semantic IDs + restricted SELECT-only plan/proof; never arbitrary SQL/runtime text-to-SQL authority
+6. preserve SUSPECT/INVALID critical-health blocking and provenance/uncertainty truth without inventing unsupported percentage accuracy
+7. keep Brain discovery read-only through current qualified Connection/Gateway authority; no ERP credentials move to Builder/E2B merely for discovery
+8. treat any missing Brain property or lifecycle vocabulary as a stop/reopen falsifier, not a DTO-design opportunity
+9. keep remaining 4B owners provisional until their bounded schema-closure slices are proved
 ```
 
 Closed owner-slice Evidence:

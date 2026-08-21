@@ -108,7 +108,7 @@
             "lastChangeAt": { "type": "string", "format": "date-time", "readOnly": true },
             "budgetAgeDays": {
               "type": "integer",
-              "description": "May be negative only when the response truth state is PARTIAL/UNVERIFIED/INDETERMINATE; negative age is never banded."
+              "description": "Negative age may be surfaced only under a non-supported truth state that still permits items; it is never clamped or banded."
             },
             "agingBand": {
               "enum": ["AGE_0_3", "AGE_4_7", "AGE_8_30", "AGE_31_PLUS"]
@@ -120,7 +120,20 @@
             "customerName": { "type": "string", "minLength": 1 },
             "sourceCompanyId": { "type": "string", "minLength": 1 },
             "pendingEvidenceState": { "enum": ["CONFIRMED", "AMBIGUOUS", "UNVERIFIED"] }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "budgetAgeDays": { "maximum": -1 }
+                },
+                "required": ["budgetAgeDays"]
+              },
+              "then": {
+                "not": { "required": ["agingBand"] }
+              }
+            }
+          ]
         }
       },
       "nextPageToken": {

@@ -217,6 +217,31 @@ The contract expands only when a real first-build transformation, owner/boundary
 
 A material failure does not authorize redesign inside the proof. It identifies the smallest authority that must re-enter the Decision Loop.
 
+## Closure result
+
+The operator authorized 3O closure after the corrected candidate survived independent Fable challenge and bounded adjudication.
+
+Preserved result:
+
+```text
+Vertical = Analisador Inteligente de Orçamentos — Sankhya / read-only analytics
+3O-P1..3O-P7 = accepted first-build vertical proof contract
+independent live-source oracle = required
+business semantics from candidate execution = forbidden
+representative coverage by declaration = forbidden
+result → transformation-rule class → live case mapping = required Evidence
+unknown / partial / unsupported != zero / success
+3N-V01..V28 + Architecture §42 + 3M intake + CR-1 + managed-execution routes = preserved
+Product code / live Sankhya execution in 3O = none
+new Product requirement / semantic owner / trust boundary = none
+3A–3N reopen = none
+3L requalification = none
+```
+
+Fable Round 1 found three material defects in the candidate contract: an unverifiable closure transition, declaration-shaped representative coverage and a path for candidate execution Evidence to supply comparison semantics. All three were accepted and corrected inside 3O. The closure-transition defect was reproduced RED against the real checker and closed GREEN with a bounded regression control; no second review round was justified because no material contradiction survived adjudication.
+
+The contract remains a **proof-before-implementation** obligation. It does not claim the Budget Analyzer, Sankhya integration, read model or any routed FIRST_BUILD/FIRST_PRODUCTION property has executed or passed. Those claims remain falsifiable only at their real routed stage.
+
 ## Closure gate
 
 3O may close only when all of the following are true on the exact candidate head:
@@ -230,6 +255,6 @@ A material failure does not authorize redesign inside the proof. It identifies t
 7. the merge candidate contains no `docs/work/**` review material and no unresolved material contradiction;
 8. after **explicit operator closure authority**, the same closure head updates the roadmap to `3O = CLOSED` while `C-018 = NOT RATIFIED` and `Product implementation = BLOCKED`, then `npm ci && npm run verify` passes again before merge.
 
-Until that explicit closure authority is given, 3O remains open, C-018 remains not ratified and Product implementation remains blocked.
+The operator has now granted the closure authority in item 8. Current mutable status remains owned only by the roadmap; C-018 and Product implementation remain separately gated.
 
 If the later real first-build proof falsifies an accepted property, it reopens only the smallest accepted owner/decision that the Evidence actually invalidates.

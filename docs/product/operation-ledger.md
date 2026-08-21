@@ -106,9 +106,9 @@ OIDC callback/redirect, provider callback/token refresh, queue delivery/redelive
 
 | Regime | Meaning | Required closure |
 | --- | --- | --- |
-| registered `Query` | exact Project-defined read | exact input/output; read-only semantics; named consumer; exact Release/source/binding scope; truthful freshness/outcome |
-| registered `Action` | exact Project-defined consequential/business command | exact owner semantics; current authorization/preconditions; idempotency/reconciliation where repeated intake/effect risk exists |
-| Integration Operation | exact provider-aware Project capability where provider-specific meaning is honest | exact Connection/binding/revision/environment; Gateway last mile; declared effect/read/idempotency/reconciliation scope |
+| registered `Query` | exact Project-defined read | exact input/output; read-only semantics; named consumer; exact Release/source/binding scope; truthful freshness/outcome; `IC0` |
+| registered `Action` | exact Project-defined consequential/business command | exact owner semantics; current authorization/preconditions; at least current-state protection; `IC3` when consequential intake can repeat; `IC4` whenever an external/ambiguous effect can escape |
+| Integration Operation | exact provider-aware Project capability where provider-specific meaning is honest | exact Connection/binding/revision/environment; Gateway last mile; declared read/effect scope; effectful operations require `IC4` idempotency/reconciliation semantics |
 
 `AnalyticQuery` is not an arbitrary Project slug. It remains the fixed Brain-governed platform read regime `BRN-12`.
 
@@ -305,9 +305,9 @@ No secret read, arbitrary TestURL, generic credential fetch/executor or cross-Wo
 | `PAR-05` | `RunProductAgentHeadless` | PAR | exact active Release/Agent + explicit headless authority | consequential command |
 | `PAR-06` | `ListAgentRuns` | PAR | exact Project/Agent/Conversation + current disclosure | read |
 | `PAR-07` | `GetAgentRun` | PAR | exact AgentRun; `COMPLETED != every effect succeeded` | read/provenance |
-| `PAR-08` | `ListApprovalRequests` | PAR | exact Project/AgentRun + current approval disclosure/eligibility | read/approval |
-| `PAR-09` | `GetApprovalRequest` | PAR | exact sealed subject/digest/current state | read/approval |
-| `PAR-10` | `DecideApprovalRequest` | PAR | exact sealed proposal + current human eligibility; `ALLOW_ONCE`/`DENY` only | decision/current-authority |
+| `PAR-08` | `ListApprovalRequests` | PAR | current eligible approver UX or separately authorized investigation; exact Project/AgentRun disclosure | read/approval |
+| `PAR-09` | `GetApprovalRequest` | PAR | current eligible approver or separately authorized investigator; exact sealed subject/current state | read/approval |
+| `PAR-10` | `DecideApprovalRequest` | PAR | current eligible human shown the exact sealed proposal; surface does not confer eligibility | decision/current-authority |
 | `PAR-11` | `ListAgentTriggers` | PAR | exact Project/Agent trigger administration | read |
 | `PAR-12` | `GetAgentTrigger` | PAR | exact TriggerRevision/current state | read |
 | `PAR-13` | `CreateScheduleTrigger` | PAR | exact active/evolvable Agent + current Project authority | command |
@@ -316,6 +316,17 @@ No secret read, arbitrary TestURL, generic credential fetch/executor or cross-Wo
 | `PAR-16` | `DisableAgentTrigger` | PAR | exact TriggerRevision; explicit narrowing allowed for archived Project | narrowing command |
 
 Agent authoring stays in `BLD-03` + normal Change/Release. Mastra thread/tool-registry/runtime snapshot/provider IDs and owner terminal transitions are not Product operations.
+
+Approval is owner-specific rather than Control-Plane-specific:
+
+```text
+exact ApprovalRequest subject
+→ current eligible human through the exact admitted approval surface
+→ PAR revalidates eligibility + revocation + Release + sealed proposal
+→ only then can ALLOW_ONCE reach Gateway effect admission
+```
+
+The exact approval surface may be Control Plane or Published Application when the current Product experience admits it. Published-App role `{admin,member}` by itself never grants approval authority, and exposing approval in a Published App never grants Builder/Control-Plane access. `PAR-09` may additionally be inspected read-only through the separately authorized audit/investigator route; that route can never decide the request.
 
 ## 5.9 Gateway inspection — 2
 
@@ -405,6 +416,45 @@ The following grouped matrix is **complete**: every fixed platform operation app
 | `ANALYTIC` | `SUPPORTED_CURRENT`, `SUPPORTED_STALE`, `PARTIAL`, `UNVERIFIED/INDETERMINATE`, `UNSUPPORTED`, `DEPENDENCY_UNAVAILABLE`; unknown != zero |
 | `PROOF` | success/failure/error/unknown proof states do not rewrite Product meaning or current owner facts by narration |
 
+### 8.1.1 Disclosure and semantic outcome law
+
+4A fixes the semantic distinction; 4B later chooses the exact Problem schema/code spelling.
+
+```text
+401-class unauthenticated
+= no valid current Conexus session/principal for a protected human surface
+
+404-class absent / intentionally non-disclosable
+= subject does not exist OR current disclosure policy must not confirm that foreign/out-of-scope subject exists
+= default for guessed/cross-Workspace/cross-Project identifiers when existence itself is not disclosable
+
+403-class authenticated but denied
+= the subject/surface is legitimately disclosable to this current caller, but the caller lacks the required action/decision authority
+
+409-class conflict
+= current owner state/uniqueness/single-flight conflict where the request is otherwise admitted
+
+412-class stale precondition/current-subject conflict
+= caller named an expected revision/generation/digest/current subject that is no longer current or cannot win
+
+422-class admitted semantic/business-input failure
+= caller is authorized for the operation, but the admitted input violates the operation's semantic validation contract
+
+503-class required dependency unavailable
+= required current provider/source/runtime dependency is unavailable and the operation cannot truthfully complete
+```
+
+Rules:
+
+```text
+foreign identifier + no disclosure authority -X-> 403 existence oracle
+non-disclosable unknown                     -X-> convenient negative answer
+stale/current-authority conflict            -X-> silent last-write-wins
+required dependency unavailable             -X-> empty/zero/success
+```
+
+Owner-specific finer distinctions may narrow disclosure further, but no later wire/frontend layer may collapse these classes into a more permissive meaning.
+
 ### 8.2 Idempotency / concurrency profiles
 
 | Profile | Required property |
@@ -462,8 +512,10 @@ The following grouped matrix is **complete**: every fixed platform operation app
 | `REL-08` | `HUMAN_ACCOUNT_SESSION / CP` | `release.promote` | exact target-environment conformance subject; read grants no pointer mutation | `PROOF` | `IC0` |
 | `PAR-01..04` | `PUBLISHED_APP_HUMAN / PA` | exact app access/role + active Release/Agent | exact Project/Agent/Conversation/Release scope | reads `READ`; `PAR-03` `COMMAND`; `PAR-04` `CONSEQUENTIAL` | reads `IC0`; create/turn `IC3`; downstream effects additionally `IC4` |
 | `PAR-05` | `HUMAN_ACCOUNT_SESSION / HEADLESS` | `agent.headless.invoke` | exact active Release/Agent + current headless admission | `CONSEQUENTIAL` | `IC3`; downstream effects `IC4` |
-| `PAR-06,PAR-07` | `HUMAN_ACCOUNT_SESSION / CP` or authorized in-scope app user | Control Plane `project.read` or exact in-scope app access | exact AgentRun/Conversation/Project disclosure | `PAR-07` `PROVENANCE_READ`; `PAR-06` `READ` | `IC0` |
-| `PAR-08..10` | `HUMAN_ACCOUNT_SESSION / CP` | `agent.effect.approve` + exact current approver eligibility | exact sealed ApprovalRequest/proposal digest; changed subject requires a new request | reads `READ`; decision `DECISION` | reads `IC0`; decision `IC2/IC4` |
+| `PAR-06,PAR-07` | `HUMAN_ACCOUNT_SESSION / CP` or `PUBLISHED_APP_HUMAN / PA` | Control Plane `project.read` or exact in-scope app access | exact AgentRun/Conversation/Project disclosure | `PAR-07` `PROVENANCE_READ`; `PAR-06` `READ` | `IC0` |
+| `PAR-08` | `HUMAN_ACCOUNT_SESSION / CP` or `PUBLISHED_APP_HUMAN / PA` | `agent.effect.approve` + exact current approver eligibility | exact Project/AgentRun/ApprovalRequest scope; PA additionally requires current app access/Release; app role alone is never approval authority | `READ` | `IC0` |
+| `PAR-09` | eligible approver via `CP` or `PA`, or `HUMAN_ACCOUNT_SESSION / CP` investigator | approver route: `agent.effect.approve` + exact current eligibility; investigator route: `audit.read` | exact sealed ApprovalRequest/proposal digest; investigator is read-only; PA app role alone is never approval authority | `PROVENANCE_READ` | `IC0` |
+| `PAR-10` | `HUMAN_ACCOUNT_SESSION / CP` or `PUBLISHED_APP_HUMAN / PA` | `agent.effect.approve` + exact current approver eligibility | exact sealed proposal + current revocation/Release/eligibility recheck; changed subject requires new request; PA additionally requires current app access/Release | `DECISION` | `IC2/IC4` |
 | `PAR-11..16` | `HUMAN_ACCOUNT_SESSION / CP` | `agent.trigger.manage` | exact Project/Agent/TriggerRevision; archive blocks creation/enable but narrowing disable remains allowed | reads `READ`; writes `COMMAND` | reads `IC0`; create `IC3`; revise/enable `IC2`; disable `IC1` |
 | `GW-01,GW-02` | `HUMAN_ACCOUNT_SESSION / CP` | `audit.read` | exact Project + originating run/operation/effect subject; no retry authority | `PROVENANCE_READ` | `IC0` (underlying effect owner uses `IC4`) |
 | `MAR-01,MAR-02` | `HUMAN_ACCOUNT_SESSION / CP` | `project.read` | exact Project/Release/job/JobRun | `MAR-02` `PROVENANCE_READ`; `MAR-01` `READ` | `IC0` |

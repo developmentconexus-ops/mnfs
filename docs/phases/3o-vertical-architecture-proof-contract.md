@@ -69,7 +69,7 @@ result = MATCH | MISMATCH | UNSUPPORTED | INDETERMINATE
 
 ## Proof-case admission
 
-A first-build reconciliation case is admissible only when it resolves all of the following from current authority or exact execution Evidence:
+A first-build reconciliation case is admissible only when all of the following are established. Items 1 and 3, plus every business-semantic premise used by item 5, resolve **only from current accepted authority**. Exact execution Evidence may establish the identity/provenance/coverage coordinates in items 2, 4, 6 and 7 and the concrete oracle realization in item 5, but it may not supply missing semantic meaning.
 
 1. an exact semantic subject/reference already authorized outside the proof itself;
 2. exact Project/source binding identity sufficient to know which governed Sankhya source is being tested;
@@ -79,9 +79,17 @@ A first-build reconciliation case is admissible only when it resolves all of the
 6. the real Product-side result path being tested;
 7. exact Evidence provenance sufficient to identify semantic revision, source/binding scope, candidate Release/build identity and comparison boundary.
 
-If one of these cannot be established, the case is `INDETERMINATE`; the proof may not fill the gap with an inferred default.
+Missing, ambiguous or unsupported semantic meaning yields `UNSUPPORTED`. Inability to establish required source/candidate coverage, identity, oracle realization or provenance yields `INDETERMINATE`. Neither path may be repaired with an inferred default from candidate behavior.
 
 The proof contract does not require an exhaustive golden case per KPI by default. Every Product-visible analytical output must resolve to current semantic authority, while live reconciliation requires the **smallest representative set that covers each materially distinct source-to-Product transformation rule actually used by the first vertical**. A new materially distinct grain, relationship path, temporal rule, aggregation/formula class, or null/unknown rule expands that set; labels or duplicated presentation alone do not.
+
+Before representative coverage can be claimed, first-build Evidence must exhibit:
+
+1. the enumerated inventory of Product-visible analytical results in the candidate scope, each linked to its exact current semantic reference or an explicit `UNSUPPORTED` disposition;
+2. the declared transformation-rule class for every supported result, applying the expansion triggers above; and
+3. the case → rule-class mapping showing at least one admitted live reconciliation case for every materially distinct rule class.
+
+This inventory and mapping are proof Evidence only; they create no new Product object, durable record class or proof engine. Multiple results may share one representative case only when the exhibited mapping shows they genuinely use the same materially relevant transformation class. An unmapped supported result or uncovered rule class makes the reconciliation proof incomplete; it cannot be reported as `MATCH` by declaration.
 
 ## Core first-build proof contract
 
@@ -90,9 +98,9 @@ The proof contract does not require an exhaustive golden case per KPI by default
 | `3O-P1` semantic admission | a Product-visible KPI/result has no resolvable current semantic authority, or the proof itself invents its meaning | every exposed analytical result resolves to current accepted semantics; unresolved meaning is `UNSUPPORTED`, never fabricated |
 | `3O-P2` oracle independence | expected truth is obtained from the Project read model, Product output, the same result-producing transformation, or a fixture copied from the candidate | the oracle reaches governed live Sankhya and is independently derived from the candidate transformation while sharing only accepted semantics and commodity transport where appropriate |
 | `3O-P3` comparison closure | source and candidate are compared across different business cutoffs/coverage and the proof still claims success | both sides share a declared comparison boundary; inability to establish equivalent coverage yields `INDETERMINATE` |
-| `3O-P4` real-path reconciliation | a supported representative case differs between independent source truth and the real Budget Analyzer result without detection | every admitted representative case is `MATCH`, or the proof fails closed with explicit mismatch Evidence |
+| `3O-P4` real-path reconciliation | a supported representative case differs between independent source truth and the real Budget Analyzer result without detection, or a materially distinct rule class is omitted from reconciliation | the exhibited result → rule-class → case mapping covers every materially distinct class, and every admitted representative case is `MATCH`; otherwise the proof fails closed with explicit mismatch/incomplete-coverage Evidence |
 | `3O-P5` unsupported/unknown preservation | unsupported semantics, missing data, partial coverage or unavailable source truth becomes `0`, success, nearest-name inference or another plausible numeric substitute | unsupported meaning is `UNSUPPORTED`; missing/partial/unverifiable truth is `INDETERMINATE`; neither can masquerade as a supported result |
-| `3O-P6` falsifier firing | deliberate divergence on one comparison side still produces a green proof | a deterministic negative control changes one side outside the live-source oracle and the reconciliation must fail; production/source mutation is not required for the control |
+| `3O-P6` falsifier firing | deliberate divergence on one comparison side still produces a green proof | a deterministic negative control perturbs only the non-oracle comparison side — candidate result or comparison input under test — never governed live-source/oracle truth, and reconciliation must fail; production/source mutation is not required |
 | `3O-P7` provenance closure | a mismatch/pass cannot be tied to the exact semantic/source/candidate/comparison identities that produced it | Evidence pins enough exact identity to reproduce or adjudicate the claim without treating telemetry as owner truth |
 
 A tolerance may exist only when current semantic authority or the exact business calculation requires it. The proof may not invent a tolerance after observing a mismatch.
@@ -106,7 +114,8 @@ The oracle must not:
 - read the Project DB/read model as its source of expected truth;
 - call the Budget Analyzer result under test and treat the response as expected truth;
 - reuse the candidate materialization/aggregation function merely through another entrypoint;
-- obtain the expected value from a golden fixture copied from candidate output.
+- obtain the expected value from a golden fixture copied from candidate output;
+- derive grain, filters, formulas, null handling or business-time meaning from candidate behavior when current accepted authority does not define that meaning.
 
 The candidate side must be captured from the furthest stable Product-owned result boundary that actually serves the analytical result. Reading the Project DB directly is insufficient when additional Product logic transforms that state before the user-visible result.
 

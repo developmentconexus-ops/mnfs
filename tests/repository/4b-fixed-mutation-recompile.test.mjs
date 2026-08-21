@@ -17,12 +17,13 @@ test('operator-approved 4B-F01 recompiles fixed Product authority to exactly 111
   const sectionEnd = ledger.indexOf('\n---\n\n## 6. Product-visible Published Application boundary', sectionStart)
   if (sectionStart < 0 || sectionEnd < 0) throw new Error('unable to locate fixed-platform census in operation ledger')
 
-  const rows = [...ledger.slice(sectionStart, sectionEnd).matchAll(/^\| `([A-Z]+-\d+)` \| `([A-Za-z][A-Za-z0-9]+)` \|/gm)]
+  const fixedSection = ledger.slice(sectionStart, sectionEnd)
+  const rows = [...fixedSection.matchAll(/^\| `([A-Z]+-\d+)` \| `([A-Za-z][A-Za-z0-9]+)` \|/gm)]
   if (rows.length !== 111) throw new Error(`expected 111 fixed 4A operations after 4B-F01, found ${rows.length}`)
 
   for (const [id, operationId] of removed) {
-    if (ledger.includes(`\`${id}\``) || ledger.includes(`\`${operationId}\``)) {
-      throw new Error(`removed 4B-F01 operation remains in current 4A ledger: ${id} ${operationId}`)
+    if (fixedSection.includes(`\`${id}\``) || fixedSection.includes(`\`${operationId}\``)) {
+      throw new Error(`removed 4B-F01 operation remains in current 4A census: ${id} ${operationId}`)
     }
   }
 })

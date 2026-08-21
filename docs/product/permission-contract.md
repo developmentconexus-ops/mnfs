@@ -88,12 +88,11 @@ The candidate is intentionally small and semantic. The count is an output, not a
 
 | Permission | Meaning | Material current consumers |
 | --- | --- | --- |
-| `release.compose` | admit an exact accepted/verified Project candidate into Release composition when the Product exposes that action | Release composition current-proof path; retained as a candidate Permission even while `ComposeRelease` undergoes Product-operation subtraction |
 | `release.promote` | decide/perform exact Release Promotion/rollback under current conformance/proof | `REL-04..08`, especially `REL-06` |
 | `job.run` | manually admit an occurrence of an exact Release-pinned managed `job/v1` | `MAR-03` |
 | `audit.read` | inspect audit/effect/technical execution evidence beyond ordinary owner views | `OBS-02/04/05`, `GW-01/02` where authorized |
 
-Ordinary Release/Promotion history may remain visible under `project.read`; `release.promote` is the consequential authority distinction.
+Release composition is an owner/system transition gated by exact current accepted proof in the current subtractive candidate; it therefore carries no ordinary human `release.compose` Permission. Ordinary Release/Promotion history may remain visible under `project.read`; `release.promote` is the consequential authority distinction.
 
 ### 3.4 Brain
 
@@ -151,7 +150,6 @@ project.manage
 project.build
 project.review
 
-release.compose
 release.promote
 job.run
 audit.read
@@ -174,11 +172,11 @@ agent.effect.approve
 ```
 
 ```text
-candidate ordinary Permissions = 26
+candidate ordinary Permissions = 25
 status = NOT FROZEN / NOT RATIFIED
 ```
 
-The number 26 has no independent value. It survives only if each Permission remains necessary after final operation subtraction and no accepted operation requires a missing semantic distinction.
+The number 25 has no independent value. It survives only if each Permission remains necessary after final operation subtraction and no accepted operation requires a missing semantic distinction.
 
 ---
 
@@ -201,6 +199,7 @@ action.execute
 integration.execute
 analyticquery.execute
 release.read
+release.compose
 promotion.read
 effect.read
 job.read

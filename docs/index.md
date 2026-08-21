@@ -19,7 +19,8 @@ Default task pack is at most five files. Do not recursively read `docs/`, Git hi
 | --- | --- | --- | --- |
 | Current stage / implementation gate | [roadmap.md](roadmap.md) | [development/engineering-rules.md](development/engineering-rules.md) | research, qualification |
 | Phase 4 / Implementation Readiness | [phases/4-implementation-readiness-program.md](phases/4-implementation-readiness-program.md) | current owning 4A–4G contract routed by `roadmap.md` | Product code, unrelated Phase-3 history |
-| 4A Product Surface & Authority | [phases/4a-product-surface-and-authority-contract.md](phases/4a-product-surface-and-authority-contract.md) | [product/contract.md](product/contract.md), then only the owning reference required by a concrete operation family | HTTP/router/frontend/runtime choices |
+| 4A Product Surface & Authority | [phases/4a-product-surface-and-authority-contract.md](phases/4a-product-surface-and-authority-contract.md) | [product/contract.md](product/contract.md), then only the owning reference required by a concrete operation family | HTTP/router/frontend/runtime/SDK choices |
+| Planning harness / Paved-Road design input | [development/blueprint-harness-design.md](development/blueprint-harness-design.md) | [reference/builder-and-harness.md](reference/builder-and-harness.md), [reference/mastra/index.md](reference/mastra/index.md) only for current accepted mechanism mapping | treating Blueprint/Forge names or candidate SDKs as accepted Product authority |
 | Realization Planning / first-build skeleton | [phases/realization-planning.md](phases/realization-planning.md) | [development/production-realization-guide.md](development/production-realization-guide.md); use as Phase-4/4F input, not direct execution authority | Product implementation history, unrelated qualification |
 | Product meaning / scope / journeys | [product/contract.md](product/contract.md) | [decisions/index.md](decisions/index.md) | research, phase history |
 | Architecture overview / owners | [architecture/index.md](architecture/index.md) | one reference below | research, raw Evidence |
@@ -63,6 +64,7 @@ Mechanism is not authority. Research and reviewer findings are Evidence, never i
 ## Durable supporting routes
 
 - Phase baselines / readiness gates: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md), [3M](phases/3m-failure-recovery-architecture.md), [3N](phases/3n-architecture-verification.md), [3O](phases/3o-vertical-architecture-proof-contract.md), [C-018](phases/c-018-final-architecture-ratification.md), [Realization Planning](phases/realization-planning.md), [Phase 4 Implementation Readiness](phases/4-implementation-readiness-program.md), [4A Product Surface](phases/4a-product-surface-and-authority-contract.md).
+- Planning/research/review/Paved-Road design input: [Conexus Blueprint Harness](development/blueprint-harness-design.md).
 - Realization research/implementation companion: [Evidence-Grounded Realization Engineering](development/production-realization-guide.md).
 - Research router: [research/index.md](research/index.md).
 - Qualification Evidence summary: [evidence/qualification/3l/summary.md](evidence/qualification/3l/summary.md).

@@ -46,7 +46,7 @@ Do not replay 3N/3O by ceremony. A material contradiction stops C-018 and return
 
 The bounded OPEN candidate at `a8bd6570e5d75c380b3986929648eab79288365c` passed the complete repository gate in Verify #92 with 37/37 repository tests passing. Its R1–R7 review found no surviving material Product, semantic-owner, trust-boundary, structural or qualification contradiction and introduced no new architecture authority.
 
-The operator then explicitly ratified C-018. The ratified durable projection is therefore:
+The operator then granted explicit operator ratification of C-018. The ratified durable projection is therefore:
 
 ```text
 3A–3O = CLOSED

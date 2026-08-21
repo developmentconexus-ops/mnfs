@@ -18,7 +18,7 @@ Default task pack is at most five files. Do not recursively read `docs/`, Git hi
 | Need | Read first | Add only when needed | Do not read by default |
 | --- | --- | --- | --- |
 | Current stage / implementation gate | [roadmap.md](roadmap.md) | [development/engineering-rules.md](development/engineering-rules.md) | research, qualification |
-| Realization Planning / first build | [phases/realization-planning.md](phases/realization-planning.md) | [development/evidence-grounded-realization.md](development/evidence-grounded-realization.md), then one owning reference named by the concrete slice | Product implementation history, unrelated qualification |
+| Realization Planning / first build | [phases/realization-planning.md](phases/realization-planning.md) | [development/production-realization-guide.md](development/production-realization-guide.md), then one owning reference named by the concrete slice | Product implementation history, unrelated qualification |
 | Product meaning / scope / journeys | [product/contract.md](product/contract.md) | [decisions/index.md](decisions/index.md) | research, phase history |
 | Architecture overview / owners | [architecture/index.md](architecture/index.md) | one reference below | research, raw Evidence |
 | Builder / Harness | [reference/builder-and-harness.md](reference/builder-and-harness.md) | [reference/security-and-authority.md](reference/security-and-authority.md) | raw qualification |
@@ -61,7 +61,7 @@ Mechanism is not authority. Research and reviewer findings are Evidence, never i
 ## Durable supporting routes
 
 - Phase baselines / final gate: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md), [3M](phases/3m-failure-recovery-architecture.md), [3N](phases/3n-architecture-verification.md), [3O](phases/3o-vertical-architecture-proof-contract.md), [C-018](phases/c-018-final-architecture-ratification.md), [Realization Planning](phases/realization-planning.md).
-- Realization research/implementation companion: [Evidence-Grounded Realization Engineering](development/evidence-grounded-realization.md).
+- Realization research/implementation companion: [Evidence-Grounded Realization Engineering](development/production-realization-guide.md).
 - Research router: [research/index.md](research/index.md).
 - Qualification Evidence summary: [evidence/qualification/3l/summary.md](evidence/qualification/3l/summary.md).
 - Executable qualification harnesses live under `qualification/3l/` and are opt-in, never default-read.

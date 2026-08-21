@@ -23,33 +23,33 @@ x-conexus-browser-request-authenticity:
   fallback: EXACT_ORIGIN_OR_REFERER
 paths:
   /api/control/access-context:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1access-context'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1access-context'
   /api/control/session:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1session'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1session'
   /api/control/accounts:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1accounts'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1accounts'
   /api/control/workspaces/{workspaceId}/members:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1members'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1members'
   /api/control/workspaces/{workspaceId}/members/{accountId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1members~1{accountId}'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1members~1{accountId}'
   /api/control/projects/{projectId}/account-grants/{accountId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1account-grants~1{accountId}'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1account-grants~1{accountId}'
   /api/control/workspaces/{workspaceId}/areas/{areaId}/members/{accountId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas~1{areaId}~1members~1{accountId}'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas~1{areaId}~1members~1{accountId}'
   /api/control/projects/{projectId}/area-grants/{areaId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1area-grants~1{areaId}'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1area-grants~1{areaId}'
   /api/apps/{projectId}/access-context:
-    $ref: './fixed-paths.yaml#/paths/~1api~1apps~1{projectId}~1access-context'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1apps~1{projectId}~1access-context'
   /api/control/projects/{projectId}/app-access:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access'
   /api/control/projects/{projectId}/app-access/{accountId}:
-    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access~1{accountId}'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access~1{accountId}'
   /api/control/workspaces:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces'
   /api/control/workspaces/{workspaceId}:
-    $ref: './fixed-census-overrides.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}'
   /api/control/workspaces/{workspaceId}/areas:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas'
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas'
   /api/control/workspaces/{workspaceId}/projects:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1projects'
   /api/control/projects/{projectId}:

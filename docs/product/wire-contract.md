@@ -1,8 +1,8 @@
 # Conexus OS — Executable Wire Contract
 
-> **Status:** 4B CANDIDATE / REPRESENTATION + FIXED METHOD/PATH BIJECTION CLOSED / SHARED CARRIERS ACTIVE
+> **Status:** 4B CANDIDATE / REPRESENTATION + 111 FIXED METHOD/PATH BIJECTION CLOSED / SHARED CARRIERS ACTIVE
 > **Owner:** 4B — Executable Wire Contract.
-> **Product semantics:** accepted 4A authority remains canonical above this wire.
+> **Product semantics:** current operator-ratified 4A authority, including bounded `4B-F01`, remains canonical above this wire.
 > **Implementation:** BLOCKED.
 
 This document owns the human-readable 4B decisions that govern the canonical machine-readable wire artifacts. The machine-readable Product wire must conform to this contract; neither this prose nor generated code may invent Product meaning beyond accepted 4A.
@@ -32,24 +32,26 @@ The single canonical entry document remains:
 contracts/api/product/openapi.yaml
 ```
 
-Real method/path mapping created enough size/maintenance pressure that 4B's previously defined split trigger fired. The OAD is therefore now a **single multi-file OpenAPI authority**:
+Real method/path mapping created enough size/maintenance pressure that 4B's previously defined split trigger fired. The OAD is therefore one **multi-file OpenAPI authority**:
 
 ```text
-contracts/api/product/openapi.yaml     canonical entrypoint / shared wire law
-contracts/api/product/fixed-paths.yaml referenced Path Item source fragment
+contracts/api/product/openapi.yaml                 canonical entrypoint / shared wire law
+contracts/api/product/fixed-paths.yaml             baseline referenced Path Item fragment
+contracts/api/product/current-state-overrides.yaml bounded current-subject carrier corrections
+contracts/api/product/fixed-census-overrides.yaml  bounded 4B-F01 read-preserving census corrections
 ```
 
 Rules:
 
 ```text
-one editable entrypoint authority
+one canonical entrypoint authority
 + deterministic local refs
-+ validator resolves the whole graph
++ validator resolves the whole active graph
 + bundle is generated proof output
-+ source ↔ bundle operation census is mechanically checked
++ active bundle ↔ 4A operation census is mechanically checked
 ```
 
-`fixed-paths.yaml` is not a second Product API and is never consumed independently as an alternative entrypoint. Its existence is a maintenance partition inside one OAD authority.
+Fragments are never consumed independently as alternative Product APIs. They are maintenance partitions inside one OAD authority. A stale/dead fragment cannot re-enter authority unless the canonical entrypoint references it and the bundle/bijection proofs admit it.
 
 Generated bundles under `/tmp` are proof artifacts only and are never committed/editable co-authority.
 
@@ -65,14 +67,14 @@ A concrete Project declaration is authoritative only as part of an exact admitte
 
 ### 2.3 First Budget Analyzer proof instance
 
-The first Budget Analyzer must instantiate exactly:
+The first Budget Analyzer instantiates exactly:
 
 ```text
 AnalyzePendingBudgets
 ListPendingBudgets
 ```
 
-as `project-operation/v1` declarations and produce an exact generated/conforming application OAD. No third operation is admitted merely for wire convenience.
+as `project-operation/v1` declarations and produces an exact generated/conforming application OAD. No third operation is admitted merely for wire convenience.
 
 ## 3. Fixed operation identity / HTTP shape law
 
@@ -83,11 +85,11 @@ operationId = exact accepted 4A semantic operation name
 x-conexus-4a-id = exact accepted 4A ledger ID
 ```
 
-The current fixed shape derivation has mechanically closed:
+The current fixed shape derivation has mechanically closed after operator-approved `4B-F01`:
 
 ```text
-4A fixed operations        = 114
-OAS fixed operations       = 114
+4A fixed operations        = 111
+OAS fixed operations       = 111
 missing                    = 0
 extra                      = 0
 duplicate operationId      = 0
@@ -95,9 +97,11 @@ duplicate 4A ID            = 0
 duplicate method+path      = 0
 ```
 
+`WS-03 UpdateWorkspace`, `WS-06 UpdateArea` and `PRJ-04 UpdateProject` are not current Product wire operations. Their subtraction was a semantic correction, not a route-style choice.
+
 `npm run wire:bijection` must remain green. The checker also rejects generic Product paths shaped like unrestricted `/execute` or `{operationSlug}` dispatch.
 
-HTTP shape Evidence: [../evidence/4b/http-shape-derivation.md](../evidence/4b/http-shape-derivation.md).
+HTTP shape Evidence: [../evidence/4b/http-shape-derivation.md](../evidence/4b/http-shape-derivation.md). Bounded subtraction Evidence: [../evidence/4b/fixed-mutation-semantic-gap.md](../evidence/4b/fixed-mutation-semantic-gap.md).
 
 Surface roots preserve 4A ingress separation:
 
@@ -192,30 +196,32 @@ IC2 is a **semantic current-subject obligation**, not an automatic `If-Match` in
 
 RFC 9110 `If-Match` is used only when the ETag describes the current representation of the **same HTTP target resource being mutated**.
 
-Truthful cases include:
+The current literal `IF_MATCH` set is exactly:
 
 ```text
-GET /api/control/workspaces/{workspaceId}
-→ strong ETag
+PRJ-12 ClearProjectBrainBinding
+PAR-14 ReviseScheduleTrigger
+```
 
-PATCH same workspace target
-→ If-Match
+Truthful same-target examples:
 
-GET /api/control/projects/{projectId}
-→ strong ETag
-
-PATCH same Project target
-→ If-Match
-
+```text
 GET /.../brain-binding
 → strong ETag when present
 
-PUT/DELETE same brain-binding target
+DELETE same brain-binding target
 → If-Match when present
-→ If-None-Match: * may protect exact absent-create semantics where applicable
+
+GET /.../triggers/{triggerId}
+→ strong ETag
+
+PATCH same trigger target
+→ If-Match
 ```
 
-Do **not** reuse an ETag from one resource as `If-Match` on a different command/collection target. Examples that therefore require explicit semantic current-subject input rather than cross-resource ETag abuse include:
+`PRJ-11 SetProjectBrainBinding` remains `CURRENT_OR_ABSENT`: the same exact target can later map present-state update through `If-Match` and absent-state create through an exact absent precondition such as `If-None-Match: *`, but 4B must close that request shape explicitly rather than pretending one unconditional ETag exists.
+
+Do **not** reuse an ETag from one resource as `If-Match` on a different command/collection target. Current explicit-semantic examples include:
 
 ```text
 PromoteRelease
@@ -228,16 +234,20 @@ EnableAgentTrigger
 → exact TriggerRevision explicitly carried
 
 ArchiveProject command subpath
-→ exact Project current revision/generation explicitly carried if the command target remains distinct
+→ exact Project current revision/generation explicitly carried
 ```
 
-Likewise, when no exact item GET exists (for example an Area or Published-App grant item), 4B must expose an explicit current revision/role/subject carrier rather than pretending the collection's ETag is the item's validator.
+Likewise, when no exact item GET exists (for example a Published-App grant item), 4B must expose an explicit current revision/role/subject carrier rather than pretending the collection's ETag is the item's validator.
+
+`WS-03`, `WS-06` and `PRJ-04` are no longer conditional-carrier cases because `4B-F01` removed those generic Product mutations entirely.
 
 Failed standard representation preconditions remain 412-class Problems. Exact field/header spelling for explicit semantic revisions is operation schema work inside 4B.
 
+Bounded Evidence: [../evidence/4b/current-state-carrier-assessment.md](../evidence/4b/current-state-carrier-assessment.md).
+
 ## 8. Idempotency contract
 
-There is no current RFC standardizing `Idempotency-Key`; the IETF HTTPAPI draft expired in April 2026. 4B owns the semantics while adopting the interoperable header name:
+There is no current RFC standardizing `Idempotency-Key`; 4B owns the semantics while adopting the interoperable header name:
 
 ```text
 Idempotency-Key
@@ -444,7 +454,8 @@ Current proof tooling is intentionally build-only:
 
 ```text
 @redocly/cli@2.47.0  OAS lint + bundle
-ajv-cli@5.0.0        JSON Schema 2020-12 compile
+ajv-cli@5.0.0        JSON Schema 2020-12 compile/validation
+ajv-formats@3.0.1    RFC3339 date/date-time validation for proving fixtures
 ```
 
 These are not runtime dependencies and do not select future server/client codegen.
@@ -455,37 +466,48 @@ The repository `verify` path currently proves:
 
 ```text
 repository hygiene / docs / current-state guards
-+ repository tests
++ repository tests including 4B-F01 census regression
 + OAS lint
 + OAS deterministic bundle
 + Project declaration schema compilation
 + 4A ↔ fixed Product OAS bijection
++ current-state carrier exact-set proof
++ Budget declaration/generation/OAS proof
++ Budget truth-state positive and negative controls
 ```
 
-Latest established green proof before this amendment:
+Current established GREEN on the corrected authority:
 
 ```text
-Verify #205 = SUCCESS
-fixed 4A↔OAS = 114/114
+Verify #241 = SUCCESS
+fixed 4A↔OAS = 111/111
 missing = 0
 extra = 0
 duplicate = 0
+literal IF_MATCH = { PRJ-12, PAR-14 }
+Budget static generated paths = 2
 ```
 
-Any current HEAD after this amendment must be freshly reverified before the proof result is advanced.
+The TDD RED for the bounded correction was explicit:
+
+```text
+Verify #233 = FAILURE
+expected 111 fixed 4A operations after 4B-F01, found 114
+```
 
 ## 18. Next derivation
 
-Proceed in this order:
+Representation, method/path bijection, Project grammar, Budget proving instance, request-authenticity and carrier-class correction are now established.
+
+Proceed with the smallest remaining 4B closure:
 
 ```text
-1. encode request-authenticity/session attributes in machine-readable shared wire metadata
-2. correct exact IC2 carrier mapping where cross-resource If-Match would be semantically false
-3. freeze shared Problem / continuation / truth-provenance schemas
-4. instantiate the two Budget Analyzer project-operation declarations
-5. deterministically generate and validate the Budget application OAD
-6. use that vertical to falsify Project operation generation before mass request/response schema closure
-7. then complete exact request/response/error/carrier mapping across the 114 fixed operations
+1. derive shared machine schemas only where repeated semantics are already accepted
+2. close exact request/success/Problem shapes owner-by-owner across the corrected 111 fixed operations
+3. start with Identity & Access + Workspace because their semantic owners are bounded and expose auth/current-authority edge cases early
+4. keep Product-property gaps as stop/reopen falsifiers rather than inventing DTO fields
+5. then complete Technical Ingress/protocol classification and generated-projection/no-parallel-DTO proof
+6. run whole-4B adversarial review before ratification
 ```
 
 Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.

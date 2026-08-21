@@ -17,6 +17,10 @@ x-conexus-security-semantics:
   productAuthority: server-resolved-current-owner-facts
   nonHttpIngress:
     - PAR_TOOL
+x-conexus-browser-request-authenticity:
+  credentialedCrossOriginProductApi: DENY
+  fetchMetadata: SAME_ORIGIN_ONLY
+  fallback: EXACT_ORIGIN_OR_REFERER
 paths:
   /api/control/access-context:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1access-context'
@@ -39,7 +43,7 @@ paths:
   /api/control/projects/{projectId}/app-access:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access'
   /api/control/projects/{projectId}/app-access/{accountId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access~1{accountId}'
+    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access~1{accountId}'
   /api/control/workspaces:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces'
   /api/control/workspaces/{workspaceId}:
@@ -47,13 +51,13 @@ paths:
   /api/control/workspaces/{workspaceId}/areas:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas'
   /api/control/workspaces/{workspaceId}/areas/{areaId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas~1{areaId}'
+    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas~1{areaId}'
   /api/control/workspaces/{workspaceId}/projects:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1projects'
   /api/control/projects/{projectId}:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}'
   /api/control/projects/{projectId}/commands/archive:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1archive'
+    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1archive'
   /api/control/projects/{projectId}/commands/duplicate:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1duplicate'
   /api/control/projects/{projectId}/inception-investigations:
@@ -143,7 +147,7 @@ paths:
   /api/control/connections/{connectionId}:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}'
   /api/control/connections/{connectionId}/revisions:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}~1revisions'
+    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1connections~1{connectionId}~1revisions'
   /api/control/connections/{connectionId}/credential:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}~1credential'
   /api/control/connections/{connectionId}/qualifications:
@@ -155,7 +159,7 @@ paths:
   /api/control/projects/{projectId}/releases/{releaseId}:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1releases~1{releaseId}'
   /api/control/projects/{projectId}/promotions:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions'
+    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions'
   /api/control/projects/{projectId}/promotions/{promotionId}:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions~1{promotionId}'
   /api/control/projects/{projectId}/serving-state:
@@ -179,13 +183,13 @@ paths:
   /api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}:
     $ref: './fixed-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}'
   /api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}/decisions:
-    $ref: './fixed-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}~1decisions'
+    $ref: './current-state-overrides.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}~1decisions'
   /api/control/projects/{projectId}/agents/{agentId}/triggers:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers'
   /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}'
   /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/enable:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1enable'
+    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1enable'
   /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/disable:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1disable'
   /api/control/projects/{projectId}/effect-attempts:
@@ -243,8 +247,8 @@ components:
       description: >-
         Opaque server-owned Conexus iam.session carriage. Keycloak tokens, roles,
         groups, and organizations are not accepted as Product authorization.
-        The server-issued cookie MUST be Secure, HttpOnly, Path=/, and MUST NOT
-        include a Domain attribute.
+        The server-issued cookie MUST be Secure, HttpOnly, SameSite=Lax, Path=/,
+        and MUST NOT include a Domain attribute.
   schemas:
     Problem:
       type: object

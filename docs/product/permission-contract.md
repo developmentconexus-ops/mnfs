@@ -45,7 +45,7 @@ The vocabulary is not a universal policy language and does not imply a custom Ro
 | trusted `platform_operator` | first-installation/trusted F1 Account/Workspace provisioning condition; not a general tenant Permission |
 | current Workspace membership | containment/disclosure root; does not grant all Workspace resources |
 | exact Project grant | Project access fact; still constrained by operation Permission/current owner state |
-| Published App role `{admin, member}` | independent app-use authority; never automatically Control-Plane authority |
+| Published App role `{admin, member}` | independent app-use authority; never automatically Control-Plane authority or effect-approval authority |
 | exact PAR AgentRun/ToolProjection | runtime capability context; not a human Permission |
 | exact MAR JobRun/Release projection | managed execution context; queue identity is not authority |
 | owner/system transition | internal current-state transition after admitted authority/proof; no public Permission |
@@ -86,7 +86,7 @@ The vocabulary is frozen as the **4A candidate**, not yet operator-ratified.
 | --- | --- | --- |
 | `release.promote` | inspect exact target conformance and decide/perform governed Promotion/rollback | `REL-06`, `REL-08` |
 | `job.run` | manually admit an occurrence of an exact Release-pinned managed `job/v1` | `MAR-03` |
-| `audit.read` | inspect audit/effect/technical execution Evidence beyond ordinary owner views | `OBS-02/04/05`, `GW-01/02` |
+| `audit.read` | inspect audit/effect/technical execution Evidence and exact decision subjects through read-only investigator paths beyond ordinary owner views | `OBS-02/04/05`, `GW-01/02`, investigator route of `PAR-09` |
 
 Release composition is an owner/system transition gated by exact accepted proof; there is no `release.compose` Permission. Ordinary Release/Promotion history and serving/job-run projections use `project.read` where disclosed.
 
@@ -131,13 +131,15 @@ Product Agent
 | --- | --- | --- |
 | `agent.trigger.manage` | create/revise/enable/disable exact `SCHEDULE` trigger authority for a Project-owned Product Agent | `PAR-11..16` |
 | `agent.headless.invoke` | manually invoke an exact active Product Agent through the admitted headless surface | `PAR-05` |
-| `agent.effect.approve` | inspect/decide one exact current sealed ApprovalRequest subject when separately eligible | `PAR-08..10` |
+| `agent.effect.approve` | participate as a human approver for an exact current sealed ApprovalRequest subject when separately eligible | `PAR-08..10` approver routes |
 
 Product Agent authoring is **not** `agent.manage`; it remains ordinary Project evolution through `project.build` and the same Change/Release path.
 
 Interactive Published-App Agent use is authorized by exact Published-App access/role + active Agent/Release semantics, not by `agent.headless.invoke`.
 
-`agent.effect.approve` is never sufficient alone: current approver eligibility, exact sealed proposal identity and current subject state must pass atomically.
+`agent.effect.approve` is a semantic authority distinction, not a Control-Plane UI entitlement. An eligible human may reach the exact owner-specific approval surface through Control Plane or Published App when that Product experience exposes it, but every decision still rechecks current approver eligibility, revocation, Release, exact sealed proposal and owner state. Published-App role `{admin,member}` alone is never approval authority; conversely, presenting approval in a Published App never grants Builder/Control-Plane access.
+
+`audit.read` can expose `PAR-09` read-only to a separately authorized investigator; it can never decide an ApprovalRequest.
 
 ---
 
@@ -232,6 +234,7 @@ StartBrainDiscovery using external source
 
 DecideApprovalRequest
 → agent.effect.approve + exact current approver eligibility + exact sealed proposal
+→ current ingress may be CP or an exact admitted PA approval surface; PA role alone grants nothing
 ```
 
 ---
@@ -251,6 +254,7 @@ These roles are an independent Product authorization plane.
 Project admin -X-> app admin
 app admin     -X-> project.manage
 app member    -X-> project.read
+app role      -X-> agent.effect.approve
 ```
 
 Every exact Project-defined operation in `Ops(R)` declares its admitted app-role subset, PAR/MAR projection or future real DEDICATED service allowlist. Conexus does not create a global Permission per customer business operation.
@@ -305,6 +309,7 @@ ordinary Permissions                         = 25
 operations requiring a new global business-op Permission = 0
 Keycloak claims used as Product grants        = 0
 Published-App roles implying Control Plane    = 0
+Published-App roles implying effect approval  = 0
 ```
 
 Closure challenge dispositions:
@@ -313,7 +318,7 @@ Closure challenge dispositions:
 2. **PASS** — no Permission exists only because a screen/menu/CRUD noun exists.
 3. **PASS** — Workspace/Project/Brain/Connection/app/Agent authority remains non-transitive except where one operation explicitly requires a compound route.
 4. **PASS** — Project-defined operations do not create an unbounded global Permission namespace.
-5. **PASS** — Published-App roles remain independent from Control Plane Permissions.
+5. **PASS** — Published-App roles remain independent from Control Plane Permissions and from effect-approval eligibility.
 6. **PASS** — Keycloak proves authentication only and never substitutes for Conexus grants.
 7. **PASS** — narrowing/revocation paths retain the exact administration authority needed to reduce current authority without demanding a new broader grant.
 8. **PASS** — binding/approval/promotion compound operations preserve owner-specific current checks atomically at the semantic level.

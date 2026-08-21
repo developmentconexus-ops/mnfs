@@ -51,41 +51,41 @@ paths:
   /api/control/workspaces/{workspaceId}/areas:
     $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas'
   /api/control/workspaces/{workspaceId}/projects:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1projects'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1projects'
   /api/control/projects/{projectId}:
-    $ref: './fixed-census-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}'
   /api/control/projects/{projectId}/commands/archive:
-    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1archive'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1archive'
   /api/control/projects/{projectId}/commands/duplicate:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1duplicate'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1duplicate'
   /api/control/projects/{projectId}/inception-investigations:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1inception-investigations'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1inception-investigations'
   /api/control/projects/{projectId}/baseline:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1baseline'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1baseline'
   /api/control/projects/{projectId}/baseline/decisions:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1baseline~1decisions'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1baseline~1decisions'
   /api/control/projects/{projectId}/brain-binding:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1brain-binding'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1brain-binding'
   /api/control/projects/{projectId}/connection-bindings:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1connection-bindings'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1connection-bindings'
   /api/control/projects/{projectId}/commands/set-connection-binding:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1set-connection-binding'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1set-connection-binding'
   /api/control/projects/{projectId}/commands/remove-connection-binding:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1remove-connection-binding'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1remove-connection-binding'
   /api/control/projects/{projectId}/capabilities:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1capabilities'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1capabilities'
   /api/control/projects/{projectId}/capabilities/{capabilityId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1capabilities~1{capabilityId}'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1capabilities~1{capabilityId}'
   /api/control/projects/{projectId}/data-resources:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1data-resources'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1data-resources'
   /api/control/projects/{projectId}/data-resources/{dataResourceId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1data-resources~1{dataResourceId}'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1data-resources~1{dataResourceId}'
   /api/control/projects/{projectId}/product-agents:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1product-agents'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1product-agents'
   /api/control/projects/{projectId}/product-agents/{agentId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1product-agents~1{agentId}'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1product-agents~1{agentId}'
   /api/control/workspaces/{workspaceId}/product-agents:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1product-agents'
+    $ref: './project-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1product-agents'
   /api/control/projects/{projectId}/changes:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes'
   /api/control/projects/{projectId}/changes/{changeId}:

@@ -1,11 +1,13 @@
 # Budget Analyzer — First-Vertical Product Semantic Contract
 
-> **Status:** CANDIDATE / OPERATOR DECISION REQUIRED / 4A-BUDGET-01
+> **Status:** OPERATOR APPROVED / 4A-BUDGET-01 CLOSED / 4A RATIFICATION PENDING
 > **Product:** Analisador Inteligente de Orçamentos — Sankhya
 > **Purpose:** close the smallest real business semantic/result inventory required to instantiate the 4A Project-defined Query grammar without copying Mitra's implementation fragmentation.
 > **Not authorized:** OpenAPI, SQL, schema, sync implementation, frontend, runtime or Product code.
 
-This contract is a **Product/Brain semantic decision candidate**. It deliberately uses Mitra only as benchmark Evidence. No Mitra query, table, heuristic or function count becomes Conexus authority by observation.
+This contract is the operator-approved **Product/Brain semantic decision** for the first Budget Analyzer vertical. It deliberately uses Mitra only as benchmark Evidence. No Mitra query, table, heuristic or function count becomes Conexus authority by observation.
+
+The accepted Product meaning is intentionally separated from the initial Sankhya source mapping. A later real-source proof may correct a source field/type mapping without silently redefining the Product concept.
 
 ---
 
@@ -38,8 +40,8 @@ margin
 → VLRCUS was not usable as cost in 94.8% of sampled items
 → margin feature was correctly cancelled
 
-aging
-→ days since DTALTER
+aging benchmark
+→ Mitra used days since DTALTER
 → Mitra used bands <=3, <=7, <=30, >30
 
 Mitra implementation
@@ -47,13 +49,13 @@ Mitra implementation
 → seller/customer/aging/month cross-filters
 ```
 
-The benchmark also used a heuristic factor approximately `1.00 / 0.45 / 0.20 / 0.05` by aging band. That factor has no accepted Conexus business authority and is **not** imported by this candidate.
+The benchmark also used a heuristic factor approximately `1.00 / 0.45 / 0.20 / 0.05` by aging band. That factor has no accepted Conexus business authority and is **not** imported by this contract.
 
-These facts are useful to formulate and falsify the Conexus Product contract. They do not settle it.
+These facts formulate and falsify the Conexus Product contract. They do not settle Product meaning by themselves.
 
 ---
 
-## 3. Recommended F1 semantic boundary
+## 3. Accepted F1 semantic boundary
 
 ### 3.1 Dataset grain
 
@@ -63,58 +65,76 @@ Conceptually:
 
 ```text
 Budget grain
-= exact source-qualified budget document identity
+= exact source-qualified Budget document identity
 ```
 
 The canonical source identity and field mapping are proven later against the real Sankhya Connection; 4A does not select physical mirror columns.
 
-### 3.2 Budget eligibility
+### 3.2 Budget semantic and initial source mapping
 
-Recommended Product rule:
+Accepted Product meaning:
 
-> A document is a Budget only when the current published Brain semantic definition admits its Sankhya operation/type into the Budget population.
+> A document is a Budget only when the current published Brain semantic definition admits that source document into the Budget population.
 
-For the first benchmark, the **initial semantic candidate** is the observed source rule:
+The initial Sankhya mapping Evidence is:
 
 ```text
 CODTIPOPER ∈ {14, 714}
 ```
 
-but this rule becomes authoritative only after operator acceptance here **and** later real-source validation confirms those meanings still hold for the bound Sankhya source.
+This is **not** the Product definition of Budget. It is an initial source binding hypothesis that must survive real-source validation for the bound Sankhya Connection. If the exact operation codes differ while the accepted Budget meaning remains intact, the smallest correction is to the Brain/source mapping rather than to Product authority.
 
 `TGFTOP.ORCAMENTO='S'` is not accepted as authority merely because a field is named like a business concept.
 
-### 3.3 Pending Budget
+### 3.3 Pending Budget semantic and initial source mapping
 
-Recommended Product meaning:
+Accepted Product meaning:
 
-> A Pending Budget is an admitted Budget whose current source state says it remains pending and for which no current admitted derivative/sale relation establishes conversion.
+> A Pending Budget is an admitted Budget whose current authoritative source state says it remains pending and for which no current admitted conversion/derivative relation establishes conversion.
 
-First benchmark candidate:
+The initial Sankhya mapping Evidence is:
 
 ```text
 PENDENTE = 'S'
 AND no admitted derivative relation in TGFVAR
 ```
 
-The exact derivative topology is a real-source proof obligation. Unknown/ambiguous derivation must not be silently classified as pending or converted.
+This mapping must survive real-source proof. The exact derivative topology is a source/Brain proof obligation; unknown or ambiguous derivation must not be silently classified as pending or converted.
 
-### 3.4 Time semantics
+### 3.4 Time coordinate
 
-All age/time-derived results are bound to an explicit **`as_of` source/reconciliation coordinate**, never hidden database/server "now".
+Every age/time-derived result is bound to an explicit **`as_of` source/reconciliation coordinate** carried with the admitted result.
 
-Recommended age measure:
+For F1:
 
 ```text
-age_days
-= calendar-day difference between current source DTALTER date and explicit as_of date
+as_of
+= exact source/reconciliation coordinate of the analytical snapshot
+
+as_of
+!= arbitrary caller-selected historical query coordinate
 ```
 
-This makes replay/reconciliation deterministic and avoids a dashboard changing historical meaning simply because it was queried later.
+The caller cannot request unconstrained historical reconstruction merely by supplying an old timestamp. Historical snapshot/query capability would be a separate Product decision and is not admitted in F1.
 
-### 3.5 Aging bands
+This keeps replay/reconciliation deterministic and prevents request time from masquerading as data time without inventing a temporal-query product.
 
-For benchmark comparability, recommend the first semantic bands:
+### 3.5 Budget age
+
+Accepted Product meaning:
+
+```text
+budget_age_days
+= calendar-day difference between the canonical Budget business date and as_of
+```
+
+The exact Sankhya field that supplies the canonical Budget business date is fixed by the published Brain mapping after real-source proof. 4A does not guess `DTNEG` or another field by name.
+
+`DTALTER` is **not** the F1 Budget-age authority. A technical or administrative update must not make an old Budget analytically young. Last-change time may remain observable provenance/detail, but `days_since_last_change` is not admitted as an F1 Product metric.
+
+### 3.6 Aging bands
+
+The accepted F1 semantic bands are:
 
 ```text
 AGE_0_3
@@ -125,11 +145,11 @@ AGE_31_PLUS
 
 These are neutral analytical bands, not probability claims.
 
-The Mitra label `Janela de ouro` is **not** canonical business truth in this candidate. 4C may later choose a user-facing label only if it does not imply unsupported probability/business policy.
+The Mitra label `Janela de ouro` is **not** canonical business truth. 4C may later choose a user-facing label only if it does not imply unsupported probability or business policy.
 
-### 3.6 Source qualification
+### 3.7 Source qualification
 
-Seller, customer, company and budget identities remain source-qualified.
+Seller, customer, company and Budget identities remain source-qualified.
 
 If one Connection credential can technically see multiple companies, that does **not** authorize ambient all-company analysis. The exact ProjectConnectionBinding/source scope decides what is admitted.
 
@@ -137,7 +157,7 @@ If one Connection credential can technically see multiple companies, that does *
 
 ## 4. Supported first Product-visible results
 
-The recommended minimum useful result inventory is:
+The accepted minimum useful result inventory is:
 
 ### R1 — Pending summary
 
@@ -157,7 +177,7 @@ Per exact seller identity:
 ```text
 budget_count
 budget_value
-average_age_days
+average_budget_age_days
 ```
 
 ### R3 — Pending by customer
@@ -167,7 +187,7 @@ Per exact customer identity:
 ```text
 budget_count
 budget_value
-average_age_days
+average_budget_age_days
 ```
 
 ### R4 — Pending by aging band
@@ -181,24 +201,24 @@ budget_value
 
 ### R5 — Pending by month
 
-Per admitted calendar month of the Budget source date:
+Per admitted calendar month of the canonical Budget business date:
 
 ```text
 budget_count
 budget_value
 ```
 
-The exact source date used for month grouping must be fixed by the published Brain mapping before implementation; 4A does not silently choose `DTNEG` versus another business date by field-name intuition.
+The exact source field used for the canonical business date must be fixed by the published Brain mapping before implementation. 4A does not silently choose a Sankhya field by field-name intuition.
 
 ### R6 — Pending Budget drilldown
 
-A pageable/read-only list sufficient to inspect the budgets behind aggregate results, with exact source-qualified identifiers and the minimum accepted business fields such as:
+A pageable/read-only list sufficient to inspect the Budgets behind aggregate results, with exact source-qualified identifiers and the minimum accepted business fields such as:
 
 ```text
-budget identity
-budget source/business date
-last-change time/date
-age_days
+Budget identity
+canonical Budget business date
+last-change time/date as provenance where useful
+budget_age_days
 value
 seller identity/presentation
 customer identity/presentation
@@ -206,7 +226,7 @@ source/company identity where admitted
 current pending/derivation evidence state
 ```
 
-4C decides the presentation. 4B decides exact wire. 4D decides SQL/read-model mechanics.
+4C decides presentation. 4B decides exact wire. 4D decides SQL/read-model mechanics.
 
 ---
 
@@ -226,11 +246,9 @@ Reason: benchmark Evidence found the apparent source-cost field unreliable in 94
 Mitra FATOR aging heuristic = REJECT_F1_AS_AUTHORITY
 ```
 
-The observed `1.00 / 0.45 / 0.20 / 0.05` weighting is not a verified business probability model. Conexus must not label it "chance of conversion", expected revenue or intelligence score without evidence/owner acceptance.
+The observed `1.00 / 0.45 / 0.20 / 0.05` weighting is not a verified business probability model. Conexus must not label it "chance of conversion", expected revenue or intelligence score without Evidence and owner acceptance.
 
 ### 5.3 Actual conversion rate/value
-
-Recommended current disposition:
 
 ```text
 conversion metrics = DEFER / UNSUPPORTED until exact derivative semantics are proved
@@ -238,7 +256,7 @@ conversion metrics = DEFER / UNSUPPORTED until exact derivative semantics are pr
 
 Reason: it is not enough to know that a `TGFVAR` row exists. Correct conversion may require proving one-to-many derivations, partial conversion, cancellations/returns, relevant operation types, time attribution and value semantics.
 
-If the operator explicitly requires conversion in the first vertical, 4A must open a bounded semantic decision/probe for that metric before `N_budget` can close. It must not guess.
+If conversion is later explicitly required, the smallest owning semantic item must reopen before that metric or operation is admitted. It must not be guessed from source topology.
 
 ---
 
@@ -246,13 +264,13 @@ If the operator explicitly requires conversion in the first vertical, 4A must op
 
 Mitra's 28 analytical server functions are an implementation artifact, not 28 Product meanings.
 
-The recommended Conexus operation surface is only **two** Project-defined registered Queries:
+The accepted Conexus operation surface is exactly **two** Project-defined registered `Query` operations.
 
 ### `AnalyzePendingBudgets`
 
-One semantic analytical read over the exact current result boundary, capable of returning R1–R5 under admitted filters/dimensions.
+One coherent analytical read that returns the closed R1–R5 snapshot under the admitted F1 filters.
 
-Conceptual filter semantics may include:
+Accepted filter dimensions may include only the closed semantic set required by this vertical:
 
 ```text
 seller
@@ -262,29 +280,43 @@ calendar month
 source/company where explicitly admitted
 ```
 
-The operation is not screen-shaped: its meaning is the coherent pending-budget analysis dataset/result set, usable by dashboard, tests and independent 3O candidate reconciliation.
+The operation does **not** admit caller-defined arbitrary metrics, arbitrary dimensions, arbitrary `groupBy`, SQL or source fields. It is not a disguised generic analytics executor.
 
-Cross-filter presentation behavior belongs to 4C. The semantic operation simply applies explicit filters truthfully.
+Conceptually:
+
+```text
+AnalyzePendingBudgets
+→ R1 summary
++ R2 by seller
++ R3 by customer
++ R4 by aging band
++ R5 by month
++ as_of/freshness/coverage/provenance
+```
+
+Cross-filter presentation belongs to 4C. Exact input/output wire belongs to 4B.
 
 ### `ListPendingBudgets`
 
-One pageable drilldown read for R6 under the same accepted semantic filters/`as_of`/source scope.
+One pageable drilldown read for R6 under the same accepted semantic filters, source scope and result coordinate.
 
-No third `GetBudgetDetail` operation is admitted until a real 4C interaction proves the list representation is insufficient.
+The operation consumes the system-resolved analytical coordinate; it does not expose arbitrary historical reconstruction through caller-selected `as_of`.
 
-Therefore the recommended first-vertical census is:
+No third `GetBudgetDetail` operation is admitted until a real later interaction proves the list representation insufficient.
+
+Therefore:
 
 ```text
 N_budget = 2
 ```
 
-subject to operator semantic acceptance and later 4A proof.
+This count is closed for the 4A candidate and remains subject only to the normal 4A adversarial proof/ratification gate, not to further semantic preference.
 
 ---
 
 ## 7. Published-App authorization
 
-The first Budget Analyzer is read-only. Recommended F1 operation authorization:
+The first Budget Analyzer is read-only. Accepted F1 authorization is:
 
 ```text
 Published App role admin  → AnalyzePendingBudgets + ListPendingBudgets
@@ -324,13 +356,15 @@ read-model result != source proof
 empty current result != failed source
 ```
 
-The dashboard must expose material `as_of`, freshness, coverage and provenance rather than treating request time as data time.
+The Product must expose material `as_of`, freshness, coverage and provenance rather than treating request time as data time.
 
 ---
 
-## 9. 3O proof linkage
+## 9. Accepted 3O proof-boundary projection
 
-If accepted, the first-vertical result inventory becomes:
+3O is already closed and is **not reopened** by this semantic decision.
+
+The accepted first-vertical result inventory projected into downstream proof is:
 
 ```text
 R1 summary
@@ -341,47 +375,53 @@ R5 monthly trend
 R6 drilldown
 ```
 
-The later 3O concrete candidate/proof must:
+Any later concrete implementation/proof stage consuming this contract must preserve the accepted 3O falsification boundary by:
 
-- bind every result to exact Brain semantic IDs/source mappings;
-- prove the Budget and Pending population against real Sankhya at one common comparison coordinate;
-- prove the exact business-date choice for R5;
-- cover distinct transformation-rule classes rather than merely result count;
-- include one deterministic negative control such as excluded non-Budget operation type, derivative converted budget, wrong seller/customer scope or wrong aging boundary;
-- return INDETERMINATE/UNSUPPORTED rather than fabricate truth when the source coordinate or semantic mapping is insufficient.
+- binding every result to exact Brain semantic IDs/source mappings;
+- proving the Budget and Pending population against real Sankhya at one common comparison coordinate;
+- proving the canonical Budget business-date mapping used by age and month semantics;
+- covering distinct transformation-rule classes rather than merely result count;
+- including a deterministic negative control such as excluded non-Budget operation type, derivative converted Budget, wrong seller/customer scope or wrong aging boundary;
+- returning INDETERMINATE/UNSUPPORTED rather than fabricating truth when the source coordinate or semantic mapping is insufficient.
+
+A correction to a Sankhya mapping should remain a mapping/proof correction unless Evidence genuinely falsifies the accepted Product semantic meaning.
 
 ---
 
-## 10. Operator decision
+## 10. Operator decision record
 
-### Recommended acceptance
+Operator approval was explicit on **2026-08-21**.
 
-Accept the first Budget Analyzer F1 semantic contract as:
+The accepted F1 contract is:
 
 ```text
-Product focus            = pending-budget intelligence
-Budget rule candidate    = CODTIPOPER {14,714}, subject to real-source validation
-Pending rule candidate   = PENDENTE='S' + no admitted TGFVAR derivative, subject to real-source validation
-Time                     = explicit as_of; age from DTALTER
-Age bands                = 0–3 / 4–7 / 8–30 / 31+
-Supported results        = summary + seller + customer + aging + month + drilldown
-Margin                   = unsupported
-Heuristic probability    = rejected
-Conversion metric        = deferred until separately proved
-Product operations       = AnalyzePendingBudgets + ListPendingBudgets
-N_budget                  = 2
-App roles                 = admin + member read access
+Product focus             = pending-budget intelligence
+Budget semantic           = Brain-admitted Budget document
+Initial Sankhya mapping   = CODTIPOPER {14,714} as Evidence; real-source validation required
+Pending semantic          = admitted Budget currently pending with no admitted conversion relation proving otherwise
+Initial pending mapping   = PENDENTE='S' + candidate TGFVAR topology as Evidence; real-source validation required
+Time coordinate           = system-resolved source/reconciliation as_of; disclosed, not arbitrary historical query input
+Budget age                = as_of - canonical Budget business date
+Age bands                 = 0–3 / 4–7 / 8–30 / 31+
+Supported results         = summary + seller + customer + aging + month + drilldown
+Margin                    = unsupported
+Heuristic probability     = rejected
+Conversion metric         = deferred until separately proved and admitted
+Product operations        = AnalyzePendingBudgets + ListPendingBudgets
+N_budget                   = 2
+App roles                  = admin + member read access
+Product Agent/MAR/DEDICATED= not admitted for these operations in F1
 ```
-
-This is the smallest contract that remains useful, comparable with the benchmark and honest about what the current Evidence does **not** establish.
 
 ### Reopen triggers
 
-Reopen only the smallest semantic item if real-source proof establishes that:
+Reopen only the smallest owning item if material Evidence establishes that:
 
-- `{14,714}` is not the correct Budget population;
-- the Pending/TGFVAR rule is incomplete or false;
-- the business date for monthly analysis differs from the selected Brain mapping;
+- the accepted Product concept of Budget or Pending Budget is itself wrong, rather than merely a Sankhya binding code/field being wrong;
+- the Pending derivative semantics are materially incomplete or false;
+- the canonical Budget business-date semantic needs a different Product meaning, not merely a different source field mapping;
 - the age-band boundaries do not reflect desired Product meaning;
 - a real first-vertical consumer requires detail not expressible through the two admitted Queries;
-- correct conversion semantics are proved and explicitly admitted.
+- correct conversion semantics are proved and explicitly proposed for admission.
+
+A source-code/field mapping correction alone does not manufacture a new Product operation or automatically reopen 4A.

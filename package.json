@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npm run test:repository",
     "test:repository": "node --test tests/repository/*.test.mjs",
-    "repository:check": "node scripts/check-repository-hygiene.mjs && node scripts/check-doc-index.mjs && node scripts/check-current-state.mjs && node scripts/check-qualification-provenance.mjs",
+    "repository:check": "node scripts/check-repository-hygiene.mjs && node scripts/check-doc-index.mjs && node scripts/check-current-state.mjs && node scripts/check-architecture-verification.mjs && node scripts/check-qualification-provenance.mjs",
     "verify": "npm run repository:check && npm run test:repository"
   }
 }

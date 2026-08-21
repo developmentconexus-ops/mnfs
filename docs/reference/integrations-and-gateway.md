@@ -81,6 +81,19 @@ Release source authority
 model-spend authority
 ```
 
+### 19.2.1 `budget_counter` — external-effect budgets only
+
+The current Product Agent contract admits explicit `budgets`, and an approved exact effect rechecks current authorization/policy/budget before Gateway admission. The Gateway-owned durable `budget_counter` is the smallest current-state record for **non-monetary external-effect unit budgets** when an exact Release/Agent policy actually declares such a bound.
+
+```text
+current Product Agent / Release effect budget
++ current admitted effect units already consumed in the declared scope
+→ Gateway checks and consumes the next allowed unit at effect admission
+→ process restart / runtime retry / fresh AgentRun cannot reset or oversubscribe that same current budget
+```
+
+`budget_counter` is therefore not model-spend authority, not provider-invoice truth and not the hard USD reservation/cost-envelope machinery deferred by 3L-R1. Exact counter scope, columns and concurrency primitive belong to derived Realization Planning. No generic `BudgetService` or quota framework is introduced.
+
 ## 19.3 Caller surfaces and the 3A-R9 amendment
 
 Gateway caller context is surface-specific. Current callers include the bounded explicit:

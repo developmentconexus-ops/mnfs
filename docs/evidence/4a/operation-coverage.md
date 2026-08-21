@@ -6,8 +6,6 @@
 
 This Evidence attacks the completed operation candidate against the accepted 15 Product journeys, 13 semantic owners, closed 46 durable record classes, first Budget Analyzer semantic contract and whole-product negative laws. It tests both missing Product capability and CRUD/mechanism inflation.
 
----
-
 ## 1. Test rule
 
 Persistence does not manufacture Product CRUD.
@@ -33,8 +31,6 @@ Project capability admitted through arbitrary/mutable/global executor
 Product surface treated as authority merely because the UI exposes it
 non-disclosable foreign state exposed through a 403/existence oracle
 ```
-
----
 
 ## 2. 46 durable record-class disposition
 
@@ -192,8 +188,6 @@ record class requiring generic CRUD only by persistence symmetry = 0
 mutable foreign-owner mirror required = 0
 ```
 
----
-
 ## 3. 13-owner boundary check
 
 | Owner | Product operation/projection exists | Inflation explicitly prevented |
@@ -213,8 +207,6 @@ mutable foreign-owner mirror required = 0
 | MAR | job-run/serving projection | no scheduler/workflow Product domain |
 
 Result: `13/13 owner boundaries preserved`.
-
----
 
 ## 4. Whole-product scenario cross-check
 
@@ -248,8 +240,6 @@ Result: `13/13 owner boundaries preserved`.
 | Budget Analyzer business results | operator-approved R1–R6 semantic set + `BUD-01/02` | COVERED |
 
 Result: accepted 15 journeys + whole-product negative laws have an operation/protocol/non-Product home with no remaining semantic blocker.
-
----
 
 ## 5. Subtractive attack — applied
 
@@ -316,8 +306,6 @@ Result: KEEP under `audit.read`; no retry authority.
 Retained only where detail is materially richer, immutable or exact-subject scoped. No general list/get symmetry law exists.
 
 Result: KEEP subject to later 4B/4C falsification.
-
----
 
 ## 6. Exact census consistency proof
 
@@ -398,8 +386,6 @@ Budget operations all fields     2/2
 
 No admitted fixed operation is absent from the matrix and no removed/internal operation is counted by the exact prefix sets.
 
----
-
 ## 7. Project capability grammar consistency proof
 
 The grammar survives the first vertical without becoming a universal executor:
@@ -433,8 +419,6 @@ unregistered Product-Agent tool          = REJECT
 
 Budget Analyzer specifically proves the grammar can express a real app with two exact `Query` operations without inventing generic dimension/metric/SQL authority.
 
----
-
 ## 8. Budget semantic blocker closure
 
 `4A-BUDGET-01` / prior `4A-F05` is CLOSED by explicit operator approval on 2026-08-21.
@@ -457,8 +441,6 @@ operations              BUD-01 + BUD-02
 ```
 
 A later field/code mapping correction remains a Brain/source-proof correction unless Evidence genuinely falsifies the Product semantic meaning.
-
----
 
 ## 9. Material findings disposition
 
@@ -507,8 +489,6 @@ outcome profile distinguished denied/non-disclosable but did not fix the 403-vs-
 
 Neither F08 nor F09 changes Product operation count, owner count, Permission count, trust topology, `N_budget` or any Phase-3 authority.
 
----
-
 ## 10. Lead adversarial pass
 
 The completed candidate was challenged against these falsifiers after the Budget decision and full authority matrix were present:
@@ -542,8 +522,6 @@ N_budget                           = 2 unchanged
 
 This is **not** the independent adversarial review required for 4A closure. It only establishes that the consolidated candidate is ready to hand to an independent reviewer on an exact HEAD.
 
----
-
 ## 11. Independent review handoff law
 
 The independent review must be anchored to exactly one candidate commit SHA and must review the complete 4A authority pack at that SHA, not an earlier partial candidate or the temporary SoftwareForge-only review branch.
@@ -564,8 +542,6 @@ AGENTS.md
 The independent reviewer must not treat this Evidence document, prior reviewer output or PR prose as Product authority. A material finding must cite the current accepted authority it believes the candidate violates or identify a concrete accepted F1 interaction that cannot be safely expressed.
 
 If the candidate HEAD changes after review begins, findings remain Evidence against the reviewed SHA. Material corrections must be adjudicated on the candidate branch, verified, and the changed properties independently re-challenged as required before 4A ratification.
-
----
 
 ## 12. Proof conclusion before independent challenge
 

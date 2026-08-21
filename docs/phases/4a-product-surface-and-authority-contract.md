@@ -35,6 +35,22 @@ Derive only from current accepted authority, principally:
 
 Research, sibling repositories and reviewer findings may inform method or expose questions, but they are not Conexus Product authority.
 
+### 3.1 Non-authoritative planning-harness hypothesis to adjudicate
+
+The [Blueprint Harness design input](../development/blueprint-harness-design.md) records a provider-independent reconstruction of the strongest planning/research/review/Paved-Road behavior observed across current project work.
+
+It is deliberately **not** an accepted Product contract. In particular, the working names `Blueprint` and `Forge`, any proposed planning/execution mode, and any candidate harness-facing operation must pass the same 4A admission law as every other Product interaction:
+
+```text
+real accepted/current F1 meaning
++ real consumer
++ one semantic owner
++ safe authority/scope
++ falsifiable behavior
+```
+
+If the useful behavior can remain internal Builder orchestration without becoming a Product capability, 4A must keep it internal rather than inventing a mode/API for symmetry.
+
 ## 4. Required canonical output
 
 4A must produce one canonical durable Product operation ledger under `docs/product/` before 4B opens.
@@ -92,7 +108,7 @@ An operation is admitted only when all are true:
 6. it cannot be represented more truthfully as an existing admitted operation/read model;
 7. its positive and material negative behavior can later be falsified.
 
-No operation is admitted solely for possible SaaS, future provider, future UI or framework symmetry.
+No operation is admitted solely for possible SaaS, future provider, future UI, planning-mode symmetry, framework symmetry or because an SDK/workflow could expose it elegantly.
 
 ## 7. Permission and principal derivation
 
@@ -143,7 +159,7 @@ No generic `Approve`, `Execute`, `Sync`, `Retry`, `Refresh`, `SetStatus` or othe
 
 ## 10. Current-authority and concurrency semantics
 
-For security-sensitive or stale-state-sensitive operations, the ledger must identify the protected property before 4B chooses carriers or 4D chooses database primitives.
+For security-sensitive or stale-state-sensitive operations, the ledger must identify the protected property before 4B chooses carriers or 4D chooses database/Paved-Road primitives.
 
 Examples of semantic requirements already accepted include:
 
@@ -154,7 +170,7 @@ exact Release/binding revisions cannot silently follow latest
 ambiguous effect cannot be blind-replayed
 ```
 
-4A records which operations require these properties. It does not select SQL isolation, lock shape, ETag syntax or transaction framework.
+4A records which operations require these properties. It does not select SQL isolation, lock shape, ETag syntax, SDK helper or transaction framework.
 
 ## 11. Consumer coverage
 
@@ -186,14 +202,14 @@ The numeric census `N` must emerge from derivation. It must not be chosen in adv
 4A is not accepted because a large list exists. The candidate must prove at least:
 
 1. **Census closure** — every operation name is unique and every admitted F1 interaction maps to exactly one operation or explicit non-Product protocol/mechanic.
-2. **Owner closure** — each operation has one primary semantic owner; no generic API/Gateway/UI owner absorbs business meaning.
-3. **Permission closure** — every protected operation has one current authorization route; no frontend visibility or Keycloak claim substitutes for it.
+2. **Owner closure** — each operation has one primary semantic owner; no generic API/Gateway/UI/PlanningHarness owner absorbs business meaning.
+3. **Permission closure** — every protected operation has one current authorization route; no frontend visibility, prompt role or Keycloak claim substitutes for it.
 4. **Scope closure** — Workspace/Project/Published-App containment is explicit and cross-scope use fails closed.
 5. **Consumer closure** — no admitted Product operation is orphaned.
-6. **Ingress closure** — Product API, Published-App, Product-Agent, Technical Ingress, OIDC and internal mechanics cannot be silently collapsed.
+6. **Ingress closure** — Product API, Published-App, Product-Agent, Technical Ingress, OIDC and internal planning/runtime mechanics cannot be silently collapsed.
 7. **Outcome closure** — known-empty/unknown/unsupported/partial and consequential accepted/pending/rejected/ambiguous classes remain distinct wherever current authority requires them.
 8. **Idempotency/concurrency routing** — every operation that can reach an accepted idempotency or stale-current-authority obligation is marked before wire/runtime mechanism selection.
-9. **Negative challenge** — deliberately proposed convenience operations such as generic sync/retry/approve or screen-shaped endpoints must be rejected unless current Product authority proves a real semantic gap.
+9. **Negative challenge** — deliberately proposed convenience operations such as generic sync/retry/approve, screen-shaped endpoints or speculative planning-mode operations must be rejected unless current Product authority proves a real semantic gap.
 
 Proof may use a small executable census/consistency guard if useful, but tooling is proof mechanics, not Product authority.
 
@@ -209,12 +225,13 @@ Use this order:
 5. derive principal + Permission + scope
 6. derive outcome/disclosure/current-authority obligations
 7. classify Product vs Published-App vs Technical Ingress vs protocol/mechanic
-8. deduplicate overlapping operations
-9. attack for missing and speculative operations
-10. freeze exact census only after closure
+8. explicitly adjudicate planning/execution-harness interactions: Product capability or internal Builder mechanic
+9. deduplicate overlapping operations
+10. attack for missing and speculative operations
+11. freeze exact census only after closure
 ```
 
-Do not begin with routes, REST nouns, React screens, database tables or framework controllers.
+Do not begin with routes, REST nouns, React screens, database tables, SDK methods or framework controllers.
 
 ## 14. Explicit non-scope
 
@@ -229,6 +246,8 @@ select queue/scheduler implementation
 select exact Node OIDC library or Keycloak version
 create React routes/components
 select router/form/design-system packages
+define concrete backend/frontend/data SDK APIs
+instantiate the Blueprint Harness in Mastra
 create screen-shaped/BFF API
 implement Product handlers
 implement migrations
@@ -249,7 +268,7 @@ STOP and reopen only the smallest owning authority when:
 - an accepted 3N/3O falsifier becomes impossible to route from the proposed surface;
 - closing the operation census requires a new semantic owner, trust boundary or Product capability not already accepted.
 
-Do not reopen for naming preference, REST aesthetics, sibling-repository symmetry or imagined future scale.
+Do not reopen for naming preference, REST aesthetics, sibling-repository symmetry, framework elegance or imagined future scale.
 
 ## 16. Exit condition
 
@@ -261,6 +280,7 @@ complete admitted F1 Product operation census
 + complete owner mapping
 + complete current consumer mapping
 + complete ingress classification
++ explicit disposition of planning/execution-harness interactions as Product or internal mechanics
 + routed idempotency/concurrency/disclosure/outcome obligations
 + zero speculative/orphan Product operations
 + internal/adversarial challenge passed

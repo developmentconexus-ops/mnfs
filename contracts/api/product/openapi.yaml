@@ -1,0 +1,112 @@
+openapi: 3.1.2
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/2024-11-10
+info:
+  title: Conexus Product API
+  version: 4b-candidate
+  description: >-
+    Canonical machine-readable HTTP wire for accepted Conexus Product operations.
+    Product semantics remain owned by accepted 4A authority; this description may
+    not invent operations, permissions, owners, or trust boundaries.
+paths: {}
+components:
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details base envelope.
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: Stable machine-readable problem type identifier.
+        title:
+          type: string
+          description: Short human-readable summary for the problem type.
+        status:
+          type: integer
+          minimum: 100
+          maximum: 599
+          description: HTTP status code for this occurrence.
+        detail:
+          type: string
+          description: Human-readable occurrence detail; never a machine branching contract.
+        instance:
+          type: string
+          format: uri-reference
+          description: Identifier for this specific problem occurrence when disclosed.
+      additionalProperties: true
+  parameters:
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: >-
+        Strong current-representation precondition when the exact operation maps
+        an accepted IC2 obligation to HTTP representation state.
+      schema:
+        type: string
+        minLength: 1
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >-
+        Conexus-owned repeatable-intake identity for operations whose accepted
+        IC3/IC4 wire mapping requires a caller-supplied retry identity. The header
+        value never replaces owner/effect identity or authorizes replay of an
+        unresolved external effect.
+      schema:
+        type: string
+        minLength: 1
+  headers:
+    ETag:
+      description: Strong representation validator where an accepted current-state contract requires it.
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    Problem401:
+      description: No valid current Conexus principal/session for the protected human surface.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem403:
+      description: Subject is legitimately disclosable to the current caller, but required action authority is denied.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem404:
+      description: Subject is absent or current disclosure policy intentionally does not reveal its existence.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem409:
+      description: Current owner-state, uniqueness, single-flight, or equivalent admitted conflict.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem412:
+      description: Expected revision, generation, digest, or current representation precondition is stale.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem422:
+      description: Authorized request violates the operation's admitted semantic or business-input contract.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem503:
+      description: Required current provider, source, or runtime dependency is unavailable.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'

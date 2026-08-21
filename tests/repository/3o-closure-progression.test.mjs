@@ -36,9 +36,9 @@ const fixture = () => {
 const set3OStatus = (target, status) => {
   const path = resolve(target, 'docs/roadmap.md')
   const original = readFileSync(path, 'utf8')
-  const next = original.replace('| 3O | OPEN / ACTIVE |', `| 3O | ${status} |`)
-  assert.notEqual(next, original, '3O status mutation target missing')
-  writeFileSync(path, next)
+  const pattern = /^(\| 3O \| )[^|]+(?= \|)/m
+  assert.match(original, pattern, '3O status row missing')
+  writeFileSync(path, original.replace(pattern, `$1${status}`))
 }
 
 test('closed 3N verifier admits the operator-authorized 3O CLOSED closure state', () => {

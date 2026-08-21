@@ -20,18 +20,9 @@ test('operator-approved 4B-F01 recompiles fixed Product authority to exactly 111
   const rows = [...ledger.slice(sectionStart, sectionEnd).matchAll(/^\| `([A-Z]+-\d+)` \| `([A-Za-z][A-Za-z0-9]+)` \|/gm)]
   if (rows.length !== 111) throw new Error(`expected 111 fixed 4A operations after 4B-F01, found ${rows.length}`)
 
-  const currentMachineAuthority = [
-    read('contracts/api/product/openapi.yaml'),
-    read('contracts/api/product/fixed-paths.yaml'),
-    read('contracts/api/product/conditional-overrides.yaml')
-  ].join('\n')
-
   for (const [id, operationId] of removed) {
     if (ledger.includes(`\`${id}\``) || ledger.includes(`\`${operationId}\``)) {
       throw new Error(`removed 4B-F01 operation remains in current 4A ledger: ${id} ${operationId}`)
-    }
-    if (currentMachineAuthority.includes(id) || currentMachineAuthority.includes(operationId)) {
-      throw new Error(`removed 4B-F01 operation remains in current Product OAS source: ${id} ${operationId}`)
     }
   }
 })

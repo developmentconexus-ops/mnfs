@@ -23,15 +23,11 @@ This is the single current phase/status authority. It is not a worklog.
 | Product implementation | BLOCKED | Requires 4A–4G closed/integrated plus a separate explicit operator Product execution grant; no prior planning/merge approval carries forward | No historical authorization carries forward |
 
 ```text
-3A = CLOSED / consolidated baseline preserved
-3L = CLOSED
-3M = CLOSED / OPERATOR RATIFIED
-3N = CLOSED / OPERATOR RATIFIED
-3O = CLOSED / OPERATOR AUTHORIZED CLOSURE
+3A–3O = CLOSED
 C-018 = RATIFIED / OPERATOR RATIFIED
 C-015 = REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED
-Realization Planning = ACCEPTED / OPERATOR ACCEPTED / EXECUTION SKELETON
-4A = CLOSED / OPERATOR RATIFIED / 4B-F01 BOUNDED CORRECTION ACCEPTED / N_platform=111
+Realization Planning = ACCEPTED / OPERATOR ACCEPTED
+4A = CLOSED / OPERATOR RATIFIED / 4B-F01 ACCEPTED / N_platform=111
 4B = OPEN / ACTIVE
 4C–4G = NOT STARTED
 Product implementation = BLOCKED
@@ -39,59 +35,34 @@ Product implementation = BLOCKED
 
 ## Exact next action
 
-Continue **4B — Executable Wire Contract** only, from the corrected current 4A authority.
+Continue **4B — Executable Wire Contract** only.
 
-Current established executable foundation:
+Established executable state:
 
 ```text
-OpenAPI 3.1.2 + JSON Schema 2020-12 representation
-single multi-file canonical Product OAD
-fixed Product operation bijection = 111 ↔ 111
-schema-closed fixed operations = 58 / 111
+fixed Product bijection = 111 ↔ 111
+schema-closed = 58 / 111
 missing / extra / duplicate = 0
-opaque Conexus session + same-origin browser request-authenticity law
-literal IF_MATCH exact set = { PRJ-12, PAR-14 }
-Project-defined project-operation/v1 declaration grammar
-Budget Analyzer exact two-query static-path generation
-Budget truth-state positive/negative falsifiers
-Identity & Access + Workspace schema closure = 20 / 20
-Project schema closure = 21 / 21
-Builder schema closure = 17 / 17
-Verify #270 = SUCCESS on the final Builder closure checkpoint
+literal IF_MATCH = { PRJ-12, PAR-14 }
+IAM + Workspace = 20 / 20 CLOSED
+Project = 21 / 21 CLOSED
+Builder = 17 / 17 CLOSED
+Budget Analyzer generated two-query proof = green
+Verify #270 = SUCCESS
 ```
 
-`4B-F01` is CLOSED / OPERATOR ACCEPTED:
+Next bounded slice:
 
 ```text
-SUBTRACT WS-03 UpdateWorkspace
-SUBTRACT WS-06 UpdateArea
-SUBTRACT PRJ-04 UpdateProject
-
-N_platform 114 → 111
+Brain Product operations = 11
+= BRN-01 → BRN-10 + BRN-12
+BRN-11 RunBrainHealthProbe = SYSTEM_OWNER_TRANSITION / not caller Product wire
 ```
 
-Do not replace those operations with speculative rename/settings/generic patch operations. A later real consumer must establish an exact Product semantic before any replacement is admitted.
+Close Brain schemas only from accepted Brain/knowledge/data authority. Preserve human review before publication, immutable revisions, explicit Project adoption, provenance/uncertainty and health truth, and restricted semantic-ID/SELECT-only AnalyticQuery. Do not admit arbitrary SQL/text-to-SQL runtime authority, move ERP credentials into Builder/E2B for discovery, or invent missing lifecycle/property vocabularies.
 
-The next bounded 4B work is:
-
-```text
-1. close the 11 current Brain Product operations: BRN-01 → BRN-10 plus BRN-12
-2. keep BRN-11 RunBrainHealthProbe absent from caller Product wire; it is SYSTEM_OWNER_TRANSITION
-3. derive Workspace Brain, immutable revision, Discovery, KnowledgeProposal, publication, health and AnalyticQuery shapes only from accepted Brain/knowledge/data authority
-4. preserve review-before-publish, immutable published revisions, explicit Project binding and UPDATE_AVAILABLE rather than silent inheritance
-5. preserve semantic-query admission as registered exact semantic IDs + restricted SELECT-only plan/proof; never arbitrary SQL/runtime text-to-SQL authority
-6. preserve SUSPECT/INVALID critical-health blocking and provenance/uncertainty truth without inventing unsupported percentage accuracy
-7. keep Brain discovery read-only through current qualified Connection/Gateway authority; no ERP credentials move to Builder/E2B merely for discovery
-8. treat any missing Brain property or lifecycle vocabulary as a stop/reopen falsifier, not a DTO-design opportunity
-9. keep remaining 4B owners provisional until their bounded schema-closure slices are proved
-```
-
-Closed owner-slice Evidence:
-
-- [Identity & Access + Workspace schema closure](evidence/4b/identity-workspace-schema-closure.md)
-- [Project schema closure](evidence/4b/project-schema-closure.md)
-- [Builder schema closure](evidence/4b/builder-schema-closure.md)
+Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md).
 
 Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 
-The current 4B owning contract is [phases/4b-executable-wire-contract.md](phases/4b-executable-wire-contract.md). Current human-readable wire authority is [product/wire-contract.md](product/wire-contract.md). Current 4A authority is [product/operation-ledger.md](product/operation-ledger.md). The resolved bounded falsifier is [evidence/4b/fixed-mutation-semantic-gap.md](evidence/4b/fixed-mutation-semantic-gap.md).
+Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → [4A operation ledger](product/operation-ledger.md).

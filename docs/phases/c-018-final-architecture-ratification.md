@@ -1,6 +1,6 @@
 # C-018 — Final Product Architecture Ratification
 
-Current gate status remains owned only by [../roadmap.md](../roadmap.md). Decision disposition remains owned by [../decisions/index.md](../decisions/index.md). This document owns the bounded final-ratification continuity contract and, after explicit operator ratification, its durable result summary.
+Current gate status remains owned only by [../roadmap.md](../roadmap.md). Decision disposition remains owned by [../decisions/index.md](../decisions/index.md). This document owns the bounded final-ratification continuity contract and its durable result summary.
 
 C-018 does not redesign accepted architecture, authorize Product implementation, execute FIRST_BUILD/FIRST_PRODUCTION proof, or select realization mechanics.
 
@@ -36,14 +36,27 @@ C-018 Decision Register = NOT RATIFIED
 Product implementation = BLOCKED
 ```
 
-Opening the gate is not partial ratification.
+Opening the gate was not partial ratification.
 
 ## Review law
 
 Do not replay 3N/3O by ceremony. A material contradiction stops C-018 and returns to the smallest owning decision. Independent review is added only when a new material change or contradiction genuinely benefits from an adversarial challenger.
 
-## Ratification gate
+## Ratification result
 
-C-018 may become ratified only after this continuity contract is satisfied on one exact green candidate head and the operator gives explicit operator ratification. Ratification remains separate from merge authority.
+The bounded OPEN candidate at `a8bd6570e5d75c380b3986929648eab79288365c` passed the complete repository gate in Verify #92 with 37/37 repository tests passing. Its R1–R7 review found no surviving material Product, semantic-owner, trust-boundary, structural or qualification contradiction and introduced no new architecture authority.
 
-Until then, C-018 remains NOT RATIFIED in the Decision Register and Product implementation remains BLOCKED.
+The operator then explicitly ratified C-018. The ratified durable projection is therefore:
+
+```text
+3A–3O = CLOSED
+C-018 roadmap gate = RATIFIED / OPERATOR RATIFIED
+C-018 Decision Register = CURRENT / OPERATOR RATIFIED
+Product implementation = BLOCKED
+```
+
+Ratification does not consume or waive any FIRST_BUILD/FIRST_PRODUCTION obligation. It does not authorize Product code, Realization Planning, runtime/deployment realization, live Sankhya execution or production effects. The ratification transition itself must remain green under the repository verification gate before integration.
+
+## Reopen law
+
+Reopen only the smallest implicated owner/decision when material Evidence falsifies the ratified Product/architecture target, qualification scope, semantic owner/trust boundary, or proves that a routed FIRST_BUILD/FIRST_PRODUCTION property can no longer be genuinely falsified.

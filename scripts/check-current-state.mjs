@@ -53,7 +53,7 @@ if (bootstrapBytes > 20 * 1024) errors.push(`bootstrap budget exceeded: ${bootst
 for (const path of ['AGENTS.md', 'README.md', 'docs/index.md']) {
   const text = read(path)
   if (!text.includes('roadmap.md')) errors.push(`${path} must route mutable status to docs/roadmap.md`)
-  if (/3M\s*(?:=|is)\s*(?:NEXT|next)/i.test(text) || /NEXT \/ NOT STARTED/.test(text)) errors.push(`${path} must not restate mutable phase status`)
+  if (/3[A-Z]\s*(?:=|is)\s*(?:NEXT|next)/i.test(text) || /NEXT \/ NOT STARTED/.test(text)) errors.push(`${path} must not restate mutable phase status`)
 }
 
 const readme = read('README.md')

@@ -437,9 +437,9 @@ Development/proving state can never silently become PROD authority. Activation r
 
 ---
 
-## 36. Operational resilience architecture
+## 36. Operational resilience and recovery architecture
 
-Current first-installation posture:
+Current first-installation posture remains deliberately bounded:
 
 ```text
 single physical failure domain accepted
@@ -452,7 +452,9 @@ whole-Hub emergency-stop drill before first production
 no HA/auto-failover/multi-region claim
 ```
 
-Required recovery set:
+### 36.1 Required recovery set and custody
+
+Required recovery material includes:
 
 ```text
 hub_control
@@ -460,12 +462,95 @@ all production Project DBs
 mastra_par
 non-reconstructible digest-addressed bytes
 CredentialBackend ciphertext backing
+separately custodied decryption key generations / recovery means required by recoverable ciphertext
 provider-independent canonical Git recovery bundles
-recovery manifests
+recovery manifests / generation provenance
 ```
 
-Not required by default: `mastra_builder` and E2B/validation/cache/reconstructible state. The RPO/RTO numbers are the first-installation operations contract, not a SaaS SLA.
+`mastra_builder`, E2B/validation/cache/reconstructible state remain not required by default.
 
-3M still owns the semantic question: after interruption/restore, do current durable facts suffice to decide resume/retry/reconcile without fabricated success?
+For every recoverable ciphertext generation, the referenced decryption key generation or equivalent recovery means must also be recoverable and restore-time decryptability must be proven. Ciphertext and root/recovery-key material remain under separate custody; no single compromise path/location/credential may expose both sets.
+
+### 36.2 PostgreSQL recovery consistency
+
+The mutable PostgreSQL recovery set required for F1 restores from one internally consistent PostgreSQL recovery generation. Current first-installation topology places `hub_control`, `mastra_par` and production Project DBs in one cluster, making that the smallest current property. Exact backup/WAL tooling remains Realization Planning rather than Product authority.
+
+Recovered owner references needed by a re-enabled surface must close over the exact referenced Git, immutable Artifact/Blob/CAS, credential and Release material. Missing required closure fails closed; credentials additionally require decryptability proof.
+
+### 36.3 Normal restart vs disaster restore
+
+Normal PROD admission requires **positive evidence of continuity of the current durable generation**. Missing, unreadable or unknown continuity evidence is `UNKNOWN` and enters recovery posture; absence of a recovery marker is never proof of normal continuity.
+
+A disaster restore may reintroduce an older generation. Any effect, revocation, approval decision, trigger transition, execution or authored change that could have occurred after the protected cutoff cannot be inferred as nonexistent merely because the recovered generation lacks it.
+
+The exact continuity/provenance mechanism belongs Realization Planning. If the property cannot be realized without a new semantic owner or durable Product class, return to the smallest Decision Loop.
+
+### 36.4 Deny-only recovery posture
+
+Disaster recovery uses a posture that survives Hub/process restart and is **deny-only infrastructure**:
+
+```text
+recovery posture
+→ may deny normal ingress/autonomy
+-X-> grant Product authority
+-X-> prove an owner operation is allowed
+```
+
+Restricted operator/infrastructure recovery ingress may exist while normal ingress remains fenced. Clearing the extra deny is an infrastructure procedure only; each re-enabled behavior still passes the ordinary current operation of its existing owner.
+
+No composite Hub-side `ActivateRecoveredProd` semantic flow exists. If realization later requires one composite activation flow, durable activation record, or owner that consumes the fence as permission, that is an L7/owner Decision Loop amendment.
+
+### 36.5 Authority and external-effect re-establishment
+
+Restored normal sessions are invalid for normal reuse. Privileged/autonomous/effectful authority whose post-cutoff narrowing may have been lost remains fenced until the responsible existing owner re-establishes or recertifies the required current authority.
+
+During **initial** disaster recovery, all governed external-effect admission is denied by default because a post-cutoff EffectAttempt may be absent from recovered local state. Each effect-capable Gateway/Connection surface is re-enabled only after existing owner/provider/business reconciliation establishes acceptable current safety. Missing local EffectAttempts never prove a surface safe.
+
+If the lost interval cannot be reconciled sufficiently, that effect surface remains fail-closed beyond broad platform recovery rather than fabricating certainty. After broad recovery posture clears, remaining faults return to owner/surface scope.
+
+Canonical Project/Brain Git history that survives beyond the recovered Hub cutoff remains authoring/provenance truth. It is preserved and reconciled explicitly; Git-write-capable authoring paths stay fenced until reconciliation completes, and surviving Git never auto-recreates lost Hub Change/Plan/acceptance/Release/current-serving authority.
+
+### 36.6 Release and serving recovery
+
+A recovered Release pointer is not sufficient to declare PROD active. Re-enabled serving uses the existing Release/Promotion authority:
+
+```text
+exact Release closure
++ target schema/migration/conformance checks
++ required bindings/readiness
++ real serving path verification
+→ SERVED_VERIFIED where serving is restored
+```
+
+A non-terminal Promotion reconciles actual migration/pointer/served state instead of blindly replaying the last intended step. Existing CAS, migration-ledger/checksum and maintenance-required recovery laws remain authoritative.
+
+### 36.7 RPO/RTO meaning
+
+`RPO <= 6h` means a last complete, off-host, verifiable recovery generation exists inside the accepted window; merely scheduling a backup does not satisfy it when the generation is incomplete, corrupt or local-only.
+
+`RTO <= 8h` is the first-installation objective for **useful safe platform service**, not a guarantee that every effect-capable integration is reconciled within eight hours. The minimum useful-safe service set is fixed in Realization Planning and proved before first production. Unsafe effect surfaces may remain fail-closed beyond broad platform recovery.
+
+These numbers remain the first-installation operations contract, not a SaaS SLA.
+
+### 36.8 Required first-production proof
+
+The real off-host restore proof must falsify at least:
+
+```text
+restore/start without positive generation-continuity evidence
+→ normal PROD stays denied
+
+restore protected PostgreSQL generation
+→ verify backup integrity + cross-store closure + credential decryptability
+→ recovery posture survives another process restart
+→ restored sessions cannot be reused normally
+→ external-effect admission is deny-by-default
+→ post-cutoff canonical Git is reconciled before Git-write paths reopen
+→ existing owners re-establish required authority/readiness
+→ EnvironmentConformance + exact serving verification
+→ removing recovery deny does not create a composite Product grant
+```
+
+The whole-Hub emergency-stop drill remains independently required.
 
 ---

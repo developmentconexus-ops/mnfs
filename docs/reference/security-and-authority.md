@@ -157,4 +157,23 @@ owner record/current authorization
 
 Public exposure requires explicit admitted Product policy/consumer. Storage key/path/prefix/provider URL never grants semantic access by possession alone.
 
+## 34.4 Disaster-restore authority
+
+A disaster restore may reintroduce a control generation older than the last pre-failure authority decisions. A restored mutable grant/session/approval/trigger/credential fact is therefore historical as-of-cutoff when a later narrowing or revocation may have been lost; the restored value does not become current merely because it exists.
+
+Before normal ingress, autonomous execution or effectful use is re-enabled:
+
+```text
+restored normal sessions
+→ invalid for normal reuse
+
+material privileged/autonomous/effectful authority
+→ re-established/recertified through the existing owning module
+→ current owner checks apply again before protected use
+```
+
+The exact closed set of authority classes that require recertification is fixed in Realization Planning and proven in the first-production restore drill. This is an operational recovery rule, not a new authorization domain.
+
+The infrastructure recovery posture is deny-only. It may prevent normal ingress/autonomy, but neither its presence nor its clearing grants Product authority. Any future realization that requires a composite Hub-side recovery-activation grant is an L7/owner Decision Loop trigger.
+
 ---

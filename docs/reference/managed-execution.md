@@ -62,6 +62,29 @@ QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION MECHANICS / PRIVATE MAR 
 
 The one-catch-up/no-N-slots law is preserved as a Product owner-side law and first-build reconciliation conformance obligation. It is not a remaining pg-boss cron/catch-up qualification probe.
 
+## 27.4 Failure and recovery
+
+Current recovery scope stays limited to the real F1 managed-sync consumer.
+
+An exact-pinned `JobRun` that was durably admitted before process loss remains the same semantic occurrence. Queue presentation/redelivery is private mechanics and never authorizes execution by itself. A later Release does not rewrite or re-resolve the admitted JobRun pins.
+
+A `RUNNING` orphan settles only current sync facts before continuation or terminalization:
+
+```text
+exact JobRun / Release / job pins
+durable sync freshness/cursor
+deterministic Project DB merge/commit state
+single-flight / one-current-catch-up rules
+```
+
+Cancel or timeout first prevents new owner-authorized retry/redelivery, requests cooperative handler stop, establishes handler quiescence where required, and then settles durable sync progress. Timeout, process death and `job.signal` are not rollback or terminal truth.
+
+The same JobRun may continue only when its durable cursor/merge contract proves continuation deterministic and compatible. The current sync/job contract must therefore carry enough cursor/merge semantics for that decision; no generic `JobAttempt` or recovery lifecycle is added.
+
+Current F1 managed-sync recovery does **not** include a generic MAR→Gateway unresolved-effect discovery seam. The first real effect-capable `MANAGED_JOB` is a reopen trigger for the smallest MAR/Gateway recovery boundary; only then is a correlation/discovery seam or smaller proven alternative admitted.
+
+Recurrence after restart remains freshness-derived: at most one current catch-up when due, never N historical slot replays.
+
 ---
 
 ## 28. Model-provider spend architecture

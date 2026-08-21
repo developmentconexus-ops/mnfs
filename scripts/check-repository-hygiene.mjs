@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { resolve, relative } from 'node:path'
 
 const root = resolve(new URL('../', import.meta.url).pathname)
 const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' })
@@ -9,7 +9,23 @@ const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: '
 const errors = []
 const forbiddenLegacy = ['m', 'n', 'f', 's'].join('')
 const reviewCandidate = process.env.REVIEW_CANDIDATE_REF || ''
+const temporaryGate = process.env.TEMPORARY_GATE === '1'
 const reviewFile = 'docs/work/current/ai-dialog.md'
+const gateFiles = new Set([
+  'docs/work/current/index.md',
+  'docs/work/current/proposal.md',
+  'docs/work/current/plan.md'
+])
+
+const walk = dir => {
+  if (!existsSync(dir)) return []
+  return readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
+    const path = resolve(dir, entry.name)
+    return entry.isDirectory() ? walk(path) : [relative(root, path).replaceAll('\\', '/')]
+  })
+}
+
+const presentWorkFiles = walk(resolve(root, 'docs/work'))
 
 if (reviewCandidate) {
   const changed = execFileSync('git', ['diff', '--name-only', `${reviewCandidate}...HEAD`], { cwd: root, encoding: 'utf8' })
@@ -19,7 +35,13 @@ if (reviewCandidate) {
   }
   const candidatePaths = execFileSync('git', ['ls-tree', '-r', '--name-only', reviewCandidate], { cwd: root, encoding: 'utf8' })
     .split('\n').filter(Boolean)
-  if (candidatePaths.some(path => path.startsWith('docs/work/'))) errors.push('review candidate itself contains docs/work/**')
+  const invalidCandidateWork = candidatePaths.filter(path => path.startsWith('docs/work/') && !gateFiles.has(path))
+  if (invalidCandidateWork.length) errors.push(`review candidate contains non-gate docs/work paths: ${invalidCandidateWork.join(', ')}`)
+  const invalidPresentWork = presentWorkFiles.filter(path => !gateFiles.has(path) && path !== reviewFile)
+  if (invalidPresentWork.length) errors.push(`review branch contains non-admitted docs/work paths: ${invalidPresentWork.join(', ')}`)
+} else if (temporaryGate) {
+  const invalidPresentWork = presentWorkFiles.filter(path => !gateFiles.has(path))
+  if (invalidPresentWork.length) errors.push(`temporary gate contains non-admitted docs/work paths: ${invalidPresentWork.join(', ')}`)
 } else if (existsSync(resolve(root, 'docs/work'))) {
   errors.push('merge candidate/main must not contain docs/work/**')
 }
@@ -30,7 +52,10 @@ for (const path of tracked) {
   if (normalized.startsWith('docs/superpowers/')) errors.push(`superseded documentation tree: ${path}`)
   if (/(handoff|dialogue|round|correction-handoff)/i.test(path) && path !== reviewFile) errors.push(`transient path: ${path}`)
   if (/^(ai_dialog|knowledge-migration)\.md$/i.test(path)) errors.push(`temporary root artifact: ${path}`)
-  if (normalized.startsWith('docs/work/') && !(reviewCandidate && path === reviewFile)) errors.push(`temporary work path in candidate: ${path}`)
+  if (normalized.startsWith('docs/work/')) {
+    const allowed = reviewCandidate ? path === reviewFile || gateFiles.has(path) : temporaryGate && gateFiles.has(path)
+    if (!allowed) errors.push(`temporary work path in candidate: ${path}`)
+  }
 
   const bytes = readFileSync(resolve(root, path))
   if (!bytes.includes(0) && bytes.toString('utf8').toLowerCase().includes(forbiddenLegacy)) {

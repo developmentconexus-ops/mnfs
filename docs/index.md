@@ -27,7 +27,7 @@ Default task pack is at most five files. Do not recursively read `docs/`, Git hi
 | Data / Sankhya | [reference/data-and-persistence.md](reference/data-and-persistence.md) | [reference/integrations-and-gateway.md](reference/integrations-and-gateway.md) | runtime qualification |
 | Integrations / Gateway | [reference/integrations-and-gateway.md](reference/integrations-and-gateway.md) | [reference/security-and-authority.md](reference/security-and-authority.md) | raw research |
 | Security / authority | [reference/security-and-authority.md](reference/security-and-authority.md) | [architecture/index.md](architecture/index.md) | implementation history |
-| Release / deployment / failure-recovery | [reference/release-deployment-and-operations.md](reference/release-deployment-and-operations.md) | [roadmap.md](roadmap.md) | future 3M design until opened |
+| Release / deployment / failure-recovery | [reference/release-deployment-and-operations.md](reference/release-deployment-and-operations.md) | [phases/3m-failure-recovery-architecture.md](phases/3m-failure-recovery-architecture.md) only for closure rationale | raw review/history |
 | Frontend / Product surfaces | [reference/frontend-and-product-surfaces.md](reference/frontend-and-product-surfaces.md) | [product/contract.md](product/contract.md) | qualification |
 | Managed execution | [reference/managed-execution.md](reference/managed-execution.md) | [reference/managed-execution-qualification.md](reference/managed-execution-qualification.md) | unrelated runtime research |
 | Decision rationale / reopen | [decisions/index.md](decisions/index.md) | [phases/3a-authority-baseline.md](phases/3a-authority-baseline.md) | old review rounds in Git |
@@ -59,7 +59,7 @@ Mechanism is not authority. Research and reviewer findings are Evidence, never i
 
 ## Durable supporting routes
 
-- Phase baselines: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md).
+- Phase baselines: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md), [3M](phases/3m-failure-recovery-architecture.md).
 - Research router: [research/index.md](research/index.md).
 - Qualification Evidence summary: [evidence/qualification/3l/summary.md](evidence/qualification/3l/summary.md).
 - Executable qualification harnesses live under `qualification/3l/` and are opt-in, never default-read.

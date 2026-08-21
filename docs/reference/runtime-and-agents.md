@@ -114,6 +114,26 @@ valid occurrence + active trigger-origin AgentRun
 
 Schedule fire never executes the Product Agent directly. Exact transport remains Package-B proof.
 
+## 24.8 Failure and recovery
+
+Normal restart distinguishes a durable admitted wait from an ordinary actively executing AgentRun.
+
+For the existing approval/suspension path, the same AgentRun may resume only when the exact owner `ApprovalRequest`, old Release/AgentRun pins and current owner checks remain admissible. Native Mastra suspension/resume remains mechanical continuation only.
+
+For an ordinary active AgentRun that loses its process:
+
+```text
+no PAR terminal owner fact
+-X-> infer completion from Mastra thread/snapshot/trace/message
+-X-> silently re-drive the same execution through a new runtime
+```
+
+A later attempt requires owner admission. Current F1 does not enable DurableAgent active-run crash recovery/reconnect by inheritance; enabling it remains an explicit requalification trigger.
+
+Cancel/timeout first prevents new PAR progression and propagates cooperative abort where available. Abort, timeout and process loss do not prove that an already-crossed Gateway effect did not happen. Late runtime completion remains subordinate to current guarded/write-once owner transitions.
+
+After disaster restore, restored pending `ApprovalRequest`/Mastra suspension state is historical as-of-cutoff and is not directly actionable merely because it was pending in the recovered generation. Effect-capable continuation is re-established through current owner authority; the restored runtime state never authorizes itself and cannot bypass the initial Gateway/operations external-effect deny posture.
+
 ---
 
 ## 25. Builder ↔ Production Agent Runtime isolation
@@ -191,7 +211,7 @@ Package D = CLOSED / LEAD-ADJUDICATED / QUALIFIED_TRANSACTIONAL_MANAGED_OCCURREN
 Package E = DEFER SAFELY / NO PRE-C-018 RUNTIME PROBE
 CX-MANAGED-JOB-01 = QUALIFIED FOR CURRENT F1 TESTED TRANSACTIONAL-ADMISSION SUBSET = DOWNSTREAM REMAINDER PRESERVED
 3L = CLOSED / 3L-R3 FINAL CLOSURE
-Current phase status is owned only by [../ROADMAP.md](../roadmap.md).
+Current phase status is owned only by [../roadmap.md](../roadmap.md).
 Product implementation = BLOCKED
 C-018 = NOT RATIFIED
 ```
@@ -278,23 +298,23 @@ No generic RuntimeBus/EventBus/UniversalRuntimeEnvelope for optionality.
 
 ---
 
-## 45. Recovery invariants carried into 3M
+## 45. Recovery architecture after 3M
 
-R11-D does not solve 3M. Current durable architecture constrains it:
+3M confirms that existing owners are sufficient; no generic recovery owner, universal retry lifecycle or active-run DurableAgent requirement is added.
+
+Runtime-level recovery must preserve:
 
 1. owner truth survives runtime/process restart where recoverability is required;
 2. runtime snapshot without owner authority never authorizes continuation;
-3. current authorization is rechecked on protected re-entry;
+3. protected re-entry rechecks current/exact-pinned owner facts;
 4. model spend survives restart/resume through owner facts;
-5. external-effect ambiguity never becomes retry permission;
-6. Release/Promotion history remains immutable and serving authority explicit;
-7. Builder physical sandbox recreation never implies write-lineage continuity;
-8. Mastra thread/trace continuity is not domain-run continuity;
-9. missing required Evidence yields NOT_PROVEN, not reconstructed success;
-10. restore cannot fabricate newer semantic truth than recovered owners establish;
-11. migration recovery branch remains explicit after irreversible/maintenance transition;
-12. current Plan/WorkUnit/ActorRun facts must be sufficient to settle interrupted Builder work without trusting session prose.
+5. external-effect ambiguity and replay remain Gateway-owned;
+6. Mastra thread/trace/suspension state is mechanics, not domain-run or current-authorization truth;
+7. same-execution continuation requires the positive owner-specific basis described above;
+8. cancel/timeout/process loss initiate owner settlement and do not imply rollback;
+9. disaster-restored runtime/approval state is historical as-of-cutoff until current owner authority is re-established;
+10. enabling DurableAgent, active-run same-stream recovery, changed cancellation/orphan semantics or changed Builder/PAR topology reopens the existing 3L qualification boundary.
 
-3M tests whether existing durable facts are sufficient without inventing a generic recovery engine.
+No additional pre-C-018 runtime probe is required by 3M; the remaining falsifiers belong to 3N, first-build and first-production integrated paths.
 
 ---

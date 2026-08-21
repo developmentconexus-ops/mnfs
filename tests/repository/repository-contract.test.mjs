@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process'
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { resolve } from 'node:path'
 
@@ -19,7 +19,9 @@ test('Conexus OS repository contract is green', () => {
 
 test('repository hygiene guard fires on temporary work contamination', () => {
   const workDir = resolve(root, 'docs/work/current')
-  const file = resolve(workDir, 'ai-dialog.md')
+  const file = resolve(workDir, 'forbidden-fixture.md')
+  const existed = existsSync(file)
+  const original = existed ? readFileSync(file, 'utf8') : null
   mkdirSync(workDir, { recursive: true })
   writeFileSync(file, '# temporary review\n')
   try {
@@ -27,14 +29,15 @@ test('repository hygiene guard fires on temporary work contamination', () => {
     const output = `${result.stdout}\n${result.stderr}`
     if (result.status === 0 || !output.includes('docs/work')) throw new Error('hygiene negative control did not fire')
   } finally {
-    rmSync(resolve(root, 'docs/work'), { recursive: true, force: true })
+    if (existed) writeFileSync(file, original)
+    else rmSync(file, { force: true })
   }
 })
 
 test('bootstrap/status guard fires when README becomes a phase authority', () => {
   const path = resolve(root, 'README.md')
   const original = readFileSync(path, 'utf8')
-  writeFileSync(path, `${original}\n3M = NEXT / NOT STARTED\n`)
+  writeFileSync(path, `${original}\n3N = NEXT / NOT STARTED\n`)
   try {
     const result = run('scripts/check-current-state.mjs')
     const output = `${result.stdout}\n${result.stderr}`

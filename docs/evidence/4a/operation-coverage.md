@@ -519,7 +519,7 @@ B. operation admitted only because durable record or UI exists
 C. two semantic owners for one operation
 D. hidden universal execute/query/provider primitive
 E. Permission implied by Keycloak/app role/UI location
-F. cross-Workspace/cross-Project disclosure oracle
+F. cross-scope disclosure oracle
 G. current authority checked only before, not through protected mutation/decision
 H. stale exact subject/generation allowed to win
 I. consequential intake repeat creates duplicate owner/effect occurrence

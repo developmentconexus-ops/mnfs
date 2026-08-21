@@ -1,0 +1,51 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API fixed-census Path Item overrides
+  version: 4b-candidate
+paths:
+  /api/control/workspaces/{workspaceId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: GetWorkspace
+      operationId: GetWorkspace
+      x-conexus-4a-id: WS-02
+      x-conexus-ingress:
+        - CONTROL_PLANE
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: >-
+            Provisional 4B method/path mapping success; exact success schema/status
+            remains to be closed in this stage.
+          x-conexus-provisional: true
+  /api/control/projects/{projectId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: GetProject
+      operationId: GetProject
+      x-conexus-4a-id: PRJ-02
+      x-conexus-ingress:
+        - CONTROL_PLANE
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: >-
+            Provisional 4B method/path mapping success; exact success schema/status
+            remains to be closed in this stage.
+          x-conexus-provisional: true

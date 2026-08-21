@@ -20,6 +20,7 @@ Default task pack is at most five files. Do not recursively read `docs/`, Git hi
 | Current stage / implementation gate | [roadmap.md](roadmap.md) | [development/engineering-rules.md](development/engineering-rules.md) | research, qualification |
 | Phase 4 / Implementation Readiness | [phases/4-implementation-readiness-program.md](phases/4-implementation-readiness-program.md) | current owning 4A–4G contract routed by `roadmap.md` | Product code, unrelated Phase-3 history |
 | 4A Product Surface & Authority | [phases/4a-product-surface-and-authority-contract.md](phases/4a-product-surface-and-authority-contract.md) | [product/operation-ledger.md](product/operation-ledger.md); [product/permission-contract.md](product/permission-contract.md) for authority mapping; [product/budget-analyzer-contract.md](product/budget-analyzer-contract.md) only for the first-vertical semantic decision; then one exact owner reference as needed | HTTP/router/frontend/runtime choices |
+| 4B Executable Wire | [phases/4b-executable-wire-contract.md](phases/4b-executable-wire-contract.md) | [product/wire-contract.md](product/wire-contract.md); accepted [product/operation-ledger.md](product/operation-ledger.md) for exact operation mapping; [evidence/4b/wire-representation-assessment.md](evidence/4b/wire-representation-assessment.md) only when representation/standards Evidence is material | frontend topology, router/runtime, persistence, Product implementation |
 | Blueprint / planning-harness design | [development/blueprint-harness-design.md](development/blueprint-harness-design.md) | [development/softwareforge-reference-assessment.md](development/softwareforge-reference-assessment.md) only when evaluating SoftwareForge-derived traceability/impact/execution-envelope ideas | Product authority by reference, raw competitor marketing |
 | Realization Planning / first-build skeleton | [phases/realization-planning.md](phases/realization-planning.md) | [development/production-realization-guide.md](development/production-realization-guide.md); use as Phase-4/4F input, not direct execution authority | Product implementation history, unrelated qualification |
 | Product meaning / scope / journeys | [product/contract.md](product/contract.md) | [decisions/index.md](decisions/index.md) | research, phase history |
@@ -63,11 +64,13 @@ Mechanism is not authority. Research and reviewer findings are Evidence, never i
 
 ## Durable supporting routes
 
-- Phase baselines / readiness gates: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md), [3M](phases/3m-failure-recovery-architecture.md), [3N](phases/3n-architecture-verification.md), [3O](phases/3o-vertical-architecture-proof-contract.md), [C-018](phases/c-018-final-architecture-ratification.md), [Realization Planning](phases/realization-planning.md), [Phase 4 Implementation Readiness](phases/4-implementation-readiness-program.md), [4A Product Surface](phases/4a-product-surface-and-authority-contract.md).
-- Current 4A operation candidate: [Product Operation Ledger](product/operation-ledger.md).
-- Current 4A Permission candidate: [Permission Contract](product/permission-contract.md).
-- First-vertical semantic decision candidate: [Budget Analyzer Contract](product/budget-analyzer-contract.md).
+- Phase baselines / readiness gates: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md), [3M](phases/3m-failure-recovery-architecture.md), [3N](phases/3n-architecture-verification.md), [3O](phases/3o-vertical-architecture-proof-contract.md), [C-018](phases/c-018-final-architecture-ratification.md), [Realization Planning](phases/realization-planning.md), [Phase 4 Implementation Readiness](phases/4-implementation-readiness-program.md), [4A Product Surface](phases/4a-product-surface-and-authority-contract.md), [4B Executable Wire](phases/4b-executable-wire-contract.md).
+- Accepted 4A Product operation authority: [Product Operation Ledger](product/operation-ledger.md).
+- Accepted 4A Permission authority: [Permission Contract](product/permission-contract.md).
+- Accepted first-vertical semantic authority: [Budget Analyzer Contract](product/budget-analyzer-contract.md).
+- Current 4B human-readable wire authority: [Executable Wire Contract](product/wire-contract.md).
 - 4A supporting coverage Evidence: [Operation Coverage](evidence/4a/operation-coverage.md).
+- 4B wire-representation Evidence: [Wire Representation Assessment](evidence/4b/wire-representation-assessment.md).
 - Planning/research/review harness design input: [Blueprint Harness Design](development/blueprint-harness-design.md).
 - Bounded SoftwareForge reference assessment: [SoftwareForge Reference Assessment](development/softwareforge-reference-assessment.md).
 - Realization research/implementation companion: [Evidence-Grounded Realization Engineering](development/production-realization-guide.md).

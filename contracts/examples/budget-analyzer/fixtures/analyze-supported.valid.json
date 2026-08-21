@@ -1,0 +1,17 @@
+{
+  "truth": {
+    "state": "SUPPORTED_CURRENT",
+    "asOf": "coord-current-1",
+    "freshness": "CURRENT",
+    "coverage": "COMPLETE",
+    "provenance": "VERIFIED"
+  },
+  "summary": {
+    "pendingBudgetCount": 0,
+    "pendingBudgetValue": "0"
+  },
+  "bySeller": [],
+  "byCustomer": [],
+  "byAgingBand": [],
+  "byMonth": []
+}

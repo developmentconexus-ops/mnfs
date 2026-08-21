@@ -6,12 +6,11 @@ import { test } from 'node:test'
 const root = resolve(new URL('../../', import.meta.url).pathname)
 const read = path => readFileSync(resolve(root, path), 'utf8')
 
-test('C-018 opens as ratification review without promoting decision or Product implementation', () => {
-  const roadmap = read('docs/roadmap.md')
-  const decisions = read('docs/decisions/index.md')
-  assert.match(roadmap, /\| C-018 \| OPEN \/ RATIFICATION REVIEW \|/)
-  assert.match(roadmap, /\| Product implementation \| BLOCKED \|/)
-  assert.match(decisions, /\| C-018 \| Final Product architecture ratification\. \| NOT RATIFIED \|/)
+test('C-018 durable contract records the opening review state without Product authorization', () => {
+  const contract = read('docs/phases/c-018-final-architecture-ratification.md')
+  assert.match(contract, /C-018 roadmap gate = OPEN \/ RATIFICATION REVIEW/)
+  assert.match(contract, /C-018 Decision Register = NOT RATIFIED/)
+  assert.match(contract, /Product implementation = BLOCKED/)
 })
 
 test('C-018 durable contract carries R1 through R7 and deny-only execution law', () => {

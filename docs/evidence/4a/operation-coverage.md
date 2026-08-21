@@ -544,7 +544,30 @@ This is **not** the independent adversarial review required for 4A closure. It o
 
 ---
 
-## 11. Proof conclusion before independent challenge
+## 11. Independent review handoff law
+
+The independent review must be anchored to exactly one candidate commit SHA and must review the complete 4A authority pack at that SHA, not an earlier partial candidate or the temporary SoftwareForge-only review branch.
+
+The reviewer should receive only the bounded current route necessary to challenge 4A:
+
+```text
+AGENTS.md
+→ docs/index.md
+→ docs/roadmap.md
+→ docs/phases/4a-product-surface-and-authority-contract.md
+→ docs/product/operation-ledger.md
+→ docs/product/permission-contract.md
+→ docs/product/budget-analyzer-contract.md
+→ docs/evidence/4a/operation-coverage.md as Evidence under challenge
+```
+
+The independent reviewer must not treat this Evidence document, prior reviewer output or PR prose as Product authority. A material finding must cite the current accepted authority it believes the candidate violates or identify a concrete accepted F1 interaction that cannot be safely expressed.
+
+If the candidate HEAD changes after review begins, findings remain Evidence against the reviewed SHA. Material corrections must be adjudicated on the candidate branch, verified, and the changed properties independently re-challenged as required before 4A ratification.
+
+---
+
+## 12. Proof conclusion before independent challenge
 
 ```text
 fixed platform census             = 114

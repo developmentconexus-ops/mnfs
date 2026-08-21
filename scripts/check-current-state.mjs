@@ -23,17 +23,31 @@ for (const required of ['3A', '3B–3K', '3L', '3M', '3N', '3O', 'C-018', 'Produ
 }
 
 const phases = rows.filter(({ name }) => /^3(?:[A-Z]|[A-Z]–3[A-Z])$/.test(name))
-const allowedPhaseStatuses = new Set(['CLOSED', 'NEXT / NOT STARTED', 'NOT STARTED'])
+const allowedPhaseStatuses = new Set(['CLOSED', 'OPEN / ACTIVE', 'NEXT / NOT STARTED', 'NOT STARTED'])
 for (const { name, status } of phases) if (!allowedPhaseStatuses.has(status)) errors.push(`roadmap invalid phase status for ${name}: ${status}`)
+
+const activePhases = phases.filter(({ status }) => status === 'OPEN / ACTIVE')
 const nextPhases = phases.filter(({ status }) => status === 'NEXT / NOT STARTED')
-const firstOpen = phases.findIndex(({ status }) => status !== 'CLOSED')
-if (firstOpen < 0) {
-  if (nextPhases.length !== 0) errors.push('roadmap cannot contain NEXT after all phases close')
+const firstUnclosed = phases.findIndex(({ status }) => status !== 'CLOSED')
+
+if (firstUnclosed < 0) {
+  if (activePhases.length !== 0 || nextPhases.length !== 0) errors.push('roadmap cannot contain ACTIVE or NEXT after all phases close')
 } else {
-  if (nextPhases.length !== 1) errors.push(`roadmap must contain exactly one NEXT / NOT STARTED phase; found ${nextPhases.length}`)
-  if (phases[firstOpen]?.status !== 'NEXT / NOT STARTED') errors.push('roadmap first non-closed phase must be NEXT / NOT STARTED')
-  if (phases.slice(firstOpen + 1).some(({ status }) => status !== 'NOT STARTED')) errors.push('roadmap phases after NEXT must be NOT STARTED')
+  const current = phases[firstUnclosed]
+  if (current.status === 'OPEN / ACTIVE') {
+    if (activePhases.length !== 1) errors.push(`roadmap must contain exactly one OPEN / ACTIVE phase; found ${activePhases.length}`)
+    if (nextPhases.length !== 0) errors.push(`roadmap cannot contain NEXT / NOT STARTED while a phase is OPEN / ACTIVE; found ${nextPhases.length}`)
+  } else if (current.status === 'NEXT / NOT STARTED') {
+    if (nextPhases.length !== 1) errors.push(`roadmap must contain exactly one NEXT / NOT STARTED phase; found ${nextPhases.length}`)
+    if (activePhases.length !== 0) errors.push(`roadmap cannot contain OPEN / ACTIVE while a phase is only NEXT / NOT STARTED; found ${activePhases.length}`)
+  } else {
+    errors.push(`roadmap first non-closed phase must be OPEN / ACTIVE or NEXT / NOT STARTED; got ${current.status}`)
+  }
+  if (phases.slice(firstUnclosed + 1).some(({ status }) => status !== 'NOT STARTED')) {
+    errors.push('roadmap phases after the current/next phase must be NOT STARTED')
+  }
 }
+
 if (byName.get('C-018') === 'RATIFIED' && phases.some(({ status }) => status !== 'CLOSED')) errors.push('C-018 cannot be RATIFIED before all phases close')
 if (byName.get('Product implementation') !== 'BLOCKED' && byName.get('C-018') !== 'RATIFIED') errors.push('Product implementation cannot be unblocked before C-018 ratification')
 
@@ -53,7 +67,9 @@ if (bootstrapBytes > 20 * 1024) errors.push(`bootstrap budget exceeded: ${bootst
 for (const path of ['AGENTS.md', 'README.md', 'docs/index.md']) {
   const text = read(path)
   if (!text.includes('roadmap.md')) errors.push(`${path} must route mutable status to docs/roadmap.md`)
-  if (/3[A-Z]\s*(?:=|is)\s*(?:NEXT|next)/i.test(text) || /NEXT \/ NOT STARTED/.test(text)) errors.push(`${path} must not restate mutable phase status`)
+  if (/3[A-Z]\s*(?:=|is)\s*(?:NEXT|next|OPEN|open)/i.test(text) || /NEXT \/ NOT STARTED|OPEN \/ ACTIVE/.test(text)) {
+    errors.push(`${path} must not restate mutable phase status`)
+  }
 }
 
 const readme = read('README.md')

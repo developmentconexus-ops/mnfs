@@ -1,7 +1,7 @@
 # 4B Evidence — Current-State Carrier Assessment
 
 > **Kind:** bounded 4B derivation Evidence; not Product authority by itself.
-> **Accepted semantic source:** 4A operation authority/current-state/IC mapping.
+> **Accepted semantic source:** current 4A operation authority/current-state/IC mapping, including operator-approved `4B-F01`.
 > **Wire rule under test:** `docs/product/wire-contract.md` §7.
 
 ## 1. Decision question
@@ -25,13 +25,11 @@ different owner resource, command subpath or collection
 
 IC2 is a Product current-subject law. HTTP conditional headers are only one possible carrier.
 
-## 3. Exact `If-Match` set retained
+## 3. Exact current `If-Match` set retained
 
-The current fixed wire admits `IF_MATCH` only for these exact operations:
+After operator-approved `4B-F01`, the current fixed wire admits literal `IF_MATCH` only for:
 
 ```text
-WS-03  UpdateWorkspace
-PRJ-04 UpdateProject
 PRJ-12 ClearProjectBrainBinding
 PAR-14 ReviseScheduleTrigger
 ```
@@ -39,18 +37,21 @@ PAR-14 ReviseScheduleTrigger
 Why they survive:
 
 ```text
-UpdateWorkspace
-GET/PATCH same /workspaces/{workspaceId} representation
-
-UpdateProject
-GET/PATCH same /projects/{projectId} representation
-
 ClearProjectBrainBinding
 GET/DELETE same /projects/{projectId}/brain-binding representation
 
 ReviseScheduleTrigger
 GET/PATCH same /triggers/{triggerId} representation
 ```
+
+The two previously truthful target-representation cases below no longer exist as Product mutations:
+
+```text
+WS-03  UpdateWorkspace → SUBTRACTED by 4B-F01
+PRJ-04 UpdateProject   → SUBTRACTED by 4B-F01
+```
+
+Their removal narrows the `IF_MATCH` set; it does not change the HTTP conditional rule.
 
 `PRJ-11 SetProjectBrainBinding` remains `CURRENT_OR_ABSENT`: the same exact target can later map present-state update through `If-Match` and absent-state create through an exact absent precondition such as `If-None-Match: *`, but 4B must close that request shape explicitly rather than pretending one unconditional ETag exists.
 
@@ -65,20 +66,6 @@ DELETE /api/control/projects/{projectId}/app-access/{accountId}
 ```
 
 No exact item GET is currently admitted. Required current grant/role/revision therefore remains an explicit current subject.
-
-```text
-carrier = EXPLICIT_CURRENT_SUBJECT
-```
-
-### WS-06 — UpdateArea
-
-Target wire:
-
-```text
-PATCH /api/control/workspaces/{workspaceId}/areas/{areaId}
-```
-
-The accepted Product surface has `ListAreas` but no `GetArea` fixed operation. A collection ETag is not the item's validator.
 
 ```text
 carrier = EXPLICIT_CURRENT_SUBJECT
@@ -159,6 +146,8 @@ The protected subject is the exact TriggerRevision/current state, not the comman
 carrier = EXPLICIT_TRIGGER_REVISION
 ```
 
+Historical pre-`4B-F01` carrier work also converted `WS-06 UpdateArea` from false `IF_MATCH` to `EXPLICIT_CURRENT_SUBJECT`; the later operator-approved subtraction removed that Product operation entirely.
+
 ## 5. Current-or-absent cases
 
 These remain deliberately distinct from `IF_MATCH`:
@@ -178,18 +167,17 @@ PRJ-11 SetProjectBrainBinding
 
 ## 6. Executable falsifier
 
-The final machine mapping must satisfy:
+The current machine mapping must satisfy:
 
 ```text
 operations carrying literal IF_MATCH
-= { WS-03, PRJ-04, PRJ-12, PAR-14 }
+= { PRJ-12, PAR-14 }
 ```
 
-and must reject these stale values:
+and must reject stale false mappings such as:
 
 ```text
 IAM-17 IF_MATCH
-WS-06  IF_MATCH
 PRJ-05 IF_MATCH
 CON-06 IF_MATCH
 REL-06 IF_MATCH+IDEMPOTENCY_KEY
@@ -197,7 +185,15 @@ PAR-10 IF_MATCH
 PAR-15 IF_MATCH
 ```
 
-A repository checker must evaluate the **bundled canonical OAD**, not only source fragments, so a stale override/ref cannot evade the proof.
+The repository checker evaluates the **bundled canonical OAD**, not only source fragments, so a stale override/ref cannot evade the proof.
+
+Current established proof:
+
+```text
+Verify #241 = SUCCESS
+bundled fixed operations = 111
+IF_MATCH exact set = PRJ-12,PAR-14
+```
 
 ## 7. Scope
 

@@ -10,6 +10,7 @@ const script = resolve(root, 'scripts/check-architecture-verification.mjs')
 const authorityPaths = [
   'docs/roadmap.md',
   'docs/architecture/index.md',
+  'docs/reference/data-and-persistence.md',
   'docs/phases/3n-architecture-verification.md'
 ]
 
@@ -49,6 +50,35 @@ test('current 3N architecture verification contract is green', () => {
   assert.equal(result.status, 0, outputOf(result))
 })
 
+test('3N current authority uses bounded F1 model execution rather than superseded monetary reservation', () => {
+  const architecture = readFileSync(resolve(root, 'docs/architecture/index.md'), 'utf8')
+  assert.doesNotMatch(architecture, /provider call occurring without spend reservation/)
+  assert.match(architecture, /provider\/model execution escaping finite server-derived call\/step\/retry\/fallback bounds/)
+})
+
+test('3N vertical route distinguishes the 3O contract from real first-build execution', () => {
+  const contract = readFileSync(resolve(root, 'docs/phases/3n-architecture-verification.md'), 'utf8')
+  assert.match(
+    contract,
+    /\| 3N-V28 \| 3O_CONTRACT \| FIRST_BUILD \| first vertical read model proving itself \/ unsupported KPI fabricated \|/
+  )
+})
+
+test('3N can verify the current 46-class and 16-FK data closure without Git archaeology', () => {
+  const data = readFileSync(resolve(root, 'docs/reference/data-and-persistence.md'), 'utf8')
+  assert.match(data, /## 6\.5\.1 Current durable record inventory/)
+  assert.match(data, /TOTAL\s+46/)
+  assert.match(data, /## 6\.5\.2 Current Tier-2 cross-module FK allowlist — 16/)
+  assert.match(data, /\| 16 \| `att\.attachment\.project_id → prj\.project\(id\)` \|/)
+})
+
+test('3N carries downstream proof families beyond the explicit section-46 minimum', () => {
+  const contract = readFileSync(resolve(root, 'docs/phases/3n-architecture-verification.md'), 'utf8')
+  assert.match(contract, /## Downstream proof-family coverage/)
+  assert.match(contract, /Builder UX progressive disclosure/)
+  assert.match(contract, /Golden benchmark \/ Worker Eval outcome quality/)
+})
+
 test('3N owner guard rejects semantic-owner drift', () => {
   const target = fixture()
   try {
@@ -69,16 +99,31 @@ test('3N dependency guard rejects L7 orchestration drift', () => {
   }
 })
 
-test('3N invariant guard rejects deletion from the accepted falsifier census', () => {
+test('3N minimum-falsifier guard rejects deletion from accepted section-46 coverage', () => {
   const target = fixture()
   try {
     mutate(
       target,
       'docs/architecture/index.md',
-      'Gateway idempotency/reconciliation scope accepted when deliberately under-declared\n',
+      'FIRST_BUILD | Gateway idempotency/reconciliation scope accepted when deliberately under-declared\n',
       ''
     )
-    expectRejected(target, /section-46 invariant census changed/)
+    expectRejected(target, /section-46 minimum falsifier count changed/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N spend guard rejects resurrection of superseded monetary reservation wording', () => {
+  const target = fixture()
+  try {
+    mutate(
+      target,
+      'docs/architecture/index.md',
+      'FIRST_BUILD | provider/model execution escaping finite server-derived call/step/retry/fallback bounds\n',
+      'FIRST_BUILD | provider call occurring without spend reservation\n'
+    )
+    expectRejected(target, /superseded model-spend reservation wording/)
   } finally {
     rmSync(target, { recursive: true, force: true })
   }
@@ -90,10 +135,35 @@ test('3N routing guard rejects a first-production falsifier moved to first-build
     mutate(
       target,
       'docs/phases/3n-architecture-verification.md',
-      '| 3N-V25 | FIRST_PRODUCTION | restore without positive generation continuity opening normal PROD |',
-      '| 3N-V25 | FIRST_BUILD | restore without positive generation continuity opening normal PROD |'
+      '| 3N-V25 | FIRST_PRODUCTION | FIRST_PRODUCTION | restore without positive generation continuity opening normal PROD |',
+      '| 3N-V25 | FIRST_BUILD | FIRST_BUILD | restore without positive generation continuity opening normal PROD |'
     )
-    expectRejected(target, /3N-V25 must route to FIRST_PRODUCTION/)
+    expectRejected(target, /3N-V25 routing differs from architecture authority/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N data-closure guard rejects loss of a durable record class', () => {
+  const target = fixture()
+  try {
+    mutate(target, 'docs/reference/data-and-persistence.md', 'audit_record / operational_event\n', 'audit_record\n')
+    expectRejected(target, /durable record inventory count changed/)
+  } finally {
+    rmSync(target, { recursive: true, force: true })
+  }
+})
+
+test('3N proof-family guard rejects deletion of current UX proof coverage', () => {
+  const target = fixture()
+  try {
+    mutate(
+      target,
+      'docs/phases/3n-architecture-verification.md',
+      '| Builder UX progressive disclosure / platform machinery not primary workflow | FIRST_BUILD |',
+      ''
+    )
+    expectRejected(target, /downstream proof-family coverage missing/)
   } finally {
     rmSync(target, { recursive: true, force: true })
   }

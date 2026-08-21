@@ -48,7 +48,7 @@ branch integrity           the truncation/restore pair (3405318/d296852)
                            carry no content                                CONFIRMED
 ```
 
-Local `npm run verify` was not reproducible on this reviewer's Windows host (the check scripts mis-join absolute paths outside WSL2, e.g. `C:\C:\...` in `check-architecture-verification.mjs`); `AGENTS.md` mandates WSL2, so this is an environment observation, not a candidate defect. CI Verify #177 SUCCESS on the exact HEAD stands as the verification evidence.
+`npm run verify` was independently reproduced **green on the exact candidate HEAD `d296852a`** in a WSL2 Ubuntu Linux-filesystem worktree per `AGENTS.md` (repository hygiene 167 tracked files, documentation index/reachability, canonical current state, qualification provenance all passed; 39/39 repository tests pass), independently confirming CI Verify #177. Note: verify correctly **fails** on this review branch tip itself — the hygiene guard rejects `docs/work/**` contamination, which is the intended proof that this review channel can never enter the merge candidate. A first attempt outside WSL2 failed on script path joining (`C:\C:\...`), consistent with the `AGENTS.md` WSL2 mandate being load-bearing.
 
 ### Findings
 

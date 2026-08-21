@@ -48,16 +48,32 @@ if (firstUnclosed < 0) {
   }
 }
 
+const c018Status = byName.get('C-018')
+const allowedC018Statuses = new Set(['NOT RATIFIED', 'OPEN / RATIFICATION REVIEW'])
+if (!allowedC018Statuses.has(c018Status)) {
+  errors.push(`roadmap invalid C-018 status before operator ratification: ${c018Status ?? 'missing'}`)
+}
+if (c018Status === 'OPEN / RATIFICATION REVIEW' && phases.some(({ status }) => status !== 'CLOSED')) {
+  errors.push('C-018 ratification review requires all phases CLOSED')
+}
+if (byName.get('Product implementation') !== 'BLOCKED') {
+  errors.push('Product implementation must remain BLOCKED until a later Realization Planning / explicit execution-authority gate')
+}
+
 if (byName.get('C-018') === 'RATIFIED' && phases.some(({ status }) => status !== 'CLOSED')) errors.push('C-018 cannot be RATIFIED before all phases close')
-if (byName.get('Product implementation') !== 'BLOCKED' && byName.get('C-018') !== 'RATIFIED') errors.push('Product implementation cannot be unblocked before C-018 ratification')
 
 const decisions = existsSync(resolve(root, 'docs/decisions/index.md')) ? read('docs/decisions/index.md') : ''
 const decisionRows = [...decisions.matchAll(/^\| (C-[A-Z0-9-]+) \| .*? \| ([^|]+?) \|/gm)].map(([, id, status]) => ({ id, status: status.trim() }))
 const controlled = new Set(['CURRENT', 'PRESERVE', 'REFINED', 'PARTIALLY_SUPERSEDED', 'SUPERSEDED', 'DEFERRED', 'REJECTED_F1', 'REOPEN', 'NOT RATIFIED'])
-for (const { id, status } of decisionRows) {
+for (const { id, status }) of decisionRows) {
   if (![...controlled].some(term => status === term || status.startsWith(`${term} / `) || status.startsWith(`${term} AS `))) {
     errors.push(`${id} has uncontrolled disposition: ${status}`)
   }
+}
+
+const c018DecisionStatus = decisionRows.find(({ id }) => id === 'C-018')?.status
+if (c018Status === 'OPEN / RATIFICATION REVIEW' && c018DecisionStatus !== 'NOT RATIFIED') {
+  errors.push(`C-018 must remain NOT RATIFIED in the Decision Register while ratification review is open; got ${c018DecisionStatus ?? 'missing'}`)
 }
 
 const bootstrapPaths = ['AGENTS.md', 'docs/index.md', 'docs/roadmap.md']

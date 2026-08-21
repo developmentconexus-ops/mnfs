@@ -1,15 +1,16 @@
 # Realization Planning — First Build
 
-Current mutable status and the exact next action remain owned only by [../roadmap.md](../roadmap.md). This document compiles the ratified Product/architecture target into the smallest executable first-build plan. It does not authorize Product implementation, production activation, C-018 reinterpretation, or architecture reopen by preference.
+Current mutable status and the exact next action remain owned only by [../roadmap.md](../roadmap.md). This document compiles the ratified Product/architecture target into the smallest executable first-build plan. It does not authorize Product implementation or production activation. The operator-selected Keycloak requirement fired the named C-015 identity-provider reopen trigger; that decision is now boundedly refined and registered without reopening 3A–3O, 3L or C-018 as a whole.
 
 ## 1. Decision
 
-**Outcome:** `CURRENT STRUCTURE CONFIRMED` for the first real vertical.
+**Outcome:** `CURRENT STRUCTURE CONFIRMED` for the first real vertical, with the bounded post-C-018 C-015 authentication refinement registered in the decision authority.
 
 The first authorized build should realize only the architecture needed to deliver and falsify a real read-only **Analisador Inteligente de Orçamentos — Sankhya** slice:
 
 ```text
 minimum current authority
+→ Keycloak-backed human authentication + Conexus-owned session/authorization
 → Workspace + Project
 → exact Brain semantic binding
 → exact Sankhya Connection binding
@@ -22,7 +23,7 @@ minimum current authority
 → independent live-source reconciliation
 ```
 
-No material Evidence found during planning requires a new Product capability, semantic owner, trust zone, framework replacement, generic workflow/proof/recovery abstraction, or C-018/3L reopen.
+No material Evidence found during planning requires a new Product capability, semantic owner, trust zone, framework replacement, generic workflow/proof/recovery abstraction, or 3A–3O/3L reopen. C-015 alone was reopened by its explicit trigger and immediately refined through the operator-approved Keycloak selection while preserving its Account/session/authorization invariants.
 
 The first build deliberately does **not** use Mastra, Builder runtime, PAR, Product Agent, E2B, AnalyticQuery, external writes, or effect-capable managed jobs. Their accepted seams remain intact without dormant implementation.
 
@@ -38,6 +39,7 @@ The implementation plan and every later execution slice inherit these laws:
 repository current authority > plan > implementation mechanics
 mechanism != authority
 one semantic authority per meaning
+provider identity proof != Product authorization
 unknown / partial / unsupported != zero / success
 future seam != dormant implementation
 same Workspace != implicit resource-use authority
@@ -60,8 +62,10 @@ The first authorized build contains exactly the following Product capability sur
 
 - one real Workspace isolation root;
 - one real Budget Analyzer Project with an approved Project Baseline sufficient for this slice;
-- minimum Identity & Access needed for a trusted Control Plane operator and an independently authorized Published Application user;
-- server-derived current authorization at protected control points;
+- Keycloak as the selected standards-based OIDC authentication provider for real human login;
+- one verified external identity key `(issuer, subject)` mapped as attributes of the existing Conexus `iam.account`;
+- Conexus-owned opaque application session and server-derived current authorization at protected control points;
+- Keycloak roles/groups/Authorization Services never substitute for Workspace membership, Project grants or Published App access;
 - no public signup, SaaS onboarding, billing, Area UX, cross-Workspace sharing, or generic role/policy engine.
 
 ### 4.2 Minimum Brain semantics
@@ -139,6 +143,8 @@ brn: health / binding_validation
 rel: release / promotion / active_pointer
 mar: serving_route / job_run
 ```
+
+The Keycloak `(issuer, subject)` identity key is an attribute of existing `iam.account`. Keycloak provider persistence is external authentication-substrate state and does not create a Hub schema or 47th Conexus record class.
 
 Project analytical/read-model tables are Project-owned business state and are not part of the 46 Hub record classes.
 
@@ -241,9 +247,11 @@ If no common boundary can be established without candidate self-reference, the b
 - exact lockfile and supported dependency provenance;
 - reject known malicious Mastra package families/versions already denied by Q0/C-016;
 - no floating runtime dependency resolution;
-- no framework package is admitted before a current consumer exists.
+- no framework package is admitted before a current consumer exists;
+- select and pin an exact supported Keycloak release plus a maintained standards-compliant Node OIDC implementation using current official release/security/version Evidence before R1 code;
+- a Node OIDC implementation that cannot support the required confidential server-side client is not admissible.
 
-This executes the applicable supply-chain proof family without creating a generalized dependency platform.
+This executes the applicable supply-chain proof family without creating a generalized dependency platform. Detailed Keycloak research/negative controls remain derived guidance under `docs/development/production-realization-guide.md`; C-015 in the decision register owns the accepted technology decision and its reopen triggers.
 
 ## 8. Ordered realization slices
 
@@ -251,12 +259,12 @@ Each slice must leave an independently falsifiable working boundary. Later slice
 
 | Slice | Deliverable | Owners / authority | Depends on | FIRST_BUILD obligations exercised |
 | --- | --- | --- | --- | --- |
-| `R1` | minimum Account/session + Workspace + Project + approved Baseline and project access | I&A, Workspace, Project | `G0` admission | `3N-V01`; CR-1 contract prepared |
+| `R1` | Keycloak OIDC login + Conexus Account/session + Workspace + Project + approved Baseline and project access | I&A, Workspace, Project; Keycloak only as auth mechanism | `G0` admission | `3N-V01`; CR-1 contract prepared; Published-App/session security preconditions |
 | `R2` | canonical minimal Brain revision/binding + exact Sankhya Connection revision/binding + read-only Gateway path | Brain, Registry, Project, Connections, Gateway | `R1` | `3N-V06`, `V07`, `V10`; Brain conformance/health; Connection/Gateway egress |
 | `R3` | Project read-model migration + governed sync artifact/admission contract + cursor/merge semantics | Project DB, MAR, Release pins, Connections/Gateway | `R2` | `3N-V18`, `V19`; managed duplicate-authority/deciding-Evidence contract |
 | `R4` | static registered Query artifacts + Product-owned result API/boundary | Project, Registry, Gateway/read executor | `R3` | 3O semantic/unknown preconditions; read-only query enforcement |
-| `R5` | minimal React Published Application using only admitted results + independent app authorization | I&A, Project, MAR serving | `R4` | `3N-V21`; frontend/security and Published App proof families |
-| `R6` | exact candidate artifacts → Release → non-production Promotion → EnvironmentConformance → active serving → `SERVED_VERIFIED` | Registry, Release, Project, I&A, MAR | `R3–R5` | `3N-V22`, `V23`; CR-1 representative concurrency proof; Release/serving family |
+| `R5` | minimal React Published Application using only admitted results + independent app authorization | I&A, Project, MAR serving | `R4` | `3N-V21`, `V24`; frontend/security and Published App proof families |
+| `R6` | exact candidate artifacts + current verification Evidence digests → Release → non-production Promotion → EnvironmentConformance → active serving → `SERVED_VERIFIED` | Registry, Release, Project, I&A, MAR | `R3–R5` | `3N-V22`, `V23`, `V24`; CR-1 representative concurrency proof; current-proof recheck; Release/serving family |
 | `R7` | real JobRun + governed Sankhya sync + real Product result + independent live oracle + negative control + complete verification manifest | existing owners; proof Evidence owns no Product meaning | `R6` + real source boundary | `3N-V18`, `V28` through `3O-P1..P7`; first-vertical reconciliation; minimal benchmark Evidence |
 
 ### 8.1 Why Release appears before the real sync occurrence
@@ -270,6 +278,21 @@ job code exists
 != admitted JobRun
 != queue presentation authority
 ```
+
+### 8.2 First-build current-proof subject without Builder
+
+The first slice does not instantiate Builder or `bld.change_acceptance`. It therefore MUST NOT manufacture a fake Change acceptance merely to satisfy Release wording.
+
+For this slice:
+
+```text
+candidate verification/validation Evidence digests
+→ closed into the exact ReleaseManifest
+→ rechecked as the current admitted proof at ComposeRelease
+→ rechecked again before material Promotion steps
+```
+
+Stale/inadmissible proof refuses progression. When Builder is first instantiated, its `bld.change_acceptance` owner fact inherits the original Release current-proof route.
 
 ## 9. Exact FIRST_BUILD applicability manifest
 
@@ -300,7 +323,7 @@ The first-build implementation branch must carry one manifest keyed by the exist
 | `3N-V21` | `EXECUTE` | `R5/R7`: Control Plane authority does not imply Published App access and vice versa |
 | `3N-V22` | `EXECUTE` | `R6`: AVAILABLE or pointer swap without served-digest verification cannot become `SERVED_VERIFIED` |
 | `3N-V23` | `EXECUTE` | `R6`: real target migration/conformance drift must fail closed before success |
-| `3N-V24` | `NOT_INSTANTIATED` | no private attachment/blob or caller-addressable storage-object capability; internal Registry/CAS keys are not exposed as a Product authorization surface |
+| `3N-V24` | `EXECUTE` | `R5/R6`: caller-addressable Published App serving retrieves exact stored/digest-addressed bytes; asset/data paths may not bypass current serving/app authorization merely through object/path/digest possession |
 | `3N-V25` | `FIRST_PRODUCTION` | preserved unchanged; no DEV restore imitation |
 | `3N-V26` | `FIRST_PRODUCTION` | preserved unchanged; no DEV stale-authority imitation |
 | `3N-V27` | `FIRST_PRODUCTION` | preserved unchanged; no DEV post-cutoff Git imitation |
@@ -315,13 +338,13 @@ A later first instantiation of any `NOT_INSTANTIATED` surface inherits the origi
 | Brain Discovery/feedback/conformance/health | execute only binding conformance + critical semantic health actually used; Discovery/feedback = `NOT_INSTANTIATED` |
 | scaffold/codegen/frontend contract/security invariants | `EXECUTE` for the real Published App scaffold and contract/security surface; no generic codegen platform required |
 | Builder UX progressive disclosure | `NOT_INSTANTIATED` because Builder Product UX is absent |
-| Observability/audit/redaction/GC Product paths | `NOT_INSTANTIATED` as a Product capability; ordinary logs/proof Evidence do not instantiate the OBS owner |
+| Observability/audit/redaction/GC Product paths | `NOT_INSTANTIATED` as a Product capability; ordinary logs/proof Evidence do not instantiate the OBS owner; this non-production slice explicitly classifies zero operations `audit-required`, and the first real audit-required/production consumer inherits the fail-closed OBS route |
 | Release/Promotion/EnvironmentConformance/serving | `EXECUTE` in `R6` |
-| Published App authorization/session/browser security | `EXECUTE` in `R5/R7` |
-| private attachment/blob authorization | `NOT_INSTANTIATED`; internal Registry/CAS storage does not create a private attachment/blob Product surface |
-| supply-chain/dependency admission | `EXECUTE` in `G0` |
+| Published App authorization/session/browser security | `EXECUTE` in `R1/R5/R7`, including Keycloak authentication vs Conexus authorization separation |
+| private attachment/blob authorization | `NOT_INSTANTIATED` for `att.*`; `3N-V24` separately executes against the reachable Published App serving-byte path |
+| supply-chain/dependency admission | `EXECUTE` in `G0`, including exact Keycloak/OIDC admission before R1 |
 | Connection/Gateway effect/egress | execute the real **read-only egress/binding** path; effect/write branch = `NOT_INSTANTIATED` |
-| first-production restore/emergency-stop/activation | `FIRST_PRODUCTION` only |
+| first-production restore/emergency-stop/activation | `FIRST_PRODUCTION` only, now including Keycloak issuer/subject recovery continuity through C-015 |
 | first vertical live-source/read-model reconciliation | `EXECUTE` in `R7` through 3O |
 | Golden benchmark / Worker Eval integration | preserve the Budget Analyzer as benchmark Evidence; execute minimal deterministic result/reconciliation regression cases; Worker/Builder evaluator runtime = `NOT_INSTANTIATED` |
 
@@ -342,7 +365,7 @@ The proof must demonstrate both halves together:
 1. the Promotion commit serializes/conflicts with the current revoke/narrow so stale authorization cannot commit; and
 2. the Release owner still cannot directly read/write/lock unrelated IAM state, `SET ROLE` into IAM, or use a broad umbrella DB role.
 
-The exact serialization primitive is implementation detail. The protected property is not.
+The exact serialization primitive is implementation detail. The protected property is not. The closed cross-owner same-transaction set remains unchanged; `PromoteRelease` is not permission to add a third cross-owner domain transaction. If implementation Evidence proves such a transaction is genuinely necessary, stop and return to the data-owner Decision Loop rather than inventing it as implementation plumbing.
 
 If implementation Evidence proves `PromoteRelease` cannot honestly exercise the cross-owner mutable-authority condition, choose the smallest actually security-sensitive first-slice mutation that does and record the substitution as a bounded Realization finding; do not delete CR-1.
 
@@ -428,9 +451,14 @@ Fixtures remain allowed for unit/contract/negative controls. They can never subs
 
 `3N-V25..V27` and the first-production restore/emergency-stop/activation family remain unexecuted during first build.
 
-For the **authority classes actually instantiated by this first slice**, the first-production restore drill must begin deny-only and treat the following recovered mutable authority as historical until the current owner re-establishes it:
+For the **authority classes and authentication dependency actually instantiated by this first slice**, the first-production restore drill must begin deny-only and treat/re-establish the following correctly:
 
 ```text
+Keycloak provider persistence/configuration
++ configured issuer / stable subject identities
+                                    → recover compatible provider generation and prove
+                                      (issuer, subject) continuity before normal human login/use
+
 iam.session                         → normal reuse invalid
 instantiated workspace/project access facts
                                     → current I&A recertification before protected reuse
@@ -441,14 +469,22 @@ active Release/serving generation   → Release + EnvironmentConformance + serve
 MAR recurrence admission            → derived again only from the current recertified served Release + current freshness
 ```
 
+The `(issuer, subject)` mapping remains an attribute of existing `iam.account`, not a new durable class. A rebuilt/restored IdP may not silently remap an Account when identity continuity is unknown. Successful Keycloak authentication never recertifies Conexus grants by itself.
+
+The first-production recoverable set therefore includes Keycloak provider state needed for stable issuer/subject continuity. Exact backup/store tooling remains first-production realization; the closure property is current. If Keycloak uses the same protected PostgreSQL cluster, its provider-specific persistence participates in that generation under isolated credentials; otherwise the restore must prove compatible cross-store provenance/continuity.
+
 No PAR ApprovalRequest/AgentTrigger, Builder/E2B authority, external-effect replay or attachment authority is included because those surfaces are not instantiated. Their original first-production route applies when first introduced.
 
-Post-cutoff canonical Git handling remains exactly `3N-V27`; Realization does not define backup mechanics or a production topology to fake it early.
+Post-cutoff canonical Git handling remains exactly `3N-V27`; Realization does not implement backup machinery or execute a production restore early.
 
 ## 15. Negative controls defined before implementation
 
 The following controls are part of the implementation contract before code is authorized. A slice cannot be called realized until every reachable control assigned to it is demonstrated to fire:
 
+- forged/invalid Keycloak issuer, audience, signature, nonce or state cannot create a Conexus session;
+- Keycloak role/group/provider changes alone cannot grant Workspace/Project/Published App authority;
+- an authenticated Account with no current Conexus grant remains denied;
+- Conexus session logout/revocation denies subsequent protected use even if an old provider token exists;
 - cross-Workspace Project/app/query access is denied;
 - stale/narrowed authorization cannot commit the CR-1 representative mutation;
 - Project Brain binding does not move when a newer Brain revision becomes AVAILABLE;
@@ -458,13 +494,15 @@ The following controls are part of the implementation contract before code is au
 - downtime with multiple missed intervals produces at most one current catch-up;
 - Control Plane admin without Published App access cannot consume the app;
 - Published App member cannot gain Builder/Control Plane/source authority;
+- direct/guessed Published App asset or data path cannot use storage/path/digest possession to bypass current app/serving authorization;
 - AVAILABLE Release without served verification is not `SERVED_VERIFIED`;
+- stale/inadmissible candidate Evidence digest cannot pass ComposeRelease/Promotion current-proof recheck;
 - deliberate EnvironmentConformance drift turns the gate red;
 - unsupported semantic meaning stays `UNSUPPORTED`;
 - partial/unverifiable comparison stays `INDETERMINATE`;
 - deliberate candidate-side reconciliation divergence turns 3O red.
 
-No fake telemetry consumer, private storage API, Mastra runtime, Product Agent, external write, or other excluded capability may be added merely to create another negative control.
+No fake telemetry consumer, private attachment API, Mastra runtime, Product Agent, external write, or other excluded capability may be added merely to create another negative control.
 
 A presence-only test, mock-only integration, or fixture that proves only itself cannot satisfy a real-path claim.
 
@@ -475,6 +513,7 @@ Execution must stop rather than broaden scope when Evidence shows any of the fol
 ### Stop without architecture reopen
 
 - no admissible Mastra package/source exists yet for a later Mastra consumer;
+- no admissible supported Keycloak/OIDC-client combination satisfies the C-015 confidential OIDC boundary;
 - real Sankhya access/credential/provenance needed for the probe is unavailable;
 - Product-visible semantics are not yet accepted enough to admit a useful result;
 - the common source/candidate comparison boundary is not yet established;
@@ -484,11 +523,12 @@ These are prerequisites/unknowns, not permission to fabricate authority.
 
 ### Reopen the smallest owner/decision only
 
+- C-015 Keycloak security/topology/recovery Evidence makes the selected IdP unfit, stable `(issuer, subject)` identity cannot be preserved, or a real SSO/SCIM/passkey/multi-IdP requirement materially changes the authentication contract;
 - independent live-source oracle cannot be constructed without candidate self-reference;
 - no honest common comparison boundary is expressible within accepted source/data boundaries;
 - a correct read-only Budget Analyzer requires a new Product capability, semantic owner or trust boundary;
 - an applicable 3N/3O obligation cannot be genuinely falsified through its accepted owner;
-- CR-1 cannot be realized without violating owner isolation;
+- CR-1 cannot be realized without violating owner isolation, or requires a genuinely new cross-owner transaction outside the closed set;
 - a real source semantic requirement contradicts current Brain/Product authority;
 - bounded Mastra requalification falsifies an accepted 3L property;
 - first real effect-capable managed job appears, triggering the deferred MAR/Gateway recovery decision;
@@ -507,9 +547,9 @@ The plan intentionally deletes from first build:
 - generic workflow/scheduler machinery because one governed sync consumer is enough;
 - generic proof/evidence/recovery platforms because existing proof routing/owners suffice;
 - OBS/attachment Product surfaces because no first-slice consumer requires them;
-- first-production topology/recovery mechanics because first build is non-production.
+- first-production backup/restore execution because first build is non-production.
 
-What remains is essential complexity: isolation, exact bindings, semantic authority, truthful unknowns, read-only enterprise access, deterministic sync, owner-isolated persistence, exact Release/serving, independent Published App authorization, and real-data falsification.
+Keycloak is retained because human authentication is now a real operator-selected first-slice consumer and reuses mature credential/authentication machinery instead of making Conexus own it. What remains is essential complexity: authentication without delegated Product authorization, isolation, exact bindings, semantic authority, truthful unknowns, read-only enterprise access, deterministic sync, owner-isolated persistence, exact Release/serving, independent Published App authorization, and real-data falsification.
 
 ## 18. Implementation authorization boundary
 
@@ -521,7 +561,7 @@ Realization Plan drafted
 != first production authorized
 ```
 
-This Draft PR may only establish the plan. Product implementation remains **BLOCKED** until:
+This Draft PR may only establish the plan and the bounded C-015 refinement required by the operator-selected Keycloak mechanism. Product implementation remains **BLOCKED** until:
 
 1. this Realization Plan survives required independent review/adjudication;
 2. the operator explicitly accepts the plan;
@@ -540,11 +580,12 @@ The planning gate can close only when the exact candidate head proves all of the
 4. every Architecture §42 proof family remains routed;
 5. `3O-P1..P7` are executable against a real source and real Product path and contain a firing negative control;
 6. Mastra old pins are not inherited and the exact source admission floor/affected requalification route is explicit;
-7. Z3 remains absent/Hub-outbound-only and no guest→private-Hub inbound path is introduced;
-8. FIRST_PRODUCTION restore obligations remain routed and the first-slice recertification classes are explicit without production implementation;
-9. no Product code, live production effect, runtime probe disguised as Product implementation, or architecture reopen enters this planning PR;
-10. repository verification passes on the exact planning candidate;
-11. a fresh independent Fable/adversarial review challenges the exact consolidated candidate and every material finding is adjudicated against current authority;
-12. operator explicitly accepts Realization Planning before any closure/merge transition.
+7. C-015 records the operator-approved Keycloak OIDC refinement, Conexus authorization sovereignty, exact-version admission route and first-production identity/recovery closure without adding a semantic owner or trust zone;
+8. Z3 remains absent/Hub-outbound-only and no guest→private-Hub inbound path is introduced;
+9. FIRST_PRODUCTION restore obligations remain routed and the first-slice recertification/recovery classes are explicit without executing production recovery;
+10. no Product code, live production effect or runtime probe disguised as Product implementation enters this planning PR; the only owning-decision reopen is the named, operator-approved C-015 identity-provider refinement and no 3A–3O/3L reopen is introduced;
+11. repository verification passes on the exact planning candidate;
+12. a fresh independent Fable/adversarial review challenges the exact consolidated candidate and every material finding is adjudicated against current authority;
+13. operator explicitly accepts Realization Planning before any closure/merge transition.
 
 Failure reopens only the smallest decision actually falsified by Evidence.

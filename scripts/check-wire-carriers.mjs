@@ -15,7 +15,7 @@ for (const [path, pathItem] of Object.entries(oas.paths ?? {})) {
   }
 }
 
-const exactIfMatch = new Set(['WS-03', 'PRJ-04', 'PRJ-12', 'PAR-14']);
+const exactIfMatch = new Set(['PRJ-12', 'PAR-14']);
 const actualIfMatch = new Set();
 for (const [id, { operation }] of operations) {
   const carrier = String(operation['x-conexus-current-state-carrier'] ?? '');
@@ -31,7 +31,6 @@ if (missingIfMatch.length || extraIfMatch.length) {
 const expectedCarriers = new Map([
   ['IAM-15', 'CURRENT_OR_ABSENT'],
   ['IAM-17', 'EXPLICIT_CURRENT_SUBJECT'],
-  ['WS-06', 'EXPLICIT_CURRENT_SUBJECT'],
   ['PRJ-05', 'EXPLICIT_CURRENT_SUBJECT'],
   ['PRJ-11', 'CURRENT_OR_ABSENT'],
   ['CON-06', 'EXPLICIT_CURRENT_REVISION'],
@@ -54,4 +53,4 @@ if (approval?.['x-conexus-effect-fence'] !== 'OWNER_GATEWAY_IC4') {
   throw new Error('PAR-10 must preserve owner/Gateway IC4 effect fence independently from caller current-subject carrier');
 }
 
-console.log(`wire carrier proof passed (${operations.size} operations; IF_MATCH exact set=${[...exactIfMatch].join(',')}; 7 cross-resource false conditionals removed).`);
+console.log(`wire carrier proof passed (${operations.size} operations; IF_MATCH exact set=${[...exactIfMatch].join(',')}; 7 cross-resource false conditionals remain removed).`);

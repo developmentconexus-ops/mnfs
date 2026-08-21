@@ -46,3 +46,19 @@ test('bootstrap/status guard fires when README becomes a phase authority', () =>
     writeFileSync(path, original)
   }
 })
+
+test('phase progression guard fires when more than one phase is active', () => {
+  const path = resolve(root, 'docs/roadmap.md')
+  const original = readFileSync(path, 'utf8')
+  let mutated = original.replace('| 3N | CLOSED |', '| 3N | OPEN / ACTIVE |')
+  mutated = mutated.replace('| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
+  if (mutated === original) throw new Error('active-phase negative-control mutation target missing')
+  writeFileSync(path, mutated)
+  try {
+    const result = run('scripts/check-current-state.mjs')
+    const output = `${result.stdout}\n${result.stderr}`
+    if (result.status === 0 || !output.includes('OPEN / ACTIVE')) throw new Error('active-phase negative control did not fire')
+  } finally {
+    writeFileSync(path, original)
+  }
+})

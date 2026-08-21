@@ -59,7 +59,7 @@ Mechanism is not authority. Research and reviewer findings are Evidence, never i
 
 ## Durable supporting routes
 
-- Phase baselines: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md), [3M](phases/3m-failure-recovery-architecture.md), [3N](phases/3n-architecture-verification.md).
+- Phase baselines: [3A](phases/3a-authority-baseline.md), [3L](phases/3l-technology-qualification.md), [3M](phases/3m-failure-recovery-architecture.md), [3N](phases/3n-architecture-verification.md), [3O](phases/3o-vertical-architecture-proof-contract.md).
 - Research router: [research/index.md](research/index.md).
 - Qualification Evidence summary: [evidence/qualification/3l/summary.md](evidence/qualification/3l/summary.md).
 - Executable qualification harnesses live under `qualification/3l/` and are opt-in, never default-read.

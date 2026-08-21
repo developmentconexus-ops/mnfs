@@ -53,7 +53,9 @@ const phase3O = statusByName.get('3O')
 if (phase3N === 'NEXT / NOT STARTED') {
   if (phase3O !== 'NOT STARTED') errors.push('3O must remain NOT STARTED before 3N closure')
 } else if (phase3N === 'CLOSED') {
-  if (phase3O !== 'NEXT / NOT STARTED') errors.push('3O must become NEXT / NOT STARTED only after 3N closure')
+  if (!['NEXT / NOT STARTED', 'OPEN / ACTIVE', 'CLOSED'].includes(phase3O)) {
+    errors.push('3O must be NEXT / NOT STARTED, OPEN / ACTIVE, or CLOSED after 3N closure')
+  }
 } else {
   errors.push(`3N has illegal verification-stage status: ${phase3N ?? 'missing'}`)
 }

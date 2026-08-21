@@ -97,3 +97,21 @@ test('C-018 ratification alone cannot unblock Product implementation', () => {
     writeFileSync(path, original)
   }
 })
+
+test('ratified C-018 cannot coexist with an unclosed architecture phase', () => {
+  const path = resolve(root, 'docs/roadmap.md')
+  const original = readFileSync(path, 'utf8')
+  let mutated = original.replace('| C-018 | OPEN / RATIFICATION REVIEW |', '| C-018 | RATIFIED / OPERATOR RATIFIED |')
+  mutated = mutated.replace('| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
+  if (mutated === original) throw new Error('C-018 ratified-continuity mutation target missing')
+  writeFileSync(path, mutated)
+  try {
+    const result = run('scripts/check-current-state.mjs')
+    const output = `${result.stdout}\n${result.stderr}`
+    if (result.status === 0 || !output.includes('C-018 ratification requires all phases CLOSED')) {
+      throw new Error(`C-018 ratified continuity negative control did not fire:\n${output}`)
+    }
+  } finally {
+    writeFileSync(path, original)
+  }
+})

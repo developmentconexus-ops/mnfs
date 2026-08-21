@@ -2,7 +2,7 @@
 
 > **Kind:** Evidence / supporting proof, not Product authority.
 > **Candidate authority under test:** `docs/product/operation-ledger.md` + `docs/product/permission-contract.md` + `docs/product/budget-analyzer-contract.md`.
-> **Status:** 4A OPEN / CENSUS+SUBTRACTION+CONSISTENCY PROOF COMPLETE / INDEPENDENT REVIEW PENDING.
+> **Status:** 4A OPEN / CENSUS+SUBTRACTION+CONSISTENCY PROOF COMPLETE / LEAD ADVERSARIAL PASS COMPLETE / INDEPENDENT REVIEW PENDING.
 
 This Evidence attacks the completed operation candidate against the accepted 15 Product journeys, 13 semantic owners, closed 46 durable record classes, first Budget Analyzer semantic contract and whole-product negative laws. It tests both missing Product capability and CRUD/mechanism inflation.
 
@@ -30,6 +30,8 @@ foreign owner state mirrored into a generic API
 mechanism promoted to Product authority
 operation lacking principal/authority/scope/outcome/current-state closure
 Project capability admitted through arbitrary/mutable/global executor
+Product surface treated as authority merely because the UI exposes it
+non-disclosable foreign state exposed through a 403/existence oracle
 ```
 
 ---
@@ -135,7 +137,7 @@ Result: `3/3 CLOSED_CANDIDATE`.
 | --- | --- | --- |
 | `par.conversation` | DIRECT | Conversation lifecycle/use |
 | `par.agent_run` | DIRECT | exact interactive/headless execution + run inspection |
-| `par.approval_request` | DIRECT | exact sealed approval subject/read/decision |
+| `par.approval_request` | DIRECT | exact sealed approval subject/read/decision; approval surface never grants eligibility |
 | `par.agent_trigger` | DIRECT | schedule trigger inspect/revise/enable/disable |
 
 Authored Agent definition remains Project Git/Artifact/Release through Builder, not PAR CRUD.
@@ -204,7 +206,7 @@ mutable foreign-owner mirror required = 0
 | Connections | yes | no generic Secret/provider executor |
 | Gateway | effect inspection + internal execution | no second business command/retry API |
 | Brain | yes | no RAG/memory/policy owner; probe remains internal |
-| PAR | runtime semantics only | no authored Agent CRUD duplication |
+| PAR | runtime semantics only | no authored Agent CRUD duplication; UI surface cannot confer approval authority |
 | Release | yes | composition/pointer/served truth owner-controlled |
 | OBS/Audit | read/evidence projection | no current business-state authority |
 | Attachments/Blob | operation carrier | no global file owner |
@@ -232,7 +234,7 @@ Result: `13/13 owner boundaries preserved`.
 | publish/use app | Release/Promotion/app access + exact `Ops(R)` | COVERED |
 | Product Agent author/evolve | Builder Change path; no PAR definition CRUD | COVERED |
 | Product Agent conversation/run | PAR exact active Release/Conversation/AgentRun | COVERED |
-| effect approval | exact ApprovalRequest + current eligibility + Gateway atomic effect admission | COVERED |
+| effect approval | exact ApprovalRequest + current human eligibility + owner recheck + Gateway atomic effect admission; CP/PA presentation does not grant authority | COVERED |
 | unresolved external effect | Gateway effect fence + EffectAttempt inspection | COVERED |
 | managed sync/job | exact job artifact + MAR occurrence/run | COVERED |
 | Project archive | Project command; no implicit unpublish/trigger stop | COVERED |
@@ -387,7 +389,7 @@ consumer                         114/114
 principal / ingress              114/114
 Permission / special condition   114/114
 scope / containment              114/114
-outcome profile                  114/114
+outcome + disclosure profile     114/114
 current-authority route          114/114
 idempotency/concurrency profile  114/114
 
@@ -408,6 +410,14 @@ exact Release R
 → registered Query / Action / honest Integration Operation only
 → exact caller + authority + Project/app/binding scope
 → exact positive + negative proof
+```
+
+Effect/read consistency:
+
+```text
+registered Query                    → read-only / IC0
+consequential repeatable Action     → IC3
+Action/Integration external effect  → IC4 effect fence + idempotency/reconciliation
 ```
 
 Negative controls:
@@ -480,11 +490,61 @@ operation authority fields could remain narrative/incomplete
 4A-F07 CLOSED_CANDIDATE
 candidate Permission vocabulary had unresolved AnalyticQuery route
 → no new analyticquery.execute; exact CP/PA/PAR routes closed
+
+4A-F08 CLOSED / LEAD-ADJUDICATED
+ApprovalRequest matrix accidentally narrowed eligible-current-human approval to CP ingress
+→ CP or exact admitted PA approval surface may present the same owner-specific subject
+→ agent.effect.approve + exact eligibility remains required
+→ app admin/member alone never authorizes approval
+→ audit.read permits PAR-09 read-only investigator inspection only
+
+4A-F09 CLOSED / LEAD-ADJUDICATED
+outcome profile distinguished denied/non-disclosable but did not fix the 403-vs-404 semantic boundary
+→ 404-class for absent/intentionally non-disclosable foreign subjects
+→ 403-class only when subject/surface is already legitimately disclosable but action authority is denied
+→ 401/409/412/422/503 semantic classes also fixed before wire design
 ```
+
+Neither F08 nor F09 changes Product operation count, owner count, Permission count, trust topology, `N_budget` or any Phase-3 authority.
 
 ---
 
-## 10. Proof conclusion before independent challenge
+## 10. Lead adversarial pass
+
+The completed candidate was challenged against these falsifiers after the Budget decision and full authority matrix were present:
+
+```text
+A. missing accepted journey/consumer
+B. operation admitted only because durable record or UI exists
+C. two semantic owners for one operation
+D. hidden universal execute/query/provider primitive
+E. Permission implied by Keycloak/app role/UI location
+F. cross-Workspace/cross-Project disclosure oracle
+G. current authority checked only before, not through protected mutation/decision
+H. stale exact subject/generation allowed to win
+I. consequential intake repeat creates duplicate owner/effect occurrence
+J. OUTCOME_UNKNOWN can be blind-replayed
+K. analytics converts unknown/partial/stale into zero/current
+L. Budget source mapping silently becomes Product meaning
+M. arbitrary caller-selected historical `as_of`
+N. Product Agent approval surface silently confers eligibility
+O. internal probe/composition/runtime mechanics promoted to Product API
+```
+
+Result after F08/F09 corrections:
+
+```text
+material unresolved Lead findings = 0
+N_platform                         = 114 unchanged
+Permissions                        = 25 unchanged
+N_budget                           = 2 unchanged
+```
+
+This is **not** the independent adversarial review required for 4A closure. It only establishes that the consolidated candidate is ready to hand to an independent reviewer on an exact HEAD.
+
+---
+
+## 11. Proof conclusion before independent challenge
 
 ```text
 fixed platform census             = 114
@@ -496,6 +556,7 @@ owner-boundary classification     = 13/13
 orphan concrete operations        = 0
 speculative concrete operations   = 0
 known unresolved semantic blockers= 0
+Lead adversarial findings open    = 0
 ```
 
 The semantic/census/subtractive/consistency candidate is complete enough for an independent adversarial challenge over the **exact consolidated 4A HEAD**.

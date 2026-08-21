@@ -13,8 +13,8 @@ This is the single current phase/status authority. It is not a worklog.
 | C-018 | RATIFIED / OPERATOR RATIFIED | Final Product architecture continuity ratified after exact-head R1–R7 review; implementation-dependent proof remains routed downstream | Material Evidence falsifies the ratified Product/architecture target, qualification scope, owner/trust boundary, or genuine downstream falsifiability |
 | C-015 refinement | REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED | Named identity-provider trigger resolved through a narrow Keycloak OIDC authentication boundary while Conexus retains Account/session/membership/grant/Published-App authorization sovereignty; first-production identity/recovery closure updated | Keycloak security/topology/recovery Evidence makes the selected IdP unfit; stable issuer-subject identity cannot be preserved; or a real SSO/SCIM/passkey/multi-IdP requirement materially changes the contract |
 | Realization Planning | ACCEPTED / OPERATOR ACCEPTED | R1–R7 first-build skeleton accepted after independent Fable challenge; retained as Phase-4 input rather than direct Product-code authority | Material Phase-4 Evidence falsifies the skeleton, an applicability disposition, or ratified/refined authority it compiles |
-| 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED / MATERIAL REOPEN CANDIDATE `4B-F01` | Ratified 4A remains current unless operator accepts the bounded downstream falsifier; `4B-F01` shows three generic update operations lack a closed mutable Product property set and cannot be safely schema-authored without inventing meaning | Material Evidence shows an accepted F1 interaction cannot be expressed safely; `4B-F01` is the current bounded trigger under operator adjudication |
-| 4B — Executable Wire Contract | OPEN / BLOCKED ON `4B-F01` OPERATOR ADJUDICATION | Canonical machine-readable Product wire closes accepted/corrected 4A semantics without parallel DTO/API authority | Upstream operation semantics change materially or executable wire exposes another accepted-operation contradiction |
+| 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED / `4B-F01` BOUNDED CORRECTION ACCEPTED | Current authority is `N_platform=111`, exact Release-pinned Project capability grammar, `N_budget=2`, 25 ordinary Permissions, 46/46 durable-record classification and 13/13 owner boundaries; `WS-03`, `WS-06`, `PRJ-04` were operator-approved downstream subtractions rather than speculative DTO repair | Material Evidence shows another accepted F1 interaction cannot be expressed without new Product meaning/owner/trust, or the current authority is materially contradictory/falsified |
+| 4B — Executable Wire Contract | OPEN / ACTIVE | Canonical machine-readable Product wire closes current 4A semantics without parallel DTO/API authority | 4A changes materially or executable wire cannot express an accepted operation safely |
 | 4C — Frontend Interaction & Authority Realization | NOT STARTED | Frontend goals/routes/states/consumers derive bidirectionally from accepted Product/wire authority with zero invented frontend operations | Real frontend interaction exposes a material 4A/4B gap |
 | 4D — Project Paved Road & Runtime Realization | NOT STARTED | Exact scaffold/ownership classes, backend/frontend/data/integration/verification Paved Road, runtime/persistence/dependencies/deployment and conformance/escape-hatch/evaluation contract ratified before implementation graph | Required property cannot be realized by the Paved Road/runtime without changing accepted authority, or conformance proves the road can be silently bypassed |
 | 4E — Whole-System Coherence & Golden Flows | NOT STARTED | Product/wire/frontend/Paved-Road/runtime form one coherent falsifiable system; first Budget Analyzer path and material negatives compose correctly | Composed flow reveals contradiction or missing authority/mechanism |
@@ -31,58 +31,52 @@ This is the single current phase/status authority. It is not a worklog.
 C-018 = RATIFIED / OPERATOR RATIFIED
 C-015 = REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED
 Realization Planning = ACCEPTED / OPERATOR ACCEPTED / EXECUTION SKELETON
-4A = CLOSED / OPERATOR RATIFIED / MATERIAL REOPEN CANDIDATE 4B-F01
-4B = OPEN / BLOCKED ON 4B-F01 OPERATOR ADJUDICATION
+4A = CLOSED / OPERATOR RATIFIED / 4B-F01 BOUNDED CORRECTION ACCEPTED / N_platform=111
+4B = OPEN / ACTIVE
 4C–4G = NOT STARTED
 Product implementation = BLOCKED
 ```
 
 ## Exact next action
 
-Adjudicate **`4B-F01` — generic fixed-mutation semantic gap** only.
+Continue **4B — Executable Wire Contract** only, from the corrected current 4A authority.
 
-4B has already established and must preserve:
+Current established executable foundation:
 
 ```text
 OpenAPI 3.1.2 + JSON Schema 2020-12 representation
-single multi-file Product OAD authority
-114 ↔ 114 accepted fixed-operation method/path bijection at the pre-finding census
+single multi-file canonical Product OAD
+fixed Product operation bijection = 111 ↔ 111
+missing / extra / duplicate = 0
 opaque Conexus session + same-origin browser request-authenticity law
-truthful IC2 carrier rule; cross-resource If-Match rejected
+literal IF_MATCH exact set = { PRJ-12, PAR-14 }
 Project-defined project-operation/v1 declaration grammar
-Budget Analyzer exact two-query generation
-Budget truth-state negative controls
+Budget Analyzer exact two-query static-path generation
+Budget truth-state positive/negative falsifiers
+Verify #241 = SUCCESS on the 4B-F01 recompile
 ```
 
-The material downstream finding is bounded to:
+`4B-F01` is CLOSED / OPERATOR ACCEPTED:
 
 ```text
-WS-03  UpdateWorkspace
-WS-06  UpdateArea
-PRJ-04 UpdateProject
-```
-
-For these three operations, accepted Product/owner authority contains no closed mutable property inventory. 4B therefore cannot author an exact request schema without inventing Product meaning.
-
-Lead recommendation in [evidence/4b/fixed-mutation-semantic-gap.md](evidence/4b/fixed-mutation-semantic-gap.md):
-
-```text
-SUBTRACT WS-03
-SUBTRACT WS-06
-SUBTRACT PRJ-04
+SUBTRACT WS-03 UpdateWorkspace
+SUBTRACT WS-06 UpdateArea
+SUBTRACT PRJ-04 UpdateProject
 
 N_platform 114 → 111
 ```
 
-Do **not** replace them by preference with rename/settings/generic patch operations. If a later real consumer requires a rename or metadata edit, admit the smallest exact semantic operation then.
+Do not replace those operations with speculative rename/settings/generic patch operations. A later real consumer must establish an exact Product semantic before any replacement is admitted.
 
-Because 4A was operator-ratified, this bounded correction requires explicit operator approval before 4A authority or the OAS census changes.
+The next bounded 4B work is:
 
-Until adjudicated:
+```text
+1. derive shared machine schemas only from repeated accepted semantics
+2. close exact request/success/Problem shapes owner-by-owner across the corrected 111 fixed operations
+3. begin with Identity & Access + Workspace to attack auth/disclosure/current-authority edge cases early
+4. treat any missing Product property inventory as a stop/reopen falsifier, not a DTO-design opportunity
+```
 
-- do not mass-author fixed request/response schemas on top of the unresolved three operations;
-- do not open 4C;
-- do not choose runtime/Paved Road/persistence mechanics;
-- do not implement Product code, Sankhya, migrations, or R1–R7.
+Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 
-The current 4B owning contract is [phases/4b-executable-wire-contract.md](phases/4b-executable-wire-contract.md). Current human-readable wire authority is [product/wire-contract.md](product/wire-contract.md). Accepted 4A authority remains [product/operation-ledger.md](product/operation-ledger.md) until explicit operator adjudication changes it.
+The current 4B owning contract is [phases/4b-executable-wire-contract.md](phases/4b-executable-wire-contract.md). Current human-readable wire authority is [product/wire-contract.md](product/wire-contract.md). Current 4A authority is [product/operation-ledger.md](product/operation-ledger.md). The resolved bounded falsifier is [evidence/4b/fixed-mutation-semantic-gap.md](evidence/4b/fixed-mutation-semantic-gap.md).

@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const ledgerPath = 'docs/product/operation-ledger.md';
 const bundlePath = '/tmp/conexus-product-openapi.bundle.json';
 const expectedFixedOperationCount = 111;
+const allowedContractStates = new Set(['METHOD_PATH_MAPPED', 'SCHEMA_CLOSED']);
 
 const ledger = fs.readFileSync(ledgerPath, 'utf8');
 const sectionStart = ledger.indexOf('# 5. Fixed Conexus platform census');
@@ -40,10 +41,11 @@ for (const [path, pathItem] of Object.entries(oas.paths ?? {})) {
     if (!operationId || !fourAId) {
       throw new Error(`wire operation missing operationId or x-conexus-4a-id: ${method.toUpperCase()} ${path}`);
     }
-    if (operation?.['x-conexus-contract-state'] !== 'METHOD_PATH_MAPPED') {
-      throw new Error(`unexpected 4B contract state for ${operationId}`);
+    const contractState = operation?.['x-conexus-contract-state'];
+    if (!allowedContractStates.has(contractState)) {
+      throw new Error(`unexpected 4B contract state for ${operationId}: ${contractState ?? '<missing>'}`);
     }
-    actual.push({ fourAId, operationId, method: method.toUpperCase(), path });
+    actual.push({ fourAId, operationId, method: method.toUpperCase(), path, contractState });
   }
 }
 
@@ -76,4 +78,5 @@ for (const [id, operationId] of expectedById) {
   if (!seenIds.has(id)) throw new Error(`4A operation missing from Product OAS: ${id} ${operationId}`);
 }
 
-console.log(`4A↔OAS bijection passed (${actual.length} fixed Product operations; 0 missing; 0 extra; 0 duplicate).`);
+const schemaClosed = actual.filter((entry) => entry.contractState === 'SCHEMA_CLOSED').length;
+console.log(`4A↔OAS bijection passed (${actual.length} fixed Product operations; ${schemaClosed} schema-closed; 0 missing; 0 extra; 0 duplicate).`);

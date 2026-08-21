@@ -7,6 +7,9 @@ info:
     Canonical machine-readable HTTP wire for accepted Conexus Product operations.
     Product semantics remain owned by accepted 4A authority; this description may
     not invent operations, permissions, owners, or trust boundaries.
+servers:
+  - url: /
+    description: Relative Product API root; deployment origin remains outside 4B.
 paths: {}
 components:
   schemas:

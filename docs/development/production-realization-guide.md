@@ -3,7 +3,7 @@
 > **Status:** CURRENT REALIZATION COMPANION / DERIVED
 > **Parent authority:** DevelopmentConexus Engineering Method v1.0.0
 > **Current gate:** [Realization Planning](../phases/realization-planning.md)
-> **Boundary:** this guide governs how material realization choices are researched and proven. It does not create Product meaning, semantic owners, stage authority, or implementation authorization.
+> **Boundary:** this guide governs how material realization choices are researched and proven. It does not create Product meaning, semantic owners, stage authority, implementation authorization, or technology-decision authority; accepted material technology decisions are discoverable through the [decision register](../decisions/index.md).
 
 ## 1. Purpose
 
@@ -125,7 +125,9 @@ production claim             → production-stage Evidence; never a DEV imitatio
 
 A control counts only when it can be demonstrated to fire. A mock proves the local mock boundary only.
 
-## 5. Current first-build authentication decision — Keycloak
+## 5. Current first-build authentication realization — Keycloak
+
+The authoritative material decision is C-015 in the decision register. This section is its realization guidance, not a parallel decision authority.
 
 ### 5.1 Protected property
 
@@ -151,7 +153,7 @@ Alternatives considered at realization level:
 3. **external/hosted identity service** — viable class, but adds external commercial/service dependency not required by the internal/company-first F1;
 4. **Keycloak as self-hosted OIDC Identity Provider** — selected: mature standards-based authentication while Conexus retains domain authorization.
 
-**Decision:** `ADOPT` Keycloak for authentication protocol/identity proof; `ADAPT` through a narrow Conexus OIDC boundary. Do **not** adopt Keycloak Authorization Services as Conexus Product authorization.
+C-015 therefore records `ADOPT` Keycloak for authentication protocol/identity proof and `ADAPT` through a narrow Conexus OIDC boundary. Keycloak Authorization Services are not adopted as Conexus Product authorization.
 
 ### 5.3 Exact authority boundary
 
@@ -166,11 +168,11 @@ browser
 → every protected request resolves current Conexus I&A/domain authority
 ```
 
-Keycloak owns authentication mechanics and its own provider-side user/credential state. Conexus owns Product identity mapping and all Product authorization.
+Keycloak owns authentication mechanics and its own provider-side user/credential state. Conexus owns Product identity mapping and all Product authorization. The `(issuer, subject)` mapping is stored as attributes of the existing `iam.account`; it never creates another Conexus record class.
 
 The first-build integration MUST preserve:
 
-- confidential server-side OIDC client where the selected Node OIDC library supports the required deployment shape;
+- a confidential server-side OIDC client; a Node OIDC implementation that cannot support this required deployment shape is not admissible;
 - Authorization Code flow with PKCE `S256`;
 - exact allowlisted HTTPS redirect URIs outside local development;
 - `state`, `nonce`, issuer/audience/signature/time validation through a current standards-compliant OIDC implementation;
@@ -202,9 +204,21 @@ token says role X
 
 without an explicit later Product decision changing the authority model.
 
-### 5.5 Exact-version admission before R1 implementation
+### 5.5 Recovery and identity continuity
 
-Do not hard-code a volatile `latest` from planning. Immediately before implementation:
+Self-hosted Keycloak is stateful provider infrastructure. First-production recovery therefore includes the provider persistence/configuration needed to preserve the configured issuer and the stable subject identities referenced by `iam.account`.
+
+```text
+restored/rebuilt Keycloak
++ unknown or changed issuer-subject identity
+-X-> silently remap existing Conexus Account
+```
+
+Unknown continuity keeps normal human login/use fail-closed until I&A explicitly reconciles the identity. Keycloak recovery never recertifies Workspace/Project/Published-App grants; those remain current Conexus authority. Exact persistence placement/backup mechanics belong the first-production realization, while the recovery closure is current through C-015 and the release/data/security references.
+
+### 5.6 Exact-version admission before R1 implementation
+
+Keycloak admission runs under the Realization Plan `RP-G0.3` dependency/supply-chain discipline. Do not hard-code a volatile `latest` from planning. Immediately before implementation:
 
 1. select an exact supported Keycloak release from official release/documentation sources;
 2. review its migration notes and current security advisories;
@@ -212,9 +226,9 @@ Do not hard-code a volatile `latest` from planning. Immediately before implement
 4. pin/reproduce the selected dependencies and deployment artifact;
 5. prove the OIDC flow and session boundary against a real non-production Keycloak instance.
 
-The current planning review observed Keycloak `26.5.2` documentation/release material, but that observation is Evidence only, not the execution pin.
+The current planning review observed Keycloak `26.5.2` documentation/release material, but that observation is Evidence only, not the execution pin. Selection reopen triggers remain owned by C-015 in the decision register.
 
-### 5.6 Required authentication negative controls
+### 5.7 Required authentication negative controls
 
 R1 cannot be called realized until applicable controls fire:
 

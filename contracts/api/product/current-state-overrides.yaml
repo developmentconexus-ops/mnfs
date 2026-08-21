@@ -1,0 +1,179 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API current-state Path Item overrides
+  version: 4b-candidate
+paths:
+  /api/control/projects/{projectId}/app-access/{accountId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: accountId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    put:
+      summary: SetPublishedAppAccess
+      operationId: SetPublishedAppAccess
+      x-conexus-4a-id: IAM-15
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: CURRENT_OR_ABSENT
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+    delete:
+      summary: RevokePublishedAppAccess
+      operationId: RevokePublishedAppAccess
+      x-conexus-4a-id: IAM-17
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+  /api/control/workspaces/{workspaceId}/areas/{areaId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: areaId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    patch:
+      summary: UpdateArea
+      operationId: UpdateArea
+      x-conexus-4a-id: WS-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+  /api/control/projects/{projectId}/commands/archive:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    post:
+      summary: ArchiveProject
+      operationId: ArchiveProject
+      x-conexus-4a-id: PRJ-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+  /api/control/connections/{connectionId}/revisions:
+    parameters:
+      - name: connectionId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    post:
+      summary: ReviseConnection
+      operationId: ReviseConnection
+      x-conexus-4a-id: CON-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_REVISION
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+  /api/control/projects/{projectId}/promotions:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    get:
+      summary: ListPromotions
+      operationId: ListPromotions
+      x-conexus-4a-id: REL-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+    post:
+      summary: PromoteRelease
+      operationId: PromoteRelease
+      x-conexus-4a-id: REL-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPECTED_POINTER_GENERATION+IDEMPOTENCY_KEY
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+  /api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}/decisions:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: approvalRequestId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    post:
+      summary: DecideApprovalRequest
+      operationId: DecideApprovalRequest
+      x-conexus-4a-id: PAR-10
+      x-conexus-ingress: [CONTROL_PLANE, PUBLISHED_APP]
+      x-conexus-current-state-carrier: EXPLICIT_SEALED_SUBJECT
+      x-conexus-effect-fence: OWNER_GATEWAY_IC4
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true
+  /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/enable:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: agentId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: triggerId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    post:
+      summary: EnableAgentTrigger
+      operationId: EnableAgentTrigger
+      x-conexus-4a-id: PAR-15
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_TRIGGER_REVISION
+      x-conexus-contract-state: METHOD_PATH_MAPPED
+      responses:
+        '200':
+          description: Provisional 4B method/path mapping success; exact success schema/status remains to be closed in this stage.
+          x-conexus-provisional: true

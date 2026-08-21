@@ -1,0 +1,21 @@
+{
+  "truth": {
+    "state": "PARTIAL",
+    "asOf": "coord-partial-1",
+    "freshness": "CURRENT",
+    "coverage": "PARTIAL",
+    "provenance": "PARTIAL"
+  },
+  "items": [
+    {
+      "budgetRef": "budget:synthetic:1",
+      "canonicalBusinessDate": "2026-08-22",
+      "budgetAgeDays": -1,
+      "budgetValue": "100.00",
+      "sellerId": "seller:synthetic:1",
+      "customerId": "customer:synthetic:1",
+      "sourceCompanyId": "company:synthetic:1",
+      "pendingEvidenceState": "UNVERIFIED"
+    }
+  ]
+}

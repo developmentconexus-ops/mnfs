@@ -60,7 +60,16 @@ if (phase3N === 'NEXT / NOT STARTED') {
   errors.push(`3N has illegal verification-stage status: ${phase3N ?? 'missing'}`)
 }
 
-if (statusByName.get('C-018') !== 'NOT RATIFIED') errors.push('C-018 must remain NOT RATIFIED during 3N')
+const phaseC018 = statusByName.get('C-018')
+if (phaseC018 !== 'NOT RATIFIED') {
+  if (phaseC018 === 'OPEN / RATIFICATION REVIEW') {
+    if (!(phase3N === 'CLOSED' && phase3O === 'CLOSED')) {
+      errors.push('C-018 must remain NOT RATIFIED until 3O closure')
+    }
+  } else {
+    errors.push('C-018 status is not admitted before explicit operator ratification support')
+  }
+}
 if (statusByName.get('Product implementation') !== 'BLOCKED') errors.push('Product implementation must remain BLOCKED during 3N')
 
 // 3N-S2 — semantic-owner closure.

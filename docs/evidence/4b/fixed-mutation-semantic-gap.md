@@ -1,14 +1,15 @@
 # 4B Evidence — Fixed Mutation Semantic Gap
 
-> **Kind:** material downstream falsifier Evidence against accepted 4A fixed-operation closure.
-> **Status:** `4B-F01 OPEN / OPERATOR ADJUDICATION REQUIRED BEFORE MASS FIXED SCHEMA AUTHORING`.
-> **Do not infer reopen by preference:** this finding is bounded to the three operations below.
+> **Kind:** material downstream falsifier Evidence against the original operator-ratified 4A fixed-operation closure.
+> **Status:** `4B-F01 CLOSED / OPERATOR ACCEPTED / RECOMPILED`.
+> **Decision date:** `2026-08-21`.
+> **Scope:** bounded exclusively to the three operations below.
 
 ## 1. Falsifier
 
 4B must produce exact request schemas without creating new Product meaning.
 
-While beginning the first fixed-owner schema pass, three accepted operations proved non-executable as currently specified:
+While beginning the first fixed-owner schema pass, three accepted operations proved non-executable as specified:
 
 ```text
 WS-03  UpdateWorkspace
@@ -16,9 +17,9 @@ WS-06  UpdateArea
 PRJ-04 UpdateProject
 ```
 
-For each operation, accepted 4A authority names a generic update command but does **not** define a closed Product-visible mutable property set.
+For each operation, the original accepted 4A authority named a generic update command but did **not** define a closed Product-visible mutable property set.
 
-Current accepted Product concepts establish only:
+Accepted Product concepts establish only:
 
 ```text
 Workspace
@@ -31,7 +32,7 @@ Project
 = independent unit of software/Product lifecycle inside a Workspace
 ```
 
-No accepted Product/owner authority found by the bounded 4B route fixes any of the following as current mutable semantics:
+No accepted Product/owner authority fixed any of the following as current mutable semantics:
 
 ```text
 Workspace name / display name
@@ -44,19 +45,7 @@ Project description
 Project arbitrary settings
 ```
 
-Consequently a 4B request such as:
-
-```json
-{ "name": "..." }
-```
-
-or
-
-```json
-{ "settings": { "anything": "..." } }
-```
-
-would make 4B the first authority to decide what those operations mean.
+Consequently a 4B request such as `{ "name": "..." }` or a free-form `settings` map would make wire/DTO the first authority to decide what those operations mean.
 
 That violates the Phase-4 law:
 
@@ -99,13 +88,11 @@ generic Area edit
 generic Project edit
 ```
 
-There is also no accepted closed field inventory behind those verbs.
+There was also no accepted closed field inventory behind those verbs. Their survival was therefore indistinguishable from CRUD completeness.
 
-Therefore their survival cannot currently be justified by a concrete distinct Product interaction. Their shape is indistinguishable from CRUD completeness.
+## 3. Operator decision
 
-## 3. Strongest bounded correction
-
-Recommended Lead disposition:
+The operator explicitly accepted the bounded Lead recommendation:
 
 ```text
 WS-03  UpdateWorkspace → SUBTRACT
@@ -113,19 +100,19 @@ WS-06  UpdateArea      → SUBTRACT
 PRJ-04 UpdateProject   → SUBTRACT
 ```
 
-Do **not** replace them now with speculative `RenameWorkspace`, `RenameArea`, `RenameProject`, generic patch maps or settings APIs.
+The correction deliberately does **not** replace them with speculative `RenameWorkspace`, `RenameArea`, `RenameProject`, generic patch maps or settings APIs.
 
 If 4C later exposes a real rename/metadata consumer, reopen only that exact Product interaction and admit the smallest semantic operation/property then.
 
-## 4. Candidate census consequence if operator accepts
+## 4. Current census consequence
 
 ```text
-current N_platform = 114
-- WS-03            =  -1
-- WS-06            =  -1
-- PRJ-04           =  -1
--------------------------
-proposed N_platform = 111
+operator-ratified pre-finding N_platform = 114
+- WS-03                               =  -1
+- WS-06                               =  -1
+- PRJ-04                              =  -1
+-------------------------------------------
+current N_platform                    = 111
 ```
 
 Prefix delta:
@@ -136,49 +123,61 @@ PRJ 22 → 21
 all other prefixes unchanged
 ```
 
-Ordinary Permission count need not change:
+Ordinary Permission count remains exactly 25:
 
 ```text
 workspace.manage
-→ still has current Area-structure consumer(s), especially CreateArea and authorized Area administration/listing
+→ still has ListAreas/CreateArea as distinct current structural administration consumers
 
 project.manage
 → still has Project lifecycle/Baseline/binding/app-access consumers
 ```
 
-No owner, principal class, trust boundary, durable record class or Budget operation changes.
+No owner, principal class, trust boundary, durable record class or Budget operation changed.
 
-## 5. Downstream recompile if accepted
+## 5. Completed downstream recompile
 
-Only the smallest affected 4A/4B artifacts need correction:
+The bounded correction was projected into:
 
 ```text
 4A operation ledger
-4A Permission consumer wording where it names removed ops
-4A coverage/census Evidence
+4A Permission consumer wording
 4A fixed N_platform 114 → 111
-
-4B HTTP shape Evidence
-fixed Product OAD
+fixed Product OAD active graph
 4A↔OAS bijection count
 current-state carrier exact IF_MATCH set
 ```
 
-The following stay intact:
+Executable TDD proof:
+
+```text
+RED  Verify #233
+→ expected 111 fixed 4A operations after 4B-F01, found 114
+
+GREEN Verify #241
+→ corrected 4A census = 111
+→ corrected bundled Product OAD = 111
+→ missing = 0
+→ extra = 0
+→ duplicate = 0
+→ IF_MATCH exact set = { PRJ-12, PAR-14 }
+```
+
+The following remain intact:
 
 ```text
 Project-defined Ops(R) grammar
 N_budget = 2
 Budget declarations/generation/truth falsifiers
-25-Permission semantic vocabulary unless a separate falsifier proves otherwise
+25 ordinary Permissions
 46 durable record classes
 13 semantic owners
 4B representation/session/request-authenticity decisions
 ```
 
-## 6. Negative control
+## 6. Permanent negative control
 
-Until adjudicated, 4B MUST NOT close these three operations with any schema that accepts:
+4B/4C/4D MUST NOT resurrect these generic mutations by convenience through:
 
 ```text
 free-form property map
@@ -187,14 +186,10 @@ field names inferred only from CRUD conventions
 field names copied from a frontend hypothesis
 ```
 
-A downstream wire that does so is a falsifier, not a completion.
+A future mutation requires a real consumer and a separately admitted exact Product semantic.
 
-## 7. Decision required
+## 7. Closure
 
-Because 4A was explicitly operator-ratified, changing the accepted fixed-operation census requires explicit operator approval.
+`4B-F01` is resolved. 4A is **operator-ratified as boundedly corrected** to `N_platform = 111`; 4B may resume from the corrected authority.
 
-Recommended decision:
-
-> Accept `4B-F01` and boundedly reopen 4A only to subtract `WS-03`, `WS-06`, and `PRJ-04`, rederive `N_platform = 111`, then resume 4B from the corrected authority.
-
-No 4C or Product implementation is authorized by this finding.
+No 4C or Product implementation is authorized by this correction.

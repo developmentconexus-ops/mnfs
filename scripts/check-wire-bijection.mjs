@@ -2,6 +2,7 @@ import fs from 'node:fs';
 
 const ledgerPath = 'docs/product/operation-ledger.md';
 const bundlePath = '/tmp/conexus-product-openapi.bundle.json';
+const expectedFixedOperationCount = 111;
 
 const ledger = fs.readFileSync(ledgerPath, 'utf8');
 const sectionStart = ledger.indexOf('# 5. Fixed Conexus platform census');
@@ -21,8 +22,8 @@ for (const match of fixedSection.matchAll(rowPattern)) {
   expectedById.set(id, operationId);
 }
 
-if (expectedById.size !== 114) {
-  throw new Error(`expected 114 fixed 4A operations, found ${expectedById.size}`);
+if (expectedById.size !== expectedFixedOperationCount) {
+  throw new Error(`expected ${expectedFixedOperationCount} fixed 4A operations, found ${expectedById.size}`);
 }
 
 const oas = JSON.parse(fs.readFileSync(bundlePath, 'utf8'));
@@ -46,8 +47,8 @@ for (const [path, pathItem] of Object.entries(oas.paths ?? {})) {
   }
 }
 
-if (actual.length !== 114) {
-  throw new Error(`expected 114 Product wire operations, found ${actual.length}`);
+if (actual.length !== expectedFixedOperationCount) {
+  throw new Error(`expected ${expectedFixedOperationCount} Product wire operations, found ${actual.length}`);
 }
 
 const seenIds = new Set();

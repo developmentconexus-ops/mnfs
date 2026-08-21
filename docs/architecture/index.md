@@ -118,9 +118,9 @@ F1 is a modular monolith with explicit semantic owners:
 | **Project** | Project identity/lifecycle, Project Baseline, explicit Brain/Connection binding intent, Project-level composition intent | Workspace resources themselves, runtime implementation, external effect authority |
 | **Builder** | Change, Plan/current plan items, WorkUnit, Builder ActorRun, checkpoints/correctness coordination, Findings/routing, CodingSession relationship | Project business authority, PAR runtime truth, provider/runtime authority |
 | **Artifact Registry** | immutable compiled ArtifactRevision identity/digest/payload/availability | authored Git truth, active serving, business meaning of each artifact kind |
-| **Connections** | one Connection logical lifecycle with `ownerScope = WORKSPACE | PROJECT`, qualification/current logical credential relationship | plaintext/ciphertext secret-byte ownership, external effect execution, cross-Workspace use |
+| **Connections** | one Connection logical lifecycle with `ownerScope = WORKSPACE \| PROJECT`, qualification/current logical credential relationship | plaintext/ciphertext secret-byte ownership, external effect execution, cross-Workspace use |
 | **Capability Gateway** | governed Query/Action/Integration execution, effect admission/replay/idempotency, credential last-mile, execution receipts | Project/Brain meaning, Account identity, Product Agent lifecycle, model-spend authority |
-| **Brain** | Workspace `SEMANTIC | KNOWLEDGE | EVIDENCE_SPEC` meaning, validation/compilation/publication, Discovery proposal semantics, KnowledgeProposal, health/conformance | actual Builder/verification Evidence, RAG/index, agent memory, Project DB, telemetry, security policy |
+| **Brain** | Workspace `SEMANTIC \| KNOWLEDGE \| EVIDENCE_SPEC` meaning, validation/compilation/publication, Discovery proposal semantics, KnowledgeProposal, health/conformance | actual Builder/verification Evidence, RAG/index, agent memory, Project DB, telemetry, security policy |
 | **Production Agent Runtime (PAR)** | Conversation, Product AgentRun, ApprovalRequest, AgentTrigger runtime semantics, exact-projection execution/terminal owner facts | Agent authored source/Release authority, Gateway effect replay, I&A authority |
 | **Release** | exact immutable Project composition, Release/Promotion/current serving authority | authored source, mutable framework state, Project business data |
 | **Observability & Audit** | authorized audit facts and operational observations/provenance projections | business-state reconstruction from logs, authorization, owner F5 terminal truth |
@@ -266,12 +266,10 @@ supply-chain/dependency admission
 Connection/Gateway effect/egress
 first-production restore/emergency-stop/activation
 first vertical live-source/read-model reconciliation
-Golden benchmark / Worker Eval outcome quality
+Golden benchmark / Worker Eval integration into engineering system
 ```
 
 Builder UX proof must falsify the Product becoming an infrastructure console: WorkUnit/ActorRun/Gateway/CAS/Mastra/E2B machinery remains progressively inspectable when material, but it must not become the required primary workflow for expressing and inspecting ordinary Product intent.
-
-Worker Eval outcome quality is judged on representative correctness/completion, rework/correction burden, elapsed time, cost and required human intervention where measurable. Agent usage volume, token volume or parallel-agent count alone are not evidence of engineering effectiveness.
 
 Named proof routing remains explicit:
 

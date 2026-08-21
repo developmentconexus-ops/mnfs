@@ -2,22 +2,32 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const repositoryRoot = resolve(new URL('../', import.meta.url).pathname)
-const root = process.env.CONEXUS_ARCH_VERIFY_ROOT
-  ? resolve(process.env.CONEXUS_ARCH_VERIFY_ROOT)
-  : repositoryRoot
-const read = path => readFileSync(resolve(root, path), 'utf8')
+const root = process.argv[2] ? resolve(process.argv[2]) : repositoryRoot
 const errors = []
+
+const read = path => {
+  try {
+    return readFileSync(resolve(root, path), 'utf8')
+  } catch (error) {
+    console.error(`unable to read verification file ${path} under ${root}: ${error.code ?? error.message}`)
+    process.exit(1)
+  }
+}
 
 const roadmap = read('docs/roadmap.md')
 const architecture = read('docs/architecture/index.md')
-const data = read('docs/reference/data-and-persistence.md')
+const phase3M = read('docs/phases/3m-failure-recovery-architecture.md')
 const contract = read('docs/phases/3n-architecture-verification.md')
+const data = read('docs/reference/data-and-persistence.md')
+const gateway = read('docs/reference/integrations-and-gateway.md')
+const managedQualification = read('docs/reference/managed-execution-qualification.md')
 
-const sameSet = (left, right) =>
-  left.length === right.length &&
-  new Set(left).size === left.length &&
-  new Set(right).size === right.length &&
-  left.every(value => right.includes(value))
+const normalize = value => value.trim().replace(/\s+/g, ' ')
+const sameSet = (left, right) => {
+  const a = [...new Set(left)].sort()
+  const b = [...new Set(right)].sort()
+  return a.length === b.length && a.every((value, index) => value === b[index])
+}
 
 const sectionBetween = (text, startMarker, endMarker, label) => {
   const start = text.indexOf(startMarker)
@@ -51,7 +61,7 @@ if (phase3N === 'NEXT / NOT STARTED') {
 if (statusByName.get('C-018') !== 'NOT RATIFIED') errors.push('C-018 must remain NOT RATIFIED during 3N')
 if (statusByName.get('Product implementation') !== 'BLOCKED') errors.push('Product implementation must remain BLOCKED during 3N')
 
-// 3N-S2 — semantic-owner closure. Closed sets are compared as sets, not presentation order.
+// 3N-S2 — semantic-owner closure.
 const expectedOwners = [
   'Identity & Access',
   'Workspace',
@@ -112,82 +122,106 @@ if (!sameSet(actualInfrastructureBoundaries, expectedInfrastructureBoundaries)) 
   errors.push(`infrastructure boundary set changed: expected ${expectedInfrastructureBoundaries.join(', ')}; got ${actualInfrastructureBoundaries.join(', ') || 'none'}`)
 }
 
-// 3N-S4 — current-authority coherence.
+// 3N-S4 — current-authority coherence and data closure.
 const staleSpendWording = 'provider call occurring without spend reservation'
 if (architecture.includes(staleSpendWording) || contract.includes(staleSpendWording)) {
   errors.push('superseded model-spend reservation wording reappeared after 3L-R1')
 }
-if (!architecture.includes('provider/model execution escaping finite server-derived call/step/retry/fallback bounds')) {
-  errors.push('current bounded F1 model-execution falsifier is missing')
+
+const schemaMatch = data.match(/`hub_control` has exactly (\d+) owner schemas:\s*```text\s*([\s\S]*?)```/)
+const declaredSchemaCount = Number(schemaMatch?.[1] ?? NaN)
+const declaredSchemas = schemaMatch
+  ? schemaMatch[2].split(/\s+/).map(value => value.trim()).filter(Boolean)
+  : []
+if (!Number.isFinite(declaredSchemaCount) || declaredSchemas.length !== declaredSchemaCount || new Set(declaredSchemas).size !== declaredSchemas.length) {
+  errors.push(`durable record schema closure changed: projected=${declaredSchemas.length}, declared=${declaredSchemaCount}`)
 }
 
 const recordSection = sectionBetween(
   data,
   '## 6.5.1 Current durable record inventory',
-  '## 6.5.2 Current Tier-2 cross-module FK allowlist — 16',
+  '## 6.5.2 Current Tier-2 cross-module FK allowlist',
   'durable record inventory'
 )
 const declaredRecordCount = Number(recordSection.match(/TOTAL\s+(\d+)/)?.[1] ?? NaN)
 const recordRows = [...recordSection.matchAll(/^([a-z]+): (.+)$/gm)]
   .map(([, schema, records]) => ({ schema, records: records.split(' / ').map(value => value.trim()).filter(Boolean) }))
+const recordSchemas = recordRows.map(row => row.schema)
+if (!sameSet(recordSchemas, declaredSchemas) || new Set(recordSchemas).size !== recordRows.length || recordRows.some(row => row.records.length === 0)) {
+  errors.push(`durable record schema closure changed: declared=${declaredSchemas.join(',') || 'none'}; projected=${recordSchemas.join(',') || 'none'}`)
+}
 const actualRecordCount = recordRows.reduce((sum, row) => sum + row.records.length, 0)
 const declaredArchitectureRecordCount = Number(data.match(/closed at (\d+) record classes/)?.[1] ?? NaN)
 if (!Number.isFinite(declaredRecordCount) || actualRecordCount !== declaredRecordCount || declaredRecordCount !== declaredArchitectureRecordCount) {
   errors.push(`durable record inventory count changed: projected=${actualRecordCount}, declared=${declaredRecordCount}, architecture=${declaredArchitectureRecordCount}`)
 }
+const recordsBySchema = new Map(recordRows.map(row => [row.schema, new Set(row.records)]))
 
-const fkHeadingCount = Number(data.match(/## 6\.5\.2 Current Tier-2 cross-module FK allowlist — (\d+)/)?.[1] ?? NaN)
+const fkHeadingMatch = data.match(/## 6\.5\.2 Current Tier-2 cross-module FK allowlist — (\d+)/)
+const fkHeadingCount = Number(fkHeadingMatch?.[1] ?? NaN)
 const fkSection = sectionBetween(
   data,
-  '## 6.5.2 Current Tier-2 cross-module FK allowlist — 16',
+  '## 6.5.2 Current Tier-2 cross-module FK allowlist',
   'Tier-3 semantic references/digests',
   'Tier-2 FK allowlist'
 )
 const fkRows = [...fkSection.matchAll(/^\| (\d+) \| (.+?) \|$/gm)]
-  .map(([, number, fk]) => ({ number: Number(number), fk: fk.trim() }))
+  .map(([, number, cell]) => ({ number: Number(number), cell, expression: cell.match(/`([^`]+)`/)?.[1] ?? '' }))
 if (!Number.isFinite(fkHeadingCount) || fkRows.length !== fkHeadingCount) {
   errors.push(`Tier-2 FK allowlist count changed: projected=${fkRows.length}, declared=${fkHeadingCount}`)
 }
-if (new Set(fkRows.map(row => row.fk)).size !== fkRows.length) errors.push('Tier-2 FK allowlist contains duplicates')
+if (fkRows.some((row, index) => row.number !== index + 1)) errors.push('Tier-2 FK allowlist numbering changed')
+if (!data.includes('Tier-2 is admitted only when')) errors.push('Tier-2 FK admission rule is missing from current data authority')
 
-// 3N-S5 — architecture §46 is the oracle for the explicit minimum and its routing.
+for (const row of fkRows) {
+  const match = row.expression.match(/^([a-z]+)\.([a-z_]+)\.[a-z_]+ → ([a-z]+)\.([a-z_]+)\(id\)$/)
+  if (!match) {
+    errors.push(`Tier-2 FK expression is not structurally parseable: ${row.expression || row.cell}`)
+    continue
+  }
+  const [, sourceSchema, sourceRecord, targetSchema, targetRecord] = match
+  const sourceExists = recordsBySchema.get(sourceSchema)?.has(sourceRecord)
+  const targetExists = recordsBySchema.get(targetSchema)?.has(targetRecord)
+  if (!sourceExists || !targetExists) {
+    errors.push(`Tier-2 FK endpoint is outside current data closure: ${row.expression}`)
+  }
+}
+
+if (recordsBySchema.get('gw')?.has('budget_counter')) {
+  const budgetProjectionComplete =
+    gateway.includes('`budget_counter`') &&
+    gateway.includes('external-effect unit/budget authority') &&
+    /Product Agent[\s\S]*budgets/.test(gateway) &&
+    gateway.includes('not model-spend authority')
+  if (!budgetProjectionComplete) errors.push('gw.budget_counter lacks current Gateway consumer/invariant projection')
+}
+
+// 3N-S5 — accepted explicit minimum and contract/execution routing.
 const invariantSection = sectionBetween(
   architecture,
   '## 46. Verification invariants carried into 3N / 3O',
   '## 47. Reopen triggers by family',
   'section-46 invariant'
 )
-const declaredMinimum = Number(invariantSection.match(/Accepted explicit minimum count = (\d+)/)?.[1] ?? NaN)
+const declaredInvariantCount = Number(invariantSection.match(/Accepted explicit minimum count = (\d+)/)?.[1] ?? NaN)
 const invariantMatch = invariantSection.match(/```text\s*([\s\S]*?)```/)
-const invariantLines = invariantMatch
-  ? invariantMatch[1].split('\n').map(line => line.trim()).filter(Boolean)
+const architectureRoutes = invariantMatch
+  ? invariantMatch[1].split('\n').map(line => line.trim()).filter(Boolean).map(line => {
+      const separator = line.indexOf(' | ')
+      return separator < 0 ? { route: '', falsifier: line } : { route: line.slice(0, separator), falsifier: line.slice(separator + 3) }
+    })
   : []
-
-const parseInvariant = line => {
-  if (line.startsWith('FIRST_BUILD | ')) {
-    return { contractStage: 'FIRST_BUILD', executionStage: 'FIRST_BUILD', falsifier: line.slice('FIRST_BUILD | '.length) }
-  }
-  if (line.startsWith('FIRST_PRODUCTION | ')) {
-    return { contractStage: 'FIRST_PRODUCTION', executionStage: 'FIRST_PRODUCTION', falsifier: line.slice('FIRST_PRODUCTION | '.length) }
-  }
-  if (line.startsWith('3O_CONTRACT→FIRST_BUILD | ')) {
-    return { contractStage: '3O_CONTRACT', executionStage: 'FIRST_BUILD', falsifier: line.slice('3O_CONTRACT→FIRST_BUILD | '.length) }
-  }
-  errors.push(`invalid section-46 routing syntax: ${line}`)
-  return null
+if (!Number.isFinite(declaredInvariantCount) || architectureRoutes.length !== declaredInvariantCount) {
+  errors.push(`section-46 minimum falsifier count changed: projected=${architectureRoutes.length}, declared=${declaredInvariantCount}`)
 }
-const invariants = invariantLines.map(parseInvariant).filter(Boolean)
-if (!Number.isFinite(declaredMinimum) || invariants.length !== declaredMinimum) {
-  errors.push(`section-46 minimum falsifier count changed: projected=${invariants.length}, declared=${declaredMinimum}`)
-}
-if (new Set(invariants.map(item => item.falsifier)).size !== invariants.length) {
-  errors.push('section-46 explicit minimum contains duplicate falsifiers')
+if (new Set(architectureRoutes.map(row => row.falsifier)).size !== architectureRoutes.length) {
+  errors.push('section-46 minimum contains duplicate falsifiers')
 }
 
 const routeRows = [...contract.matchAll(/^\| (3N-V\d{2}) \| ([A-Z0-9_]+) \| ([A-Z0-9_]+) \| (.+?) \|$/gm)]
   .map(([, id, contractStage, executionStage, falsifier]) => ({ id, contractStage, executionStage, falsifier }))
-if (routeRows.length !== invariants.length) {
-  errors.push(`3N routing table must cover the architecture explicit minimum: expected ${invariants.length}, found ${routeRows.length}`)
+if (routeRows.length !== architectureRoutes.length) {
+  errors.push(`3N routing table must contain ${architectureRoutes.length} explicit minimum falsifiers; found ${routeRows.length}`)
 }
 const routeById = new Map()
 for (const row of routeRows) {
@@ -195,67 +229,105 @@ for (const row of routeRows) {
   routeById.set(row.id, row)
 }
 
-for (let index = 0; index < invariants.length; index += 1) {
+for (let index = 0; index < architectureRoutes.length; index += 1) {
   const id = `3N-V${String(index + 1).padStart(2, '0')}`
-  const expected = invariants[index]
+  const source = architectureRoutes[index]
+  const [expectedContractStage, expectedExecutionStage] = source.route.includes('→')
+    ? source.route.split('→')
+    : [source.route, source.route]
   const row = routeById.get(id)
   if (!row) {
     errors.push(`missing 3N routing id: ${id}`)
     continue
   }
-  if (
-    row.contractStage !== expected.contractStage ||
-    row.executionStage !== expected.executionStage ||
-    row.falsifier !== expected.falsifier
-  ) {
-    errors.push(`${id} routing differs from architecture authority`)
+  if (row.contractStage !== expectedContractStage || row.executionStage !== expectedExecutionStage) {
+    errors.push(`${id} routing differs from architecture authority: expected ${expectedContractStage}→${expectedExecutionStage}; got ${row.contractStage}→${row.executionStage}`)
   }
+  if (row.falsifier !== source.falsifier) errors.push(`${id} falsifier text differs from architecture authority`)
 }
 
-// 3N-S6 — carry every architecture §42 proof family without inventing new Product authority.
-const proofSection = sectionBetween(
+// 3N-S6 — downstream proof-family coverage from Architecture §42.
+const proofFamilySection = sectionBetween(
   architecture,
   '## 42. Downstream proof families not pulled artificially into 3L',
-  'Named proof routing remains explicit:',
-  'downstream proof families'
+  '## 43. Explicit future seams — no dormant machinery',
+  'downstream proof family'
 )
-const proofMatch = proofSection.match(/```text\s*([\s\S]*?)```/)
-const proofFamilies = proofMatch
-  ? proofMatch[1].split('\n').map(line => line.trim()).filter(Boolean)
+const proofFamilyMatch = proofFamilySection.match(/Examples:\s*```text\s*([\s\S]*?)```/)
+const architectureProofFamilies = proofFamilyMatch
+  ? proofFamilyMatch[1].split('\n').map(line => line.trim()).filter(Boolean)
   : []
 const contractProofSection = sectionBetween(
   contract,
   '## Downstream proof-family coverage',
-  '## Lead global-coherence challenge',
-  '3N downstream proof-family coverage'
+  '## Current 3N-routed obligation intake',
+  '3N downstream proof-family'
 )
 const contractProofRows = [...contractProofSection.matchAll(/^\| ([^|]+?) \| ([^|]+?) \|$/gm)]
-  .map(([, family, routing]) => ({ family: family.trim(), routing: routing.trim() }))
-  .filter(row => row.family !== 'Proof family' && !/^---+$/.test(row.family))
-const contractFamilies = contractProofRows.map(row => row.family)
-if (!sameSet(proofFamilies, contractFamilies)) {
-  const missing = proofFamilies.filter(family => !contractFamilies.includes(family))
-  const extra = contractFamilies.filter(family => !proofFamilies.includes(family))
-  errors.push(`downstream proof-family coverage missing or extra: missing=${missing.join('; ') || 'none'}; extra=${extra.join('; ') || 'none'}`)
+  .filter(([, family]) => family.trim() !== 'Proof family' && !family.trim().startsWith('---'))
+  .map(([, family, route]) => ({ family: family.trim(), route: route.trim() }))
+if (!sameSet(contractProofRows.map(row => row.family), architectureProofFamilies)) {
+  errors.push(`downstream proof-family coverage missing or extra: architecture=${architectureProofFamilies.length}, contract=${contractProofRows.length}`)
+}
+for (const row of contractProofRows) {
+  if (!['FIRST_BUILD', 'FIRST_PRODUCTION', '3O_CONTRACT → FIRST_BUILD'].includes(row.route)) {
+    errors.push(`invalid downstream proof-family route for ${row.family}: ${row.route}`)
+  }
 }
 
-const allowedProofRoutes = new Set(['FIRST_BUILD', 'FIRST_PRODUCTION', '3O_CONTRACT → FIRST_BUILD'])
-for (const row of contractProofRows) {
-  if (!allowedProofRoutes.has(row.routing)) errors.push(`invalid downstream proof-family routing for ${row.family}: ${row.routing}`)
+// 3N-S7 — bounded current-owner intake explicitly routed to 3N/3O.
+const sourceIntake = []
+const phase3MRoute = phase3M.match(/^- \*\*3N:\*\* (.+)\.$/m)
+if (!phase3MRoute) {
+  errors.push('3M current 3N routing is missing')
+} else {
+  const obligations = phase3MRoute[1]
+    .split(', ')
+    .map(value => normalize(value.replace(/^and /, '')))
+    .filter(Boolean)
+  for (const obligation of obligations) sourceIntake.push(`3M closure::${obligation}`)
+}
+
+const cr1Obligation = 'current-authority serialization × owner isolation'
+if (!data.includes('3N/3O must prove both sides together')) {
+  errors.push('CR-1 current 3N routing is missing')
+} else {
+  sourceIntake.push(`data CR-1::${cr1Obligation}`)
+}
+
+for (const obligation of ['architecture-wide duplicate-authority proof', 'architecture-wide deciding-evidence completeness']) {
+  if (!managedQualification.includes(`${obligation}`) || !managedQualification.includes('→ 3N/3O')) {
+    errors.push(`managed-execution current 3N routing is missing: ${obligation}`)
+  } else {
+    sourceIntake.push(`managed qualification::${obligation}`)
+  }
+}
+
+const intakeSection = sectionBetween(
+  contract,
+  '## Current 3N-routed obligation intake',
+  '## Lead global-coherence challenge',
+  'current 3N-routed obligation intake'
+)
+const intakeRows = [...intakeSection.matchAll(/^\| ([^|]+?) \| ([^|]+?) \| ([^|]+?) \| ([^|]+?) \|$/gm)]
+  .filter(([, source]) => source.trim() !== 'Source' && !source.trim().startsWith('---'))
+  .map(([, source, obligation]) => `${normalize(source)}::${normalize(obligation)}`)
+if (!sameSet(intakeRows, sourceIntake)) {
+  errors.push(`3N-routed obligation intake differs from current owners: owners=${sourceIntake.length}, contract=${intakeRows.length}`)
+}
+
+if (!contract.includes('explicit operator closure authority') || !contract.includes('`3N = CLOSED`') || !contract.includes('`3O = NEXT / NOT STARTED`')) {
+  errors.push('3N closure gate does not bind operator authority to the roadmap transition')
 }
 
 if (errors.length) {
   console.error(errors.join('\n'))
   process.exitCode = 1
 } else {
-  const routeCounts = invariants.reduce((counts, item) => {
-    const key = `${item.contractStage}→${item.executionStage}`
-    counts.set(key, (counts.get(key) ?? 0) + 1)
-    return counts
-  }, new Map())
-  const routeSummary = [...routeCounts.entries()].map(([key, count]) => `${count} ${key}`).join(', ')
+  const buildCount = architectureRoutes.filter(row => row.route === 'FIRST_BUILD').length
+  const productionCount = architectureRoutes.filter(row => row.route === 'FIRST_PRODUCTION').length
+  const verticalCount = architectureRoutes.filter(row => row.route === '3O_CONTRACT→FIRST_BUILD').length
   console.log(
-    `3N architecture verification passed (${invariants.length} explicit minimum falsifiers: ${routeSummary}; ` +
-    `${proofFamilies.length} downstream proof families; data ${actualRecordCount} records/${fkRows.length} Tier-2 FKs).`
+    `3N architecture verification passed (${architectureRoutes.length} explicit minimum falsifiers: ${buildCount} FIRST_BUILD→FIRST_BUILD, ${productionCount} FIRST_PRODUCTION→FIRST_PRODUCTION, ${verticalCount} 3O_CONTRACT→FIRST_BUILD; ${architectureProofFamilies.length} downstream proof families; ${sourceIntake.length} current-owner routed obligations; data ${actualRecordCount} records/${fkRows.length} Tier-2 FKs).`
   )
 }

@@ -241,6 +241,8 @@ A new durable record class still requires the existing Decision Loop/material Fi
 
 ## 6.5.2 Current Tier-2 cross-module FK allowlist — 16
 
+Tier-2 is admitted only when a cross-owner reference protects stable structural identity or containment whose dangling state is invalid independently of mutable authorization/eligibility. The target is a stable owner identity/PK; enforcement is `RESTRICT`/`NO ACTION`, never `CASCADE`/`SET NULL`; the FK grants no Product authority and authorizes no cross-schema SQL. Historical/exact semantic pins whose current eligibility must be revalidated remain Tier-3. Absence remains the default, and any new Tier-2 FK requires the existing Decision Loop/material Finding.
+
 | # | Tier-2 FK |
 | --- | --- |
 | 1 | `iam.workspace_membership.workspace_id → ws.workspace(id)` |

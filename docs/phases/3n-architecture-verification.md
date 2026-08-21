@@ -4,7 +4,7 @@ Current phase/status and the exact next action remain owned only by [../roadmap.
 
 ## Authority boundary
 
-3N derives from the closed 3A–3M current projection, principally [../architecture/index.md](../architecture/index.md) sections 2, 4, 4.1, and 42–47, plus the current task owners routed from [../index.md](../index.md).
+3N derives from the closed 3A–3M current projection, principally [../architecture/index.md](../architecture/index.md) sections 2, 4, 4.1, 42–44 and 46–47, plus the current task owners routed from [../index.md](../index.md), especially 3M recovery, data/persistence and managed-execution qualification where they explicitly route proof into 3N/3O.
 
 It may falsify accepted architecture. It may not silently redesign it to make a proof pass.
 
@@ -34,6 +34,7 @@ The answer is a **static closure check + current-authority coherence challenge +
 | `3N-S4` current-authority coherence | a consolidated current owner points to unreachable load-bearing authority or carries superseded semantics | current projection is self-sufficient for load-bearing closed facts and later accepted amendments supersede stale wording |
 | `3N-S5` explicit minimum falsifiers/routing | a section-46 minimum falsifier disappears or is routed to a contract/execution stage incapable of genuine falsification | every architecture §46 minimum falsifier is preserved exactly once and the 3N route is derived from current architecture authority rather than a second checker oracle |
 | `3N-S6` downstream proof-family coverage | an implementation-dependent accepted family is dropped because it was not one of the explicit §46 lines | every current architecture §42 proof family remains routed forward without fake pre-implementation execution |
+| `3N-S7` current routed-obligation intake | a current owner explicitly routes proof to 3N/3O but the phase contract omits it | the bounded intake below matches the named current owner routes without scanning history/research as authority |
 
 Every material guard must have a deterministic negative control where a static guard can honestly exist. A green static check is **not** evidence that later Product behavior works.
 
@@ -93,9 +94,29 @@ Architecture §42 remains independently load-bearing. These families are not con
 | Connection/Gateway effect/egress | FIRST_BUILD |
 | first-production restore/emergency-stop/activation | FIRST_PRODUCTION |
 | first vertical live-source/read-model reconciliation | 3O_CONTRACT → FIRST_BUILD |
-| Golden benchmark / Worker Eval outcome quality | FIRST_BUILD |
+| Golden benchmark / Worker Eval integration into engineering system | FIRST_BUILD |
 
 `FIRST_BUILD` means the first real build that instantiates the applicable owner/boundary; it does not require the Budget Analyzer to manufacture an unused capability merely to exercise infrastructure.
+
+## Current 3N-routed obligation intake
+
+This intake is intentionally bounded to **current owner documents that explicitly route proof to 3N/3O**. It is not a repository-wide keyword scan and does not make history, research or review text authoritative.
+
+| Source | Obligation | 3N disposition | Downstream execution |
+| --- | --- | --- | --- |
+| 3M closure | authority uniqueness | EXECUTED_IN_3N | FIRST_BUILD behavior where applicable |
+| 3M closure | current/exact-pinned re-entry | ROUTE_AND_COHERENCE | FIRST_BUILD |
+| 3M closure | unknown preservation | ROUTE_AND_COHERENCE | FIRST_BUILD / FIRST_PRODUCTION by owner |
+| 3M closure | dependency/storage boundaries | STATIC_CLOSURE | FIRST_BUILD / FIRST_PRODUCTION by owner |
+| 3M closure | generation-continuity/deny-only posture | ROUTE_AND_COHERENCE | FIRST_PRODUCTION |
+| 3M closure | Gateway new-admission fence | ROUTE_AND_COHERENCE | FIRST_BUILD |
+| 3M closure | idempotency-scope validation | ROUTE_AND_COHERENCE | FIRST_BUILD |
+| 3M closure | YAGNI deletion challenge | EXECUTED_IN_3N | N/A |
+| data CR-1 | current-authority serialization × owner isolation | JOINT_CONTRACT_CHECK | FIRST_BUILD / 3O contract where applicable |
+| managed qualification | architecture-wide duplicate-authority proof | STATIC_AND_REVIEW | FIRST_BUILD conformance where implementation-dependent |
+| managed qualification | architecture-wide deciding-evidence completeness | INVENTORY_AND_ROUTING | FIRST_BUILD / FIRST_PRODUCTION by property |
+
+The intake does not claim the implementation-dependent behavior is already proven. It proves only that the current architecture has not dropped obligations explicitly handed to 3N/3O by their present owners.
 
 ## Lead global-coherence challenge
 
@@ -110,11 +131,11 @@ The Lead re-challenged current architecture against the repository Product Contr
 | `PAR` + `MAR` + Gateway split | preserved; reasoning/runtime occurrence and external-effect replay/credential authority remain distinct meanings |
 | generic Workflow business owner | rejected F1; a future named deterministic consumer may use Mastra Workflow or another mechanism behind the smallest real owner without moving Gateway effect authority |
 | DEDICATED trust seam | preserved after deletion challenge; physical deployment remains deferred, while the current server-to-platform trust contract prevents an undefined future authority crossing |
-| 46 durable records / 16 Tier-2 FKs | semantic closure preserved; current consolidated data owner repaired so Fresh Actors can verify the exact inventory without Git archaeology |
+| 46 durable records / 16 Tier-2 FKs | semantic closure preserved; current consolidated data owner exposes the exact inventory and structural admission rule so Fresh Actors can falsify it without Git archaeology |
 | model-spend reservation wording | corrected as stale projection from pre-3L-R1 semantics; F1 keeps finite server-derived execution bounds and truthful usage/cost states, not hard monetary reservation machinery |
 | 3O role | corrected: 3O defines the vertical proof contract; the first authorized real build executes and can falsify it |
 | Product UX complexity | preserve progressive disclosure; internal factory machinery is inspectable when material but must not become the required primary user workflow |
-| Worker/runtime evaluation | preserve Golden benchmark + Worker Eval; measure outcome/correctness/rework/elapsed time/cost/completion rather than agent-usage vanity metrics |
+| Worker/runtime evaluation | preserve the accepted Golden benchmark + Worker Eval obligation; Factory evidence favors outcome-oriented evaluation, but exact metrics remain non-authoritative realization guidance until an owning decision defines them |
 
 Provisional Lead verdict before Fable:
 
@@ -127,7 +148,19 @@ surviving structural YAGNI      = 0 identified by Lead challenge
 bounded projection defects      = corrected in this 3N candidate
 ```
 
-Independent Fable review must attack this conclusion rather than merely confirm it.
+## Independent Fable Round-1 adjudication
+
+Fable reviewed the frozen corrected candidate as a whole-system architecture challenge. Its core verdict preserved 3A–3M, required no Product reopen and required no 3L requalification. Five bounded findings were adjudicated as follows:
+
+| Finding | Lead adjudication |
+| --- | --- |
+| F-01 incomplete 3N intake outside Architecture §42/§46 | ACCEPTED — bounded current-owner intake added and executable comparison required |
+| F-02 Worker Eval metrics became new authority | ACCEPTED — exact metric contract removed from architecture; comparative guidance remains Evidence only |
+| F-03 `gw.budget_counter` alleged structural YAGNI | DELETION REJECTED / PROJECTION GAP ACCEPTED — current Product Agent budgets plus Gateway external-effect unit/budget authority justify the record; owner projection now distinguishes it from deferred model spend |
+| F-04 46/16 checker counted without resolving structure | ACCEPTED — schema/record closure and every Tier-2 FK endpoint must resolve against current data authority |
+| F-05 closure transaction omitted roadmap transition | ACCEPTED — operator-authorized closure must update roadmap and reverify on the closure head |
+
+No material architecture contradiction survives this adjudication. A second independent round is not required unless these corrections themselves create a new material contradiction.
 
 ## Executable mechanism
 
@@ -138,15 +171,17 @@ It must fail closed on:
 - illegal phase/ratification/implementation progression;
 - semantic-owner or closed dependency drift;
 - resurrection of the superseded model-spend reservation wording;
-- mismatch between the declared 46-class inventory and the records actually projected by the current data owner;
-- mismatch between the declared 16-FK Tier-2 allowlist and its current projected entries;
+- mismatch between the declared 13 schemas / 46-class inventory and the records actually projected by the current data owner;
+- a Tier-2 FK endpoint outside the current schema/record closure or a mismatch against the declared 16-entry allowlist;
 - loss/duplication of an architecture §46 explicit minimum falsifier;
 - mismatch between §46 contract/execution routing and this phase route;
-- loss of a current architecture §42 downstream proof family from this contract.
+- loss of a current architecture §42 downstream proof family from this contract;
+- omission of a current 3N/3O-routed obligation from the bounded named-owner intake;
+- a projected Gateway `budget_counter` without its current external-effect budget consumer/invariant.
 
 The checker does **not** hard-code the 28 falsifier texts as a second semantic authority; it derives them from current architecture §46. Comparative Global-Maximum judgment remains review/adjudication work, not something a regex can prove.
 
-`tests/repository/architecture-verification.test.mjs` supplies deterministic negative controls against the real checker. Fixture copies are isolated mechanics only; they never claim implementation/runtime proof.
+`tests/repository/architecture-verification.test.mjs` supplies deterministic negative controls against the real checker. Fixture copies are isolated mechanics only; they never claim implementation/runtime proof. The test root is supplied only as an explicit checker argument; normal repository verification uses the repository root and ignores environment injection.
 
 ## Closure gate
 
@@ -158,6 +193,9 @@ The checker does **not** hard-code the 28 falsifier texts as a second semantic a
 4. independent Fable review is run from a newly isolated review branch over the exact corrected candidate HEAD under the current Repository Standard;
 5. every material Fable finding is adjudicated against current authority and no admitted contradiction remains unresolved;
 6. the merge candidate contains no `docs/work/**` review material;
-7. closure does not start 3O, ratify C-018, or authorize Product implementation by implication.
+7. closure does not ratify C-018 or authorize Product implementation by implication;
+8. **after explicit operator closure authority**, the same closure head updates the roadmap to `3N = CLOSED` and `3O = NEXT / NOT STARTED`, while `C-018 = NOT RATIFIED` and `Product implementation = BLOCKED`; `npm ci && npm run verify` must pass again on that closure head before merge.
+
+Until that explicit operator closure authority is given, roadmap status remains unchanged and 3O is not started.
 
 If a later real proof falsifies a routed property, it reopens only the smallest accepted owner/decision that the Evidence actually invalidates.

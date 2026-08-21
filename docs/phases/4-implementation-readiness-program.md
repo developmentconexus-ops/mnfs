@@ -69,7 +69,7 @@ technical ingress != Product API
 unknown / partial / unsupported != zero / success
 no screen-shaped second API authority
 no manual parallel DTO authority
-no operation without a current consumer class
+no concrete operation without a current consumer class
 no consumer interaction without an admitted operation/capability
 no SDK/helper/abstraction before a concrete protected property or repeated consumer
 no dependency before a concrete consumer/property
@@ -83,23 +83,45 @@ A stage may discover a bounded upstream defect. It may not silently repair it in
 
 4A derives the complete admitted F1 Product operation surface from current Product/architecture authority before HTTP shape or frontend design.
 
-It owns:
+Because Conexus is a platform that publishes Project-defined applications, 4A deliberately closes **three** different operation surfaces instead of fabricating one global count for unknown future software:
 
-- Product operation census;
+```text
+A. fixed Conexus platform operations
+   → exact finite N_platform
+
+B. Project-defined capability operation grammar
+   → exact Release R contains finite Ops(R)
+   → registered Query / Action / honest Integration Operation
+   → no global execute(anySlug, anyInput)
+
+C. first Budget Analyzer application operations
+   → exact finite N_budget
+   → concrete first proof that the Project grammar is usable
+```
+
+The fixed platform census owns Conexus-provided Product meaning. Project-defined business operations remain exact Project/Product authority even though Conexus validates, publishes and executes them. A provider transport, runtime callback, queue delivery, OIDC route or framework method is not admitted merely because software needs it.
+
+4A owns:
+
+- the exact fixed platform-operation census;
+- the Project-defined capability admission grammar and exact-Release law;
+- the first Budget Analyzer concrete application-operation census;
 - operation semantics and owner;
-- actor/principal classes actually admitted by F1;
+- actor/principal/caller classes actually admitted by F1;
 - ordinary Permission vocabulary and special authenticated/system conditions where current authority requires them;
 - Workspace / Project / Published-App / other exact scope rules;
 - read versus consequential command semantics;
 - current-authority, eligibility and disclosure requirements;
 - knowledge/freshness/outcome classes that must remain distinguishable;
 - idempotency and concurrency/precondition requirements at semantic level;
-- Product API versus Published-App capability versus Technical Ingress versus internal-mechanic separation;
-- consumer-class coverage for every admitted operation.
+- Conexus platform API versus exact Project capability versus Published-App versus Product-Agent versus Technical-Ingress versus internal-mechanic separation;
+- consumer-class coverage for every concrete admitted operation.
 
 4A does not choose paths, HTTP methods, router/framework, database schema, frontend package topology, SDK APIs or deployment mechanics.
 
 Owning contract: [4a-product-surface-and-authority-contract.md](4a-product-surface-and-authority-contract.md).
+
+Canonical candidate ledger: [../product/operation-ledger.md](../product/operation-ledger.md).
 
 The non-authoritative [Blueprint Harness design input](../development/blueprint-harness-design.md) may expose candidate Product questions such as planning/execution modes, but it cannot admit those meanings by itself.
 
@@ -124,6 +146,8 @@ Product versus Technical Ingress routing
 mechanically generated client/server projections
 ```
 
+For fixed Conexus platform operations, 4B freezes the platform wire. For Project-defined operations, 4B freezes the **operation-definition/codegen grammar** that deterministically produces exact wire for `Ops(R)` rather than exposing an unrestricted generic executor. The first Budget Analyzer must instantiate that grammar with an exact generated/conforming application wire.
+
 OpenAPI is the preferred Product wire authority where it fits the accepted surface. 4B remains router/runtime neutral and does not select database or deployment mechanics.
 
 A frontend or backend implementation may not maintain a second hand-written wire/DTO authority.
@@ -146,7 +170,8 @@ frontend interaction → admitted operation → semantic owner → accepted Prod
 - human goals and workflows;
 - App Shell / information architecture;
 - semantic route/screen meanings;
-- complete operation-to-consumer mapping for frontend-reachable operations;
+- complete operation-to-consumer mapping for frontend-reachable fixed platform operations;
+- complete operation-to-consumer mapping for the first Budget Analyzer application wire;
 - state ownership: server, URL/navigation, form draft, ephemeral UI and any proved additional class;
 - honest unknown/partial/stale/outcome UX;
 - generated transport consumption;
@@ -157,7 +182,7 @@ frontend interaction → admitted operation → semantic owner → accepted Prod
 Target proof includes:
 
 ```text
-all frontend-reachable admitted operations covered
+all frontend-reachable admitted concrete operations covered
 orphaned frontend operations = 0
 invented frontend operations = 0
 material interaction without admitted operation = 0
@@ -376,7 +401,8 @@ No implementation slice may begin by selecting its own foundational stack. No sl
 The review must challenge at least:
 
 ```text
-orphan operation
+orphan fixed platform operation
+Project operation admitted without exact Release authority
 consumer without operation
 invented frontend operation
 missing Permission/scope
@@ -384,6 +410,7 @@ Permission broader than accepted authority
 owner duplication
 screen-shaped API
 parallel DTO/wire authority
+generic execute(anySlug, anyInput) escape
 runtime mechanism without consumer
 persistence class without owner/invariant
 SDK/helper/abstraction without protected property
@@ -405,6 +432,9 @@ Product implementation remains blocked until all are true:
 
 ```text
 4A CLOSED / OPERATOR-RATIFIED
+  fixed N_platform exact
+  Project capability grammar closed
+  first Budget Analyzer N_budget exact
 4B CLOSED / OPERATOR-RATIFIED
 4C CLOSED / OPERATOR-RATIFIED
 4D CLOSED / OPERATOR-RATIFIED

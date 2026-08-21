@@ -50,7 +50,7 @@ Why selected:
 
 ### B. New whole-architecture review
 
-Rejected by default. A new global review would duplicate 3N and part of 3O without a new material falsifier. It becomes justified only if C-018 work itself exposes a real contradiction that the accepted authorities do not already resolve.
+Rejected by default. A new global review would duplicate 3N and part of 3O without a new material falsifier. It becomes justified only if C-018 candidate work itself changes a material Product/architecture boundary and therefore needs an independent challenge before that change can be accepted.
 
 ### C. Ratification plus immediate implementation authorization
 
@@ -79,12 +79,12 @@ Product implementation authorized
 Opening C-018 should make the gate visible without promoting its decision:
 
 ```text
-3A–3O = CLOSED
-C-018 = OPEN / RATIFICATION REVIEW
+roadmap:   C-018 = OPEN / RATIFICATION REVIEW
+decisions: C-018 = NOT RATIFIED
 Product implementation = BLOCKED
 ```
 
-`OPEN / RATIFICATION REVIEW` is a gate status only. It must not be interpreted as partial ratification.
+`OPEN / RATIFICATION REVIEW` is a roadmap workflow status only. It is not a Decision Register disposition and must not be interpreted as partial ratification. The Decision Register remains `NOT RATIFIED` until an explicit operator ratification closes the gate.
 
 ### Ratified state
 
@@ -92,7 +92,8 @@ Only after every ratification condition is satisfied and the operator explicitly
 
 ```text
 3A–3O = CLOSED
-C-018 = RATIFIED / OPERATOR RATIFIED
+roadmap:   C-018 = RATIFIED / OPERATOR RATIFIED
+decisions: C-018 = RATIFIED / OPERATOR RATIFIED
 Product implementation = BLOCKED
 ```
 
@@ -112,7 +113,7 @@ Falsifier:
 
 ### R2 — architecture continuity
 
-The current Product/architecture target remains internally coherent across the current decision register and architecture projection.
+The current Product/architecture target remains internally coherent across the current decision register and architecture projection. C-018 relies on the already-completed 3N whole-architecture verification and checks that no later accepted change or current contradiction invalidated that result; it does not rebuild a second whole-architecture verifier.
 
 Falsifier:
 
@@ -213,7 +214,9 @@ A negative control should prove that changing Product implementation away from `
 
 Do not automatically run another whole-architecture Fable review.
 
-Independent review becomes required only if C-018 candidate work introduces or exposes a material Product, architecture, owner, trust-boundary, or qualification contradiction. Otherwise C-018 relies on the already-completed independent challenges in 3N and 3O and performs continuity/ratification only.
+If C-018 exposes a material contradiction in already-accepted Product/architecture/qualification authority, stop and reopen the smallest owning Decision Loop; another review does not cure contradictory authority.
+
+Independent review is justified only if the C-018 candidate itself proposes a material Product, architecture, owner, trust-boundary, or qualification change after that reopen/adjudication. Otherwise C-018 relies on the already-completed independent challenges in 3N and 3O and performs continuity/ratification only.
 
 If an independent review is triggered, reviewer output remains Evidence and must use the isolated temporary review-channel workflow.
 

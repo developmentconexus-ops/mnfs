@@ -1,0 +1,564 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Identity and Workspace Path Items
+  version: 4b-candidate
+paths:
+  /api/control/access-context:
+    get:
+      summary: GetControlPlaneAccessContext
+      operationId: GetControlPlaneAccessContext
+      x-conexus-4a-id: IAM-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current disclosable Control Plane access context resolved from server-owned authority.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [accountId, workspaces, projects]
+                properties:
+                  accountId: { type: string, minLength: 1 }
+                  workspaces:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [workspaceId]
+                      properties:
+                        workspaceId: { type: string, minLength: 1 }
+                  projects:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [projectId, workspaceId]
+                      properties:
+                        projectId: { type: string, minLength: 1 }
+                        workspaceId: { type: string, minLength: 1 }
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+
+  /api/control/session:
+    delete:
+      summary: EndSession
+      operationId: EndSession
+      x-conexus-4a-id: IAM-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204':
+          description: Current Conexus session ended.
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+
+  /api/control/accounts:
+    post:
+      summary: ProvisionAccount
+      operationId: ProvisionAccount
+      x-conexus-4a-id: IAM-03
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [externalSubject]
+              properties:
+                externalSubject:
+                  type: string
+                  minLength: 1
+                  description: Stable subject from the single server-pinned configured authentication issuer; caller cannot select issuer/provider authority.
+      responses:
+        '201':
+          description: Conexus Account provisioned or the same admitted intake resolved to its already-created Account.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [accountId]
+                properties:
+                  accountId: { type: string, minLength: 1 }
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/workspaces/{workspaceId}/members:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and disclosure are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    get:
+      summary: ListWorkspaceMembers
+      operationId: ListWorkspaceMembers
+      x-conexus-4a-id: IAM-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current disclosable Workspace members.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [accountId]
+                      properties:
+                        accountId: { type: string, minLength: 1 }
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/workspaces/{workspaceId}/members/{accountId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: accountId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    put:
+      summary: AddWorkspaceMember
+      operationId: AddWorkspaceMember
+      x-conexus-4a-id: IAM-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Workspace membership established. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+    delete:
+      summary: RemoveWorkspaceMember
+      operationId: RemoveWorkspaceMember
+      x-conexus-4a-id: IAM-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Workspace membership removed. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+
+  /api/control/projects/{projectId}/account-grants/{accountId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: accountId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    put:
+      summary: GrantAccountProjectAccess
+      operationId: GrantAccountProjectAccess
+      x-conexus-4a-id: IAM-07
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Direct Account Project access established. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+    delete:
+      summary: RevokeAccountProjectAccess
+      operationId: RevokeAccountProjectAccess
+      x-conexus-4a-id: IAM-08
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Direct Account Project access removed. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+
+  /api/control/workspaces/{workspaceId}/areas/{areaId}/members/{accountId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: areaId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: accountId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    put:
+      summary: AddAreaMember
+      operationId: AddAreaMember
+      x-conexus-4a-id: IAM-09
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Area membership established. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+    delete:
+      summary: RemoveAreaMember
+      operationId: RemoveAreaMember
+      x-conexus-4a-id: IAM-10
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Area membership removed. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+
+  /api/control/projects/{projectId}/area-grants/{areaId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: areaId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    put:
+      summary: GrantAreaProjectAccess
+      operationId: GrantAreaProjectAccess
+      x-conexus-4a-id: IAM-11
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Area-derived Project access established. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+    delete:
+      summary: RevokeAreaProjectAccess
+      operationId: RevokeAreaProjectAccess
+      x-conexus-4a-id: IAM-12
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: OWNER_CURRENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '204': { description: Area-derived Project access removed. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+
+  /api/apps/{projectId}/access-context:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current Published-App containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    get:
+      summary: GetPublishedAppAccessContext
+      operationId: GetPublishedAppAccessContext
+      x-conexus-4a-id: IAM-13
+      x-conexus-ingress: [PUBLISHED_APP]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current exact Published-App access and active Release context.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [projectId, activeReleaseId, role]
+                properties:
+                  projectId: { type: string, minLength: 1 }
+                  activeReleaseId: { type: string, minLength: 1 }
+                  role: { enum: [admin, member] }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+
+  /api/control/projects/{projectId}/app-access:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current Project/app administration scope is resolved server-side.
+        schema: { type: string, minLength: 1 }
+    get:
+      summary: ListPublishedAppAccess
+      operationId: ListPublishedAppAccess
+      x-conexus-4a-id: IAM-14
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current Published-App access grants for the exact Project.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [accountId, role]
+                      properties:
+                        accountId: { type: string, minLength: 1 }
+                        role: { enum: [admin, member] }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+
+  /api/control/projects/{projectId}/app-access/{accountId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted reference only; current Project/app administration scope is resolved server-side.
+        schema: { type: string, minLength: 1 }
+      - name: accountId
+        in: path
+        required: true
+        description: Untrusted reference only; current grant subject and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    put:
+      summary: SetPublishedAppAccess
+      operationId: SetPublishedAppAccess
+      x-conexus-4a-id: IAM-15
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: CURRENT_OR_ABSENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [role, expectedCurrent]
+              properties:
+                role:
+                  enum: [admin, member]
+                expectedCurrent:
+                  oneOf:
+                    - type: object
+                      additionalProperties: false
+                      required: [state]
+                      properties:
+                        state: { const: ABSENT }
+                    - type: object
+                      additionalProperties: false
+                      required: [state, role]
+                      properties:
+                        state: { const: PRESENT }
+                        role: { enum: [admin, member] }
+      responses:
+        '200':
+          description: Current Published-App access grant after the admitted set/change.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [projectId, accountId, role]
+                properties:
+                  projectId: { type: string, minLength: 1 }
+                  accountId: { type: string, minLength: 1 }
+                  role: { enum: [admin, member] }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '412': { $ref: './openapi.yaml#/components/responses/Problem412' }
+        '422': { $ref: './openapi.yaml#/components/responses/Problem422' }
+    delete:
+      summary: RevokePublishedAppAccess
+      operationId: RevokePublishedAppAccess
+      x-conexus-4a-id: IAM-17
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - name: expectedRole
+          in: query
+          required: true
+          description: Exact current Published-App role expected for the grant being narrowed; it is a stale-subject guard, not authority.
+          schema:
+            enum: [admin, member]
+      responses:
+        '204': { description: Published-App access grant revoked. }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '412': { $ref: './openapi.yaml#/components/responses/Problem412' }
+
+  /api/control/workspaces:
+    post:
+      summary: CreateWorkspace
+      operationId: CreateWorkspace
+      x-conexus-4a-id: WS-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Workspace created from the admitted trusted-operator intake.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [workspaceId]
+                properties:
+                  workspaceId: { type: string, minLength: 1 }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
+
+  /api/control/workspaces/{workspaceId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and disclosure are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    get:
+      summary: GetWorkspace
+      operationId: GetWorkspace
+      x-conexus-4a-id: WS-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current disclosable Workspace identity.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [workspaceId]
+                properties:
+                  workspaceId: { type: string, minLength: 1 }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+
+  /api/control/workspaces/{workspaceId}/areas:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted reference only; current containment and authority are resolved server-side.
+        schema: { type: string, minLength: 1 }
+    get:
+      summary: ListAreas
+      operationId: ListAreas
+      x-conexus-4a-id: WS-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current disclosable Areas in the exact Workspace.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      required: [areaId]
+                      properties:
+                        areaId: { type: string, minLength: 1 }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+    post:
+      summary: CreateArea
+      operationId: CreateArea
+      x-conexus-4a-id: WS-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Area created within the exact Workspace.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [areaId]
+                properties:
+                  areaId: { type: string, minLength: 1 }
+        '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
+        '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
+        '404': { $ref: './openapi.yaml#/components/responses/Problem404' }
+        '409': { $ref: './openapi.yaml#/components/responses/Problem409' }

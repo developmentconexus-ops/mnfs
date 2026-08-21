@@ -65,7 +65,7 @@ if (byName.get('C-018') === 'RATIFIED' && phases.some(({ status }) => status !==
 const decisions = existsSync(resolve(root, 'docs/decisions/index.md')) ? read('docs/decisions/index.md') : ''
 const decisionRows = [...decisions.matchAll(/^\| (C-[A-Z0-9-]+) \| .*? \| ([^|]+?) \|/gm)].map(([, id, status]) => ({ id, status: status.trim() }))
 const controlled = new Set(['CURRENT', 'PRESERVE', 'REFINED', 'PARTIALLY_SUPERSEDED', 'SUPERSEDED', 'DEFERRED', 'REJECTED_F1', 'REOPEN', 'NOT RATIFIED'])
-for (const { id, status }) of decisionRows) {
+for (const { id, status } of decisionRows) {
   if (![...controlled].some(term => status === term || status.startsWith(`${term} / `) || status.startsWith(`${term} AS `))) {
     errors.push(`${id} has uncontrolled disposition: ${status}`)
   }

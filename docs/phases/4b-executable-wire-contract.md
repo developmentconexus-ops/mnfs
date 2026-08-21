@@ -33,23 +33,34 @@ Derive only from current accepted authority, principally:
 
 Research, sibling repositories, framework docs and reviewer output may inform wire mechanics but cannot add Product meaning.
 
+The current 4A input is the operator-ratified authority **boundedly corrected by `4B-F01`**:
+
+```text
+fixed Conexus platform operations = 111
+Project-defined operations        = exact finite Release-pinned Ops(R)
+first Budget Analyzer operations  = 2
+ordinary Permissions              = 25
+```
+
+`4B-F01` subtracted only `WS-03 UpdateWorkspace`, `WS-06 UpdateArea` and `PRJ-04 UpdateProject` after executable schema derivation proved that 4A had not defined any closed mutable property inventory for those generic verbs. No rename/settings replacement was admitted.
+
 ## 4. Required 4B closures
 
 4B must close four related but non-confusable wire surfaces.
 
 ### 4.1 Fixed Conexus platform wire
 
-Every one of the accepted 114 fixed platform operations receives one canonical executable wire definition with no duplicate hand-written DTO authority.
+Every one of the accepted 111 fixed platform operations receives one canonical executable wire definition with no duplicate hand-written DTO authority.
 
 Required closure:
 
 ```text
-fixed platform operations                     = 114
-fixed platform operations with operationId    = 114
-fixed platform operations with request shape  = 114 where input exists
-fixed platform operations with success shape  = 114
-fixed platform operations with auth carriage  = 114
-fixed platform operations with semantic errors= 114
+fixed platform operations                     = 111
+fixed platform operations with operationId    = 111
+fixed platform operations with request shape  = 111 where input exists
+fixed platform operations with success shape  = 111
+fixed platform operations with auth carriage  = 111
+fixed platform operations with semantic errors= 111
 orphan semantic operations                    = 0
 wire-only invented Product operations         = 0
 ```
@@ -76,7 +87,7 @@ execute(anySql)
 execute(anyProviderOperation)
 ```
 
-A Project operation definition must remain exact-Release authority. Generated transport is a projection, not a second editable Product contract.
+A Project operation definition must remain exact-Release authority. Generated transport is a projection, not a second editable business-operation contract.
 
 ### 4.3 First Budget Analyzer wire instance
 
@@ -100,7 +111,7 @@ The generated/conforming wire must preserve:
 
 ### 4.4 Non-Product protocol / Technical Ingress separation
 
-4B must decide exact wire homes for externally reachable protocol/technical interactions where a concrete current consumer requires them while keeping them outside the 114 Product operation census.
+4B must decide exact wire homes for externally reachable protocol/technical interactions where a concrete current consumer requires them while keeping them outside the 111 Product operation census.
 
 Examples include, only where current authority requires exact wire:
 
@@ -302,7 +313,7 @@ Executable proof tooling is Evidence/mechanics, not Product authority.
 1. pin exact specification/dialect + canonical artifact topology
 2. define operationId/naming/component/error/security conventions
 3. derive shared semantic wire primitives only from repeated accepted properties
-4. map all 114 fixed operations
+4. map all 111 fixed operations
 5. derive Project-operation definition/codegen grammar
 6. instantiate Budget Analyzer BUD-01/BUD-02
 7. classify exact Technical Ingress/protocol wire that current consumers require
@@ -348,12 +359,14 @@ STOP and reopen only the smallest owning authority when:
 
 Do not reopen for REST aesthetics, naming preference, sibling-repository symmetry or framework convenience.
 
+`4B-F01` is the first exercised instance of this law: 4B stopped rather than invent generic update payloads, the operator accepted the bounded subtraction, and the wire was recompiled to the corrected 111-operation authority.
+
 ## 18. Exit condition
 
 4B can close only when the exact candidate establishes:
 
 ```text
-canonical machine-readable fixed platform wire for all 114 operations
+canonical machine-readable fixed platform wire for all 111 operations
 + deterministic exact-Release Project-operation wire grammar
 + exact Budget Analyzer BUD-01/BUD-02 wire instance
 + complete Problem/disclosure/truth-state contract

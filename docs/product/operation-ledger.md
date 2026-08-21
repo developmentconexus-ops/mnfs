@@ -1,6 +1,6 @@
 # Conexus OS — Product Operation Ledger
 
-> **Status:** CLOSED CANDIDATE / 4A OPEN / INDEPENDENT REVIEW PENDING / NOT RATIFIED
+> **Status:** CLOSED CANDIDATE / 4A OPEN / INDEPENDENT REVIEW ADJUDICATED / NOT RATIFIED
 > **Authority:** derived only from current accepted Product/architecture authority routed by `docs/index.md`, the 4A contract and the operator-approved first Budget Analyzer semantic contract.
 > **Mutable program status:** owned only by `docs/roadmap.md`.
 
@@ -15,7 +15,7 @@ first Budget Analyzer operations  = 2
 ordinary Conexus Permissions      = 25 (owned by permission-contract.md)
 ```
 
-The numbers are derivation results, not targets. They remain unratified until the complete 4A candidate survives independent adversarial review and explicit operator ratification.
+The numbers are derivation results, not targets. The complete candidate survived independent Fable challenge with bounded consistency/precision corrections and remains unratified until explicit operator 4A ratification.
 
 ---
 
@@ -175,7 +175,7 @@ The tables below are the exact 114 Product operations. IDs deliberately remain s
 | `IAM-12` | `RevokeAreaProjectAccess` | I&A | exact Area + Project; narrowing | narrowing command/current-authority |
 | `IAM-13` | `GetPublishedAppAccessContext` | I&A | exact Published App human; current app access/role | read |
 | `IAM-14` | `ListPublishedAppAccess` | I&A | Project/app administration; business use not implied | read |
-| `IAM-15` | `SetPublishedAppAccess` | I&A | exact Project/app + Account + `{admin,member}` + expected current subject when present | command/current-authority |
+| `IAM-15` | `SetPublishedAppAccess` | I&A | exact Project/app + Account + `{admin,member}` + expected current grant state, including explicit absent state on create | command/current-authority |
 | `IAM-17` | `RevokePublishedAppAccess` | I&A | exact current app grant; narrowing | narrowing command/current-authority |
 
 `IAM-16 ChangePublishedAppAccessRole` was subtracted into `IAM-15`: grant and role change are one Product meaning over `iam.published_app_access`; wire-level create/update/precondition detail belongs to 4B.
@@ -298,14 +298,14 @@ No secret read, arbitrary TestURL, generic credential fetch/executor or cross-Wo
 
 | ID | Operation | Owner | Consumer / authority root | Class |
 | --- | --- | --- | --- | --- |
-| `PAR-01` | `ListConversations` | PAR | exact Project/Agent + current app/owner disclosure | read |
+| `PAR-01` | `ListConversations` | PAR | exact Project/Agent + current Published-App disclosure | read |
 | `PAR-02` | `GetConversation` | PAR | exact Conversation + current Project/Agent/app authority | read |
 | `PAR-03` | `CreateConversation` | PAR | exact active Release + Agent + current app access | command |
 | `PAR-04` | `SendProductAgentTurn` | PAR | exact Conversation + current app/Agent/Release authority; admits exact AgentRun | consequential command |
 | `PAR-05` | `RunProductAgentHeadless` | PAR | exact active Release/Agent + explicit headless authority | consequential command |
 | `PAR-06` | `ListAgentRuns` | PAR | exact Project/Agent/Conversation + current disclosure | read |
 | `PAR-07` | `GetAgentRun` | PAR | exact AgentRun; `COMPLETED != every effect succeeded` | read/provenance |
-| `PAR-08` | `ListApprovalRequests` | PAR | current eligible approver UX or separately authorized investigation; exact Project/AgentRun disclosure | read/approval |
+| `PAR-08` | `ListApprovalRequests` | PAR | current eligible approver UX; exact Project/AgentRun disclosure | read/approval |
 | `PAR-09` | `GetApprovalRequest` | PAR | current eligible approver or separately authorized investigator; exact sealed subject/current state | read/approval |
 | `PAR-10` | `DecideApprovalRequest` | PAR | current eligible human shown the exact sealed proposal; surface does not confer eligibility | decision/current-authority |
 | `PAR-11` | `ListAgentTriggers` | PAR | exact Project/Agent trigger administration | read |
@@ -326,7 +326,7 @@ exact ApprovalRequest subject
 → only then can ALLOW_ONCE reach Gateway effect admission
 ```
 
-The exact approval surface may be Control Plane or Published Application when the current Product experience admits it. Published-App role `{admin,member}` by itself never grants approval authority, and exposing approval in a Published App never grants Builder/Control-Plane access. `PAR-09` may additionally be inspected read-only through the separately authorized audit/investigator route; that route can never decide the request.
+The exact approval surface may be Control Plane or Published Application when the current Product experience admits it. Published-App role `{admin,member}` by itself never grants approval authority, and exposing approval in a Published App never grants Builder/Control-Plane access. `PAR-09` may additionally be inspected read-only through the separately authorized audit/investigator route; that route can never list the approval queue through `PAR-08` or decide the request.
 
 ## 5.9 Gateway inspection — 2
 
@@ -383,10 +383,10 @@ The operator-approved `docs/product/budget-analyzer-contract.md` closes the firs
 
 | ID | Operation | Regime | Owner | Consumer | Product authority |
 | --- | --- | --- | --- | --- | --- |
-| `BUD-01` | `AnalyzePendingBudgets` | registered `Query` | Budget Analyzer Project/Product semantic contract | Published-App human | exact active Budget Analyzer Release; current app access; role `{admin,member}`; exact ProjectConnectionBinding/Brain mapping/read-model result coordinate |
-| `BUD-02` | `ListPendingBudgets` | registered `Query` | Budget Analyzer Project/Product semantic contract | Published-App human | same exact Release/app/source authority; pageable drilldown only |
+| `BUD-01` | `AnalyzePendingBudgets` | registered `Query` | Budget Analyzer Project/Product semantic contract | Published-App human | exact active Budget Analyzer Release; current app access; role `{admin,member}`; exact ProjectConnectionBinding/Brain mapping + system-resolved result coordinate |
+| `BUD-02` | `ListPendingBudgets` | registered `Query` | Budget Analyzer Project/Product semantic contract | Published-App human | same exact Release/app/source authority; each response/page has its own disclosed system-resolved result coordinate |
 
-`AnalyzePendingBudgets` returns exactly the closed R1–R5 analytical snapshot under the admitted filter set; it is not arbitrary metrics/dimensions/group-by/SQL. `ListPendingBudgets` returns R6 drilldown. Neither operation admits arbitrary historical reconstruction through caller-selected `as_of`.
+`AnalyzePendingBudgets` returns exactly the closed R1–R5 analytical snapshot under the admitted filter set; it is not arbitrary metrics/dimensions/group-by/SQL. `ListPendingBudgets` returns R6 drilldown. F1 does not promise cross-call or cross-page snapshot pinning: a changed result coordinate must remain visible and mixed-coordinate data must not be represented as one coherent snapshot. Neither operation admits arbitrary historical reconstruction through caller-selected `as_of`.
 
 ```text
 N_budget = 2
@@ -394,7 +394,7 @@ Budget Analyzer orphan operations = 0
 Budget Analyzer speculative operations = 0
 ```
 
-Margin is unsupported, Mitra conversion-probability weighting is rejected, and actual conversion metrics remain deferred until separately proved/admitted.
+Margin is unsupported, Mitra conversion-probability weighting is rejected, actual conversion metrics remain deferred until separately proved/admitted, and a negative Budget age is never silently clamped into an aging band.
 
 ---
 
@@ -473,14 +473,17 @@ Owner-specific finer distinctions may narrow disclosure further, but no later wi
 | --- | --- | --- | --- | --- | --- |
 | `IAM-01` | `HUMAN_ACCOUNT_SESSION / CP` | `authenticated` | exact current Conexus session; server resolves only disclosable Workspace/Project context | `READ` | `IC0` |
 | `IAM-02` | `HUMAN_ACCOUNT_SESSION / CP` | `authenticated` | exact current session subject | `COMMAND` | `IC1` |
-| `IAM-03` | `HUMAN_ACCOUNT_SESSION / CP` | trusted `platform_operator` | trusted F1 provisioning boundary; no public signup | `COMMAND` | `IC2` |
+| `IAM-03` | `HUMAN_ACCOUNT_SESSION / CP` | trusted `platform_operator` | trusted F1 provisioning boundary; stable provisioned human identity/uniqueness prevents duplicate Account creation; no public signup | `COMMAND` | `IC3` |
 | `IAM-04..12` | `HUMAN_ACCOUNT_SESSION / CP` | `workspace.access.manage` | exact Workspace/Area/Project containment; grant/revoke target and current authority rechecked at commit | read rows `READ`; writes `COMMAND` | reads `IC0`; writes `IC1` |
 | `IAM-13` | `PUBLISHED_APP_HUMAN / PA` | exact app access + role | exact Published App + active Release; app role never implies Control Plane authority | `READ` | `IC0` |
 | `IAM-14` | `HUMAN_ACCOUNT_SESSION / CP` | `project.manage` | exact Project/app administration | `READ` | `IC0` |
-| `IAM-15,IAM-17` | `HUMAN_ACCOUNT_SESSION / CP` | `project.manage` | exact Project/app/Account subject; current grant/role rechecked; revoke is narrowing | `COMMAND` | `IC2` |
+| `IAM-15,IAM-17` | `HUMAN_ACCOUNT_SESSION / CP` | `project.manage` | exact Project/app/Account subject; current grant state includes explicit absent state for create and exact current role/grant for change/revoke | `COMMAND` | `IC2` |
 | `WS-01` | `HUMAN_ACCOUNT_SESSION / CP` | trusted `platform_operator` | trusted first-access Workspace creation | `COMMAND` | `IC3` |
 | `WS-02` | `HUMAN_ACCOUNT_SESSION / CP` | current Workspace membership | exact Workspace disclosure | `READ` | `IC0` |
-| `WS-03..06` | `HUMAN_ACCOUNT_SESSION / CP` | `workspace.manage` | exact Workspace/Area; current administration authority | reads `READ`; writes `COMMAND` | reads `IC0`; writes `IC1/IC2` |
+| `WS-03` | `HUMAN_ACCOUNT_SESSION / CP` | `workspace.manage` | exact current Workspace administration; stale/current revision cannot win | `COMMAND` | `IC2` |
+| `WS-04` | `HUMAN_ACCOUNT_SESSION / CP` | `workspace.manage` | exact Workspace administration/disclosure | `READ` | `IC0` |
+| `WS-05` | `HUMAN_ACCOUNT_SESSION / CP` | `workspace.manage` | exact Workspace + stable create intake/subject identity; duplicate intake cannot create duplicate Area | `COMMAND` | `IC3` |
+| `WS-06` | `HUMAN_ACCOUNT_SESSION / CP` | `workspace.manage` | exact current Area + Workspace administration; stale/current revision cannot win | `COMMAND` | `IC2` |
 | `PRJ-01,PRJ-02` | `HUMAN_ACCOUNT_SESSION / CP` | `project.read` + exact Project grant where applicable | current Workspace/Project disclosure | `READ` | `IC0` |
 | `PRJ-03` | `HUMAN_ACCOUNT_SESSION / CP` | `project.create` | destination Workspace + atomic Project/initial-grant composition | `COMMAND` | `IC3` |
 | `PRJ-04,PRJ-05` | `HUMAN_ACCOUNT_SESSION / CP` | `project.manage` | exact current Project; archive preserves independent serving/automation laws | `COMMAND` | `IC2` |
@@ -508,7 +511,7 @@ Owner-specific finer distinctions may narrow disclosure further, but no later wi
 | `CON-05..07` | `HUMAN_ACCOUNT_SESSION / CP` | `connection.manage` | exact ownerScope/current Connection; credential is write-only; no sibling reuse | `COMMAND`/`CONSEQUENTIAL` | `CON-05` `IC3`; `CON-06` `IC2`; `CON-07` `IC3` |
 | `CON-08` | `HUMAN_ACCOUNT_SESSION / CP` | `connection.qualify` | exact ConnectionRevision/environment + real provider/source Evidence | `PROOF` | `IC3` |
 | `REL-01,REL-02,REL-04,REL-05,REL-07` | `HUMAN_ACCOUNT_SESSION / CP` | `project.read` | exact Project/Release/Promotion/serving disclosure | `REL-07` `PROVENANCE_READ`; others `READ` | `IC0` |
-| `REL-06` | `HUMAN_ACCOUNT_SESSION / CP` | `release.promote` | exact Release/environment + current proof/conformance + expected pointer generation | `CONSEQUENTIAL` | `IC2/IC3` |
+| `REL-06` | `HUMAN_ACCOUNT_SESSION / CP` | `release.promote` | exact Release/environment + current proof/conformance + expected pointer generation; repeatable promotion intake cannot manufacture duplicate Promotion/effect | `CONSEQUENTIAL` | `IC2 AND IC3` |
 | `REL-08` | `HUMAN_ACCOUNT_SESSION / CP` | `release.promote` | exact target-environment conformance subject; read grants no pointer mutation | `PROOF` | `IC0` |
 | `PAR-01..04` | `PUBLISHED_APP_HUMAN / PA` | exact app access/role + active Release/Agent | exact Project/Agent/Conversation/Release scope | reads `READ`; `PAR-03` `COMMAND`; `PAR-04` `CONSEQUENTIAL` | reads `IC0`; create/turn `IC3`; downstream effects additionally `IC4` |
 | `PAR-05` | `HUMAN_ACCOUNT_SESSION / HEADLESS` | `agent.headless.invoke` | exact active Release/Agent + current headless admission | `CONSEQUENTIAL` | `IC3`; downstream effects `IC4` |
@@ -527,8 +530,8 @@ Owner-specific finer distinctions may narrow disclosure further, but no later wi
 
 | Operation | Principal / ingress | Permission/special condition | Scope/current-authority rule | Outcome | IC |
 | --- | --- | --- | --- | --- | --- |
-| `BUD-01 AnalyzePendingBudgets` | `PUBLISHED_APP_HUMAN / PA` | exact app role `{admin,member}` | exact active Budget Analyzer Release + current app access + exact Project/Brain/Connection/read-model binding + system-resolved `as_of` | `ANALYTIC` | `IC0` |
-| `BUD-02 ListPendingBudgets` | `PUBLISHED_APP_HUMAN / PA` | exact app role `{admin,member}` | same exact Release/app/source authority; pageable drilldown only | `ANALYTIC` | `IC0` |
+| `BUD-01 AnalyzePendingBudgets` | `PUBLISHED_APP_HUMAN / PA` | exact app role `{admin,member}` | exact active Budget Analyzer Release + current app access + exact Project/Brain/Connection/read-model binding + system-resolved result coordinate | `ANALYTIC` | `IC0` |
+| `BUD-02 ListPendingBudgets` | `PUBLISHED_APP_HUMAN / PA` | exact app role `{admin,member}` | same exact Release/app/source authority; each response/page binds its own system-resolved coordinate; no cross-call/page snapshot pinning is promised | `ANALYTIC` | `IC0` |
 
 No Product Agent, MAR JobRun or DEDICATED caller is admitted for `BUD-01/02` merely to exercise infrastructure.
 
@@ -623,7 +626,7 @@ The bounded SoftwareForge review changes none of the 114 fixed operations, the P
 
 ---
 
-# 12. Closure assertions before independent review
+# 12. Closure assertions after independent review
 
 ```text
 N_platform                              = 114
@@ -634,12 +637,28 @@ fixed operations with consumer          = 114/114
 fixed operations with principal/ingress = 114/114
 fixed operations with auth/scope route  = 114/114
 fixed operations with outcome profile   = 114/114
-fixed operations with IC profile        = 114/114
+fixed operations with exact IC profile  = 114/114
 Budget operations with all fields       = 2/2
 Project grammar exact-Release pinned     = yes
 universal execute authority              = rejected
 orphan concrete operations               = 0
 speculative concrete operations          = 0
+independent trust-critical falsifiers    = survived
+unresolved material review findings      = 0
 ```
 
-The candidate is now semantically complete enough for census/consistency proof and independent adversarial challenge. It remains **not ratified** and does not authorize 4B or Product implementation.
+Independent Fable review found two material consistency defects and five minor precision defects. Lead adjudication accepted all seven because they narrow or make explicit already-admitted authority without adding an operation, Permission, owner or trust boundary:
+
+```text
+4A-IR-01 ACCEPT → PAR-08 is approver-list only; audit investigator route remains PAR-09 exact-subject read
+4A-IR-02 ACCEPT → remove unsupported retained cross-call/page snapshot guarantee; every response/page discloses its own system coordinate
+4A-IR-03 ACCEPT → bind WS-03/04/05/06 IC profiles exactly; REL-06 requires IC2 AND IC3
+4A-IR-04 ACCEPT → IAM-03 creation uses IC3; IAM-15 absent/create state is explicit under IC2
+4A-IR-05 ACCEPT → PAR-01 wording aligned to its PA-only matrix route
+4A-IR-06 ACCEPT → project.read explicitly lists PAR-06/07 Control-Plane consumers in permission-contract.md
+4A-IR-07 ACCEPT → negative Budget age is never clamped/banded; PARTIAL or UNVERIFIED/INDETERMINATE preserves truth
+```
+
+No second independent round is required because every accepted correction is exactly within a reviewer-proposed bounded resolution, removes ambiguity rather than introducing a new capability, and leaves the challenged counts/topology unchanged. Fresh repository verification on the corrected exact HEAD remains required before operator ratification.
+
+The candidate remains **not ratified** and does not authorize 4B or Product implementation.

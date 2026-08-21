@@ -53,7 +53,8 @@ literal IF_MATCH exact set = { PRJ-12, PAR-14 }
 Project-defined project-operation/v1 declaration grammar
 Budget Analyzer exact two-query static-path generation
 Budget truth-state positive/negative falsifiers
-Verify #241 = SUCCESS on the 4B-F01 recompile
+Identity & Access + Workspace schema closure = 20 operations SCHEMA_CLOSED
+Verify #257 = SUCCESS on the routed Identity/Workspace closure checkpoint
 ```
 
 `4B-F01` is CLOSED / OPERATOR ACCEPTED:
@@ -71,11 +72,15 @@ Do not replace those operations with speculative rename/settings/generic patch o
 The next bounded 4B work is:
 
 ```text
-1. derive shared machine schemas only from repeated accepted semantics
-2. close exact request/success/Problem shapes owner-by-owner across the corrected 111 fixed operations
-3. begin with Identity & Access + Workspace to attack auth/disclosure/current-authority edge cases early
-4. treat any missing Product property inventory as a stop/reopen falsifier, not a DTO-design opportunity
+1. close the Project owner slice across the 21 current PRJ operations
+2. derive request/success/Problem shapes only from accepted Project/data/owner authority
+3. preserve cross-owner creation/composition, archive/duplicate constraints, Baseline current-state law and exact Brain/Connection binding semantics
+4. preserve PRJ-12 as a truthful same-target IF_MATCH case and PRJ-11 as CURRENT_OR_ABSENT
+5. treat any missing Project property inventory as a stop/reopen falsifier, not a DTO-design opportunity
+6. keep the remaining 4B owners provisional until their own bounded schema-closure slice is proved
 ```
+
+Identity & Access + Workspace schema closure is recorded in [evidence/4b/identity-workspace-schema-closure.md](evidence/4b/identity-workspace-schema-closure.md).
 
 Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

@@ -779,7 +779,8 @@ components:
           minLength: 1
         state:
           type: string
-          enum: [OPEN, CLOSED]
+          minLength: 1
+          description: Builder-owner current Finding resolution state; 4B does not invent an unratified lifecycle enum.
         summary:
           type: string
           minLength: 1

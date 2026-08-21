@@ -66,7 +66,8 @@ test('phase progression guard fires when more than one phase is active', () => {
 test('C-018 ratification review cannot overlap an open architecture phase', () => {
   const path = resolve(root, 'docs/roadmap.md')
   const original = readFileSync(path, 'utf8')
-  const mutated = original.replace('| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
+  let mutated = original.replace('| C-018 | RATIFIED / OPERATOR RATIFIED |', '| C-018 | OPEN / RATIFICATION REVIEW |')
+  mutated = mutated.replace('| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
   if (mutated === original) throw new Error('C-018 overlap mutation target missing')
   writeFileSync(path, mutated)
   try {
@@ -83,8 +84,7 @@ test('C-018 ratification review cannot overlap an open architecture phase', () =
 test('C-018 ratification alone cannot unblock Product implementation', () => {
   const path = resolve(root, 'docs/roadmap.md')
   const original = readFileSync(path, 'utf8')
-  let mutated = original.replace('| C-018 | OPEN / RATIFICATION REVIEW |', '| C-018 | RATIFIED / OPERATOR RATIFIED |')
-  mutated = mutated.replace('| Product implementation | BLOCKED |', '| Product implementation | AUTHORIZED |')
+  const mutated = original.replace('| Product implementation | BLOCKED |', '| Product implementation | AUTHORIZED |')
   if (mutated === original) throw new Error('C-018 deny-only mutation target missing')
   writeFileSync(path, mutated)
   try {
@@ -101,8 +101,7 @@ test('C-018 ratification alone cannot unblock Product implementation', () => {
 test('ratified C-018 cannot coexist with an unclosed architecture phase', () => {
   const path = resolve(root, 'docs/roadmap.md')
   const original = readFileSync(path, 'utf8')
-  let mutated = original.replace('| C-018 | OPEN / RATIFICATION REVIEW |', '| C-018 | RATIFIED / OPERATOR RATIFIED |')
-  mutated = mutated.replace('| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
+  const mutated = original.replace('| 3O | CLOSED |', '| 3O | OPEN / ACTIVE |')
   if (mutated === original) throw new Error('C-018 ratified-continuity mutation target missing')
   writeFileSync(path, mutated)
   try {

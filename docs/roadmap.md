@@ -47,7 +47,7 @@ Current established executable foundation:
 OpenAPI 3.1.2 + JSON Schema 2020-12 representation
 single multi-file canonical Product OAD
 fixed Product operation bijection = 111 ↔ 111
-schema-closed fixed operations = 41 / 111
+schema-closed fixed operations = 58 / 111
 missing / extra / duplicate = 0
 opaque Conexus session + same-origin browser request-authenticity law
 literal IF_MATCH exact set = { PRJ-12, PAR-14 }
@@ -56,7 +56,8 @@ Budget Analyzer exact two-query static-path generation
 Budget truth-state positive/negative falsifiers
 Identity & Access + Workspace schema closure = 20 / 20
 Project schema closure = 21 / 21
-Verify #262 = SUCCESS on the Project machine-closure checkpoint
+Builder schema closure = 17 / 17
+Verify #270 = SUCCESS on the final Builder closure checkpoint
 ```
 
 `4B-F01` is CLOSED / OPERATOR ACCEPTED:
@@ -74,20 +75,21 @@ Do not replace those operations with speculative rename/settings/generic patch o
 The next bounded 4B work is:
 
 ```text
-1. close the Builder owner slice across BLD-01 → BLD-17
-2. derive Change/Plan/progress/diff/source/preview/Finding/Evidence/execution-detail shapes only from accepted Builder, Project-Git and Evidence authority
-3. preserve BLD-05 exact current Plan-revision/reviewer eligibility and BLD-13 exact current Finding-resolution subject
-4. preserve ready != verified != live, visual completion != verification, and Evidence/provenance truth
-5. keep Project source reads exact-revision/path pinned and read-only
-6. reject generic AcceptChange, direct CreateWorkUnit/CreateActorRun, plan-JSON mutation, SetWorkItemStatus, ResumeSandbox and MarkVerified Product operations/mechanics
-7. treat any missing Builder property inventory as a stop/reopen falsifier, not a DTO-design opportunity
-8. keep the remaining 4B owners provisional until their own bounded schema-closure slice is proved
+1. close the Brain owner slice across BRN-01 → BRN-12
+2. derive Workspace Brain, immutable revision, Discovery, KnowledgeProposal, publication, health and AnalyticQuery shapes only from accepted Brain/knowledge/data authority
+3. preserve review-before-publish, immutable published revisions, explicit Project binding and UPDATE_AVAILABLE rather than silent inheritance
+4. preserve semantic-query admission as registered exact semantic IDs + restricted SELECT-only plan/proof; never arbitrary SQL/runtime text-to-SQL authority
+5. preserve SUSPECT/INVALID critical-health blocking and provenance/uncertainty truth without inventing unsupported percentage accuracy
+6. keep Brain discovery read-only through current qualified Connection/Gateway authority; no ERP credentials move to Builder/E2B merely for discovery
+7. treat any missing Brain property or lifecycle vocabulary as a stop/reopen falsifier, not a DTO-design opportunity
+8. keep remaining 4B owners provisional until their bounded schema-closure slices are proved
 ```
 
 Closed owner-slice Evidence:
 
 - [Identity & Access + Workspace schema closure](evidence/4b/identity-workspace-schema-closure.md)
 - [Project schema closure](evidence/4b/project-schema-closure.md)
+- [Builder schema closure](evidence/4b/builder-schema-closure.md)
 
 Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

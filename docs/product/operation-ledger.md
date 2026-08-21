@@ -49,7 +49,7 @@ final Budget Analyzer census = N_budget
 candidate count now           = UNRESOLVED_FOR_4A
 ```
 
-The current repository does not yet contain the exact accepted Brain semantic/result inventory needed to freeze `N_budget`; §10 records that blocker.
+The current repository does not yet contain the exact accepted Brain semantic/result inventory needed to freeze `N_budget`; §19 records that blocker.
 
 ---
 
@@ -113,6 +113,8 @@ These interactions are important but are **not fixed Product operations merely b
 | Blob/CAS provider URL/object key | storage mechanic | possession never grants semantic identity/access |
 | Release asset/static-byte serving transport | serving mechanic | caller authorization + exact active Release decides; storage path does not |
 | owner F5 runtime callback | internal owner-control path | runtime proposes; owner validates/applies terminal/current state |
+| first-production backup/restore mechanics | operations/recovery control | recovery reconstructs/narrows authority; it is not ordinary Product API by existence |
+| emergency-stop physical control | out-of-band operations control | must remain available without trusting ordinary application ingress; no decorative Product button is inferred |
 
 4B may still give protocols exact wire/routes where required. Classification here only prevents protocol shape from becoming Product meaning.
 
@@ -200,6 +202,10 @@ exact Release + exact Agent ToolProjection admits it
 
 `job/v1` remains a Release-pinned managed-execution artifact, not a fourth generic business-operation regime. A human manual occurrence and JobRun inspection are Conexus platform operations; the job's internal work calls only exact governed Project/Gateway capabilities.
 
+### 4.7 Exact bytes / attachments
+
+Private byte capability is an operation **carrier/property**, not a global File Manager domain. A Project-defined operation may declare owner-authorized upload/download/exact-byte semantics; 4B will define the wire pattern. No global caller operation `GetBlob(storageKey)` or `UploadAnyFile` is admitted.
+
 ---
 
 # 5. Fixed platform operation candidates — Journey A / Identity & Access
@@ -274,13 +280,13 @@ No `DeleteWorkspace`, `DeleteArea`, generic Organization tree, or hidden/default
 | `PRJ-15` | `RemoveProjectConnectionBinding` | Project | Project administrator | exact current binding; removal/narrowing | narrowing command | ADMIT_CANDIDATE |
 | `PRJ-16` | `ListProjectCapabilities` | Project projection | Build/Capabilities/App authoring | exact Project; reports exact authored/release capability identities without granting invocation | read | ADMIT_CANDIDATE |
 | `PRJ-17` | `GetProjectCapability` | Project projection | Build/Capabilities inspection | exact Project + exact capability identity; provider/runtime IDs subordinate | read | ADMIT_CANDIDATE |
-| `PRJ-18` | `ListProjectDataResources` | Project | Data inspectability | exact Project; only declared/authorized data/read-model resources; no raw DB console | read | UNRESOLVED |
-| `PRJ-19` | `GetProjectDataResource` | Project | Data inspectability | exact Project resource + owner/source/freshness/provenance; no inferred completeness | read | UNRESOLVED |
+| `PRJ-18` | `ListProjectDataResources` | Project | Data inspectability | exact Project; declared Product/read-model/source resources only; no arbitrary table/catalog browser | read | ADMIT_CANDIDATE |
+| `PRJ-19` | `GetProjectDataResource` | Project | Data inspectability | exact declared resource + source/grain/freshness/coverage/provenance where material; never infers read-model completeness | read | ADMIT_CANDIDATE |
 | `PRJ-20` | `ListProjectProductAgents` | Project projection | Project Agents surface | exact Project; Agent authored identity/revision/Release state only, not PAR runtime ownership | read | ADMIT_CANDIDATE |
 | `PRJ-21` | `GetProjectProductAgent` | Project projection | Project Agent inspection | exact Project/Agent authoring identity + current immutable revisions/Release refs | read | ADMIT_CANDIDATE |
-| `PRJ-22` | `ListWorkspaceProductAgents` | Project-owned filtered projection | Workspace access-filtered Agent catalog | current Workspace + per-Project/Agent disclosure; no fleet authority | read | UNRESOLVED |
+| `PRJ-22` | `ListWorkspaceProductAgents` | Project-owned filtered projection | Workspace access-filtered Agent catalog | current Workspace + per-Project/Agent disclosure; Project remains owner of each Agent definition; no fleet authority | read | ADMIT_CANDIDATE |
 
-`PRJ-18/19` must be sharpened from current Product data-inspectability meaning without creating a generic database browser. `PRJ-22` needs one exact projection owner while preserving “catalog != fleet owner”.
+`PRJ-18/19` are Product-level declared data-resource projections, **not** a generic database explorer. `PRJ-22` is a filtered projection over Project-owned Agents and creates no Workspace Agent owner.
 
 ---
 
@@ -305,7 +311,16 @@ No `DeleteWorkspace`, `DeleteArea`, generic Organization tree, or hidden/default
 | `BLD-15` | `GetEvidence` | Builder projection | investigator/reviewer | exact Evidence identity/provenance; telemetry alone not promoted | read | ADMIT_CANDIDATE |
 | `BLD-16` | `AskConexusAboutContext` | Builder | contextual Platform Consultant | exact selected resource/context + current server-derived access; grants no new authority | read/assistant interaction | ADMIT_CANDIDATE |
 | `BLD-17` | `GetChangeExecutionDetail` | Builder | progressive technical inspection | exact Change; may project WorkUnit/ActorRun identities and current states without making them primary workflow | read | ADMIT_CANDIDATE |
-| `BLD-U01` | direct human `AcceptChange` operation | Builder | human/reviewer | current architecture has `change_acceptance`, but direct Product command semantics are not yet proven distinct from checkpoint/verifier owner settlement | decision | UNRESOLVED |
+
+### 8.1 Change acceptance disposition
+
+A direct generic human `AcceptChange` operation is **not admitted** from current authority.
+
+`bld.change_acceptance` is a current-proof/acceptance owner fact. Human decisions enter through the exact accepted checkpoint/criteria mechanisms; material verification and Builder owner settlement produce current acceptance Evidence/fact, and `ComposeRelease` rechecks the required current proof. A generic `AcceptChange` button would risk bypassing criteria/verifier semantics.
+
+```text
+BLD-U01 direct AcceptChange = REJECT
+```
 
 No direct `CreateWorkUnit`, arbitrary plan JSON patch, `SetWorkItemStatus`, `CreateActorRun`, `ResumeSandbox`, or `MarkVerified` Product operation is admitted. Those are Builder owner/runtime mechanics derived from accepted Change/Plan authority.
 
@@ -327,7 +342,16 @@ No direct `CreateWorkUnit`, arbitrary plan JSON patch, `SetWorkItemStatus`, `Cre
 | `BRN-10` | `GetBrainHealth` | Brain | Brain/Project/Agent inspection | exact Brain/binding context; `UNVERIFIED/VALID/SUSPECT/INVALID/CHECK_ERROR` preserved | read | ADMIT_CANDIDATE |
 | `BRN-11` | `RunBrainHealthProbe` | Brain / existing L7 flow | authorized operator/system | exact Brain/binding/source scope; probe output cannot rewrite published meaning | command/proof | ADMIT_CANDIDATE |
 | `BRN-12` | `RunAnalyticQuery` | Brain/Gateway governed read regime | admitted app/human caller; Product Agent only if separately projected | exact Project + Brain binding + curated dataset + semantic IDs + current read authority; SELECT-only/restricted plan | read | ADMIT_CANDIDATE |
-| `BRN-U01` | interactive Discovery interview continuation | Brain | human discovery | real journey exists, but whether it is one long-running `StartBrainDiscovery` interaction or a separate semantic operation is unresolved | interaction | UNRESOLVED |
+
+### 9.1 Discovery interview disposition
+
+No separate `BrainDiscoverySession` owner/record or generic conversational operation is invented. The current candidate treats directed profiling + generated questions + human factual/review input as one bounded Discovery interaction whose durable authority closes through KnowledgeProposal/review/publication.
+
+```text
+BRN-U01 separate generic interview operation = REJECT_FOR_NOW
+```
+
+If 4C later proves the human interaction cannot be expressed without a separately durable current subject, reopen only the Brain interaction contract.
 
 No vector/RAG search operation, free-form SQL operation, memory-publish operation, or machine `ApproveSemanticMapping` authority is admitted.
 
@@ -384,31 +408,176 @@ Static asset/route byte serving is serving mechanics under current app authoriza
 
 ---
 
-# 13. Journey coverage checkpoint — first derivation wave
+# 13. Journeys I/J — Product Agent authoring and use
+
+## 13.1 Authoring is Builder authority, not PAR CRUD
+
+Current Agent authoring entry points:
+
+```text
+Project → Agents → New Agent
+Project → Agent → Change with Conexus
+Project → Build → natural-language Agent intent
+```
+
+all converge to:
+
+```text
+BLD-03 CreateChange
+→ same Builder/Change/Plan/diff/proof path
+→ candidate agent/v1
+→ immutable ArtifactRevision
+→ exact Release
+```
+
+Therefore:
+
+```text
+CreateProductAgentDefinition direct PAR op = REJECT
+UpdateProductAgentDefinition direct PAR op = REJECT
+PublishProductAgentOutsideRelease          = REJECT
+```
+
+`PRJ-20/21` provide control-plane inspection of Project-owned Agent definitions; PAR starts only at runtime semantics.
+
+## 13.2 PAR runtime operation candidates
+
+| ID | Semantic operation | Owner | Consumer/surface | Current authority / scope | Class | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| `PAR-01` | `ListConversations` | PAR | Published App Agent UX / authorized Project inspection | exact Project/Agent + current app/owner disclosure; Conversation existence never grants authorization | read | ADMIT_CANDIDATE |
+| `PAR-02` | `GetConversation` | PAR | Published App Agent UX | exact Conversation + current exact Project/Agent/app authority; provider thread id remains hidden mechanism | read | ADMIT_CANDIDATE |
+| `PAR-03` | `CreateConversation` | PAR | Published App human Agent UX | exact active Release + admitted Agent + current app access; creates Conexus Conversation identity | command | ADMIT_CANDIDATE |
+| `PAR-04` | `SendProductAgentTurn` | PAR | interactive Published App user | exact Conversation + current app/Agent/Release authority + typed app context refs; admits exact AgentRun | consequential command | ADMIT_CANDIDATE |
+| `PAR-05` | `RunProductAgentHeadless` | PAR | authorized manual headless consumer/operator | exact active Release/Agent + current headless authority; threadless by default | consequential command | ADMIT_CANDIDATE |
+| `PAR-06` | `ListAgentRuns` | PAR | Agent/Project technical inspection | exact Project/Agent/Conversation filters + current disclosure | read | ADMIT_CANDIDATE |
+| `PAR-07` | `GetAgentRun` | PAR | user/operator/investigator | exact AgentRun + current disclosure; `COMPLETED != every effect succeeded` | read | ADMIT_CANDIDATE |
+| `PAR-08` | `ListApprovalRequests` | PAR | eligible approver UX / run inspection | exact Project/AgentRun + current approval disclosure/eligibility | read | ADMIT_CANDIDATE |
+| `PAR-09` | `GetApprovalRequest` | PAR | exact eligible approver/investigator | sealed subject + exact args/content/digest + current status; no widening | read | ADMIT_CANDIDATE |
+| `PAR-10` | `DecideApprovalRequest` | PAR | current eligible human | exact sealed proposal + current eligibility; only `ALLOW_ONCE` or `DENY` are direct human decisions; changed subject needs new request | decision / CR-1 + Gateway atomicity candidate | ADMIT_CANDIDATE |
+| `PAR-11` | `ListAgentTriggers` | PAR | Project Agent administration | exact Project/Agent + current trigger administration disclosure | read | ADMIT_CANDIDATE |
+| `PAR-12` | `GetAgentTrigger` | PAR | Project Agent administration | exact TriggerRevision/current state + current disclosure | read | ADMIT_CANDIDATE |
+| `PAR-13` | `CreateScheduleTrigger` | PAR | Project Agent administration | exact active/evolvable Agent + current Project authority; archived Project blocks creation | command | ADMIT_CANDIDATE |
+| `PAR-14` | `ReviseScheduleTrigger` | PAR | Project Agent administration | exact current TriggerRevision + current authority; material schedule semantics become new revision | command/current-state | ADMIT_CANDIDATE |
+| `PAR-15` | `EnableAgentTrigger` | PAR | Project Agent administration | exact current TriggerRevision + active Project/Release/current authority; archived Project cannot enable | consequential command | ADMIT_CANDIDATE |
+| `PAR-16` | `DisableAgentTrigger` | PAR | Project Agent administration | exact TriggerRevision; explicit narrowing remains allowed for archived Project | narrowing command | ADMIT_CANDIDATE |
+
+`EXPIRED` and `STALE` ApprovalRequest states are owner/system outcomes, not caller commands. Schedule fire/occurrence admission is Technical/internal ingress, not another Product operation.
+
+No direct Product operation is admitted for Mastra thread creation/resume, tool registry mutation, runtime snapshot mutation, provider message IDs, or `MarkAgentRunCompleted`.
+
+---
+
+# 14. Journey K — Gateway effect authority and receipts
+
+The Product command that requests business effect remains the exact Project-defined `Action`/Integration Operation or exact Product Agent tool invocation. Gateway does **not** become a second business-command API.
+
+Gateway's effect admission/replay/idempotency execution path is owner-internal after an admitted semantic command and, when needed, exact PAR approval.
+
+Read-only inspectability is Product-visible:
+
+| ID | Semantic operation | Owner | Consumer/surface | Current authority / scope | Class | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| `GW-01` | `ListEffectAttempts` | Gateway | AgentRun/Project Activity/investigator | exact Project and originating semantic run/operation scope + current disclosure; does not imply effect retry authority | read | ADMIT_CANDIDATE |
+| `GW-02` | `GetEffectAttempt` | Gateway | exact run/effect technical inspection | exact EffectAttempt + receipt/reconciliation/provenance; `OUTCOME_UNKNOWN` preserved | read | ADMIT_CANDIDATE |
+
+Explicitly internal / rejected as public operations:
+
+```text
+AdmitEffect               = INTERNAL owner path
+ClaimIdempotency          = INTERNAL owner path
+ResumeEffect              = INTERNAL owner path
+RetryEffect               = REJECT generic Product operation
+MarkEffectSucceeded       = REJECT
+ResolveUnknownAsFailure   = REJECT
+```
+
+A current unresolved effect fences both replay and new duplicate-scope admission until reconciliation establishes a safe owner result.
+
+---
+
+# 15. Journey L — managed `job/v1`
+
+The job definition/schedule is an exact Release artifact inspected through Project capabilities. MAR owns admitted occurrence/run semantics, not a generic scheduler Product.
+
+| ID | Semantic operation | Owner | Consumer/surface | Current authority / scope | Class | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| `MAR-01` | `ListManagedJobRuns` | MAR | Project operations/Data/Activity | exact Project + Release/job filters + current disclosure | read | ADMIT_CANDIDATE |
+| `MAR-02` | `GetManagedJobRun` | MAR | Project operations/investigator | exact JobRun + exact pinned Release/job/current state | read | ADMIT_CANDIDATE |
+| `MAR-03` | `RunManagedJobNow` | MAR | authorized Project operator | exact currently served Release + admitted `job/v1` + current authority; manual occurrence uses normal single-flight/coalesce laws | command | ADMIT_CANDIDATE |
+
+No direct operations are admitted for:
+
+```text
+ReplayMissedSlots
+CreateCron
+PauseQueue
+ForceRedelivery
+MarkJobSucceeded
+ExecuteArbitraryProjectJobCode
+```
+
+Fixed-interval occurrence creation/redelivery/restart handling is MAR/queue mechanics under exact Release and freshness law. At most one current catch-up is owner logic, never a user backlog operation.
+
+---
+
+# 16. Activity / Audit / cost / technical observation reads
+
+Observability provides **projections/evidence**, never current business authority.
+
+| ID | Semantic operation | Owner | Consumer/surface | Current authority / scope | Class | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| `OBS-01` | `ListProjectActivity` | Observability & Audit projection | Project Activity / investigator | exact Project + current disclosure; entries reference owner facts rather than replacing them | read | ADMIT_CANDIDATE |
+| `OBS-02` | `GetExecutionObservationDetail` | Observability & Audit projection | technical investigator | exact closed supported subject ref (e.g. ActorRun/AgentRun/JobRun/EffectAttempt) + current disclosure; telemetry cannot decide terminal truth | read | ADMIT_CANDIDATE |
+| `OBS-03` | `GetProjectUsageCostSummary` | Observability & Audit projection | Project operator/investigator | exact Project/period + provenance states; missing != zero, calculated != reported/reconciled | read | ADMIT_CANDIDATE |
+| `OBS-04` | `ListAuditRecords` | Observability & Audit | authorized auditor/admin | exact Workspace/Project scope + current audit disclosure | read | ADMIT_CANDIDATE |
+| `OBS-05` | `GetAuditRecord` | Observability & Audit | authorized auditor/investigator | exact immutable audit fact + current disclosure | read | ADMIT_CANDIDATE |
+
+`OBS-02` uses a **closed typed subject union**, not a universal arbitrary Resource/Status envelope. Owner-specific current truth remains resolved at the owning operation (`GetAgentRun`, `GetManagedJobRun`, `GetPromotion`, etc.).
+
+---
+
+# 17. F1 operational capabilities not admitted as ordinary Product API
+
+Current F1 also requires backup/restore/emergency-stop correctness and Worker/Golden evaluations. Their current consumer/mechanism is operational/engineering rather than an accepted ordinary Product API surface.
+
+| Capability | 4A disposition |
+| --- | --- |
+| backup execution | OPERATIONS CONTROL / 4D–first-production realization |
+| restore execution | OPERATIONS CONTROL / first-production recovery procedure; cannot be ordinary self-authorizing Product command |
+| emergency stop | OUT-OF-BAND CONTROL; no app-ingress dependency implied |
+| recovery recertification | owner-specific operational path; no generic `ActivateRecoveredSystem` Product authority admitted |
+| Budget Analyzer golden benchmark | Builder/engineering evaluation capability; not a business Product operation |
+| Worker Eval | Builder engineering/evaluation capability; no generic model leaderboard Product domain admitted |
+
+A future real operator UI can reopen only the smallest surface needed to expose these controls safely; the infrastructure requirement itself does not manufacture HTTP/Product operations now.
+
+---
+
+# 18. Journey coverage checkpoint — second derivation wave
 
 | Journey | Current 4A coverage state |
 | --- | --- |
 | A — first access / Workspace | COVERED_CANDIDATE (`IAM-*`, `WS-*`) |
 | B — Project Inception / Baseline | COVERED_CANDIDATE (`PRJ-*`) |
-| C — Plan / build / verify / publish | PARTIAL_CANDIDATE (`BLD-*`, `REL-*`); direct Change acceptance semantics unresolved |
-| D — Brain assisted Discovery | PARTIAL_CANDIDATE (`BRN-*`); interactive interview split unresolved |
+| C — Plan / build / verify / publish | COVERED_CANDIDATE (`BLD-*`, `REL-*`); direct generic Change acceptance rejected |
+| D — Brain assisted Discovery | COVERED_CANDIDATE (`BRN-*`); no separate Discovery-session owner admitted |
 | E — Brain publish / bind / feedback | COVERED_CANDIDATE (`BRN-*`, `PRJ-10..12`) |
 | F — Connection / Integration | COVERED_CANDIDATE (`CON-*`, `PRJ-13..15`, Project capability grammar) |
-| G — Data / static Query / AnalyticQuery | PARTIAL_CANDIDATE (Project Query grammar + `BRN-12`); Data inspectability `PRJ-18/19` unresolved |
+| G — Data / static Query / AnalyticQuery | COVERED_CANDIDATE (`PRJ-18/19`, Project Query grammar, `BRN-12`) |
 | H — publish/use business application | COVERED_CANDIDATE (`REL-*`, `IAM-13..17`, exact Project `Ops(R)`) |
-| I — create/evolve Product Agent | NEXT DERIVATION WAVE |
-| J — use Product Agent | NEXT DERIVATION WAVE |
-| K — exact effect approval | NEXT DERIVATION WAVE |
-| L — managed sync/job | NEXT DERIVATION WAVE |
-| M — duplicate Project | operation `PRJ-06` admitted; full negative proof to close later |
-| N — Budget Analyzer | BLOCKED_ON_EXACT_SEMANTIC_RESULT_INVENTORY |
-| O — maintenance/reusable learning | base path covered by `BLD-03` + Brain proposal path; full closure later |
+| I — create/evolve Product Agent | COVERED_CANDIDATE through `BLD-03`, `PRJ-20/21`; direct PAR authoring CRUD rejected |
+| J — use Product Agent | COVERED_CANDIDATE (`PAR-01..16`) |
+| K — exact effect approval | COVERED_CANDIDATE (`PAR-08..10`, Gateway internal admission, `GW-01/02`) |
+| L — managed sync/job | COVERED_CANDIDATE (`MAR-01..03`, Project capability inspection) |
+| M — duplicate Project | COVERED_CANDIDATE (`PRJ-06`) |
+| N — Budget Analyzer | **BLOCKED_ON_EXACT_SEMANTIC_RESULT_INVENTORY** |
+| O — maintenance/reusable learning | COVERED_CANDIDATE (`BLD-03`, `BRN-07..09`, normal Release path) |
 
-No journey is considered accepted by this table. It only routes the next derivation work.
+This table asserts only derivation coverage, not 4A acceptance. The remaining material blocker is the first vertical semantic/result contract plus final Permission/subtraction/proof closure.
 
 ---
 
-# 14. Budget Analyzer operation census blocker — `4A-BUDGET-01`
+# 19. Budget Analyzer operation census blocker — `4A-BUDGET-01`
 
 Current authority fixes the composition:
 
@@ -444,7 +613,7 @@ This is a closure blocker, not permission to start Brain implementation or live 
 
 ---
 
-# 15. Blueprint / Forge design-hypothesis disposition — first pass
+# 20. Blueprint / Forge design-hypothesis disposition — first pass
 
 Current Product authority already has:
 
@@ -475,11 +644,11 @@ This disposition may be reopened only if a real current interaction cannot be ex
 
 ---
 
-# 16. Permission derivation — not frozen
+# 21. Permission derivation — next closure
 
-4A will derive ordinary Permission vocabulary only after the concrete operation candidate has survived subtraction/owner review.
+4A will derive ordinary Permission vocabulary from the surviving concrete operation set; it will **not** use the Published App roles or narrative personas as a shortcut.
 
-The current owner-fact families that Permissions must **not** flatten include:
+The current owner-fact families that Permissions must not flatten include:
 
 ```text
 Workspace membership/admin authority
@@ -498,11 +667,20 @@ Published App `{admin,member}` roles are not automatically Control Plane Permiss
 
 `PlanningDepth`, `RigorProfile`, Keycloak role/group claims and runtime/provider identities are not ordinary Permissions.
 
+Before Permission names are frozen, the next pass must answer for every command/read:
+
+```text
+which existing grant/membership/app-access fact authorizes it?
+is a distinct semantic Permission genuinely required?
+can two operations safely share one Permission without widening authority?
+would a proposed Permission merely mirror a screen or CRUD noun?
+```
+
 ---
 
-# 17. Immediate negative controls for this candidate
+# 22. Immediate negative controls for this candidate
 
-The following proposals are already rejected unless a later material gap proves otherwise:
+The following proposals are rejected unless a later material gap proves otherwise:
 
 ```text
 CreateWorkflow
@@ -523,28 +701,33 @@ PublishBrainFromModelMemory
 CreateProductAgentOutsideChange
 GrantFromKeycloakRole
 GetBlobByStorageKeyAsAuthorization
+ReplayMissedSlots
+CreateCron
+ForceQueueRedelivery
+MarkAgentRunCompleted
+MarkEffectSucceeded
+ActivateRecoveredSystem
 ```
 
 Each rejected shortcut protects a current accepted authority boundary rather than a naming preference.
 
 ---
 
-# 18. Next 4A derivation work
+# 23. Next 4A derivation work
 
 Continue in this order:
 
 ```text
-1. derive Journeys I/J/K Product Agent authoring/use/approval
-2. derive Journey L managed execution
-3. close Activity/Audit/cost/technical-inspection reads
-4. adjudicate PRJ-18/19 Data inspectability
-5. adjudicate BLD-U01 Change acceptance
-6. adjudicate BRN-U01 Discovery interview semantics
-7. derive candidate ordinary Permission vocabulary from the surviving operations
-8. run journey + scenario + owner + 46-record-class cross-check
-9. subtract CRUD/symmetric/speculative operations
-10. resolve 4A-BUDGET-01 through the smallest Product/Brain authority
-11. only then freeze `N_platform` and `N_budget`
+1. derive candidate ordinary Permission vocabulary from the surviving operations
+2. cross-check every operation against 15 journeys + whole-product scenario gate
+3. cross-check every operation against 13 owners + 46 durable record classes
+4. identify records with no Product operation by design vs missing consumer
+5. run subtractive attack: merge/remove CRUD-symmetric/speculative operations
+6. bind idempotency/current-authority/CR-1/audit-required obligations per surviving command
+7. resolve 4A-BUDGET-01 through the smallest Product/Brain authority
+8. produce executable census/consistency guard once the semantic candidate stabilizes
+9. independent Fable challenge over the exact consolidated candidate
+10. only after corrections/ratification freeze `N_platform`, Permission vocabulary and `N_budget`
 ```
 
 Do not begin 4B/OpenAPI, frontend wireframes, concrete SDKs/Paved Road, runtime selection or Product code while this ledger is open.

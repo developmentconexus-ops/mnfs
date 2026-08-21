@@ -11,9 +11,10 @@
     "test:repository": "node --test tests/repository/*.test.mjs",
     "repository:check": "node scripts/check-repository-hygiene.mjs && node scripts/check-doc-index.mjs && node scripts/check-current-state.mjs && node scripts/check-architecture-verification.mjs && node scripts/check-qualification-provenance.mjs",
     "wire:lint": "npx --yes @redocly/cli@2.47.0 lint contracts/api/product/openapi.yaml --extends=recommended",
-    "wire:bundle": "npx --yes @redocly/cli@2.47.0 bundle contracts/api/product/openapi.yaml --output=/tmp/conexus-product-openapi.bundle.yaml",
+    "wire:bundle": "npx --yes @redocly/cli@2.47.0 bundle contracts/api/product/openapi.yaml --output=/tmp/conexus-product-openapi.bundle.json --ext=json",
     "wire:schema": "npx --yes ajv-cli@5.0.0 compile --spec=draft2020 -s contracts/api/project-operation.schema.json",
-    "wire:verify": "npm run wire:lint && npm run wire:bundle && npm run wire:schema",
+    "wire:bijection": "node scripts/check-wire-bijection.mjs",
+    "wire:verify": "npm run wire:lint && npm run wire:bundle && npm run wire:schema && npm run wire:bijection",
     "verify": "npm run repository:check && npm run test:repository && npm run wire:verify"
   }
 }

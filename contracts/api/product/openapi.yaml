@@ -119,23 +119,23 @@ paths:
   /api/control/projects/{projectId}/changes/{changeId}/execution-detail:
     $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1execution-detail'
   /api/control/workspaces/{workspaceId}/brain:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain'
   /api/control/workspaces/{workspaceId}/brain/revisions:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1revisions'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1revisions'
   /api/control/workspaces/{workspaceId}/brain/revisions/{brainRevisionId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1revisions~1{brainRevisionId}'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1revisions~1{brainRevisionId}'
   /api/control/workspaces/{workspaceId}/brain/discoveries:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1discoveries'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1discoveries'
   /api/control/workspaces/{workspaceId}/brain/proposals:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals'
   /api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals~1{proposalId}'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals~1{proposalId}'
   /api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}/decisions:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals~1{proposalId}~1decisions'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals~1{proposalId}~1decisions'
   /api/control/workspaces/{workspaceId}/brain/publications:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1publications'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1publications'
   /api/control/workspaces/{workspaceId}/brain/health:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1health'
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1health'
   /api/control/connectors:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1connectors'
   /api/control/connectors/{connectorDefinitionId}:
@@ -211,31 +211,7 @@ paths:
   /api/control/workspaces/{workspaceId}/audit-records/{auditRecordId}:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1audit-records~1{auditRecordId}'
   /api/projects/{projectId}/analytic-queries:
-    parameters:
-      - name: projectId
-        in: path
-        required: true
-        description: Untrusted reference only; current containment and authority are resolved server-side.
-        schema:
-          type: string
-          minLength: 1
-    post:
-      summary: RunAnalyticQuery
-      operationId: RunAnalyticQuery
-      x-conexus-4a-id: BRN-12
-      x-conexus-ingress:
-        - CONTROL_PLANE
-        - PUBLISHED_APP
-      x-conexus-non-http-ingress:
-        - PAR_TOOL
-      x-conexus-current-state-carrier: NONE
-      x-conexus-contract-state: METHOD_PATH_MAPPED
-      responses:
-        '200':
-          description: >-
-            Provisional 4B method/path mapping success; exact success schema/status
-            remains to be closed in this stage.
-          x-conexus-provisional: true
+    $ref: './brain-paths.yaml#/paths/~1api~1projects~1{projectId}~1analytic-queries'
 components:
   securitySchemes:
     ConexusSession:

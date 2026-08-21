@@ -41,27 +41,27 @@ Established executable state:
 
 ```text
 fixed Product bijection = 111 ↔ 111
-schema-closed = 58 / 111
+schema-closed = 69 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 IAM + Workspace = 20 / 20 CLOSED
 Project = 21 / 21 CLOSED
 Builder = 17 / 17 CLOSED
+Brain = 11 / 11 CLOSED
 Budget Analyzer generated two-query proof = green
-Verify #270 = SUCCESS
+Verify #278 = SUCCESS
 ```
 
 Next bounded slice:
 
 ```text
-Brain Product operations = 11
-= BRN-01 → BRN-10 + BRN-12
-BRN-11 RunBrainHealthProbe = SYSTEM_OWNER_TRANSITION / not caller Product wire
+Connections Product operations = 9
+= CON-01 → CON-09
 ```
 
-Close Brain schemas only from accepted Brain/knowledge/data authority. Preserve human review before publication, immutable revisions, explicit Project adoption, provenance/uncertainty and health truth, and restricted semantic-ID/SELECT-only AnalyticQuery. Do not admit arbitrary SQL/text-to-SQL runtime authority, move ERP credentials into Builder/E2B for discovery, or invent missing lifecycle/property vocabularies.
+Close Connection schemas only from accepted Connections/Gateway authority. Preserve `WORKSPACE | PROJECT` owner scope, private Project containment, exact Connector definition/version, immutable Connection revisions, write-only secret ingress, credential-handle rather than plaintext disclosure, real-environment qualification/provenance and the distinction `configured != qualified != bound != healthy != authorized`. Do not admit secret readback, arbitrary TestURL, generic credential fetch/executor, cross-Workspace sharing, or duplicate Project-binding authority.
 
-Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md).
+Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md).
 
 Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

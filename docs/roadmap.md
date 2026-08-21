@@ -13,8 +13,8 @@ This is the single current phase/status authority. It is not a worklog.
 | C-018 | RATIFIED / OPERATOR RATIFIED | Final Product architecture continuity ratified after exact-head R1–R7 review; implementation-dependent proof remains routed downstream | Material Evidence falsifies the ratified Product/architecture target, qualification scope, owner/trust boundary, or genuine downstream falsifiability |
 | C-015 refinement | REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED | Named identity-provider trigger resolved through a narrow Keycloak OIDC authentication boundary while Conexus retains Account/session/membership/grant/Published-App authorization sovereignty; first-production identity/recovery closure updated | Keycloak security/topology/recovery Evidence makes the selected IdP unfit; stable issuer-subject identity cannot be preserved; or a real SSO/SCIM/passkey/multi-IdP requirement materially changes the contract |
 | Realization Planning | ACCEPTED / OPERATOR ACCEPTED | R1–R7 first-build skeleton accepted after independent Fable challenge; retained as Phase-4 input rather than direct Product-code authority | Material Phase-4 Evidence falsifies the skeleton, an applicability disposition, or ratified/refined authority it compiles |
-| 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED | `N_platform=114`, exact Release-pinned Project capability grammar, `N_budget=2`, 25 ordinary Permissions, 46/46 durable-record classification, 13/13 owner boundaries and complete per-operation authority/IC mapping survived Lead + independent Fable challenge and were explicitly operator-ratified; PR #54 integrated | Material Evidence shows an accepted F1 interaction cannot be expressed without new Product meaning/owner/trust, the Project capability grammar requires an unsafe universal executor, or accepted 4A authority is materially contradictory/falsified |
-| 4B — Executable Wire Contract | OPEN / ACTIVE | Canonical machine-readable Product wire closes accepted 4A semantics without parallel DTO/API authority | 4A changes materially or executable wire cannot express an accepted operation safely |
+| 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED / MATERIAL REOPEN CANDIDATE `4B-F01` | Ratified 4A remains current unless operator accepts the bounded downstream falsifier; `4B-F01` shows three generic update operations lack a closed mutable Product property set and cannot be safely schema-authored without inventing meaning | Material Evidence shows an accepted F1 interaction cannot be expressed safely; `4B-F01` is the current bounded trigger under operator adjudication |
+| 4B — Executable Wire Contract | OPEN / BLOCKED ON `4B-F01` OPERATOR ADJUDICATION | Canonical machine-readable Product wire closes accepted/corrected 4A semantics without parallel DTO/API authority | Upstream operation semantics change materially or executable wire exposes another accepted-operation contradiction |
 | 4C — Frontend Interaction & Authority Realization | NOT STARTED | Frontend goals/routes/states/consumers derive bidirectionally from accepted Product/wire authority with zero invented frontend operations | Real frontend interaction exposes a material 4A/4B gap |
 | 4D — Project Paved Road & Runtime Realization | NOT STARTED | Exact scaffold/ownership classes, backend/frontend/data/integration/verification Paved Road, runtime/persistence/dependencies/deployment and conformance/escape-hatch/evaluation contract ratified before implementation graph | Required property cannot be realized by the Paved Road/runtime without changing accepted authority, or conformance proves the road can be silently bypassed |
 | 4E — Whole-System Coherence & Golden Flows | NOT STARTED | Product/wire/frontend/Paved-Road/runtime form one coherent falsifiable system; first Budget Analyzer path and material negatives compose correctly | Composed flow reveals contradiction or missing authority/mechanism |
@@ -31,38 +31,58 @@ This is the single current phase/status authority. It is not a worklog.
 C-018 = RATIFIED / OPERATOR RATIFIED
 C-015 = REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED
 Realization Planning = ACCEPTED / OPERATOR ACCEPTED / EXECUTION SKELETON
-4A = CLOSED / OPERATOR RATIFIED / INTEGRATED
-4B = OPEN / ACTIVE
+4A = CLOSED / OPERATOR RATIFIED / MATERIAL REOPEN CANDIDATE 4B-F01
+4B = OPEN / BLOCKED ON 4B-F01 OPERATOR ADJUDICATION
 4C–4G = NOT STARTED
 Product implementation = BLOCKED
 ```
 
 ## Exact next action
 
-Execute **4B — Executable Wire Contract** only, owned by [phases/4b-executable-wire-contract.md](phases/4b-executable-wire-contract.md).
+Adjudicate **`4B-F01` — generic fixed-mutation semantic gap** only.
 
-First close the representation foundation before enumerating HTTP routes:
-
-```text
-1. select/pin the exact OpenAPI Specification + JSON Schema dialect from current official Evidence
-2. define canonical artifact topology and split/bundle law
-3. define operationId/component/Problem/security/conditional/idempotency conventions
-4. prove those conventions can represent accepted 4A authority without custom parallel semantics
-5. only then map the 114 fixed platform operations and Project-operation grammar
-```
-
-The accepted 4A input is fixed:
+4B has already established and must preserve:
 
 ```text
-114 fixed Conexus platform operations
-+ exact Release-pinned Project-defined operation grammar
-+ 2 Budget Analyzer registered Queries
-+ 25 ordinary Permissions and accepted special/runtime/app authority routes
-+ accepted disclosure/outcome/current-authority/idempotency-concurrency obligations
+OpenAPI 3.1.2 + JSON Schema 2020-12 representation
+single multi-file Product OAD authority
+114 ↔ 114 accepted fixed-operation method/path bijection at the pre-finding census
+opaque Conexus session + same-origin browser request-authenticity law
+truthful IC2 carrier rule; cross-resource If-Match rejected
+Project-defined project-operation/v1 declaration grammar
+Budget Analyzer exact two-query generation
+Budget truth-state negative controls
 ```
 
-4B must make these semantics executable without creating a second Product authority in DTOs/routes/schemas. Wire representation may not create new Product operations, Permissions, owners or trust boundaries.
+The material downstream finding is bounded to:
 
-Do **not** begin 4C, choose the Project Paved Road/runtime, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
+```text
+WS-03  UpdateWorkspace
+WS-06  UpdateArea
+PRJ-04 UpdateProject
+```
 
-The stable Phase-4 sequence is defined in [phases/4-implementation-readiness-program.md](phases/4-implementation-readiness-program.md). Accepted 4A authority is [product/operation-ledger.md](product/operation-ledger.md), [product/permission-contract.md](product/permission-contract.md) and [product/budget-analyzer-contract.md](product/budget-analyzer-contract.md), with [evidence/4a/operation-coverage.md](evidence/4a/operation-coverage.md) retained as supporting Evidence.
+For these three operations, accepted Product/owner authority contains no closed mutable property inventory. 4B therefore cannot author an exact request schema without inventing Product meaning.
+
+Lead recommendation in [evidence/4b/fixed-mutation-semantic-gap.md](evidence/4b/fixed-mutation-semantic-gap.md):
+
+```text
+SUBTRACT WS-03
+SUBTRACT WS-06
+SUBTRACT PRJ-04
+
+N_platform 114 → 111
+```
+
+Do **not** replace them by preference with rename/settings/generic patch operations. If a later real consumer requires a rename or metadata edit, admit the smallest exact semantic operation then.
+
+Because 4A was operator-ratified, this bounded correction requires explicit operator approval before 4A authority or the OAS census changes.
+
+Until adjudicated:
+
+- do not mass-author fixed request/response schemas on top of the unresolved three operations;
+- do not open 4C;
+- do not choose runtime/Paved Road/persistence mechanics;
+- do not implement Product code, Sankhya, migrations, or R1–R7.
+
+The current 4B owning contract is [phases/4b-executable-wire-contract.md](phases/4b-executable-wire-contract.md). Current human-readable wire authority is [product/wire-contract.md](product/wire-contract.md). Accepted 4A authority remains [product/operation-ledger.md](product/operation-ledger.md) until explicit operator adjudication changes it.

@@ -87,37 +87,37 @@ paths:
   /api/control/workspaces/{workspaceId}/product-agents:
     $ref: './project-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1product-agents'
   /api/control/projects/{projectId}/changes:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes'
   /api/control/projects/{projectId}/changes/{changeId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}'
   /api/control/projects/{projectId}/changes/{changeId}/plan:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1plan'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1plan'
   /api/control/projects/{projectId}/changes/{changeId}/plan/decisions:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1plan~1decisions'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1plan~1decisions'
   /api/control/projects/{projectId}/changes/{changeId}/progress:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1progress'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1progress'
   /api/control/projects/{projectId}/changes/{changeId}/diff:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1diff'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1diff'
   /api/control/projects/{projectId}/source/tree:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1source~1tree'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1source~1tree'
   /api/control/projects/{projectId}/source/file:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1source~1file'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1source~1file'
   /api/control/projects/{projectId}/changes/{changeId}/preview:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1preview'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1preview'
   /api/control/projects/{projectId}/changes/{changeId}/findings:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings'
   /api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings~1{findingId}'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings~1{findingId}'
   /api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}/commands/close:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings~1{findingId}~1commands~1close'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings~1{findingId}~1commands~1close'
   /api/control/projects/{projectId}/changes/{changeId}/evidence:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1evidence'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1evidence'
   /api/control/projects/{projectId}/changes/{changeId}/evidence/{evidenceId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1evidence~1{evidenceId}'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1evidence~1{evidenceId}'
   /api/control/projects/{projectId}/assistant/queries:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1assistant~1queries'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1assistant~1queries'
   /api/control/projects/{projectId}/changes/{changeId}/execution-detail:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1execution-detail'
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1execution-detail'
   /api/control/workspaces/{workspaceId}/brain:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain'
   /api/control/workspaces/{workspaceId}/brain/revisions:

@@ -257,6 +257,7 @@ Examples:
 ```text
 Brain Discovery/feedback/conformance/health
 scaffold/codegen/frontend contract/security invariants
+Builder UX progressive disclosure / platform machinery not primary workflow
 Observability/audit/redaction/GC Product paths
 Release/Promotion/EnvironmentConformance/serving
 Published App authorization/session/browser security
@@ -265,8 +266,12 @@ supply-chain/dependency admission
 Connection/Gateway effect/egress
 first-production restore/emergency-stop/activation
 first vertical live-source/read-model reconciliation
-Golden benchmark / Worker Eval integration into engineering system
+Golden benchmark / Worker Eval outcome quality
 ```
+
+Builder UX proof must falsify the Product becoming an infrastructure console: WorkUnit/ActorRun/Gateway/CAS/Mastra/E2B machinery remains progressively inspectable when material, but it must not become the required primary workflow for expressing and inspecting ordinary Product intent.
+
+Worker Eval outcome quality is judged on representative correctness/completion, rework/correction burden, elapsed time, cost and required human intervention where measurable. Agent usage volume, token volume or parallel-agent count alone are not evidence of engineering effectiveness.
 
 Named proof routing remains explicit:
 
@@ -350,40 +355,46 @@ generic Recovery owner/engine or universal recovery FSM
 
 ## 46. Verification invariants carried into 3N / 3O
 
-Future architecture verification/proof must be able to falsify at least:
+Future architecture verification/proof must be able to falsify at least the following accepted explicit minimum.
+
+Accepted explicit minimum count = 28.
 
 ```text
-Workspace isolation bypass through Project/DB/runtime shortcuts
-coding crossing a materially insufficient Project Baseline
-runtime/session closing Change authority by itself
-Plan/tasks/UI state disagreeing with Hub authority without detection
-E2B cross-incarnation silent write replay
-Brain canonical source accidentally residing in first Project repo
-Brain binding silently following new Brain revision
-Brain Discovery proposal becoming authority without human publish
-AnalyticQuery escaping semantic/SELECT-only boundaries
-caller/model selecting arbitrary Connection/effect destination
-Gateway duplicate/lost-response replay manufacturing second effect
-Gateway unresolved effect bypassed by fresh AgentRun/new admission
-Gateway idempotency/reconciliation scope accepted when deliberately under-declared
-Product Agent losing exact old Release pins across suspension/restart
-Builder/PAR mutable-state leakage
-stale RequestContext authority resurrection
-provider call occurring without spend reservation
-managed sync replaying all missed slots
-managed sync recovery depending on effect-capable machinery with no current consumer
-telemetry manufacturing F5/terminal truth
-Published App authority collapsing into Control Plane
-Release AVAILABLE/pointer swap masquerading as SERVED_VERIFIED
-migration/EnvironmentConformance drift hidden as success
-storage object key bypassing owner authorization
-restore without positive generation continuity opening normal PROD
-restored stale authority regaining privileged/autonomous/effectful use
-post-cutoff canonical Git silently discarded or promoted to current Hub authority
-first vertical read model proving itself / unsupported KPI fabricated
+FIRST_BUILD | Workspace isolation bypass through Project/DB/runtime shortcuts
+FIRST_BUILD | coding crossing a materially insufficient Project Baseline
+FIRST_BUILD | runtime/session closing Change authority by itself
+FIRST_BUILD | Plan/tasks/UI state disagreeing with Hub authority without detection
+FIRST_BUILD | E2B cross-incarnation silent write replay
+FIRST_BUILD | Brain canonical source accidentally residing in first Project repo
+FIRST_BUILD | Brain binding silently following new Brain revision
+FIRST_BUILD | Brain Discovery proposal becoming authority without human publish
+FIRST_BUILD | AnalyticQuery escaping semantic/SELECT-only boundaries
+FIRST_BUILD | caller/model selecting arbitrary Connection/effect destination
+FIRST_BUILD | Gateway duplicate/lost-response replay manufacturing second effect
+FIRST_BUILD | Gateway unresolved effect bypassed by fresh AgentRun/new admission
+FIRST_BUILD | Gateway idempotency/reconciliation scope accepted when deliberately under-declared
+FIRST_BUILD | Product Agent losing exact old Release pins across suspension/restart
+FIRST_BUILD | Builder/PAR mutable-state leakage
+FIRST_BUILD | stale RequestContext authority resurrection
+FIRST_BUILD | provider/model execution escaping finite server-derived call/step/retry/fallback bounds
+FIRST_BUILD | managed sync replaying all missed slots
+FIRST_BUILD | managed sync recovery depending on effect-capable machinery with no current consumer
+FIRST_BUILD | telemetry manufacturing F5/terminal truth
+FIRST_BUILD | Published App authority collapsing into Control Plane
+FIRST_BUILD | Release AVAILABLE/pointer swap masquerading as SERVED_VERIFIED
+FIRST_BUILD | migration/EnvironmentConformance drift hidden as success
+FIRST_BUILD | storage object key bypassing owner authorization
+FIRST_PRODUCTION | restore without positive generation continuity opening normal PROD
+FIRST_PRODUCTION | restored stale authority regaining privileged/autonomous/effectful use
+FIRST_PRODUCTION | post-cutoff canonical Git silently discarded or promoted to current Hub authority
+3O_CONTRACT→FIRST_BUILD | first vertical read model proving itself / unsupported KPI fabricated
 ```
 
-3O later defines the contract-only end-to-end vertical proof target; this baseline does not pre-implement it.
+The 28 lines above are an explicit minimum, not an exhaustive proof inventory. Section 42 remains independently load-bearing and must be routed into the first applicable real slice.
+
+`FIRST_BUILD` means the first authorized real Product implementation that actually instantiates the relevant owner/boundary. `FIRST_PRODUCTION` requires the real first-installation topology. `3O_CONTRACT→FIRST_BUILD` means 3O owns only the vertical proof contract; the first authorized real vertical build executes that contract and can falsify the behavior.
+
+No pre-C-018 architecture fixture may claim these implementation/production properties by imitating Product code.
 
 ---
 

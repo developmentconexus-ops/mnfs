@@ -216,7 +216,51 @@ iam ws prj bld reg con gw brn par rel mar obs att
 
 The F1 durable inventory is closed at 46 record classes, and the Tier-2 structural cross-module FK allowlist is closed at exactly 16. Tier-3 semantic references/digests are the default for non-structural cross-owner references. There is no shared/common schema, and a mutable current-state mirror of another owner is forbidden.
 
-The exact 46-class inventory and 16-FK allowlist live in 3E-02. A new durable class or Tier-2 FK requires the Decision Loop/material Finding; this projection does not reproduce those full lists.
+The current projection below preserves the accepted 3E closure directly so a Fresh Actor can verify this load-bearing boundary without Git archaeology. Names are semantic record classes, not post-C-018 table/column spellings.
+
+## 6.5.1 Current durable record inventory
+
+```text
+iam: account / session / workspace_membership / area_membership / area_project_grant / account_project_grant / published_app_access
+ws: workspace / area
+prj: project / approved_baseline / brain_binding / connection_binding / config_contract_revision
+bld: change / contract_revision / plan_revision / work_unit / actor_run / coding_session / finding / change_acceptance
+reg: artifact / artifact_revision
+con: connection / connection_revision / connection_qualification
+gw: effect_attempt / idempotency_claim / budget_counter
+brn: knowledge_proposal / health / binding_validation
+par: conversation / agent_run / approval_request / agent_trigger
+rel: release / promotion / active_pointer
+mar: serving_route / job_run
+obs: audit_record / operational_event
+att: attachment / blob
+TOTAL 46
+```
+
+A new durable record class still requires the existing Decision Loop/material Finding and the same admission test: one current owner, a real durable consumer/invariant, non-derivability from sufficient authority, no mutable foreign-authority mirror, no substrate/provider-only duplication, and no generic framework without a consumer.
+
+## 6.5.2 Current Tier-2 cross-module FK allowlist — 16
+
+| # | Tier-2 FK |
+| --- | --- |
+| 1 | `iam.workspace_membership.workspace_id → ws.workspace(id)` |
+| 2 | `iam.area_membership.area_id → ws.area(id)` |
+| 3 | `iam.area_project_grant.area_id → ws.area(id)` |
+| 4 | `iam.area_project_grant.project_id → prj.project(id)` |
+| 5 | `iam.account_project_grant.project_id → prj.project(id)` |
+| 6 | `iam.published_app_access.project_id → prj.project(id)` |
+| 7 | `prj.project.workspace_id → ws.workspace(id)` |
+| 8 | `con.connection.workspace_id → ws.workspace(id)` when `ownerScope=WORKSPACE` |
+| 9 | `con.connection.project_id → prj.project(id)` when `ownerScope=PROJECT` |
+| 10 | `reg.artifact.workspace_id → ws.workspace(id)` when `kind=brain` |
+| 11 | `reg.artifact.project_id → prj.project(id)` for PROJECT-scoped kinds |
+| 12 | `bld.change.project_id → prj.project(id)` |
+| 13 | `rel.release.project_id → prj.project(id)` |
+| 14 | `rel.active_pointer.project_id → prj.project(id)` |
+| 15 | `mar.serving_route.project_id → prj.project(id)` |
+| 16 | `att.attachment.project_id → prj.project(id)` |
+
+Tier-3 semantic references/digests remain the default for non-structural cross-owner references. In particular, ProjectConnectionBinding→Connection/ConnectionRevision, ProjectBrainBinding→Brain/Registry revision, Gateway↔PAR semantic refs, JobRun→Release composition, OBS refs, Mastra refs, and digest refs do not gain Tier-2 FKs merely for convenience.
 
 ---
 

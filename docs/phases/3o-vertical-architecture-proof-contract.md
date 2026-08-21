@@ -160,6 +160,7 @@ The first authorized build must produce a bounded verification manifest covering
 | `3N-V25..3N-V27` | preserve unchanged; 3O and the first non-production build do not imitate these properties | FIRST_PRODUCTION |
 | `3N-V28` | **CONTRACTED_HERE** through `3O-P1..3O-P7` | FIRST_BUILD |
 | Architecture §42 proof families | preserve every family; execute at its first applicable real slice; the first-vertical live-source/read-model family is mandatory for this vertical | FIRST_BUILD / FIRST_PRODUCTION by current route |
+| 3N current-owner intake — 3M closure rows | preserve every 3N disposition and downstream execution route; entries already executed in 3N are not re-executed merely for 3O | FIRST_BUILD / FIRST_PRODUCTION / N/A exactly as routed by 3N |
 | data CR-1 | prove current-authority serialization × owner isolation together if the first build instantiates a qualifying security-sensitive mutation; otherwise record `NOT_INSTANTIATED` rather than manufacturing one | FIRST_BUILD where applicable |
 | managed-execution duplicate-authority / deciding-evidence obligations routed by 3N | preserve in the first-build applicability manifest; no new generic authority may be introduced to satisfy them | FIRST_BUILD where applicable |
 

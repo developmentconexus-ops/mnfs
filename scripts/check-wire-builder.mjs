@@ -151,9 +151,13 @@ if (property(preview, 'ready')?.type !== 'boolean' || property(preview, 'verifie
 }
 
 // Finding closure consumes exact current Finding revision plus actual Evidence; it never accepts a generic status write.
+// 4B intentionally does not invent a Finding lifecycle enum that current Product authority has not ratified.
 const finding = assertClosedObject(successSchema('BLD-12'), 'BLD-12 success');
 required(finding, 'findingId', 'changeId', 'findingRevision', 'state', 'summary');
-exactEnum(property(finding, 'state'), ['OPEN', 'CLOSED'], 'Finding state');
+const findingState = property(finding, 'state');
+if (findingState?.type !== 'string' || findingState?.enum) {
+  throw new Error('Finding state must remain an owner-issued string until Product authority closes a lifecycle vocabulary');
+}
 const closeFinding = assertClosedObject(requestSchema('BLD-13'), 'BLD-13 request');
 required(closeFinding, 'expectedFindingRevision', 'resolutionEvidenceIds');
 if (closeFinding.properties?.status || closeFinding.properties?.resolved) {

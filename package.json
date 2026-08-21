@@ -18,6 +18,7 @@
     "wire:identity-workspace": "node scripts/check-wire-identity-workspace.mjs",
     "wire:project": "node scripts/check-wire-project.mjs",
     "wire:builder": "node scripts/check-wire-builder.mjs",
+    "wire:brain": "node scripts/check-wire-brain.mjs",
     "wire:budget-declarations": "npx --yes ajv-cli@5.0.0 validate --spec=draft2020 -s contracts/api/project-operation.schema.json -d 'contracts/examples/budget-analyzer/*.operation.json'",
     "wire:budget-generate": "node scripts/generate-project-openapi.mjs contracts/examples/budget-analyzer /tmp/conexus-budget-analyzer.openapi.generated.json --write",
     "wire:budget-lint": "npx --yes @redocly/cli@2.47.0 lint /tmp/conexus-budget-analyzer.openapi.generated.json --extends=recommended",
@@ -26,7 +27,7 @@
     "wire:budget-negative": "if npx --yes --package=ajv-cli@5.0.0 --package=ajv-formats@3.0.1 ajv validate --spec=draft2020 -c ajv-formats -s /tmp/AnalyzePendingBudgets.output.schema.json -d contracts/examples/budget-analyzer/fixtures/analyze-unverified-zero.invalid.json; then echo 'negative control failed: UNVERIFIED analysis accepted business zero'; exit 1; else echo 'negative control fired: UNVERIFIED cannot masquerade as zero'; fi && if npx --yes --package=ajv-cli@5.0.0 --package=ajv-formats@3.0.1 ajv validate --spec=draft2020 -c ajv-formats -s /tmp/ListPendingBudgets.output.schema.json -d contracts/examples/budget-analyzer/fixtures/list-supported-negative-age.invalid.json; then echo 'negative control failed: supported result accepted negative banded age'; exit 1; else echo 'negative control fired: supported negative Budget age rejected'; fi && if npx --yes --package=ajv-cli@5.0.0 --package=ajv-formats@3.0.1 ajv validate --spec=draft2020 -c ajv-formats -s /tmp/ListPendingBudgets.output.schema.json -d contracts/examples/budget-analyzer/fixtures/list-partial-negative-age-banded.invalid.json; then echo 'negative control failed: PARTIAL negative age accepted an aging band'; exit 1; else echo 'negative control fired: negative Budget age is never banded'; fi",
     "wire:budget-truth": "npm run wire:budget-extract && npm run wire:budget-valid && npm run wire:budget-negative",
     "wire:budget-verify": "npm run wire:budget-declarations && npm run wire:budget-generate && npm run wire:budget-lint && npm run wire:budget-truth",
-    "wire:verify": "npm run wire:lint && npm run wire:bundle && npm run wire:schema && npm run wire:bijection && npm run wire:carriers && npm run wire:identity-workspace && npm run wire:project && npm run wire:builder && npm run wire:budget-verify",
+    "wire:verify": "npm run wire:lint && npm run wire:bundle && npm run wire:schema && npm run wire:bijection && npm run wire:carriers && npm run wire:identity-workspace && npm run wire:project && npm run wire:builder && npm run wire:brain && npm run wire:budget-verify",
     "verify": "npm run repository:check && npm run test:repository && npm run wire:verify"
   }
 }

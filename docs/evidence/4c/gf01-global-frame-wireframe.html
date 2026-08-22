@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en" data-wireframe="gf-01">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GF-01 · Conexus global frame · lo-fi candidate</title>
+  <style>
+    :root {
+      --ink: #181818;
+      --muted: #666;
+      --line: #b9b9b9;
+      --line-strong: #777;
+      --paper: #fff;
+      --soft: #f3f3f3;
+      --soft-2: #e8e8e8;
+      --rail: 224px;
+      --topbar: 60px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #ededed; }
+    button, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    [hidden] { display: none !important; }
+
+    .evidence-note {
+      max-width: 1440px;
+      margin: 18px auto 8px;
+      padding: 12px 16px;
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .evidence-note strong { font-size: 14px; }
+    .evidence-note span { color: var(--muted); font-size: 12px; }
+    .status { border: 1px solid var(--line-strong); padding: 5px 8px; font-size: 12px; font-weight: 700; }
+
+    .scope-lab {
+      max-width: 1440px;
+      margin: 0 auto 8px;
+      padding: 8px 0;
+      display: flex;
+      gap: 8px;
+    }
+
+    .scope-lab button {
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      padding: 8px 12px;
+    }
+
+    .scope-lab button[aria-pressed="true"] { background: var(--soft-2); font-weight: 700; }
+
+    .app-shell {
+      max-width: 1440px;
+      min-height: 760px;
+      margin: 0 auto 24px;
+      border: 2px solid #333;
+      background: var(--paper);
+      display: grid;
+      grid-template-columns: var(--rail) minmax(0, 1fr);
+      grid-template-rows: var(--topbar) minmax(0, 1fr);
+      grid-template-areas:
+        "top top"
+        "rail main";
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topbar {
+      grid-area: top;
+      border-bottom: 1px solid var(--line-strong);
+      background: var(--soft);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      min-width: 0;
+    }
+
+    .brand { font-weight: 700; white-space: nowrap; }
+    .context-chain { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+    .context-chain label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
+    .context-chain select {
+      min-width: 160px;
+      max-width: 260px;
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      padding: 6px 28px 6px 8px;
+    }
+    .slash { color: var(--muted); }
+    .account {
+      margin-left: auto;
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      border-radius: 20px;
+      padding: 7px 12px;
+      white-space: nowrap;
+    }
+    .menu-toggle {
+      display: none;
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      width: 38px;
+      height: 34px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rail {
+      grid-area: rail;
+      background: var(--soft);
+      border-right: 1px solid var(--line-strong);
+      padding: 14px 10px 18px;
+      overflow: auto;
+    }
+
+    .rail-header {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 14px 8px 6px;
+      letter-spacing: .04em;
+    }
+
+    .rail-button,
+    .back-button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 8px 10px;
+      margin: 1px 0;
+      border-radius: 4px;
+    }
+
+    .rail-button:hover,
+    .rail-button:focus-visible,
+    .back-button:hover,
+    .back-button:focus-visible { border-color: var(--line-strong); outline: none; }
+    .rail-button[aria-current="page"] { background: var(--soft-2); border-color: var(--line); font-weight: 700; }
+    .back-button { border-bottom: 1px solid var(--line); border-radius: 0; margin-bottom: 10px; }
+
+    .main {
+      grid-area: main;
+      min-width: 0;
+      overflow: auto;
+      padding: 28px 32px 42px;
+    }
+
+    .crumb { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    h1 { font-size: 24px; margin: 0 0 6px; }
+    .lede { color: var(--muted); margin: 0 0 24px; font-size: 13px; }
+
+    .toolbar {
+      min-height: 44px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 22px;
+      padding-bottom: 12px;
+    }
+
+    .primary-action {
+      border: 1px solid #444;
+      background: var(--soft-2);
+      padding: 8px 12px;
+      font-weight: 700;
+    }
+
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: 920px; }
+    .card {
+      border: 1px solid var(--line-strong);
+      background: var(--paper);
+      min-height: 112px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .card h2 { font-size: 16px; margin: 0 0 8px; }
+    .card p { color: var(--muted); font-size: 12px; margin: 0; }
+    .card button { border: 1px solid var(--line-strong); background: var(--paper); padding: 7px 9px; white-space: nowrap; }
+
+    .surface-placeholder {
+      border: 1px dashed var(--line-strong);
+      min-height: 430px;
+      max-width: 1080px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 30px;
+      color: var(--muted);
+      background: #fcfcfc;
+    }
+    .surface-placeholder strong { color: var(--ink); display: block; margin-bottom: 8px; font-size: 18px; }
+    .surface-placeholder code { color: var(--ink); }
+
+    .mobile-context-summary { display: none; }
+    .scrim { display: none; }
+
+    @media (max-width: 760px) {
+      body { background: var(--paper); }
+      .evidence-note { margin: 0; border-width: 0 0 1px; }
+      .scope-lab { display: none; }
+      .app-shell {
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
+        border: 0;
+        grid-template-columns: 1fr;
+        grid-template-rows: var(--topbar) minmax(0, 1fr);
+        grid-template-areas: "top" "main";
+      }
+      .topbar { padding: 0 10px; gap: 8px; }
+      .brand { display: none; }
+      .menu-toggle { display: inline-flex; }
+      .context-chain { min-width: 0; }
+      .context-chain > .field:first-child,
+      .slash { display: none; }
+      .context-chain select { min-width: 0; max-width: 180px; width: 100%; }
+      .account { font-size: 0; width: 34px; height: 34px; padding: 0; }
+      .account::after { content: "A"; font-size: 13px; }
+      .rail {
+        position: absolute;
+        z-index: 20;
+        top: var(--topbar);
+        left: 0;
+        bottom: 0;
+        width: min(82vw, 310px);
+        transform: translateX(-102%);
+        transition: transform 120ms linear;
+        border-right: 1px solid #333;
+        box-shadow: 2px 0 0 #bbb;
+      }
+      .app-shell[data-drawer-open="true"] .rail { transform: translateX(0); }
+      .scrim {
+        position: absolute;
+        z-index: 10;
+        inset: var(--topbar) 0 0 0;
+        border: 0;
+        background: rgba(0,0,0,.16);
+      }
+      .app-shell[data-drawer-open="true"] .scrim { display: block; }
+      .mobile-context-summary { display: block; padding: 4px 8px 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+      .mobile-context-summary small { color: var(--muted); display: block; }
+      .mobile-context-summary strong { display: block; margin: 4px 0 8px; }
+      .main { padding: 22px 18px 34px; }
+      .cards { grid-template-columns: 1fr; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .primary-action { align-self: flex-start; }
+      .surface-placeholder { min-height: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- GF-01 uses plain HTML/CSS and vanilla JavaScript only. This is P8 Evidence, not production frontend code. -->
+  <aside class="evidence-note" aria-label="Wireframe status">
+    <div>
+      <strong>GF-01 · Global frame · H1 single adaptive rail</strong><br>
+      <span>Low-fidelity structural browser artifact. Inspect desktop and narrow widths.</span>
+    </div>
+    <span class="status">CANDIDATE · NOT LOCKED</span>
+  </aside>
+
+  <div class="scope-lab" aria-label="Wireframe scenario controls">
+    <button type="button" id="showWorkspace" aria-pressed="true">Inspect Workspace frame</button>
+    <button type="button" id="showProject" aria-pressed="false">Inspect Project frame</button>
+  </div>
+
+  <div class="app-shell" id="shell" data-scope="workspace" data-drawer-open="false">
+    <header class="topbar">
+      <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="currentNavigation" aria-expanded="false">☰</button>
+      <div class="brand">Conexus</div>
+
+      <div class="context-chain" aria-label="Current context">
+        <div class="field">
+          <label for="workspaceSelect">Workspace</label>
+          <select id="workspaceSelect" aria-label="Workspace">
+            <option>Metal Nobre</option>
+            <option>Development Conexus</option>
+          </select>
+        </div>
+        <span class="slash" id="contextSlash" hidden>/</span>
+        <div class="field" id="projectField" hidden>
+          <label for="projectSelect">Project</label>
+          <select id="projectSelect" aria-label="Project">
+            <option>Budget Analyzer</option>
+            <option>Marketplace Central</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="account" type="button" aria-label="Account and session menu">Account</button>
+    </header>
+
+    <nav class="rail" id="currentNavigation" aria-label="Workspace navigation">
+      <div class="mobile-context-summary">
+        <small>Workspace</small>
+        <strong id="mobileWorkspaceName">Metal Nobre</strong>
+        <div id="mobileProjectContext" hidden>
+          <small>Project</small>
+          <strong id="mobileProjectName">Budget Analyzer</strong>
+        </div>
+      </div>
+
+      <section id="workspaceNavigation" data-scope="workspace" aria-label="Workspace navigation">
+        <div class="rail-header">Work</div>
+        <button class="rail-button" type="button" data-route="Projects" aria-current="page">Projects</button>
+        <button class="rail-button" type="button" data-route="Agents">Agents</button>
+
+        <div class="rail-header">Shared context</div>
+        <button class="rail-button" type="button" data-route="Brain">Brain</button>
+        <button class="rail-button" type="button" data-route="Connections">Connections</button>
+
+        <div class="rail-header">Admin / investigate</div>
+        <button class="rail-button" type="button" data-route="People & access">People &amp; access</button>
+        <button class="rail-button" type="button" data-route="Audit">Audit</button>
+      </section>
+
+      <section id="projectNavigation" data-scope="project" aria-label="Project navigation" hidden>
+        <button class="back-button" id="backToProjects" type="button">← Back to Projects</button>
+
+        <button class="rail-button" type="button" data-route="Build" aria-current="page">Build</button>
+
+        <div class="rail-header">Product</div>
+        <button class="rail-button" type="button" data-route="Data">Data</button>
+        <button class="rail-button" type="button" data-route="Capabilities">Capabilities</button>
+        <button class="rail-button" type="button" data-route="Integrations">Integrations</button>
+        <button class="rail-button" type="button" data-route="Agents">Agents</button>
+        <button class="rail-button" type="button" data-route="Brain">Brain</button>
+
+        <div class="rail-header">Operate / inspect</div>
+        <button class="rail-button" type="button" data-route="Releases">Releases</button>
+        <button class="rail-button" type="button" data-route="Activity">Activity</button>
+
+        <div class="rail-header">Manage</div>
+        <button class="rail-button" type="button" data-route="Settings">Settings</button>
+      </section>
+    </nav>
+
+    <button class="scrim" id="scrim" type="button" aria-label="Close navigation"></button>
+
+    <main class="main" id="mainContent" tabindex="-1">
+      <div id="workspaceSurface">
+        <div class="crumb">Workspace · Metal Nobre</div>
+        <div class="toolbar">
+          <div>
+            <h1 id="workspaceTitle">Projects</h1>
+            <p class="lede" id="workspaceLede">Primary Workspace destination. Browse disclosed Projects and enter a Project context.</p>
+          </div>
+          <button class="primary-action" type="button">New Project</button>
+        </div>
+
+        <div id="projectCards" class="cards">
+          <article class="card">
+            <div>
+              <h2>Budget Analyzer</h2>
+              <p>Human-readable Project identity from current server disclosure.</p>
+            </div>
+            <button type="button" class="open-project" data-project="Budget Analyzer">Open</button>
+          </article>
+          <article class="card">
+            <div>
+              <h2>Marketplace Central</h2>
+              <p>Human-readable Project identity from current server disclosure.</p>
+            </div>
+            <button type="button" class="open-project" data-project="Marketplace Central">Open</button>
+          </article>
+        </div>
+
+        <div id="workspaceGeneric" class="surface-placeholder" hidden>
+          <div><strong id="workspaceGenericTitle">Workspace surface</strong>GF-01 fixes only global frame and findability. Internal screen composition belongs to its later material block.</div>
+        </div>
+      </div>
+
+      <div id="projectSurface" hidden>
+        <div class="crumb" id="projectCrumb">Metal Nobre / Budget Analyzer</div>
+        <div class="toolbar">
+          <div>
+            <h1 id="projectTitle">Build</h1>
+            <p class="lede" id="projectLede">Primary/default Project destination. Build composition is intentionally not decided by GF-01.</p>
+          </div>
+        </div>
+
+        <div class="surface-placeholder">
+          <div>
+            <strong id="projectPlaceholderTitle">Build surface</strong>
+            Current screen content receives remaining width. This block tests the global frame only.<br><br>
+            <code>Workspace → Project → current task/resource</code>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // vanilla JavaScript: deterministic structural interaction only.
+    const shell = document.getElementById('shell');
+    const workspaceNavigation = document.getElementById('workspaceNavigation');
+    const projectNavigation = document.getElementById('projectNavigation');
+    const workspaceSurface = document.getElementById('workspaceSurface');
+    const projectSurface = document.getElementById('projectSurface');
+    const projectField = document.getElementById('projectField');
+    const contextSlash = document.getElementById('contextSlash');
+    const mobileProjectContext = document.getElementById('mobileProjectContext');
+    const projectSelect = document.getElementById('projectSelect');
+    const workspaceSelect = document.getElementById('workspaceSelect');
+    const mainContent = document.getElementById('mainContent');
+    const menuToggle = document.getElementById('menuToggle');
+    const currentNavigation = document.getElementById('currentNavigation');
+
+    function closeDrawer() {
+      shell.dataset.drawerOpen = 'false';
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.setAttribute('aria-label', 'Open navigation');
+    }
+
+    function setScope(scope, projectName = projectSelect.value) {
+      const project = scope === 'project';
+      shell.dataset.scope = scope;
+      workspaceNavigation.hidden = project;
+      projectNavigation.hidden = !project;
+      workspaceSurface.hidden = project;
+      projectSurface.hidden = !project;
+      projectField.hidden = !project;
+      contextSlash.hidden = !project;
+      mobileProjectContext.hidden = !project;
+      currentNavigation.setAttribute('aria-label', project ? 'Project navigation' : 'Workspace navigation');
+      document.getElementById('showWorkspace').setAttribute('aria-pressed', String(!project));
+      document.getElementById('showProject').setAttribute('aria-pressed', String(project));
+
+      if (project) {
+        projectSelect.value = projectName;
+        document.getElementById('mobileProjectName').textContent = projectName;
+        document.getElementById('projectCrumb').textContent = `${workspaceSelect.value} / ${projectName}`;
+        setProjectRoute('Build');
+      } else {
+        setWorkspaceRoute('Projects');
+      }
+      closeDrawer();
+      mainContent.focus({ preventScroll: true });
+    }
+
+    function markCurrent(container, route) {
+      container.querySelectorAll('.rail-button').forEach(button => {
+        if (button.dataset.route === route) button.setAttribute('aria-current', 'page');
+        else button.removeAttribute('aria-current');
+      });
+    }
+
+    function setWorkspaceRoute(route) {
+      markCurrent(workspaceNavigation, route);
+      document.getElementById('workspaceTitle').textContent = route;
+      const projects = route === 'Projects';
+      document.getElementById('projectCards').hidden = !projects;
+      document.getElementById('workspaceGeneric').hidden = projects;
+      document.getElementById('workspaceGenericTitle').textContent = `${route} surface`;
+      document.getElementById('workspaceLede').textContent = projects
+        ? 'Primary Workspace destination. Browse disclosed Projects and enter a Project context.'
+        : 'GF-01 proves this destination is findable; its internal composition is intentionally deferred.';
+      closeDrawer();
+    }
+
+    function setProjectRoute(route) {
+      markCurrent(projectNavigation, route);
+      document.getElementById('projectTitle').textContent = route;
+      document.getElementById('projectPlaceholderTitle').textContent = `${route} surface`;
+      document.getElementById('projectLede').textContent = route === 'Build'
+        ? 'Primary/default Project destination. Build composition is intentionally not decided by GF-01.'
+        : 'GF-01 proves this Project destination is findable; its internal composition is intentionally deferred.';
+      closeDrawer();
+    }
+
+    document.getElementById('showWorkspace').addEventListener('click', () => setScope('workspace'));
+    document.getElementById('showProject').addEventListener('click', () => setScope('project'));
+    document.getElementById('backToProjects').addEventListener('click', () => setScope('workspace'));
+
+    document.querySelectorAll('.open-project').forEach(button => {
+      button.addEventListener('click', () => setScope('project', button.dataset.project));
+    });
+
+    workspaceNavigation.querySelectorAll('.rail-button').forEach(button => {
+      button.addEventListener('click', () => setWorkspaceRoute(button.dataset.route));
+    });
+    projectNavigation.querySelectorAll('.rail-button').forEach(button => {
+      button.addEventListener('click', () => setProjectRoute(button.dataset.route));
+    });
+
+    workspaceSelect.addEventListener('change', () => {
+      document.getElementById('mobileWorkspaceName').textContent = workspaceSelect.value;
+      if (shell.dataset.scope === 'project') {
+        document.getElementById('projectCrumb').textContent = `${workspaceSelect.value} / ${projectSelect.value}`;
+      }
+    });
+    projectSelect.addEventListener('change', () => {
+      document.getElementById('mobileProjectName').textContent = projectSelect.value;
+      document.getElementById('projectCrumb').textContent = `${workspaceSelect.value} / ${projectSelect.value}`;
+    });
+
+    menuToggle.addEventListener('click', () => {
+      const open = shell.dataset.drawerOpen !== 'true';
+      shell.dataset.drawerOpen = String(open);
+      menuToggle.setAttribute('aria-expanded', String(open));
+      menuToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    });
+    document.getElementById('scrim').addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeDrawer();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,598 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Brain Path Items
+  version: 4b-candidate
+paths:
+  /api/control/workspaces/{workspaceId}/brain:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      summary: GetWorkspaceBrain
+      operationId: GetWorkspaceBrain
+      x-conexus-4a-id: BRN-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Canonical Workspace Brain publication projection; runtime memory, vector indexes and tool authority are not Brain Product authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceBrain'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/workspaces/{workspaceId}/brain/revisions:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      summary: ListBrainRevisions
+      operationId: ListBrainRevisions
+      x-conexus-4a-id: BRN-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Immutable published Brain revisions currently disclosable for the Workspace.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BrainRevision'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/workspaces/{workspaceId}/brain/revisions/{brainRevisionId}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/BrainRevisionId'
+    get:
+      summary: GetBrainRevision
+      operationId: GetBrainRevision
+      x-conexus-4a-id: BRN-03
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact immutable published Brain revision. AVAILABLE does not mean any Project silently adopts it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainRevision'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/workspaces/{workspaceId}/brain/discoveries:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    post:
+      summary: StartBrainDiscovery
+      operationId: StartBrainDiscovery
+      x-conexus-4a-id: BRN-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [projectId]
+              properties:
+                projectId:
+                  type: string
+                  minLength: 1
+                  description: Project whose already-admitted source/Connection context is used for read-only discovery; it is an untrusted reference, not credential authority.
+      responses:
+        '200':
+          description: Directed read-only discovery result containing hypotheses with provenance; unsupported semantic mappings remain hypotheses.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainDiscoveryResult'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+  /api/control/workspaces/{workspaceId}/brain/proposals:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      summary: ListKnowledgeProposals
+      operationId: ListKnowledgeProposals
+      x-conexus-4a-id: BRN-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current KnowledgeProposal projections with provenance and owner-issued hypothesis/review state.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KnowledgeProposal'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+    post:
+      summary: SubmitKnowledgeProposal
+      operationId: SubmitKnowledgeProposal
+      x-conexus-4a-id: BRN-07
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [candidateSourceRevision, provenanceRefs]
+              properties:
+                candidateSourceRevision:
+                  type: string
+                  minLength: 1
+                provenanceRefs:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    type: string
+                    minLength: 1
+      responses:
+        '201':
+          description: KnowledgeProposal submitted for human review; submission cannot self-publish Brain authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeProposal'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/ProposalId'
+    get:
+      summary: GetKnowledgeProposal
+      operationId: GetKnowledgeProposal
+      x-conexus-4a-id: BRN-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact KnowledgeProposal candidate/provenance with current Brain-owner review state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeProposal'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}/decisions:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/ProposalId'
+    post:
+      summary: DecideKnowledgeProposal
+      operationId: DecideKnowledgeProposal
+      x-conexus-4a-id: BRN-08
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expectedProposalRevision, decision]
+              properties:
+                expectedProposalRevision:
+                  type: string
+                  minLength: 1
+                decision:
+                  type: string
+                  enum: [APPROVE, REJECT]
+      responses:
+        '200':
+          description: Human decision applied to the exact current proposal revision; machine confidence cannot replace review authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeProposal'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/workspaces/{workspaceId}/brain/publications:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    post:
+      summary: PublishBrainRevision
+      operationId: PublishBrainRevision
+      x-conexus-4a-id: BRN-09
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_REVISION
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [candidateSourceRevision]
+              properties:
+                candidateSourceRevision:
+                  type: string
+                  minLength: 1
+      responses:
+        '201':
+          description: Human-reviewed candidate published as a new immutable AVAILABLE Brain revision; Projects remain explicitly pinned until separately rebound.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainRevision'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/workspaces/{workspaceId}/brain/health:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      summary: GetBrainHealth
+      operationId: GetBrainHealth
+      x-conexus-4a-id: BRN-10
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Operational health overlay for the exact Brain revision; the overlay cannot mutate immutable Brain content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrainHealth'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+  /api/projects/{projectId}/analytic-queries:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: RunAnalyticQuery
+      operationId: RunAnalyticQuery
+      x-conexus-4a-id: BRN-12
+      x-conexus-ingress: [CONTROL_PLANE, PUBLISHED_APP]
+      x-conexus-non-http-ingress: [PAR_TOOL]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-query-regime: ANALYTIC_QUERY_V0
+      x-conexus-sql-proof: SELECT_ONLY_REQUIRED
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [datasetSemanticId, selectSemanticIds]
+              properties:
+                datasetSemanticId:
+                  type: string
+                  minLength: 1
+                selectSemanticIds:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    type: string
+                    minLength: 1
+      responses:
+        '200':
+          description: Restricted semantic-ID analytical result produced only after exact Brain/binding/health admission and SELECT-only proof.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticQueryResult'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+components:
+  parameters:
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    BrainRevisionId:
+      name: brainRevisionId
+      in: path
+      required: true
+      description: Exact immutable Brain revision reference; disclosure/authority remain server-resolved.
+      schema:
+        type: string
+        minLength: 1
+    ProposalId:
+      name: proposalId
+      in: path
+      required: true
+      description: Untrusted KnowledgeProposal reference; current Workspace containment and review authority are server-resolved.
+      schema:
+        type: string
+        minLength: 1
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      description: Untrusted Project reference; exact current Brain binding, health and query authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    WorkspaceBrain:
+      type: object
+      additionalProperties: false
+      required: [workspaceId, publishedBrainRevisionId]
+      properties:
+        workspaceId:
+          type: string
+          minLength: 1
+        publishedBrainRevisionId:
+          type: [string, 'null']
+          minLength: 1
+          description: Current Workspace-published Brain revision when one exists; Project adoption remains independently explicit.
+    BrainRevision:
+      type: object
+      additionalProperties: false
+      required: [brainRevisionId, brainDigest, sourceRevision, availability]
+      properties:
+        brainRevisionId:
+          type: string
+          minLength: 1
+        brainDigest:
+          type: string
+          minLength: 1
+        sourceRevision:
+          type: string
+          minLength: 1
+        availability:
+          type: string
+          const: AVAILABLE
+    BrainDiscoveryCandidate:
+      type: object
+      additionalProperties: false
+      required: [candidateRef, hypothesis, provenanceRefs]
+      properties:
+        candidateRef:
+          type: string
+          minLength: 1
+        hypothesis:
+          type: string
+          minLength: 1
+        provenanceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+    BrainDiscoveryResult:
+      type: object
+      additionalProperties: false
+      required: [projectId, candidates]
+      properties:
+        projectId:
+          type: string
+          minLength: 1
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrainDiscoveryCandidate'
+    KnowledgeProposal:
+      type: object
+      additionalProperties: false
+      required: [proposalId, proposalRevision, candidateSourceRevision, provenanceRefs, hypothesisState, reviewState]
+      properties:
+        proposalId:
+          type: string
+          minLength: 1
+        proposalRevision:
+          type: string
+          minLength: 1
+        candidateSourceRevision:
+          type: string
+          minLength: 1
+        provenanceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        hypothesisState:
+          type: string
+          minLength: 1
+          description: Brain-owner hypothesis state; no lifecycle enum is invented by 4B.
+        reviewState:
+          type: string
+          minLength: 1
+          description: Brain-owner review state; no lifecycle enum is invented by 4B.
+    BrainHealthState:
+      type: string
+      enum: [UNVERIFIED, VALID, SUSPECT, INVALID, CHECK_ERROR]
+    BrainHealthItem:
+      type: object
+      additionalProperties: false
+      required: [semanticRef, state, critical]
+      properties:
+        semanticRef:
+          type: string
+          minLength: 1
+        state:
+          $ref: '#/components/schemas/BrainHealthState'
+        critical:
+          type: boolean
+    BrainHealth:
+      type: object
+      additionalProperties: false
+      required: [brainRevisionId, brainDigest, healthSnapshotDigest, items]
+      properties:
+        brainRevisionId:
+          type: string
+          minLength: 1
+        brainDigest:
+          type: string
+          minLength: 1
+        healthSnapshotDigest:
+          type: string
+          minLength: 1
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrainHealthItem'
+    AnalyticColumn:
+      type: object
+      additionalProperties: false
+      required: [semanticId]
+      properties:
+        semanticId:
+          type: string
+          minLength: 1
+    AnalyticScalar:
+      oneOf:
+        - type: string
+        - type: number
+        - type: boolean
+        - type: 'null'
+    AnalyticRow:
+      type: object
+      additionalProperties: false
+      required: [values]
+      properties:
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticScalar'
+    AnalyticQueryResult:
+      type: object
+      additionalProperties: false
+      required: [effectiveBrainPlanDigest, projectBindingDigest, healthSnapshotDigest, datasetSemanticId, columns, rows, provenanceRefs]
+      properties:
+        effectiveBrainPlanDigest:
+          type: string
+          minLength: 1
+        projectBindingDigest:
+          type: string
+          minLength: 1
+        healthSnapshotDigest:
+          type: string
+          minLength: 1
+        datasetSemanticId:
+          type: string
+          minLength: 1
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticColumn'
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticRow'
+        provenanceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1

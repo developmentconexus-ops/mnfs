@@ -1,0 +1,420 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Release Path Items
+  version: 4b-candidate
+paths:
+  /api/control/projects/{projectId}/releases:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListReleases
+      operationId: ListReleases
+      x-conexus-4a-id: REL-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Immutable Release identities currently disclosable for the exact Project; Release availability is not Promotion or serving truth.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReleaseSummary'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/releases/{releaseId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ReleaseId'
+    get:
+      summary: GetRelease
+      operationId: GetRelease
+      x-conexus-4a-id: REL-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact immutable Release composition and proof coordinates. AVAILABLE does not imply promoted, active or served.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/promotions:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListPromotions
+      operationId: ListPromotions
+      x-conexus-4a-id: REL-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Promotion history for the exact Project; historical owner state does not itself mutate the current pointer.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Promotion'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+    post:
+      summary: PromoteRelease
+      operationId: PromoteRelease
+      x-conexus-4a-id: REL-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPECTED_POINTER_GENERATION+IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [releaseId, environment, expectedPointerGeneration]
+              properties:
+                releaseId:
+                  type: string
+                  minLength: 1
+                  description: Exact immutable Release selected for governed Promotion; selecting an eligible prior Release is the rollback mechanism.
+                environment:
+                  type: string
+                  minLength: 1
+                  description: Exact target environment under Release-owner conformance and current pointer authority.
+                expectedPointerGeneration:
+                  type: integer
+                  minimum: 0
+                  description: Exact expected current target-environment pointer generation; stale generation refuses progression rather than force-writing.
+      responses:
+        '201':
+          description: Promotion owner record admitted for the exact Release/environment/current generation. Creation or pointer swap alone is not SERVED_VERIFIED.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+  /api/control/projects/{projectId}/promotions/{promotionId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/PromotionId'
+    get:
+      summary: GetPromotion
+      operationId: GetPromotion
+      x-conexus-4a-id: REL-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact Promotion owner history/current state; pointer swap and serving verification remain distinct facts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/serving-state:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: GetProjectServingState
+      operationId: GetProjectServingState
+      x-conexus-4a-id: REL-07
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact active Release pointer plus independently observed serving verification; an active pointer never proves served bytes by itself.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectServingState'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+  /api/control/projects/{projectId}/environments/{environmentId}/conformance:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/EnvironmentId'
+    get:
+      summary: GetEnvironmentConformance
+      operationId: GetEnvironmentConformance
+      x-conexus-4a-id: REL-08
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current Release-owner conformance Evidence from the real target environment; this proof grants no direct pointer mutation or repair authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentConformance'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      description: Untrusted Project reference; current containment/disclosure/Release authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    ReleaseId:
+      name: releaseId
+      in: path
+      required: true
+      description: Exact immutable Release identity; path possession grants no serving or Promotion authority.
+      schema:
+        type: string
+        minLength: 1
+    PromotionId:
+      name: promotionId
+      in: path
+      required: true
+      description: Exact Promotion owner reference; current disclosure remains server-resolved.
+      schema:
+        type: string
+        minLength: 1
+    EnvironmentId:
+      name: environmentId
+      in: path
+      required: true
+      description: Exact target environment reference; caller-selected environment identity never bypasses Project/Release authority.
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    ReleaseSummary:
+      type: object
+      additionalProperties: false
+      required: [releaseId, releaseManifestDigest, releaseState]
+      properties:
+        releaseId:
+          type: string
+          minLength: 1
+        releaseManifestDigest:
+          type: string
+          minLength: 1
+        releaseState:
+          type: string
+          minLength: 1
+          description: Release-owner state. 4B does not invent a closed lifecycle enum from conceptual architecture wording.
+    ReleaseManifestProjection:
+      type: object
+      additionalProperties: true
+      x-conexus-schema-source: RELEASE_MANIFEST
+      description: Exact immutable owner-produced ReleaseManifest projection. Detailed manifest schema spelling remains owned by the later realization contract rather than a parallel hand-written 4B manifest authority.
+    Release:
+      type: object
+      additionalProperties: false
+      required: [releaseId, projectId, releaseManifestDigest, sourceRevision, verificationEvidenceDigest, releaseState, composition]
+      properties:
+        releaseId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+        releaseManifestDigest:
+          type: string
+          minLength: 1
+        sourceRevision:
+          type: string
+          minLength: 1
+        verificationEvidenceDigest:
+          type: string
+          minLength: 1
+          description: Digest over the exact verification/validation Evidence set admitted into the immutable Release composition.
+        releaseState:
+          type: string
+          minLength: 1
+          description: Release-owner state; availability is distinct from Promotion/current serving truth.
+        composition:
+          $ref: '#/components/schemas/ReleaseManifestProjection'
+    Promotion:
+      type: object
+      additionalProperties: false
+      required: [promotionId, projectId, releaseId, environment, expectedPointerGeneration, promotionState]
+      properties:
+        promotionId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+        releaseId:
+          type: string
+          minLength: 1
+        environment:
+          type: string
+          minLength: 1
+        expectedPointerGeneration:
+          type: integer
+          minimum: 0
+        resultingPointerGeneration:
+          type: integer
+          minimum: 0
+          description: Present only after an admitted pointer transition; its existence is not serving verification.
+        promotionState:
+          type: string
+          minLength: 1
+          description: Release-owner Promotion state. 4B preserves owner truth without inventing a universal deployment lifecycle enum.
+    ServingVerification:
+      type: object
+      additionalProperties: false
+      required: [state, expectedReleaseId, expectedManifestDigest]
+      properties:
+        state:
+          type: string
+          minLength: 1
+          description: Release/MAR serving-verification state; only owner Evidence may establish SERVED_VERIFIED.
+        expectedReleaseId:
+          type: string
+          minLength: 1
+        expectedManifestDigest:
+          type: string
+          minLength: 1
+        observedReleaseId:
+          type: string
+          minLength: 1
+        observedManifestDigest:
+          type: string
+          minLength: 1
+        evidenceRefs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+    ProjectServingState:
+      type: object
+      additionalProperties: false
+      required: [projectId, environment, activeReleaseId, activeReleaseManifestDigest, pointerGeneration, servingVerification]
+      properties:
+        projectId:
+          type: string
+          minLength: 1
+        environment:
+          type: string
+          minLength: 1
+        activeReleaseId:
+          type: string
+          minLength: 1
+        activeReleaseManifestDigest:
+          type: string
+          minLength: 1
+        pointerGeneration:
+          type: integer
+          minimum: 0
+        servingVerification:
+          $ref: '#/components/schemas/ServingVerification'
+    EnvironmentConformanceCheck:
+      type: object
+      additionalProperties: false
+      required: [subject, state, evidenceRefs]
+      properties:
+        subject:
+          type: string
+          enum: [POSTGRES_MAJOR, PRIVILEGES, MIGRATIONS, SCHEMA_FINGERPRINT, CONFIG_BINDINGS, CONNECTION_BINDINGS, CURRENT_POINTER, SERVED_DIGEST]
+          description: Exact Release-owner conformance axis. POSTGRES_MAJOR includes the required-major/extension-set check while privilege and fingerprint Evidence remain separate axes.
+        state:
+          type: string
+          minLength: 1
+          description: Owner-issued conformance state; 4B does not invent one universal proof-state enum.
+        evidenceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+    EnvironmentConformance:
+      type: object
+      additionalProperties: false
+      required: [projectId, environment, conformanceState, observedPointerGeneration, checks, evidenceRefs]
+      properties:
+        projectId:
+          type: string
+          minLength: 1
+        environment:
+          type: string
+          minLength: 1
+        conformanceState:
+          type: string
+          minLength: 1
+          description: Release-owner aggregate conformance projection; DRIFT/current failures remain explicit owner truth rather than best-effort success.
+        observedPointerGeneration:
+          type: integer
+          minimum: 0
+        checks:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/EnvironmentConformanceCheck'
+        evidenceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1

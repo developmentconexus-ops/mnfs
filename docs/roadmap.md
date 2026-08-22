@@ -11,10 +11,10 @@ This is the single current phase/status authority. It is not a worklog.
 | 3N | CLOSED | Architecture verification contract accepted and executed; accepted 3A–3M architecture survived Lead + independent Fable challenge; bounded authority/proof-routing/data-closure defects corrected | Material Evidence falsifies an accepted architecture invariant or proves a routed proof stage incapable of genuine falsification |
 | 3O | CLOSED | First Budget Analyzer vertical proof contract accepted; independent live-source/read-model falsification, semantic admission, representative coverage and 3N forward routing preserved without Product implementation | Material Evidence falsifies the contract, proves a routed proof stage incapable of genuine falsification, or exposes a contradiction with accepted Product/architecture authority |
 | C-018 | RATIFIED / OPERATOR RATIFIED | Final Product architecture continuity ratified after exact-head R1–R7 review; implementation-dependent proof remains routed downstream | Material Evidence falsifies the ratified Product/architecture target, qualification scope, owner/trust boundary, or genuine downstream falsifiability |
-| C-015 refinement | REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED | Named identity-provider trigger resolved through a narrow Keycloak OIDC authentication boundary while Conexus retains Account/session/membership/grant/Published-App authorization sovereignty; first-production identity/recovery closure updated | Keycloak security/topology/recovery Evidence makes the selected IdP unfit; stable issuer-subject identity cannot be preserved; or a real SSO/SCIM/passkey/multi-IdP requirement materially changes the contract |
+| C-015 refinement | REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED | Named identity-provider trigger resolved through a narrow Keycloak OIDC authentication boundary while Conexus retains Account/session/membership/grant/Published-App authorization sovereignty; first-production identity/recovery closure updated | Keycloak security/topology/recovery Evidence makes the selection unfit; stable issuer-subject identity cannot be preserved; or a real SSO/SCIM/passkey/multi-IdP requirement materially changes the authentication contract |
 | Realization Planning | ACCEPTED / OPERATOR ACCEPTED | R1–R7 first-build skeleton accepted after independent Fable challenge; retained as Phase-4 input rather than direct Product-code authority | Material Phase-4 Evidence falsifies the skeleton, an applicability disposition, or ratified/refined authority it compiles |
-| 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED | `N_platform=114`, exact Release-pinned Project capability grammar, `N_budget=2`, 25 ordinary Permissions, 46/46 durable-record classification, 13/13 owner boundaries and complete per-operation authority/IC mapping survived Lead + independent Fable challenge and were explicitly operator-ratified; PR #54 integrated | Material Evidence shows an accepted F1 interaction cannot be expressed without new Product meaning/owner/trust, the Project capability grammar requires an unsafe universal executor, or accepted 4A authority is materially contradictory/falsified |
-| 4B — Executable Wire Contract | NEXT / NOT STARTED | Canonical machine-readable Product wire closes accepted 4A semantics without parallel DTO/API authority | 4A changes materially or executable wire cannot express an accepted operation safely |
+| 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED / `4B-F01` BOUNDED CORRECTION ACCEPTED | Current authority is `N_platform=111`, exact Release-pinned Project capability grammar, `N_budget=2`, 25 ordinary Permissions, 46/46 durable-record classification and 13/13 owner boundaries; `WS-03`, `WS-06`, `PRJ-04` were operator-approved downstream subtractions rather than speculative DTO repair | Material Evidence shows another accepted F1 interaction cannot be expressed without new Product meaning/owner/trust, or the current authority is materially contradictory/falsified |
+| 4B — Executable Wire Contract | CLOSED / OPERATOR RATIFIED / AWAITING INTEGRATION | Canonical Product wire is 111↔111 schema-closed; Technical Ingress remains 3 protocol-only operations with zero Product-count impact; Project grammar, Budget proof, generated projections, whole adversarial proof, independent Fable review and Lead adjudication converged with no 4A reopen | 4A changes materially, executable wire cannot express an accepted operation safely, or new Evidence falsifies the ratified wire/proof boundary |
 | 4C — Frontend Interaction & Authority Realization | NOT STARTED | Frontend goals/routes/states/consumers derive bidirectionally from accepted Product/wire authority with zero invented frontend operations | Real frontend interaction exposes a material 4A/4B gap |
 | 4D — Project Paved Road & Runtime Realization | NOT STARTED | Exact scaffold/ownership classes, backend/frontend/data/integration/verification Paved Road, runtime/persistence/dependencies/deployment and conformance/escape-hatch/evaluation contract ratified before implementation graph | Required property cannot be realized by the Paved Road/runtime without changing accepted authority, or conformance proves the road can be silently bypassed |
 | 4E — Whole-System Coherence & Golden Flows | NOT STARTED | Product/wire/frontend/Paved-Road/runtime form one coherent falsifiable system; first Budget Analyzer path and material negatives compose correctly | Composed flow reveals contradiction or missing authority/mechanism |
@@ -23,40 +23,41 @@ This is the single current phase/status authority. It is not a worklog.
 | Product implementation | BLOCKED | Requires 4A–4G closed/integrated plus a separate explicit operator Product execution grant; no prior planning/merge approval carries forward | No historical authorization carries forward |
 
 ```text
-3A = CLOSED / consolidated baseline preserved
-3L = CLOSED
-3M = CLOSED / OPERATOR RATIFIED
-3N = CLOSED / OPERATOR RATIFIED
-3O = CLOSED / OPERATOR AUTHORIZED CLOSURE
+3A–3O = CLOSED
 C-018 = RATIFIED / OPERATOR RATIFIED
 C-015 = REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED
-Realization Planning = ACCEPTED / OPERATOR ACCEPTED / EXECUTION SKELETON
-4A = CLOSED / OPERATOR RATIFIED / INTEGRATED
-4B = NEXT / NOT STARTED
+Realization Planning = ACCEPTED / OPERATOR ACCEPTED
+4A = CLOSED / OPERATOR RATIFIED / 4B-F01 ACCEPTED / N_platform=111
+4B = CLOSED / OPERATOR RATIFIED / AWAITING INTEGRATION
 4C–4G = NOT STARTED
 Product implementation = BLOCKED
 ```
 
 ## Exact next action
 
-Open **4B — Executable Wire Contract** only.
+Integrate the operator-ratified **4B — Executable Wire Contract** candidate only after a separate explicit merge authorization.
 
-Derive the smallest canonical machine-readable wire that expresses the accepted 4A Product surface exactly:
+Ratified 4B preserves:
 
 ```text
-114 fixed Conexus platform operations
-+ exact Release-pinned Project-defined operation grammar
-+ 2 Budget Analyzer registered Queries
-+ 25 ordinary Permissions and the accepted special/runtime/app authority routes
-+ accepted disclosure/outcome/current-authority/idempotency-concurrency obligations
+fixed Product bijection/schema closure = 111 / 111
+missing / extra / duplicate = 0
+semantic IF_MATCH = { PRJ-12, PAR-14 }
+HTTP If-Match = { PRJ-11, PRJ-12, PAR-14 }
+HTTP If-None-Match = { PRJ-11 }
+all fixed owner slices = CLOSED
+Budget Analyzer proof = green
+Technical Ingress = CLOSED / 3 protocol-only HTTP operations / N_platform impact 0
+generated projection / no-parallel-DTO = CLOSED / real Kubb 5.0.0 OAS probe green
+whole-4B executable/negative proof = CLOSED
+Product YAML topology = 10 reachable fragments / 0 dead parallel fragments
+independent Fable review = COMPLETE / 2 bounded material findings corrected
+Lead adjudication = COMPLETE / 4A reopen NO
+operator ratification = COMPLETE
 ```
 
-4B must make accepted semantics executable without creating a second Product authority in DTOs/routes/schemas. It must preserve exact operation identity, principal/ingress separation, scope/disclosure law, truth states, immutable/current-subject requirements and effect/idempotency semantics. Wire representation may not create new Product operations, Permissions, owners or trust boundaries.
+Do **not** begin 4C or Product implementation while 4B remains unintegrated. Ratification does not authorize merge by itself.
 
-Do **not** begin 4C, choose the Project Paved Road/runtime, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
+Current bounded Evidence: [Technical Ingress](evidence/4b/technical-ingress-classification.md) → [Generated Projection / No Parallel DTO](evidence/4b/generated-projection-no-parallel-dto.md) → [Whole-Wire Adversarial Proof](evidence/4b/whole-wire-adversarial-proof.md) → [Independent Fable Review](evidence/4b/fable-independent-review.md) → [Lead Adjudication](evidence/4b/fable-review-adjudication.md).
 
-The stable Phase-4 sequence is defined in [phases/4-implementation-readiness-program.md](phases/4-implementation-readiness-program.md). Accepted 4A authority is [product/operation-ledger.md](product/operation-ledger.md), [product/permission-contract.md](product/permission-contract.md) and [product/budget-analyzer-contract.md](product/budget-analyzer-contract.md), with [evidence/4a/operation-coverage.md](evidence/4a/operation-coverage.md) retained as supporting Evidence.
-
-The [Blueprint Harness design input](development/blueprint-harness-design.md) remains provider-independent planning/research/review/Paved-Road input. Its `Blueprint` / `Forge` working names are not admitted Product owners/APIs. Concrete scaffold/SDK/Mastra realization remains routed to 4D.
-
-The accepted [Realization Plan](phases/realization-planning.md) remains an execution skeleton and first-build proof budget consumed/rederived in 4F; it does not authorize starting R1 directly from Phase 3 or from 4B.
+Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → canonical Product + Technical machine-readable wire.

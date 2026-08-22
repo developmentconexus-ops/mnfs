@@ -1,0 +1,201 @@
+# 4B Evidence — Brain Schema Closure
+
+> **Kind:** bounded 4B executable Evidence; not Product authority by itself.
+> **Accepted semantic source:** current 4A Product authority plus accepted Brain/knowledge/data contracts.
+> **Machine authority under proof:** `contracts/api/product/openapi.yaml` resolved graph.
+
+## 1. Decision question
+
+> Can the current Brain Product surface be given exact wire shapes without turning Brain into self-publishing memory, arbitrary SQL/text-to-SQL authority, or a new credential/data owner?
+
+## 2. Exact Product slice
+
+Current caller Product operations are exactly:
+
+```text
+BRN-01 → BRN-10
+BRN-12
+```
+
+Total:
+
+```text
+11 Product operations
+```
+
+`BRN-11 RunBrainHealthProbe` remains absent from caller Product wire because current authority classifies it as `SYSTEM_OWNER_TRANSITION`.
+
+Canonical active Path Items:
+
+```text
+contracts/api/product/brain-paths.yaml
+```
+
+They become authority only through the canonical `contracts/api/product/openapi.yaml` entrypoint and resolved bundle.
+
+## 3. Closure laws proved
+
+### 3.1 One Workspace Brain authority
+
+`GetWorkspaceBrain` projects the canonical Workspace Brain publication state only. Brain does not absorb runtime conversation memory, vector/RAG indexes, tool authority, Permissions or Product authorization.
+
+### 3.2 Published Brain revisions are immutable
+
+Published Brain revision detail carries exact artifact/source identity:
+
+```text
+brainRevisionId
+brainDigest
+sourceRevision
+availability = AVAILABLE
+```
+
+`AVAILABLE` does not mean live inheritance. Projects remain explicitly pinned to exact Brain revisions through Project-owned binding authority.
+
+### 3.3 Discovery remains read-only and provenance-first
+
+`StartBrainDiscovery` receives only the Project reference whose already-admitted source/Connection context is resolved server-side.
+
+The request does not admit caller-selected:
+
+```text
+credential
+secret
+connectionString
+sql
+url / targetUrl
+physicalTable
+fullScan
+```
+
+Discovery candidates remain hypotheses bound to provenance. Unsupported mappings do not become canonical truth and no percentage accuracy is manufactured without measured Evidence.
+
+### 3.4 KnowledgeProposal requires human review
+
+KnowledgeProposal carries exact proposal/candidate/provenance coordinates. Its hypothesis/review states remain owner-issued strings because current Product authority does not ratify a lifecycle enum.
+
+Submission cannot self-publish. Decision requires the exact current proposal revision plus:
+
+```text
+APPROVE | REJECT
+```
+
+Machine confidence never replaces current human review authority.
+
+### 3.5 Publication creates a new immutable AVAILABLE revision
+
+`PublishBrainRevision` names the exact reviewed candidate source revision and produces an immutable Brain revision. Publication does not silently rebind Projects or mutate existing revisions.
+
+### 3.6 Health is an overlay, not content mutation
+
+Brain health uses the accepted exact vocabulary:
+
+```text
+UNVERIFIED
+VALID
+SUSPECT
+INVALID
+CHECK_ERROR
+```
+
+The health projection carries the exact Brain revision/digest and `healthSnapshotDigest`. Critical health can block dependent use under current policy, but the overlay cannot rewrite immutable Brain content.
+
+### 3.7 AnalyticQuery remains a restricted semantic query regime
+
+`RunAnalyticQuery` is closed as:
+
+```text
+x-conexus-query-regime = ANALYTIC_QUERY_V0
+x-conexus-sql-proof = SELECT_ONLY_REQUIRED
+HTTP ingress = CONTROL_PLANE + PUBLISHED_APP
+non-HTTP ingress = PAR_TOOL
+```
+
+Caller input is restricted to registered semantic authority:
+
+```text
+datasetSemanticId
+selectSemanticIds[]
+```
+
+The wire rejects arbitrary SQL and physical topology authority such as:
+
+```text
+sql / rawSql
+physical table/schema
+caller-defined joins/join topology
+connectionId
+arbitrary expression
+```
+
+The response preserves exact Brain-plan, Project-binding and health-snapshot digests plus semantic columns/rows/provenance. It does not disclose SQL, physical storage topology or credentials.
+
+## 4. Executable falsifiers
+
+The Brain checker rejects at least:
+
+```text
+any current BRN Product operation not SCHEMA_CLOSED
+BRN-11 appearing in caller Product wire
+provisional Brain response authority
+Brain memory/vector/tool/Permission ownership creep
+mutable/live-inherited Brain revisions
+Discovery credential/arbitrary-source/full-scan escape hatches
+unsupported accuracy percentages or auto-canonical discovery output
+KnowledgeProposal self-publish/machine-approval authority
+invented proposal lifecycle enums
+Brain health state vocabulary drift
+health overlay mutation of immutable Brain content
+AnalyticQuery arbitrary SQL/physical join/Connection authority
+loss of SELECT-only proof law
+loss of PAR_TOOL non-HTTP separation
+```
+
+Machine guard:
+
+```text
+scripts/check-wire-brain.mjs
+```
+
+## 5. TDD proof
+
+```text
+Verify #276 = FAILURE
+→ expected RED before Brain schema activation
+→ current BRN-01 remained METHOD_PATH_MAPPED/provisional while the new gate required SCHEMA_CLOSED
+
+Verify #278 = SUCCESS
+HEAD = 057094bbf4663a5350df1a43eff400e146d43881
+```
+
+Final established counts:
+
+```text
+fixed 4A operations      = 111
+fixed OAS operations     = 111
+schema-closed operations = 69
+IAM + Workspace          = 20 / 20
+Project                  = 21 / 21
+Builder                  = 17 / 17
+Brain Product            = 11 / 11
+missing                  = 0
+extra                    = 0
+duplicate                = 0
+literal IF_MATCH          = { PRJ-12, PAR-14 }
+```
+
+Budget Analyzer declaration/codegen/truth-state positive and negative controls remained part of the same successful full Verify.
+
+## 6. Result
+
+```text
+IAM + Workspace = CLOSED inside 4B
+Project         = CLOSED inside 4B
+Builder         = CLOSED inside 4B
+Brain           = CLOSED inside 4B
+schema-closed   = 69 / 111
+4B overall      = OPEN / ACTIVE
+Product code    = BLOCKED
+```
+
+The next owner slice must continue compiling accepted authority into the same OAD. Missing semantics remain a falsifier/reopen trigger rather than permission to invent DTO meaning.

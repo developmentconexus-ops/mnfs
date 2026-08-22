@@ -1,0 +1,874 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Builder Path Items
+  version: 4b-candidate
+paths:
+  /api/control/projects/{projectId}/changes:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListChanges
+      operationId: ListChanges
+      x-conexus-4a-id: BLD-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current disclosable Builder Changes for the exact Project.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChangeSummary'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+    post:
+      summary: CreateChange
+      operationId: CreateChange
+      x-conexus-4a-id: BLD-03
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [intent]
+              properties:
+                intent:
+                  type: string
+                  minLength: 1
+                  description: Bounded statement of what must become true; not a WorkUnit, ActorRun or status command.
+      responses:
+        '201':
+          description: Change established and pinned to the current accepted Project Baseline before execution work begins.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Change'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/changes/{changeId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: GetChange
+      operationId: GetChange
+      x-conexus-4a-id: BLD-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact current Change projection pinned to its accepted Baseline and Builder planning/rigor coordinates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Change'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/plan:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: GetChangePlan
+      operationId: GetChangePlan
+      x-conexus-4a-id: BLD-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current visual Plan projection over Hub-owned plan state; this is not a JSON mutation surface.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePlan'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/plan/decisions:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    post:
+      summary: DecideChangePlanCheckpoint
+      operationId: DecideChangePlanCheckpoint
+      x-conexus-4a-id: BLD-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_REVISION
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [planRevision, decision]
+              properties:
+                planRevision:
+                  type: string
+                  minLength: 1
+                decision:
+                  type: string
+                  enum: [APPROVE, REJECT]
+      responses:
+        '200':
+          description: Exact current Plan checkpoint decided by a currently eligible reviewer; work-item state remains owner-controlled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePlan'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/changes/{changeId}/progress:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: GetChangeProgress
+      operationId: GetChangeProgress
+      x-conexus-4a-id: BLD-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Hub-owned current checklist projection; worker narration cannot mark completion by itself.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeProgress'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/diff:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: GetChangeDiff
+      operationId: GetChangeDiff
+      x-conexus-4a-id: BLD-07
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact Builder/Git candidate lineage diff; no mutable workspace head is implied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeDiff'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/source/tree:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListProjectSourceTree
+      operationId: ListProjectSourceTree
+      x-conexus-4a-id: BLD-08
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: '#/components/parameters/SourceRevision'
+      responses:
+        '200':
+          description: Read-only Project source tree for the exact requested source revision.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceTree'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/source/file:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: GetProjectSourceFile
+      operationId: GetProjectSourceFile
+      x-conexus-4a-id: BLD-09
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: '#/components/parameters/SourceRevision'
+        - name: path
+          in: query
+          required: true
+          description: Exact Project-Git source path under the requested immutable source revision; never an authorization identity.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Read-only exact source-file content projection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceFile'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/preview:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: GetRunPreview
+      operationId: GetRunPreview
+      x-conexus-4a-id: BLD-10
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Controlled candidate Preview state. Ready, verified and live are independent truths; Preview is never production live.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunPreview'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/findings:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: ListChangeFindings
+      operationId: ListChangeFindings
+      x-conexus-4a-id: BLD-11
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Durable Findings currently disclosable for the exact Change.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Finding'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+      - $ref: '#/components/parameters/FindingId'
+    get:
+      summary: GetFinding
+      operationId: GetFinding
+      x-conexus-4a-id: BLD-12
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact current Finding and its current owner-controlled resolution state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Finding'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}/commands/close:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+      - $ref: '#/components/parameters/FindingId'
+    post:
+      summary: CloseFinding
+      operationId: CloseFinding
+      x-conexus-4a-id: BLD-13
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expectedFindingRevision, resolutionEvidenceIds]
+              properties:
+                expectedFindingRevision:
+                  type: string
+                  minLength: 1
+                resolutionEvidenceIds:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    type: string
+                    minLength: 1
+      responses:
+        '200':
+          description: Finding closed only against the exact current Finding subject and actual admitted resolution Evidence.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Finding'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/changes/{changeId}/evidence:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: ListChangeEvidence
+      operationId: ListChangeEvidence
+      x-conexus-4a-id: BLD-14
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Provenance-preserving actual Evidence for the exact Change; existence alone does not prove a claim.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Evidence'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/changes/{changeId}/evidence/{evidenceId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+      - $ref: '#/components/parameters/EvidenceId'
+    get:
+      summary: GetEvidence
+      operationId: GetEvidence
+      x-conexus-4a-id: BLD-15
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact collected Evidence bound to its claim, subject digest and provenance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/assistant/queries:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: AskConexusAboutContext
+      operationId: AskConexusAboutContext
+      x-conexus-4a-id: BLD-16
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [question]
+              properties:
+                question:
+                  type: string
+                  minLength: 1
+      responses:
+        '200':
+          description: Contextual Conexus guidance over current authorized Project/platform context with provenance; no new authority is granted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextualAssistantAnswer'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/changes/{changeId}/execution-detail:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/ChangeId'
+    get:
+      summary: GetChangeExecutionDetail
+      operationId: GetChangeExecutionDetail
+      x-conexus-4a-id: BLD-17
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Read-only subordinate WorkUnit/ActorRun projection for technical investigation; no dispatch/resume/status mutation authority is exposed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeExecutionDetail'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    ChangeId:
+      name: changeId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    FindingId:
+      name: findingId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    EvidenceId:
+      name: evidenceId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    SourceRevision:
+      name: sourceRevision
+      in: query
+      required: true
+      description: Exact immutable Project-Git source revision to read; never mutable latest/head authority.
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    PlanningDepth:
+      type: string
+      enum: [DIRECT, LIGHT, FULL]
+    RigorProfile:
+      type: string
+      enum: [FAST, BOUNDED, CONTROLLED]
+    ChangeSummary:
+      type: object
+      additionalProperties: false
+      required: [changeId, projectId, state]
+      properties:
+        changeId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+        state:
+          type: string
+          minLength: 1
+          description: Builder-owner current Change state; 4B does not invent an unratified global Change lifecycle enum.
+    Change:
+      type: object
+      additionalProperties: false
+      required: [changeId, projectId, baselineDigest, planningDepth, rigorProfile, state]
+      properties:
+        changeId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+        baselineDigest:
+          type: string
+          minLength: 1
+        planningDepth:
+          $ref: '#/components/schemas/PlanningDepth'
+        rigorProfile:
+          $ref: '#/components/schemas/RigorProfile'
+        state:
+          type: string
+          minLength: 1
+          description: Builder-owner current Change state; completion narration is not verification authority.
+    PlanItem:
+      type: object
+      additionalProperties: false
+      required: [itemId, summary, state]
+      properties:
+        itemId:
+          type: string
+          minLength: 1
+        summary:
+          type: string
+          minLength: 1
+        state:
+          type: string
+          minLength: 1
+          description: Hub-owned current checklist/item state; worker narration cannot write this field directly.
+    PlanDependencyEdge:
+      type: object
+      additionalProperties: false
+      required: [fromItemId, toItemId]
+      properties:
+        fromItemId:
+          type: string
+          minLength: 1
+        toItemId:
+          type: string
+          minLength: 1
+    PlanAcceptanceLink:
+      type: object
+      additionalProperties: false
+      required: [itemId, assertionRef]
+      properties:
+        itemId:
+          type: string
+          minLength: 1
+        assertionRef:
+          type: string
+          minLength: 1
+    ChangePlan:
+      type: object
+      additionalProperties: false
+      required: [planRevision, planningDepth, rigorProfile, items, dependencyEdges, acceptanceLinks, blockers, unknowns, progress]
+      properties:
+        planRevision:
+          type: string
+          minLength: 1
+        planningDepth:
+          $ref: '#/components/schemas/PlanningDepth'
+        rigorProfile:
+          $ref: '#/components/schemas/RigorProfile'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanItem'
+        dependencyEdges:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanDependencyEdge'
+        acceptanceLinks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanAcceptanceLink'
+        blockers:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        unknowns:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        progress:
+          type: string
+          minLength: 1
+          description: Owner-issued Plan progress summary; operational item truth remains in Hub current state.
+    ChangeProgress:
+      type: object
+      additionalProperties: false
+      required: [planRevision, items, overallState]
+      properties:
+        planRevision:
+          type: string
+          minLength: 1
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanItem'
+        overallState:
+          type: string
+          minLength: 1
+          description: Builder-owner current Change progress state; not a client-writable status enum.
+    ChangeDiff:
+      type: object
+      additionalProperties: false
+      required: [baseSourceRevision, candidateSourceRevision, patch]
+      properties:
+        baseSourceRevision:
+          type: string
+          minLength: 1
+        candidateSourceRevision:
+          type: string
+          minLength: 1
+        patch:
+          type: string
+          description: Read-only textual diff projection between the exact source revisions.
+    SourceTreeEntry:
+      type: object
+      additionalProperties: false
+      required: [path, kind]
+      properties:
+        path:
+          type: string
+          minLength: 1
+        kind:
+          type: string
+          enum: [FILE, DIRECTORY]
+    SourceTree:
+      type: object
+      additionalProperties: false
+      required: [sourceRevision, entries]
+      properties:
+        sourceRevision:
+          type: string
+          minLength: 1
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceTreeEntry'
+    SourceFile:
+      type: object
+      additionalProperties: false
+      required: [sourceRevision, path, content]
+      properties:
+        sourceRevision:
+          type: string
+          minLength: 1
+        path:
+          type: string
+          minLength: 1
+        content:
+          type: string
+    RunPreview:
+      type: object
+      additionalProperties: false
+      required: [previewId, candidateDigest, ready, verified, live]
+      properties:
+        previewId:
+          type: string
+          minLength: 1
+        candidateDigest:
+          type: string
+          minLength: 1
+        ready:
+          type: boolean
+        verified:
+          type: boolean
+        live:
+          type: boolean
+          const: false
+    Finding:
+      type: object
+      additionalProperties: false
+      required: [findingId, changeId, findingRevision, state, summary]
+      properties:
+        findingId:
+          type: string
+          minLength: 1
+        changeId:
+          type: string
+          minLength: 1
+        findingRevision:
+          type: string
+          minLength: 1
+        state:
+          type: string
+          minLength: 1
+          description: Builder-owner current Finding resolution state; 4B does not invent an unratified lifecycle enum.
+        summary:
+          type: string
+          minLength: 1
+    Evidence:
+      type: object
+      additionalProperties: false
+      required: [evidenceId, changeId, claim, subjectDigest, provenance]
+      properties:
+        evidenceId:
+          type: string
+          minLength: 1
+        changeId:
+          type: string
+          minLength: 1
+        claim:
+          type: string
+          minLength: 1
+        subjectDigest:
+          type: string
+          minLength: 1
+        provenance:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+    ContextualAssistantAnswer:
+      type: object
+      additionalProperties: false
+      required: [answer, provenanceRefs]
+      properties:
+        answer:
+          type: string
+          minLength: 1
+        provenanceRefs:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+    WorkUnitProjection:
+      type: object
+      additionalProperties: false
+      required: [workUnitId, state, actorRunIds, resultCommit]
+      properties:
+        workUnitId:
+          type: string
+          minLength: 1
+        state:
+          type: string
+          minLength: 1
+        actorRunIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        resultCommit:
+          type: [string, 'null']
+          minLength: 1
+          description: Canonical Project-Git result commit when one exists; null while no result commit exists.
+    ActorRunProjection:
+      type: object
+      additionalProperties: false
+      required: [actorRunId, state, lineageDisposition]
+      properties:
+        actorRunId:
+          type: string
+          minLength: 1
+        state:
+          type: string
+          minLength: 1
+        lineageDisposition:
+          type: string
+          enum: [FRESH_BASE, CONTINUE_LINEAGE]
+    ChangeExecutionDetail:
+      type: object
+      additionalProperties: false
+      required: [changeId, workUnits, actorRuns]
+      properties:
+        changeId:
+          type: string
+          minLength: 1
+        workUnits:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkUnitProjection'
+        actorRuns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActorRunProjection'

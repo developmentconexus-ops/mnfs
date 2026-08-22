@@ -1,0 +1,326 @@
+openapi: 3.1.2
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/2024-11-10
+info:
+  title: Conexus Product API
+  version: 4b-candidate
+  description: >-
+    Canonical machine-readable HTTP wire for accepted Conexus Product operations.
+    Product semantics remain owned by accepted 4A authority; this description may
+    not invent operations, permissions, owners, or trust boundaries.
+servers:
+  - url: /
+    description: Relative Product API root; deployment origin remains outside 4B.
+security:
+  - ConexusSession: []
+x-conexus-security-semantics:
+  keycloak: authentication-provider-only
+  productAuthority: server-resolved-current-owner-facts
+  nonHttpIngress:
+    - PAR_TOOL
+x-conexus-browser-request-authenticity:
+  credentialedCrossOriginProductApi: DENY
+  fetchMetadata: SAME_ORIGIN_ONLY
+  fallback: EXACT_ORIGIN_OR_REFERER
+paths:
+  /api/control/access-context:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1access-context'
+  /api/control/session:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1session'
+  /api/control/accounts:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1accounts'
+  /api/control/workspaces/{workspaceId}/members:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1members'
+  /api/control/workspaces/{workspaceId}/members/{accountId}:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1members~1{accountId}'
+  /api/control/projects/{projectId}/account-grants/{accountId}:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1account-grants~1{accountId}'
+  /api/control/workspaces/{workspaceId}/areas/{areaId}/members/{accountId}:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas~1{areaId}~1members~1{accountId}'
+  /api/control/projects/{projectId}/area-grants/{areaId}:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1area-grants~1{areaId}'
+  /api/apps/{projectId}/access-context:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1apps~1{projectId}~1access-context'
+  /api/control/projects/{projectId}/app-access:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access'
+  /api/control/projects/{projectId}/app-access/{accountId}:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1app-access~1{accountId}'
+  /api/control/workspaces:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces'
+  /api/control/workspaces/{workspaceId}:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}'
+  /api/control/workspaces/{workspaceId}/areas:
+    $ref: './identity-workspace-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1areas'
+  /api/control/workspaces/{workspaceId}/projects:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1projects'
+  /api/control/projects/{projectId}:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}'
+  /api/control/projects/{projectId}/commands/archive:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1archive'
+  /api/control/projects/{projectId}/commands/duplicate:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1duplicate'
+  /api/control/projects/{projectId}/inception-investigations:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1inception-investigations'
+  /api/control/projects/{projectId}/baseline:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1baseline'
+  /api/control/projects/{projectId}/baseline/decisions:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1baseline~1decisions'
+  /api/control/projects/{projectId}/brain-binding:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1brain-binding'
+  /api/control/projects/{projectId}/connection-bindings:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1connection-bindings'
+  /api/control/projects/{projectId}/commands/set-connection-binding:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1set-connection-binding'
+  /api/control/projects/{projectId}/commands/remove-connection-binding:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1commands~1remove-connection-binding'
+  /api/control/projects/{projectId}/capabilities:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1capabilities'
+  /api/control/projects/{projectId}/capabilities/{capabilityId}:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1capabilities~1{capabilityId}'
+  /api/control/projects/{projectId}/data-resources:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1data-resources'
+  /api/control/projects/{projectId}/data-resources/{dataResourceId}:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1data-resources~1{dataResourceId}'
+  /api/control/projects/{projectId}/product-agents:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1product-agents'
+  /api/control/projects/{projectId}/product-agents/{agentId}:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1product-agents~1{agentId}'
+  /api/control/workspaces/{workspaceId}/product-agents:
+    $ref: './project-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1product-agents'
+  /api/control/projects/{projectId}/changes:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes'
+  /api/control/projects/{projectId}/changes/{changeId}:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}'
+  /api/control/projects/{projectId}/changes/{changeId}/plan:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1plan'
+  /api/control/projects/{projectId}/changes/{changeId}/plan/decisions:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1plan~1decisions'
+  /api/control/projects/{projectId}/changes/{changeId}/progress:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1progress'
+  /api/control/projects/{projectId}/changes/{changeId}/diff:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1diff'
+  /api/control/projects/{projectId}/source/tree:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1source~1tree'
+  /api/control/projects/{projectId}/source/file:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1source~1file'
+  /api/control/projects/{projectId}/changes/{changeId}/preview:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1preview'
+  /api/control/projects/{projectId}/changes/{changeId}/findings:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings'
+  /api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings~1{findingId}'
+  /api/control/projects/{projectId}/changes/{changeId}/findings/{findingId}/commands/close:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1findings~1{findingId}~1commands~1close'
+  /api/control/projects/{projectId}/changes/{changeId}/evidence:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1evidence'
+  /api/control/projects/{projectId}/changes/{changeId}/evidence/{evidenceId}:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1evidence~1{evidenceId}'
+  /api/control/projects/{projectId}/assistant/queries:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1assistant~1queries'
+  /api/control/projects/{projectId}/changes/{changeId}/execution-detail:
+    $ref: './builder-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1changes~1{changeId}~1execution-detail'
+  /api/control/workspaces/{workspaceId}/brain:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain'
+  /api/control/workspaces/{workspaceId}/brain/revisions:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1revisions'
+  /api/control/workspaces/{workspaceId}/brain/revisions/{brainRevisionId}:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1revisions~1{brainRevisionId}'
+  /api/control/workspaces/{workspaceId}/brain/discoveries:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1discoveries'
+  /api/control/workspaces/{workspaceId}/brain/proposals:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals'
+  /api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals~1{proposalId}'
+  /api/control/workspaces/{workspaceId}/brain/proposals/{proposalId}/decisions:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1proposals~1{proposalId}~1decisions'
+  /api/control/workspaces/{workspaceId}/brain/publications:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1publications'
+  /api/control/workspaces/{workspaceId}/brain/health:
+    $ref: './brain-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1brain~1health'
+  /api/control/connectors:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connectors'
+  /api/control/connectors/{connectorDefinitionId}:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connectors~1{connectorDefinitionId}'
+  /api/control/connection-scopes/{ownerScopeKind}/{ownerId}/connections:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connection-scopes~1{ownerScopeKind}~1{ownerId}~1connections'
+  /api/control/connections/{connectionId}:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}'
+  /api/control/connections/{connectionId}/revisions:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}~1revisions'
+  /api/control/connections/{connectionId}/credential:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}~1credential'
+  /api/control/connections/{connectionId}/qualifications:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}~1qualifications'
+  /api/control/connections/{connectionId}/qualifications/{qualificationId}:
+    $ref: './connection-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}~1qualifications~1{qualificationId}'
+  /api/control/projects/{projectId}/releases:
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1releases'
+  /api/control/projects/{projectId}/releases/{releaseId}:
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1releases~1{releaseId}'
+  /api/control/projects/{projectId}/promotions:
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions'
+  /api/control/projects/{projectId}/promotions/{promotionId}:
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions~1{promotionId}'
+  /api/control/projects/{projectId}/serving-state:
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1serving-state'
+  /api/control/projects/{projectId}/environments/{environmentId}/conformance:
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1environments~1{environmentId}~1conformance'
+  /api/apps/{projectId}/agents/{agentId}/conversations:
+    $ref: './par-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations'
+  /api/apps/{projectId}/agents/{agentId}/conversations/{conversationId}:
+    $ref: './par-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations~1{conversationId}'
+  /api/apps/{projectId}/agents/{agentId}/conversations/{conversationId}/turns:
+    $ref: './par-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations~1{conversationId}~1turns'
+  /api/headless/projects/{projectId}/agents/{agentId}/runs:
+    $ref: './par-paths.yaml#/paths/~1api~1headless~1projects~1{projectId}~1agents~1{agentId}~1runs'
+  /api/runtime/projects/{projectId}/agent-runs:
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1agent-runs'
+  /api/runtime/projects/{projectId}/agent-runs/{agentRunId}:
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1agent-runs~1{agentRunId}'
+  /api/runtime/projects/{projectId}/approval-requests:
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests'
+  /api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}:
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}'
+  /api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}/decisions:
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}~1decisions'
+  /api/control/projects/{projectId}/agents/{agentId}/triggers:
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers'
+  /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}:
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}'
+  /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/enable:
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1enable'
+  /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/disable:
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1disable'
+  /api/control/projects/{projectId}/effect-attempts:
+    $ref: './gateway-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts'
+  /api/control/projects/{projectId}/effect-attempts/{effectAttemptId}:
+    $ref: './gateway-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts~1{effectAttemptId}'
+  /api/control/projects/{projectId}/job-runs:
+    $ref: './mar-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1job-runs'
+  /api/control/projects/{projectId}/job-runs/{jobRunId}:
+    $ref: './mar-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1job-runs~1{jobRunId}'
+  /api/control/projects/{projectId}/jobs/{jobId}/runs:
+    $ref: './mar-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1jobs~1{jobId}~1runs'
+  /api/control/projects/{projectId}/activity:
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1activity'
+  /api/control/projects/{projectId}/execution-observations/{observationId}:
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1execution-observations~1{observationId}'
+  /api/control/projects/{projectId}/usage-cost-summary:
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1usage-cost-summary'
+  /api/control/workspaces/{workspaceId}/audit-records:
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1audit-records'
+  /api/control/workspaces/{workspaceId}/audit-records/{auditRecordId}:
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1audit-records~1{auditRecordId}'
+  /api/projects/{projectId}/analytic-queries:
+    $ref: './brain-paths.yaml#/paths/~1api~1projects~1{projectId}~1analytic-queries'
+components:
+  securitySchemes:
+    ConexusSession:
+      type: apiKey
+      in: cookie
+      name: __Host-conexus_session
+      description: >-
+        Opaque server-owned Conexus iam.session carriage. Keycloak tokens, roles,
+        groups, and organizations are not accepted as Product authorization.
+        The server-issued cookie MUST be Secure, HttpOnly, SameSite=Lax, Path=/,
+        and MUST NOT include a Domain attribute.
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details base envelope.
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: Stable machine-readable problem type identifier.
+        title:
+          type: string
+          description: Short human-readable summary for the problem type.
+        status:
+          type: integer
+          minimum: 100
+          maximum: 599
+          description: HTTP status code for this occurrence.
+        detail:
+          type: string
+          description: Human-readable occurrence detail; never a machine branching contract.
+        instance:
+          type: string
+          format: uri-reference
+          description: Identifier for this specific problem occurrence when disclosed.
+      additionalProperties: true
+  parameters:
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: >-
+        Strong current-representation precondition when the exact operation maps
+        an accepted IC2 obligation to HTTP representation state.
+      schema:
+        type: string
+        minLength: 1
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: >-
+        Conexus-owned repeatable-intake identity for operations whose accepted
+        IC3/IC4 wire mapping requires a caller-supplied retry identity. The header
+        value never replaces owner/effect identity or authorizes replay of an
+        unresolved external effect.
+      schema:
+        type: string
+        minLength: 1
+  headers:
+    ETag:
+      description: Strong representation validator where an accepted current-state contract requires it.
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    Problem401:
+      description: No valid current Conexus principal/session for the protected human surface.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem403:
+      description: Subject is legitimately disclosable to the current caller, but required action authority is denied.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem404:
+      description: Subject is absent or current disclosure policy intentionally does not reveal its existence.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem409:
+      description: Current owner-state, uniqueness, single-flight, or equivalent admitted conflict.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem412:
+      description: Expected revision, generation, digest, or current representation precondition is stale.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem422:
+      description: Authorized request violates the operation's admitted semantic or business-input contract.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Problem503:
+      description: Required current provider, source, or runtime dependency is unavailable.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'

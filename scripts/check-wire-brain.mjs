@@ -1,0 +1,193 @@
+import fs from 'node:fs';
+
+const oas = JSON.parse(fs.readFileSync('/tmp/conexus-product-openapi.bundle.json', 'utf8'));
+const methods = new Set(['get', 'put', 'post', 'delete', 'patch', 'head', 'options', 'trace']);
+const operations = new Map();
+
+for (const [path, pathItem] of Object.entries(oas.paths ?? {})) {
+  for (const [method, operation] of Object.entries(pathItem ?? {})) {
+    if (!methods.has(method)) continue;
+    const id = operation?.['x-conexus-4a-id'];
+    if (id) operations.set(id, { path, method: method.toUpperCase(), operation });
+  }
+}
+
+const expectedIds = [
+  ...Array.from({ length: 10 }, (_, i) => `BRN-${String(i + 1).padStart(2, '0')}`),
+  'BRN-12',
+];
+if (expectedIds.length !== 11) throw new Error('internal Brain gate setup error');
+if (operations.has('BRN-11')) throw new Error('BRN-11 RunBrainHealthProbe must remain SYSTEM_OWNER_TRANSITION, not caller Product wire');
+
+for (const id of expectedIds) {
+  const entry = operations.get(id);
+  if (!entry) throw new Error(`Brain schema closure missing operation ${id}`);
+  if (entry.operation['x-conexus-contract-state'] !== 'SCHEMA_CLOSED') throw new Error(`${id} is not SCHEMA_CLOSED`);
+  for (const response of Object.values(entry.operation.responses ?? {})) {
+    if (response?.['x-conexus-provisional'] === true) throw new Error(`${id} still has provisional response authority`);
+  }
+}
+
+function op(id) {
+  const entry = operations.get(id);
+  if (!entry) throw new Error(`missing operation ${id}`);
+  return entry.operation;
+}
+
+function resolveLocalRef(value) {
+  if (!value?.$ref || !value.$ref.startsWith('#/')) return value;
+  return value.$ref
+    .slice(2)
+    .split('/')
+    .map((part) => part.replaceAll('~1', '/').replaceAll('~0', '~'))
+    .reduce((node, part) => node?.[part], oas);
+}
+
+function resolveSchema(schema) {
+  let current = schema;
+  const seen = new Set();
+  while (current?.$ref?.startsWith('#/')) {
+    if (seen.has(current.$ref)) throw new Error(`schema ref cycle while checking ${current.$ref}`);
+    seen.add(current.$ref);
+    current = resolveLocalRef(current);
+  }
+  return current;
+}
+
+function resolvedParameters(id) {
+  return (op(id).parameters ?? []).map(resolveLocalRef);
+}
+
+function parameter(id, where, name) {
+  return resolvedParameters(id).find((p) => p?.in === where && p?.name === name);
+}
+
+function hasRequiredParameter(id, where, name) {
+  return parameter(id, where, name)?.required === true;
+}
+
+function requestSchema(id) {
+  return resolveSchema(op(id).requestBody?.content?.['application/json']?.schema);
+}
+
+function successSchema(id, status = '200') {
+  return resolveSchema(op(id).responses?.[status]?.content?.['application/json']?.schema);
+}
+
+function assertClosedObject(schema, label) {
+  const resolved = resolveSchema(schema);
+  if (!resolved || resolved.type !== 'object' || resolved.additionalProperties !== false) {
+    throw new Error(`${label} must be a closed object schema`);
+  }
+  return resolved;
+}
+
+function required(schema, ...names) {
+  const set = new Set(resolveSchema(schema)?.required ?? []);
+  for (const name of names) {
+    if (!set.has(name)) throw new Error(`${name} must be required`);
+  }
+}
+
+function property(schema, name) {
+  return resolveSchema(resolveSchema(schema)?.properties?.[name]);
+}
+
+function exactEnum(schema, expected, label) {
+  const actual = [...(resolveSchema(schema)?.enum ?? [])].sort();
+  const want = [...expected].sort();
+  if (actual.join(',') !== want.join(',')) throw new Error(`${label} must be exactly ${want.join('/')}; got ${actual.join(',')}`);
+}
+
+// Canonical Workspace Brain is one authority, not memory/vector/search runtime authority.
+const brain = assertClosedObject(successSchema('BRN-01'), 'BRN-01 success');
+required(brain, 'workspaceId', 'publishedBrainRevisionId');
+for (const forbidden of ['memory', 'conversationMemory', 'vectorIndex', 'ragIndex', 'toolAuthority', 'permissions']) {
+  if (brain.properties?.[forbidden]) throw new Error(`BRN-01 must not expose non-Brain authority ${forbidden}`);
+}
+
+// Published Brain revisions are immutable exact artifact/source identities and AVAILABLE is not live adoption.
+const revision = assertClosedObject(successSchema('BRN-03'), 'BRN-03 success');
+required(revision, 'brainRevisionId', 'brainDigest', 'sourceRevision', 'availability');
+if (property(revision, 'availability')?.const !== 'AVAILABLE') throw new Error('BRN-03 immutable published revision availability must be AVAILABLE');
+for (const forbidden of ['activeEverywhere', 'liveInherited', 'mutable', 'latest']) {
+  if (revision.properties?.[forbidden]) throw new Error(`BRN-03 must not imply mutable/live inheritance via ${forbidden}`);
+}
+
+// Discovery is read-only over admitted Project source authority. Credentials/arbitrary source selectors/full scans are not caller input.
+const discovery = assertClosedObject(requestSchema('BRN-04'), 'BRN-04 request');
+required(discovery, 'projectId');
+if (!hasRequiredParameter('BRN-04', 'header', 'Idempotency-Key')) throw new Error('BRN-04 must require Idempotency-Key');
+for (const forbidden of ['credential', 'secret', 'connectionString', 'sql', 'url', 'targetUrl', 'physicalTable', 'fullScan']) {
+  if (discovery.properties?.[forbidden]) throw new Error(`BRN-04 must not accept discovery escape field ${forbidden}`);
+}
+const discoveryResult = assertClosedObject(successSchema('BRN-04'), 'BRN-04 success');
+required(discoveryResult, 'projectId', 'candidates');
+const candidate = resolveSchema(property(discoveryResult, 'candidates')?.items);
+if (candidate) {
+  required(candidate, 'candidateRef', 'hypothesis', 'provenanceRefs');
+  for (const forbidden of ['accuracyPercent', 'verifiedPercent', 'canonical']) {
+    if (candidate.properties?.[forbidden]) throw new Error(`Brain Discovery candidate must not manufacture certainty via ${forbidden}`);
+  }
+}
+
+// Proposals are exact Git/source candidates with provenance and remain hypotheses until human decision/publication.
+const proposal = assertClosedObject(successSchema('BRN-06'), 'BRN-06 success');
+required(proposal, 'proposalId', 'proposalRevision', 'candidateSourceRevision', 'provenanceRefs', 'hypothesisState', 'reviewState');
+if (property(proposal, 'hypothesisState')?.enum || property(proposal, 'reviewState')?.enum) {
+  throw new Error('BRN-06 proposal states must remain owner-issued until Product authority ratifies exact lifecycle vocabularies');
+}
+for (const forbidden of ['accuracyPercent', 'autoPublished', 'machineApproved']) {
+  if (proposal.properties?.[forbidden]) throw new Error(`BRN-06 must not expose false Brain authority ${forbidden}`);
+}
+
+const submitProposal = assertClosedObject(requestSchema('BRN-07'), 'BRN-07 request');
+required(submitProposal, 'candidateSourceRevision', 'provenanceRefs');
+if (!hasRequiredParameter('BRN-07', 'header', 'Idempotency-Key')) throw new Error('BRN-07 must require Idempotency-Key');
+for (const forbidden of ['publish', 'autoPublish', 'approved', 'machineDecision']) {
+  if (submitProposal.properties?.[forbidden]) throw new Error(`BRN-07 must never self-publish via ${forbidden}`);
+}
+
+const decideProposal = assertClosedObject(requestSchema('BRN-08'), 'BRN-08 request');
+required(decideProposal, 'expectedProposalRevision', 'decision');
+exactEnum(property(decideProposal, 'decision'), ['APPROVE', 'REJECT'], 'BRN-08 decision');
+if (decideProposal.properties?.machineApproved || decideProposal.properties?.confidenceThreshold) {
+  throw new Error('BRN-08 must preserve human review authority');
+}
+
+const publish = assertClosedObject(requestSchema('BRN-09'), 'BRN-09 request');
+required(publish, 'candidateSourceRevision');
+const published = assertClosedObject(successSchema('BRN-09', '201'), 'BRN-09 success');
+required(published, 'brainRevisionId', 'brainDigest', 'sourceRevision', 'availability');
+if (property(published, 'availability')?.const !== 'AVAILABLE') throw new Error('BRN-09 must produce immutable AVAILABLE revision, not live adoption');
+
+// Brain operational health has an accepted exact state vocabulary and never mutates immutable Brain content.
+const health = assertClosedObject(successSchema('BRN-10'), 'BRN-10 success');
+required(health, 'brainRevisionId', 'brainDigest', 'healthSnapshotDigest', 'items');
+const healthItem = resolveSchema(property(health, 'items')?.items);
+if (!healthItem) throw new Error('BRN-10 must expose health items');
+required(healthItem, 'semanticRef', 'state', 'critical');
+exactEnum(property(healthItem, 'state'), ['UNVERIFIED', 'VALID', 'SUSPECT', 'INVALID', 'CHECK_ERROR'], 'Brain health state');
+if (healthItem.properties?.rewriteBrain || healthItem.properties?.mutateRevision) throw new Error('BRN-10 health overlay must not mutate immutable Brain revision');
+
+// AnalyticQuery v0 is semantic-ID + curated-dataset only, with explicit restricted/SELECT-only proof semantics and no SQL/physical topology authority.
+const analytic = assertClosedObject(requestSchema('BRN-12'), 'BRN-12 request');
+required(analytic, 'datasetSemanticId', 'selectSemanticIds');
+const selected = property(analytic, 'selectSemanticIds');
+if (selected?.type !== 'array' || (selected?.minItems ?? 0) < 1) throw new Error('BRN-12 selectSemanticIds must be a non-empty array');
+for (const forbidden of ['sql', 'rawSql', 'table', 'schema', 'join', 'joinTopology', 'physicalTable', 'connectionId', 'expression']) {
+  if (analytic.properties?.[forbidden]) throw new Error(`BRN-12 must not accept arbitrary query/physical authority ${forbidden}`);
+}
+if (op('BRN-12')['x-conexus-query-regime'] !== 'ANALYTIC_QUERY_V0') throw new Error('BRN-12 must declare ANALYTIC_QUERY_V0 regime');
+if (op('BRN-12')['x-conexus-sql-proof'] !== 'SELECT_ONLY_REQUIRED') throw new Error('BRN-12 must require SELECT-only proof');
+const httpIngress = [...(op('BRN-12')['x-conexus-ingress'] ?? [])].sort();
+if (httpIngress.join(',') !== ['CONTROL_PLANE', 'PUBLISHED_APP'].sort().join(',')) throw new Error('BRN-12 HTTP ingress must be CONTROL_PLANE + PUBLISHED_APP only');
+const nonHttpIngress = op('BRN-12')['x-conexus-non-http-ingress'] ?? [];
+if (nonHttpIngress.length !== 1 || nonHttpIngress[0] !== 'PAR_TOOL') throw new Error('BRN-12 PAR_TOOL must remain explicit non-HTTP ingress');
+const analyticResult = assertClosedObject(successSchema('BRN-12'), 'BRN-12 success');
+required(analyticResult, 'effectiveBrainPlanDigest', 'projectBindingDigest', 'healthSnapshotDigest', 'datasetSemanticId', 'columns', 'rows', 'provenanceRefs');
+for (const forbidden of ['rawSql', 'executedSql', 'physicalTable', 'credential']) {
+  if (analyticResult.properties?.[forbidden]) throw new Error(`BRN-12 response must not expose physical/secret authority ${forbidden}`);
+}
+
+console.log('Brain schema closure passed (11 Product operations; BRN-11 remains owner transition; publication/health/AnalyticQuery boundaries closed).');

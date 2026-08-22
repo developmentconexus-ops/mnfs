@@ -1,0 +1,22 @@
+{
+  "truth": {
+    "state": "SUPPORTED_CURRENT",
+    "asOf": "coord-current-2",
+    "freshness": "CURRENT",
+    "coverage": "COMPLETE",
+    "provenance": "VERIFIED"
+  },
+  "items": [
+    {
+      "budgetRef": "budget:synthetic:2",
+      "canonicalBusinessDate": "2026-08-22",
+      "budgetAgeDays": -1,
+      "agingBand": "AGE_0_3",
+      "budgetValue": "100.00",
+      "sellerId": "seller:synthetic:2",
+      "customerId": "customer:synthetic:2",
+      "sourceCompanyId": "company:synthetic:1",
+      "pendingEvidenceState": "CONFIRMED"
+    }
+  ]
+}

@@ -1,0 +1,479 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Observability Path Items
+  version: 4b-candidate
+paths:
+  /api/control/projects/{projectId}/activity:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted Project reference; current Project disclosure is resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: ListProjectActivity
+      operationId: ListProjectActivity
+      x-conexus-4a-id: OBS-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - name: pageToken
+          in: query
+          required: false
+          description: Opaque continuation for the same admitted Project activity projection; never owner-state or authorization authority.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Currently disclosable Project activity projection whose entries reference owner facts without becoming owner truth.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectActivityPage'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/execution-observations/{observationId}:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted Project reference; current Project disclosure is resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+      - name: observationId
+        in: path
+        required: true
+        description: Exact operational observation reference; possession grants no authority over the referenced owner subject.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: GetExecutionObservationDetail
+      operationId: GetExecutionObservationDetail
+      x-conexus-4a-id: OBS-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Technical observation detail correlated to one exact owner execution subject; telemetry never decides that subject's terminal/current truth.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionObservationDetail'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/usage-cost-summary:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted Project reference; current Project disclosure is resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: GetProjectUsageCostSummary
+      operationId: GetProjectUsageCostSummary
+      x-conexus-4a-id: OBS-03
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Inclusive RFC3339 start coordinate of the requested reporting period.
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          description: Exclusive RFC3339 end coordinate of the requested reporting period; must be later than from.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Project usage/cost projection for the exact requested period with explicit usage, calculation and reconciliation truth states.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectUsageCostSummary'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/workspaces/{workspaceId}/audit-records:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted Workspace reference; current audit disclosure is resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: ListAuditRecords
+      operationId: ListAuditRecords
+      x-conexus-4a-id: OBS-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - name: projectId
+          in: query
+          required: false
+          description: Optional contained Project scope for this Workspace audit view; server revalidates containment and disclosure.
+          schema:
+            type: string
+            minLength: 1
+        - name: pageToken
+          in: query
+          required: false
+          description: Opaque continuation for the same admitted audit list shape.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Immutable audit facts currently disclosable in the exact Workspace scope; listing grants no mutation or authorization authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditRecordPage'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/workspaces/{workspaceId}/audit-records/{auditRecordId}:
+    parameters:
+      - name: workspaceId
+        in: path
+        required: true
+        description: Untrusted Workspace reference; current audit disclosure is resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+      - name: auditRecordId
+        in: path
+        required: true
+        description: Exact immutable AuditRecord reference; possession grants no authority over its actor or subject.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: GetAuditRecord
+      operationId: GetAuditRecord
+      x-conexus-4a-id: OBS-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact immutable audit fact and provenance; it records an admitted fact but cannot mutate/reconstruct current owner authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditRecord'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+components:
+  schemas:
+    OwnerSubjectRef:
+      type: object
+      additionalProperties: false
+      required: [kind, ref]
+      properties:
+        kind:
+          type: string
+          minLength: 1
+          description: Owner-issued typed subject class. OBS does not create a universal lifecycle/status taxonomy.
+        ref:
+          type: string
+          minLength: 1
+          description: Exact Conexus owner subject reference. Correlation by reference never transfers semantic authority to OBS.
+
+    EvidenceRefs:
+      type: array
+      uniqueItems: true
+      items:
+        type: string
+        minLength: 1
+
+    ProjectActivityEntry:
+      type: object
+      additionalProperties: false
+      required: [activityId, subject, kind, occurredAt]
+      properties:
+        activityId:
+          type: string
+          minLength: 1
+          description: OBS-owned activity/operational-event projection identity.
+        subject:
+          $ref: '#/components/schemas/OwnerSubjectRef'
+        kind:
+          type: string
+          minLength: 1
+          description: Owner-/projection-issued activity kind; never an authoritative lifecycle state.
+        occurredAt:
+          type: string
+          format: date-time
+        observationId:
+          type: string
+          minLength: 1
+          description: Optional exact technical observation detail reference when this activity entry has one.
+        evidenceRefs:
+          $ref: '#/components/schemas/EvidenceRefs'
+
+    ProjectActivityPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectActivityEntry'
+        nextPageToken:
+          type: string
+          minLength: 1
+          description: Opaque continuation for the same admitted activity projection when more entries exist.
+
+    ExecutionObservationDetail:
+      type: object
+      additionalProperties: false
+      required: [observationId, projectId, subject, producerTrust, observedAt, evidenceRefs]
+      properties:
+        observationId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+        subject:
+          $ref: '#/components/schemas/OwnerSubjectRef'
+        producerTrust:
+          type: string
+          enum: [HUB_AUTHORITY, GATEWAY_AUTHORITY, PROVIDER_OBSERVED, GUEST_OBSERVED]
+          description: Trust class of the observation producer; authenticated transport alone never upgrades this classification.
+        observedAt:
+          type: string
+          format: date-time
+        durationMs:
+          type: integer
+          minimum: 0
+          description: Observed duration when available; never terminal owner truth.
+        traceRefs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+          description: Correlation-only trace/span references; provider/trace identity is never Conexus authority.
+        evidenceRefs:
+          $ref: '#/components/schemas/EvidenceRefs'
+
+    UsagePeriod:
+      type: object
+      additionalProperties: false
+      required: [from, to]
+      properties:
+        from:
+          type: string
+          format: date-time
+          description: Inclusive reporting period start.
+        to:
+          type: string
+          format: date-time
+          description: Exclusive reporting period end.
+
+    UsageCounts:
+      type: object
+      additionalProperties: false
+      properties:
+        inputTokens:
+          type: integer
+          minimum: 0
+        outputTokens:
+          type: integer
+          minimum: 0
+        cacheTokens:
+          type: integer
+          minimum: 0
+        reasoningTokens:
+          type: integer
+          minimum: 0
+
+    CostAmounts:
+      type: object
+      additionalProperties: false
+      properties:
+        calculatedUsd:
+          type: string
+          pattern: '^(0|[1-9][0-9]*)(\.[0-9]+)?$'
+          description: Exact decimal-string calculated LLM/model cost when calculation is supported and complete enough.
+        providerReportedUsd:
+          type: string
+          pattern: '^(0|[1-9][0-9]*)(\.[0-9]+)?$'
+          description: Exact decimal-string provider-reported cost when available; distinct from calculated/reconciled cost.
+        reconciledUsd:
+          type: string
+          pattern: '^(0|[1-9][0-9]*)(\.[0-9]+)?$'
+          description: Exact decimal-string reconciled cost when reconciliation produces one.
+        sandboxUsd:
+          type: string
+          pattern: '^(0|[1-9][0-9]*)(\.[0-9]+)?$'
+          description: Exact decimal-string sandbox/runtime monetary cost when available; kept distinct from model cost.
+
+    ProjectUsageCostSummary:
+      type: object
+      additionalProperties: false
+      description: >-
+        Truthful Project usage/cost projection for one exact period. missing != zero:
+        MISSING usage, missing price or unsupported calculation must remain explicit and
+        must not synthesize zero-valued usage/cost facts.
+      required: [projectId, period, usageState, calculationState, reconciliationState, evidenceRefs]
+      properties:
+        projectId:
+          type: string
+          minLength: 1
+        period:
+          $ref: '#/components/schemas/UsagePeriod'
+        usageState:
+          type: string
+          enum: [REPORTED, INFERRED, MISSING]
+        calculationState:
+          type: string
+          enum: [CALCULATED, MISSING_USAGE, MISSING_PRICE, UNSUPPORTED]
+        reconciliationState:
+          type: string
+          enum: [NOT_AVAILABLE, PENDING, MATCHED, MISMATCH, ADJUSTED]
+        usage:
+          $ref: '#/components/schemas/UsageCounts'
+        cost:
+          $ref: '#/components/schemas/CostAmounts'
+        evidenceRefs:
+          $ref: '#/components/schemas/EvidenceRefs'
+      allOf:
+        - if:
+            properties:
+              usageState:
+                const: MISSING
+            required: [usageState]
+          then:
+            not:
+              properties:
+                usage: {}
+              required: [usage]
+        - if:
+            properties:
+              calculationState:
+                enum: [MISSING_USAGE, MISSING_PRICE, UNSUPPORTED]
+            required: [calculationState]
+          then:
+            properties:
+              cost:
+                not:
+                  properties:
+                    calculatedUsd: {}
+                  required: [calculatedUsd]
+
+    AuditRecordSummary:
+      type: object
+      additionalProperties: false
+      required: [auditRecordId, workspaceId, actor, action, subject, occurredAt]
+      properties:
+        auditRecordId:
+          type: string
+          minLength: 1
+        workspaceId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+          description: Exact contained Project when the audit fact is Project-scoped.
+        actor:
+          $ref: '#/components/schemas/OwnerSubjectRef'
+        action:
+          type: string
+          minLength: 1
+          description: Owner-issued audited action/fact kind; OBS does not create a universal authorization/action taxonomy.
+        subject:
+          $ref: '#/components/schemas/OwnerSubjectRef'
+        occurredAt:
+          type: string
+          format: date-time
+
+    AuditRecordPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditRecordSummary'
+        nextPageToken:
+          type: string
+          minLength: 1
+          description: Opaque continuation for the same admitted immutable-audit list shape.
+
+    AuditRecord:
+      type: object
+      additionalProperties: false
+      required: [auditRecordId, workspaceId, actor, action, subject, occurredAt, evidenceRefs]
+      properties:
+        auditRecordId:
+          type: string
+          minLength: 1
+        workspaceId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+          description: Exact contained Project when the audit fact is Project-scoped.
+        actor:
+          $ref: '#/components/schemas/OwnerSubjectRef'
+        action:
+          type: string
+          minLength: 1
+          description: Owner-issued audited action/fact kind; immutable audit facts never become current authorization state.
+        subject:
+          $ref: '#/components/schemas/OwnerSubjectRef'
+        occurredAt:
+          type: string
+          format: date-time
+        evidenceRefs:
+          $ref: '#/components/schemas/EvidenceRefs'

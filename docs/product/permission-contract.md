@@ -1,11 +1,11 @@
 # Conexus OS — Permission Contract
 
-> **Status:** CLOSED CANDIDATE / 4A OPEN / INDEPENDENT REVIEW ADJUDICATED / NOT RATIFIED
-> **Purpose:** derive the smallest ordinary Permission vocabulary needed by the exact Conexus platform operation candidate without turning personas, screens, Keycloak claims or Published-App roles into a universal policy system.
+> **Status:** CURRENT / OPERATOR RATIFIED / 4B-F01 BOUNDED CORRECTION ACCEPTED
+> **Purpose:** derive the smallest ordinary Permission vocabulary needed by the exact Conexus platform operation authority without turning personas, screens, Keycloak claims or Published-App roles into a universal policy system.
 > **Operation authority:** [operation-ledger.md](operation-ledger.md).
 > **Mutable program status:** owned only by [../roadmap.md](../roadmap.md).
 
-This document is the single candidate home for ordinary Conexus Control-Plane/runtime Permission names during 4A. It does not define HTTP security schemes, storage policy mechanics or a role editor and it does not authorize implementation.
+This document is the single current home for ordinary Conexus Control-Plane/runtime Permission names. It does not define HTTP security schemes, storage policy mechanics or a role editor and it does not authorize implementation.
 
 The exact operation → principal/ingress/Permission/scope/outcome/current-authority/idempotency-concurrency mapping is canonical in the operation ledger. This document owns only the reusable ordinary Permission vocabulary and its separation from special/runtime/app authority.
 
@@ -57,15 +57,17 @@ The vocabulary is not a universal policy language and does not imply a custom Ro
 
 ## 3. Ordinary Permission vocabulary
 
-The vocabulary is frozen as the **4A candidate**, not yet operator-ratified.
+The vocabulary remains exactly **25** after operator-approved `4B-F01`; only three generic mutation consumers were subtracted.
 
 ### 3.1 Workspace and access
 
 | Permission | Meaning | Material current consumers |
 | --- | --- | --- |
-| `workspace.manage` | administer Workspace/Area structure and ordinary Workspace settings | `WS-03..06` |
+| `workspace.manage` | administer the admitted Workspace/Area structure | `WS-04`, `WS-05` |
 | `workspace.access.manage` | administer Workspace membership, Area membership and Workspace-derived Project grants | `IAM-04..12` |
 | `project.create` | create a Project in an exact Workspace or duplicate into an admitted destination Workspace | `PRJ-03`; destination side of `PRJ-06` |
+
+`4B-F01` removed generic Workspace/Area updates rather than inventing rename/settings payloads. `workspace.manage` remains justified by the distinct current Area administration consumers above.
 
 ### 3.2 Project
 
@@ -74,11 +76,11 @@ The vocabulary is frozen as the **4A candidate**, not yet operator-ratified.
 | `project.read` | inspect ordinary Project-level Product truth/projections | `PRJ-01/02/16/17/22`; `PAR-06/07` Control-Plane run inspection; ordinary Release/Promotion/serving/job/activity reads |
 | `project.source.read` | inspect Project source/diff/authored definitions without write authority | `BLD-07..09`, `PRJ-20/21` |
 | `project.data.read` | inspect declared Product/read-model/source resources without becoming a generic DB console | `PRJ-18/19`; Control-Plane `BRN-12` together with `brain.read` |
-| `project.manage` | administer Project identity/lifecycle, Baseline, bindings and independent Published-App access configuration | `PRJ-04..15` where mapped; `IAM-14/15/17`; source side of `PRJ-06` |
+| `project.manage` | administer Project lifecycle, Baseline, bindings and independent Published-App access configuration | `PRJ-05..15` where mapped; `IAM-14/15/17`; source side of `PRJ-06` |
 | `project.build` | create/evolve accepted Project Product/Agent intent through Change/Builder | `BLD-01..04/06/10/16/17` |
 | `project.review` | participate in exact Plan/Change checkpoint, Finding and Evidence review | `BLD-05/11..15` |
 
-`project.manage` does **not** imply `project.build`, `project.review`, Published-App business use, Brain publication, Connection use or Release promotion.
+`project.manage` does **not** imply `project.build`, `project.review`, Published-App business use, Brain publication, Connection use or Release promotion. `4B-F01` removed generic `UpdateProject`; it did not remove the distinct lifecycle/Baseline/binding/app-access consumers that justify this Permission.
 
 ### 3.3 Release, managed execution and audit
 
@@ -143,7 +145,7 @@ Interactive Published-App Agent use is authorized by exact Published-App access/
 
 ---
 
-## 4. Candidate census
+## 4. Current census
 
 ```text
 workspace.manage
@@ -180,10 +182,10 @@ agent.effect.approve
 
 ```text
 ordinary Permissions = 25
-status = FROZEN 4A CANDIDATE / NOT RATIFIED
+status = CURRENT / OPERATOR RATIFIED / 4B-F01 CORRECTED
 ```
 
-The number 25 has no independent value. It survives because the completed operation mapping requires each distinction and no accepted operation requires a 26th ordinary Permission.
+The number 25 has no independent value. It survives because the current operation mapping still requires each distinction and no accepted operation requires a 26th ordinary Permission.
 
 ---
 
@@ -258,70 +260,3 @@ app role      -X-> agent.effect.approve
 ```
 
 Every exact Project-defined operation in `Ops(R)` declares its admitted app-role subset, PAR/MAR projection or future real DEDICATED service allowlist. Conexus does not create a global Permission per customer business operation.
-
-For the operator-approved Budget Analyzer:
-
-```text
-admin  → AnalyzePendingBudgets + ListPendingBudgets
-member → AnalyzePendingBudgets + ListPendingBudgets
-```
-
-No Product Agent, MAR JobRun or DEDICATED caller is admitted to those two operations in F1 merely to exercise infrastructure.
-
----
-
-## 7. Project-defined capability authorization grammar
-
-A Project-defined operation gains authority only from its exact Release contract:
-
-```text
-exact semantic operation
-+ exact consumer/principal/ingress
-+ exact Project/Published-App scope
-+ exact operation-local app/runtime authority class
-+ current Project/Brain/Connection/Release facts
-```
-
-Admitted operation-local caller classes include only current real cases:
-
-```text
-Published-App role subset `{admin, member}`
-PAR ToolProjection
-MAR JobProjection
-DEDICATED SERVICE_SCOPED allowlist when a real consumer exists
-Control-Plane Project capability where current Product semantics explicitly admit it
-```
-
-Future customer-specific business policy remains Project Product logic. It does not become an unbounded Conexus global Permission namespace.
-
----
-
-## 8. Closure proof
-
-The completed operation ledger maps every concrete operation to exactly one ordinary Permission route or explicit non-ordinary/special route.
-
-```text
-fixed platform operations                    = 114
-fixed operations with authorization route    = 114/114
-Budget Analyzer operations                   = 2
-Budget operations with authorization route   = 2/2
-ordinary Permissions                         = 25
-operations requiring a new global business-op Permission = 0
-Keycloak claims used as Product grants        = 0
-Published-App roles implying Control Plane    = 0
-Published-App roles implying effect approval  = 0
-```
-
-Closure challenge dispositions:
-
-1. **PASS** — every fixed platform operation maps to ordinary Permission(s) or explicit special/current-authority conditions in the ledger.
-2. **PASS** — no Permission exists only because a screen/menu/CRUD noun exists.
-3. **PASS** — Workspace/Project/Brain/Connection/app/Agent authority remains non-transitive except where one operation explicitly requires a compound route.
-4. **PASS** — Project-defined operations do not create an unbounded global Permission namespace.
-5. **PASS** — Published-App roles remain independent from Control Plane Permissions and from effect-approval eligibility.
-6. **PASS** — Keycloak proves authentication only and never substitutes for Conexus grants.
-7. **PASS** — narrowing/revocation paths retain the exact administration authority needed to reduce current authority without demanding a new broader grant.
-8. **PASS** — binding/approval/promotion compound operations preserve owner-specific current checks atomically at the semantic level.
-9. **PASS** — removing any of the surviving 25 Permissions would either merge a currently distinct reusable authority class or force operation-local hidden policy.
-
-Independent Fable review is complete and Lead-adjudicated. It found no missing Permission or trust-boundary defect; the only Permission-document correction was to make the existing `PAR-06/07` Control-Plane `project.read` consumers explicit and preserve investigator access on `PAR-09` only. Explicit operator 4A ratification remains required before the vocabulary becomes accepted authority.

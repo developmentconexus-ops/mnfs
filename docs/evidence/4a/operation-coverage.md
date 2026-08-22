@@ -1,35 +1,35 @@
 # 4A Evidence — Product Operation Coverage
 
 > **Kind:** Evidence / supporting proof, not Product authority.
-> **Candidate authority under test:** `docs/product/operation-ledger.md` + `docs/product/permission-contract.md` + `docs/product/budget-analyzer-contract.md`.
-> **Status:** 4A OPEN / CENSUS + SUBTRACTION + CONSISTENCY PROOF COMPLETE / INDEPENDENT FABLE REVIEW COMPLETE / LEAD-ADJUDICATED / OPERATOR RATIFICATION PENDING.
+> **Current authority:** `docs/product/operation-ledger.md` + `docs/product/permission-contract.md` + `docs/product/budget-analyzer-contract.md`.
+> **Status:** ORIGINAL 4A REVIEW COMPLETE / OPERATOR RATIFIED / `4B-F01` DOWNSTREAM CORRECTION ACCEPTED AND RECOMPILED.
 
-This Evidence records the completed 4A challenge against accepted Product journeys, semantic owners, durable record classes, first-vertical semantics and whole-product negative laws. It does not ratify 4A, open 4B or authorize Product implementation.
+This Evidence records the 4A challenge against Product journeys, semantic owners, durable record classes, first-vertical semantics and whole-product negative laws. The original independent review proved the pre-4B wire candidate; the operator-approved downstream falsifier `4B-F01` subsequently narrowed only three generic mutation rows. This file projects both the historical review provenance and the **current 111-operation closure**.
 
 Repository current authority always outranks this Evidence.
 
 ---
 
-## 1. Exact closure under test
+## 1. Current exact closure
 
-The completed candidate derives three different Product surfaces:
+The current authority derives three different Product surfaces:
 
 ```text
-fixed Conexus platform operations = 114
+fixed Conexus platform operations = 111
 Project-defined operations        = exact finite Release-pinned Ops(R)
 first Budget Analyzer operations  = 2
 ordinary Conexus Permissions      = 25
 ```
 
-Required concrete closure:
+Current concrete closure:
 
 ```text
-fixed operations with semantic owner       = 114/114
-fixed operations with real consumer        = 114/114
-fixed operations with principal/ingress    = 114/114
-fixed operations with auth/scope route     = 114/114
-fixed operations with outcome/disclosure   = 114/114
-fixed operations with exact IC profile     = 114/114
+fixed operations with semantic owner       = 111/111
+fixed operations with real consumer        = 111/111
+fixed operations with principal/ingress    = 111/111
+fixed operations with auth/scope route     = 111/111
+fixed operations with outcome/disclosure   = 111/111
+fixed operations with exact IC profile     = 111/111
 Budget operations with all fields          = 2/2
 orphan concrete operations                 = 0
 speculative concrete operations            = 0
@@ -90,6 +90,8 @@ Material subtractive dispositions preserved:
 - Attachments/Blob remain owner-bound carriers; no global File Manager.
 - MAR owns job-run/serving semantics; no generic scheduler/workflow Product domain.
 
+`4B-F01` reinforces this proof: Workspace, Area and Project durable record existence did not justify generic mutation CRUD when no exact Product property/consumer existed.
+
 ---
 
 ## 3. Semantic-owner boundary proof — 13/13
@@ -97,8 +99,8 @@ Material subtractive dispositions preserved:
 | Owner | Product home | Inflation prevented |
 | --- | --- | --- |
 | I&A | identity/session/access | Keycloak/provider claims excluded; app access CRUD symmetry removed |
-| Workspace | Workspace/Area lifecycle | no generic organization tree |
-| Project | Project/Baseline/binding intent | no hidden resource registry |
+| Workspace | Workspace/Area lifecycle | no generic organization tree or generic metadata mutation by symmetry |
+| Project | Project/Baseline/binding intent | no hidden resource registry or generic metadata mutation by symmetry |
 | Builder | Change/Plan/Findings/execution projections | no WorkUnit/CodingSession API authority |
 | Artifact Registry | immutable semantic projections | no Universal Artifact CRUD |
 | Connections | Connection lifecycle/qualification | no generic secret/provider executor |
@@ -119,7 +121,7 @@ owner collision requiring new owner  = 0
 
 ## 4. Whole-product consumer/journey coverage
 
-The accepted Product journeys A–O and material whole-product negatives were re-walked against the candidate.
+The accepted Product journeys A–O and material whole-product negatives remain covered after `4B-F01`.
 
 ```text
 A first access / Workspace             COVERED
@@ -139,6 +141,8 @@ N Budget Analyzer                      COVERED
 O maintenance/reusable learning        COVERED
 ```
 
+The consumer challenge that produced `4B-F01` specifically found that no A–O journey required generic Workspace/Area/Project editing; removing those three rows therefore removes CRUD symmetry rather than journey coverage.
+
 Honest non-Product/deferred boundaries remain explicit:
 
 - backup/restore/emergency stop = operations control, not ordinary Product API;
@@ -152,12 +156,12 @@ No accepted current journey requires an orphan or speculative operation.
 
 ## 5. Fixed-platform census and subtraction
 
-Prefix census:
+Current prefix census:
 
 ```text
 IAM = 16
-WS  =  6
-PRJ = 22
+WS  =  4
+PRJ = 21
 BLD = 17
 BRN = 11
 CON =  9
@@ -167,10 +171,10 @@ GW  =  2
 MAR =  3
 OBS =  5
 ----------------
-TOTAL = 114
+TOTAL = 111
 ```
 
-Independent subtractive equation:
+Original 4A subtractive equation:
 
 ```text
 initial admitted platform candidate        = 117
@@ -178,10 +182,26 @@ S1 IAM grant/role-change semantic merge    =  -1
 S2 BrainHealthProbe → SYSTEM               =  -1
 S3 ComposeRelease → SYSTEM                 =  -1
 ------------------------------------------------
-N_platform                                 = 114
+operator-ratified pre-wire N_platform      = 114
 ```
 
-Applied decisions:
+The 4B executable-wire pass then produced one material downstream falsifier:
+
+```text
+114
+- WS-03 UpdateWorkspace
+  → no closed mutable Workspace property set / no distinct current consumer
+- WS-06 UpdateArea
+  → no closed mutable Area property set / no distinct current consumer
+- PRJ-04 UpdateProject
+  → no closed mutable Project property set / no distinct current consumer
+------------------------------------------------
+current N_platform                         = 111
+```
+
+The operator explicitly accepted this bounded correction. No `Rename*`, arbitrary settings object or generic patch replacement was admitted.
+
+Other applied subtractive decisions remain:
 
 ```text
 IAM-15 SetPublishedAppAccess
@@ -282,7 +302,7 @@ budget_age_days < 0
 → otherwise UNVERIFIED / INDETERMINATE
 ```
 
-A future requirement for retained snapshot history or future-dated Budget classification reopens only the smallest Budget semantic item.
+4B later made these truth rules executable through generated Budget wire and positive/negative JSON Schema fixtures; `4B-F01` does not affect them.
 
 ---
 
@@ -291,7 +311,7 @@ A future requirement for retained snapshot history or future-dated Budget classi
 The ordinary Permission vocabulary remains exactly 25 and is owned by `permission-contract.md`.
 
 ```text
-fixed platform operations with auth route  = 114/114
+fixed platform operations with auth route  = 111/111
 Budget operations with auth route          = 2/2
 new global Permission per Project op        = 0
 Keycloak claim used as Product grant        = 0
@@ -331,25 +351,27 @@ OR separately authorized audit.read investigator exact-subject read
 
 ## 9. Idempotency/current-authority precision
 
-Independent review confirmed the profile model and identified grouped precision gaps. Lead adjudication now binds them exactly:
+The original independent review established these precision corrections:
 
 ```text
 IAM-03 ProvisionAccount = IC3
 IAM-15 SetPublishedAppAccess = IC2 with explicit absent state on create
 
-WS-03 UpdateWorkspace = IC2
+WS-03 UpdateWorkspace = IC2        [historical pre-4B-F01 row]
 WS-04 ListAreas       = IC0
 WS-05 CreateArea      = IC3
-WS-06 UpdateArea      = IC2
+WS-06 UpdateArea      = IC2        [historical pre-4B-F01 row]
 
 REL-06 PromoteRelease = IC2 AND IC3
 ```
+
+`4B-F01` later subtracted the two generic Workspace/Area mutations rather than changing their carrier semantics. The current literal HTTP `IF_MATCH` set is now `{PRJ-12, PAR-14}` as proven by 4B's bundled-OAD carrier checker.
 
 Other already-exact consequential boundaries remain unchanged, including PAR approval/effects, managed job occurrence and Gateway `OUTCOME_UNKNOWN` fencing.
 
 ---
 
-## 10. Independent Fable review
+## 10. Independent Fable review — historical pre-4B-F01 closure
 
 ### Reviewed subject
 
@@ -366,11 +388,11 @@ Fable independently reproduced repository verification on the reviewed candidate
 
 ### Verdict
 
-The complete candidate **survived every trust-critical falsifier**. Fable found no:
+The original candidate survived every trust-critical falsifier then in scope. Fable found no:
 
 ```text
 missing accepted journey/consumer
-speculative or CRUD-symmetry operation
+speculative or CRUD-symmetry operation identified by that review
 owner collision / hidden owner
 unsafe universal executor
 Permission derived from Keycloak/app role/UI location
@@ -385,11 +407,13 @@ approval surface → eligibility grant
 internal mechanism promoted to Product API
 ```
 
-Fable found two material consistency defects and five minor precision defects. All seven were bounded textual/semantic consistency corrections; none changed `N_platform`, `N_budget`, Permission count, owner count or trust topology.
+Fable found two material consistency defects and five minor precision defects. All seven were bounded consistency corrections; none changed the then-current `N_platform=114`, `N_budget=2`, Permission count, owner count or trust topology.
+
+The later `4B-F01` is not a contradiction of that review's integrity: it is a downstream executable-schema falsifier that became observable only when generic update verbs had to produce exact request property contracts.
 
 ---
 
-## 11. Lead adjudication of Fable findings
+## 11. Lead adjudication of original Fable findings
 
 ```text
 4A-IR-01 ACCEPT
@@ -427,28 +451,30 @@ negative Budget age had no semantic disposition
 ```
 
 ```text
-material unresolved independent findings = 0
-minor unresolved independent findings    = 0
+material unresolved original review findings = 0
+minor unresolved original review findings    = 0
 ```
 
-### Second-round disposition
+### Original second-round disposition
 
-No second independent round is required.
+No second independent round was required for those seven corrections because each was within the reviewer-proposed bounded resolution and introduced no new capability.
 
-Reason:
+At that time:
 
-1. every accepted correction is one of the bounded resolutions explicitly proposed by Fable;
-2. the corrections only narrow disclosure, remove an unsupported guarantee or make an existing obligation exact;
-3. no new operation, Permission, semantic owner, trust boundary, principal class, ingress class or Product capability was introduced;
-4. `114 / 25 / 2`, `46/46` and `13/13` remain unchanged;
-5. the changed properties are directly checkable in the corrected canonical contracts and remain subject to fresh repository verification on the resulting exact HEAD.
+```text
+N_platform = 114
+Permissions = 25
+N_budget = 2
+```
+
+The later operator-approved `4B-F01` independently rederived only `N_platform` to 111. Its executable RED→GREEN proof is owned by `docs/evidence/4b/fixed-mutation-semantic-gap.md`.
 
 ---
 
-## 12. Final proof conclusion
+## 12. Current proof conclusion
 
 ```text
-fixed platform census                  = 114
+fixed platform census                  = 111
 Project capability grammar             = closed exact-Release admission law
 Budget Analyzer census                 = 2
 ordinary Permission vocabulary         = 25
@@ -457,12 +483,20 @@ semantic owner boundaries              = 13/13 preserved
 orphan concrete operations             = 0
 speculative concrete operations        = 0
 known semantic blockers                = 0
-Lead adversarial findings open         = 0
-independent material findings open     = 0
-independent minor findings open        = 0
-trust-critical independent falsifiers  = SURVIVED
+original Fable material findings open  = 0
+original Fable minor findings open     = 0
+trust-critical original falsifiers     = SURVIVED
+4B-F01                                  = OPERATOR ACCEPTED / RECOMPILED
 ```
 
-The only remaining 4A closure gate is **fresh repository verification on the exact corrected candidate HEAD followed by explicit operator 4A ratification**.
+Current executable downstream proof:
 
-No prior approval authorizes PR #54 merge, 4B opening or Product implementation.
+```text
+Verify #241 = SUCCESS
+4A ↔ Product OAS = 111/111
+missing = 0
+extra = 0
+duplicate = 0
+```
+
+4A is operator-ratified as boundedly corrected by `4B-F01`. 4B remains open. This Evidence does not authorize 4C or Product implementation.

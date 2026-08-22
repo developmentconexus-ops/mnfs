@@ -1,0 +1,237 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Managed Application Runtime Path Items
+  version: 4b-candidate
+paths:
+  /api/control/projects/{projectId}/job-runs:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListManagedJobRuns
+      operationId: ListManagedJobRuns
+      x-conexus-4a-id: MAR-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - name: releaseId
+          in: query
+          required: false
+          description: Optional exact Release filter for already-admitted JobRuns; never selects execution authority.
+          schema:
+            type: string
+            minLength: 1
+        - name: jobId
+          in: query
+          required: false
+          description: Optional exact authored job identity filter for already-admitted JobRuns.
+          schema:
+            type: string
+            minLength: 1
+        - name: pageToken
+          in: query
+          required: false
+          description: Opaque continuation for the same admitted Project/Release/job list shape.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Currently disclosable managed JobRuns for the exact Project and optional exact Release/job filters. Queue and scheduler mechanics are not exposed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedJobRunPage'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/job-runs/{jobRunId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/JobRunId'
+    get:
+      summary: GetManagedJobRun
+      operationId: GetManagedJobRun
+      x-conexus-4a-id: MAR-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact MAR-owned JobRun truth with the pinned Release/job and current owner-issued state/provenance. Queue delivery state is not Product authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedJobRun'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/jobs/{jobId}/runs:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/JobId'
+    post:
+      summary: RunManagedJobNow
+      operationId: RunManagedJobNow
+      x-conexus-4a-id: MAR-03
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: One manual managed-job occurrence admitted after resolving the exact currently served Release and verifying that its exact job/v1 admits this job. The caller cannot select Release, queue, schedule, retry or catch-up mechanics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedJobRunAdmission'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      description: Untrusted Project reference; current containment and authorization are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    JobRunId:
+      name: jobRunId
+      in: path
+      required: true
+      description: Exact MAR JobRun reference. Possession grants no queue, retry, recurrence or execution authority.
+      schema:
+        type: string
+        minLength: 1
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      description: Authored job identity reference that must be admitted by the exact currently served Release before run-now admission.
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    EvidenceRefs:
+      type: array
+      uniqueItems: true
+      items:
+        type: string
+        minLength: 1
+    ManagedJobRunSummary:
+      type: object
+      additionalProperties: false
+      required: [jobRunId, releaseId, jobId, state, admittedAt]
+      properties:
+        jobRunId:
+          type: string
+          minLength: 1
+        releaseId:
+          type: string
+          minLength: 1
+          description: Exact immutable Release pinned when MAR admitted this JobRun.
+        jobId:
+          type: string
+          minLength: 1
+          description: Exact job/v1 identity pinned from that Release.
+        state:
+          type: string
+          minLength: 1
+          description: MAR owner-issued current JobRun state. 4B does not invent a universal queue/worker lifecycle enum.
+        admittedAt:
+          type: string
+          format: date-time
+    ManagedJobRunPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedJobRunSummary'
+        nextPageToken:
+          type: string
+          minLength: 1
+          description: Opaque continuation for the same admitted list shape when more JobRuns exist.
+    ManagedJobRun:
+      type: object
+      additionalProperties: false
+      required: [jobRunId, projectId, releaseId, jobId, state, admittedAt, evidenceRefs]
+      properties:
+        jobRunId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+        releaseId:
+          type: string
+          minLength: 1
+          description: Exact immutable Release pinned at JobRun admission; never resolved through mutable latest.
+        jobId:
+          type: string
+          minLength: 1
+          description: Exact admitted job/v1 identity for this JobRun.
+        state:
+          type: string
+          minLength: 1
+          description: MAR owner-issued current JobRun state. Queue delivery/redelivery/worker state remains subordinate mechanics.
+        admittedAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+          description: Owner-recorded start time when established.
+        completedAt:
+          type: string
+          format: date-time
+          description: Owner-recorded terminal time when established; absence must not be inferred as failure.
+        evidenceRefs:
+          $ref: '#/components/schemas/EvidenceRefs'
+    ManagedJobRunAdmission:
+      type: object
+      additionalProperties: false
+      required: [jobRunId, projectId, releaseId, jobId, state, admittedAt]
+      properties:
+        jobRunId:
+          type: string
+          minLength: 1
+        projectId:
+          type: string
+          minLength: 1
+        releaseId:
+          type: string
+          minLength: 1
+          description: Exact currently served Release resolved by MAR at admission time; caller selection is forbidden.
+        jobId:
+          type: string
+          minLength: 1
+        state:
+          type: string
+          minLength: 1
+          description: MAR owner-issued admission/current state; not a pg-boss or queue status contract.
+        admittedAt:
+          type: string
+          format: date-time

@@ -1,0 +1,900 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Project Path Items
+  version: 4b-candidate
+paths:
+  /api/control/workspaces/{workspaceId}/projects:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      summary: ListProjects
+      operationId: ListProjects
+      x-conexus-4a-id: PRJ-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Projects currently disclosable to the caller in the Workspace.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectSummary'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+    post:
+      summary: CreateProject
+      operationId: CreateProject
+      x-conexus-4a-id: PRJ-03
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      responses:
+        '201':
+          description: Project identity established in the exact Workspace with the admitted initial operator grant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectRepresentation'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+
+  /api/control/projects/{projectId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: GetProject
+      operationId: GetProject
+      x-conexus-4a-id: PRJ-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact current disclosable Project identity and owner state without sibling data-plane facts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectRepresentation'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/commands/archive:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: ArchiveProject
+      operationId: ArchiveProject
+      x-conexus-4a-id: PRJ-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expectedProjectRevision]
+              properties:
+                expectedProjectRevision:
+                  type: string
+                  minLength: 1
+      responses:
+        '200':
+          description: Project archived without destructive deletion.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectRepresentation'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+
+  /api/control/projects/{projectId}/commands/duplicate:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: DuplicateProject
+      operationId: DuplicateProject
+      x-conexus-4a-id: PRJ-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [destinationWorkspaceId]
+              properties:
+                destinationWorkspaceId:
+                  type: string
+                  minLength: 1
+      responses:
+        '201':
+          description: Duplicated Project created with the accepted NO DATA copy policy; destination establishes its own current bindings and authorization.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [project, businessDataPolicy]
+                properties:
+                  project:
+                    $ref: '#/components/schemas/ProjectRepresentation'
+                  businessDataPolicy:
+                    type: string
+                    const: NO_DATA
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/inception-investigations:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: RunInceptionInvestigation
+      operationId: RunInceptionInvestigation
+      x-conexus-4a-id: PRJ-07
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Governed investigation completed over the Project's currently admitted sources and produced a candidate Baseline subject.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [candidateBaselineDigest, sourceRevision]
+                properties:
+                  candidateBaselineDigest:
+                    type: string
+                    minLength: 1
+                  sourceRevision:
+                    type: string
+                    minLength: 1
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+  /api/control/projects/{projectId}/baseline:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: GetApprovedProjectBaseline
+      operationId: GetApprovedProjectBaseline
+      x-conexus-4a-id: PRJ-08
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact currently approved Project Baseline pinned to its source revision and digest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovedBaseline'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/baseline/decisions:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: ApproveProjectBaselineRevision
+      operationId: ApproveProjectBaselineRevision
+      x-conexus-4a-id: PRJ-09
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_REVISION
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [candidateBaselineDigest]
+              properties:
+                candidateBaselineDigest:
+                  type: string
+                  minLength: 1
+      responses:
+        '200':
+          description: Exact candidate Baseline digest accepted as the current approved Project Baseline.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovedBaseline'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/brain-binding:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: GetProjectBrainBinding
+      operationId: GetProjectBrainBinding
+      x-conexus-4a-id: PRJ-10
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact current Project Brain binding and current conformance/update projection.
+          headers:
+            ETag:
+              $ref: './openapi.yaml#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectBrainBinding'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+    put:
+      summary: SetProjectBrainBinding
+      operationId: SetProjectBrainBinding
+      x-conexus-4a-id: PRJ-11
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: CURRENT_OR_ABSENT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      x-conexus-precondition-one-of: [If-Match, If-None-Match]
+      parameters:
+        - name: If-Match
+          in: header
+          required: false
+          description: Strong current binding representation validator for a present-state replacement. Exactly one of If-Match or If-None-Match must be supplied.
+          schema:
+            type: string
+            minLength: 1
+        - name: If-None-Match
+          in: header
+          required: false
+          description: Exact absent-state precondition for initial binding establishment. Exactly one of If-Match or If-None-Match must be supplied.
+          schema:
+            type: string
+            const: '*'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [brainRevisionId]
+              properties:
+                brainRevisionId:
+                  type: string
+                  minLength: 1
+      responses:
+        '200':
+          description: Existing exact Project Brain binding replaced after current-state and conformance checks.
+          headers:
+            ETag:
+              $ref: './openapi.yaml#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectBrainBinding'
+        '201':
+          description: Exact Project Brain binding established from an absent state after conformance checks.
+          headers:
+            ETag:
+              $ref: './openapi.yaml#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectBrainBinding'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+    delete:
+      summary: ClearProjectBrainBinding
+      operationId: ClearProjectBrainBinding
+      x-conexus-4a-id: PRJ-12
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IF_MATCH
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: Exact current Project Brain binding removed; Workspace Brain authority is unchanged.
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+
+  /api/control/projects/{projectId}/connection-bindings:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListProjectConnectionBindings
+      operationId: ListProjectConnectionBindings
+      x-conexus-4a-id: PRJ-13
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact Project connection bindings without credential material.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectConnectionBinding'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/commands/set-connection-binding:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: SetProjectConnectionBinding
+      operationId: SetProjectConnectionBinding
+      x-conexus-4a-id: PRJ-14
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [connectionId, connectionRevisionId, environment, expectedCurrent]
+              properties:
+                connectionId:
+                  type: string
+                  minLength: 1
+                connectionRevisionId:
+                  type: string
+                  minLength: 1
+                environment:
+                  type: string
+                  minLength: 1
+                expectedCurrent:
+                  $ref: '#/components/schemas/ExpectedConnectionBindingState'
+      responses:
+        '200':
+          description: Exact qualified compatible Connection revision bound for the stated Project environment after current-state comparison.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectConnectionBinding'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/commands/remove-connection-binding:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      summary: RemoveProjectConnectionBinding
+      operationId: RemoveProjectConnectionBinding
+      x-conexus-4a-id: PRJ-15
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_SUBJECT
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [connectionId, expectedConnectionRevisionId, expectedEnvironment]
+              properties:
+                connectionId:
+                  type: string
+                  minLength: 1
+                expectedConnectionRevisionId:
+                  type: string
+                  minLength: 1
+                expectedEnvironment:
+                  type: string
+                  minLength: 1
+      responses:
+        '204':
+          description: Exact current Project connection binding removed; Connection owner state and credentials are unchanged.
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+
+  /api/control/projects/{projectId}/capabilities:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListProjectCapabilities
+      operationId: ListProjectCapabilities
+      x-conexus-4a-id: PRJ-16
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact finite authored/Release capability projection; listing does not grant invocation authority.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectCapability'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/capabilities/{capabilityId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/CapabilityId'
+    get:
+      summary: GetProjectCapability
+      operationId: GetProjectCapability
+      x-conexus-4a-id: PRJ-17
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact Project capability identity and admitted regime; no execution is performed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectCapability'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/data-resources:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListProjectDataResources
+      operationId: ListProjectDataResources
+      x-conexus-4a-id: PRJ-18
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Declared Product/read-model/source resource identities; not a database explorer.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectDataResourceSummary'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/data-resources/{dataResourceId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/DataResourceId'
+    get:
+      summary: GetProjectDataResource
+      operationId: GetProjectDataResource
+      x-conexus-4a-id: PRJ-19
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact declared resource with semantic grain, freshness, coverage and provenance; physical credentials/storage internals are excluded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDataResource'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/product-agents:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      summary: ListProjectProductAgents
+      operationId: ListProjectProductAgents
+      x-conexus-4a-id: PRJ-20
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Authored Product Agent identities/revisions and Release projection; PAR runtime authority is excluded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectProductAgent'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/projects/{projectId}/product-agents/{agentId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/AgentId'
+    get:
+      summary: GetProjectProductAgent
+      operationId: GetProjectProductAgent
+      x-conexus-4a-id: PRJ-21
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact Project-owned Agent authoring identity/revision and Release references without runtime override authority.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectProductAgent'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/workspaces/{workspaceId}/product-agents:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      summary: ListWorkspaceProductAgents
+      operationId: ListWorkspaceProductAgents
+      x-conexus-4a-id: PRJ-22
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Access-filtered Workspace catalog projection over Project-owned Product Agents.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkspaceProductAgentCatalogItem'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+components:
+  parameters:
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    CapabilityId:
+      name: capabilityId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    DataResourceId:
+      name: dataResourceId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    AgentId:
+      name: agentId
+      in: path
+      required: true
+      description: Untrusted reference only; current containment and authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    ProjectSummary:
+      type: object
+      additionalProperties: false
+      required: [projectId, workspaceId, archived]
+      properties:
+        projectId:
+          type: string
+          minLength: 1
+        workspaceId:
+          type: string
+          minLength: 1
+        archived:
+          type: boolean
+    ProjectRepresentation:
+      type: object
+      additionalProperties: false
+      required: [projectId, workspaceId, projectRevision, archived]
+      properties:
+        projectId:
+          type: string
+          minLength: 1
+        workspaceId:
+          type: string
+          minLength: 1
+        projectRevision:
+          type: string
+          minLength: 1
+        archived:
+          type: boolean
+    ApprovedBaseline:
+      type: object
+      additionalProperties: false
+      required: [baselineDigest, sourceRevision, sourceText, applicationRuntimeProfile]
+      properties:
+        baselineDigest:
+          type: string
+          minLength: 1
+        sourceRevision:
+          type: string
+          minLength: 1
+        sourceText:
+          type: string
+          minLength: 1
+        applicationRuntimeProfile:
+          type: string
+          enum: [MANAGED, DEDICATED]
+    ProjectBrainBinding:
+      type: object
+      additionalProperties: false
+      required: [brainRevisionId, brainDigest, projectBindingDigest, validationState, updateAvailable]
+      properties:
+        brainRevisionId:
+          type: string
+          minLength: 1
+        brainDigest:
+          type: string
+          minLength: 1
+        projectBindingDigest:
+          type: string
+          minLength: 1
+        validationState:
+          type: string
+          minLength: 1
+          description: Owner-issued binding/conformance state; 4B does not invent a new global lifecycle enum.
+        updateAvailable:
+          type: boolean
+    ProjectConnectionBinding:
+      type: object
+      additionalProperties: false
+      required: [connectionId, connectionRevisionId, environment]
+      properties:
+        connectionId:
+          type: string
+          minLength: 1
+        connectionRevisionId:
+          type: string
+          minLength: 1
+        environment:
+          type: string
+          minLength: 1
+    ExpectedConnectionBindingState:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [state]
+          properties:
+            state:
+              type: string
+              const: ABSENT
+        - type: object
+          additionalProperties: false
+          required: [state, connectionRevisionId, environment]
+          properties:
+            state:
+              type: string
+              const: PRESENT
+            connectionRevisionId:
+              type: string
+              minLength: 1
+            environment:
+              type: string
+              minLength: 1
+    ProjectCapability:
+      type: object
+      additionalProperties: false
+      required: [capabilityId, operationId, regime]
+      properties:
+        capabilityId:
+          type: string
+          minLength: 1
+        operationId:
+          type: string
+          minLength: 1
+        regime:
+          type: string
+          enum: [QUERY, ACTION, INTEGRATION]
+    ProjectDataResourceSummary:
+      type: object
+      additionalProperties: false
+      required: [dataResourceId]
+      properties:
+        dataResourceId:
+          type: string
+          minLength: 1
+    ProjectDataResource:
+      type: object
+      additionalProperties: false
+      required: [dataResourceId, grain, freshness, coverage, provenance]
+      properties:
+        dataResourceId:
+          type: string
+          minLength: 1
+        grain:
+          type: string
+          minLength: 1
+        freshness:
+          type: string
+          minLength: 1
+        coverage:
+          type: string
+          minLength: 1
+        provenance:
+          type: string
+          minLength: 1
+    ProjectProductAgent:
+      type: object
+      additionalProperties: false
+      required: [agentId, authoredRevisionId, releaseRefs, activeReleaseId]
+      properties:
+        agentId:
+          type: string
+          minLength: 1
+        authoredRevisionId:
+          type: string
+          minLength: 1
+        releaseRefs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        activeReleaseId:
+          type: [string, 'null']
+          minLength: 1
+    WorkspaceProductAgentCatalogItem:
+      allOf:
+        - $ref: '#/components/schemas/ProjectProductAgent'
+        - type: object
+          required: [projectId]
+          properties:
+            projectId:
+              type: string
+              minLength: 1

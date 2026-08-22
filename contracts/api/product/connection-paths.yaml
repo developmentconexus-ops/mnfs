@@ -1,0 +1,469 @@
+openapi: 3.1.2
+info:
+  title: Conexus Product API Connection Path Items
+  version: 4b-candidate
+paths:
+  /api/control/connectors:
+    get:
+      summary: ListConnectorDefinitions
+      operationId: ListConnectorDefinitions
+      x-conexus-4a-id: CON-01
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Admitted declarative ConnectorDefinition projections from the platform pack.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConnectorDefinitionSummary'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+
+  /api/control/connectors/{connectorDefinitionId}:
+    parameters:
+      - $ref: '#/components/parameters/ConnectorDefinitionId'
+    get:
+      summary: GetConnectorDefinition
+      operationId: GetConnectorDefinition
+      x-conexus-4a-id: CON-02
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact admitted ConnectorDefinition/version with provider-specific configuration and credential-input schemas; no secret values are present.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorDefinition'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/connection-scopes/{ownerScopeKind}/{ownerId}/connections:
+    parameters:
+      - $ref: '#/components/parameters/OwnerScopeKind'
+      - $ref: '#/components/parameters/OwnerId'
+    get:
+      summary: ListConnections
+      operationId: ListConnections
+      x-conexus-4a-id: CON-03
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Connections owned by the exact Workspace or Project scope and currently disclosable to the caller.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Connection'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+    post:
+      summary: CreateConnection
+      operationId: CreateConnection
+      x-conexus-4a-id: CON-05
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [connectorDefinitionId, connectorVersion, configuration]
+              properties:
+                connectorDefinitionId:
+                  type: string
+                  minLength: 1
+                connectorVersion:
+                  type: string
+                  minLength: 1
+                configuration:
+                  type: object
+                  additionalProperties: true
+                  x-conexus-schema-source: CONNECTOR_DEFINITION_CONFIGURATION_SCHEMA
+                  description: Provider-specific non-secret configuration validated against the exact selected ConnectorDefinition/version.
+      responses:
+        '201':
+          description: Logical Connection established in the exact owner scope with an initial immutable revision; credential material remains absent until separately written.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Connection'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/connections/{connectionId}:
+    parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+    get:
+      summary: GetConnection
+      operationId: GetConnection
+      x-conexus-4a-id: CON-04
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Current logical Connection owner/definition/revision facts with non-secret credential-presence projection only.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Connection'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+  /api/control/connections/{connectionId}/revisions:
+    parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+    post:
+      summary: ReviseConnection
+      operationId: ReviseConnection
+      x-conexus-4a-id: CON-06
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: EXPLICIT_CURRENT_REVISION
+      x-conexus-contract-state: SCHEMA_CLOSED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [expectedCurrentRevisionId, configuration]
+              properties:
+                expectedCurrentRevisionId:
+                  type: string
+                  minLength: 1
+                configuration:
+                  type: object
+                  additionalProperties: true
+                  x-conexus-schema-source: CONNECTOR_DEFINITION_CONFIGURATION_SCHEMA
+                  description: New provider-specific non-secret configuration validated against the current Connection's exact ConnectorDefinition/version.
+      responses:
+        '201':
+          description: New immutable ConnectionRevision created from the exact current logical Connection revision.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionRevision'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '412':
+          $ref: './openapi.yaml#/components/responses/Problem412'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/connections/{connectionId}/credential:
+    parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+    put:
+      summary: SetConnectionCredential
+      operationId: SetConnectionCredential
+      x-conexus-4a-id: CON-07
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [credential]
+              properties:
+                credential:
+                  type: object
+                  additionalProperties: true
+                  writeOnly: true
+                  x-conexus-schema-source: CONNECTOR_DEFINITION_CREDENTIAL_INPUT_SCHEMA
+                  description: Provider-specific plaintext secret input accepted only on the trusted write-only ingress and validated against the exact ConnectorDefinition/version.
+      responses:
+        '204':
+          description: Credential material stored behind the Connection owner boundary. No plaintext, ciphertext or credential handle is returned.
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/connections/{connectionId}/qualifications:
+    parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+    post:
+      summary: QualifyConnection
+      operationId: QualifyConnection
+      x-conexus-4a-id: CON-08
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: IDEMPOTENCY_KEY
+      x-conexus-contract-state: SCHEMA_CLOSED
+      parameters:
+        - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [connectionRevisionId, environment]
+              properties:
+                connectionRevisionId:
+                  type: string
+                  minLength: 1
+                environment:
+                  type: string
+                  minLength: 1
+      responses:
+        '201':
+          description: Qualification attempt/result bound to the exact immutable ConnectionRevision and real environment with provenance.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionQualification'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+        '409':
+          $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
+
+  /api/control/connections/{connectionId}/qualifications/{qualificationId}:
+    parameters:
+      - $ref: '#/components/parameters/ConnectionId'
+      - $ref: '#/components/parameters/QualificationId'
+    get:
+      summary: GetConnectionQualification
+      operationId: GetConnectionQualification
+      x-conexus-4a-id: CON-09
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact ConnectionQualification state and provenance. Qualification is not Project binding, runtime health or caller authorization.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionQualification'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
+
+components:
+  parameters:
+    ConnectorDefinitionId:
+      name: connectorDefinitionId
+      in: path
+      required: true
+      description: Exact admitted ConnectorDefinition identity; current admission/disclosure remains server-resolved.
+      schema:
+        type: string
+        minLength: 1
+    OwnerScopeKind:
+      name: ownerScopeKind
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [WORKSPACE, PROJECT]
+    OwnerId:
+      name: ownerId
+      in: path
+      required: true
+      description: Exact owner scope identifier. A Project-scoped Connection remains private to that Project.
+      schema:
+        type: string
+        minLength: 1
+    ConnectionId:
+      name: connectionId
+      in: path
+      required: true
+      description: Untrusted logical Connection reference; current owner/disclosure/authority are resolved server-side.
+      schema:
+        type: string
+        minLength: 1
+    QualificationId:
+      name: qualificationId
+      in: path
+      required: true
+      description: Untrusted qualification reference bound to the exact Connection/Revision/environment server-side.
+      schema:
+        type: string
+        minLength: 1
+  schemas:
+    ConnectorDefinitionSummary:
+      type: object
+      additionalProperties: false
+      required: [connectorDefinitionId, connectorVersion, provider]
+      properties:
+        connectorDefinitionId:
+          type: string
+          minLength: 1
+        connectorVersion:
+          type: string
+          minLength: 1
+        provider:
+          type: string
+          minLength: 1
+    JsonSchemaDocument:
+      type: object
+      additionalProperties: true
+      description: Machine-readable provider-specific schema projected from the admitted ConnectorDefinition; contains shape/validation metadata, never credential values.
+    ConnectorDefinition:
+      type: object
+      additionalProperties: false
+      required: [connectorDefinitionId, connectorVersion, provider, configurationSchema, credentialInputSchema, operationIds, environments]
+      properties:
+        connectorDefinitionId:
+          type: string
+          minLength: 1
+        connectorVersion:
+          type: string
+          minLength: 1
+        provider:
+          type: string
+          minLength: 1
+        configurationSchema:
+          $ref: '#/components/schemas/JsonSchemaDocument'
+        credentialInputSchema:
+          $ref: '#/components/schemas/JsonSchemaDocument'
+        operationIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+        environments:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+    Connection:
+      type: object
+      additionalProperties: false
+      required: [connectionId, ownerScopeKind, ownerId, connectorDefinitionId, connectorVersion, currentRevisionId, credentialConfigured]
+      properties:
+        connectionId:
+          type: string
+          minLength: 1
+        ownerScopeKind:
+          type: string
+          enum: [WORKSPACE, PROJECT]
+        ownerId:
+          type: string
+          minLength: 1
+        connectorDefinitionId:
+          type: string
+          minLength: 1
+        connectorVersion:
+          type: string
+          minLength: 1
+        currentRevisionId:
+          type: string
+          minLength: 1
+        credentialConfigured:
+          type: boolean
+          description: Non-secret presence fact only; does not imply qualification, binding, health or caller authorization.
+    ConnectionRevision:
+      type: object
+      additionalProperties: false
+      required: [connectionId, connectionRevisionId, connectorDefinitionId, connectorVersion]
+      properties:
+        connectionId:
+          type: string
+          minLength: 1
+        connectionRevisionId:
+          type: string
+          minLength: 1
+        connectorDefinitionId:
+          type: string
+          minLength: 1
+        connectorVersion:
+          type: string
+          minLength: 1
+    ConnectionQualification:
+      type: object
+      additionalProperties: false
+      required: [qualificationId, connectionId, connectionRevisionId, environment, qualificationState, evidenceRefs]
+      properties:
+        qualificationId:
+          type: string
+          minLength: 1
+        connectionId:
+          type: string
+          minLength: 1
+        connectionRevisionId:
+          type: string
+          minLength: 1
+        environment:
+          type: string
+          minLength: 1
+        qualificationState:
+          type: string
+          minLength: 1
+          description: Connection-owner qualification state; 4B does not invent an unratified lifecycle enum.
+        evidenceRefs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1

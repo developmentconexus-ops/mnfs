@@ -39,26 +39,28 @@ Continue **4B — Executable Wire Contract** only.
 
 ```text
 fixed Product bijection = 111 ↔ 111
-schema-closed = 103 / 111
+schema-closed = 106 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 IAM+Workspace 20/20; Project 21/21; Builder 17/17; Brain 11/11
-Connections 9/9; Release 7/7; PAR 16/16; Gateway 2/2 = CLOSED
-Budget Analyzer two-query proof = green; Verify #323 = SUCCESS
+Connections 9/9; Release 7/7; PAR 16/16; Gateway 2/2; MAR 3/3 = CLOSED
+Budget Analyzer two-query proof = green; Verify #331 = SUCCESS
 ```
 
 Next bounded slice:
 
 ```text
-Managed Application Runtime = 3 Product operations
-MAR-01 ListManagedJobRuns
-MAR-02 GetManagedJobRun
-MAR-03 RunManagedJobNow
+Observability & Audit = 5 Product operations
+OBS-01 ListProjectActivity
+OBS-02 GetExecutionObservationDetail
+OBS-03 GetProjectUsageCostSummary
+OBS-04 ListAuditRecords
+OBS-05 GetAuditRecord
 ```
 
-Close only managed JobRun read/provenance and explicit run-now occurrence admission. Preserve exact currently served Release + admitted `job/v1`, single-flight/coalesce semantics and repeatable occurrence intake; queue/redelivery/catch-up mechanics remain runtime-private. Do not create CreateCron, ReplayMissedSlots, ForceRedelivery, MarkJobSucceeded or a generic scheduler/workflow Product domain.
+Close only caller-visible observation, usage/cost provenance and immutable audit inspection. Preserve telemetry/Evidence as non-authoritative projections of owner facts; missing usage/cost must not become zero. Do not create generic telemetry mutation, owner-state reconstruction, retry, completion or authorization authority.
 
-Gateway Evidence: [schema closure](evidence/4b/gateway-schema-closure.md). PAR Evidence: [schema closure](evidence/4b/par-schema-closure.md); [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
+MAR Evidence: [schema closure](evidence/4b/mar-schema-closure.md). Gateway Evidence: [schema closure](evidence/4b/gateway-schema-closure.md). PAR Evidence: [schema closure](evidence/4b/par-schema-closure.md); [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
 
 Do **not** begin 4C, select runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

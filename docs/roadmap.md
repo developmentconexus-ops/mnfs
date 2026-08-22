@@ -15,7 +15,7 @@ This is the single current phase/status authority. It is not a worklog.
 | Realization Planning | ACCEPTED / OPERATOR ACCEPTED | R1–R7 first-build skeleton accepted after independent Fable challenge; retained as Phase-4 input rather than direct Product-code authority | Material Phase-4 Evidence falsifies the skeleton, an applicability disposition, or ratified/refined authority it compiles |
 | 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED / `4B-F01` BOUNDED CORRECTION ACCEPTED | Current authority is `N_platform=111`, exact Release-pinned Project capability grammar, `N_budget=2`, 25 ordinary Permissions, 46/46 durable-record classification and 13/13 owner boundaries; `WS-03`, `WS-06`, `PRJ-04` were operator-approved downstream subtractions rather than speculative DTO repair | Material Evidence shows another accepted F1 interaction cannot be expressed without new Product meaning/owner/trust, or the current authority is materially contradictory/falsified |
 | 4B — Executable Wire Contract | CLOSED / OPERATOR RATIFIED / INTEGRATED | Canonical Product wire is 111↔111 schema-closed; Technical Ingress remains 3 protocol-only operations with zero Product-count impact; Project grammar, Budget proof, generated projections, whole adversarial proof, independent Fable review and Lead adjudication converged with no 4A reopen | 4A changes materially, executable wire cannot express an accepted operation safely, or new Evidence falsifies the ratified wire/proof boundary |
-| 4C — Frontend Interaction & Authority Realization | OPEN / ACTIVE / CONTRACT OPERATOR ACCEPTED / 4C-0→3 GREEN | Human goals/flows/IA/interactions trace bidirectionally to accepted Product/wire authority with operator-locked structural Evidence and zero invented frontend authority | Real interaction exposes a material 4A/4B gap or the 4C method cannot close coherent UX without invented authority |
+| 4C — Frontend Interaction & Authority Realization | OPEN / ACTIVE / CONTRACT OPERATOR ACCEPTED / 4C-0→3 GREEN / 4C-4 CANDIDATE | Human goals/flows/IA/interactions trace bidirectionally to accepted Product/wire authority with operator-locked structural Evidence and zero invented frontend authority | Real interaction exposes a material 4A/4B gap or the 4C method cannot close coherent UX without invented authority |
 | 4D — Project Paved Road & Runtime Realization | NOT STARTED | Exact scaffold/ownership classes, backend/frontend/data/integration/verification Paved Road, runtime/persistence/dependencies/deployment and conformance/escape-hatch/evaluation contract ratified before implementation graph | Required property cannot be realized by the Paved Road/runtime without changing accepted authority, or conformance proves the road can be silently bypassed |
 | 4E — Whole-System Coherence & Golden Flows | NOT STARTED | Product/wire/frontend/Paved-Road/runtime form one coherent falsifiable system; first Budget Analyzer path and material negatives compose correctly | Composed flow reveals contradiction or missing authority/mechanism |
 | 4F — Implementation Program & Execution Graph | NOT STARTED | R1–R7 rederived against exact 4A–4E contracts and exact Paved-Road version/profile into bounded implementation/proof slices | Exact realized contracts require a different implementation graph/order |
@@ -29,28 +29,35 @@ C-015 = REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED
 Realization Planning = ACCEPTED / OPERATOR ACCEPTED
 4A = CLOSED / OPERATOR RATIFIED / 4B-F01 ACCEPTED / N_platform=111
 4B = CLOSED / OPERATOR RATIFIED / INTEGRATED
-4C = OPEN / ACTIVE / CONTRACT OPERATOR ACCEPTED / 4C-0→3 GREEN
+4C = OPEN / ACTIVE / CONTRACT OPERATOR ACCEPTED / 4C-0→3 GREEN / 4C-4 CANDIDATE
 4D–4G = NOT STARTED
 Product implementation = BLOCKED
 ```
 
 ## Exact next action
 
-Open **4C-4 — Candidate Information Architecture + terminology glossary** from the mechanically green [4C-0 → 4C-3 foundation and coverage](evidence/4c/foundation-and-coverage.md).
+Review the **4C-4 Candidate Information Architecture + terminology glossary** in [candidate-information-architecture.md](evidence/4c/candidate-information-architecture.md).
 
-Preserve as inputs:
+Candidate result currently preserves:
 
 ```text
-7 accepted human actor contexts
-15 accepted Journey A–O flows
-110 frontend-reachable fixed platform operations
-2 frontend-reachable Budget Analyzer operations
-PAR-05 = HEADLESS / no direct browser UI consumer
-4C-A01 / 4C-A02 = OPEN UX/IA evidence questions
+CONTROL PLANE != PUBLISHED APPLICATION
+Workspace primary anchor = Projects
+Project primary anchor = Build
+Workspace shared context = Brain + Connections
+Project direct resources = Data + Capabilities + Integrations + Agents + Brain
+Project operate/inspect = Releases + Activity
+People & access = candidate Workspace administration label
+Versions = rejected as leading Project nav label
+Releases = candidate Project nav label
+universal Approval Center = rejected
+Product-wide global search = not admitted
+4C-A01 = VALIDATED
+4C-A02 = OPEN
 ```
 
-4C-4 must derive human findability/navigation from tasks and mental models; the Phase-3 Workspace/Project shells are semantic seeds, not a pre-approved navbar. 4C-4 exits `CANDIDATE`; no IA becomes `LOCKED` without the later rendered global-frame block and explicit operator adjudication.
+4C-4 remains `CANDIDATE`, never `LOCKED`. If the operator accepts it for candidate progression, the next stage is **4C-5 — candidate screen/material-surface inventory**. Global IA can become `LOCKED` only later through the rendered first global-frame block and explicit operator visual adjudication.
 
-Do not begin 4C-5 screen inventory, 4C-8 wireframes, 4D, final Paved Road/runtime/code generator selection, or Product implementation by inheritance.
+Do not begin 4C-5 before operator review of this candidate. Do not begin 4C-8 wireframes, 4D, final Paved Road/runtime/code generator selection, or Product implementation by inheritance.
 
-Authority: [4C contract](phases/4c-frontend-interaction-and-authority-realization.md) → [4C foundation](evidence/4c/foundation-and-coverage.md) → accepted [4A operation authority](product/operation-ledger.md) + [4B executable wire](product/wire-contract.md) → one exact owner/reference only when a concrete interaction requires it.
+Authority: [4C contract](phases/4c-frontend-interaction-and-authority-realization.md) → [4C foundation](evidence/4c/foundation-and-coverage.md) → [4C-4 candidate IA](evidence/4c/candidate-information-architecture.md) → accepted [4A operation authority](product/operation-ledger.md) + [4B executable wire](product/wire-contract.md) → one exact owner/reference only when a concrete interaction requires it.

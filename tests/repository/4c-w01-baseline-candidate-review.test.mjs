@@ -23,7 +23,9 @@ test('W-01 exposes a durable exact candidate Baseline for human review before ap
   }
 
   const inception = operationSection(wire, 'PRJ-07', 'PRJ-08')
-  if (!inception.includes('candidateBaselineDigest')) throw new Error('test precondition lost: PRJ-07 no longer produces a candidate Baseline subject')
+  if (!inception.includes("$ref: '#/components/schemas/ProjectBaselineCandidate'")) {
+    throw new Error('PRJ-07 must produce the exact candidate Baseline representation for immediate review')
+  }
   if (!wire.includes('operationId: ApproveProjectBaselineRevision')) throw new Error('test precondition lost: PRJ-09 approval no longer exists')
 
   if (!ledger.includes('| `PRJ-23` | `GetProjectBaselineCandidate` |')) {
@@ -36,14 +38,25 @@ test('W-01 exposes a durable exact candidate Baseline for human review before ap
     throw new Error('canonical Product OAS must route the exact PRJ-23 candidate Baseline path')
   }
 
-  const candidate = operationSection(wire, 'PRJ-23', null)
+  const candidatePathStart = wire.indexOf('  /api/control/projects/{projectId}/baseline-candidates/{candidateBaselineDigest}:')
+  const candidatePathEnd = wire.indexOf('\n  /api/control/projects/{projectId}/brain-binding:', candidatePathStart)
+  if (candidatePathStart < 0 || candidatePathEnd < 0) throw new Error('unable to isolate PRJ-23 path')
+  const candidatePath = wire.slice(candidatePathStart, candidatePathEnd)
+  if (!candidatePath.includes("$ref: '#/components/schemas/ProjectBaselineCandidate'")) {
+    throw new Error('PRJ-23 must return the canonical ProjectBaselineCandidate schema')
+  }
+
+  const candidateSchemaStart = wire.indexOf('    ProjectBaselineCandidate:')
+  const candidateSchemaEnd = wire.indexOf('\n    ProjectBrainBinding:', candidateSchemaStart)
+  if (candidateSchemaStart < 0 || candidateSchemaEnd < 0) throw new Error('unable to isolate ProjectBaselineCandidate schema')
+  const candidate = wire.slice(candidateSchemaStart, candidateSchemaEnd)
   for (const required of ['candidateBaselineDigest', 'sourceRevision', 'sourceText', 'applicationRuntimeProfile']) {
     if (!candidate.includes(required)) throw new Error(`PRJ-23 candidate read must expose ${required}`)
   }
   for (const profile of ['MANAGED', 'DEDICATED']) {
     if (!candidate.includes(profile)) throw new Error(`PRJ-23 candidate read must preserve runtime profile ${profile}`)
   }
-  if (/ListProjectBaselineCandidates|candidate status|candidateStatus/i.test(candidate)) {
+  if (/ListProjectBaselineCandidates|candidateStatus|candidate status/i.test(candidatePath + candidate)) {
     throw new Error('PRJ-23 must not expand into candidate list/workflow CRUD')
   }
 })

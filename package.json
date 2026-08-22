@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "npm run test:repository",
-    "test:repository": "node --test tests/repository/*.test.mjs",
+    "test:repository": "node --test --test-concurrency=1 tests/repository/*.test.mjs",
     "repository:check": "node scripts/check-repository-hygiene.mjs && node scripts/check-doc-index.mjs && node scripts/check-current-state.mjs && node scripts/check-architecture-verification.mjs && node scripts/check-qualification-provenance.mjs",
     "wire:lint": "npx --yes @redocly/cli@2.47.0 lint contracts/api/product/openapi.yaml --extends=recommended",
     "wire:bundle": "npx --yes @redocly/cli@2.47.0 bundle contracts/api/product/openapi.yaml --output=/tmp/conexus-product-openapi.bundle.json --ext=json",

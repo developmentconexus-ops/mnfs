@@ -41,7 +41,7 @@ Established executable state:
 
 ```text
 fixed Product bijection = 111 ↔ 111
-schema-closed = 78 / 111
+schema-closed = 85 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 IAM + Workspace = 20 / 20 CLOSED
@@ -49,20 +49,21 @@ Project = 21 / 21 CLOSED
 Builder = 17 / 17 CLOSED
 Brain = 11 / 11 CLOSED
 Connections = 9 / 9 CLOSED
+Release = 7 / 7 CLOSED
 Budget Analyzer generated two-query proof = green
-Verify #285 = SUCCESS
+Verify #293 = SUCCESS
 ```
 
 Next bounded slice:
 
 ```text
-Release / Promotion / serving Product operations = 7
-= REL-01, REL-02, REL-04, REL-05, REL-06, REL-07, REL-08
+Product Agent Runtime Product operations = 16
+= PAR-01 → PAR-16
 ```
 
-Close only those Release-owned Product schemas from accepted Release authority. `REL-03 ComposeRelease` remains `SYSTEM_OWNER_TRANSITION`, not caller Product wire. Missing Product meaning remains a stop/reopen falsifier rather than permission to invent request fields, lifecycle state, rollback authority or serving semantics.
+Close only caller-visible PAR schemas from accepted Product Agent Runtime authority. Preserve exact Published-App / Control-Plane / HEADLESS ingress distinctions, active Release/Agent pins, Conversation/AgentRun owner truth, exact sealed ApprovalRequest authority, current approver revalidation, trigger revision/current-state semantics, and `COMPLETED != every effect succeeded`. Product Agent authoring remains Builder/Release authority; Mastra thread/tool/snapshot/provider/runtime mechanics remain non-Product substrate. Do not create generic Agent CRUD, generic tool/workflow APIs, model-as-principal authority, direct effect execution/retry, or approval eligibility from surface/app role alone.
 
-Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md), [Connections](evidence/4b/connections-schema-closure.md).
+Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md), [Connections](evidence/4b/connections-schema-closure.md), [Release](evidence/4b/release-schema-closure.md).
 
 Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

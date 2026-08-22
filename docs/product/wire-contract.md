@@ -47,6 +47,7 @@ contracts/api/product/connection-paths.yaml         closed Connections Path Item
 contracts/api/product/release-paths.yaml            closed Release / Promotion / serving Path Items
 contracts/api/product/par-paths.yaml                closed Product Agent Runtime Path Items
 contracts/api/product/gateway-paths.yaml            closed Gateway inspection Path Items
+contracts/api/product/mar-paths.yaml                closed Managed Application Runtime Path Items
 ```
 
 Rules:
@@ -464,6 +465,19 @@ possible external acceptance + ambiguous response
 
 `OUTCOME_UNKNOWN` is not part of the analytical truth vocabulary above; it is Gateway-owned external-effect truth.
 
+MAR adds a parallel mechanism-separation law for managed occurrences:
+
+```text
+JobRun owner state / exact pinned Release + job
+!= pg-boss queue / worker / redelivery state
+
+RunManagedJobNow
+→ server resolves exact currently served Release
+→ verifies admitted job/v1
+→ admits one repeatable-intake JobRun occurrence
+-X-> caller Release / queue / retry / catch-up selection
+```
+
 ## 15. Exact bytes
 
 Byte transport remains subordinate to an owning Product operation:
@@ -509,18 +523,18 @@ repository hygiene / docs / current-state guards
 + Project declaration schema compilation
 + 4A ↔ fixed Product OAS bijection
 + current-state carrier exact-set proof
-+ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release, PAR and Gateway
++ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release, PAR, Gateway and MAR
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 ```
 
-Current technical GREEN before Gateway closeout-only documentation:
+Current technical GREEN before MAR closeout-only documentation:
 
 ```text
-Verify #323 = SUCCESS
-candidate HEAD = ab2768b8d33ff0d6bfd47107841577fec76b5c70
+Verify #331 = SUCCESS
+candidate HEAD = 22f62f3b6c83b75a634d018a91897074b75b6b7e
 fixed 4A↔OAS = 111/111
-schema-closed = 103/111
+schema-closed = 106/111
 missing = 0
 extra = 0
 duplicate = 0
@@ -533,6 +547,7 @@ Connections = 9/9
 Release = 7/7
 Product Agent Runtime = 16/16
 Gateway = 2/2
+Managed Application Runtime = 3/3
 Budget static generated paths = 2
 ```
 
@@ -603,34 +618,53 @@ Verify #323 = SUCCESS
 
 Bounded Evidence: [../evidence/4b/gateway-schema-closure.md](../evidence/4b/gateway-schema-closure.md).
 
+The Managed Application Runtime slice then closed JobRun inspection and explicit run-now admission without importing queue/scheduler authority:
+
+```text
+Verify #329 = FAILURE
+→ expected RED: MAR-01 was not SCHEMA_CLOSED in the canonical bundle
+→ all prior owner gates remained green
+
+Verify #331 = SUCCESS
+→ MAR reached 3 / 3 and total schema closure reached 106 / 111
+→ run-now resolves exact current served Release + admitted job/v1 server-side
+→ queue/redelivery/retry/catch-up mechanics remain runtime-private
+→ 111↔111, IF_MATCH exact set and Budget proof remained green
+```
+
+Bounded Evidence: [../evidence/4b/mar-schema-closure.md](../evidence/4b/mar-schema-closure.md).
+
 ## 18. Next derivation
 
-Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first eight owner schema slices are established.
+Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first nine owner schema slices are established.
 
 Closed owner slices:
 
 ```text
-IAM + Workspace       = 20 / 20
-Project               = 21 / 21
-Builder               = 17 / 17
-Brain                 = 11 / 11
-Connections           = 9 / 9
-Release               = 7 / 7
-Product Agent Runtime = 16 / 16
-Gateway               = 2 / 2
+IAM + Workspace             = 20 / 20
+Project                     = 21 / 21
+Builder                     = 17 / 17
+Brain                       = 11 / 11
+Connections                 = 9 / 9
+Release                     = 7 / 7
+Product Agent Runtime       = 16 / 16
+Gateway                     = 2 / 2
+Managed Application Runtime = 3 / 3
 ```
 
 The next bounded owner slice is only:
 
 ```text
-Managed Application Runtime = 3 Product operations
-MAR-01 ListManagedJobRuns
-MAR-02 GetManagedJobRun
-MAR-03 RunManagedJobNow
+Observability & Audit = 5 Product operations
+OBS-01 ListProjectActivity
+OBS-02 GetExecutionObservationDetail
+OBS-03 GetProjectUsageCostSummary
+OBS-04 ListAuditRecords
+OBS-05 GetAuditRecord
 ```
 
-Derive MAR schemas only from accepted managed occurrence/serving authority. Preserve exact Project/Release/job/JobRun disclosure, exact currently served Release + admitted `job/v1` for manual run-now admission, and normal single-flight/coalesce/repeatable-intake law. Queue delivery/redelivery, catch-up and schedule mechanics remain owner/runtime-private; no CreateCron, ReplayMissedSlots, ForceRedelivery or MarkJobSucceeded Product operation is admitted.
+Derive OBS/Audit schemas only from accepted observation/provenance/audit authority. Preserve telemetry/Evidence as projections rather than current owner truth, preserve immutable audit facts, and ensure missing usage/cost never masquerades as zero. No telemetry mutation, owner terminal-state reconstruction, retry/completion or authorization authority is admitted.
 
-After the remaining fixed owner slices close, 4B still must complete Technical Ingress/protocol classification, generated-projection/no-parallel-DTO proof, whole-4B adversarial review and explicit operator ratification.
+After the remaining fixed owner slice closes, 4B still must complete Technical Ingress/protocol classification, generated-projection/no-parallel-DTO proof, whole-4B adversarial review and explicit operator ratification.
 
 Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.

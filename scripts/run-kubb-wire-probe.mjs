@@ -9,6 +9,7 @@ const versions = {
   kubb: '5.0.0',
   typescript: '7.0.2',
 };
+const expectedProductOperations = 112;
 const root = '/tmp/conexus-kubb-real-oas-probe';
 const outputA = path.join(root, 'generated-a');
 const outputB = path.join(root, 'generated-b');
@@ -123,7 +124,9 @@ for (const [route, rawPathItem] of Object.entries(oas.paths ?? {})) {
     expectedPairs.add(`${method.toUpperCase()} ${route}`);
   }
 }
-if (expectedPairs.size !== 111) throw new Error(`Kubb probe expected 111 source operation pairs, found ${expectedPairs.size}`);
+if (expectedPairs.size !== expectedProductOperations) {
+  throw new Error(`Kubb probe expected ${expectedProductOperations} source operation pairs, found ${expectedPairs.size}`);
+}
 
 const clientsRoot = path.join(outputA, 'clients');
 const clientFiles = listFiles(clientsRoot).filter((file) => file.endsWith('.ts'));
@@ -134,8 +137,8 @@ for (const file of clientFiles) {
   const urlMatch = text.match(/url:\s*['\"]([^'\"]+)['\"]/);
   if (methodMatch && urlMatch) generatedPairs.add(`${methodMatch[1]} ${urlMatch[1]}`);
 }
-if (generatedPairs.size !== 111) {
-  throw new Error(`Kubb Fetch projection must expose 111 method+path pairs, found ${generatedPairs.size} across ${clientFiles.length} client files`);
+if (generatedPairs.size !== expectedProductOperations) {
+  throw new Error(`Kubb Fetch projection must expose ${expectedProductOperations} method+path pairs, found ${generatedPairs.size} across ${clientFiles.length} client files`);
 }
 for (const pair of expectedPairs) {
   if (!generatedPairs.has(pair)) throw new Error(`Kubb Fetch projection lost ${pair}`);
@@ -150,6 +153,9 @@ for (const carrier of ['If-Match', 'Idempotency-Key']) {
 }
 if (!allGeneratedText.includes('__Host-conexus_session')) {
   throw new Error('Kubb generated client lost ConexusSession cookie security scheme');
+}
+if (!allGeneratedText.includes('GetProjectBaselineCandidate')) {
+  throw new Error('Kubb generated projection lost accepted PRJ-23 GetProjectBaselineCandidate');
 }
 for (const status of ['401', '403', '404', '409', '412', '422', '503']) {
   const pattern = new RegExp(`['\"]?${status}['\"]?\\s*:`);
@@ -184,4 +190,4 @@ fs.writeFileSync(
 const tscBin = path.join(root, 'node_modules', '.bin', 'tsc');
 run(tscBin, ['--project', path.join(root, 'tsconfig.json')]);
 
-console.log(`Kubb real-OAS probe passed (kubb=${versions.kubb}, typescript=${versions.typescript}, operations=111, files=${snapshotA.size}, byte-deterministic, TypeScript strict compile green).`);
+console.log(`Kubb real-OAS probe passed (kubb=${versions.kubb}, typescript=${versions.typescript}, operations=${expectedProductOperations}, files=${snapshotA.size}, byte-deterministic, TypeScript strict compile green).`);

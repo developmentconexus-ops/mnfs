@@ -38,26 +38,16 @@ Product implementation = BLOCKED
 Continue **4B — Executable Wire Contract** only.
 
 ```text
-fixed Product bijection = 111 ↔ 111
-schema-closed = 111 / 111
+fixed Product bijection/schema closure = 111 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 all fixed owner slices = CLOSED
-Budget Analyzer two-query proof = green
+Budget Analyzer proof = green
 Verify #339 = SUCCESS
 ```
 
-Next bounded slice:
+Next: **Technical Ingress / protocol classification** for exact current consumers, outside `N_platform=111`. Then generated projection/no-parallel-DTO proof → whole-4B executable/negative proof → independent review → Lead adjudication → explicit operator ratification.
 
-```text
-Technical Ingress / protocol classification
-→ classify only exact current externally reachable technical consumers
-→ keep them outside N_platform=111
-→ prevent Product/technical operation identity collision
-```
-
-Then derive generated projections + no-parallel-DTO proof, rerun whole-4B executable/negative proof, independent adversarial review, Lead adjudication and explicit operator 4B ratification. Do **not** begin 4C or Product implementation.
-
-OBS Evidence: [schema closure](evidence/4b/observability-schema-closure.md). MAR Evidence: [schema closure](evidence/4b/mar-schema-closure.md). PAR [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
+OBS Evidence: [schema closure](evidence/4b/observability-schema-closure.md). Do **not** begin 4C or Product implementation.
 
 Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → [4A operation ledger](product/operation-ledger.md).

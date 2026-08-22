@@ -201,15 +201,15 @@ paths:
   /api/control/projects/{projectId}/jobs/{jobId}/runs:
     $ref: './mar-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1jobs~1{jobId}~1runs'
   /api/control/projects/{projectId}/activity:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1activity'
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1activity'
   /api/control/projects/{projectId}/execution-observations/{observationId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1execution-observations~1{observationId}'
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1execution-observations~1{observationId}'
   /api/control/projects/{projectId}/usage-cost-summary:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1usage-cost-summary'
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1usage-cost-summary'
   /api/control/workspaces/{workspaceId}/audit-records:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1audit-records'
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1audit-records'
   /api/control/workspaces/{workspaceId}/audit-records/{auditRecordId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1audit-records~1{auditRecordId}'
+    $ref: './observability-paths.yaml#/paths/~1api~1control~1workspaces~1{workspaceId}~1audit-records~1{auditRecordId}'
   /api/projects/{projectId}/analytic-queries:
     $ref: './brain-paths.yaml#/paths/~1api~1projects~1{projectId}~1analytic-queries'
 components:

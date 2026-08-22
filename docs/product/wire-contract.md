@@ -395,6 +395,10 @@ The grammar accepts only the bounded 4A caller/Permission vocabulary. It does no
 
 An exact declaration is not runtime authority by file existence; it must be admitted into the exact Release.
 
+The generated HTTP OAD must preserve the declaration's HTTP caller objects, scope and effect classification. Admitted non-HTTP callers remain explicitly classified as non-HTTP projection metadata and are never converted into session/header authority. A declaration with no admitted HTTP caller is not forced into the HTTP OAD merely to make generation universal.
+
+Whole-wire Evidence: [../evidence/4b/whole-wire-adversarial-proof.md](../evidence/4b/whole-wire-adversarial-proof.md).
+
 ## 13. Pagination / continuation law
 
 There is no global filter/sort/include language.
@@ -570,6 +574,7 @@ repository hygiene / docs / current-state guards
 + real Kubb 5.0.0 / TypeScript 7.0.2 codegen probe
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
++ whole-4B cross-surface executable/negative proof
 ```
 
 Generated-projection TDD/probe chain:
@@ -588,6 +593,23 @@ Verify #356 = SUCCESS
 → deterministic generation + strict compile green
 ```
 
+Whole-wire TDD/falsification chain:
+
+```text
+Verify #361 = FAILURE
+→ expected RED: Whole 4B executable proof is missing
+→ all prior 4B gates green first
+
+Verify #363 = FAILURE
+→ genuine falsifier: generated Project HTTP OAD lost exact caller/authorization projection
+→ root cause isolated to Project OAD projection fidelity
+
+Verify #364 = SUCCESS
+→ minimal generator correction preserves HTTP/non-HTTP caller split, scope and effectClass
+→ cross-surface negatives green
+→ all prior 4B gates remain green
+```
+
 Historical owner-slice RED/GREEN Evidence remains in the bounded files under `docs/evidence/4b/`; this contract does not duplicate the full worklog.
 
 ## 18. Current remaining 4B derivation
@@ -601,18 +623,11 @@ Budget Analyzer proving instance         = GREEN
 Technical Ingress                        = CLOSED / 3 protocol-only operations
 Product-count impact of Technical        = 0
 generated projection/no-parallel-DTO     = CLOSED / real Kubb probe green
+whole-4B executable/negative proof       = CLOSED / one Project projection defect corrected
 ```
 
-The next bounded gate is the **whole-4B executable/negative proof**:
+The next 4B gate is **independent adversarial review of the exact candidate**, followed by Lead adjudication and explicit operator ratification.
 
-```text
-all canonical wire surfaces together
-→ rerun bijection/spec/truth/carrier/projection gates
-→ exercise bounded negative attacks against generic executor/CRUD,
-   scope/authority drift, technical-ingress promotion and parallel DTO authority
-→ no new Product meaning
-```
-
-Then perform independent adversarial review, Lead adjudication and explicit operator 4B ratification.
+Whole-wire Evidence: [../evidence/4b/whole-wire-adversarial-proof.md](../evidence/4b/whole-wire-adversarial-proof.md).
 
 Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.

@@ -1,0 +1,174 @@
+openapi: 3.1.2
+jsonSchemaDialect: https://spec.openapis.org/oas/3.1/dialect/2024-11-10
+info:
+  title: Conexus Technical Ingress Protocol API
+  version: 4b-candidate
+  description: >-
+    Externally reachable protocol-only HTTP surfaces required by current F1 consumers.
+    This description is not Product authority and has zero impact on N_platform.
+  license:
+    name: Proprietary
+servers:
+  - url: /
+    description: Relative technical-protocol root; deployment origin remains outside 4B.
+security: []
+x-conexus-surface: TECHNICAL_INGRESS
+x-conexus-product-operation-count-impact: 0
+x-conexus-authority-law:
+  productAuthority: NONE
+  protocolIdentityNeverGrantsProductAuthority: true
+  internalMechanicsRemainInternal: true
+paths:
+  /protocol/oidc/login:
+    get:
+      summary: Begin OIDC login protocol
+      operationId: BeginOidcLoginProtocol
+      x-conexus-technical-id: TI-01
+      x-conexus-surface: TECHNICAL_INGRESS
+      x-conexus-protocol-state: PROTOCOL_CLOSED
+      x-conexus-oidc-flow: AUTHORIZATION_CODE_PKCE_S256
+      description: >-
+        Begins the exact server-configured Keycloak OIDC Authorization Code + PKCE S256 flow.
+        Conexus creates the authorization transaction, state and PKCE verifier server-side;
+        the caller cannot select issuer, realm, client, redirect URI or authorization scope.
+      security: []
+      responses:
+        '302':
+          description: Redirect to the exact server-configured Keycloak authorization endpoint.
+          headers:
+            Location:
+              description: Server-derived OIDC authorization URL for the configured Keycloak client.
+              schema:
+                type: string
+                minLength: 1
+        '503':
+          description: The configured identity-provider dependency is unavailable or unusable.
+
+  /protocol/oidc/callback:
+    get:
+      summary: Complete OIDC callback protocol
+      operationId: CompleteOidcCallbackProtocol
+      x-conexus-technical-id: TI-02
+      x-conexus-surface: TECHNICAL_INGRESS
+      x-conexus-protocol-state: PROTOCOL_CLOSED
+      description: >-
+        Handles the successful allowlisted OIDC authorization callback. The server validates the
+        authorization transaction/state, exchanges and validates the code through the configured
+        confidential OIDC client, resolves verified issuer+subject to a Conexus Account, and issues
+        a new Conexus-owned opaque session. Provider tokens/claims never become Product authorization.
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Opaque OIDC authorization code; never Product authority and never returned to Product clients.
+          schema:
+            type: string
+            minLength: 1
+        - name: state
+          in: query
+          required: true
+          description: Opaque server-issued authorization-transaction correlation value; never Product authority.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '303':
+          description: Conexus session established; redirect to the server-derived post-login Conexus location.
+          headers:
+            Location:
+              description: Server-derived same-origin Conexus location after successful authentication.
+              schema:
+                type: string
+                minLength: 1
+            Set-Cookie:
+              description: >-
+                Conexus-owned opaque session cookie. The value is server-owned and must use
+                __Host-conexus_session with Secure, HttpOnly, SameSite=Lax, Path=/ and no Domain.
+              schema:
+                type: string
+                minLength: 1
+        '400':
+          description: Invalid, stale, mismatched or otherwise inadmissible OIDC callback transaction.
+        '503':
+          description: Required Keycloak/OIDC provider dependency is unavailable.
+
+  /protocol/projects/{projectId}/agent-runs/{agentRunId}/stream:
+    parameters:
+      - name: projectId
+        in: path
+        required: true
+        description: Untrusted Project reference; current Published-App containment/access is resolved server-side.
+        schema:
+          type: string
+          minLength: 1
+      - name: agentRunId
+        in: path
+        required: true
+        description: Exact Conexus AgentRun reference; runtime/framework run identities are never accepted here.
+        schema:
+          type: string
+          minLength: 1
+    get:
+      summary: Stream safe AgentRun projection
+      operationId: StreamAgentRunProjection
+      x-conexus-technical-id: TI-03
+      x-conexus-surface: TECHNICAL_INGRESS
+      x-conexus-protocol-state: PROTOCOL_CLOSED
+      x-conexus-stream-projection:
+        identity: AGENT_RUN
+        terminalTruth: false
+        rawReasoning: false
+        frameworkIdsAuthoritative: false
+        resume: DEFERRED_REQUALIFICATION
+        safeCategories:
+          - ASSISTANT_TEXT
+          - AUTHORIZED_SOURCE
+          - SAFE_PROGRESS
+          - SAFE_TOOL_ACTIVITY
+          - APPROVAL_REQUEST_REF
+          - SAFE_STATUS_ERROR_FINISH_PROJECTION
+      description: >-
+        Streams a safe SSE projection of one already-admitted Product AgentRun. Current Published-App
+        authority and exact Project/AgentRun containment are revalidated before disclosure. The stream
+        may use Mastra/AI-SDK-compatible mechanics at realization time, but Mastra runId/toolCallId/threadId,
+        RequestContext, raw provider chunks, runtime snapshots and raw reasoning are never Product identity
+        or authority. Stream EOF/disconnect never terminalizes the Product AgentRun. F1 does not promise
+        DurableAgent/replay/reconnect semantics; any such enablement remains a requalification decision.
+      security:
+        - ConexusSession: []
+      responses:
+        '200':
+          description: Safe live projection of the exact admitted AgentRun; transport completion is not owner terminal truth.
+          headers:
+            Cache-Control:
+              description: Streaming projection must not be stored as authoritative reusable state.
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: >-
+                  Framework-compatible SSE/UI-message projection containing only admitted safe categories;
+                  exact adapter/version is selected later in 4D without changing Product authority.
+        '401':
+          description: No valid current Conexus human session.
+        '403':
+          description: Exact AgentRun is disclosable but current Published-App access does not admit this stream.
+        '404':
+          description: AgentRun/Project is absent or current disclosure intentionally hides its existence.
+        '409':
+          description: Exact AgentRun exists but has no currently streamable live projection under F1 semantics.
+        '503':
+          description: Required live runtime projection dependency is unavailable.
+components:
+  securitySchemes:
+    ConexusSession:
+      type: apiKey
+      in: cookie
+      name: __Host-conexus_session
+      description: >-
+        Opaque Conexus-owned human session carriage. Keycloak tokens/roles/groups and framework/runtime IDs
+        are never accepted as Product authorization.

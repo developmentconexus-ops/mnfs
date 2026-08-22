@@ -40,16 +40,22 @@ Continue **4B — Executable Wire Contract** only.
 ```text
 fixed Product bijection/schema closure = 111 / 111
 missing / extra / duplicate = 0
-literal IF_MATCH = { PRJ-12, PAR-14 }
+semantic IF_MATCH = { PRJ-12, PAR-14 }
 all fixed owner slices = CLOSED
 Budget Analyzer proof = green
 Technical Ingress = CLOSED / 3 protocol-only HTTP operations / N_platform impact 0
 generated projection / no-parallel-DTO = CLOSED / real Kubb 5.0.0 OAS probe green
-whole-4B executable/negative proof = CLOSED / one Project projection defect corrected
+whole-4B executable/negative proof = CLOSED
+independent Fable review = COMPLETE / 2 bounded material findings
+Fable M1 = CORRECTED / constrained exact payload grammar / no object-only DTO rule
+Fable M2 = CORRECTED / 3 dead Product fragments deleted / reachability gate active
+Fable N1 = CORRECTED / repeat-safe serial repository mutation tests
+Fable N2/N3 = PROOF HARDENED
+Lead adjudication = COMPLETE / 4A reopen NO
 ```
 
-Next: perform **independent adversarial review** of the exact 4B candidate → Lead adjudication → explicit operator ratification.
+Next: **explicit operator 4B ratification**, contingent on the exact current candidate HEAD passing full repository `Verify`. Do **not** begin 4C or Product implementation before that ratification and integration.
 
-Current bounded Evidence: [Technical Ingress](evidence/4b/technical-ingress-classification.md) → [Generated Projection / No Parallel DTO](evidence/4b/generated-projection-no-parallel-dto.md) → [Whole-Wire Adversarial Proof](evidence/4b/whole-wire-adversarial-proof.md). Do **not** begin 4C or Product implementation.
+Current bounded Evidence: [Technical Ingress](evidence/4b/technical-ingress-classification.md) → [Generated Projection / No Parallel DTO](evidence/4b/generated-projection-no-parallel-dto.md) → [Whole-Wire Adversarial Proof](evidence/4b/whole-wire-adversarial-proof.md) → [Independent Fable Review](evidence/4b/fable-independent-review.md) → [Lead Adjudication](evidence/4b/fable-review-adjudication.md).
 
 Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → canonical Product + Technical machine-readable wire.

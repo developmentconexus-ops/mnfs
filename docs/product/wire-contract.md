@@ -46,6 +46,7 @@ contracts/api/product/brain-paths.yaml              closed Brain Path Items
 contracts/api/product/connection-paths.yaml         closed Connections Path Items
 contracts/api/product/release-paths.yaml            closed Release / Promotion / serving Path Items
 contracts/api/product/par-paths.yaml                closed Product Agent Runtime Path Items
+contracts/api/product/gateway-paths.yaml            closed Gateway inspection Path Items
 ```
 
 Rules:
@@ -450,6 +451,19 @@ empty supported-current result != dependency failure
 
 The first Budget Analyzer operation schemas are the proving instance for this shared law.
 
+Gateway effect provenance adds one separate owner-specific truth law:
+
+```text
+possible external acceptance + ambiguous response
+→ OUTCOME_UNKNOWN
+→ receipt / reconciliation Evidence
+-X-> false FAILED
+-X-> false SUCCESS
+-X-> caller retry authority
+```
+
+`OUTCOME_UNKNOWN` is not part of the analytical truth vocabulary above; it is Gateway-owned external-effect truth.
+
 ## 15. Exact bytes
 
 Byte transport remains subordinate to an owning Product operation:
@@ -495,18 +509,18 @@ repository hygiene / docs / current-state guards
 + Project declaration schema compilation
 + 4A ↔ fixed Product OAS bijection
 + current-state carrier exact-set proof
-+ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release and PAR
++ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release, PAR and Gateway
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 ```
 
-Current technical GREEN before PAR closeout-only documentation:
+Current technical GREEN before Gateway closeout-only documentation:
 
 ```text
-Verify #305 = SUCCESS
-candidate HEAD = e5e598afacc17156b8f0b06698626dbd5dffd54d
+Verify #323 = SUCCESS
+candidate HEAD = ab2768b8d33ff0d6bfd47107841577fec76b5c70
 fixed 4A↔OAS = 111/111
-schema-closed = 101/111
+schema-closed = 103/111
 missing = 0
 extra = 0
 duplicate = 0
@@ -518,6 +532,7 @@ Brain = 11/11
 Connections = 9/9
 Release = 7/7
 Product Agent Runtime = 16/16
+Gateway = 2/2
 Budget static generated paths = 2
 ```
 
@@ -572,9 +587,25 @@ Verify #305 = SUCCESS
 
 Bounded Evidence: [../evidence/4b/par-schema-closure.md](../evidence/4b/par-schema-closure.md).
 
+The Gateway slice then closed effect inspection without exposing a second effect-control surface:
+
+```text
+Verify #321 = FAILURE
+→ expected RED: GW-01 was not SCHEMA_CLOSED in the canonical bundle
+→ all prior owner gates remained green
+
+Verify #323 = SUCCESS
+→ Gateway reached 2 / 2 and total schema closure reached 103 / 111
+→ OUTCOME_UNKNOWN remained explicit Gateway truth
+→ retry/replay/reconciliation/effect execution remained owner-internal
+→ 111↔111, IF_MATCH exact set and Budget proof remained green
+```
+
+Bounded Evidence: [../evidence/4b/gateway-schema-closure.md](../evidence/4b/gateway-schema-closure.md).
+
 ## 18. Next derivation
 
-Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first seven owner schema slices are established.
+Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first eight owner schema slices are established.
 
 Closed owner slices:
 
@@ -586,17 +617,19 @@ Brain                 = 11 / 11
 Connections           = 9 / 9
 Release               = 7 / 7
 Product Agent Runtime = 16 / 16
+Gateway               = 2 / 2
 ```
 
 The next bounded owner slice is only:
 
 ```text
-Gateway inspection = 2 Product operations
-GW-01 ListEffectAttempts
-GW-02 GetEffectAttempt
+Managed Application Runtime = 3 Product operations
+MAR-01 ListManagedJobRuns
+MAR-02 GetManagedJobRun
+MAR-03 RunManagedJobNow
 ```
 
-Derive Gateway inspection schemas only from accepted effect receipt/reconciliation/provenance authority. Preserve `OUTCOME_UNKNOWN`, exact originating run/operation/effect disclosure and zero retry/effect-execution authority. Effect admission, idempotency claims and reconciliation mechanics remain owner-internal.
+Derive MAR schemas only from accepted managed occurrence/serving authority. Preserve exact Project/Release/job/JobRun disclosure, exact currently served Release + admitted `job/v1` for manual run-now admission, and normal single-flight/coalesce/repeatable-intake law. Queue delivery/redelivery, catch-up and schedule mechanics remain owner/runtime-private; no CreateCron, ReplayMissedSlots, ForceRedelivery or MarkJobSucceeded Product operation is admitted.
 
 After the remaining fixed owner slices close, 4B still must complete Technical Ingress/protocol classification, generated-projection/no-parallel-DTO proof, whole-4B adversarial review and explicit operator ratification.
 

@@ -43,11 +43,11 @@ missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 all fixed owner slices = CLOSED
 Budget Analyzer proof = green
-Verify #339 = SUCCESS
+Technical Ingress = CLOSED / 3 protocol-only HTTP operations / N_platform impact 0
 ```
 
-Next: **Technical Ingress / protocol classification** for exact current consumers, outside `N_platform=111`. Then generated projection/no-parallel-DTO proof → whole-4B executable/negative proof → independent review → Lead adjudication → explicit operator ratification.
+Next: **generated projection / no-parallel-DTO proof** from the canonical Product wire and exact Project-operation grammar. Then whole-4B executable/negative proof → independent review → Lead adjudication → explicit operator ratification.
 
-OBS Evidence: [schema closure](evidence/4b/observability-schema-closure.md). Do **not** begin 4C or Product implementation.
+Technical Ingress Evidence: [classification](evidence/4b/technical-ingress-classification.md). Do **not** begin 4C or Product implementation.
 
-Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → [4A operation ledger](product/operation-ledger.md).
+Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → canonical Product + Technical machine-readable wire.

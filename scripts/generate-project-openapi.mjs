@@ -36,6 +36,8 @@ const regimeRoot = {
   INTEGRATION: 'integrations',
 };
 
+const httpCallerKinds = new Set(['PUBLISHED_APP', 'CONTROL_PLANE']);
+
 const paths = {};
 const operationIds = new Set();
 for (const { filePath, value: declaration } of declarations) {
@@ -53,11 +55,12 @@ for (const { filePath, value: declaration } of declarations) {
   }
   if (paths[operationPath]) throw new Error(`generated Project operation path collision: ${operationPath}`);
 
-  const publishedAppCaller = declaration.callers.find((caller) => caller.kind === 'PUBLISHED_APP');
-  const unsupportedHttpCaller = declaration.callers.find((caller) => !['PUBLISHED_APP', 'CONTROL_PLANE'].includes(caller.kind));
-  if (unsupportedHttpCaller) {
-    throw new Error(`generator has no admitted HTTP carriage for caller ${unsupportedHttpCaller.kind} in ${operationId}`);
+  const httpCallers = declaration.callers.filter((caller) => httpCallerKinds.has(caller.kind));
+  const nonHttpCallers = declaration.callers.filter((caller) => !httpCallerKinds.has(caller.kind));
+  if (httpCallers.length === 0) {
+    throw new Error(`generator has no admitted HTTP caller for ${operationId}`);
   }
+  const publishedAppCaller = httpCallers.find((caller) => caller.kind === 'PUBLISHED_APP');
 
   paths[operationPath] = {
     parameters: [
@@ -74,7 +77,11 @@ for (const { filePath, value: declaration } of declarations) {
       operationId,
       'x-conexus-project-operation-regime': declaration.regime,
       'x-conexus-contract-state': 'SCHEMA_MAPPED',
+      'x-conexus-http-callers': httpCallers,
+      'x-conexus-non-http-callers': nonHttpCallers,
+      'x-conexus-scope': declaration.scope,
       'x-conexus-required-pins': declaration.requiredPins,
+      'x-conexus-effect-class': declaration.effectClass,
       'x-conexus-outcome-profile': declaration.outcomeProfile,
       'x-conexus-ic-profiles': declaration.icProfiles,
       ...(publishedAppCaller ? { 'x-conexus-app-roles': publishedAppCaller.roles } : {}),

@@ -37,11 +37,9 @@ Product implementation = BLOCKED
 
 Continue **4B — Executable Wire Contract** only.
 
-Established executable state:
-
 ```text
 fixed Product bijection = 111 ↔ 111
-schema-closed = 85 / 111
+schema-closed = 101 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 IAM + Workspace = 20 / 20 CLOSED
@@ -50,23 +48,23 @@ Builder = 17 / 17 CLOSED
 Brain = 11 / 11 CLOSED
 Connections = 9 / 9 CLOSED
 Release = 7 / 7 CLOSED
-Budget Analyzer generated two-query proof = green
-Verify #297 = SUCCESS on the Release closeout head
+Product Agent Runtime = 16 / 16 CLOSED
+Budget Analyzer two-query proof = green
+Verify #305 = SUCCESS
 ```
 
-Bounded operator-approved leverage Evidence: [Technology Leverage and PAR Streaming Review](evidence/4b/technology-leverage-and-par-streaming-review.md). It changes no Product/owner authority and selects no 4D technology.
-
-Next bounded slice remains:
+Next bounded slice:
 
 ```text
-Product Agent Runtime Product operations = 16
-= PAR-01 → PAR-16
+Gateway inspection = 2 Product operations
+GW-01 ListEffectAttempts
+GW-02 GetEffectAttempt
 ```
 
-Before PAR RED/schema work, approve the final PAR wire design using accepted PAR authority plus the leverage Evidence. Preserve ingress separation, exact Release/Agent pins, Conversation/AgentRun truth, sealed ApprovalRequest/current eligibility, trigger current-state semantics, `COMPLETED != every effect succeeded`, and live structured-stream compatibility without making Mastra IDs/raw reasoning/runtime state Product authority.
+Close only caller-visible effect-attempt inspection from accepted Gateway authority. Preserve exact originating run/operation/effect disclosure, receipt/reconciliation/provenance, `OUTCOME_UNKNOWN`, and zero retry/effect-execution authority. Effect admission, idempotency claim, resume and reconciliation remain owner-internal mechanics.
 
-Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md), [Connections](evidence/4b/connections-schema-closure.md), [Release](evidence/4b/release-schema-closure.md).
+PAR closure Evidence: [Product Agent Runtime](evidence/4b/par-schema-closure.md). Technology-leverage Evidence remains [bounded input](evidence/4b/technology-leverage-and-par-streaming-review.md), not 4D selection authority.
 
-Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
+Do **not** begin 4C, select runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 
 Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → [4A operation ledger](product/operation-ledger.md).

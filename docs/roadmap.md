@@ -39,29 +39,25 @@ Continue **4B — Executable Wire Contract** only.
 
 ```text
 fixed Product bijection = 111 ↔ 111
-schema-closed = 106 / 111
+schema-closed = 111 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
-IAM+Workspace 20/20; Project 21/21; Builder 17/17; Brain 11/11
-Connections 9/9; Release 7/7; PAR 16/16; Gateway 2/2; MAR 3/3 = CLOSED
-Budget Analyzer two-query proof = green; Verify #331 = SUCCESS
+all fixed owner slices = CLOSED
+Budget Analyzer two-query proof = green
+Verify #339 = SUCCESS
 ```
 
 Next bounded slice:
 
 ```text
-Observability & Audit = 5 Product operations
-OBS-01 ListProjectActivity
-OBS-02 GetExecutionObservationDetail
-OBS-03 GetProjectUsageCostSummary
-OBS-04 ListAuditRecords
-OBS-05 GetAuditRecord
+Technical Ingress / protocol classification
+→ classify only exact current externally reachable technical consumers
+→ keep them outside N_platform=111
+→ prevent Product/technical operation identity collision
 ```
 
-Close only caller-visible observation, usage/cost provenance and immutable audit inspection. Preserve telemetry/Evidence as non-authoritative projections of owner facts; missing usage/cost must not become zero. Do not create generic telemetry mutation, owner-state reconstruction, retry, completion or authorization authority.
+Then derive generated projections + no-parallel-DTO proof, rerun whole-4B executable/negative proof, independent adversarial review, Lead adjudication and explicit operator 4B ratification. Do **not** begin 4C or Product implementation.
 
-MAR Evidence: [schema closure](evidence/4b/mar-schema-closure.md). Gateway Evidence: [schema closure](evidence/4b/gateway-schema-closure.md). PAR Evidence: [schema closure](evidence/4b/par-schema-closure.md); [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
-
-Do **not** begin 4C, select runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
+OBS Evidence: [schema closure](evidence/4b/observability-schema-closure.md). MAR Evidence: [schema closure](evidence/4b/mar-schema-closure.md). PAR [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
 
 Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → [4A operation ledger](product/operation-ledger.md).

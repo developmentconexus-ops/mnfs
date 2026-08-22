@@ -23,10 +23,9 @@ test('W-01 exposes a durable exact candidate Baseline for human review before ap
 
   const inception = operationSection(wire, 'PRJ-07', 'PRJ-08')
   const approved = operationSection(wire, 'PRJ-08', 'PRJ-09')
-  const decision = operationSection(wire, 'PRJ-09', 'PRJ-10')
 
   if (!inception.includes('candidateBaselineDigest')) throw new Error('test precondition lost: PRJ-07 no longer produces a candidate Baseline subject')
-  if (!decision.includes('ApproveProjectBaselineRevision')) throw new Error('test precondition lost: PRJ-09 approval no longer exists')
+  if (!wire.includes('operationId: ApproveProjectBaselineRevision')) throw new Error('test precondition lost: PRJ-09 approval no longer exists')
 
   const hasDedicatedRead = /\| `PRJ-[0-9]+` \| `Get[^`]*(?:BaselineCandidate|CandidateProjectBaseline)[^`]*`/i.test(ledger)
   const approvedReadCanSelectCandidate = /(candidateBaselineDigest|candidateDigest)/i.test(approved)

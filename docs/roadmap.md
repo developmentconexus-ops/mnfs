@@ -36,28 +36,8 @@ Product implementation = BLOCKED
 
 ## Exact next action
 
-Review the **4C-4 Candidate Information Architecture + terminology glossary** in [candidate-information-architecture.md](evidence/4c/candidate-information-architecture.md).
+Review [4C-4 Candidate IA + terminology](evidence/4c/candidate-information-architecture.md) under the accepted [4C contract](phases/4c-frontend-interaction-and-authority-realization.md) and green [4C foundation](evidence/4c/foundation-and-coverage.md).
 
-Candidate result currently preserves:
+4C-4 remains `CANDIDATE`, never `LOCKED`. After explicit operator acceptance for candidate progression, open **4C-5 — candidate screen/material-surface inventory**. Global IA can become `LOCKED` only through the later rendered global-frame block and operator visual adjudication.
 
-```text
-CONTROL PLANE != PUBLISHED APPLICATION
-Workspace primary anchor = Projects
-Project primary anchor = Build
-Workspace shared context = Brain + Connections
-Project direct resources = Data + Capabilities + Integrations + Agents + Brain
-Project operate/inspect = Releases + Activity
-People & access = candidate Workspace administration label
-Versions = rejected as leading Project nav label
-Releases = candidate Project nav label
-universal Approval Center = rejected
-Product-wide global search = not admitted
-4C-A01 = VALIDATED
-4C-A02 = OPEN
-```
-
-4C-4 remains `CANDIDATE`, never `LOCKED`. If the operator accepts it for candidate progression, the next stage is **4C-5 — candidate screen/material-surface inventory**. Global IA can become `LOCKED` only later through the rendered first global-frame block and explicit operator visual adjudication.
-
-Do not begin 4C-5 before operator review of this candidate. Do not begin 4C-8 wireframes, 4D, final Paved Road/runtime/code generator selection, or Product implementation by inheritance.
-
-Authority: [4C contract](phases/4c-frontend-interaction-and-authority-realization.md) → [4C foundation](evidence/4c/foundation-and-coverage.md) → [4C-4 candidate IA](evidence/4c/candidate-information-architecture.md) → accepted [4A operation authority](product/operation-ledger.md) + [4B executable wire](product/wire-contract.md) → one exact owner/reference only when a concrete interaction requires it.
+Do not begin 4C-5 before that review; do not begin 4C-8, 4D, final Paved Road/runtime/code-generator selection or Product implementation.

@@ -14,8 +14,8 @@ This is the single current phase/status authority. It is not a worklog.
 | C-015 refinement | REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED | Named identity-provider trigger resolved through a narrow Keycloak OIDC authentication boundary while Conexus retains Account/session/membership/grant/Published-App authorization sovereignty; first-production identity/recovery closure updated | Keycloak security/topology/recovery Evidence makes the selection unfit; stable issuer-subject identity cannot be preserved; or a real SSO/SCIM/passkey/multi-IdP requirement materially changes the authentication contract |
 | Realization Planning | ACCEPTED / OPERATOR ACCEPTED | R1–R7 first-build skeleton accepted after independent Fable challenge; retained as Phase-4 input rather than direct Product-code authority | Material Phase-4 Evidence falsifies the skeleton, an applicability disposition, or ratified/refined authority it compiles |
 | 4A — Product Surface & Authority Contract | CLOSED / OPERATOR RATIFIED / `4B-F01` BOUNDED CORRECTION ACCEPTED | Current authority is `N_platform=111`, exact Release-pinned Project capability grammar, `N_budget=2`, 25 ordinary Permissions, 46/46 durable-record classification and 13/13 owner boundaries; `WS-03`, `WS-06`, `PRJ-04` were operator-approved downstream subtractions rather than speculative DTO repair | Material Evidence shows another accepted F1 interaction cannot be expressed without new Product meaning/owner/trust, or the current authority is materially contradictory/falsified |
-| 4B — Executable Wire Contract | CLOSED / OPERATOR RATIFIED / AWAITING INTEGRATION | Canonical Product wire is 111↔111 schema-closed; Technical Ingress remains 3 protocol-only operations with zero Product-count impact; Project grammar, Budget proof, generated projections, whole adversarial proof, independent Fable review and Lead adjudication converged with no 4A reopen | 4A changes materially, executable wire cannot express an accepted operation safely, or new Evidence falsifies the ratified wire/proof boundary |
-| 4C — Frontend Interaction & Authority Realization | NOT STARTED | Frontend goals/routes/states/consumers derive bidirectionally from accepted Product/wire authority with zero invented frontend operations | Real frontend interaction exposes a material 4A/4B gap |
+| 4B — Executable Wire Contract | CLOSED / OPERATOR RATIFIED / INTEGRATED | Canonical Product wire is 111↔111 schema-closed; Technical Ingress remains 3 protocol-only operations with zero Product-count impact; Project grammar, Budget proof, generated projections, whole adversarial proof, independent Fable review and Lead adjudication converged with no 4A reopen | 4A changes materially, executable wire cannot express an accepted operation safely, or new Evidence falsifies the ratified wire/proof boundary |
+| 4C — Frontend Interaction & Authority Realization | NEXT / NOT STARTED | Frontend goals/routes/states/consumers derive bidirectionally from accepted Product/wire authority with zero invented frontend operations | Real frontend interaction exposes a material 4A/4B gap |
 | 4D — Project Paved Road & Runtime Realization | NOT STARTED | Exact scaffold/ownership classes, backend/frontend/data/integration/verification Paved Road, runtime/persistence/dependencies/deployment and conformance/escape-hatch/evaluation contract ratified before implementation graph | Required property cannot be realized by the Paved Road/runtime without changing accepted authority, or conformance proves the road can be silently bypassed |
 | 4E — Whole-System Coherence & Golden Flows | NOT STARTED | Product/wire/frontend/Paved-Road/runtime form one coherent falsifiable system; first Budget Analyzer path and material negatives compose correctly | Composed flow reveals contradiction or missing authority/mechanism |
 | 4F — Implementation Program & Execution Graph | NOT STARTED | R1–R7 rederived against exact 4A–4E contracts and exact Paved-Road version/profile into bounded implementation/proof slices | Exact realized contracts require a different implementation graph/order |
@@ -28,16 +28,17 @@ C-018 = RATIFIED / OPERATOR RATIFIED
 C-015 = REFINED / KEYCLOAK AUTHENTICATION SELECTED / OPERATOR APPROVED
 Realization Planning = ACCEPTED / OPERATOR ACCEPTED
 4A = CLOSED / OPERATOR RATIFIED / 4B-F01 ACCEPTED / N_platform=111
-4B = CLOSED / OPERATOR RATIFIED / AWAITING INTEGRATION
-4C–4G = NOT STARTED
+4B = CLOSED / OPERATOR RATIFIED / INTEGRATED
+4C = NEXT / NOT STARTED
+4D–4G = NOT STARTED
 Product implementation = BLOCKED
 ```
 
 ## Exact next action
 
-Integrate the operator-ratified **4B — Executable Wire Contract** candidate only after a separate explicit merge authorization.
+Open **4C — Frontend Interaction & Authority Realization** as a fresh Phase-4 authority gate from current integrated `main`.
 
-Ratified 4B preserves:
+Integrated 4B preserves:
 
 ```text
 fixed Product bijection/schema closure = 111 / 111
@@ -56,7 +57,9 @@ Lead adjudication = COMPLETE / 4A reopen NO
 operator ratification = COMPLETE
 ```
 
-Do **not** begin 4C or Product implementation while 4B remains unintegrated. Ratification does not authorize merge by itself.
+4C must derive frontend goals, routes, states and consumers bidirectionally from accepted 4A+4B authority with zero invented frontend operations, DTOs or authority.
+
+Do **not** begin 4D or Product implementation. Opening 4C does not select the final Paved Road/runtime.
 
 Current bounded Evidence: [Technical Ingress](evidence/4b/technical-ingress-classification.md) → [Generated Projection / No Parallel DTO](evidence/4b/generated-projection-no-parallel-dto.md) → [Whole-Wire Adversarial Proof](evidence/4b/whole-wire-adversarial-proof.md) → [Independent Fable Review](evidence/4b/fable-independent-review.md) → [Lead Adjudication](evidence/4b/fable-review-adjudication.md).
 

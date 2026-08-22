@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 const root = resolve(new URL('../../', import.meta.url).pathname)
 const read = path => readFileSync(resolve(root, path), 'utf8')
 
-const hasHumanLabelField = text => /\b(?:displayName|name|label|title):\s*\{/m.test(text)
+const hasHumanLabelField = text => /\b(?:displayName|name|label|title):(?:\s*\{[^}]*type:\s*string|\s*\n\s+type:\s*string)/m.test(text)
 
 function between(text, start, end) {
   const i = text.indexOf(start)

@@ -135,7 +135,7 @@ function deepClone(value) {
   return structuredClone(value);
 }
 
-function expectRejected(label, mutate) {
+function expectRejected(label, expectedMessage, mutate) {
   const mutated = {
     product: deepClone(product),
     technical: deepClone(technical),
@@ -145,7 +145,11 @@ function expectRejected(label, mutate) {
   mutate(mutated);
   try {
     assertWhole(mutated.product, mutated.technical, mutated.project, mutated.projection);
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes(expectedMessage)) {
+      throw new Error(`negative control ${label} failed for wrong reason: ${message}`);
+    }
     console.log(`negative control fired: ${label}`);
     return;
   }
@@ -163,23 +167,23 @@ function firstOperation(oas) {
 
 assertWhole(product, technical, budget, projection);
 
-expectRejected('Technical Ingress cannot acquire x-conexus-4a-id', ({ technical: candidate }) => {
+expectRejected('Technical Ingress cannot acquire x-conexus-4a-id', 'Technical operation acquired Product authority', ({ technical: candidate }) => {
   firstOperation(candidate)['x-conexus-4a-id'] = 'IAM-01';
 });
-expectRejected('Product wire cannot escape into /protocol', ({ product: candidate }) => {
+expectRejected('Product wire cannot escape into /protocol', 'Product route escaped /api surface', ({ product: candidate }) => {
   const [route, item] = Object.entries(candidate.paths)[0];
   delete candidate.paths[route];
   candidate.paths[`/protocol/adversarial${route}`] = item;
 });
-expectRejected('Project operation cannot become generic {operationSlug} dispatch', ({ project: candidate }) => {
+expectRejected('Project operation cannot become generic {operationSlug} dispatch', 'generated Project operation became generic dispatch', ({ project: candidate }) => {
   const [route, item] = Object.entries(candidate.paths)[0];
   delete candidate.paths[route];
   candidate.paths['/api/projects/{projectId}/queries/{operationSlug}'] = item;
 });
-expectRejected('generated wire projection cannot become editable authority', ({ projection: candidate }) => {
+expectRejected('generated wire projection cannot become editable authority', 'wire projection must remain PROJECTION_ONLY', ({ projection: candidate }) => {
   candidate.authority = 'EDITABLE_AUTHORITY';
 });
-expectRejected('generated wire projection cannot drift method/path identity', ({ projection: candidate }) => {
+expectRejected('generated wire projection cannot drift method/path identity', 'wire projection drifted from canonical Product operation', ({ projection: candidate }) => {
   candidate.operations[0].path = '/api/adversarial/drift';
 });
 

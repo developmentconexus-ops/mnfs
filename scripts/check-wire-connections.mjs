@@ -8,7 +8,7 @@ for (const [path, pathItem] of Object.entries(oas.paths ?? {})) {
   for (const [method, operation] of Object.entries(pathItem ?? {})) {
     if (!methods.has(method)) continue;
     const id = operation?.['x-conexus-4a-id'];
-    if (id) operations.set(id, { path, method: method.toUpperCase(), operation });
+    if (id) operations.set(id, { path, method: method.toUpperCase(), operation, pathItem });
   }
 }
 
@@ -49,7 +49,15 @@ function resolveSchema(schema) {
 }
 
 function resolvedParameters(id) {
-  return (op(id).parameters ?? []).map(resolveLocalRef);
+  const entry = operations.get(id);
+  if (!entry) throw new Error(`missing operation ${id}`);
+
+  const parameters = new Map();
+  for (const value of [...(entry.pathItem.parameters ?? []), ...(entry.operation.parameters ?? [])]) {
+    const resolved = resolveLocalRef(value);
+    parameters.set(`${resolved?.in}\0${resolved?.name}`, resolved);
+  }
+  return [...parameters.values()];
 }
 
 function parameter(id, where, name) {

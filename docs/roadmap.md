@@ -36,6 +36,6 @@ Product implementation = BLOCKED
 
 ## Exact next action
 
-Adjudicate [`4C-F01`](evidence/4c/gf01-authority-feasibility-preflight.md): GF-01 proved current wire has disclosable Workspace/Project IDs but no human-readable Workspace/Project identity; `Verify #417` is RED for that exact reason.
+Adjudicate [`4C-F01`](evidence/4c/gf01-authority-feasibility-preflight.md): GF-01 proved current wire has disclosable Workspace/Project IDs but no human-readable Workspace/Project identity; `Verify #417/#419` are RED for that exact reason.
 
 If accepted, reopen only the smallest 4A Product identity semantics and recompile 4B wire/proof. Do not render or `LOCK` GF-01 until that falsifier is green. Do not begin 4D or Product implementation.

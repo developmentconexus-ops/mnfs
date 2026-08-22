@@ -76,7 +76,7 @@ Mechanism is not authority. Research and reviewer findings are Evidence, never i
 - 4B browser request-authenticity Evidence: [Browser Request Authenticity Assessment](evidence/4b/browser-request-authenticity-assessment.md).
 - 4B first-vertical executable Evidence: [Budget Wire Falsification](evidence/4b/budget-wire-falsification.md).
 - 4B resolved bounded upstream falsifier: [Fixed Mutation Semantic Gap](evidence/4b/fixed-mutation-semantic-gap.md).
-- 4B closed owner-slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md), [Connections](evidence/4b/connections-schema-closure.md).
+- 4B closed owner-slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md), [Connections](evidence/4b/connections-schema-closure.md), [Release](evidence/4b/release-schema-closure.md).
 - Planning/research/review harness design input: [Blueprint Harness Design](development/blueprint-harness-design.md).
 - Bounded SoftwareForge reference assessment: [SoftwareForge Reference Assessment](development/softwareforge-reference-assessment.md).
 - Realization research/implementation companion: [Evidence-Grounded Realization Engineering](development/production-realization-guide.md).

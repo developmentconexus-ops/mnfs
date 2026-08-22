@@ -195,11 +195,11 @@ paths:
   /api/control/projects/{projectId}/effect-attempts/{effectAttemptId}:
     $ref: './gateway-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts~1{effectAttemptId}'
   /api/control/projects/{projectId}/job-runs:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1job-runs'
+    $ref: './mar-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1job-runs'
   /api/control/projects/{projectId}/job-runs/{jobRunId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1job-runs~1{jobRunId}'
+    $ref: './mar-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1job-runs~1{jobRunId}'
   /api/control/projects/{projectId}/jobs/{jobId}/runs:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1jobs~1{jobId}~1runs'
+    $ref: './mar-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1jobs~1{jobId}~1runs'
   /api/control/projects/{projectId}/activity:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1activity'
   /api/control/projects/{projectId}/execution-observations/{observationId}:

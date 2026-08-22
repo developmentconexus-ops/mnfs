@@ -506,199 +506,113 @@ owner subject + current authorization
 
 Storage keys, object paths, signed provider URLs and blob identifiers never authorize by possession. No global File Manager API is admitted.
 
-## 16. Generated projections
+## 16. Generated projections / no-parallel-DTO law
 
 Canonical machine-readable wire may generate implementation-facing artifacts, but final 4D SDK/runtime toolchain is not selected here.
 
-Required property:
+Binding custody law:
 
 ```text
-canonical source wire
-→ deterministic bundle/projection
-→ drift from source fails verification
+canonical Product OAS / exact Project declaration
+→ deterministic generated projection
+→ implementation consumption
+
+-X-> separately hand-owned transport DTO
+-X-> generated file patched into authority
+-X-> frontend/client error taxonomy that redefines the wire
 ```
 
-Current proof tooling is intentionally build-only:
+Current executable proof adds two build-only mechanisms:
 
 ```text
-@redocly/cli@2.47.0  OAS lint + bundle
-ajv-cli@5.0.0        JSON Schema 2020-12 compile/validation
-ajv-formats@3.0.1    RFC3339 date/date-time validation for proving fixtures
+scripts/generate-wire-projection.mjs
+→ tool-neutral deterministic 111-operation projection manifest
+
+scripts/run-kubb-wire-probe.mjs
+→ isolated /tmp real-OAS codegen probe
+→ Kubb 5.0.0 + TypeScript 7.0.2
+→ TypeScript + Fetch only
 ```
 
-These are not runtime dependencies and do not select future server/client codegen.
+The real-OAS probe requires:
+
+```text
+two generations are byte-identical
+exact 111 method+path pairs preserved
+missing/invented routes = 0
+If-Match and Idempotency-Key carriers preserved
+__Host-conexus_session carriage preserved
+401/403/404/409/412/422/503 response distinctions preserved
+explicit public any = 0
+strict TypeScript no-emit compile = green
+```
+
+All generated artifacts and probe dependencies live under `/tmp`; none become runtime dependencies or editable Product authority.
+
+Kubb 5.0.0 is therefore an **empirically viable 4D ADOPT candidate**, not a 4B Paved-Road selection. Orval remains a fallback probe only if a material Kubb falsifier fires. TanStack Query and generated Zod remain focused 4D consumer/validation evaluations; canonical OpenAPI + JSON Schema/AJV authority is never weakened to fit a generator.
+
+Bounded Evidence: [../evidence/4b/generated-projection-no-parallel-dto.md](../evidence/4b/generated-projection-no-parallel-dto.md).
 
 ## 17. Current executable proof
 
-The repository `verify` path currently proves:
+The repository `verify` path proves:
 
 ```text
 repository hygiene / docs / current-state guards
 + repository tests including 4B-F01 census regression
-+ OAS lint
-+ OAS deterministic bundle
++ Product OAS lint + deterministic bundle
 + Project declaration schema compilation
-+ 4A ↔ fixed Product OAS bijection
-+ current-state carrier exact-set proof
-+ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release, PAR, Gateway, MAR and OBS/Audit
++ 4A ↔ fixed Product OAS bijection = 111 / 111
++ current-state carrier exact-set proof = { PRJ-12, PAR-14 }
++ all fixed owner schema gates = 111 / 111
++ Technical Ingress lint + exact 3-operation protocol separation
++ deterministic generated-projection manifest
++ real Kubb 5.0.0 / TypeScript 7.0.2 codegen probe
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 ```
 
-Current technical GREEN after all fixed-owner schemas closed:
+Generated-projection TDD/probe chain:
 
 ```text
-Verify #339 = SUCCESS
-candidate HEAD = 8757e3b89e8feb89dc72053d6b819399ea312507
-fixed 4A↔OAS = 111/111
-schema-closed = 111/111
-missing = 0
-extra = 0
-duplicate = 0
-literal IF_MATCH = { PRJ-12, PAR-14 }
-IAM + Workspace = 20/20
-Project = 21/21
-Builder = 17/17
-Brain = 11/11
-Connections = 9/9
-Release = 7/7
-Product Agent Runtime = 16/16
-Gateway = 2/2
-Managed Application Runtime = 3/3
-Observability & Audit = 5/5
-Budget static generated paths = 2
+Verify #353 = FAILURE
+→ expected RED: Generated wire projection proof is missing
+
+Verify #355 = FAILURE
+→ real Kubb generation reached strict compile
+→ probe tsconfig did not yet admit Kubb's explicit .ts imports
+→ Product/OAS semantics and Kubb semantic assertions remained unchanged
+
+Verify #356 = SUCCESS
+→ exact real Conexus 111-operation Kubb probe green
+→ deterministic generation + strict compile green
 ```
 
-The bounded `4B-F01` TDD remains preserved:
+Historical owner-slice RED/GREEN Evidence remains in the bounded files under `docs/evidence/4b/`; this contract does not duplicate the full worklog.
+
+## 18. Current remaining 4B derivation
+
+Completed current wire surfaces/proofs:
 
 ```text
-Verify #233 = FAILURE
-expected 111 fixed 4A operations after 4B-F01, found 114
+fixed Product wire/schema closure       = 111 / 111
+Project-defined operation grammar       = CLOSED
+Budget Analyzer proving instance         = GREEN
+Technical Ingress                        = CLOSED / 3 protocol-only operations
+Product-count impact of Technical        = 0
+generated projection/no-parallel-DTO     = CLOSED / real Kubb probe green
 ```
 
-The Connections slice added a separate exact TDD chain:
+The next bounded gate is the **whole-4B executable/negative proof**:
 
 ```text
-Verify #283 = FAILURE
-→ expected RED: CON-01 was not SCHEMA_CLOSED in the canonical bundle
-
-Verify #284 = FAILURE
-→ canonical Connections activation reached 78 / 111 schema-closed
-→ prior gates remained green
-→ checker defect exposed: Path Item parameters were not inherited
-
-Verify #285 = SUCCESS
-→ checker now interprets OAS Path Item parameters plus operation overrides without weakening semantic assertions
+all canonical wire surfaces together
+→ rerun bijection/spec/truth/carrier/projection gates
+→ exercise bounded negative attacks against generic executor/CRUD,
+   scope/authority drift, technical-ingress promotion and parallel DTO authority
+→ no new Product meaning
 ```
 
-Bounded Evidence: [../evidence/4b/connections-schema-closure.md](../evidence/4b/connections-schema-closure.md).
-
-The Release slice preserved the same test-first law:
-
-```text
-Verify #291 = FAILURE
-→ expected RED: REL-01 was not SCHEMA_CLOSED in the canonical bundle
-
-Verify #293 = SUCCESS
-→ Release reached 7 / 7 and total schema closure reached 85 / 111
-```
-
-Bounded Evidence: [../evidence/4b/release-schema-closure.md](../evidence/4b/release-schema-closure.md).
-
-The Product Agent Runtime slice then closed the live-agent Product boundary without importing framework authority:
-
-```text
-Verify #303 = FAILURE
-→ expected RED: PAR-01 was not SCHEMA_CLOSED in the canonical bundle
-→ all prior owner gates remained green
-
-Verify #305 = SUCCESS
-→ PAR reached 16 / 16 and total schema closure reached 101 / 111
-→ Product command/AgentRun truth remained separate from live stream mechanics
-→ 111↔111, IF_MATCH exact set and Budget proof remained green
-```
-
-Bounded Evidence: [../evidence/4b/par-schema-closure.md](../evidence/4b/par-schema-closure.md).
-
-The Gateway slice then closed effect inspection without exposing a second effect-control surface:
-
-```text
-Verify #321 = FAILURE
-→ expected RED: GW-01 was not SCHEMA_CLOSED in the canonical bundle
-→ all prior owner gates remained green
-
-Verify #323 = SUCCESS
-→ Gateway reached 2 / 2 and total schema closure reached 103 / 111
-→ OUTCOME_UNKNOWN remained explicit Gateway truth
-→ retry/replay/reconciliation/effect execution remained owner-internal
-→ 111↔111, IF_MATCH exact set and Budget proof remained green
-```
-
-Bounded Evidence: [../evidence/4b/gateway-schema-closure.md](../evidence/4b/gateway-schema-closure.md).
-
-The Managed Application Runtime slice then closed JobRun inspection and explicit run-now admission without importing queue/scheduler authority:
-
-```text
-Verify #329 = FAILURE
-→ expected RED: MAR-01 was not SCHEMA_CLOSED in the canonical bundle
-→ all prior owner gates remained green
-
-Verify #331 = SUCCESS
-→ MAR reached 3 / 3 and total schema closure reached 106 / 111
-→ run-now resolves exact current served Release + admitted job/v1 server-side
-→ queue/redelivery/retry/catch-up mechanics remain runtime-private
-→ 111↔111, IF_MATCH exact set and Budget proof remained green
-```
-
-Bounded Evidence: [../evidence/4b/mar-schema-closure.md](../evidence/4b/mar-schema-closure.md).
-
-The Observability & Audit slice closed the final five fixed Product schemas without promoting telemetry to authority:
-
-```text
-Verify #337 = FAILURE
-→ expected RED: OBS-01 was not SCHEMA_CLOSED in the canonical bundle
-→ all prior owner gates remained green at 106 / 111
-
-Verify #339 = SUCCESS
-→ OBS/Audit reached 5 / 5 and total schema closure reached 111 / 111
-→ producer trust remains explicit and telemetry remains non-authoritative
-→ usage/cost preserves missing != zero
-→ AuditRecord remains immutable inspection only
-→ 111↔111, IF_MATCH exact set and Budget proof remained green
-```
-
-Bounded Evidence: [../evidence/4b/observability-schema-closure.md](../evidence/4b/observability-schema-closure.md).
-
-## 18. Next derivation
-
-Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and **all fixed owner schema slices** are established.
-
-Closed owner slices:
-
-```text
-IAM + Workspace             = 20 / 20
-Project                     = 21 / 21
-Builder                     = 17 / 17
-Brain                       = 11 / 11
-Connections                 = 9 / 9
-Release                     = 7 / 7
-Product Agent Runtime       = 16 / 16
-Gateway                     = 2 / 2
-Managed Application Runtime = 3 / 3
-Observability & Audit       = 5 / 5
-TOTAL                       = 111 / 111
-```
-
-The next bounded 4B derivation is **Technical Ingress / protocol classification** only, following the contract's working order:
-
-```text
-current externally reachable technical consumers
-→ exact technical wire home where required
-→ explicit Product-vs-Technical classification
-→ technical operation identifiers cannot collide with Product operationId/x-conexus-4a-id
-→ N_platform remains exactly 111
-```
-
-After that, derive generated projections + no-parallel-DTO proof, rerun the whole 4B executable/negative proof, perform independent adversarial review, Lead adjudication and explicit operator 4B ratification.
+Then perform independent adversarial review, Lead adjudication and explicit operator 4B ratification.
 
 Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.

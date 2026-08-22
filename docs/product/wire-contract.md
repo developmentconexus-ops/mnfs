@@ -44,6 +44,7 @@ contracts/api/product/project-paths.yaml            closed Project Path Items
 contracts/api/product/builder-paths.yaml            closed Builder Path Items
 contracts/api/product/brain-paths.yaml              closed Brain Path Items
 contracts/api/product/connection-paths.yaml         closed Connections Path Items
+contracts/api/product/release-paths.yaml            closed Release / Promotion / serving Path Items
 ```
 
 Rules:
@@ -477,7 +478,7 @@ repository hygiene / docs / current-state guards
 + Project declaration schema compilation
 + 4A ↔ fixed Product OAS bijection
 + current-state carrier exact-set proof
-+ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain and Connections
++ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections and Release
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 ```
@@ -485,10 +486,10 @@ repository hygiene / docs / current-state guards
 Current established GREEN:
 
 ```text
-Verify #285 = SUCCESS
-HEAD = 176b4bd608630e567714f3e839ebdcb7cca5e36b
+Verify #293 = SUCCESS
+HEAD = f9cc2ba557e3b4025671d97e6b27882fbb0afa5b
 fixed 4A↔OAS = 111/111
-schema-closed = 78/111
+schema-closed = 85/111
 missing = 0
 extra = 0
 duplicate = 0
@@ -498,6 +499,7 @@ Project = 21/21
 Builder = 17/17
 Brain = 11/11
 Connections = 9/9
+Release = 7/7
 Budget static generated paths = 2
 ```
 
@@ -525,9 +527,23 @@ Verify #285 = SUCCESS
 
 Bounded Evidence: [../evidence/4b/connections-schema-closure.md](../evidence/4b/connections-schema-closure.md).
 
+The Release slice then preserved the same test-first law:
+
+```text
+Verify #291 = FAILURE
+→ expected RED: REL-01 was not SCHEMA_CLOSED in the canonical bundle
+→ all previously closed owner gates remained green
+
+Verify #293 = SUCCESS
+→ Release reached 7 / 7 and total schema closure reached 85 / 111
+→ 111↔111, IF_MATCH exact set and Budget proof remained green
+```
+
+Bounded Evidence: [../evidence/4b/release-schema-closure.md](../evidence/4b/release-schema-closure.md).
+
 ## 18. Next derivation
 
-Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first five owner schema slices are established.
+Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first six owner schema slices are established.
 
 Closed owner slices:
 
@@ -537,16 +553,17 @@ Project         = 21 / 21
 Builder         = 17 / 17
 Brain           = 11 / 11
 Connections     = 9 / 9
+Release         = 7 / 7
 ```
 
 The next bounded owner slice is only:
 
 ```text
-Release / Promotion / serving = 7 Product operations
-REL-01, REL-02, REL-04, REL-05, REL-06, REL-07, REL-08
+Product Agent Runtime = 16 Product operations
+PAR-01 → PAR-16
 ```
 
-`REL-03 ComposeRelease` remains `SYSTEM_OWNER_TRANSITION`, not caller Product wire. Derive the next schemas only from accepted Release authority; a missing property/lifecycle/serving meaning is a stop/reopen falsifier rather than permission to invent DTO or rollback semantics.
+Derive PAR schemas only from accepted Product Agent Runtime authority. Preserve Published-App / Control-Plane / HEADLESS ingress separation, exact active Release/Agent pins, Conversation and AgentRun owner truth, sealed ApprovalRequest/current-eligibility authority, trigger revision/current-state semantics and `COMPLETED != every effect succeeded`. Product Agent authoring remains Builder/Release authority; Mastra thread/tool/snapshot/provider mechanics remain substrate rather than Product authority.
 
 After the remaining fixed owner slices close, 4B still must complete Technical Ingress/protocol classification, generated-projection/no-parallel-DTO proof, whole-4B adversarial review and explicit operator ratification.
 

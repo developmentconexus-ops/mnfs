@@ -279,6 +279,17 @@ This is deliberately lighter than the full Screen Contract. It prevents operator
 
 Each material block requires a rendered/viewable low-fidelity structural artifact before it becomes baseline authority.
 
+For **Conexus 4C**, the operator has selected a stricter P8 medium than the reusable methodology requires:
+
+```text
+primary structural wireframe = unbranded HTML + CSS
+bounded vanilla JavaScript    = allowed only when needed to inspect navigation/responsive structure
+production frontend framework = forbidden in P8 Evidence
+static image / SVG             = not current wireframe authority
+```
+
+This remains P8 rather than P11: one bounded block may use browser interaction to make hierarchy, navigation and responsive transformation inspectable, but it does not claim complete cross-screen flows, backend behavior or production implementation.
+
 The artifact proves/exposes structure, not brand design. It should make inspectable where relevant:
 
 ```text

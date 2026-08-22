@@ -54,7 +54,7 @@ Budget Analyzer generated two-query proof = green
 Verify #297 = SUCCESS on the Release closeout head
 ```
 
-Operator-approved bounded realization Evidence is now recorded at [Technology Leverage and PAR Streaming Review](evidence/4b/technology-leverage-and-par-streaming-review.md). It does **not** change Product/owner authority or select 4D technology. It requires the upcoming PAR wire derivation to prefer native mature mechanics where they preserve Conexus semantics and to avoid freezing Mastra/runtime/provider mechanics as Product authority.
+Bounded operator-approved leverage Evidence: [Technology Leverage and PAR Streaming Review](evidence/4b/technology-leverage-and-par-streaming-review.md). It changes no Product/owner authority and selects no 4D technology.
 
 Next bounded slice remains:
 
@@ -63,11 +63,7 @@ Product Agent Runtime Product operations = 16
 = PAR-01 → PAR-16
 ```
 
-Before opening the PAR RED/schema work, finish the bounded PAR wire design against accepted Product Agent Runtime authority plus the technology-leverage Evidence and obtain explicit operator approval of that final design.
-
-The final PAR design must preserve exact Published-App / Control-Plane / HEADLESS ingress distinctions, active Release/Agent pins, Conversation/AgentRun owner truth, exact sealed ApprovalRequest authority, current approver revalidation, trigger revision/current-state semantics, `COMPLETED != every effect succeeded`, and a live structured-stream-compatible boundary without promoting Mastra `runId`, `toolCallId`, `threadId`, raw reasoning or runtime snapshots into Product identity/authority.
-
-Product Agent authoring remains Builder/Release authority. Mastra direct Agent/native stream/native HITL, DurableAgent, Workspace/E2B, AI SDK UI, pg-boss repin, PostgreSQL-major repin and generated SDK/client choices are realization Evidence/candidates only until their owning later stage selects/proves them.
+Before PAR RED/schema work, approve the final PAR wire design using accepted PAR authority plus the leverage Evidence. Preserve ingress separation, exact Release/Agent pins, Conversation/AgentRun truth, sealed ApprovalRequest/current eligibility, trigger current-state semantics, `COMPLETED != every effect succeeded`, and live structured-stream compatibility without making Mastra IDs/raw reasoning/runtime state Product authority.
 
 Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md), [Connections](evidence/4b/connections-schema-closure.md), [Release](evidence/4b/release-schema-closure.md).
 

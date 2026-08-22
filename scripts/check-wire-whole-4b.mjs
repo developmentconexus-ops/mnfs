@@ -1,13 +1,29 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const adversarialRunner = 'scripts/run-wire-whole-4b-adversarial.mjs';
 const projectSchema = 'contracts/api/project-operation.schema.json';
 const budgetDeclaration = 'contracts/examples/budget-analyzer/AnalyzePendingBudgets.operation.json';
+const productDirectory = 'contracts/api/product';
+const productEntrypoint = path.join(productDirectory, 'openapi.yaml');
 
 if (!fs.existsSync(adversarialRunner)) {
   throw new Error('Whole 4B executable proof is missing');
 }
+
+const productSource = fs.readFileSync(productEntrypoint, 'utf8');
+const directlyReferencedYaml = new Set(
+  [...productSource.matchAll(/\$ref:\s*['"]?\.\/([^#'"\s]+\.yaml)#/g)].map((match) => match[1]),
+);
+const productYaml = fs.readdirSync(productDirectory)
+  .filter((name) => name.endsWith('.yaml') && name !== 'openapi.yaml')
+  .sort();
+const unreachableYaml = productYaml.filter((name) => !directlyReferencedYaml.has(name));
+if (unreachableYaml.length) {
+  throw new Error(`Product contract directory contains unreachable YAML authority: ${unreachableYaml.join(', ')}`);
+}
+console.log(`Product wire topology passed (${productYaml.length} reachable YAML fragments; 0 dead parallel fragments).`);
 
 const result = spawnSync('node', [adversarialRunner], {
   encoding: 'utf8',

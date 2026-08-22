@@ -1,250 +1,212 @@
-# 4C W-01 — Authority Feasibility Preflight
+# 4C W-01 — Authority Feasibility Preflight / Global-Maximum Adjudication
 
-> **Status:** `FINDING / 4C-F02 / UPSTREAM BOUNDED REOPEN REQUIRED`
-> **Block:** `W-01` — Projects + create / inception / approved Baseline
-> **Locked dependency:** `GF-01 H1-R2` remains `LOCKED / OPERATOR APPROVED` and is not reopened by this finding.
+> **Status:** `FINDING / 4C-F02 / REVISED BOUNDED CORRECTION REQUIRES OPERATOR DECISION`
+> **Block:** `W-01` — Projects + create/import / Inception / candidate+approved Baseline
+> **Locked dependency:** `GF-01 H1-R2` remains `LOCKED / OPERATOR APPROVED`.
 > **Implementation authority:** none.
 
-W-01 was opened only after GF-01 completed its operator lock, exact P9 trace and P10 bounded consolidation. The first W-01 authority-feasibility question exposed a Product-semantic gap before any W-01 layout hypothesis or HTML wireframe was rendered.
+The operator conditionally approved the first source-bootstrap proposal only if it survived the Conexus Global-Maximum method. It did not. Completing the whole Journey-B preflight exposed three independent missing Product properties before any W-01 layout or HTML was authored.
 
-The block must stop here until the smallest upstream correction is operator-adjudicated and mechanically green.
+## 1. Accepted Journey B
 
----
-
-## 1. Human journey W-01 must complete
-
-Accepted Journey B requires:
+Current Product authority requires:
 
 ```text
 Workspace
-→ create/import a Project
-→ establish current source/context
-→ run Project Inception / investigation
-→ inspect exact candidate Baseline subject
-→ approve exact candidate Baseline
-→ reach the current approved incremental Project Baseline
+→ Create/Import Project
+→ establish/associate canonical source repo
+→ Inception / Discovery
+→ inspect objective/users/constraints/source systems/real data where relevant
+→ propose sufficient Project Baseline
+→ human checkpoint: “this is what we are building”
+→ approved Baseline digest
+→ initial Change
 ```
 
-Load-bearing truths:
+F1 has one canonical source repo per Project. Project Git is canonical Project authoring/provenance truth. Inception is not a fake Change.
 
-- Inception is not a fake Change;
-- F1 has one canonical source repo per Project;
-- Project Git is canonical Project-scoped authoring/provenance truth;
-- approved Baseline pins exact `baselineDigest` + `sourceRevision` and carries readable source + `ApplicationRuntimeProfile`;
-- a material Project-level decision missing from the Baseline may not be invented later by a coding actor.
+## 2. Three independent falsifiers
 
----
+### F02-A — source bootstrap is not caller-expressible
 
-## 2. Current accepted operation/wire facts
+Current `PRJ-03 CreateProject` accepts only `name`. `PRJ-07 RunInceptionInvestigation` intentionally accepts no source selector and operates over already admitted sources. No Product or Technical-Ingress operation establishes a brownfield Git source.
 
-### `PRJ-01 ListProjects`
+### F02-B — Inception business intent is not caller-expressible
 
-Current Workspace Projects browse read. It supplies exact disclosed `ProjectSummary` entries; it does not establish source authority.
+Journey B requires objective/users/constraints to participate in Inception. Current `PRJ-07` has no request body and no separate admitted Inception-context command exists. Source inspection alone cannot tell a greenfield Project what humans intend to build.
 
-### `PRJ-03 CreateProject`
+### F02-C — candidate Baseline is not durably readable before approval
 
-Current request establishes:
+`PRJ-07` yields `candidateBaselineDigest + sourceRevision`; `PRJ-09` approves the digest; `PRJ-08` reads only the already-approved Baseline. There is no durable caller-readable exact candidate subject for refresh/re-entry before the human checkpoint. Browser cache/localStorage or rerunning Inception is not authority.
+
+Corrected TDD result:
 
 ```text
-name
+Verify #465 = EXPECTED RED
+repository tests = 51
+prior gates      = 48 PASS
+W-01 falsifiers  = 3 FAIL exactly
+
+F02-A source bootstrap
+F02-B inception intent
+F02-C candidate Baseline re-entry/read
 ```
 
-under the exact Workspace with idempotent Project creation and the accepted initial Project/I&A composition.
+All prior GF-01, 4C-F01, 4A/4B, architecture, documentation and repository gates remain green.
 
-The current request exposes no source/repository/import/origin input.
+## 3. Adversarial option comparison
 
-### `PRJ-07 RunInceptionInvestigation`
+| Need | Candidate | Disposition | Reason |
+| --- | --- | --- | --- |
+| source bootstrap | enrich `PRJ-03 CreateProject` with discriminated source bootstrap | **LEADING** | source choice is part of Project birth; reuses existing atomic Project+initial-grant creation meaning |
+| source bootstrap | new `ImportProject` operation | REJECT | duplicates Project creation semantics and splits one human job without a distinct lifecycle owner |
+| source bootstrap | post-create `AttachSource` | REJECT | creates a partially initialized Project and invents post-create source mutation/switching state |
+| source bootstrap | source selector on `PRJ-07` | REJECT | conflates source admission with investigation and breaks the accepted inputless-source-scope law |
+| Inception context | required `intent` on `PRJ-07` | **LEADING** | keeps human intent at the investigation boundary without turning it into generic Project metadata |
+| Inception context | add intent to `PRJ-03` | REJECT | mixes Project/source establishment with semantic investigation and risks hidden mutable metadata authority |
+| Inception context | separate context CRUD/operation | REJECT | no independent owner/lifecycle/consumer; unnecessary ceremony |
+| candidate review | exact candidate read by digest | **LEADING** | supports refresh/re-entry and exact human review without mutating candidate state |
+| candidate review | overload `PRJ-08 GetApprovedProjectBaseline` | REJECT | collapses current approved truth with unapproved candidate truth into one ambiguous read |
+| candidate review | rely on `PRJ-07` response/browser state | REJECT | transient UI state cannot be durable review authority |
+| candidate review | use generic source-file read | REJECT | no accepted candidate Baseline path contract and source-read Permission is not the Baseline-management authority |
 
-Current wire intentionally has **no request body**. It runs over the Project's **currently admitted sources** and returns:
+Current platform references (Vercel/Render/Replit) support repository selection as part of creation rather than later source CRUD; they are pattern Evidence only and do not define Conexus authority.
+
+## 4. Revised bounded Global-Maximum candidate
+
+### 4.1 `PRJ-03 CreateProject` — source bootstrap at Project birth
+
+Keep one Product operation. Add one required closed discriminated input:
 
 ```text
-candidateBaselineDigest
-sourceRevision
+sourceBootstrap.mode = NEW | EXISTING_GIT
 ```
 
-The accepted 4B Project proof explicitly forbids making PRJ-07 caller-configurable through arbitrary URL, Connection, source ID or SQL. This negative law remains correct.
-
-### `PRJ-08 GetApprovedProjectBaseline`
-
-Returns the exact currently approved Baseline.
-
-### `PRJ-09 ApproveProjectBaselineRevision`
-
-Accepts the exact `candidateBaselineDigest` to make that candidate current, preserving stale/current-subject semantics.
-
----
-
-## 3. Falsifier
-
-The accepted authority simultaneously states:
+`NEW`:
 
 ```text
-Journey B = Create/Import Project
-PRJ-07 consumer = exact greenfield/brownfield Project
-Project = exactly one canonical source repo in F1
+Project creation
+→ platform establishes the one canonical Project Git
+→ exact scaffold/seed/hosting mechanics remain 4D
 ```
 
-but the caller-visible Product wire currently provides only:
+`EXISTING_GIT`:
 
 ```text
-PRJ-03 CreateProject { name }
-→ no source bootstrap choice/reference
-
-PRJ-07 RunInceptionInvestigation {}
-→ uses source that must already be admitted
-
-no separate admitted Product source/import operation
+caller identifies one existing Git remote through an untrusted provider-neutral locator
+→ trusted GitInfra validates/adopts it under server-side credentials/policy
+→ that remote becomes the one canonical Project Git
+→ exact immutable source revision is resolved server-side
 ```
 
-Therefore the browser cannot truthfully render the accepted W-01 `Project create / source-association flow` for a brownfield Project.
+Constraints:
 
-A source URL/input drawn only in the frontend would be invented Product authority. Omitting brownfield onboarding would leave an accepted Journey-B branch without a human-operable path.
+- no Git credential/secret in Product payload;
+- no generic outbound-network authority from the locator;
+- no second mutable source authority/copy kept in parallel;
+- no post-create source switching;
+- no multi-repo F1;
+- no Repository CRUD domain;
+- no provider-specific GitHub/GitLab Product semantic;
+- idempotent CreateProject intake still prevents duplicate Project creation.
 
----
+The exact locator schema is closed in the bounded 4A/4B recompile; mechanism/credential package stays 4D.
 
-## 4. Technical Ingress does not close the gap
+### 4.2 `PRJ-07 RunInceptionInvestigation` — human intent, not source selection
 
-The current three Technical Ingress operations are exactly:
+Add exactly one required human business-intent input:
 
 ```text
-TI-01 BeginOidcLoginProtocol
-TI-02 CompleteOidcCallbackProtocol
-TI-03 StreamAgentRunProjection
+intent: string (non-blank)
 ```
 
-They are unrelated to Project source bootstrap. No hidden technical Git/source HTTP route exists in the current accepted 4B set that W-01 can lawfully surface.
+It may express objective/users/constraints in ordinary language. It is Inception input, not generic mutable Project metadata.
 
-`GitInfra` is an accepted infrastructure boundary, but mechanism capability is not Product authority. The existence of `GitInfra` cannot tell the frontend which source a user chose or authorize an import by itself.
-
----
-
-## 5. TDD proof
-
-Executable falsifier:
+`PRJ-07` still MUST NOT accept:
 
 ```text
-tests/repository/4c-w01-source-onboarding.test.mjs
+repositoryUrl
+sourceUrl
+sourceId
+connectionId chosen only to widen source authority
+SQL
+arbitrary target URL
 ```
 
-Observed result:
+The server resolves the already-admitted canonical Project source and applicable already-authorized source context. The investigation returns the exact candidate Baseline representation for immediate review.
+
+### 4.3 New exact read — `PRJ-23 GetProjectBaselineCandidate`
+
+A real consumer now proves one new fixed Product read is necessary:
 
 ```text
-Verify #458 = FAILURE / expected RED
-repository tests = 49 total
-prior tests       = 48 PASS
-new W-01 gate     = 1 FAIL
+consumer    = W-01 human candidate-Baseline review/re-entry
+owner       = Project
+principal   = HUMAN_ACCOUNT_SESSION
+Ingress     = CP
+Permission  = project.manage
+class       = READ
+IC          = IC0
+subject     = exact Project + candidateBaselineDigest
 ```
 
-Exact failure:
+Return one exact immutable candidate only:
 
 ```text
-W-01 cannot express brownfield source onboarding:
-Journey B requires Create/Import and PRJ-07 expects an exact
-greenfield/brownfield Project, but current Product wire exposes
-no caller-visible source/repository onboarding authority before inception
+ProjectBaselineCandidate
+  candidateBaselineDigest
+  sourceRevision
+  sourceText
+  applicationRuntimeProfile = MANAGED | DEDICATED
 ```
 
-No prior GF-01, 4C-F01, 4A/4B, architecture or repository gate regressed.
+No list-candidates operation, candidate CRUD, workflow/status domain or generic artifact API is admitted. Candidate bytes/source may be durably projected from existing Project-Git/immutable-byte mechanisms; this read alone does not justify a new Hub durable record class.
 
----
+`PRJ-07` may return the same representation immediately. `PRJ-23` exists because a durable exact read is independently necessary after refresh/re-entry.
 
-## 6. Smallest recommended bounded reopen
+`PRJ-09 ApproveProjectBaselineRevision` remains the exact decision by `candidateBaselineDigest` and continues to revalidate current eligibility/staleness.
 
-The leading YAGNI correction is **not** a generic Repository domain and does **not** need a new operation unless exact semantics prove otherwise.
+## 5. Consequence if operator accepts
 
-Recommended Product semantic:
+Counts are derivation results, not targets:
 
 ```text
-PRJ-03 CreateProject
-+ one closed creation-time Project source bootstrap
-
-ProjectSourceBootstrap
-= GREENFIELD
-| IMPORT_GIT
+fixed Product operations      111 → 112
+Project operations             21 → 22
+fixed frontend-reachable      110 → 111
+fixed no-direct-browser         1 = PAR-05
+Budget operations               2 unchanged
+total frontend-reachable      112 → 113
+ordinary Permissions           25 unchanged
+Technical Ingress               3 unchanged / Product impact 0
+semantic owners                unchanged
+new durable record classes      0 expected
 ```
 
-### GREENFIELD
+Preserving `111` by hiding the candidate read in frontend state or overloading an unrelated operation would violate the same methodology that produced the count.
 
-Semantics:
+## 6. Smallest recompile if accepted
 
 ```text
-CreateProject
-→ establish the Project
-→ establish its one canonical Project Git source authority
-→ no caller-selected external source
+bounded Project/Journey-B Product semantics
+→ operation ledger + exact counts/consumer mapping
+→ Permission consumer mapping (vocabulary stays 25)
+→ Project OAS / checker
+→ 4A↔4B 112↔112 bijection
+→ 4C coverage/surface mapping 113 frontend-reachable
+→ all three W-01 RED falsifiers GREEN
 ```
 
-Exact seed/scaffold mechanics remain 4D; 4C does not select them.
+No GF-01 reopen, no 4D selection and no Product implementation.
 
-### IMPORT_GIT
+## 7. Stop condition
 
-Semantics:
-
-```text
-caller identifies one existing Git source for one-time bootstrap
-→ trusted GitInfra obtains/read-custodies the source under later realization rules
-→ exact imported source revision is established
-→ canonical Project Git becomes the Project authoring/provenance truth
-→ PRJ-07 later investigates only that admitted canonical source
-```
-
-Important semantic constraints for the bounded reopen:
-
-- one-time bootstrap, **not** ongoing remote sync;
-- one canonical Project repo after bootstrap;
-- caller never supplies Git credentials/secrets inside Product source input;
-- imported remote does not remain a second mutable Project authority;
-- exact source revision must become provable before Baseline approval;
-- source import cannot grant Workspace/Project authorization;
-- no multi-repo Project;
-- no post-create generic source switching/editing;
-- no Repository CRUD/Product domain;
-- no arbitrary source input added to `PRJ-07`.
-
-The exact minimal locator/ref fields must be closed during the operator-accepted bounded 4A semantic correction before 4B wire recompilation. They must identify source without selecting a specific Git hosting provider or credential mechanism in 4C.
-
----
-
-## 7. Explicitly rejected repairs
-
-Do not repair W-01 by:
+Until explicit operator acceptance of this **revised** correction:
 
 ```text
-frontend-only Git URL field
-localStorage source association
-screen-specific BFF/import DTO
-hidden server default that silently decides brownfield source
-caller-selected URL/sourceId added to PRJ-07
-using Connection as generic Git source by convenience
-adding Repository settings/rename/sync CRUD
-adding multi-repo machinery
-claiming GitInfra mechanism itself is Product authority
-```
-
----
-
-## 8. W-01 stop / resume condition
-
-While `4C-F02` is open:
-
-```text
-W-01 structural hypotheses = BLOCKED
-W-01 HTML P8 candidate      = BLOCKED
-W-01 LOCKED                 = NO
-W-02 and later blocks       = NOT OPENED
-GF-01                       = remains LOCKED
+4C-F02 = OPEN
+W-01 HTML/layout = BLOCKED
+later 4C blocks = NOT OPENED
+GF-01 = LOCKED
 4D / Product implementation = BLOCKED
 ```
-
-If the operator accepts the bounded correction:
-
-```text
-smallest 4A Project source-bootstrap semantics
-→ exact 4B Project wire recompile
-→ make W-01 source-onboarding falsifier GREEN
-→ resume W-01 reference / layout-hypothesis / authority-preflight cycle
-→ render one bounded HTML/CSS lo-fi candidate
-→ return to operator visual adjudication
-```
-
-No other accepted 4A/4B authority should be reopened by preference.

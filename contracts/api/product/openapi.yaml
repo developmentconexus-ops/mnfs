@@ -191,9 +191,9 @@ paths:
   /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/disable:
     $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1disable'
   /api/control/projects/{projectId}/effect-attempts:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts'
+    $ref: './gateway-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts'
   /api/control/projects/{projectId}/effect-attempts/{effectAttemptId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts~1{effectAttemptId}'
+    $ref: './gateway-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts~1{effectAttemptId}'
   /api/control/projects/{projectId}/job-runs:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1job-runs'
   /api/control/projects/{projectId}/job-runs/{jobRunId}:

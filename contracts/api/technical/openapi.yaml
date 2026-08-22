@@ -6,8 +6,6 @@ info:
   description: >-
     Externally reachable protocol-only HTTP surfaces required by current F1 consumers.
     This description is not Product authority and has zero impact on N_platform.
-  license:
-    name: Proprietary
 servers:
   - url: /
     description: Relative technical-protocol root; deployment origin remains outside 4B.

@@ -128,10 +128,8 @@ if (expectedPairs.size !== 111) throw new Error(`Kubb probe expected 111 source 
 const clientsRoot = path.join(outputA, 'clients');
 const clientFiles = listFiles(clientsRoot).filter((file) => file.endsWith('.ts'));
 const generatedPairs = new Set();
-let generatedText = '';
 for (const file of clientFiles) {
   const text = fs.readFileSync(file, 'utf8');
-  generatedText += `\n${text}`;
   const methodMatch = text.match(/method:\s*['\"]([A-Z]+)['\"]/);
   const urlMatch = text.match(/url:\s*['\"]([^'\"]+)['\"]/);
   if (methodMatch && urlMatch) generatedPairs.add(`${methodMatch[1]} ${urlMatch[1]}`);
@@ -178,6 +176,7 @@ fs.writeFileSync(
       noEmit: true,
       skipLibCheck: true,
       allowSyntheticDefaultImports: true,
+      allowImportingTsExtensions: true,
     },
     include: ['./generated-a/**/*.ts'],
   }, null, 2)}\n`,

@@ -13,25 +13,39 @@ function operationSection(text, id, nextId) {
 }
 
 test('W-01 can establish truthful greenfield/brownfield Project source authority before inception', () => {
+  const product = read('docs/product/contract.md')
   const wire = read('contracts/api/product/project-paths.yaml')
-  const foundation = read('docs/evidence/4c/foundation-and-coverage.md')
   const inventory = read('docs/evidence/4c/candidate-screen-surface-inventory.md')
   const ledger = read('docs/product/operation-ledger.md')
 
-  if (!foundation.includes('Create/import a Project')) throw new Error('test precondition lost: Journey B no longer requires create/import')
-  if (!inventory.includes('Project create / source-association flow')) throw new Error('test precondition lost: W-01 source-association surface is no longer carried')
-  if (!ledger.includes('exact greenfield/brownfield Project')) throw new Error('test precondition lost: PRJ-07 no longer covers greenfield/brownfield inception')
+  if (!product.includes('→ Create/Import Project')) throw new Error('test precondition lost: Journey B no longer requires Create/Import Project')
+  if (!inventory.includes('Project create / source-bootstrap flow')) throw new Error('test precondition lost: W-01 source-bootstrap surface is no longer carried')
+  if (!ledger.includes('sourceBootstrap.mode = NEW | EXISTING_GIT')) throw new Error('accepted 4C-F02 source-bootstrap semantics missing from Product authority')
 
   const create = operationSection(wire, 'PRJ-03', 'PRJ-05')
   const inception = operationSection(wire, 'PRJ-07', 'PRJ-08')
 
-  const createBody = create.match(/requestBody:[\s\S]*?(?=\n\s{6}responses:)/)?.[0] ?? ''
-  const createProperties = [...createBody.matchAll(/^\s{16}([A-Za-z][A-Za-z0-9_-]*):\s*$/gm)].map(match => match[1])
-  const hasCreationSourceInput = createProperties.some(name => /source|repo|repository|import|origin/i.test(name))
-  const hasInceptionSourceInput = /requestBody:/.test(inception)
-  const hasDedicatedSourceOperation = /\| `PRJ-[0-9]+` \| (?:Import|Associate|Set|Attach)[^|]*(?:Source|Repository|Repo)/i.test(ledger)
-
-  if (!hasCreationSourceInput && !hasInceptionSourceInput && !hasDedicatedSourceOperation) {
-    throw new Error('W-01 cannot express brownfield source onboarding: Journey B requires Create/Import and PRJ-07 expects an exact greenfield/brownfield Project, but current Product wire exposes no caller-visible source/repository onboarding authority before inception')
+  if (!/required:\s*\[[^\]]*sourceBootstrap[^\]]*\]/.test(create)) {
+    throw new Error('PRJ-03 must require sourceBootstrap at Project birth')
   }
+  if (!create.includes("$ref: '#/components/schemas/ProjectSourceBootstrap'")) {
+    throw new Error('PRJ-03 must use the closed ProjectSourceBootstrap schema')
+  }
+
+  const sourceSchemaStart = wire.indexOf('    ProjectSourceBootstrap:')
+  const sourceSchemaEnd = wire.indexOf('\n    ApprovedBaseline:', sourceSchemaStart)
+  if (sourceSchemaStart < 0 || sourceSchemaEnd < 0) throw new Error('unable to isolate ProjectSourceBootstrap schema')
+  const source = wire.slice(sourceSchemaStart, sourceSchemaEnd)
+  for (const mode of ['NEW', 'EXISTING_GIT']) {
+    if (!source.includes(`const: ${mode}`)) throw new Error(`ProjectSourceBootstrap must admit ${mode}`)
+  }
+  if (!source.includes('repositoryLocator:')) throw new Error('EXISTING_GIT must carry the bounded repositoryLocator')
+  if (/credential|password|token|secret/i.test(source.replace(/no credential\/secret/gi, ''))) {
+    throw new Error('ProjectSourceBootstrap schema must not expose Git credential/secret fields')
+  }
+
+  for (const forbidden of ['repositoryUrl:', 'repositoryLocator:', 'sourceId:', 'sql:', 'connectionId:']) {
+    if (inception.includes(forbidden)) throw new Error(`PRJ-07 must not regain source-selection authority through ${forbidden}`)
+  }
+  if (!/required:\s*\[intent\]/.test(inception)) throw new Error('PRJ-07 must remain an intent-driven investigation over already-admitted source authority')
 })

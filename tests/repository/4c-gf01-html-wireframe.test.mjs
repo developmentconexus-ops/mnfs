@@ -16,6 +16,7 @@ test('GF-01 P8 authority is a low-fidelity viewable HTML wireframe, not a static
   const html = read(htmlPath)
   const hypotheses = read('docs/evidence/4c/gf01-structural-hypotheses.md')
   const roadmap = read('docs/roadmap.md')
+  const contract = read('docs/phases/4c-frontend-interaction-and-authority-realization.md')
 
   for (const required of [
     '<!doctype html>',
@@ -37,5 +38,9 @@ test('GF-01 P8 authority is a low-fidelity viewable HTML wireframe, not a static
   if (!roadmap.includes('gf01-global-frame-wireframe.html')) throw new Error('roadmap must route operator adjudication to the HTML wireframe')
   if (hypotheses.includes('gf01-global-frame-wireframe.svg') || roadmap.includes('gf01-global-frame-wireframe.svg')) {
     throw new Error('current GF-01 authority must not route to the superseded SVG')
+  }
+
+  for (const required of ['primary structural wireframe = unbranded HTML + CSS', 'static image / SVG             = not current wireframe authority']) {
+    if (!contract.includes(required)) throw new Error(`4C contract must preserve Conexus P8 medium decision: ${required}`)
   }
 })

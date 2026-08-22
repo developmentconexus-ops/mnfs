@@ -40,8 +40,10 @@ test('W-01 can establish truthful greenfield/brownfield Project source authority
     if (!source.includes(`const: ${mode}`)) throw new Error(`ProjectSourceBootstrap must admit ${mode}`)
   }
   if (!source.includes('repositoryLocator:')) throw new Error('EXISTING_GIT must carry the bounded repositoryLocator')
-  if (/credential|password|token|secret/i.test(source.replace(/no credential\/secret/gi, ''))) {
-    throw new Error('ProjectSourceBootstrap schema must not expose Git credential/secret fields')
+
+  const propertyNames = new Set([...source.matchAll(/^\s{12}([A-Za-z][A-Za-z0-9_-]*):\s*$/gm)].map(match => match[1]))
+  for (const forbidden of ['credential', 'credentials', 'password', 'token', 'secret', 'branch', 'ref']) {
+    if (propertyNames.has(forbidden)) throw new Error(`ProjectSourceBootstrap must not expose ${forbidden}`)
   }
 
   for (const forbidden of ['repositoryUrl:', 'repositoryLocator:', 'sourceId:', 'sql:', 'connectionId:']) {

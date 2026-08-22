@@ -392,6 +392,8 @@ components:
             required: [usageState]
           then:
             not:
+              properties:
+                usage: {}
               required: [usage]
         - if:
             properties:
@@ -402,6 +404,8 @@ components:
             properties:
               cost:
                 not:
+                  properties:
+                    calculatedUsd: {}
                   required: [calculatedUsd]
 
     AuditRecordSummary:

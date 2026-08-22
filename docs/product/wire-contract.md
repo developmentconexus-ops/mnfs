@@ -640,6 +640,9 @@ Verify #375 = SUCCESS
 
 Verify #377 = SUCCESS
 → actual conditional HTTP carrier sets + expected adversarial failure reasons hardened
+
+Verify #383 = SUCCESS
+→ operator-ratified closure bytes pass the complete repository Verify on exact HEAD
 ```
 
 Historical owner-slice RED/GREEN Evidence remains in the bounded files under `docs/evidence/4b/`; this contract does not duplicate the full worklog.

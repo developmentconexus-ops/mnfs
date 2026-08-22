@@ -42,15 +42,9 @@ fixed Product bijection = 111 ↔ 111
 schema-closed = 101 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
-IAM + Workspace = 20 / 20 CLOSED
-Project = 21 / 21 CLOSED
-Builder = 17 / 17 CLOSED
-Brain = 11 / 11 CLOSED
-Connections = 9 / 9 CLOSED
-Release = 7 / 7 CLOSED
-Product Agent Runtime = 16 / 16 CLOSED
-Budget Analyzer two-query proof = green
-Verify #305 = SUCCESS
+IAM+Workspace 20/20; Project 21/21; Builder 17/17; Brain 11/11
+Connections 9/9; Release 7/7; PAR 16/16 = CLOSED
+Budget Analyzer two-query proof = green; Verify #305 = SUCCESS
 ```
 
 Next bounded slice:
@@ -61,9 +55,9 @@ GW-01 ListEffectAttempts
 GW-02 GetEffectAttempt
 ```
 
-Close only caller-visible effect-attempt inspection from accepted Gateway authority. Preserve exact originating run/operation/effect disclosure, receipt/reconciliation/provenance, `OUTCOME_UNKNOWN`, and zero retry/effect-execution authority. Effect admission, idempotency claim, resume and reconciliation remain owner-internal mechanics.
+Close only caller-visible effect-attempt inspection. Preserve exact originating run/operation/effect disclosure, receipt/reconciliation/provenance, `OUTCOME_UNKNOWN`, and zero retry/effect-execution authority. Effect admission, idempotency claim, resume and reconciliation remain owner-internal.
 
-PAR closure Evidence: [Product Agent Runtime](evidence/4b/par-schema-closure.md). Technology-leverage Evidence remains [bounded input](evidence/4b/technology-leverage-and-par-streaming-review.md), not 4D selection authority.
+PAR Evidence: [schema closure](evidence/4b/par-schema-closure.md); [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
 
 Do **not** begin 4C, select runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

@@ -94,25 +94,25 @@ function assertHumanName(schema, label) {
   if (name?.type !== 'string' || (name.minLength ?? 0) < 1 || typeof name.pattern !== 'string') {
     throw new Error(`${label} name must be an explicit non-blank string schema`);
   }
-  return name;
+  return resolved;
 }
 
 // 4C-F01: creation establishes one human-readable identity property only; no generic metadata mutation is admitted.
 const createProject = assertHumanName(requestSchema('PRJ-03'), 'PRJ-03 request');
 for (const forbidden of ['description', 'settings', 'metadata']) {
-  if (requestSchema('PRJ-03').properties?.[forbidden]) throw new Error(`PRJ-03 must not expose speculative Project field ${forbidden}`);
+  if (createProject.properties?.[forbidden]) throw new Error(`PRJ-03 must not expose speculative Project field ${forbidden}`);
 }
 if (!hasParameter('PRJ-03', 'header', 'Idempotency-Key', true)) throw new Error('PRJ-03 must require Idempotency-Key');
 
 const projectRepresentation = assertHumanName(successSchema('PRJ-02'), 'PRJ-02 success');
 const projectList = resolveSchema(successSchema('PRJ-01'));
-const projectSummary = assertHumanName(resolveSchema(projectList?.items), 'PRJ-01 item');
-for (const field of ['projectId', 'workspaceId', 'archived']) {
-  if (!requiredFields(projectSummary).has(field)) throw new Error(`PRJ-01 item must require ${field}`);
-}
+assertHumanName(resolveSchema(projectList?.items), 'PRJ-01 item');
 for (const field of ['projectId', 'workspaceId', 'projectRevision', 'archived']) {
   if (!requiredFields(projectRepresentation).has(field)) throw new Error(`PRJ-02 success must require ${field}`);
 }
+// The source-level 4C-F01 test pins the complete ProjectSummary required set. Redocly can
+// rename/collide bundled component identities, so this bundle checker only re-proves that
+// PRJ-01 still resolves to a closed human-named Project item rather than duplicating the source assertion.
 
 // ArchiveProject: current Project subject is explicit because command subpath cannot truthfully reuse Project ETag.
 const archive = assertClosedObject(requestSchema('PRJ-05'), 'PRJ-05 request');

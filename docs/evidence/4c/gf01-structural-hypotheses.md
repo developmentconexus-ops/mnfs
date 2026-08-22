@@ -1,13 +1,13 @@
 # 4C GF-01 — Structural Hypotheses
 
-> **Status:** CANDIDATE / 4C-7
+> **Status:** CANDIDATE / 4C-7 / FABLE REVIEW INCORPORATED
 > **Block:** `GF-01` — global frame + Workspace/Project navigation
 > **Prerequisite:** `4C-F01` RESOLVED / authority-feasibility GREEN.
-> **Decision posture:** neither hypothesis is `LOCKED`; only the operator may lock a rendered structure.
+> **Decision posture:** no hypothesis is `LOCKED`; only the operator may lock the rendered HTML structure.
 
-GF-01 has one real structural ambiguity: whether Workspace and Project navigation should coexist as persistent navigation landmarks or whether one contextual navigation landmark should adapt to the current scope.
+GF-01 began with one real ambiguity: whether Workspace and Project navigation should coexist as persistent navigation landmarks or one contextual navigation landmark should adapt to current scope. The first rendered H1 exposed useful review findings, now adjudicated in [GF-01 Fable Shell Review Adjudication](gf01-fable-review-adjudication.md).
 
-The earlier 4C-4 bounded reference study already supplies enough pattern evidence for this question. No additional external research is required before rendering this block.
+The earlier 4C-4 reference study remains sufficient. Additional broad research is not required for this revision.
 
 ## 1. Constraints
 
@@ -15,27 +15,29 @@ The frame must preserve:
 
 ```text
 Account/session visibility
-Workspace human-readable context + switching
-Project human-readable context when inside a Project
+human-readable Workspace + Project context
+Workspace → Project hierarchy
 Projects as primary Workspace destination
 Build as primary/default Project destination
 Control Plane != Published Application
 server-owned authorization
 no global Product search authority
-no generic Workspace settings
-one usable 320-CSS-px responsive transformation
+no generic Workspace Settings
+one usable narrow responsive transformation
 keyboard/focus/read-order plausibility
+Preview-dominant Build width
+contextual Conexus seam without global assistant authority
 ```
 
-The frame must not consume horizontal space so aggressively that the accepted Preview-dominant Build workspace becomes secondary.
-
-## 2. H1 — Single adaptive navigation rail — RECOMMENDED CANDIDATE
+## 2. H1-R2 — Single adaptive rail + breadcrumb-switcher — RECOMMENDED CANDIDATE
 
 Structure:
 
 ```text
 TOP BAR
-Conexus | Workspace selector | Project context when present | session/account
+Conexus / Workspace ▾ / Project ▾                         Account
+          └ Workspace menu can switch Workspace
+            + bounded Workspace shortcuts
 
 LEFT RAIL — Workspace context
 Projects
@@ -46,7 +48,8 @@ People & access
 Audit
 
 LEFT RAIL — Project context
-← Projects / Workspace context
+Project identity cue
+← Back to Projects
 Build
 PRODUCT
   Data
@@ -60,35 +63,71 @@ OPERATE / INSPECT
 MANAGE
   Settings
 
-CONTENT
+STAGE
 current route/surface
++ optional contextual assistant panel seam
 ```
 
-The rail changes its destination set when the user enters a Project; the top bar preserves the Workspace and Project context so scope never disappears.
+### Breadcrumb-switcher
+
+Context identity is navigation, not form entry:
+
+```text
+Conexus / Metal Nobre ▾ / Budget Analyzer ▾
+```
+
+Each segment opens only currently disclosed context choices. Local filtering inside the menu is `LOCAL_UI`, not a global Product search operation.
+
+### Workspace cross-scope mitigation
+
+H1's main cost was one extra navigation step to Workspace resources while inside a Project. The Workspace breadcrumb menu mitigates that without a permanent second rail by exposing bounded navigation shortcuts:
+
+```text
+Brain
+Connections
+People & access
+```
+
+This retains one active primary rail and does not move ownership into Project scope.
+
+### Contextual Conexus frame seam
+
+The frame reserves a collapsible right-side cooperation seam for the contextual Conexus assistant. The current surface decides whether the `Ask Conexus` affordance is eligible; GF-01 does not make the assistant global.
+
+Current structural candidate:
+
+```text
+wide:    content may cooperate with a pushed panel
+medium:  panel may overlay
+narrow:  panel may occupy the available viewport
+```
+
+Exact thresholds/mode selection belong to the later assistant/surface block. The seam exists now so P-01/P-02 do not need to retrofit the global grid after frame lock.
 
 ### Strengths
 
 - one primary navigation landmark at a time;
-- maximum content width for Preview-dominant Build;
-- clear scope transition Workspace → Project;
-- mobile transformation is straightforward: rail becomes one labeled navigation drawer;
-- fewer simultaneously focusable navigation items;
-- Project navigation can scale vertically without horizontal tab overflow;
-- Project context does not look like a sibling of Workspace-level shared resources.
+- breadcrumb expresses Workspace → Project hierarchy with low top-bar noise;
+- Workspace menu shortcuts remove most practical advantage of permanent dual rails;
+- maximum default width for Preview-dominant Build;
+- direct mobile transformation to one navigation drawer;
+- Project navigation scales vertically;
+- contextual assistant can cooperate with frame layout without becoming global authority.
 
 ### Cost / risk
 
-- Workspace destinations are one navigation step farther away while inside a Project;
-- the `← Projects` / Workspace-context affordance must be prominent enough that users do not feel trapped in Project scope;
-- current Workspace + Project naming must remain visible in the top bar, which is now possible after `4C-F01`.
+- Workspace shortcuts inside a context menu must remain discoverable;
+- Project-name cue in rail may be redundant with the breadcrumb and is explicitly under walkthrough;
+- assistant seam adds a frame responsibility, so actual panel eligibility/content must remain surface-owned;
+- relative navigation order is still not frequency-backed by `4C-A02`.
 
-## 3. H2 — Persistent Workspace rail + nested Project rail
+## 3. H2 — Persistent Workspace rail + nested Project rail — REJECTED AS LEADING CANDIDATE
 
 Structure:
 
 ```text
 TOP BAR
-Conexus | Workspace selector | Project context | session/account
+context
 
 WORKSPACE RAIL      PROJECT RAIL
 Projects            Build
@@ -102,53 +141,52 @@ Audit               Brain
                     Settings
 
 CONTENT
-current route/surface
 ```
 
 ### Strengths
 
-- Workspace destinations remain one click away from every Project screen;
-- Workspace/Project hierarchy is continuously visible;
-- may help operators who constantly alternate shared Workspace resources and one Project.
+- Workspace destinations always visible;
+- hierarchy continuously visible.
 
 ### Cost / risk
 
 - two navigation landmarks compete for attention and keyboard traversal;
-- consumes materially more horizontal space from Build/Preview;
-- denser and harder to preserve at tablet/mobile sizes;
-- risks presenting Workspace and Project destinations as two adjacent product taxonomies rather than a scope transition;
-- more responsive states and collapse rules are required before any Product value is gained;
-- `4C-A02` does not provide evidence that constant cross-scope switching is frequent enough to justify this permanent cost.
+- permanent horizontal cost reduces Build/Preview space;
+- denser responsive logic;
+- visually suggests two adjacent Product taxonomies rather than a scope transition;
+- no evidence that constant cross-scope switching justifies the cost;
+- H1-R2 Workspace-menu shortcuts now mitigate H2's only clear advantage.
 
 ## 4. Decision matrix
 
-| Criterion | H1 single adaptive rail | H2 dual rail |
+| Criterion | H1-R2 adaptive rail | H2 dual rail |
 | --- | --- | --- |
-| Human scope clarity | strong if top context is persistent | strong but visually heavier |
+| Human scope clarity | **strong breadcrumb hierarchy** | strong but heavier |
 | Build/Preview width | **best** | materially reduced |
-| Keyboard/navigation landmark simplicity | **best** | weaker |
-| Mobile transformation | **one drawer** | requires combining/cascading rails |
-| Workspace quick access from Project | one extra step | **best** |
-| Evidence for permanent cross-scope access need | no direct need | no direct need |
+| Cross-scope Workspace access | one context-menu action | always visible |
+| Keyboard landmarks | **one primary rail** | two persistent rails |
+| Mobile transformation | **one drawer** | requires rail merging/cascading |
+| Contextual assistant retrofit risk | **seam reserved now** | still needs third-column policy |
+| Evidence for permanent dual navigation | none | none |
 | YAGNI | **lower structural cost** | higher permanent cost |
-| Future Project destination growth | strong vertical scaling | strong but expensive |
 
-## 5. Leading candidate
-
-**H1 — single adaptive navigation rail** is the leading candidate.
-
-Rationale:
+## 5. Review carry-forwards that are not GF-01 decisions
 
 ```text
-accepted primary work = Project Build
-Preview should remain dominant
-cross-scope switching frequency = not proved
-one navigation landmark = simpler
-responsive transformation = simpler
-Workspace/Project context can now be named truthfully
+Workspace Agents ownership wording
+→ W-04 Workspace Agent catalog
+
+Workspace Brain vs Project Brain semantics
+→ W-02 / P-02 headings/descriptors
+
+Projects cards vs list/table
+→ W-01 competing hypothesis; GF-01 cards are fixture only
+
+pending ApprovalRequest discoverability
+→ 4C-S06, primarily P-03 with P-04 / PA-01 cross-check
 ```
 
-H2 remains a useful falsifier: if rendered H1 makes Workspace-level Brain/Connections/People work too difficult to recover from Project scope, the operator can reject H1 or require a bounded cross-scope affordance without adopting two permanent rails.
+A universal Approval Center remains rejected.
 
 ## 6. Responsive candidate
 
@@ -156,62 +194,38 @@ For narrow layouts:
 
 ```text
 TOP BAR
-menu button | current scope name | account/session
+menu | Workspace / Project breadcrumb segments | Account
 
-MENU DRAWER
-current Workspace name
-current Project name when present
-scope-appropriate navigation destinations
-explicit “Back to Workspace / Projects” transition
+NAVIGATION DRAWER
+current Workspace + Project identity
+scope-appropriate adaptive rail
+explicit Back to Projects
+
+ASSISTANT
+contextual seam may overlay/full rather than consume a permanent second column
 
 CONTENT
 single-column current surface
 ```
 
-The mobile drawer is the same semantic navigation as desktop, not a separate Product IA. Essential navigation remains reachable without drag gestures or hover.
+The drawer is the same semantic navigation as desktop, not a separate Product IA.
 
-## 7. Conexus P8 medium decision
+## 7. Rendered evidence
 
-The operator rejected a static SVG/image as the primary GF-01 wireframe medium and requires the Conexus 4C structural wireframe to be inspectable as a **low-fidelity browser artifact**.
+The revised leading H1-R2 is rendered in:
 
-For current and subsequent Conexus P8 block work:
+[GF-01 Global Frame Low-Fidelity HTML Wireframe](gf01-global-frame-wireframe.html)
 
-```text
-primary wireframe medium = unbranded HTML + CSS
-bounded vanilla JavaScript = allowed only when needed to inspect structure, navigation or responsive behavior
-production frontend framework = forbidden in P8 Evidence
-static image / SVG = not current wireframe authority
-```
+The artifact is HTML/CSS lo-fi with bounded vanilla JavaScript only to inspect context menus, scope transitions, rail behavior, assistant seam and narrow-layout transformation. It is P8 Evidence, not production frontend or P11 whole-flow proof.
 
-This is stricter than the reusable methodology's media allowance and is the current Conexus 4C operator decision. It does not collapse P8 into P11: P8 remains one bounded structural block and does not claim complete cross-flow or backend behavior.
+## 8. Operator decision requested
 
-## 8. Rendered/viewable Evidence
-
-Leading H1 is implemented as a low-fidelity browser wireframe in:
-
-[GF-01 Global Frame HTML Wireframe](gf01-global-frame-wireframe.html)
-
-The HTML intentionally supports only bounded structural inspection:
+The revised H1-R2 can receive only one of:
 
 ```text
-Workspace ↔ Project context transition
-scope-appropriate adaptive rail
-Back to Projects recovery
-Workspace/Project context selectors using deterministic fixture labels
-narrow-width drawer behavior
-keyboard-focusable navigation controls
-```
-
-It does not select brand styling, component library, router, production state model or Product implementation.
-
-## 9. Operator decision requested
-
-The rendered H1 can receive only one of:
-
-```text
-LOCKED  — operator accepts this structural baseline
-REVISE  — operator identifies a material structural change
-REJECTED — operator selects a different hypothesis
+LOCKED   — operator accepts this structural baseline
+REVISE   — operator identifies a material structural change
+REJECTED — operator selects another hypothesis
 ```
 
 Assistant/tool output does not set `LOCKED`.

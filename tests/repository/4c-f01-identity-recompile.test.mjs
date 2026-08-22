@@ -35,7 +35,7 @@ test('4C-F01 recompiles creation-time human identity without resurrecting generi
   requirePattern(createWorkspace, /required:\s*\[workspaceId, name\]/, 'WS-01 response must return workspaceId + name')
   requirePattern(getWorkspace, /required:\s*\[workspaceId, name\]/, 'WS-02 must return workspaceId + name')
 
-  requirePattern(projectCollection, /requestBody:[\s\S]*required:\s*\[name\]/, 'PRJ-03 must require creation-time name')
+  requirePattern(projectCollection, /requestBody:[\s\S]*required:\s*\[[^\]]*\bname\b[^\]]*\]/, 'PRJ-03 must continue to require creation-time name after bounded request extension')
   requirePattern(projectCollection, /name:\s*\n\s*type:\s*string[\s\S]*pattern:/, 'PRJ-03 name must be an explicit non-blank string schema')
   requirePattern(duplicateProject, /required:\s*\[destinationWorkspaceId, name\]/, 'PRJ-06 must require destination Workspace and destination Project name')
 

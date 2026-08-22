@@ -165,31 +165,31 @@ paths:
   /api/control/projects/{projectId}/environments/{environmentId}/conformance:
     $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1environments~1{environmentId}~1conformance'
   /api/apps/{projectId}/agents/{agentId}/conversations:
-    $ref: './fixed-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations'
+    $ref: './par-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations'
   /api/apps/{projectId}/agents/{agentId}/conversations/{conversationId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations~1{conversationId}'
+    $ref: './par-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations~1{conversationId}'
   /api/apps/{projectId}/agents/{agentId}/conversations/{conversationId}/turns:
-    $ref: './fixed-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations~1{conversationId}~1turns'
+    $ref: './par-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations~1{conversationId}~1turns'
   /api/headless/projects/{projectId}/agents/{agentId}/runs:
-    $ref: './fixed-paths.yaml#/paths/~1api~1headless~1projects~1{projectId}~1agents~1{agentId}~1runs'
+    $ref: './par-paths.yaml#/paths/~1api~1headless~1projects~1{projectId}~1agents~1{agentId}~1runs'
   /api/runtime/projects/{projectId}/agent-runs:
-    $ref: './fixed-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1agent-runs'
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1agent-runs'
   /api/runtime/projects/{projectId}/agent-runs/{agentRunId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1agent-runs~1{agentRunId}'
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1agent-runs~1{agentRunId}'
   /api/runtime/projects/{projectId}/approval-requests:
-    $ref: './fixed-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests'
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests'
   /api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}'
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}'
   /api/runtime/projects/{projectId}/approval-requests/{approvalRequestId}/decisions:
-    $ref: './current-state-overrides.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}~1decisions'
+    $ref: './par-paths.yaml#/paths/~1api~1runtime~1projects~1{projectId}~1approval-requests~1{approvalRequestId}~1decisions'
   /api/control/projects/{projectId}/agents/{agentId}/triggers:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers'
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers'
   /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}'
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}'
   /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/enable:
-    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1enable'
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1enable'
   /api/control/projects/{projectId}/agents/{agentId}/triggers/{triggerId}/commands/disable:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1disable'
+    $ref: './par-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1agents~1{agentId}~1triggers~1{triggerId}~1commands~1disable'
   /api/control/projects/{projectId}/effect-attempts:
     $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1effect-attempts'
   /api/control/projects/{projectId}/effect-attempts/{effectAttemptId}:

@@ -500,11 +500,11 @@ repository hygiene / docs / current-state guards
 + Budget truth-state positive and negative controls
 ```
 
-Current technical GREEN:
+Current technical GREEN before PAR closeout-only documentation:
 
 ```text
 Verify #305 = SUCCESS
-HEAD = e5e598afacc17156b8f0b06698626dbd5dffd54d
+candidate HEAD = e5e598afacc17156b8f0b06698626dbd5dffd54d
 fixed 4A↔OAS = 111/111
 schema-closed = 101/111
 missing = 0

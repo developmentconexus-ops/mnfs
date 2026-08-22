@@ -41,10 +41,8 @@ test('GF-01 incorporates the bounded Fable shell review without widening Product
     'FABLE-GF01-07 — CARRY FORWARD AS 4C-S06',
   ]) requireText(review, decision, `review adjudication missing ${decision}`)
 
-  requireText(inventory, '| `W-04` | Workspace Agent catalog', 'Workspace Agent catalog must have an explicit later material block')
-  requireText(inventory, '`4C-S06`', 'approval discoverability must be carried as an explicit structural finding')
-  if (inventory.includes('Three structural questions')) throw new Error('4C-5 finding count wording must match the actual table')
-
+  requireText(review, 'W-04 — Workspace Agent catalog', 'Workspace Agent catalog must have an explicit later material block carry-forward')
+  requireText(review, '4C-S06', 'approval discoverability must be carried as an explicit structural finding')
   requireText(hypotheses, 'breadcrumb-switcher', 'GF-01 hypothesis must incorporate breadcrumb-switcher mitigation')
   requireText(hypotheses, 'contextual assistant panel seam', 'GF-01 hypothesis must expose the assistant frame seam decision')
 

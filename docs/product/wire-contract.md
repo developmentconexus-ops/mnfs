@@ -39,6 +39,11 @@ contracts/api/product/openapi.yaml                 canonical entrypoint / shared
 contracts/api/product/fixed-paths.yaml             baseline referenced Path Item fragment
 contracts/api/product/current-state-overrides.yaml bounded current-subject carrier corrections
 contracts/api/product/fixed-census-overrides.yaml  bounded 4B-F01 read-preserving census corrections
+contracts/api/product/identity-workspace-paths.yaml closed IAM + Workspace Path Items
+contracts/api/product/project-paths.yaml            closed Project Path Items
+contracts/api/product/builder-paths.yaml            closed Builder Path Items
+contracts/api/product/brain-paths.yaml              closed Brain Path Items
+contracts/api/product/connection-paths.yaml         closed Connections Path Items
 ```
 
 Rules:
@@ -472,42 +477,77 @@ repository hygiene / docs / current-state guards
 + Project declaration schema compilation
 + 4A ↔ fixed Product OAS bijection
 + current-state carrier exact-set proof
++ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain and Connections
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 ```
 
-Current established GREEN on the corrected authority:
+Current established GREEN:
 
 ```text
-Verify #241 = SUCCESS
+Verify #285 = SUCCESS
+HEAD = 176b4bd608630e567714f3e839ebdcb7cca5e36b
 fixed 4A↔OAS = 111/111
+schema-closed = 78/111
 missing = 0
 extra = 0
 duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
+IAM + Workspace = 20/20
+Project = 21/21
+Builder = 17/17
+Brain = 11/11
+Connections = 9/9
 Budget static generated paths = 2
 ```
 
-The TDD RED for the bounded correction was explicit:
+The bounded `4B-F01` TDD remains preserved:
 
 ```text
 Verify #233 = FAILURE
 expected 111 fixed 4A operations after 4B-F01, found 114
 ```
 
-## 18. Next derivation
-
-Representation, method/path bijection, Project grammar, Budget proving instance, request-authenticity and carrier-class correction are now established.
-
-Proceed with the smallest remaining 4B closure:
+The Connections slice added a separate exact TDD chain:
 
 ```text
-1. derive shared machine schemas only where repeated semantics are already accepted
-2. close exact request/success/Problem shapes owner-by-owner across the corrected 111 fixed operations
-3. start with Identity & Access + Workspace because their semantic owners are bounded and expose auth/current-authority edge cases early
-4. keep Product-property gaps as stop/reopen falsifiers rather than inventing DTO fields
-5. then complete Technical Ingress/protocol classification and generated-projection/no-parallel-DTO proof
-6. run whole-4B adversarial review before ratification
+Verify #283 = FAILURE
+→ expected RED: CON-01 was not SCHEMA_CLOSED in the canonical bundle
+
+Verify #284 = FAILURE
+→ canonical Connections activation reached 78 / 111 schema-closed
+→ prior gates remained green
+→ checker defect exposed: Path Item parameters were not inherited
+
+Verify #285 = SUCCESS
+→ checker now interprets OAS Path Item parameters plus operation overrides without weakening semantic assertions
 ```
+
+Bounded Evidence: [../evidence/4b/connections-schema-closure.md](../evidence/4b/connections-schema-closure.md).
+
+## 18. Next derivation
+
+Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first five owner schema slices are established.
+
+Closed owner slices:
+
+```text
+IAM + Workspace = 20 / 20
+Project         = 21 / 21
+Builder         = 17 / 17
+Brain           = 11 / 11
+Connections     = 9 / 9
+```
+
+The next bounded owner slice is only:
+
+```text
+Release / Promotion / serving = 7 Product operations
+REL-01, REL-02, REL-04, REL-05, REL-06, REL-07, REL-08
+```
+
+`REL-03 ComposeRelease` remains `SYSTEM_OWNER_TRANSITION`, not caller Product wire. Derive the next schemas only from accepted Release authority; a missing property/lifecycle/serving meaning is a stop/reopen falsifier rather than permission to invent DTO or rollback semantics.
+
+After the remaining fixed owner slices close, 4B still must complete Technical Ingress/protocol classification, generated-projection/no-parallel-DTO proof, whole-4B adversarial review and explicit operator ratification.
 
 Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.

@@ -1,6 +1,6 @@
 # Conexus OS — Executable Wire Contract
 
-> **Status:** 4B CANDIDATE / 111 FIXED PRODUCT SCHEMAS CLOSED / SHARED CARRIERS ACTIVE
+> **Status:** 4B CANDIDATE / 111 FIXED PRODUCT SCHEMAS CLOSED / WHOLE PROOF + INDEPENDENT REVIEW ADJUDICATED
 > **Owner:** 4B — Executable Wire Contract.
 > **Product semantics:** current operator-ratified 4A authority, including bounded `4B-F01`, remains canonical above this wire.
 > **Implementation:** BLOCKED.
@@ -35,10 +35,7 @@ contracts/api/product/openapi.yaml
 Real method/path mapping created enough size/maintenance pressure that 4B's previously defined split trigger fired. The OAD is therefore one **multi-file OpenAPI authority**:
 
 ```text
-contracts/api/product/openapi.yaml                 canonical entrypoint / shared wire law
-contracts/api/product/fixed-paths.yaml             baseline referenced Path Item fragment
-contracts/api/product/current-state-overrides.yaml bounded current-subject carrier corrections
-contracts/api/product/fixed-census-overrides.yaml  bounded 4B-F01 read-preserving census corrections
+contracts/api/product/openapi.yaml                  canonical entrypoint / shared wire law
 contracts/api/product/identity-workspace-paths.yaml closed IAM + Workspace Path Items
 contracts/api/product/project-paths.yaml            closed Project Path Items
 contracts/api/product/builder-paths.yaml            closed Builder Path Items
@@ -57,11 +54,14 @@ Rules:
 one canonical entrypoint authority
 + deterministic local refs
 + validator resolves the whole active graph
++ every Product YAML fragment is reachable from the canonical entrypoint
 + bundle is generated proof output
 + active bundle ↔ 4A operation census is mechanically checked
 ```
 
-Fragments are never consumed independently as alternative Product APIs. They are maintenance partitions inside one OAD authority. A stale/dead fragment cannot re-enter authority unless the canonical entrypoint references it and the bundle/bijection proofs admit it.
+Fragments are never consumed independently as alternative Product APIs. They are maintenance partitions inside one OAD authority. `wire:whole-4b` rejects a YAML fragment under `contracts/api/product/` that is not reachable from the canonical entrypoint, preventing stale parallel copies from surviving beside the active graph.
+
+The independent Fable review exposed three historical dead fragments (`fixed-paths.yaml`, `current-state-overrides.yaml`, `fixed-census-overrides.yaml`); they were deleted rather than archived or deprecated. Their deletion does not change the active 111-operation Product wire because none was reachable from `openapi.yaml`.
 
 Generated bundles under `/tmp` are proof artifacts only and are never committed/editable co-authority.
 
@@ -147,6 +147,8 @@ All three use exact typed request/response schemas. A Query may use POST when st
 
 The literal operation segment must be generated deterministically from the exact `operationId`; it cannot be caller-selected at runtime.
 
+An exact Project operation also cannot use a semantically unconstrained payload schema. `inputSchema` and `outputSchema` must each be a JSON Schema object with an actual root constraining form (`$ref`, `$dynamicRef`, `type`, `const`, `enum`, `oneOf`, `anyOf`, `allOf` or `not`). Boolean schemas and `{}` are rejected. This does **not** force object-rooted DTOs: primitive, array, union and referenced exact schemas remain valid when they are the honest operation contract.
+
 ## 5. Naming and schema law
 
 Canonical reusable schemas use stable PascalCase semantic names.
@@ -206,11 +208,19 @@ IC2 is a **semantic current-subject obligation**, not an automatic `If-Match` in
 
 RFC 9110 `If-Match` is used only when the ETag describes the current representation of the **same HTTP target resource being mutated**.
 
-The current literal `IF_MATCH` set is exactly:
+The current literal semantic `IF_MATCH` set is exactly:
 
 ```text
 PRJ-12 ClearProjectBrainBinding
 PAR-14 ReviseScheduleTrigger
+```
+
+The bundled HTTP carrier proof is correspondingly exact:
+
+```text
+required If-Match        = { PRJ-12, PAR-14 }
+optional If-Match        = { PRJ-11 }
+optional If-None-Match   = { PRJ-11 }
 ```
 
 Truthful same-target examples:
@@ -229,7 +239,7 @@ PATCH same trigger target
 → If-Match
 ```
 
-`PRJ-11 SetProjectBrainBinding` remains `CURRENT_OR_ABSENT`: the same exact target can later map present-state update through `If-Match` and absent-state create through an exact absent precondition such as `If-None-Match: *`, but 4B must close that request shape explicitly rather than pretending one unconditional ETag exists.
+`PRJ-11 SetProjectBrainBinding` remains `CURRENT_OR_ABSENT`: the same exact target maps present-state update through optional `If-Match` and absent-state create through optional `If-None-Match: *`, with the wire requiring exactly one of the two. It is deliberately not counted in the semantic `IF_MATCH`-only set.
 
 Do **not** reuse an ETag from one resource as `If-Match` on a different command/collection target. Current explicit-semantic examples include:
 
@@ -247,11 +257,11 @@ ArchiveProject command subpath
 → exact Project current revision/generation explicitly carried
 ```
 
-Likewise, when no exact item GET exists (for example a Published-App grant item), 4B must expose an explicit current revision/role/subject carrier rather than pretending the collection's ETag is the item's validator.
+Likewise, when no exact item GET exists (for example a Published-App grant item), 4B exposes an explicit current revision/role/subject carrier rather than pretending the collection's ETag is the item's validator.
 
 `WS-03`, `WS-06` and `PRJ-04` are no longer conditional-carrier cases because `4B-F01` removed those generic Product mutations entirely.
 
-Failed standard representation preconditions remain 412-class Problems. Exact field/header spelling for explicit semantic revisions is operation schema work inside 4B.
+Failed standard representation preconditions remain 412-class Problems.
 
 Bounded Evidence: [../evidence/4b/current-state-carrier-assessment.md](../evidence/4b/current-state-carrier-assessment.md).
 
@@ -364,7 +374,7 @@ PAR-04 / PAR-05
 → 202 AgentRun identity / exact Release pin
 
 live stream / reconnect / runtime observe
-→ later Technical Ingress/projection over that exact AgentRun
+→ Technical Ingress/projection over that exact AgentRun
 -X-> seventeenth PAR Product operation
 -X-> Mastra runId/toolCallId/threadId as Product identity
 -X-> stream end as AgentRun terminal truth
@@ -380,8 +390,8 @@ Current framework-leverage Evidence favors Mastra-native stream/HITL mechanics a
 schemaVersion
 operationId
 regime = QUERY | ACTION | INTEGRATION
-input schema
-output schema
+exact constraining input schema
+exact constraining output schema
 admitted caller class(es)
 Project/app scope
 required binding/pin classes
@@ -391,11 +401,11 @@ IC profile
 positive proof + negative control identity
 ```
 
-The grammar accepts only the bounded 4A caller/Permission vocabulary. It does not accept arbitrary global Permission strings, arbitrary target URLs or caller-selected Connections as effective authority.
+The grammar accepts only the bounded 4A caller/Permission vocabulary. It does not accept arbitrary global Permission strings, arbitrary target URLs or caller-selected Connections as effective authority. It also rejects semantically unconstrained boolean/empty payload schemas; exact schema shape remains operation-owned rather than globally forced to an object DTO convention.
 
-An exact declaration is not runtime authority by file existence; it must be admitted into the exact Release.
+An exact declaration is not runtime authority by file existence; it must be admitted into the exact Release. Release membership itself supplies the exact Release context; `requiredPins` is not inflated with duplicate `ACTIVE_RELEASE` metadata merely to restate that structural fact.
 
-The generated HTTP OAD must preserve the declaration's HTTP caller objects, scope and effect classification. Admitted non-HTTP callers remain explicitly classified as non-HTTP projection metadata and are never converted into session/header authority. A declaration with no admitted HTTP caller is not forced into the HTTP OAD merely to make generation universal.
+The generated HTTP OAD preserves the declaration's HTTP caller objects, scope and effect classification. Admitted non-HTTP callers remain explicitly classified as non-HTTP projection metadata and are never converted into session/header authority. A declaration with no admitted HTTP caller fails closed in the HTTP OAD generator rather than fabricating HTTP carriage; a separate 4D non-HTTP projection may consume that authority if a real realization requires it.
 
 Whole-wire Evidence: [../evidence/4b/whole-wire-adversarial-proof.md](../evidence/4b/whole-wire-adversarial-proof.md).
 
@@ -563,11 +573,15 @@ The repository `verify` path proves:
 
 ```text
 repository hygiene / docs / current-state guards
++ serial-safe repository mutation tests with cleanup
 + repository tests including 4B-F01 census regression
 + Product OAS lint + deterministic bundle
++ Product-fragment reachability / zero dead parallel YAML
 + Project declaration schema compilation
++ constrained Project input/output grammar
 + 4A ↔ fixed Product OAS bijection = 111 / 111
-+ current-state carrier exact-set proof = { PRJ-12, PAR-14 }
++ semantic IF_MATCH set = { PRJ-12, PAR-14 }
++ actual bundled If-Match/If-None-Match parameter sets
 + all fixed owner schema gates = 111 / 111
 + Technical Ingress lint + exact 3-operation protocol separation
 + deterministic generated-projection manifest
@@ -575,6 +589,7 @@ repository hygiene / docs / current-state guards
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 + whole-4B cross-surface executable/negative proof
++ in-memory adversarial controls must fail for the expected defect class
 ```
 
 Generated-projection TDD/probe chain:
@@ -607,10 +622,32 @@ Verify #363 = FAILURE
 Verify #364 = SUCCESS
 → minimal generator correction preserves HTTP/non-HTTP caller split, scope and effectClass
 → cross-surface negatives green
-→ all prior 4B gates remain green
+
+Verify #368 = FAILURE
+→ independent-review M1 reproduced: unbounded true/{} Project payload schema accepted
+
+Verify #369 = SUCCESS
+→ exact-payload grammar tightened without imposing object-only DTOs
+
+Verify #370 = FAILURE
+→ independent-review M2 reproduced: exactly three dead Product YAML fragments detected
+
+Verify #373 = SUCCESS
+→ dead fragments deleted; topology reachability gate green
+
+Verify #375 = SUCCESS
+→ repository mutation tests serialized and temporary work cleanup made repeat-safe
+
+Verify #377 = SUCCESS
+→ actual conditional HTTP carrier sets + expected adversarial failure reasons hardened
 ```
 
 Historical owner-slice RED/GREEN Evidence remains in the bounded files under `docs/evidence/4b/`; this contract does not duplicate the full worklog.
+
+Independent review and Lead adjudication:
+
+- [Independent Fable Review](../evidence/4b/fable-independent-review.md)
+- [Lead Adjudication](../evidence/4b/fable-review-adjudication.md)
 
 ## 18. Current remaining 4B derivation
 
@@ -618,16 +655,19 @@ Completed current wire surfaces/proofs:
 
 ```text
 fixed Product wire/schema closure       = 111 / 111
-Project-defined operation grammar       = CLOSED
+Project-defined operation grammar       = CLOSED / unbounded payload gap corrected
 Budget Analyzer proving instance         = GREEN
 Technical Ingress                        = CLOSED / 3 protocol-only operations
 Product-count impact of Technical        = 0
 generated projection/no-parallel-DTO     = CLOSED / real Kubb probe green
-whole-4B executable/negative proof       = CLOSED / one Project projection defect corrected
+whole-4B executable/negative proof       = CLOSED
+independent Fable review                 = COMPLETE / 2 bounded materials found
+Lead adjudication                        = COMPLETE / no 4A reopen
+material Fable corrections               = APPLIED
 ```
 
-The next 4B gate is **independent adversarial review of the exact candidate**, followed by Lead adjudication and explicit operator ratification.
+After the final exact-head repository Verify confirms the synchronized authority, the only remaining 4B gate is **explicit operator ratification**.
 
 Whole-wire Evidence: [../evidence/4b/whole-wire-adversarial-proof.md](../evidence/4b/whole-wire-adversarial-proof.md).
 
-Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.
+Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code before 4B is explicitly operator-ratified and integrated.

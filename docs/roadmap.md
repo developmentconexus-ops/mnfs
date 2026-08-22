@@ -39,25 +39,26 @@ Continue **4B — Executable Wire Contract** only.
 
 ```text
 fixed Product bijection = 111 ↔ 111
-schema-closed = 101 / 111
+schema-closed = 103 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 IAM+Workspace 20/20; Project 21/21; Builder 17/17; Brain 11/11
-Connections 9/9; Release 7/7; PAR 16/16 = CLOSED
-Budget Analyzer two-query proof = green; Verify #305 = SUCCESS
+Connections 9/9; Release 7/7; PAR 16/16; Gateway 2/2 = CLOSED
+Budget Analyzer two-query proof = green; Verify #323 = SUCCESS
 ```
 
 Next bounded slice:
 
 ```text
-Gateway inspection = 2 Product operations
-GW-01 ListEffectAttempts
-GW-02 GetEffectAttempt
+Managed Application Runtime = 3 Product operations
+MAR-01 ListManagedJobRuns
+MAR-02 GetManagedJobRun
+MAR-03 RunManagedJobNow
 ```
 
-Close only caller-visible effect-attempt inspection. Preserve exact originating run/operation/effect disclosure, receipt/reconciliation/provenance, `OUTCOME_UNKNOWN`, and zero retry/effect-execution authority. Effect admission, idempotency claim, resume and reconciliation remain owner-internal.
+Close only managed JobRun read/provenance and explicit run-now occurrence admission. Preserve exact currently served Release + admitted `job/v1`, single-flight/coalesce semantics and repeatable occurrence intake; queue/redelivery/catch-up mechanics remain runtime-private. Do not create CreateCron, ReplayMissedSlots, ForceRedelivery, MarkJobSucceeded or a generic scheduler/workflow Product domain.
 
-PAR Evidence: [schema closure](evidence/4b/par-schema-closure.md); [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
+Gateway Evidence: [schema closure](evidence/4b/gateway-schema-closure.md). PAR Evidence: [schema closure](evidence/4b/par-schema-closure.md); [technology leverage](evidence/4b/technology-leverage-and-par-streaming-review.md) remains bounded 4D input only.
 
 Do **not** begin 4C, select runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

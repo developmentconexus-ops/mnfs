@@ -44,16 +44,18 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              required: [name]
+              required: [name, sourceBootstrap]
               properties:
                 name:
                   type: string
                   minLength: 1
                   pattern: '.*\S.*'
                   description: Required human-readable Project identity fixed at F1 creation; not a grant, unique key, or rename authority.
+                sourceBootstrap:
+                  $ref: '#/components/schemas/ProjectSourceBootstrap'
       responses:
         '201':
-          description: Project identity established in the exact Workspace with the admitted initial operator grant and human-readable identity.
+          description: Source-complete Project established in the exact Workspace with the admitted initial operator grant, human-readable identity and exactly one canonical Project Git source.
           content:
             application/json:
               schema:
@@ -66,6 +68,10 @@ paths:
           $ref: './openapi.yaml#/components/responses/Problem404'
         '409':
           $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
+        '503':
+          $ref: './openapi.yaml#/components/responses/Problem503'
 
   /api/control/projects/{projectId}:
     parameters:
@@ -198,22 +204,27 @@ paths:
       x-conexus-contract-state: SCHEMA_CLOSED
       parameters:
         - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [intent]
+              properties:
+                intent:
+                  type: string
+                  minLength: 1
+                  pattern: '.*\S.*'
+                  description: Human business intent for this Inception investigation, including objective/users/constraints as needed; not generic mutable Project metadata and not source-selection authority.
       responses:
         '200':
-          description: Governed investigation completed over the Project's currently admitted sources and produced a candidate Baseline subject.
+          description: Governed investigation completed over the Project's already-admitted source/context and produced one exact candidate Baseline for immediate human review.
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: false
-                required: [candidateBaselineDigest, sourceRevision]
-                properties:
-                  candidateBaselineDigest:
-                    type: string
-                    minLength: 1
-                  sourceRevision:
-                    type: string
-                    minLength: 1
+                $ref: '#/components/schemas/ProjectBaselineCandidate'
         '401':
           $ref: './openapi.yaml#/components/responses/Problem401'
         '403':
@@ -222,6 +233,8 @@ paths:
           $ref: './openapi.yaml#/components/responses/Problem404'
         '409':
           $ref: './openapi.yaml#/components/responses/Problem409'
+        '422':
+          $ref: './openapi.yaml#/components/responses/Problem422'
         '503':
           $ref: './openapi.yaml#/components/responses/Problem503'
 
@@ -290,6 +303,31 @@ paths:
           $ref: './openapi.yaml#/components/responses/Problem412'
         '422':
           $ref: './openapi.yaml#/components/responses/Problem422'
+
+  /api/control/projects/{projectId}/baseline-candidates/{candidateBaselineDigest}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/CandidateBaselineDigest'
+    get:
+      summary: GetProjectBaselineCandidate
+      operationId: GetProjectBaselineCandidate
+      x-conexus-4a-id: PRJ-23
+      x-conexus-ingress: [CONTROL_PLANE]
+      x-conexus-current-state-carrier: NONE
+      x-conexus-contract-state: SCHEMA_CLOSED
+      responses:
+        '200':
+          description: Exact immutable Project Baseline candidate identified by the caller-known candidate digest for human review/re-entry before approval.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectBaselineCandidate'
+        '401':
+          $ref: './openapi.yaml#/components/responses/Problem401'
+        '403':
+          $ref: './openapi.yaml#/components/responses/Problem403'
+        '404':
+          $ref: './openapi.yaml#/components/responses/Problem404'
 
   /api/control/projects/{projectId}/brain-binding:
     parameters:
@@ -719,6 +757,14 @@ components:
       schema:
         type: string
         minLength: 1
+    CandidateBaselineDigest:
+      name: candidateBaselineDigest
+      in: path
+      required: true
+      description: Untrusted exact candidate Baseline digest reference only; current Project containment/disclosure is resolved server-side.
+      schema:
+        type: string
+        minLength: 1
     CapabilityId:
       name: capabilityId
       in: path
@@ -783,12 +829,51 @@ components:
           minLength: 1
         archived:
           type: boolean
+    ProjectSourceBootstrap:
+      description: Creation-time establishment of exactly one canonical Project Git source; mechanism/provider credentials remain server-side and post-create source switching is not admitted.
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [mode]
+          properties:
+            mode:
+              type: string
+              const: NEW
+        - type: object
+          additionalProperties: false
+          required: [mode, repositoryLocator]
+          properties:
+            mode:
+              type: string
+              const: EXISTING_GIT
+            repositoryLocator:
+              type: string
+              minLength: 1
+              pattern: '.*\S.*'
+              description: Untrusted provider-neutral Git repository locator only. It carries no credential/secret and grants no generic fetch, network, Workspace or Project authority; server-side GitInfra/policy validates admission.
     ApprovedBaseline:
       type: object
       additionalProperties: false
       required: [baselineDigest, sourceRevision, sourceText, applicationRuntimeProfile]
       properties:
         baselineDigest:
+          type: string
+          minLength: 1
+        sourceRevision:
+          type: string
+          minLength: 1
+        sourceText:
+          type: string
+          minLength: 1
+        applicationRuntimeProfile:
+          type: string
+          enum: [MANAGED, DEDICATED]
+    ProjectBaselineCandidate:
+      type: object
+      additionalProperties: false
+      required: [candidateBaselineDigest, sourceRevision, sourceText, applicationRuntimeProfile]
+      properties:
+        candidateBaselineDigest:
           type: string
           minLength: 1
         sourceRevision:

@@ -16,22 +16,34 @@ test('W-01 exposes a durable exact candidate Baseline for human review before ap
   const product = read('docs/product/contract.md')
   const wire = read('contracts/api/product/project-paths.yaml')
   const ledger = read('docs/product/operation-ledger.md')
+  const entry = read('contracts/api/product/openapi.yaml')
 
   if (!product.includes('human checkpoint: “this is what we are building”')) {
     throw new Error('test precondition lost: Journey B no longer requires a human Baseline checkpoint')
   }
 
   const inception = operationSection(wire, 'PRJ-07', 'PRJ-08')
-  const approved = operationSection(wire, 'PRJ-08', 'PRJ-09')
-
   if (!inception.includes('candidateBaselineDigest')) throw new Error('test precondition lost: PRJ-07 no longer produces a candidate Baseline subject')
   if (!wire.includes('operationId: ApproveProjectBaselineRevision')) throw new Error('test precondition lost: PRJ-09 approval no longer exists')
 
-  const hasDedicatedRead = /\| `PRJ-[0-9]+` \| `Get[^`]*(?:BaselineCandidate|CandidateProjectBaseline)[^`]*`/i.test(ledger)
-  const approvedReadCanSelectCandidate = /(candidateBaselineDigest|candidateDigest)/i.test(approved)
-  const inceptionProvidesStableProjectGitLocator = /(sourcePath|baselinePath)/i.test(inception) && /sourceRevision/i.test(inception)
+  if (!ledger.includes('| `PRJ-23` | `GetProjectBaselineCandidate` |')) {
+    throw new Error('4A must admit the exact candidate Baseline re-entry read before 4B can expose it')
+  }
+  if (!wire.includes('operationId: GetProjectBaselineCandidate') || !wire.includes('x-conexus-4a-id: PRJ-23')) {
+    throw new Error('4B Project wire must expose the accepted PRJ-23 candidate Baseline read')
+  }
+  if (!entry.includes('/api/control/projects/{projectId}/baseline-candidates/{candidateBaselineDigest}:')) {
+    throw new Error('canonical Product OAS must route the exact PRJ-23 candidate Baseline path')
+  }
 
-  if (!hasDedicatedRead && !approvedReadCanSelectCandidate && !inceptionProvidesStableProjectGitLocator) {
-    throw new Error('W-01 cannot re-enter/reload candidate Baseline review: current wire exposes a candidate digest and an approval command but no durable caller-readable exact candidate subject before approval')
+  const candidate = operationSection(wire, 'PRJ-23', null)
+  for (const required of ['candidateBaselineDigest', 'sourceRevision', 'sourceText', 'applicationRuntimeProfile']) {
+    if (!candidate.includes(required)) throw new Error(`PRJ-23 candidate read must expose ${required}`)
+  }
+  for (const profile of ['MANAGED', 'DEDICATED']) {
+    if (!candidate.includes(profile)) throw new Error(`PRJ-23 candidate read must preserve runtime profile ${profile}`)
+  }
+  if (/ListProjectBaselineCandidates|candidate status|candidateStatus/i.test(candidate)) {
+    throw new Error('PRJ-23 must not expand into candidate list/workflow CRUD')
   }
 })

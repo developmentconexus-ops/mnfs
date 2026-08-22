@@ -27,18 +27,28 @@ paths:
                     items:
                       type: object
                       additionalProperties: false
-                      required: [workspaceId]
+                      required: [workspaceId, name]
                       properties:
                         workspaceId: { type: string, minLength: 1 }
+                        name:
+                          type: string
+                          minLength: 1
+                          pattern: '.*\S.*'
+                          description: Human-readable Workspace identity; presentation-only and never authorization.
                   projects:
                     type: array
                     items:
                       type: object
                       additionalProperties: false
-                      required: [projectId, workspaceId]
+                      required: [projectId, workspaceId, name]
                       properties:
                         projectId: { type: string, minLength: 1 }
                         workspaceId: { type: string, minLength: 1 }
+                        name:
+                          type: string
+                          minLength: 1
+                          pattern: '.*\S.*'
+                          description: Human-readable Project identity; presentation-only and never authorization.
         '401':
           $ref: './openapi.yaml#/components/responses/Problem401'
 
@@ -459,17 +469,35 @@ paths:
       x-conexus-contract-state: SCHEMA_CLOSED
       parameters:
         - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  pattern: '.*\S.*'
+                  description: Required human-readable Workspace identity fixed at F1 creation; not a grant, unique key, or rename authority.
       responses:
         '201':
-          description: Workspace created from the admitted trusted-operator intake.
+          description: Workspace created from the admitted trusted-operator intake with its human-readable identity.
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: false
-                required: [workspaceId]
+                required: [workspaceId, name]
                 properties:
                   workspaceId: { type: string, minLength: 1 }
+                  name:
+                    type: string
+                    minLength: 1
+                    pattern: '.*\S.*'
         '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
         '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
         '409': { $ref: './openapi.yaml#/components/responses/Problem409' }
@@ -490,15 +518,19 @@ paths:
       x-conexus-contract-state: SCHEMA_CLOSED
       responses:
         '200':
-          description: Current disclosable Workspace identity.
+          description: Current disclosable Workspace stable identity plus human-readable presentation identity.
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: false
-                required: [workspaceId]
+                required: [workspaceId, name]
                 properties:
                   workspaceId: { type: string, minLength: 1 }
+                  name:
+                    type: string
+                    minLength: 1
+                    pattern: '.*\S.*'
         '401': { $ref: './openapi.yaml#/components/responses/Problem401' }
         '403': { $ref: './openapi.yaml#/components/responses/Problem403' }
         '404': { $ref: './openapi.yaml#/components/responses/Problem404' }

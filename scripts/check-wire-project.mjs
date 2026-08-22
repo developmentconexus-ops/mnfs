@@ -18,7 +18,7 @@ const expectedIds = [
 ];
 
 if (expectedIds.length !== 21) throw new Error(`internal test setup error: expected 21 Project ids, got ${expectedIds.length}`);
-if (operations.has('PRJ-04')) throw new Error('PRJ-04 must remain subtracted after 4B-F01');
+if (operations.has('PRJ-04')) throw new Error('PRJ-04 must remain subtracted after 4B-F01 / 4C-F01');
 
 for (const id of expectedIds) {
   const entry = operations.get(id);
@@ -87,20 +87,49 @@ function propertySchema(schema, name) {
   return resolveSchema(resolveSchema(schema)?.properties?.[name]);
 }
 
-// CreateProject: accepted authority establishes identity + initial grant but no generic Project metadata inventory.
-if (op('PRJ-03').requestBody) throw new Error('PRJ-03 must not invent Project metadata input');
+function assertHumanName(schema, label) {
+  const resolved = assertClosedObject(schema, label);
+  if (!requiredFields(resolved).has('name')) throw new Error(`${label} must require name`);
+  const name = propertySchema(resolved, 'name');
+  if (name?.type !== 'string' || (name.minLength ?? 0) < 1 || typeof name.pattern !== 'string') {
+    throw new Error(`${label} name must be an explicit non-blank string schema`);
+  }
+  return name;
+}
+
+// 4C-F01: creation establishes one human-readable identity property only; no generic metadata mutation is admitted.
+const createProject = assertHumanName(requestSchema('PRJ-03'), 'PRJ-03 request');
+for (const forbidden of ['description', 'settings', 'metadata']) {
+  if (requestSchema('PRJ-03').properties?.[forbidden]) throw new Error(`PRJ-03 must not expose speculative Project field ${forbidden}`);
+}
 if (!hasParameter('PRJ-03', 'header', 'Idempotency-Key', true)) throw new Error('PRJ-03 must require Idempotency-Key');
+
+const projectRepresentation = assertHumanName(successSchema('PRJ-02'), 'PRJ-02 success');
+const projectList = resolveSchema(successSchema('PRJ-01'));
+const projectSummary = assertHumanName(resolveSchema(projectList?.items), 'PRJ-01 item');
+for (const field of ['projectId', 'workspaceId', 'archived']) {
+  if (!requiredFields(projectSummary).has(field)) throw new Error(`PRJ-01 item must require ${field}`);
+}
+for (const field of ['projectId', 'workspaceId', 'projectRevision', 'archived']) {
+  if (!requiredFields(projectRepresentation).has(field)) throw new Error(`PRJ-02 success must require ${field}`);
+}
 
 // ArchiveProject: current Project subject is explicit because command subpath cannot truthfully reuse Project ETag.
 const archive = assertClosedObject(requestSchema('PRJ-05'), 'PRJ-05 request');
 if (!requiredFields(archive).has('expectedProjectRevision')) throw new Error('PRJ-05 must require expectedProjectRevision');
 if (archive.properties?.name || archive.properties?.settings || archive.properties?.metadata) {
-  throw new Error('PRJ-05 must not resurrect generic Project mutation fields');
+  throw new Error('PRJ-05 must not become rename/generic Project mutation');
 }
 
-// DuplicateProject: only destination choice is caller input; accepted default remains NO DATA with no credential/binding copy switches.
+// DuplicateProject: destination Workspace and a new human-readable destination identity are explicit; default remains NO DATA.
 const duplicate = assertClosedObject(requestSchema('PRJ-06'), 'PRJ-06 request');
-if (!requiredFields(duplicate).has('destinationWorkspaceId')) throw new Error('PRJ-06 must require destinationWorkspaceId');
+for (const field of ['destinationWorkspaceId', 'name']) {
+  if (!requiredFields(duplicate).has(field)) throw new Error(`PRJ-06 must require ${field}`);
+}
+const duplicateName = propertySchema(duplicate, 'name');
+if (duplicateName?.type !== 'string' || (duplicateName.minLength ?? 0) < 1 || typeof duplicateName.pattern !== 'string') {
+  throw new Error('PRJ-06 name must be an explicit non-blank destination identity');
+}
 for (const forbidden of ['copyData', 'dataMode', 'copyCredentials', 'copyConnectionBindings', 'connectionBindings', 'credentials']) {
   if (duplicate.properties?.[forbidden]) throw new Error(`PRJ-06 must not expose speculative duplication field ${forbidden}`);
 }
@@ -184,4 +213,4 @@ for (const forbidden of ['mastraAgentId', 'runtimeRevisionId', 'requestRevisionO
   if (agent.properties?.[forbidden]) throw new Error(`PRJ-21 must not expose runtime-authority field ${forbidden}`);
 }
 
-console.log('Project schema closure passed (21 operations; Project metadata not invented; Baseline/bindings/projections closed).');
+console.log('Project schema closure passed (21 operations; human Project identity closed; generic mutation still absent; Baseline/bindings/projections closed).');

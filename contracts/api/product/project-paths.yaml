@@ -37,9 +37,23 @@ paths:
       x-conexus-contract-state: SCHEMA_CLOSED
       parameters:
         - $ref: './openapi.yaml#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  pattern: '.*\S.*'
+                  description: Required human-readable Project identity fixed at F1 creation; not a grant, unique key, or rename authority.
       responses:
         '201':
-          description: Project identity established in the exact Workspace with the admitted initial operator grant.
+          description: Project identity established in the exact Workspace with the admitted initial operator grant and human-readable identity.
           content:
             application/json:
               schema:
@@ -136,14 +150,19 @@ paths:
             schema:
               type: object
               additionalProperties: false
-              required: [destinationWorkspaceId]
+              required: [destinationWorkspaceId, name]
               properties:
                 destinationWorkspaceId:
                   type: string
                   minLength: 1
+                name:
+                  type: string
+                  minLength: 1
+                  pattern: '.*\S.*'
+                  description: Required human-readable identity of the destination Project; the source Project name is never copied implicitly as Product authority.
       responses:
         '201':
-          description: Duplicated Project created with the accepted NO DATA copy policy; destination establishes its own current bindings and authorization.
+          description: Duplicated Project created with the accepted NO DATA copy policy; destination establishes its own current human identity, bindings and authorization.
           content:
             application/json:
               schema:
@@ -728,7 +747,7 @@ components:
     ProjectSummary:
       type: object
       additionalProperties: false
-      required: [projectId, workspaceId, archived]
+      required: [projectId, workspaceId, name, archived]
       properties:
         projectId:
           type: string
@@ -736,12 +755,17 @@ components:
         workspaceId:
           type: string
           minLength: 1
+        name:
+          type: string
+          minLength: 1
+          pattern: '.*\S.*'
+          description: Human-readable Project identity; not a stable identifier, uniqueness guarantee, or authorization source.
         archived:
           type: boolean
     ProjectRepresentation:
       type: object
       additionalProperties: false
-      required: [projectId, workspaceId, projectRevision, archived]
+      required: [projectId, workspaceId, name, projectRevision, archived]
       properties:
         projectId:
           type: string
@@ -749,6 +773,11 @@ components:
         workspaceId:
           type: string
           minLength: 1
+        name:
+          type: string
+          minLength: 1
+          pattern: '.*\S.*'
+          description: Human-readable Project identity fixed for F1 after creation; rename is not admitted by this schema.
         projectRevision:
           type: string
           minLength: 1

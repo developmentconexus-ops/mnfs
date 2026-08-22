@@ -1,6 +1,6 @@
 # Conexus OS — Executable Wire Contract
 
-> **Status:** 4B CANDIDATE / REPRESENTATION + 111 FIXED METHOD/PATH BIJECTION CLOSED / SHARED CARRIERS ACTIVE
+> **Status:** 4B CANDIDATE / 111 FIXED PRODUCT SCHEMAS CLOSED / SHARED CARRIERS ACTIVE
 > **Owner:** 4B — Executable Wire Contract.
 > **Product semantics:** current operator-ratified 4A authority, including bounded `4B-F01`, remains canonical above this wire.
 > **Implementation:** BLOCKED.
@@ -48,6 +48,7 @@ contracts/api/product/release-paths.yaml            closed Release / Promotion /
 contracts/api/product/par-paths.yaml                closed Product Agent Runtime Path Items
 contracts/api/product/gateway-paths.yaml            closed Gateway inspection Path Items
 contracts/api/product/mar-paths.yaml                closed Managed Application Runtime Path Items
+contracts/api/product/observability-paths.yaml      closed Observability & Audit Path Items
 ```
 
 Rules:
@@ -478,6 +479,22 @@ RunManagedJobNow
 -X-> caller Release / queue / retry / catch-up selection
 ```
 
+OBS/Audit adds a separate observation-truth law:
+
+```text
+telemetry / trace / provider / guest observation
+→ correlation + provenance only
+-X-> owner terminal/current state
+-X-> authorization
+
+usage/cost MISSING
+-X-> zero
+
+audit fact
+→ immutable evidence
+-X-> mutable owner state
+```
+
 ## 15. Exact bytes
 
 Byte transport remains subordinate to an owning Product operation:
@@ -523,18 +540,18 @@ repository hygiene / docs / current-state guards
 + Project declaration schema compilation
 + 4A ↔ fixed Product OAS bijection
 + current-state carrier exact-set proof
-+ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release, PAR, Gateway and MAR
++ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release, PAR, Gateway, MAR and OBS/Audit
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 ```
 
-Current technical GREEN before MAR closeout-only documentation:
+Current technical GREEN after all fixed-owner schemas closed:
 
 ```text
-Verify #331 = SUCCESS
-candidate HEAD = 22f62f3b6c83b75a634d018a91897074b75b6b7e
+Verify #339 = SUCCESS
+candidate HEAD = 8757e3b89e8feb89dc72053d6b819399ea312507
 fixed 4A↔OAS = 111/111
-schema-closed = 106/111
+schema-closed = 111/111
 missing = 0
 extra = 0
 duplicate = 0
@@ -548,6 +565,7 @@ Release = 7/7
 Product Agent Runtime = 16/16
 Gateway = 2/2
 Managed Application Runtime = 3/3
+Observability & Audit = 5/5
 Budget static generated paths = 2
 ```
 
@@ -634,9 +652,26 @@ Verify #331 = SUCCESS
 
 Bounded Evidence: [../evidence/4b/mar-schema-closure.md](../evidence/4b/mar-schema-closure.md).
 
+The Observability & Audit slice closed the final five fixed Product schemas without promoting telemetry to authority:
+
+```text
+Verify #337 = FAILURE
+→ expected RED: OBS-01 was not SCHEMA_CLOSED in the canonical bundle
+→ all prior owner gates remained green at 106 / 111
+
+Verify #339 = SUCCESS
+→ OBS/Audit reached 5 / 5 and total schema closure reached 111 / 111
+→ producer trust remains explicit and telemetry remains non-authoritative
+→ usage/cost preserves missing != zero
+→ AuditRecord remains immutable inspection only
+→ 111↔111, IF_MATCH exact set and Budget proof remained green
+```
+
+Bounded Evidence: [../evidence/4b/observability-schema-closure.md](../evidence/4b/observability-schema-closure.md).
+
 ## 18. Next derivation
 
-Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first nine owner schema slices are established.
+Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and **all fixed owner schema slices** are established.
 
 Closed owner slices:
 
@@ -650,21 +685,20 @@ Release                     = 7 / 7
 Product Agent Runtime       = 16 / 16
 Gateway                     = 2 / 2
 Managed Application Runtime = 3 / 3
+Observability & Audit       = 5 / 5
+TOTAL                       = 111 / 111
 ```
 
-The next bounded owner slice is only:
+The next bounded 4B derivation is **Technical Ingress / protocol classification** only, following the contract's working order:
 
 ```text
-Observability & Audit = 5 Product operations
-OBS-01 ListProjectActivity
-OBS-02 GetExecutionObservationDetail
-OBS-03 GetProjectUsageCostSummary
-OBS-04 ListAuditRecords
-OBS-05 GetAuditRecord
+current externally reachable technical consumers
+→ exact technical wire home where required
+→ explicit Product-vs-Technical classification
+→ technical operation identifiers cannot collide with Product operationId/x-conexus-4a-id
+→ N_platform remains exactly 111
 ```
 
-Derive OBS/Audit schemas only from accepted observation/provenance/audit authority. Preserve telemetry/Evidence as projections rather than current owner truth, preserve immutable audit facts, and ensure missing usage/cost never masquerades as zero. No telemetry mutation, owner terminal-state reconstruction, retry/completion or authorization authority is admitted.
-
-After the remaining fixed owner slice closes, 4B still must complete Technical Ingress/protocol classification, generated-projection/no-parallel-DTO proof, whole-4B adversarial review and explicit operator ratification.
+After that, derive generated projections + no-parallel-DTO proof, rerun the whole 4B executable/negative proof, perform independent adversarial review, Lead adjudication and explicit operator 4B ratification.
 
 Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code.

@@ -40,6 +40,7 @@ Product implementation = BLOCKED
 
 Read when the shell baseline itself is material:
 
+- [GF-01 approved P8 HTML](evidence/4c/gf01-global-frame-wireframe.html)
 - [GF-01 H1-R2 structural lock](evidence/4c/gf01-structural-hypotheses.md)
 - [GF-01 exact Screen Contract / P10 closure](evidence/4c/gf01-screen-contract.md)
 

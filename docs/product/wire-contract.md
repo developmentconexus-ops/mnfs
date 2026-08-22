@@ -1,6 +1,6 @@
 # Conexus OS — Executable Wire Contract
 
-> **Status:** 4B CANDIDATE / 111 FIXED PRODUCT SCHEMAS CLOSED / WHOLE PROOF + INDEPENDENT REVIEW ADJUDICATED
+> **Status:** 4B CLOSED / OPERATOR RATIFIED / AWAITING INTEGRATION
 > **Owner:** 4B — Executable Wire Contract.
 > **Product semantics:** current operator-ratified 4A authority, including bounded `4B-F01`, remains canonical above this wire.
 > **Implementation:** BLOCKED.
@@ -649,9 +649,9 @@ Independent review and Lead adjudication:
 - [Independent Fable Review](../evidence/4b/fable-independent-review.md)
 - [Lead Adjudication](../evidence/4b/fable-review-adjudication.md)
 
-## 18. Current remaining 4B derivation
+## 18. Ratified 4B closure
 
-Completed current wire surfaces/proofs:
+Operator ratification closes the 4B semantic authority on this candidate. The ratified result is:
 
 ```text
 fixed Product wire/schema closure       = 111 / 111
@@ -661,13 +661,13 @@ Technical Ingress                        = CLOSED / 3 protocol-only operations
 Product-count impact of Technical        = 0
 generated projection/no-parallel-DTO     = CLOSED / real Kubb probe green
 whole-4B executable/negative proof       = CLOSED
-independent Fable review                 = COMPLETE / 2 bounded materials found
+independent Fable review                 = COMPLETE / 2 bounded materials found and corrected
 Lead adjudication                        = COMPLETE / no 4A reopen
-material Fable corrections               = APPLIED
+operator ratification                    = COMPLETE
 ```
 
-After the final exact-head repository Verify confirms the synchronized authority, the only remaining 4B gate is **explicit operator ratification**.
+Ratification does not authorize merge by itself. Until this candidate is integrated into `main`, 4C remains not started and Product implementation remains blocked.
 
 Whole-wire Evidence: [../evidence/4b/whole-wire-adversarial-proof.md](../evidence/4b/whole-wire-adversarial-proof.md).
 
-Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code before 4B is explicitly operator-ratified and integrated.
+Do not begin 4C, router/framework selection, persistence design, Paved Road selection, migrations, Sankhya implementation or Product code before 4B is integrated.

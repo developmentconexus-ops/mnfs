@@ -45,10 +45,11 @@ all fixed owner slices = CLOSED
 Budget Analyzer proof = green
 Technical Ingress = CLOSED / 3 protocol-only HTTP operations / N_platform impact 0
 generated projection / no-parallel-DTO = CLOSED / real Kubb 5.0.0 OAS probe green
+whole-4B executable/negative proof = CLOSED / one Project projection defect corrected
 ```
 
-Next: execute the **whole-4B executable/negative proof** across Product wire, Project grammar, Budget instance, Technical Ingress and generated-projection separation. Then independent adversarial review → Lead adjudication → explicit operator ratification.
+Next: perform **independent adversarial review** of the exact 4B candidate → Lead adjudication → explicit operator ratification.
 
-Current bounded Evidence: [Technical Ingress](evidence/4b/technical-ingress-classification.md) → [Generated Projection / No Parallel DTO](evidence/4b/generated-projection-no-parallel-dto.md). Do **not** begin 4C or Product implementation.
+Current bounded Evidence: [Technical Ingress](evidence/4b/technical-ingress-classification.md) → [Generated Projection / No Parallel DTO](evidence/4b/generated-projection-no-parallel-dto.md) → [Whole-Wire Adversarial Proof](evidence/4b/whole-wire-adversarial-proof.md). Do **not** begin 4C or Product implementation.
 
 Authority: [4B contract](phases/4b-executable-wire-contract.md) → [wire contract](product/wire-contract.md) → canonical Product + Technical machine-readable wire.

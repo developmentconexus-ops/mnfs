@@ -41,27 +41,28 @@ Established executable state:
 
 ```text
 fixed Product bijection = 111 ↔ 111
-schema-closed = 69 / 111
+schema-closed = 78 / 111
 missing / extra / duplicate = 0
 literal IF_MATCH = { PRJ-12, PAR-14 }
 IAM + Workspace = 20 / 20 CLOSED
 Project = 21 / 21 CLOSED
 Builder = 17 / 17 CLOSED
 Brain = 11 / 11 CLOSED
+Connections = 9 / 9 CLOSED
 Budget Analyzer generated two-query proof = green
-Verify #278 = SUCCESS
+Verify #285 = SUCCESS
 ```
 
 Next bounded slice:
 
 ```text
-Connections Product operations = 9
-= CON-01 → CON-09
+Release / Promotion / serving Product operations = 7
+= REL-01, REL-02, REL-04, REL-05, REL-06, REL-07, REL-08
 ```
 
-Close Connection schemas only from accepted Connections/Gateway authority. Preserve `WORKSPACE | PROJECT` owner scope, private Project containment, exact Connector definition/version, immutable Connection revisions, write-only secret ingress, credential-handle rather than plaintext disclosure, real-environment qualification/provenance and the distinction `configured != qualified != bound != healthy != authorized`. Do not admit secret readback, arbitrary TestURL, generic credential fetch/executor, cross-Workspace sharing, or duplicate Project-binding authority.
+Close only those Release-owned Product schemas from accepted Release authority. `REL-03 ComposeRelease` remains `SYSTEM_OWNER_TRANSITION`, not caller Product wire. Missing Product meaning remains a stop/reopen falsifier rather than permission to invent request fields, lifecycle state, rollback authority or serving semantics.
 
-Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md).
+Closed slice Evidence: [IAM + Workspace](evidence/4b/identity-workspace-schema-closure.md), [Project](evidence/4b/project-schema-closure.md), [Builder](evidence/4b/builder-schema-closure.md), [Brain](evidence/4b/brain-schema-closure.md), [Connections](evidence/4b/connections-schema-closure.md).
 
 Do **not** begin 4C, choose runtime/Paved Road/persistence mechanics, implement Product code, create migrations, implement Sankhya, or execute R1–R7 while 4B is open.
 

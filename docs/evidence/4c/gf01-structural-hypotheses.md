@@ -1,17 +1,20 @@
 # 4C GF-01 — Structural Hypotheses
 
-> **Status:** CANDIDATE / 4C-7 / FABLE REVIEW INCORPORATED
+> **Status:** `LOCKED / OPERATOR APPROVED` / 4C-8 CLOSED
 > **Block:** `GF-01` — global frame + Workspace/Project navigation
+> **Locked hypothesis:** `H1-R2` — single adaptive rail + breadcrumb-switcher + contextual assistant seam
 > **Prerequisite:** `4C-F01` RESOLVED / authority-feasibility GREEN.
-> **Decision posture:** no hypothesis is `LOCKED`; only the operator may lock the rendered HTML structure.
+> **Approved rendered artifact:** `gf01-global-frame-wireframe.html` @ Git blob `2d899d00484c41c927829bd9f529d3a870159db3`.
 
-GF-01 began with one real ambiguity: whether Workspace and Project navigation should coexist as persistent navigation landmarks or one contextual navigation landmark should adapt to current scope. The first rendered H1 exposed useful review findings, now adjudicated in [GF-01 Fable Shell Review Adjudication](gf01-fable-review-adjudication.md).
+GF-01 began with one real ambiguity: whether Workspace and Project navigation should coexist as persistent navigation landmarks or one contextual navigation landmark should adapt to current scope. The first H1 render exposed useful review findings, adjudicated in [GF-01 Fable Shell Review Adjudication](gf01-fable-review-adjudication.md). H1-R2 incorporated those findings and the operator explicitly approved the rendered structure on 2026-08-22.
 
-The earlier 4C-4 reference study remains sufficient. Additional broad research is not required for this revision.
+The approved HTML is preserved as the exact reviewed P8 artifact. Its render-time candidate label is intentionally not rewritten after the lock; this record is the operator-only lock authority.
+
+The earlier 4C-4 reference study remains sufficient. Additional broad research is not required for this block.
 
 ## 1. Constraints
 
-The frame must preserve:
+The locked frame preserves:
 
 ```text
 Account/session visibility
@@ -29,7 +32,7 @@ Preview-dominant Build width
 contextual Conexus seam without global assistant authority
 ```
 
-## 2. H1-R2 — Single adaptive rail + breadcrumb-switcher — RECOMMENDED CANDIDATE
+## 2. H1-R2 — Single adaptive rail + breadcrumb-switcher — LOCKED
 
 Structure:
 
@@ -76,11 +79,11 @@ Context identity is navigation, not form entry:
 Conexus / Metal Nobre ▾ / Budget Analyzer ▾
 ```
 
-Each segment opens only currently disclosed context choices. Local filtering inside the menu is `LOCAL_UI`, not a global Product search operation.
+Each segment exposes only currently server-disclosed context choices. Local filtering inside the menu is `LOCAL_UI`, not a Product-wide search operation.
 
 ### Workspace cross-scope mitigation
 
-H1's main cost was one extra navigation step to Workspace resources while inside a Project. The Workspace breadcrumb menu mitigates that without a permanent second rail by exposing bounded navigation shortcuts:
+H1's original cost was one extra step to Workspace resources while inside a Project. The locked Workspace breadcrumb menu mitigates that without a permanent second rail by exposing bounded navigation shortcuts:
 
 ```text
 Brain
@@ -92,36 +95,36 @@ This retains one active primary rail and does not move ownership into Project sc
 
 ### Contextual Conexus frame seam
 
-The frame reserves a collapsible right-side cooperation seam for the contextual Conexus assistant. The current surface decides whether the `Ask Conexus` affordance is eligible; GF-01 does not make the assistant global.
+The frame reserves a collapsible right-side cooperation seam for contextual Conexus assistance. The current material surface decides whether the `Ask Conexus` affordance exists; GF-01 does not make the assistant global.
 
-Current structural candidate:
+Structural support carried forward:
 
 ```text
-wide:    content may cooperate with a pushed panel
-medium:  panel may overlay
-narrow:  panel may occupy the available viewport
+wide:    content can cooperate with a pushed panel
+medium:  panel can overlay
+narrow:  panel can occupy the available viewport
 ```
 
-Exact thresholds/mode selection belong to the later assistant/surface block. The seam exists now so P-01/P-02 do not need to retrofit the global grid after frame lock.
+The seam is locked; exact thresholds, panel width and mode-selection algorithm are not. Those belong to later assistant/surface work and cannot silently change the locked global hierarchy.
 
-### Strengths
+### Locked strengths
 
 - one primary navigation landmark at a time;
 - breadcrumb expresses Workspace → Project hierarchy with low top-bar noise;
 - Workspace menu shortcuts remove most practical advantage of permanent dual rails;
 - maximum default width for Preview-dominant Build;
-- direct mobile transformation to one navigation drawer;
+- direct mobile transformation to one semantic navigation drawer;
 - Project navigation scales vertically;
 - contextual assistant can cooperate with frame layout without becoming global authority.
 
-### Cost / risk
+### Carry-forward risks / probes
 
-- Workspace shortcuts inside a context menu must remain discoverable;
-- Project-name cue in rail may be redundant with the breadcrumb and is explicitly under walkthrough;
-- assistant seam adds a frame responsibility, so actual panel eligibility/content must remain surface-owned;
-- relative navigation order is still not frequency-backed by `4C-A02`.
+- Workspace shortcuts inside a context menu must remain discoverable in assembled walkthroughs;
+- Project-name cue in rail may later prove redundant, but changing it after lock requires the smallest GF-01 reopen if material;
+- actual assistant eligibility/content must remain surface-owned;
+- relative ordering among non-primary items is not frequency-backed by `4C-A02` and remains an assumption probe rather than permission to reorder during implementation.
 
-## 3. H2 — Persistent Workspace rail + nested Project rail — REJECTED AS LEADING CANDIDATE
+## 3. H2 — Persistent Workspace rail + nested Project rail — REJECTED
 
 Structure:
 
@@ -143,32 +146,29 @@ Audit               Brain
 CONTENT
 ```
 
-### Strengths
-
-- Workspace destinations always visible;
-- hierarchy continuously visible.
-
-### Cost / risk
+Why rejected:
 
 - two navigation landmarks compete for attention and keyboard traversal;
 - permanent horizontal cost reduces Build/Preview space;
 - denser responsive logic;
 - visually suggests two adjacent Product taxonomies rather than a scope transition;
 - no evidence that constant cross-scope switching justifies the cost;
-- H1-R2 Workspace-menu shortcuts now mitigate H2's only clear advantage.
+- H1-R2 Workspace-menu shortcuts mitigate H2's only clear advantage.
 
-## 4. Decision matrix
+## 4. Final decision matrix
 
 | Criterion | H1-R2 adaptive rail | H2 dual rail |
 | --- | --- | --- |
 | Human scope clarity | **strong breadcrumb hierarchy** | strong but heavier |
 | Build/Preview width | **best** | materially reduced |
-| Cross-scope Workspace access | one context-menu action | always visible |
+| Cross-scope Workspace access | bounded context-menu action | always visible |
 | Keyboard landmarks | **one primary rail** | two persistent rails |
 | Mobile transformation | **one drawer** | requires rail merging/cascading |
 | Contextual assistant retrofit risk | **seam reserved now** | still needs third-column policy |
-| Evidence for permanent dual navigation | none | none |
+| Evidence for permanent dual navigation | no need | no need |
 | YAGNI | **lower structural cost** | higher permanent cost |
+
+Operator decision: **H1-R2 LOCKED**.
 
 ## 5. Review carry-forwards that are not GF-01 decisions
 
@@ -188,9 +188,9 @@ pending ApprovalRequest discoverability
 
 A universal Approval Center remains rejected.
 
-## 6. Responsive candidate
+## 6. Responsive baseline
 
-For narrow layouts:
+For narrow layouts, the locked semantic transformation is:
 
 ```text
 TOP BAR
@@ -208,24 +208,29 @@ CONTENT
 single-column current surface
 ```
 
-The drawer is the same semantic navigation as desktop, not a separate Product IA.
+The drawer is the same semantic navigation as desktop, not a separate Product IA. Exact pixel breakpoints are not locked authority.
 
-## 7. Rendered evidence
+## 7. Approved rendered evidence
 
-The revised leading H1-R2 is rendered in:
+The operator reviewed and approved:
 
 [GF-01 Global Frame Low-Fidelity HTML Wireframe](gf01-global-frame-wireframe.html)
 
-The artifact is HTML/CSS lo-fi with bounded vanilla JavaScript only to inspect context menus, scope transitions, rail behavior, assistant seam and narrow-layout transformation. It is P8 Evidence, not production frontend or P11 whole-flow proof.
-
-## 8. Operator decision requested
-
-The revised H1-R2 can receive only one of:
+Exact Git blob:
 
 ```text
-LOCKED   — operator accepts this structural baseline
-REVISE   — operator identifies a material structural change
-REJECTED — operator selects another hypothesis
+2d899d00484c41c927829bd9f529d3a870159db3
 ```
 
-Assistant/tool output does not set `LOCKED`.
+The artifact is HTML/CSS lo-fi with bounded vanilla JavaScript only to inspect context menus, scope transitions, rail behavior, assistant seam and narrow-layout transformation. It is P8 Evidence, not production frontend or backend/runtime proof.
+
+## 8. Operator adjudication and downstream closure
+
+```text
+H1-R2 = LOCKED / OPERATOR APPROVED
+4C-8 = CLOSED for GF-01
+```
+
+The exact post-lock vertical trace, state ownership, authorization boundary, P10 consolidation and P11 trigger disposition are in [GF-01 Locked Screen Contract](gf01-screen-contract.md).
+
+Reopen GF-01 only when material later evidence falsifies the locked hierarchy, accessibility/responsive viability, Preview-width requirement, server-derived context truth, or contextual-assistant frame cooperation. Do not reopen for visual preference or implementation convenience.

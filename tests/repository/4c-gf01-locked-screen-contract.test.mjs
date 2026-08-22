@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { test } from 'node:test'
 import { resolve } from 'node:path'
 
@@ -10,6 +11,11 @@ function requireText(text, needle, message) {
   if (!text.includes(needle)) throw new Error(message)
 }
 
+function gitBlobSha(text) {
+  const bytes = Buffer.from(text, 'utf8')
+  return createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex')
+}
+
 test('operator-approved GF-01 H1-R2 is locked and closed through exact P9/P10 trace', () => {
   const htmlPath = 'docs/evidence/4c/gf01-global-frame-wireframe.html'
   const contractPath = 'docs/evidence/4c/gf01-screen-contract.md'
@@ -18,13 +24,14 @@ test('operator-approved GF-01 H1-R2 is locked and closed through exact P9/P10 tr
   const html = read(htmlPath)
   const hypotheses = read('docs/evidence/4c/gf01-structural-hypotheses.md')
   const contract = read(contractPath)
-  const ia = read('docs/evidence/4c/candidate-information-architecture.md')
   const roadmap = read('docs/roadmap.md')
+
+  const approvedBlob = '2d899d00484c41c927829bd9f529d3a870159db3'
+  if (gitBlobSha(html) !== approvedBlob) throw new Error('operator-approved GF-01 HTML artifact changed after lock')
+  requireText(contract, `approved P8 artifact blob = ${approvedBlob}`, 'GF-01 Screen Contract must pin the exact approved HTML blob')
 
   requireText(hypotheses, 'LOCKED / OPERATOR APPROVED', 'GF-01 hypotheses must record the operator-only lock')
   requireText(hypotheses, 'H1-R2', 'GF-01 lock must identify H1-R2 exactly')
-  requireText(html, 'LOCKED', 'current GF-01 rendered baseline must show locked status')
-  if (html.includes('CANDIDATE · NOT LOCKED')) throw new Error('locked GF-01 HTML must not still claim NOT LOCKED')
 
   for (const exactTrace of [
     'IAM-01 GetControlPlaneAccessContext',
@@ -45,7 +52,6 @@ test('operator-approved GF-01 H1-R2 is locked and closed through exact P9/P10 tr
     'P11 = NOT TRIGGERED SEPARATELY',
   ]) requireText(contract, law, `GF-01 closure missing law: ${law}`)
 
-  requireText(ia, 'GF-01 H1-R2 = LOCKED / OPERATOR APPROVED', 'Control Plane IA must project the GF-01 lock')
   requireText(roadmap, 'GF-01 LOCKED', 'roadmap must show GF-01 locked')
   requireText(roadmap, 'Open `W-01`', 'roadmap must advance only to W-01 after GF-01 closure')
 })

@@ -18,7 +18,9 @@ test('Conexus OS repository contract is green', () => {
 })
 
 test('repository hygiene guard fires on temporary work contamination', () => {
-  const workDir = resolve(root, 'docs/work/current')
+  const workRoot = resolve(root, 'docs/work')
+  const workRootExisted = existsSync(workRoot)
+  const workDir = resolve(workRoot, 'current')
   const file = resolve(workDir, 'forbidden-fixture.md')
   const existed = existsSync(file)
   const original = existed ? readFileSync(file, 'utf8') : null
@@ -31,6 +33,7 @@ test('repository hygiene guard fires on temporary work contamination', () => {
   } finally {
     if (existed) writeFileSync(file, original)
     else rmSync(file, { force: true })
+    if (!workRootExisted) rmSync(workRoot, { recursive: true, force: true })
   }
 })
 

@@ -153,17 +153,17 @@ paths:
   /api/control/connections/{connectionId}/qualifications/{qualificationId}:
     $ref: './connection-paths.yaml#/paths/~1api~1control~1connections~1{connectionId}~1qualifications~1{qualificationId}'
   /api/control/projects/{projectId}/releases:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1releases'
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1releases'
   /api/control/projects/{projectId}/releases/{releaseId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1releases~1{releaseId}'
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1releases~1{releaseId}'
   /api/control/projects/{projectId}/promotions:
-    $ref: './current-state-overrides.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions'
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions'
   /api/control/projects/{projectId}/promotions/{promotionId}:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions~1{promotionId}'
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1promotions~1{promotionId}'
   /api/control/projects/{projectId}/serving-state:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1serving-state'
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1serving-state'
   /api/control/projects/{projectId}/environments/{environmentId}/conformance:
-    $ref: './fixed-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1environments~1{environmentId}~1conformance'
+    $ref: './release-paths.yaml#/paths/~1api~1control~1projects~1{projectId}~1environments~1{environmentId}~1conformance'
   /api/apps/{projectId}/agents/{agentId}/conversations:
     $ref: './fixed-paths.yaml#/paths/~1api~1apps~1{projectId}~1agents~1{agentId}~1conversations'
   /api/apps/{projectId}/agents/{agentId}/conversations/{conversationId}:

@@ -148,7 +148,7 @@ responsive transformation = simpler
 Workspace/Project context can now be named truthfully
 ```
 
-H2 remains a useful falsifier: if the rendered H1 makes Workspace-level Brain/Connections/People work too difficult to recover from Project scope, the operator can reject H1 or require a bounded cross-scope affordance without adopting two permanent rails.
+H2 remains a useful falsifier: if rendered H1 makes Workspace-level Brain/Connections/People work too difficult to recover from Project scope, the operator can reject H1 or require a bounded cross-scope affordance without adopting two permanent rails.
 
 ## 6. Responsive candidate
 
@@ -170,15 +170,41 @@ single-column current surface
 
 The mobile drawer is the same semantic navigation as desktop, not a separate Product IA. Essential navigation remains reachable without drag gestures or hover.
 
-## 7. Rendered evidence
+## 7. Conexus P8 medium decision
 
-Leading H1 is rendered in:
+The operator rejected a static SVG/image as the primary GF-01 wireframe medium and requires the Conexus 4C structural wireframe to be inspectable as a **low-fidelity browser artifact**.
 
-[GF-01 Global Frame Structural Wireframe](gf01-global-frame-wireframe.svg)
+For current and subsequent Conexus P8 block work:
 
-The SVG is grayscale structural Evidence only. It does not select typography, color, iconography, component library, router implementation or final visual design.
+```text
+primary wireframe medium = unbranded HTML + CSS
+bounded vanilla JavaScript = allowed only when needed to inspect structure, navigation or responsive behavior
+production frontend framework = forbidden in P8 Evidence
+static image / SVG = not current wireframe authority
+```
 
-## 8. Operator decision requested
+This is stricter than the reusable methodology's media allowance and is the current Conexus 4C operator decision. It does not collapse P8 into P11: P8 remains one bounded structural block and does not claim complete cross-flow or backend behavior.
+
+## 8. Rendered/viewable Evidence
+
+Leading H1 is implemented as a low-fidelity browser wireframe in:
+
+[GF-01 Global Frame HTML Wireframe](gf01-global-frame-wireframe.html)
+
+The HTML intentionally supports only bounded structural inspection:
+
+```text
+Workspace ↔ Project context transition
+scope-appropriate adaptive rail
+Back to Projects recovery
+Workspace/Project context selectors using deterministic fixture labels
+narrow-width drawer behavior
+keyboard-focusable navigation controls
+```
+
+It does not select brand styling, component library, router, production state model or Product implementation.
+
+## 9. Operator decision requested
 
 The rendered H1 can receive only one of:
 

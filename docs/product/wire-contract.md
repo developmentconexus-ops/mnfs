@@ -45,6 +45,7 @@ contracts/api/product/builder-paths.yaml            closed Builder Path Items
 contracts/api/product/brain-paths.yaml              closed Brain Path Items
 contracts/api/product/connection-paths.yaml         closed Connections Path Items
 contracts/api/product/release-paths.yaml            closed Release / Promotion / serving Path Items
+contracts/api/product/par-paths.yaml                closed Product Agent Runtime Path Items
 ```
 
 Rules:
@@ -234,7 +235,7 @@ PromoteRelease
 → expected pointer generation explicitly carried
 
 DecideApprovalRequest
-→ exact ApprovalRequest/proposal revision/digest explicitly carried
+→ exact ApprovalRequest/proposal digest explicitly carried
 
 EnableAgentTrigger
 → exact TriggerRevision explicitly carried
@@ -351,6 +352,22 @@ Control Plane Product API
 ```
 
 Technical/protocol routes never inflate `N_platform` merely because they use HTTP.
+
+For Product Agent execution specifically:
+
+```text
+PAR-04 / PAR-05
+→ admit exact Conexus AgentRun owner truth
+→ 202 AgentRun identity / exact Release pin
+
+live stream / reconnect / runtime observe
+→ later Technical Ingress/projection over that exact AgentRun
+-X-> seventeenth PAR Product operation
+-X-> Mastra runId/toolCallId/threadId as Product identity
+-X-> stream end as AgentRun terminal truth
+```
+
+Current framework-leverage Evidence favors Mastra-native stream/HITL mechanics and AI-SDK-compatible projection at realization time, but 4B selects no runtime package or React transport. [Bounded Evidence](../evidence/4b/technology-leverage-and-par-streaming-review.md).
 
 ## 12. Project-operation declaration law
 
@@ -478,18 +495,18 @@ repository hygiene / docs / current-state guards
 + Project declaration schema compilation
 + 4A ↔ fixed Product OAS bijection
 + current-state carrier exact-set proof
-+ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections and Release
++ owner-slice schema closure checks for IAM/Workspace, Project, Builder, Brain, Connections, Release and PAR
 + Budget declaration/generation/OAS proof
 + Budget truth-state positive and negative controls
 ```
 
-Current established GREEN:
+Current technical GREEN:
 
 ```text
-Verify #293 = SUCCESS
-HEAD = f9cc2ba557e3b4025671d97e6b27882fbb0afa5b
+Verify #305 = SUCCESS
+HEAD = e5e598afacc17156b8f0b06698626dbd5dffd54d
 fixed 4A↔OAS = 111/111
-schema-closed = 85/111
+schema-closed = 101/111
 missing = 0
 extra = 0
 duplicate = 0
@@ -500,6 +517,7 @@ Builder = 17/17
 Brain = 11/11
 Connections = 9/9
 Release = 7/7
+Product Agent Runtime = 16/16
 Budget static generated paths = 2
 ```
 
@@ -527,43 +545,58 @@ Verify #285 = SUCCESS
 
 Bounded Evidence: [../evidence/4b/connections-schema-closure.md](../evidence/4b/connections-schema-closure.md).
 
-The Release slice then preserved the same test-first law:
+The Release slice preserved the same test-first law:
 
 ```text
 Verify #291 = FAILURE
 → expected RED: REL-01 was not SCHEMA_CLOSED in the canonical bundle
-→ all previously closed owner gates remained green
 
 Verify #293 = SUCCESS
 → Release reached 7 / 7 and total schema closure reached 85 / 111
-→ 111↔111, IF_MATCH exact set and Budget proof remained green
 ```
 
 Bounded Evidence: [../evidence/4b/release-schema-closure.md](../evidence/4b/release-schema-closure.md).
 
+The Product Agent Runtime slice then closed the live-agent Product boundary without importing framework authority:
+
+```text
+Verify #303 = FAILURE
+→ expected RED: PAR-01 was not SCHEMA_CLOSED in the canonical bundle
+→ all prior owner gates remained green
+
+Verify #305 = SUCCESS
+→ PAR reached 16 / 16 and total schema closure reached 101 / 111
+→ Product command/AgentRun truth remained separate from live stream mechanics
+→ 111↔111, IF_MATCH exact set and Budget proof remained green
+```
+
+Bounded Evidence: [../evidence/4b/par-schema-closure.md](../evidence/4b/par-schema-closure.md).
+
 ## 18. Next derivation
 
-Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first six owner schema slices are established.
+Representation, fixed-operation bijection, shared carriers, Project grammar, Budget proving instance and the first seven owner schema slices are established.
 
 Closed owner slices:
 
 ```text
-IAM + Workspace = 20 / 20
-Project         = 21 / 21
-Builder         = 17 / 17
-Brain           = 11 / 11
-Connections     = 9 / 9
-Release         = 7 / 7
+IAM + Workspace       = 20 / 20
+Project               = 21 / 21
+Builder               = 17 / 17
+Brain                 = 11 / 11
+Connections           = 9 / 9
+Release               = 7 / 7
+Product Agent Runtime = 16 / 16
 ```
 
 The next bounded owner slice is only:
 
 ```text
-Product Agent Runtime = 16 Product operations
-PAR-01 → PAR-16
+Gateway inspection = 2 Product operations
+GW-01 ListEffectAttempts
+GW-02 GetEffectAttempt
 ```
 
-Derive PAR schemas only from accepted Product Agent Runtime authority. Preserve Published-App / Control-Plane / HEADLESS ingress separation, exact active Release/Agent pins, Conversation and AgentRun owner truth, sealed ApprovalRequest/current-eligibility authority, trigger revision/current-state semantics and `COMPLETED != every effect succeeded`. Product Agent authoring remains Builder/Release authority; Mastra thread/tool/snapshot/provider mechanics remain substrate rather than Product authority.
+Derive Gateway inspection schemas only from accepted effect receipt/reconciliation/provenance authority. Preserve `OUTCOME_UNKNOWN`, exact originating run/operation/effect disclosure and zero retry/effect-execution authority. Effect admission, idempotency claims and reconciliation mechanics remain owner-internal.
 
 After the remaining fixed owner slices close, 4B still must complete Technical Ingress/protocol classification, generated-projection/no-parallel-DTO proof, whole-4B adversarial review and explicit operator ratification.
 
